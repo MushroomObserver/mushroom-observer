@@ -20,26 +20,22 @@
 #     # inner content (e.g. a CommentItem view)
 #   end
 class Components::ListGroup::Item < Components::Base
-  # @param element [Symbol] `:div` (default, matches `<div class="list-group">`)
-  #   or `:li` (matches `<ul class="list-group">`).
-  # @param class [String] appended to the default `list-group-item`.
-  #   Falsy values are skipped.
-  # @param id [String, nil] `id=` attribute. Required for Turbo Stream
-  #   `update` / `replace` / `remove` targets to find the row.
-  # @param attributes [Hash] arbitrary HTML attrs (data:, aria-*, etc.).
-  def initialize(element: :div, class: nil, id: nil, attributes: {})
-    super()
-    @element = element
-    @html_class = grab(class:)
-    @html_id = id
-    @attributes = attributes
-  end
+  # `:div` (default, matches `<div class="list-group">`) or `:li`
+  # (matches `<ul class="list-group">`).
+  prop :element, _Union(:div, :li), default: :div
+  # `id=` attribute. Required for Turbo Stream `update` / `replace` /
+  # `remove` targets to find the row.
+  prop :id, _Nilable(String), default: nil
+  # Catch-all for class:, data:, aria:, and any other HTML attrs --
+  # matches Icon/Collapsible's pattern. `class:` is appended to the
+  # default `list-group-item`.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
     send(@element,
-         class: class_names("list-group-item", @html_class),
-         id: @html_id,
-         **@attributes,
+         class: class_names("list-group-item", @attributes[:class]),
+         id: @id,
+         **@attributes.except(:class),
          &block)
   end
 end

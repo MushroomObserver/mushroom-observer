@@ -138,10 +138,11 @@ class Image::Processor::VerifierTest < UnitTestCase
   # A local file that hasn't been generated yet (still mid-#process) means
   # nothing to verify or transfer until it exists -- this is the normal
   # in-progress window between upload and job completion, exactly the
-  # window #4791's blind rsync used to race.
+  # window #4791's blind rsync used to race. A recently-touched image is
+  # in that window, not stuck.
   def test_skips_image_still_being_processed
     image = images(:turned_over_image)
-    image.update_columns(transferred: false)
+    image.update_columns(transferred: false, updated_at: Time.zone.now)
     # Only "orig" exists locally -- the rest haven't been generated yet.
     File.write("#{local_root}/orig/#{image.id}.jpg", "orig-only")
 
@@ -149,9 +150,58 @@ class Image::Processor::VerifierTest < UnitTestCase
 
     assert_empty(result[:uploaded])
     assert_empty(result[:completed])
+    assert_empty(result[:stuck],
+                 "a recently-touched image is mid-process, not stuck")
     assert_not(image.reload.transferred)
     assert_path_exists("#{local_root}/orig/#{image.id}.jpg",
                        "not deleted -- still mid-processing")
+  end
+
+  # Past the stale threshold, nothing is still generating the missing
+  # sizes -- processing died (#4974: a restart killed the resize
+  # mid-flight). Without the timeout this state was indistinguishable
+  # from "in progress" forever, so a retried transfer silently did
+  # nothing. It must be reported as stuck instead.
+  def test_reports_image_with_missing_sizes_past_threshold_as_stuck
+    image = images(:turned_over_image)
+    image.update_columns(transferred: false, updated_at: 2.hours.ago)
+    File.write("#{local_root}/orig/#{image.id}.jpg", "orig-only")
+    messages = []
+    verifier = Image::Processor::Verifier.new { |msg| messages << msg }
+
+    result = verifier.transfer(Image.where(id: image.id))
+
+    assert_equal([image.id], result[:stuck])
+    assert_empty(result[:uploaded])
+    assert_not(image.reload.transferred)
+    assert_path_exists("#{local_root}/orig/#{image.id}.jpg")
+    assert(messages.any? { |msg| msg.include?("processing died?") })
+  end
+
+  # "Could not ask the server" is not "the server has nothing" (#4974):
+  # a failed remote check must not blind-upload every size (they are
+  # mostly already there), must not confirm anything, and must surface
+  # as a failure so TransferImagesJob retries later.
+  def test_failed_remote_check_records_failure_instead_of_reuploading
+    image = images(:turned_over_image)
+    seed_locally_complete(image)
+    verifier = Image::Processor::Verifier.new
+
+    result = verifier.stub(:remote_sizes_for, nil) do
+      verifier.transfer(Image.where(id: image.id))
+    end
+
+    assert_empty(result[:uploaded],
+                 "must not re-upload against a failed check")
+    assert_empty(result[:completed])
+    assert_equal([[image.id, :remote1, "remote check failed"],
+                  [image.id, :remote2, "remote check failed"]],
+                 result[:failed])
+    assert_not(image.reload.transferred)
+    SUBDIRS.each do |dir|
+      assert_path_exists("#{local_root}/#{dir}/#{image.id}.jpg",
+                         "#{dir} must survive an unverifiable run")
+    end
   end
 
   # A non-jpg original also expects its raw orig/<id>.<ext> file (in
@@ -281,7 +331,9 @@ class Image::Processor::VerifierTest < UnitTestCase
     assert_empty(messages)
   end
 
-  def test_ssh_sizes_logs_and_returns_empty_on_real_failure
+  # nil, not {} -- "could not ask" must stay distinguishable from "the
+  # server has nothing" (#4974).
+  def test_ssh_sizes_logs_and_returns_nil_on_real_failure
     messages = []
     verifier = Image::Processor::Verifier.new { |msg| messages << msg }
     stderr = "ssh: Could not resolve hostname example.test\n"
@@ -289,7 +341,7 @@ class Image::Processor::VerifierTest < UnitTestCase
     Open3.stub(:capture3, ["", stderr, stub_status(false)]) do
       result = verifier.send(:ssh_sizes, :ssh_server,
                              "mo@example.test:/data/mo", ["orig/1.jpg"])
-      assert_equal({}, result)
+      assert_nil(result)
     end
 
     assert(messages.any? do |msg|

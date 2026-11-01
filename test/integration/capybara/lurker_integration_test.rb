@@ -34,7 +34,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Click on next (catches a bug seen in the wild).
     # Above comment about "next" does not match "Prev" in code
     go_back_after do
-      click_link("Prev")
+      within(".show_object_nav") { click_link("Prev") }
     end
     # back at Observation
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
@@ -147,7 +147,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
       )
 
       # (Make sure observation is shown somewhere.)
-      assert(has_selector?("a[href^='#{observation_path(obs.id)}']"),
+      assert(has_selector?("a[href^='#{permanent_observation_path(obs.id)}']"),
              "Missing a link to Observation")
     end
     # back at Observation
@@ -242,8 +242,8 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     visit("/observations/identify")
     # Search for a location.
     place = "California, USA"
-    fill_in("filter_term", with: place)
-    select("Region", from: "filter_type")
+    fill_in("identify_filter_term", with: place)
+    select("Region", from: "identify_filter_type")
     within("#identify_filter") { click_button("Search") }
     assert_selector("#filters", text: /#{:query_needs_naming.l}/)
     assert_selector("#filters", text: /#{:query_region.l}/)
@@ -350,17 +350,17 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     save_path = current_fullpath
 
     # First. Prev link does not appear or have href, so nothing should happen.
-    within("#header") { click_link(text: "Prev") }
+    within(".show_object_nav") { click_link(text: "Prev") }
     assert_equal(save_path, current_fullpath)
 
-    within("#header") { click_link(text: "Next") }
+    within(".show_object_nav") { click_link(text: "Next") }
     assert_no_flash
 
     save_path = current_fullpath
-    within("#header") { click_link(text: "Next") }
+    within(".show_object_nav") { click_link(text: "Next") }
     assert_no_flash
 
-    within("#header") { click_link(text: "Prev") }
+    within(".show_object_nav") { click_link(text: "Prev") }
     assert_no_flash
 
     assert_equal(save_path, current_fullpath,
@@ -370,7 +370,7 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     index_link = first(".index_object_link")
     assert_equal(query_params, parse_query_params(index_link[:href]))
 
-    within("#header") { click_link(text: "Index") }
+    within(".show_object_nav") { click_link(text: "Index") }
     # Be sure we're actually on that sorted/filtered query, now we're on index
     assert_equal(query_params, parse_query_params(current_fullpath))
 
@@ -390,9 +390,12 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     click_link(text: "Observations at this Location")
     assert_match("Observations", page.title, "Wrong title")
 
-    within(first("form.page_input")) do
+    # No <form> -- the goto control is a plain link that
+    # page-input_controller.js keeps pointed at the typed page number
+    # (see IndexPaginationNav).
+    within(first(".input-group.page-input")) do
       fill_in("page", with: 2)
-      click_commit
+      find("a[data-page-input-target='goToLink']").click
     end
     assert_match("Observations", page.title, "Wrong title")
 

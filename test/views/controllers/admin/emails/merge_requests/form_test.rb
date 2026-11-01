@@ -6,6 +6,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
   class FormTest < ComponentTestCase
     def setup
       super
+      @user = users(:rolf)
       @email = FormObject::EmailRequest.new
       @old_name = names(:coprinus_comatus)
       @new_name = names(:agaricus_campestris)
@@ -29,7 +30,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
 
       assert_html(html, "label[for='email_old_obj']",
                   text: "#{:name.ti}:")
-      assert_html(html, "label[for='email_old_obj'] + p.form-control-static",
+      assert_html(html, "label[for='email_old_obj'] + .form-control-static",
                   text: @old_name.unique_format_name.t.as_displayed)
     end
 
@@ -38,7 +39,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
 
       assert_html(html, "label[for='email_new_obj']",
                   text: "#{:name.ti}:")
-      assert_html(html, "label[for='email_new_obj'] + p.form-control-static",
+      assert_html(html, "label[for='email_new_obj'] + .form-control-static",
                   text: @new_name.unique_format_name.t.as_displayed)
     end
 
@@ -65,7 +66,8 @@ module Views::Controllers::Admin::Emails::MergeRequests
       form = Form.new(@email,
                       old_obj: @old_name,
                       new_obj: @new_name,
-                      model_class: Name)
+                      model_class: Name,
+                      user: @user)
       # Stub url_for to avoid routing errors in test environment
       form.stub(:url_for, "/test_action") do
         render(form)

@@ -48,20 +48,13 @@ class NameChangeMailer < ApplicationMailer
       real_search_name(receiver)
   end
 
-  # "interest" / "admin" / "editor" / "author" / "reviewer" / nil —
-  # why this receiver is being notified. Computed here (not in the
-  # view; views shouldn't query the database) since editor?/author?/
-  # is_admin?/reviewer? all query permission join tables (or the
-  # reviewer association, for reviewer?). If notifiable for multiple
-  # reasons, PERMISSION_REASONS' order decides which one wins:
-  # interest first, then admin (the broadest role — if a receiver is
-  # both admin and editor/author, reporting "admin" means opting out
-  # via the "stop sending" link actually stops these notifications,
-  # since they'd otherwise still qualify via the narrower role),
-  # then editor, author, and lastly reviewer. The pre-Phlex ERB
-  # template checked editor/author before admin — a longstanding bug
-  # never caught because ERB mailers had no real test coverage for
-  # this branch; fixed here now that it's testable.
+  # "interest" / "admin" / "editor" / "author" / "reviewer" / nil --
+  # why this receiver is being notified. Computed here, not in the
+  # view, since editor?/author?/is_admin?/reviewer? all query
+  # permission join tables. PERMISSION_REASONS' order picks the
+  # reason when several apply: interest, then admin (the broadest
+  # role, so opting out of it also covers a narrower role like
+  # editor/author), then editor, author, reviewer.
   def name_email_type(receiver, name_change, desc_change)
     new_name = name_change.new_clone
     old_name = name_change.old_clone

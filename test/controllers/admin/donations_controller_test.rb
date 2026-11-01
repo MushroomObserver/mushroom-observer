@@ -31,6 +31,7 @@ module Admin
       donations = Donation.count
       params = donation_params(amount, rolf, anon, recurring)
       post(:create, params: params)
+      assert_redirected_to(new_admin_donations_path)
       assert_donations(donations + 1, amount, true, params[:donation])
     end
 
@@ -50,6 +51,7 @@ module Admin
       assert_equal(false, unreviewed.reviewed)
       params = { reviewed: { unreviewed.id => true } }
       put(:update, params: params)
+      assert_redirected_to(edit_admin_donations_path)
       reloaded = Donation.find(unreviewed.id)
       assert(reloaded.reviewed)
     end

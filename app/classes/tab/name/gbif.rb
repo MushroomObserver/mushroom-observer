@@ -10,6 +10,6 @@ class Tab::Name::Gbif < Tab::Name::ExternalBase
   end
 
   def path
-    "https://www.gbif.org/species/search?q=#{@name.sensu_stricto}"
+    "https://www.gbif.org/species/search?q=#{url_encode(@name.sensu_stricto)}"
   end
 end

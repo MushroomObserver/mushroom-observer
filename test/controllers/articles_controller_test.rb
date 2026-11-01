@@ -4,7 +4,22 @@ require("test_helper")
 
 # Controller tests for news articles
 class ArticlesControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ############ test Actions that Display data (index, show, etc.)
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Articles, :Article,
+      overrides: {
+        id_in_set: articles(:premier_article).id,
+        by_users: rolf.id
+      }
+    )
+  end
 
   def test_index
     get(:index)
@@ -72,9 +87,8 @@ class ArticlesControllerTest < FunctionalTestCase
     # Phlex `Articles::Show` pins the article body in
     # `#article_body .panel-body` (was `assert_template(:show)` + a
     # `/#{article.body}/ =~ @response.body` regex on the rendered HTML).
-    assert_select("#article_body .panel-body",
-                  text: /#{Regexp.escape(article.body)}/,
-                  count: 1)
+    assert_select_text_includes("#article_body .panel-body", article.body,
+                                count: 1)
 
     # Prove privileged user gets extra links
     login(users(:article_writer).login)
@@ -159,9 +173,11 @@ class ArticlesControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(:article_title_required)
+    assert_unprocessable
     # Phlex `Articles::New` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")
+    assert_select("form[data-turbo='true']")
     assert_form_action(action: :create) # "new" form
 
     # Prove authorized user can create Article
@@ -215,6 +231,7 @@ class ArticlesControllerTest < FunctionalTestCase
     params[:article][:title] = ""
     post(:update, params: params)
     assert_flash(:article_title_required)
+    assert_unprocessable
     # Phlex `Articles::Edit` renders the form (id derived by
     # ApplicationForm from the Views::Controllers::* namespace).
     assert_select("form#article_form")

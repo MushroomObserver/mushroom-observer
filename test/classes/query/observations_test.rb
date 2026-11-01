@@ -295,6 +295,19 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, projects: project)
   end
 
+  # Delegates to Project#violating_observations -- see project_test.rb
+  # for coverage of the underlying violation logic itself. This just
+  # proves the query_attr wiring returns the same set, in the same
+  # order.
+  def test_observation_project_violations
+    project = projects(:falmouth_2023_09_project)
+    assert(project.violating_observations.any?,
+           "Test needs a project fixture with violations")
+
+    assert_query(project.violating_observations,
+                 :Observation, project_violations: project, order_by: :name)
+  end
+
   def test_observation_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project))
@@ -317,6 +330,29 @@ class Query::ObservationsTest < UnitTestCase
     spl2 = species_lists(:one_genus_three_species_list)
     assert_query(Observation.species_lists([spl, spl2]).order_by_default,
                  :Observation, species_lists: [spl.title, spl2.title])
+  end
+
+  def test_observation_external_sites
+    mycoportal = external_sites(:mycoportal)
+    inaturalist = external_sites(:inaturalist)
+    obs_with_both = observations(:coprinus_comatus_obs)
+
+    assert_query([obs_with_both],
+                 :Observation, external_sites: mycoportal.id)
+    assert_query(Observation.external_sites(inaturalist).order_by_default,
+                 :Observation, external_sites: inaturalist.id)
+    # A site both link to doesn't double-count obs_with_both.
+    assert_query(
+      Observation.external_sites([mycoportal, inaturalist]).order_by_default,
+      :Observation, external_sites: [mycoportal.id, inaturalist.id]
+    )
+  end
+
+  def test_observation_external_site_alias
+    mycoportal = external_sites(:mycoportal)
+    obs_with_both = observations(:coprinus_comatus_obs)
+
+    assert_query([obs_with_both], :Observation, external_site: mycoportal.id)
   end
 
   def test_observation_clade
@@ -886,5 +922,101 @@ class Query::ObservationsTest < UnitTestCase
 
     # 3 raw matches, but obs2 collapses into obs1 → 2 results
     assert_equal(2, query.num_results)
+  end
+
+  # A member is dropped to keep an occurrence from appearing twice. Where
+  # the primary cannot appear, there is nothing to appear twice, and
+  # dropping the member hid it from its owner's list entirely (#5486).
+  def test_observation_query_keeps_member_when_primary_is_filtered_out
+    member = observations(:minimal_unknown_obs)      # mary's
+    primary = observations(:coprinus_comatus_obs)    # rolf's
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    member.update!(occurrence: occ)
+    assert_not_equal(member.user_id, primary.user_id)
+
+    ids = Query.lookup(:Observation, by_users: member.user_id).result_ids
+
+    assert_includes(ids, member.id,
+                    "a user should see their observation even when the " \
+                    "occurrence's primary belongs to someone else")
+    assert_not_includes(ids, primary.id)
+  end
+
+  def test_observation_query_drops_member_when_owner_holds_both
+    member = observations(:minimal_unknown_obs)
+    primary = observations(:detailed_unknown_obs)
+    assert_equal(member.user_id, primary.user_id)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    member.update!(occurrence: occ)
+
+    ids = Query.lookup(:Observation, by_users: member.user_id).result_ids
+
+    assert_not_includes(ids, member.id,
+                        "one occurrence should take one place in a list")
+    assert_includes(ids, primary.id)
+  end
+
+  # An import's primaries are native MO records carrying no import id,
+  # so the results page could show nothing of what it imported.
+  def test_observation_query_keeps_imported_member_in_import_results
+    member = observations(:minimal_unknown_obs)
+    primary = observations(:coprinus_comatus_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    import = inat_imports(:rolf_inat_import)
+    member.update!(occurrence: occ, inat_import: import)
+
+    ids = Query.lookup(:Observation, inat_import: import.id).result_ids
+
+    assert_includes(ids, member.id,
+                    "an import's results should list what it imported")
+  end
+
+  def test_observation_needs_naming_true_filters_by_viewer
+    mary = users(:mary)
+    expected = Observation.needs_naming(mary)
+
+    query = Query.lookup_and_save(:Observation, needs_naming: true)
+    query.viewer = mary
+
+    assert_equal(expected.count, query.num_results)
+  end
+
+  # `false` is a presence flag turned off, not "show only reviewed" --
+  # the scope stays out of the chain entirely.
+  def test_observation_needs_naming_false_applies_no_filter
+    query = Query.lookup_and_save(:Observation, needs_naming: false)
+    query.viewer = users(:mary)
+
+    assert_equal(Observation.count, query.num_results)
+  end
+
+  # No login (e.g. a stray `?needs_naming=1` on an anonymous session) --
+  # `viewer` is nil. `Observation.needs_naming(nil)` still applies
+  # (the `needs_naming` DB column half of the scope doesn't depend on
+  # viewer), so the correct comparison is the scope itself, not an
+  # unfiltered count.
+  def test_observation_needs_naming_without_viewer_does_not_raise
+    expected = Observation.needs_naming(nil)
+
+    query = Query.lookup_and_save(:Observation, needs_naming: true)
+
+    assert_equal(expected.count, query.num_results)
+  end
+
+  # A legacy bookmark stored `needs_naming: <user_id>` (record-backed,
+  # pre-#5246) -- :truthy must keep resolving that as "flag on" rather
+  # than failing validation, since the value's identity is ignored
+  # regardless (see apply_scope_param).
+  def test_observation_needs_naming_accepts_legacy_stored_id
+    mary = users(:mary)
+    expected = Observation.needs_naming(mary)
+
+    query = Query.lookup_and_save(:Observation, needs_naming: 999_999)
+    query.viewer = mary
+
+    assert_equal(expected.count, query.num_results)
   end
 end

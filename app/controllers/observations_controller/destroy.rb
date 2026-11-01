@@ -12,27 +12,36 @@ module ObservationsController::Destroy
 
     @observation.current_user = @user
     obs_id = @observation.id
+    return if destroy_denied?(obs_id)
+
     # decide where to redirect after deleting observation, using Query.next_id
     if (this_query = find_query(:Observation))
       this_query.current_id = @observation.id
       next_id = this_query.next_id
     end
 
-    if !permission!(@observation)
-      flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
-      redirect_to({ action: :show, id: obs_id })
     # Refetch fresh (non-strict_loading) for the destroy cascade. current_user
     # doesn't carry over from @observation above - it's a different instance.
-    elsif !refetch_for_destroy(@observation.id).destroy
-      flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
-      redirect_to({ action: :show, id: obs_id })
-    else
+    if refetch_for_destroy(@observation.id).destroy
       flash_notice(:runtime_destroy_observation_success.t(id: param_id))
       redirect_after_destroy(this_query, next_id)
+    else
+      flash_error(:runtime_destroy_observation_failed.t(id: obs_id))
+      redirect_to({ action: :show, id: obs_id })
     end
   end
 
   private
+
+  # Standard permission-denied path. A read-only reflection is
+  # deletable like any other observation: it can always be reimported.
+  def destroy_denied?(obs_id)
+    return false if permission!(@observation)
+
+    flash_error(:runtime_destroy_observation_denied.t(id: obs_id))
+    redirect_to(action: :show, id: obs_id)
+    true
+  end
 
   def refetch_for_destroy(id)
     obs = Observation.find(id)

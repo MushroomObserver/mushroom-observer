@@ -11,7 +11,7 @@ module Views::Controllers::Images
         Panel(
           panel_id: "info_panel", panel_class: "py-2"
         ) do |panel|
-          panel.with_heading { "#{:notes.ti}:" }
+          panel.with_heading { append_colon(:notes.ti) }
           panel.with_body { render_body }
         end
       end
@@ -38,21 +38,21 @@ module Views::Controllers::Images
 
       def owner_row
         div do
-          plain("#{:owner.ti}: ")
+          trusted_html(append_colon(:owner.ti))
           Link(type: :user, user: @image.user)
         end
       end
 
       def project_row(proj)
         div do
-          plain("#{:project.ti}: ")
+          trusted_html(append_colon(:project.ti))
           Link(type: :object, object: proj)
         end
       end
 
       def observation_row(obs)
         div do
-          plain("#{:observation.ti}: ")
+          trusted_html(append_colon(:observation.ti))
           Link(type: :get, name: viewer_aware_unique_format_name(obs).t,
                target: obs.show_link_args)
         end
@@ -60,7 +60,7 @@ module Views::Controllers::Images
 
       def profile_user_row(user)
         div do
-          plain("#{:user.ti}: ")
+          trusted_html(append_colon(:user.ti))
           Link(type: :get, name: user.format_name.t,
                target: user.show_link_args)
         end
@@ -68,7 +68,7 @@ module Views::Controllers::Images
 
       def glossary_term_row(term)
         div do
-          plain("#{:glossary_term.ti}: ")
+          trusted_html(append_colon(:glossary_term.ti))
           Link(type: :get, name: term.format_name.t,
                target: term.show_link_args)
         end

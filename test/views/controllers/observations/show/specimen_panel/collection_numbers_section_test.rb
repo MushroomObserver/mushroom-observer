@@ -25,14 +25,10 @@ class Views::Controllers::Observations::Show::SpecimenPanel
             first
       skip("Need an obs fixture without collection_numbers") unless obs
 
-      html = render(
-        CollectionNumbersSection.new(
-          obs: obs, user: obs.user, has_sibling_records: true
-        )
-      )
+      html = render(panel_with(obs, obs.user, has_sibling_records: true))
 
       assert_includes(html, "#{:collection_numbers.ti}:")
-      assert_no_html(html, "li")
+      assert_no_html(html, "#collection_numbers_list")
     end
 
     # Empty + can-edit path with NO sibling records: the generic
@@ -41,14 +37,10 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       obs = ::Observation.where.missing(:collection_numbers).first
       skip("Need an obs fixture without collection_numbers") unless obs
 
-      html = render(
-        CollectionNumbersSection.new(
-          obs: obs, user: obs.user, has_sibling_records: false
-        )
-      )
+      html = render(panel_with(obs, obs.user))
 
       assert_includes(html, :no_objects.t(type: :collection_number))
-      assert_no_html(html, "li")
+      assert_no_html(html, "#collection_numbers_list")
     end
 
     # Read-only one-liner: obs has collection numbers but the
@@ -58,24 +50,20 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       obs = cn.observations.first
       stranger = users(:lone_wolf)
 
-      html = render(
-        CollectionNumbersSection.new(
-          obs: obs, user: stranger, has_sibling_records: false
-        )
-      )
+      html = render(panel_with(obs, stranger))
 
       # Readonly rows render in the same tight-list shape as the
       # editable list (unified via RecordListSection), just without
       # edit-modal links -- show-link only.
-      assert_html(html, "ul.tight-list li a")
+      assert_html(html, "#collection_number_#{cn.id} a")
       assert_no_html(html, "a[data-modal*='collection_number']")
     end
 
     private
 
-    def panel_with(obs, user = @user)
+    def panel_with(obs, user = @user, has_sibling_records: false)
       CollectionNumbersSection.new(
-        obs: obs, user: user, has_sibling_records: false
+        obs: obs, user: user, has_sibling_records: has_sibling_records
       )
     end
   end

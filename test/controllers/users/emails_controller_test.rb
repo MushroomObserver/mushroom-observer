@@ -10,6 +10,7 @@ module Users
       id = mary.id
       requires_login(:new, id: id)
       assert_form_action(action: :create, id: id)
+      assert_select("form[data-turbo='true']")
 
       # Prove that trying to ask question of user who refuses questions
       # redirects to that user's page (instead of an email form).

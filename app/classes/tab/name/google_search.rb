@@ -9,11 +9,12 @@ class Tab::Name::GoogleSearch < Tab::Name::ExternalBase
   end
 
   def path
+    name = url_encode(@name.sensu_stricto)
     if @name.rank == "Group"
-      "https://www.google.com/search?q=%2B%22#{@name.sensu_stricto}%22+" \
+      "https://www.google.com/search?q=%2B%22#{name}%22+" \
         "%28group+OR+Clade+OR+Complex%29&"
     else
-      "https://www.google.com/search?q=%2B%22#{@name.sensu_stricto}%22"
+      "https://www.google.com/search?q=%2B%22#{name}%22"
     end
   end
 end

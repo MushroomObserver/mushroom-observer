@@ -220,6 +220,91 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  # #5259: the show page lists recorded constraint violations and
+  # unlicensed-photo events.
+  def test_show_renders_review_sections
+    import = inat_imports(:rolf_inat_import)
+    import.update!(
+      constraint_violation_obs_ids: [observations(:minimal_unknown_obs).id],
+      unlicensed_image_events: [{ "inat_id" => 123, "login" => "flick",
+                                  "license_code" => nil, "count" => 2 }]
+    )
+
+    login(import.user.login)
+    get(:show, params: { id: import.id })
+
+    assert_select("h5", text: :inat_import_tracker_constraint_violations.l)
+    assert_select("h5",
+                  text: :inat_import_tracker_unlicensed_images_heading.l)
+  end
+
+  # #5259: Go Back keeps the chosen target project on the redisplayed
+  # form.
+  def test_create_go_back_keeps_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    params = { inat_ids: "123", inat_username: user.inat_username,
+               consent: 1, go_back: "1",
+               inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_form_action(action: :create)
+    assert_select("input[name=?][value=?]",
+                  "inat_import[inat_project_id]", project.id.to_s, true,
+                  "Go Back should keep the chosen project id")
+  end
+
+  # #5259: a project the user can neither join nor administer is
+  # refused (#4932 invariant 4).
+  def test_create_with_unjoinable_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    project.update!(open_membership: false)
+    assert_not(project.is_admin?(user) || project.member?(user) ||
+               project.can_join?(user),
+               "premise: rolf cannot use this project")
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash(:inat_project_not_allowed, title: project.title)
+    assert_form_action(action: :create)
+  end
+
+  # #5259: typed project text that resolves to no project is refused.
+  def test_create_with_unrecognized_project
+    user = users(:rolf)
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, inat_project: "No Such Project Anywhere" }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_flash(:inat_project_not_recognized)
+    assert_form_action(action: :create)
+  end
+
+  # #5259: a confirmed create stores the target project on the import.
+  def test_create_confirmed_stores_project
+    user = users(:rolf)
+    project = projects(:open_membership_project)
+    params = { inat_ids: "123", inat_username: "anything",
+               consent: 1, confirmed: 1,
+               inat_project: project.title,
+               inat_project_id: project.id.to_s }
+
+    login(user.login)
+    post(:create, params: params)
+
+    assert_equal(project.id, created_import(user).project_id)
+  end
+
   def test_reload_preserves_checkbox_state
     user = users(:rolf)
     params = { inat_ids: "123", consent: "1", all: "1" }
@@ -445,8 +530,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     ExternalLink.create!(
       user: user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id
     )
     estimate_response = { total_results: 1 }.to_json
 
@@ -460,7 +544,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: "anything",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_flash(
       :inat_previous_import,
       count: 1,
@@ -479,8 +563,7 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     ExternalLink.create!(
       user: user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id
     )
 
     fresh_id = "1123457"
@@ -534,8 +617,8 @@ class InatImportsControllerTest < FunctionalTestCase
     )
     assert_response(:redirect)
     assert_equal(
-      user.name, created_import(user).inat_username,
-      "It should strip leading/trailing whitespace from inat_username"
+      user.name.downcase, created_import(user).inat_username,
+      "It should strip whitespace and downcase inat_username"
     )
   end
 
@@ -588,12 +671,15 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: inat_username,
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
-    body = @response.body
-    assert_match(:inat_import_confirm_expected_caption.l, body)
+    assert_select_text_includes(
+      "#expected_count_line", :inat_import_confirm_expected_caption.l
+    )
     assert_select("#expected_count", "2")
-    assert_match(:inat_import_confirm_time_estimate_caption.l, body)
+    assert_select_text_includes(
+      "#estimated_time_line", :inat_import_confirm_time_estimate_caption.l
+    )
     assert_select("#estimated_time", "00:00:24")
   end
 
@@ -620,7 +706,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: inat_ids, inat_username: user.inat_username,
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -682,6 +768,35 @@ class InatImportsControllerTest < FunctionalTestCase
     import = created_import(user)
     assert(import.recheck_all,
            "recheck_all should flatten from namespaced confirm params")
+  end
+
+  def test_create_skeletons_checkbox_checked_by_default
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    login(user.login)
+    get(:new)
+
+    assert_select(
+      "input[type=checkbox][id=inat_import_create_skeletons][checked]", true,
+      "Skeleton checkbox should default to checked on a fresh form"
+    )
+  end
+
+  def test_create_skeletons_checkbox_stays_unchecked_on_reload
+    user = users(:dick) # Dick is a superimporter
+    login(user.login)
+    # No consent, so the form re-renders with the submitted values.
+    post(:create,
+         params: { inat_import: { inat_username: "anyone",
+                                  choose_method: "ids", inat_ids: "123",
+                                  import_others: "1",
+                                  create_skeletons: "0" } })
+
+    assert_select(
+      "input[type=checkbox][id=inat_import_create_skeletons][checked]", false,
+      "An unchecked skeleton checkbox should stay unchecked on reload"
+    )
   end
 
   def test_skip_writeback_checkbox_admin_only
@@ -790,7 +905,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_username: user.inat_username, all: 1, consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -806,17 +921,17 @@ class InatImportsControllerTest < FunctionalTestCase
     # All queries return 1 (1 obs in scope, which is unlicensed)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 1 }.to_json)
-    # Unlicensed query (own import uses licensed=false) also returns 1
+    # None of it carries a license code, so unlicensed = 1 - 0
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
-      to_return(status: 200, body: { total_results: 1 }.to_json)
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
 
     login(user.login)
     post(:create,
          params: { inat_ids: inat_ids, inat_username: "rolf",
                    consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "1",
@@ -836,21 +951,18 @@ class InatImportsControllerTest < FunctionalTestCase
     # Total (no license filter) returns 5: 2 unlicensed will be skipped
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 5 }.to_json)
-    # Licensed query (the estimate) returns 3 — registered last, matched first
+    # Licensed query (the estimate) returns 3 — registered last, matched
+    # first; unlicensed = 5 - 3 (obs that will be skipped)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 3 }.to_json)
-    # Unlicensed query returns 2 (obs that will be skipped)
-    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
-      to_return(status: 200, body: { total_results: 2 }.to_json)
 
     login(user.login)
     post(:create,
          params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#expected_count", "3",
@@ -862,11 +974,117 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_confirm_leaves_opted_out_observers_out_of_expected_count
+    ExcludedInatUser.create!(inat_login: "excluded_on_inat")
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 3 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("not_user_id" => "excluded_on_inat")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+
+    post_import_others_confirm(create_skeletons: "0")
+
+    assert_select("#expected_count", "0",
+                  "Without skeletons, opted-out observers are not expected")
+  end
+
+  # One of 3 obss has an empty license: iNat's license-code filter leaves
+  # it out, and so does its `licensed=false` filter.
+  def test_confirm_counts_empty_license_obs_as_unlicensed
+    all, coded = stub_counts_with_empty_license_obs
+
+    post_import_others_confirm(create_skeletons: "0")
+
+    assert_select("#expected_count", coded.to_s,
+                  "Without skeletons, an empty-license obs is not expected")
+    assert_select("#unlicensed_obs_count", (all - coded).to_s,
+                  "An empty-license obs should count as unlicensed")
+  end
+
+  def test_confirm_counts_empty_license_obs_as_placeholder
+    all, coded = stub_counts_with_empty_license_obs
+
+    post_import_others_confirm(create_skeletons: "1")
+
+    assert_select("#expected_count", all.to_s,
+                  "With skeletons, an empty-license obs is expected")
+    assert_select("#unlicensed_obs_count", (all - coded).to_s,
+                  "An empty-license obs should count as a placeholder")
+  end
+
+  def test_confirm_shows_skeleton_obs_line_for_import_others
+    user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(user),
+           "Test requires user to be a super_importer")
+    requested = 5
+    unlicensed = 2
+    # With skeletons, the estimate has no license filter.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: requested }.to_json)
+    # Unlicensed = all minus those carrying a license code.
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
+      to_return(status: 200,
+                body: { total_results: requested - unlicensed }.to_json)
+
+    login(user.login)
+    post(:create,
+         params: { inat_ids: "1,2,3,4,5", inat_username: "anyone",
+                   consent: 1, import_others: "1", create_skeletons: "1" })
+
+    assert_unprocessable
+    assert_select("#expected_count", requested.to_s,
+                  "Estimate with skeletons should include unlicensed obs")
+    assert_select("b", text: :inat_import_confirm_skeleton_obs_caption.l)
+    assert_select("#unlicensed_obs_count", unlicensed.to_s,
+                  "Confirm form should count the obs to become skeletons")
+    assert_select("#total_ignored_count", { count: 0 },
+                  "Skeletons should not be counted as ignored")
+    assert_select("input[name='inat_import_confirm[create_skeletons]']" \
+                  "[value='1']")
+  end
+
+  def test_create_confirmed_persists_create_skeletons
+    user = users(:dick) # Dick is a superimporter
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "anyone", inat_ids: "123,456", import_all: "",
+             consent: "1", import_others: "1", create_skeletons: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert(import.create_skeletons,
+           "Should save create_skeletons from the confirm form")
+  end
+
+  def test_create_confirmed_ignores_create_skeletons_without_import_others
+    user = users(:dick) # Dick is a superimporter
+    login(user.login)
+
+    post(:create,
+         params: {
+           confirmed: 1,
+           inat_import_confirm: {
+             inat_username: "dick", inat_ids: "123,456", import_all: "",
+             consent: "1", create_skeletons: "1"
+           }
+         })
+
+    import = created_import(user)
+    assert_not(import.create_skeletons,
+               "Skeletons apply only to imports of others' obss")
+  end
+
   # Regression test: a superimporter's URL that itself filters on
   # `licensed=false` (previewing others' unlicensed obs) must not have that
   # filter silently stripped by URL normalization. Requested/after-taxon
   # must reflect the user's literal request (24), Expected must reflect
-  # MO's forced licensed:true policy (0, since the request is entirely
+  # MO's licensed-only policy (0, since the request is entirely
   # unlicensed), and Already-imported must not absorb the unlicensed obs
   # into its count.
   def test_confirm_url_mode_import_others_licensed_false_filter
@@ -876,21 +1094,20 @@ class InatImportsControllerTest < FunctionalTestCase
     url = "#{INAT_API_OBS_URL}?licensed=false&created_on=2016-02-01" \
           "&iconic_taxa=Fungi&order=desc&order_by=created_at"
 
-    # Requested / after-taxon / unlicensed-others queries all carry the
-    # user's own licensed=false filter through unmodified.
+    # Requested / after-taxon / unlicensed queries all carry the user's
+    # own licensed=false filter through unmodified.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       with(query: hash_including("licensed" => "false")).
       to_return(status: 200, body: { total_results: 24 }.to_json)
-    # The estimate always force-overrides to licensed=true, regardless of
-    # the URL's own filter — none of the (entirely unlicensed) 24 match.
+    # None of the (entirely unlicensed) 24 carries a license code.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "true")).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 0 }.to_json)
 
     login(user.login)
     post(:create, params: { inat_url: url, import_others: "1", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#requested_count", "24",
                   "Requested should be the user's literal total_results, " \
                   "not an unfiltered (broader) count")
@@ -912,14 +1129,14 @@ class InatImportsControllerTest < FunctionalTestCase
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: { total_results: 3 }.to_json)
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including("licensed" => "false")).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 500, body: "error")
 
     login(users(:rolf).login)
     post(:create,
          params: { inat_ids: "1,2,3", inat_username: "rolf", consent: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
     assert_select(
       "#unlicensed_obs_count", "",
@@ -933,14 +1150,12 @@ class InatImportsControllerTest < FunctionalTestCase
            "Test requires user to be a super_importer")
 
     # Total-others request (no license filter) returns 200 with invalid JSON,
-    # triggers JSON::ParserError and the rescue in fetch_unlicensed_others_count
+    # triggers JSON::ParserError and the rescue in inat_get_count
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
       to_return(status: 200, body: "not json")
     # Licensed estimate returns valid JSON — registered last, matched first.
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      with(query: hash_including(
-        "licensed" => "true"
-      )).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
       to_return(status: 200, body: { total_results: 3 }.to_json)
 
     login(user.login)
@@ -948,7 +1163,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_ids: "1,2,3", inat_username: "anyone",
                    consent: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select(
       "#expected_count", "3",
       "Estimate should still show when only unlicensed-others request fails"
@@ -973,7 +1188,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1000,7 +1215,7 @@ class InatImportsControllerTest < FunctionalTestCase
                    inat_username: inat_username,
                    consent: 1, go_back: 1 })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select(
       "textarea#inat_import_inat_ids",
@@ -1028,7 +1243,7 @@ class InatImportsControllerTest < FunctionalTestCase
            }
          })
 
-    assert_response(:success)
+    assert_unprocessable
     url_field = css_select("#inat_import_inat_url").first
     assert_not_nil(url_field, "inat_url input field not found in response")
     value = url_field["value"].presence || url_field.text.strip
@@ -1051,8 +1266,9 @@ class InatImportsControllerTest < FunctionalTestCase
                    consent: 1 })
 
     assert_flash_error
-    assert_response(:success)
+    assert_unprocessable
     assert_select("form#inat_import_form")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_authorization_response_denied
@@ -1061,6 +1277,49 @@ class InatImportsControllerTest < FunctionalTestCase
     get(:authorization_response, params: authorization_denial_callback_params)
 
     assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  # Linking an iNat account from the profile (Account::InatLinksController)
+  # comes back through the same callback.
+  def test_authorization_response_links_the_inat_account
+    login("rolf")
+    state = "#{InatImportsController::AccountLinking::LINK_STATE_PREFIX}abc"
+    session[:inat_link_state] = state
+
+    Inat::AuthorizedLogin.stub(:call, "Rolf_On_iNat") do
+      get(:authorization_response, params: { code: "code", state: state })
+    end
+
+    assert_equal("rolf_on_inat", users(:rolf).reload.inat_username)
+    assert_nil(session[:inat_link_state], "A link state is used once")
+    assert_redirected_to(edit_account_profile_path)
+    assert_flash_success
+  end
+
+  def test_authorization_response_refuses_an_unknown_link_state
+    login("rolf")
+    session[:inat_link_state] = "link-expected"
+
+    Inat::AuthorizedLogin.stub(:call, ->(_) { flunk("must not link") }) do
+      get(:authorization_response,
+          params: { code: "code", state: "link-forged" })
+    end
+
+    assert_redirected_to(observations_path)
+    assert_flash_error
+  end
+
+  def test_authorization_response_reports_a_failed_link
+    login("rolf")
+    session[:inat_link_state] = "link-abc"
+    failure = ->(_) { raise(RestClient::Unauthorized.new) }
+
+    Inat::AuthorizedLogin.stub(:call, failure) do
+      get(:authorization_response, params: { code: "code", state: "link-abc" })
+    end
+
+    assert_redirected_to(edit_account_profile_path)
     assert_flash_error
   end
 
@@ -1120,7 +1379,7 @@ class InatImportsControllerTest < FunctionalTestCase
          params: { inat_username: "anyone", inat_ids: nil,
                    consent: 1, all: 1, import_others: "1" })
 
-    assert_response(:success)
+    assert_unprocessable
     assert_select("#expected_count")
   end
 
@@ -1283,7 +1542,7 @@ class InatImportsControllerTest < FunctionalTestCase
     post(:create,
          params: { inat_url: url, inat_username: inat_username, consent: 1 })
 
-    assert_response(:success, "Valid URL should proceed to confirmation")
+    assert_unprocessable
     assert_select("#expected_count", "5",
                   "Confirmation should show estimate from URL query")
   end
@@ -1367,6 +1626,44 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_form_action(action: :create)
   end
 
+  # iNat shows a project's page, not a search for its observations, so
+  # that address is the one a user has to hand. MO resolves it to the
+  # search it means rather than refusing it.
+  def test_create_with_a_project_page_url_imports_the_project
+    stub_request(:get, %r{api\.inaturalist\.org/v1/projects/fundis-ne}).
+      to_return(status: 200,
+                body: { results: [{ "id" => 102_213,
+                                    "title" => "FUNDIS NE" }] }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: 5 }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_url: "https://www.inaturalist.org/projects/" \
+                             "fundis-ne?tab=observations",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_unprocessable
+    assert_select("#requested_count a[href*=?]", "project_id=102213")
+  end
+
+  def test_create_with_an_unknown_project_page_url_rejected
+    stub_request(:get, %r{api\.inaturalist\.org/v1/projects}).
+      to_return(status: 200, body: { results: [] }.to_json)
+
+    login(users(:rolf).login)
+    post(:create,
+         params: { inat_url: "https://www.inaturalist.org/projects/nope",
+                   inat_username: "rolf_inat_user", consent: 1 })
+
+    assert_flash(
+      :project_site_inat_project_unknown,
+      project: "nope",
+      on_fail: "A project page naming no iNat project should say so"
+    )
+    assert_unprocessable
+  end
+
   def test_create_invalid_url_rejected
     login
     post(:create,
@@ -1375,6 +1672,7 @@ class InatImportsControllerTest < FunctionalTestCase
 
     assert_flash(:inat_invalid_url,
                  on_fail: "Non-iNat URL should flash invalid URL error")
+    assert_unprocessable
     assert_form_action(action: :create)
   end
 
@@ -1571,6 +1869,11 @@ class InatImportsControllerTest < FunctionalTestCase
                          "Confirmed URL import should redirect to iNat auth")
     assert_equal(normalized, import.inat_url,
                  "Normalized URL query string should be saved on InatImport")
+    assert_equal(url, import.original_inat_url,
+                 "Literal submitted URL should be saved on InatImport, " \
+                 "so a later reimport link can use it instead of " \
+                 "reconstructing (and guessing the host of) a URL from " \
+                 "the normalized query string")
   end
 
   def test_url_mode_importables_is_nil
@@ -1774,8 +2077,10 @@ class InatImportsControllerTest < FunctionalTestCase
       on_fail: "Flash should surface iNat's error text instead of the " \
                "generic 'Cannot communicate' message"
     )
+    assert_unprocessable
     assert_select("#inat_import_inat_url", true,
                   "Form should be reloaded, not the confirm page")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_estimate_422_with_non_json_body_falls_back_to_exception_message
@@ -1813,6 +2118,31 @@ class InatImportsControllerTest < FunctionalTestCase
   # Each import now creates a brand-new persistent InatImport record; the
   # freshly created one is the last by id (deterministic insertion order,
   # unlike created_at which can tie under coarse/frozen timestamps).
+  # iNat's counts for 3 obss, one of whose license_code is "": the
+  # license-code filter matches 2 and `licensed=false` matches none.
+  # Returns [all, coded].
+  def stub_counts_with_empty_license_obs
+    all = 3
+    coded = 2
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 200, body: { total_results: all }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("licensed" => "false")).
+      to_return(status: 200, body: { total_results: 0 }.to_json)
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      with(query: hash_including("license" => LICENSED_FILTER[:license])).
+      to_return(status: 200, body: { total_results: coded }.to_json)
+    [all, coded]
+  end
+
+  def post_import_others_confirm(create_skeletons:)
+    login(users(:dick).login) # Dick is a superimporter
+    post(:create,
+         params: { inat_ids: "1,2,3", inat_username: "anyone", consent: 1,
+                   import_others: "1", create_skeletons: create_skeletons })
+    assert_unprocessable
+  end
+
   def created_import(user)
     InatImport.where(user: user).order(:id).last
   end

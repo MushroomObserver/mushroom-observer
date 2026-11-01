@@ -8,17 +8,16 @@
 #
 #   - Multiple Tab families share this "save a query, build an
 #     `add_q_param(target, query)` URL" pattern — `Tab::RelatedQuery`
-#     (cross-model "related index" links) and the obs-counting Tabs
-#     under `Tab::Name::ObsLink::*`. Centralizing the boilerplate
-#     here means new query-link Tabs only declare their `#query` and
+#     (cross-model "related index" links) and
+#     `Tab::Name::ObsLink::Subtaxa` (a subtaxa-observations link
+#     wrapping a query the controller already built for other page
+#     chrome). Centralizing the boilerplate here means new
+#     query-link Tabs only declare their `#build_query` and
 #     `#target_params`.
-#   - `#query` is memoized in the base. Subclasses that have save
-#     side-effects (the obs-link Tabs call `query.save` in
-#     `#build_query` so the `q` param can carry a stable record id)
-#     must not be called twice — the view typically asks for both
-#     `#path` and `#html_options[:data]`, each of which reads
-#     `query`. Without memoization the same query would be saved
-#     twice, creating two `QueryRecord` rows.
+#   - `#query` is memoized in the base. A subclass whose
+#     `#build_query` saves a new record (`query.save`) must not do
+#     that twice if `#path` is read more than once — without
+#     memoization, a second read would re-save unnecessarily.
 #
 # Subclasses MUST implement:
 #

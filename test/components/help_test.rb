@@ -3,82 +3,77 @@
 require("test_helper")
 
 class HelpTest < ComponentTestCase
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_plain_block_with_string
-    html = render(Components::Help.new(element: :p, content: "Help text"))
+    html = render_help(element: :p, content: "Help text")
 
     # Default plain shape: a `help-block`-classed element.
     assert_html(html, "p.help-block", text: "Help text")
   end
 
   def test_plain_block_with_block_content
-    html = render(Components::Help.new(element: :div)) { "From block" }
+    html = render_help(element: :div) { "From block" }
 
     # Block-form content takes precedence over `content:`.
-    assert_html(html, "div.help-block", text: "From block")
+    assert_html(html, ".help-block", text: "From block")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_content_only_uses_default_div_element
-    html = render(Components::Help.new(content: "Help text"))
+    html = render_help(content: "Help text")
 
     assert_html(html, "div.help-block", text: "Help text")
   end
 
+  # The `well:` flavour wraps content in a Bootstrap well; the
+  # element kwarg is intentionally ignored for the well shape --
+  # it always renders as a div regardless of the `:p` passed in.
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_well_wraps_in_bootstrap_well
-    html = render(Components::Help.new(element: :p, content: "Help",
-                                       well: true))
+    html = render_help(element: :p, content: "Help", well: true)
 
-    # The `well:` flavour wraps content in a Bootstrap well; the
-    # element kwarg is intentionally ignored for the well shape.
     assert_html(html, "div.well.well-sm.help-block.position-relative",
                 text: "Help")
   end
 
-  def test_arrow_implies_well_and_adds_arrow_div
-    html = render(Components::Help.new(element: :div, content: "Help",
-                                       arrow: :up))
+  # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
+  # always a well, with an `arrow-up`/`arrow-down` sibling matching
+  # the direction passed in.
+  def test_arrow_up_renders_arrow_up_sibling
+    html = render_help(element: :div, content: "Help", arrow: :up)
 
-    # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
-    # always a well, with an `arrow-up`/`arrow-down` sibling. `mt-3`
-    # is added on the up-pointing variant to leave room above for the
-    # arrow tip.
-    assert_html(html, "div.well.help-block.mt-3", text: "Help")
-    assert_html(html, "div.arrow-up.hidden-xs")
+    assert_html(html, ".well.help-block", text: "Help")
+    assert_html(html, ".arrow-up")
   end
 
-  def test_arrow_down_omits_mt3
-    html = render(Components::Help.new(element: :div, content: "Help",
-                                       arrow: :down))
+  def test_arrow_down_renders_arrow_down_sibling
+    html = render_help(element: :div, content: "Help", arrow: :down)
 
-    # Down arrows hang below the well — no leading `mt-3`.
-    assert_no_html(html, "div.mt-3")
-    assert_html(html, "div.arrow-down.hidden-xs")
+    assert_html(html, ".arrow-down")
   end
 
   def test_extra_class_appended_to_plain_block
-    html = render(Components::Help.new(element: :p, content: "Help",
-                                       class: "extra-thing"))
+    html = render_help(element: :p, content: "Help", class: "extra-thing")
 
-    assert_html(html, "p.help-block.extra-thing", text: "Help")
+    assert_html(html, ".help-block.extra-thing", text: "Help")
   end
 
   def test_id_and_extra_attrs_passed_through
-    html = render(Components::Help.new(
-                    element: :div, content: "Help",
-                    id: "h1", data: { x: "v" }
-                  ))
+    html = render_help(element: :div, content: "Help",
+                       id: "custom-help-id", data: { x: "v" })
 
     # id and arbitrary data-* asserted independently so renaming
     # the wrapper element or reshuffling attribute order doesn't
     # mass-fail this test.
-    assert_html(html, "div.help-block", text: "Help")
-    assert_html(html, "div#h1")
-    assert_html(html, "div[data-x='v']")
+    assert_html(html, ".help-block", text: "Help")
+    assert_html(html, "#custom-help-id")
+    assert_html(html, "[data-x='v']")
   end
 
   def test_renders_nothing_when_neither_content_nor_block
     # Empty wrappers are noise the form layout doesn't need; the
     # component bails out when given neither content source.
-    html = render(Components::Help.new(element: :p))
+    html = render_help(element: :p)
 
     assert_equal("", html.to_s.strip)
   end
@@ -88,53 +83,53 @@ class HelpTest < ComponentTestCase
     # reveal help" shape. The collapse wrapper takes the id; an
     # external `data-target="#<id>"` trigger toggles its
     # `.collapse` visibility class.
-    html = render(Components::Help.new(
-                    collapse_id: "field_help_x"
-                  )) { "Help" }
+    html = render_help(collapse_id: "field_help_x") { "Help" }
 
-    assert_html(html, "div.collapse#field_help_x > " \
-                      "div.well.help-block", text: "Help")
+    assert_html(html, ".collapse#field_help_x > " \
+                      ".well.help-block", text: "Help")
   end
 
   def test_collapse_id_implies_well_even_without_explicit_kwarg
-    html = render(Components::Help.new(collapse_id: "x")) { "h" }
+    html = render_help(collapse_id: "x") { "h" }
 
     # No need to pass `well: true` alongside `collapse_id:` — the
     # collapse markup only makes sense around a well.
-    assert_html(html, "div.collapse > div.well")
+    assert_html(html, ".collapse > .well")
   end
 
-  # ----- element: :span (the old "help-note" flavor's replacement) -----
+  # ----- element: :span (the "help-note" flavor) -----
   #
-  # `Components::Help` used to have a second "note" flavor
-  # (`Help::Note`, `.help-note` class, `:span` default element)
-  # alongside this one (`Help::Block`, `.help-block`). Merged into one
-  # dispatcher, but the two CSS classes stay genuinely distinct:
-  # `.help-block` is Bootstrap's own class and hardcodes
-  # `display: block`, so reusing it for `element: :span` content would
-  # force that content onto its own line regardless of the `<span>`
-  # tag. `render_plain` picks `.help-note` for `:span` and
-  # `.help-block` for everything else to keep the inline shape inline.
+  # `.help-block` is Bootstrap's class and hardcodes `display: block`,
+  # so reusing it for `element: :span` content would force a
+  # line-break regardless of the `<span>` tag. `render_plain` picks
+  # `.help-note` for `:span` and `.help-block` for everything else to
+  # keep the inline shape inline.
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_span_element_renders_help_note_class
-    html = render(Components::Help.new(element: :span, content: "(optional)"))
+    html = render_help(element: :span, content: "(optional)")
 
     assert_html(html, "span.help-note", text: "(optional)")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_span_block_form_renders_block_content
-    html = render(Components::Help.new(element: :span)) { "From block" }
+    html = render_help(element: :span) { "From block" }
 
     assert_html(html, "span.help-note", text: "From block")
   end
 
   def test_span_extra_class_and_attrs_pass_through
-    html = render(Components::Help.new(
-                    element: :span, content: "x",
-                    class: "extra-thing", id: "h", data: { foo: "bar" }
-                  ))
+    html = render_help(element: :span, content: "x",
+                       class: "extra-thing", id: "h", data: { foo: "bar" })
 
     assert_html(html, "span#h.help-note.extra-thing")
     assert_html(html, "span[data-foo='bar']")
+  end
+
+  private
+
+  def render_help(**, &block)
+    render(Components::Help.new(**), &block)
   end
 end

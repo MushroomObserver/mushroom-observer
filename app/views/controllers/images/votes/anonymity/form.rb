@@ -20,14 +20,14 @@ module Views::Controllers::Images::Votes::Anonymity
 
     def render_anonymous_count
       p do
-        plain("#{:image_vote_anonymity_num_anonymous.t}: ")
+        trusted_html(append_colon(:image_vote_anonymity_num_anonymous.t))
         strong { anon }
       end
     end
 
     def render_public_count
       p do
-        plain("#{:image_vote_anonymity_num_public.t}: ")
+        trusted_html(append_colon(:image_vote_anonymity_num_public.t))
         strong { pub }
       end
     end

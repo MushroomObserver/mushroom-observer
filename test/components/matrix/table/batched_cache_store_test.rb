@@ -8,7 +8,7 @@ require "test_helper"
 # calls into fetch(key, value), which doesn't even match this class's
 # signature (raises ArgumentError). Disabled for the whole file since
 # nearly every test calls #fetch.
-# rubocop:disable Style/RedundantFetchBlock
+# rubocop:disable-next Style/RedundantFetchBlock
 class Components::Matrix::Table::BatchedCacheStoreTest < UnitTestCase
   # Wraps a real store, counting calls so tests can assert the batched
   # store issues exactly one read_multi/write_multi regardless of how
@@ -165,4 +165,3 @@ class Components::Matrix::Table::BatchedCacheStoreTest < UnitTestCase
                  "a second flush must not re-write already-flushed entries")
   end
 end
-# rubocop:enable Style/RedundantFetchBlock

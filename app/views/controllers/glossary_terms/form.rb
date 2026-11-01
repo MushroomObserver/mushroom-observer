@@ -3,12 +3,10 @@
 module Views::Controllers::GlossaryTerms
   # Form for creating/editing glossary terms.
   class Form < ::Components::ApplicationForm
-    # Override initialize to accept upload field props (only for new
-    # form).
-    def initialize(model, action: nil, upload_params: nil, **)
-      @upload_params = upload_params
-      super(model, action: action, **)
-    end
+    # Bundled Hash (copyright_holder:/copyright_year:/licenses:/
+    # upload_license_id:) matching the caller's existing shape -- see
+    # `New#view_template`, only populated for the new-record form.
+    prop :upload_params, _Nilable(Hash), default: nil
 
     def view_template
       render_locked_checkbox if in_admin_mode?

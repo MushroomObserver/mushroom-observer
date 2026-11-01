@@ -12,11 +12,7 @@ module Observations
       return unless @observation && can_email_user_question?(@observation)
 
       respond_to do |format|
-        format.html do
-          render(Views::Controllers::Observations::Emails::New.new(
-                   observation: @observation
-                 ))
-        end
+        format.html { render_new_view }
         format.turbo_stream do
           render(Components::Modal.new(
                    type: :turbo_form,
@@ -54,16 +50,21 @@ module Observations
 
       flash_error(:runtime_missing.t(field: :message.l))
       @observation = observation
-      render(Views::Controllers::Observations::Emails::New.new(
-               observation: observation
-             ))
+      render_new_view_invalid
       false
+    end
+
+    def render_new_view(status: :ok, **render_opts)
+      render(Views::Controllers::Observations::Emails::New.new(
+               observation: @observation
+             ),
+             status: status, **render_opts)
     end
 
     def show_flash_and_send_back(observation)
       respond_to do |format|
         format.html do
-          redirect_to(observation_path(observation.id)) and return
+          redirect_to(permanent_observation_path(observation.id)) and return
         end
         format.turbo_stream do
           render_modal_close_and_flash("observation_email") and return

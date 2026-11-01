@@ -28,15 +28,51 @@ class Inat::ObservationResyncerTest < UnitTestCase
     @fresh = Inat::Obs.new(JSON.generate(@raw))
   end
 
+  # calostoma_lutescens is open (obscured: false), so its precise public
+  # coordinate mirrors into MO along with date and notes.
   def test_synced_updates_scalar_core_and_stamps_last_synced_at
     result = resync(found: { @id => @raw }).first
 
     assert_equal(:synced, result.status)
     @obs.reload
     assert_equal(@fresh.when, @obs.when, "date should mirror the source")
-    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
     assert_equal(@fresh.notes, @obs.notes, "notes should mirror the source")
+    assert_equal(@fresh.location, @obs.location, "location mirrors the source")
+    # MO rounds coordinates to 4 decimals (Location.parse_latitude).
+    assert_in_delta(@fresh.lat, @obs.lat.to_f, 1e-4, "lat mirrors the source")
+    assert_in_delta(@fresh.lng, @obs.lng.to_f, 1e-4, "lng mirrors the source")
+    assert_not(@obs.gps_hidden, "an open source is not gps_hidden")
     assert_not_nil(@link.reload.last_synced_at, "should stamp last_synced_at")
+  end
+
+  # An obscured source yields only iNat's blurred coordinate, so MO's
+  # accurate imported one is left intact; gps_hidden mirrors the obscuring
+  # so MO hides the coordinate it keeps (#4215).
+  def test_an_obscured_source_hides_gps_but_keeps_the_coordinate
+    @obs.update_columns(lat: 12.3456789, lng: -98.7654321, gps_hidden: false)
+    @obs.reload
+    original = @obs.slice(:lat, :lng, :where)
+    original_location = @obs.location
+
+    resync(found: { @id => obscured_raw })
+
+    @obs.reload
+    assert(@obs.gps_hidden, "gps_hidden mirrors the iNat obscuring")
+    assert_equal(original_location, @obs.location, "location left intact")
+    assert_equal(original["lat"], @obs.lat, "lat left intact")
+    assert_equal(original["lng"], @obs.lng, "lng left intact")
+    assert_equal(original["where"], @obs.where, "where left intact")
+  end
+
+  # specimen is MO-side (herbarium records / collection numbers a user may
+  # add to a reflection); iNat gives no reliable signal, so a resync must
+  # leave it alone rather than reset it to false.
+  def test_resync_does_not_unset_specimen
+    @obs.update_column(:specimen, true)
+
+    resync(found: { @id => @raw })
+
+    assert(@obs.reload.specimen, "resync must not unset a true specimen")
   end
 
   # Sync is owned by the admin account: anyone logged in may trigger it
@@ -49,6 +85,107 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
     assert_match(/#{User.admin.login}/, @obs.rss_log.reload.notes.to_s,
                  "a resync should be logged as the admin user")
+  end
+
+  # A placeholder synced by anyone but the iNat observer stays a skeleton:
+  # skeleton notes, no sequences.
+  def test_placeholder_stays_stripped_for_a_non_owner_sync
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+    fresh = Inat::Obs.new(JSON.generate(raw))
+
+    resync(found: { @id => raw }, requested_by: users(:rolf))
+
+    @obs.reload
+    assert(@obs.placeholder?, "A non-owner sync should keep the placeholder")
+    assert_equal(fresh.skeleton_notes, @obs.notes,
+                 "A placeholder should keep its skeleton notes")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
+    assert_equal(fresh.skeleton_omissions, @obs.skeleton_omissions,
+                 "A placeholder should record what it did not import")
+  end
+
+  # The "Not imported" list follows the source: a change on iNat to what
+  # the skeleton leaves out is a sync change, so the page refreshes.
+  def test_placeholder_omissions_follow_the_source
+    @obs.update_column(:placeholder, true)
+    stale = Inat::Obs.new(JSON.generate(@raw))
+    raw = copyrightable_raw
+    fresh = Inat::Obs.new(JSON.generate(raw))
+    assert_not_equal(stale.skeleton_omissions, fresh.skeleton_omissions,
+                     "Test requires the source's omissions to change")
+    # Bring everything else in line with the source first.
+    resync(found: { @id => @raw })
+    before = sync_state(@obs)
+    status = resync(found: { @id => @raw }).first.status
+    assert_equal(:unchanged, status,
+                 "Test requires a placeholder already in sync; changed: " \
+                 "#{sync_state_diff(before, sync_state(@obs)).inspect}")
+
+    result = resync(found: { @id => raw }).first
+
+    assert_equal(:synced, result.status,
+                 "A change in what is not imported should count as synced")
+    assert_equal(fresh.skeleton_omissions, @obs.reload.skeleton_omissions,
+                 "The placeholder should record the source's new omissions")
+  end
+
+  def test_placeholder_stays_stripped_for_the_scheduled_sync
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+
+    resync(found: { @id => raw })
+
+    @obs.reload
+    assert(@obs.placeholder?, "A sync with no requester should not upgrade")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
+  end
+
+  # The iNat observer asking for a sync upgrades the placeholder to a full
+  # reflection; its MO owner is unchanged.
+  def test_placeholder_upgrades_when_the_inat_observer_syncs
+    @obs.update_column(:placeholder, true)
+    owner = @obs.user
+    raw = copyrightable_raw
+    fresh = Inat::Obs.new(JSON.generate(raw))
+    assert(fresh.sequences.any?, "Test requires a source with a sequence")
+    requester = users(:rolf)
+    requester.update_column(:inat_username, raw[:user][:login].upcase)
+    @obs.rss_log.update_columns(notes: "20250101000000\n")
+
+    result = resync(found: { @id => raw }, requested_by: requester).first
+
+    assert_equal(:synced, result.status, "An upgrade should count as synced")
+    @obs.reload
+    assert_not(@obs.placeholder?, "The owner's sync should upgrade it")
+    assert_equal(fresh.notes, @obs.notes,
+                 "An upgraded reflection should get the full notes")
+    assert_equal(fresh.sequences.size, @obs.sequences.count,
+                 "An upgraded reflection should get the sequences")
+    assert_equal(owner, @obs.user, "The MO owner should be unchanged")
+    tag, args, = @obs.rss_log.reload.parse_log.first
+    assert_equal(:log_observation_upgraded_from_placeholder, tag,
+                 "The upgrade should be the newest log entry")
+    assert_equal(requester.login, args[:user],
+                 "The upgrade should be logged against the requester")
+    assert_nil(@obs.skeleton_omissions,
+               "An upgraded reflection should no longer record omissions")
+  end
+
+  # An observer who opted out of MO keeps a placeholder even when they
+  # ask for the sync.
+  def test_placeholder_stays_for_an_opted_out_inat_observer
+    @obs.update_column(:placeholder, true)
+    raw = copyrightable_raw
+    requester = users(:rolf)
+    requester.update_columns(inat_username: raw[:user][:login],
+                             inat_import_opt_out: true)
+
+    resync(found: { @id => raw }, requested_by: requester)
+
+    @obs.reload
+    assert(@obs.placeholder?, "An opted-out observer should not upgrade it")
+    assert_empty(@obs.sequences, "A placeholder should not sync sequences")
   end
 
   def test_second_resync_with_same_data_is_unchanged
@@ -122,9 +259,10 @@ class Inat::ObservationResyncerTest < UnitTestCase
     assert_not_nil(sib.reload.location || sib.where)
   end
 
-  # The aggregate flash goes to EVERY member's channel — a viewer may be
-  # on the non-reflection primary's page — while panel updates go only
-  # to the changed reflection's own channel.
+  # The aggregate flash goes to EVERY member's channel -- a viewer may be
+  # on the non-reflection primary's page. The changed reflection's page
+  # refreshes with the flash; the unchanged primary's page takes the
+  # flash and the new sync time in place.
   def test_flash_broadcast_reaches_every_member_page
     primary = add_non_reflection_primary
 
@@ -137,11 +275,13 @@ class Inat::ObservationResyncerTest < UnitTestCase
       end
     end
 
-    assert_equal(1, primary_msgs.length,
-                 "the primary's page gets the flash only")
-    assert(primary_msgs.first.include?('target="page_flash"'))
-    assert_equal(3, obs_msgs.length,
-                 "the synced reflection's page gets flash + panels")
+    primary_tags = stream_tags(primary_msgs)
+    assert_equal(%w[update replace], primary_tags.pluck("action"),
+                 "the primary's page gets the flash and the sync time")
+    assert_equal("page_flash", primary_tags.first["target"])
+    assert_equal(".reflection-last-synced", primary_tags.last["targets"])
+    assert_equal(%w[refresh_with_flash], stream_tags(obs_msgs).pluck("action"),
+                 "the synced reflection's page gets one refresh")
   end
 
   # Mixed outcomes (rare) are reported honestly in one flash: refreshed
@@ -157,10 +297,15 @@ class Inat::ObservationResyncerTest < UnitTestCase
       Inat::ObservationResyncer.new(@obs, fetcher: fetcher).resync
     end
 
-    flash = messages.find { |m| m.include?('target="page_flash"') }
-    assert_includes(flash, :observation_resync_synced.t(count: 1))
-    assert_includes(flash, :observation_resync_source_deleted.t(count: 1))
-    assert_includes(flash, "alert-warning",
+    refresh = stream_tags(messages).find do |tag|
+      tag["action"] == "refresh_with_flash"
+    end
+    flash = flash_in(refresh)
+    assert_includes(flash.text,
+                    :observation_resync_synced.t(count: 1).as_displayed)
+    assert_includes(flash.text,
+                    :observation_resync_source_deleted.t(count: 1).as_displayed)
+    assert_includes(flash.classes, "alert-warning",
                     "a missing source should drive the level to warning")
     assert_not_nil(sib_link.reload.last_synced_at,
                    "the deleted-source check still stamps last_synced_at")
@@ -170,27 +315,21 @@ class Inat::ObservationResyncerTest < UnitTestCase
   #  Broadcast shapes for single-reflection outcomes
   # ---------------------------------------------------------------
 
-  # A real change: one flash broadcast plus a replace of each panel that
-  # actually displays resynced fields (Details: when/location/GPS;
-  # NotesPanel: notes).
-  def test_synced_broadcasts_flash_and_panel_updates
+  # A real change refreshes the page, so each viewer refetches the
+  # namings panel and title with their session; the flash rides along.
+  def test_synced_refreshes_the_page_carrying_the_flash
     messages = capture_broadcasts(stream(@obs)) do
       resync(found: { @id => @raw })
     end
 
-    assert_equal(3, messages.length)
-    assert(messages.any? { |m| m.include?('target="page_flash"') })
-    assert(
-      messages.any? { |m| m.include?('target="observation_details"') }
-    )
-    assert(messages.any? { |m| m.include?('target="observation_notes"') })
-    flash = messages.find { |m| m.include?('target="page_flash"') }
-    assert_includes(flash, :observation_resync_synced.t(count: 1))
+    tags = stream_tags(messages)
+    assert_equal(%w[refresh_with_flash], tags.pluck("action"))
+    assert_equal(:observation_resync_synced.t(count: 1).as_displayed,
+                 flash_in(tags.first).text)
   end
 
-  # No real change: just the flash, no point re-rendering panels whose
-  # content didn't move.
-  def test_unchanged_broadcasts_flash_only
+  # No change: no refresh, just the flash and the new sync time.
+  def test_unchanged_broadcasts_flash_and_sync_time
     resync(found: { @id => @raw }) # first sync, becomes the baseline
     @obs = Observation.find(@obs.id)
 
@@ -198,18 +337,30 @@ class Inat::ObservationResyncerTest < UnitTestCase
       resync(found: { @id => @raw })
     end
 
-    assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_unchanged.t)
+    flash_tag, sync_tag = stream_tags(messages)
+    assert_equal(2, messages.length)
+    assert_equal(:observation_resync_unchanged.t.as_displayed,
+                 flash_in(flash_tag).text)
+    assert_equal(".reflection-last-synced", sync_tag["targets"])
+    assert_not_nil(
+      sync_tag.at_css("template .reflection-last-synced " \
+                      "[data-controller='local-time']"),
+      "the replacement shows the sync time"
+    )
   end
 
-  def test_source_deleted_broadcasts_warning_flash_only
+  def test_source_deleted_broadcasts_warning_flash_and_sync_time
     @obs.rss_log.update_columns(notes: "20250101000000\n")
 
     messages = capture_broadcasts(stream(@obs)) { resync(found: {}) }
 
-    assert_equal(1, messages.length)
-    assert_includes(messages.first,
-                    :observation_resync_source_deleted.t(count: 1))
+    flash_tag, sync_tag = stream_tags(messages)
+    assert_equal(2, messages.length, "flash and the new sync time")
+    flash = flash_in(flash_tag)
+    assert_equal(:observation_resync_source_deleted.t(count: 1).as_displayed,
+                 flash.text)
+    assert_includes(flash.classes, "alert-warning")
+    assert_equal(".reflection-last-synced", sync_tag["targets"])
   end
 
   def test_fetch_failed_broadcasts_danger_flash_only
@@ -218,18 +369,33 @@ class Inat::ObservationResyncerTest < UnitTestCase
     end
 
     assert_equal(1, messages.length)
-    assert_includes(messages.first, :observation_resync_failed.t)
+    flash = flash_in(stream_tags(messages).first)
+    assert_equal(:observation_resync_failed.t.as_displayed, flash.text)
+    assert_includes(flash.classes, "alert-danger")
   end
 
   private
+
+  # Broadcasts are turbo-stream markup; parse them so assertions select
+  # elements instead of matching substrings.
+  def stream_tags(messages)
+    messages.map { |m| Nokogiri::HTML5.fragment(m).at_css("turbo-stream") }
+  end
+
+  def flash_in(tag)
+    flash = tag.at_css("template #flash_notices")
+    assert_not_nil(flash, "stream should carry a flash")
+    flash
+  end
 
   def stream(obs)
     Turbo::StreamsChannel.send(:stream_name_from, [obs, :external_link_sync])
   end
 
-  def resync(found:, failed: false)
+  def resync(found:, failed: false, requested_by: nil)
     fetcher = FakeFetcher.new([found, failed])
-    Inat::ObservationResyncer.new(@obs, fetcher: fetcher).resync
+    Inat::ObservationResyncer.new(@obs, requested_by: requested_by,
+                                        fetcher: fetcher).resync
   end
 
   # A second read-only reflection grouped into @obs's occurrence, with
@@ -244,8 +410,7 @@ class Inat::ObservationResyncerTest < UnitTestCase
     link = ExternalLink.create!(
       user: sib.user, target: sib,
       external_site: external_sites(:inaturalist),
-      relationship: :import, external_id: 67_890,
-      url: "https://www.inaturalist.org/observations/67890"
+      relationship: :import, external_id: 67_890
     )
     [sib, link]
   end
@@ -265,5 +430,48 @@ class Inat::ObservationResyncerTest < UnitTestCase
   def mock_raw(filename)
     JSON.parse(File.read("test/inat/#{filename}.txt"),
                symbolize_names: true)[:results].first
+  end
+
+  # What a resync can change, so a failure that should have been a no-op
+  # says which part moved.
+  def sync_state(obs)
+    obs = Observation.find(obs.id)
+    { attributes: obs.attributes.except("updated_at"),
+      namings: obs.namings.order(:id).
+               pluck(:id, :name_id, :user_id, :external_site_id),
+      votes: Vote.where(observation_id: obs.id).order(:id).
+             pluck(:id, :naming_id, :user_id, :value, :source_value, :favorite),
+      images: obs.images.order(:id).pluck(:id, :license_id,
+                                          :copyright_holder) }
+  end
+
+  def sync_state_diff(before, after)
+    before.each_with_object({}) do |(key, old), diff|
+      new = after[key]
+      next if old == new
+
+      diff[key] = if old.is_a?(Hash)
+                    old.keys.reject { |k| old[k] == new[k] }.
+                      index_with { |k| [old[k], new[k]] }
+                  else
+                    { before: old, after: new }
+                  end
+    end
+  end
+
+  # The calostoma raw plus the content a skeleton leaves out: a
+  # description and a DNA sequence observation field.
+  def copyrightable_raw
+    dna_field = mock_raw("donadinia_PNW01")[:ofvs].
+                find { |field| field[:datatype] == "dna" }
+    assert_not_nil(dna_field, "Test requires a DNA observation field")
+    @raw.merge(description: "Copyrightable description",
+               ofvs: [dna_field])
+  end
+
+  # The open calostoma raw, flipped to obscured -- the flag iNat sets when
+  # it blurs the public coordinate (user or taxon geoprivacy).
+  def obscured_raw
+    @raw.merge(obscured: true)
   end
 end

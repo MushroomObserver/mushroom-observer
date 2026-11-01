@@ -10,9 +10,7 @@ class API2::NameDescriptionsTest < UnitTestCase
     do_basic_get_test(NameDescription, public: true)
   end
 
-  def params_get(**)
-    { method: :get, action: :name_description }.merge(**)
-  end
+  def api2_model = NameDescription
 
   def test_name_description_get_names
     public = [name_descriptions(:peltigera_alt_desc),

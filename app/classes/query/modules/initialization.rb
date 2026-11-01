@@ -109,9 +109,16 @@ module Query::Modules::Initialization
 
   # `:order_by` gets `viewer:` forwarded - it decides postal/scientific
   # location-name sort order, see AbstractModel::OrderingScopes.
+  # `:needs_naming` treats `val` as a presence flag, not an id -- `false`
+  # skips the scope (skippable_values doesn't skip `false` generally, so
+  # this has to check explicitly), `true` sends `viewer` instead of
+  # `val`. The URL can only mean "my queue", not an arbitrary user's --
+  # see Observation::Scopes#needs_naming.
   def apply_scope_param(param, val)
     if param == :order_by
       @scopes.send(param, val, viewer: viewer)
+    elsif param == :needs_naming
+      val ? @scopes.send(param, viewer) : @scopes
     elsif val.is_a?(Hash)
       @scopes.send(param, **val)
     else
@@ -170,12 +177,14 @@ module Query::Modules::Initialization
     @scopes = @scopes.exclude_non_primary_observations
   end
 
-  # For Observation queries, exclude non-primary members of
-  # multi-observation occurrences at the scope level.
+  # For Observation queries, exclude a non-primary member of an
+  # occurrence when its primary is in the same result set, so an
+  # occurrence is represented once without a member disappearing from
+  # the lists its primary cannot reach (#5486).
   def exclude_non_primary_observations
     return unless model == Observation
 
-    @scopes = @scopes.exclude_non_primary
+    @scopes = @scopes.exclude_non_primary_when_primary_present
   end
 
   ##############################################################################
@@ -186,9 +195,11 @@ module Query::Modules::Initialization
     # Bypasses the `order_by_default` scope (used directly, without a
     # `viewer`, by callers outside the Query system) so the default
     # sort on an index page is viewer-aware too - same underlying
-    # `order_by` dispatcher, with `self.class.default_order` standing
-    # in for the model's own `order_by_default` scope body.
-    @scopes = @scopes.order_by(self.class.default_order, viewer: viewer)
+    # `order_by` dispatcher, with `default_order` standing in for the
+    # model's own `order_by_default` scope body. `default_order` (not
+    # `self.class.default_order`) so a query_attr's own per-attr
+    # `default_order:` override applies when that attr is present.
+    @scopes = @scopes.order_by(default_order, viewer: viewer)
   end
 
   # array of max of MO.query_max_array unique ids for use with Arel "in"

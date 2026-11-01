@@ -6,6 +6,7 @@ module Observations
     before_action :login_required
     before_action :store_location, only: :edit
 
+    # rubocop:disable MO/NoLongCommentBlock
     ############################################################################
     #
     #  :section: Associate Observations with "undefined" +where+ strings
@@ -40,6 +41,7 @@ module Observations
     # The form is not really a `form`, but the buttons do commit to "update".
     # It contains links to assign the observations sharing the +where+ string
     # to the given Location (AR record)
+    # rubocop:enable MO/NoLongCommentBlock
 
     def edit
       # NOTE: Don't use or pass Location.user_format for @where. Needs "postal".

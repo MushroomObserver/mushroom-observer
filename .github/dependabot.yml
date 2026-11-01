@@ -1,23 +1,31 @@
 # Use Dependabot to update packages in ecosystems
 # https://docs.github.com/en/code-security/concepts/supply-chain-security/about-the-dependabot-yml-file
-
-# Update gem dependencies
-# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates
-# https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates
+#
+# Dependabot PRs are mostly security updates, so they are labeled
+# "review: urgent" (see .claude/rules/review_types.md). Setting `labels`
+# replaces Dependabot's defaults, so each list keeps "dependencies" and
+# the ecosystem label.
 version: 2
 updates:
+  # Update gem dependencies
+  # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/about-dependabot-version-updates
+  # https://docs.github.com/en/code-security/dependabot/dependabot-version-updates/configuring-dependabot-version-updates
   - package-ecosystem: "bundler"
     directory: "/"
     schedule:
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "ruby"
+      - "review: urgent"
 
-# Update GitHub Actions
-# https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/keeping-your-actions-up-to-date-with-dependabot
-version: 2
-updates:
-
+  # Update GitHub Actions
+  # https://docs.github.com/en/code-security/how-tos/secure-your-supply-chain/secure-your-dependencies/keeping-your-actions-up-to-date-with-dependabot
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      # Check for updates to GitHub Actions every week
       interval: "weekly"
+    labels:
+      - "dependencies"
+      - "github_actions"
+      - "review: urgent"

@@ -3,9 +3,9 @@
 # "Back to herbarium_records index" link (used by the edit form when
 # arriving from the index). Carries the current Query through.
 class Tab::HerbariumRecord::BackToIndex < Tab::Base
-  def initialize(q_param: nil)
+  def initialize(index_filter: nil)
     super()
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   def title
@@ -13,6 +13,10 @@ class Tab::HerbariumRecord::BackToIndex < Tab::Base
   end
 
   def path
-    @q_param ? herbarium_records_path(q: @q_param) : herbarium_records_path
+    if @index_filter
+      herbarium_records_path(**@index_filter)
+    else
+      herbarium_records_path
+    end
   end
 end

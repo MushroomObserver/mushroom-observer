@@ -11,7 +11,8 @@
 # pointing at the source. Sibling reflection rows get the same note.
 # When the occurrence holds any reflection, the pane ends with ONE
 # occurrence-wide "Sync now" button (#4215), shown to any logged-in
-# viewer, which refreshes every reflection in the occurrence. Sibling
+# viewer, which refreshes every reflection in the occurrence, and a
+# line saying when the occurrence last synced. Sibling
 # rows never get InlineCRUDLinks either way. Otherwise purely
 # informational, not a form.
 module Views::Controllers::Observations::ExternalLinks
@@ -36,14 +37,19 @@ module Views::Controllers::Observations::ExternalLinks
     def render_body
       h5(class: "mt-0") do
         strong do
-          plain("#{:show_observation_on_site.l(site: @site_name)}:")
+          append_colon(:show_observation_on_site.l(site: @site_name))
         end
       end
       ul(class: "tight-list pl-3 mb-0") do
         @site_links.each { |link| render_own_row(link) }
         @sibling_site_links.each { |sib_link| render_sibling_row(sib_link) }
       end
-      render_sync_button if @user && @obs.syncable?
+      return unless @user && @obs.syncable?
+
+      div(class: "d-flex align-items-center mt-3") do
+        render_sync_button
+        render(LastSynced.new(synced_at: @obs.last_synced_at))
+      end
     end
 
     # Edit/destroy affordance for the current obs's own links only --
@@ -56,6 +62,7 @@ module Views::Controllers::Observations::ExternalLinks
         Link(type: :external, link: link)
         if @obs.reflection?
           render_read_only_note
+          render_placeholder_notes if placeholder_source?(link)
         else
           whitespace
           InlineCRUDLinks(target: link, observation: @obs, user: @user)
@@ -71,6 +78,14 @@ module Views::Controllers::Observations::ExternalLinks
       end
     end
 
+    def placeholder_source?(link)
+      @obs.placeholder? && link.import? && @obs.skeleton_omissions.present?
+    end
+
+    def render_placeholder_notes
+      render(PlaceholderNotes.new(omissions: @obs.skeleton_omissions))
+    end
+
     # "Sync now" -- one occurrence-wide button (#4215): enqueues a
     # background refresh of EVERY reflection in the occurrence, whichever
     # member's page it's pressed on. Shown to any logged-in viewer.
@@ -82,7 +97,7 @@ module Views::Controllers::Observations::ExternalLinks
         name: :sync_now.ti,
         target: resync_observation_path(@obs.id),
         size: :sm,
-        class: "reflection-sync-button mt-3",
+        class: "reflection-sync-button",
         data: { turbo_confirm: :observation_resync_confirm.l }
       )
     end

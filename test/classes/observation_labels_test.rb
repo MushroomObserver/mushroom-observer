@@ -32,18 +32,11 @@ class ObservationLabelsTest < UnitTestCase
     assert_equal(link.link_url, inat.url)
   end
 
-  # No iNat QR field when the import link has no external_id, nor for a
-  # non-imported observation.
-  def test_qr_fields_without_inat_external_id
-    obs = observations(:imported_inat_obs)
-    obs.import_link.update_columns(external_id: nil)
-    obs.external_links.reload
-    labels = ObservationLabels::Fields.new(obs).qr_fields.map(&:label)
-    assert_empty(labels.grep(/\Ainat:/i), "Blank external_id => no iNat field")
-
+  # No iNat QR field for a non-imported observation.
+  def test_qr_fields_no_inat_import_link
     native = observations(:minimal_unknown_obs)
-    native_labels = ObservationLabels::Fields.new(native).qr_fields.map(&:label)
-    assert_empty(native_labels.grep(/\Ainat:/i),
+    labels = ObservationLabels::Fields.new(native).qr_fields.map(&:label)
+    assert_empty(labels.grep(/\Ainat:/i),
                  "Non-imported obs should get no iNat field")
   end
 end

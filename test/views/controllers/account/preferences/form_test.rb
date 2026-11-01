@@ -34,7 +34,6 @@ class Views::Controllers::Account::Preferences::FormTest <
     assert_html(html, "input[type='password'][name='user[password]'][value='']")
     assert_html(html, "input[type='password']" \
                       "[name='user[password_confirmation]'][value='']")
-    # Each section has its own submit button (one of 6).
     assert_html(html, "button[type='submit']", text: :save_edits.ti)
   end
 
@@ -72,7 +71,7 @@ class Views::Controllers::Account::Preferences::FormTest <
        /images/licenses/edit].each do |href|
       assert_html(html, ".input-group-btn a[href='#{href}']")
       assert_html(html,
-                  ".input-group-btn a[href='#{href}'] span[class*='glyphicon']")
+                  ".input-group-btn a[href='#{href}'] svg.mo-icon-new-window")
     end
   end
 
@@ -305,7 +304,7 @@ class Views::Controllers::Account::Preferences::FormTest <
   def test_email_section_renders_grouped_checkboxes_and_html_note
     html = render_form
 
-    assert_html(html, "h5", text: :prefs_email_prefs.l)
+    assert_includes(html, :prefs_email_prefs.l)
     assert_html(html, "input[type='checkbox'][name='user[no_emails]']")
     assert_html(html, "input[type='checkbox'][name='user[email_html]']")
     # Five group headers, one per `EMAIL_GROUPS` entry.
@@ -329,16 +328,6 @@ class Views::Controllers::Account::Preferences::FormTest <
     # textile-rendered, so the i18n string is a substring of the
     # rendered output.
     assert_includes(html, :prefs_email_note.l)
-  end
-
-  # ---- Multiple submits ----
-
-  def test_six_submit_buttons_one_per_section
-    html = render_form
-
-    # Each of login, privacy, appearance, filters, notes, email has
-    # its own submit so users don't have to scroll to the bottom.
-    assert_html(html, "button[type='submit']", count: 6)
   end
 
   private

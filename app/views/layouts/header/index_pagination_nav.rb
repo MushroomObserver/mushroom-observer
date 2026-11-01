@@ -9,28 +9,34 @@
 # after a page load). Only `NamesController#index` currently passes
 # it; the rest use the default of nil.
 #
-# The view reads `q_param(current_query)` directly — index pages
-# always have an `@query` set, so this collapses to the same Hash
-# the helper used to pass explicitly. Tests stub `current_query`
-# (via `controller.define_singleton_method`) when they want to
-# verify the q-param hidden fields render.
+# The page-number/letter inputs aren't inside a `<form>` -- each
+# "Goto" control is a plain link carrying the full current query
+# state (via `request_url`), same as the prev/next/max-page links.
+# `page-input_controller.js` rewrites a goto link's own `page`/
+# `letter` param (and its tooltip text) as the user types, so no
+# submission round-trip is needed.
 module Views::Layouts
   class Header::IndexPaginationNav < Views::Base
     include Phlex::Slotable
 
     slot :sorter
+    slot :type_filters
 
     prop :pagination_data, _Nilable(::PaginationData)
     prop :position, ::Symbol, default: -> { :top }
     prop :anchor, _Nilable(::String), default: nil
     # Passed from the helper which has access to request/params.
-    prop :request_url, ::String     # Full URL w/ query params, for links
-    prop :form_action_url, ::String # URL w/o query params, for form actions
-    prop :letter_param, _Nilable(::String)
+    prop :request_url, ::String # Full URL w/ query params, for links
 
     def view_template
-      div(class: "pagination-#{@position} flex-bar mb-2") do
-        div(class: "d-flex") { render(sorter_slot) if sorter_slot? }
+      return unless sorter_slot? || type_filters_slot? ||
+                    need_letter_pagination_links? || show_number_pagination?
+
+      div(class: "pagination-#{@position} flex-bar px-3 mb-2") do
+        div(class: "d-flex") do
+          render(sorter_slot) if sorter_slot?
+          render(type_filters_slot) if type_filters_slot?
+        end
         div(class: "d-flex") do
           render_letter_pagination_nav
           render_number_pagination_nav
@@ -39,6 +45,10 @@ module Views::Layouts
     end
 
     private
+
+    def show_number_pagination?
+      @pagination_data && @pagination_data.num_pages > 1
+    end
 
     def render_letter_pagination_nav
       return unless need_letter_pagination_links?
@@ -52,7 +62,7 @@ module Views::Layouts
     end
 
     def render_number_pagination_nav
-      return unless @pagination_data && @pagination_data.num_pages > 1
+      return unless show_number_pagination?
 
       setup_letter_params
       setup_page_numbers
@@ -77,12 +87,18 @@ module Views::Layouts
     end
 
     def render_page_label
-      render(Components::Navbar::Text.new(class: "mx-0 hidden-xs")) { :page.ti }
+      render(Components::Navbar::Text.new(
+               class: class_names("mx-0",
+                                  Components::Column.mobile_hide_classes)
+             )) { :page.ti }
     end
 
     def render_max_page_link(max_page)
       max_url = pagination_link_url(max_page)
-      render(Components::Navbar::Text.new(class: "ml-0 mr-2 hidden-xs")) do
+      render(Components::Navbar::Text.new(
+               class: class_names("ml-0 mr-2",
+                                  Components::Column.mobile_hide_classes)
+             )) do
         :of.l
       end
       render(Components::Navbar::Text.new(class: "mx-0")) do
@@ -108,7 +124,7 @@ module Views::Layouts
       )
       url = pagination_link_url(page)
 
-      Link(type: :icon, content: direction.to_s.to_sym.ti, path: url,
+      Link(type: :get, name: direction.to_s.to_sym.ti, target: url,
            icon: direction, button: :link, size: :lg, class: classes)
     end
 
@@ -126,22 +142,19 @@ module Views::Layouts
       url
     end
 
+    # No <form> -- the input is a free element, and "Goto" is a plain
+    # link like the prev/next/max-page links, carrying the full
+    # current query state (via pagination_link_url's request_url base)
+    # from the moment it's rendered. page-input_controller.js rewrites
+    # the link's own `page`/`letter` param (and its tooltip text) as
+    # the user types, so no submission round-trip is needed.
     def render_goto_page_input(this_page, max_page)
-      form(
-        action: @form_action_url, method: :get,
-        class: class_names(Components::Navbar::FORM_CLASS, "px-0 page_input"),
-        data: { controller: "page-input", page_input_max_value: max_page }
-      ) do
-        render_page_input_group(this_page, max_page)
-        render_q_hidden_fields
-        render_letter_hidden_field
-      end
-    end
-
-    def render_page_input_group(this_page, max_page)
-      InputGroup(class: "page-input mx-2") do
+      InputGroup(class: "page-input mx-2",
+                 data: { controller: "page-input",
+                         page_input_max_value: max_page }) do
         input(**page_input_attrs(this_page, max_page))
-        render_goto_button
+        render_goto_link(href: pagination_link_url(this_page),
+                         tooltip: :goto_page_tooltip.t(number: this_page))
       end
     end
 
@@ -150,18 +163,28 @@ module Views::Layouts
         type: :text, name: :page, value: this_page,
         class: "form-control text-right",
         size: max_page.digits.count,
+        # This `name` is reused identically across every index page,
+        # so Chrome accumulates a large saved-value history under it
+        # and offers to autofill/suggest from that history as soon as
+        # the field is focused -- suppress it.
+        autocomplete: "off",
         data: { page_input_target: "numberInput",
                 action: "page-input#sanitizeNumber" }
       }
     end
 
-    def render_goto_button
+    # `goToLink` target name is shared by both the page and letter
+    # widgets -- safe since page-input is instantiated once per
+    # InputGroup (two separate elements each carry their own
+    # data-controller="page-input"), so each instance's
+    # `this.goToLinkTarget` sees only the one link in its own DOM
+    # scope.
+    def render_goto_link(href:, tooltip:)
       render(Components::InputGroup::Addon.new) do
-        Button(
-          type: :submit,
-          variant: :outline,
-          class: "px-2"
-        ) { Icon(type: :goto, title: :goto.ti) }
+        Link(
+          type: :get, name: :goto.ti, target: href, button: :outline,
+          class: "px-2", data: { page_input_target: "goToLink" }
+        ) { Icon(type: :goto, title: tooltip, center_tooltip: true) }
       end
     end
 
@@ -182,44 +205,38 @@ module Views::Layouts
     end
 
     def render_letter_input(this_letter, used_letters)
-      form(
-        action: @form_action_url, method: :get,
-        class: class_names(Components::Navbar::FORM_CLASS, "px-0 page_input"),
-        data: { controller: "page-input",
-                page_input_letters_value: used_letters }
-      ) do
-        InputGroup(class: "page-input ml-2") do
-          input(
-            type: :text, name: :letter, value: this_letter,
-            class: "form-control text-right",
-            size: 1, placeholder: "—",
-            data: { page_input_target: "letterInput",
-                    action: "page-input#sanitizeLetter" }
-          )
-          render_goto_button
-        end
-        render_q_hidden_fields
+      InputGroup(class: "page-input ml-2",
+                 data: { controller: "page-input",
+                         page_input_letters_value: used_letters }) do
+        input(
+          type: :text, name: :letter, value: this_letter,
+          class: "form-control text-right",
+          size: 1, placeholder: "—",
+          # Same reused-name autofill exposure as the page input above.
+          autocomplete: "off",
+          data: { page_input_target: "letterInput",
+                  action: "page-input#sanitizeLetter" }
+        )
+        render_goto_link(href: letter_link_url(this_letter),
+                         tooltip: :goto_letter_tooltip.t(letter: this_letter))
       end
     end
 
-    def render_q_hidden_fields
-      q_params = q_param(current_query)
-      return unless q_params
-
-      query_string = Rack::Utils.build_nested_query({ q: q_params })
-      pairs = query_string.split(Rack::Utils::DEFAULT_SEP)
-      pairs.each do |pair|
-        key, value = pair.split("=", 2).map { |str| Rack::Utils.unescape(str) }
-        input(type: :hidden, name: key, value: value)
+    # Mirrors pagination_link_url, but for the letter-jump link: keys
+    # on letter_arg instead of page_arg, and always clears the page
+    # number -- jumping to a new letter resets pagination position
+    # within that letter's subset, matching the old form's behavior
+    # (it had no page field, so submitting it always dropped whatever
+    # page the address bar had).
+    def letter_link_url(letter)
+      params = { @pagination_data.letter_arg => letter,
+                 @pagination_data.number_arg => nil }
+      url = add_args_to_url(@request_url, params.merge(id: nil))
+      if @anchor
+        url.sub!(/#.*/, "")
+        url += "##{@anchor}"
       end
-    end
-
-    def render_letter_hidden_field
-      input(
-        type: :hidden, name: :letter, value: @letter_param,
-        data: { page_input_target: "letterHiddenInput",
-                action: "letterUpdated@window->page-input#syncLetter" }
-      )
+      url
     end
   end
 end

@@ -166,7 +166,7 @@ module Report
     # subclass reads it back as row.val(:collector_ids).
 
     # "+" is the required Arel Extensions syntax for SQL CONCAT
-    # rubocop:disable Style/StringConcatenation
+    # rubocop:disable-next Style/StringConcatenation
     def add_herbarium_labels!(rows, key)
       vals = HerbariumRecord.joins(:observations).
              merge(plain_query).
@@ -176,9 +176,8 @@ module Report
              map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, key)
     end
-    # rubocop:enable Style/StringConcatenation
 
-    # rubocop:disable Metrics/AbcSize
+    # rubocop:disable-next Metrics/AbcSize
     def add_herbarium_accession_numbers!(rows, key)
       gpc = 'GROUP_CONCAT(DISTINCT CONCAT(herbaria.code, "\t", ' \
             'herbarium_records.accession_number) SEPARATOR "\n")'
@@ -190,7 +189,6 @@ module Report
              map { |rec| rec.attributes.values[0..1] }
       add_column!(rows, vals, key)
     end
-    # rubocop:enable Metrics/AbcSize
 
     def add_collector_ids!(rows, key)
       gpc = 'GROUP_CONCAT(DISTINCT CONCAT(collection_numbers.id, "\t", ' \

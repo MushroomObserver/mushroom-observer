@@ -51,8 +51,10 @@ class GlossaryTerm < AbstractModel
         ->(str) { search_columns(GlossaryTerm[:description], str) }
 
   scope :pattern, lambda { |phrase|
-    cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
-    search_columns(cols, phrase).distinct
+    exact_match_or(phrase) do
+      cols = (GlossaryTerm[:name] + GlossaryTerm[:description].coalesce(""))
+      search_columns(cols, phrase).distinct
+    end
   }
 
   scope :show_includes, lambda {

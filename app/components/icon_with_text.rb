@@ -1,22 +1,30 @@
 # frozen_string_literal: true
 
 # Shared "icon + optional text" rendering — the icon glyph plus a
-# text `<span>` that's `.sr-only` (hidden, default) or visible (at
-# `sm+`) when `show_text:` is truthy. Included by both
-# `Components::Button::Content` (Button / Link::Get family) and
-# `Components::Link::Icon`.
+# text `<span>` whose visibility depends on `show_label:`: `:hidden`
+# is `.sr-only` (default), `:responsive` is hidden on `xs`, visible
+# at `sm`+ (for a cramped inline control that can spare the label
+# only once there's room), `:always` is visible at every breakpoint
+# (for a full-width heading with no space pressure to hide behind).
+# Included by `Components::Button::Content`, in turn included
+# by both `Components::Button` and `Components::Link` (the `Link::Get`
+# family) -- so both get the optional active-icon/active-label swap
+# below for free.
 #
-# Callers that need multiple icon/text pairs in a specific order
-# (e.g. `Link::Icon`'s stateful icon + active-icon swap) call
-# `render_icon_glyph` / `render_icon_text` separately rather than
-# the fused `render_icon_with_text`, so the icons and text spans can
-# still be grouped icon-then-icon, text-then-text.
+# `render_icon_with_text` renders icon-then-text by default; passing
+# `active_icon:`/`active_content:` additionally renders a second
+# icon/text pair (marked `.active-icon`/`.active-label`), for a
+# target whose appearance swaps based on state (e.g. a bookmark/
+# subscribe toggle) -- CSS keys visibility off a `.active`/`.collapsed`
+# class on the trigger element (see `_icons.scss`'s `.stateful-link`
+# rule).
 module Components::IconWithText
   # `icon-text-gap`, not a `.pl-*` rem-based utility -- the gap needs
   # to scale with the surrounding font-size (a `.panel-title` heading's
   # bold type needs visibly more gap than small body text), which only
   # an em-based value does. See `_icons.scss` for the rule.
-  TEXT_VISIBLE_CLASSES = "d-none d-sm-inline icon-text-gap"
+  RESPONSIVE_TEXT_CLASSES = "d-none d-sm-inline icon-text-gap"
+  ALWAYS_VISIBLE_TEXT_CLASSES = "icon-text-gap"
 
   private
 
@@ -30,18 +38,33 @@ module Components::IconWithText
                                 title: title))
   end
 
-  def render_icon_text(content, show_text:, extra_class: nil)
+  def render_icon_text(content, show_label:, extra_class: nil)
     return unless content
 
-    classes = class_names(show_text ? TEXT_VISIBLE_CLASSES : "sr-only",
-                          extra_class)
+    classes = class_names(text_visibility_class(show_label), extra_class)
     span(class: classes) { trusted_or_plain(content) }
   end
 
-  def render_icon_with_text(icon, content, show_text:, icon_class: nil,
-                            icon_title: nil)
-    render_icon_glyph(icon, html_class: icon_class, title: icon_title)
-    render_icon_text(content, show_text: show_text)
+  def text_visibility_class(show_label)
+    case show_label
+    when :always then ALWAYS_VISIBLE_TEXT_CLASSES
+    when :responsive then RESPONSIVE_TEXT_CLASSES
+    else "sr-only"
+    end
+  end
+
+  def render_icon_with_text(icon, content, show_label:, icon_opts: {},
+                            active: {})
+    render_icon_glyph(icon, html_class: icon_opts[:class],
+                            title: icon_opts[:title])
+    render_icon_text(content, show_label: show_label)
+    return unless active[:icon] && active[:content]
+
+    render_icon_glyph(active[:icon],
+                      html_class: class_names(icon_opts[:class],
+                                              "active-icon"))
+    render_icon_text(active[:content], show_label: show_label,
+                                       extra_class: "active-label")
   end
 
   # Content can be a textile-rendered safe-buffer string (e.g. a

@@ -5,7 +5,7 @@ module OccurrencesController::Edit
   def edit
     return unless find_occurrence!
 
-    render_edit_page
+    render_edit_view
   end
 
   def update
@@ -36,7 +36,11 @@ module OccurrencesController::Edit
       flash_notice(:occurrence_updated.t)
       @project_gaps = @occurrence.project_membership_gaps
       if @project_gaps.any?
-        render_edit_page
+        # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+        # Drive (see turbo_submit_forms.md) -- needs a non-2xx status
+        # even though the update already succeeded; the occurrence
+        # just isn't done until the user resolves the project gaps.
+        render_edit_view_invalid
       else
         redirect_to(occurrence_path(@occurrence))
       end
@@ -183,7 +187,7 @@ module OccurrencesController::Edit
       filter_map(&:observation)
   end
 
-  def render_edit_page
+  def render_edit_view(status: :ok, **render_opts)
     render(
       Views::Controllers::Occurrences::Edit.new(
         occurrence: @occurrence,
@@ -191,7 +195,8 @@ module OccurrencesController::Edit
         candidates: candidate_observations,
         user: @user,
         project_gaps: @project_gaps
-      )
+      ),
+      status: status, **render_opts
     )
   end
 

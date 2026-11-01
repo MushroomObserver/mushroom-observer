@@ -51,7 +51,7 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
     return nil unless @description
 
     Components::Link.new(
-      type: :icon,
+      type: :get,
       tab: Tab::Name::ShowDescription.new(name: @name)
     )
   end
@@ -60,7 +60,7 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
     return nil unless @description && permission?(@description)
 
     Components::Link.new(
-      type: :icon,
+      type: :get,
       tab: Tab::Name::EditDescription.new(name: @name)
     )
   end

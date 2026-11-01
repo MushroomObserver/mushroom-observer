@@ -61,8 +61,12 @@ class NamingsIntegrationTest < CapybaraIntegrationTestCase
       form.first("button[type='submit']").click
     end
     namer_session.assert_selector("body.namings__new")
+    # .alert-danger, not .alert-warning: no alternate-spelling
+    # suggestions exist for this name, so NameFeedback renders the
+    # "not recognized" branch (which always includes help text),
+    # not the "here are some valid names to pick from" warning.
     assert_true(namer_session.has_selector?(
-                  ".alert-warning",
+                  ".alert-danger",
                   text: /MO does not recognize the name.*#{text_name}/
                 ))
 

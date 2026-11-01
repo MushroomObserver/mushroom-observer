@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
-# Two-paragraph help text that appears under the location-autocompleter
-# field on the observation form. Localized example locations are
+# Collapsible help text (format rules, examples, map instructions)
+# for the location-autocompleter field on the observation form -- the
+# lead sentence stays always-visible, rendered separately via
+# `Details#render_location_lead`. Localized example locations are
 # flipped between postal and scientific order based on the current
 # user's `location_format`.
 module Views::Controllers::Observations

@@ -66,7 +66,7 @@ module Tab::Sequence
       assert_equal(@sequence, tab.path)
       assert_equal(:destroy, tab.html_options[:button])
       assert_equal(
-        routes.observation_path(@sequence.observation),
+        routes.permanent_observation_path(@sequence.observation),
         tab.html_options[:back]
       )
       assert_equal(@sequence, tab.model)

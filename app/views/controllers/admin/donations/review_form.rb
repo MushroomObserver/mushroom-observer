@@ -8,15 +8,15 @@ module Views::Controllers::Admin::Donations
   # Renders a table of donations with checkboxes for marking each
   # donation as reviewed.
   class ReviewForm < ::Components::ApplicationForm
-    def initialize(form, donations:, **)
-      @donations = donations
+    prop :donations, _Array(::Donation)
+
+    def initialize(form, **)
       super(form, id: "admin_review_donations_form",
                   style: "display: contents", **)
     end
 
     def view_template
       super do
-        submit(:review_donations_update.l, center: true)
         render_donations_table
         submit(:review_donations_update.l, center: true)
       end

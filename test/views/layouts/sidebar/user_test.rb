@@ -13,21 +13,22 @@ class Views::Layouts::Sidebar
       html = render_component
 
       # Should have heading with icon and username
-      assert_html(html, "div.list-group-item span.glyphicon.glyphicon-user")
+      assert_html(html,
+                  ".list-group-item svg.mo-icon-user")
       assert_includes(html, @user.login)
-      assert_html(html, "span.ml-2")
 
       # Should have mobile_only class
       assert_html(html, ".mobile-only")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_logout_button
       html = render_component
 
       # Should have logout button
       assert_includes(html, :app_logout.t)
       assert_html(html, ".logout_link")
-      assert_html(html, ".btn.btn-link")
+      assert_html(html, ".btn-link")
     end
 
     def test_renders_user_tabs

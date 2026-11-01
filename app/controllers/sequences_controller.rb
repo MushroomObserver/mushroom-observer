@@ -30,6 +30,8 @@
 # show_sequence (get)               show (get)
 #
 class SequencesController < ApplicationController
+  include ReflectionRouting
+
   before_action :login_required
   before_action :store_location, except: :destroy
 
@@ -40,9 +42,9 @@ class SequencesController < ApplicationController
   #  https://mushroomobserver.org/sequences?all=true
   #    => displays a list of all sequences in MO
   #
-  # NOTE: #index does not handle params[:pattern] or params[:ids] because
-  # we don't offer sequence pattern search. However, the Query::Sequences
-  # class can handle a pattern param.
+  # `?pattern=` works too -- Query::Sequences recognizes it (a plain
+  # fuzzy match, no keyword parser), so it's live like any other
+  # recognized param, not a dedicated UI feature.
   def index
     build_index_with_query
   end
@@ -59,20 +61,6 @@ class SequencesController < ApplicationController
   end
 
   private
-
-  def default_sort_order
-    ::Query::Sequences.default_order # :created_at
-  end
-
-  def index_active_params
-    [:all, :by, :q].freeze
-  end
-
-  # This is a param handler. In this controller, people usually want sequences
-  # for an observation. If they want all sequences, use the :all param.
-  def all
-    unfiltered_index
-  end
 
   def index_display_opts(opts, _query)
     { letters: true,
@@ -115,21 +103,19 @@ class SequencesController < ApplicationController
     return if params[:observation_id].blank?
 
     return unless find_observation!
+    return if route_reflection_to_companion!
 
     @sequence = Sequence.new
 
     respond_to do |format|
       format.turbo_stream { render_modal_sequence_form }
-      format.html do
-        render(Views::Controllers::Sequences::New.new(
-                 sequence: @sequence, observation: @observation
-               ))
-      end
+      format.html { render_new_view }
     end
   end
 
   def create
     return unless find_observation!
+    return if route_reflection_to_companion!
 
     build_sequence
   end
@@ -142,11 +128,7 @@ class SequencesController < ApplicationController
 
     respond_to do |format|
       format.turbo_stream { render_modal_sequence_form }
-      format.html do
-        render(Views::Controllers::Sequences::Edit.new(
-                 sequence: @sequence, back: @back, back_object: @back_object
-               ))
-      end
+      format.html { render_edit_view }
     end
   end
 
@@ -202,7 +184,7 @@ class SequencesController < ApplicationController
   end
 
   def figure_out_where_to_go_back_to
-    @back = params[:back]
+    @back = params.permit(:back)[:back]
     @back_object = @back == "show" ? @sequence : @sequence.observation
   end
 
@@ -268,21 +250,29 @@ class SequencesController < ApplicationController
   def respond_to_form_errors
     respond_to do |format|
       format.turbo_stream { render_modal_flash_update(modal_identifier) }
-      format.html { render_form_error_view and return }
+      format.html { render_form_error_view_invalid and return }
     end
   end
 
-  def render_form_error_view
+  def render_form_error_view_invalid
     case action_name
     when "create"
-      render(Views::Controllers::Sequences::New.new(
-               sequence: @sequence, observation: @observation
-             ))
+      render_new_view_invalid
     when "update"
-      render(Views::Controllers::Sequences::Edit.new(
-               sequence: @sequence, back: @back, back_object: @back_object
-             ))
+      render_edit_view_invalid
     end
+  end
+
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Sequences::New.new(
+             sequence: @sequence, observation: @observation
+           ), status: status, **render_opts)
+  end
+
+  def render_edit_view(status: :ok, **render_opts)
+    render(Views::Controllers::Sequences::Edit.new(
+             sequence: @sequence, back: @back, back_object: @back_object
+           ), status: status, **render_opts)
   end
 
   def show_flash_and_send_back

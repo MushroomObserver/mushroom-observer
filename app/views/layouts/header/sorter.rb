@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
-# Index-page sort-bar. Two list items in a horizontal nav:
-# `<ul class="flex-bar pl-3 sorter">` with a `<li>` `Sort by:`
-# label + a `<li>` `Components::Dropdown` whose menu lists every
-# available sort option plus a `Reverse` entry. Stashed in
-# `content_for(:sorter)` by `add_sorter` in the index view.
+# Stashed in `content_for(:sorter)` by `add_sorter` in the index
+# view. Left-edge padding lives on `Header::IndexPaginationNav`'s
+# wrapper (`px-3`), not here.
 #
 # `sorts` is `[[order_by_key, label_translation_symbol], ...]`, the
 # shape every `<Foo>Controller#index_sort_options` returns.
@@ -24,15 +22,18 @@ module Views::Layouts
     def view_template
       return unless visible?
 
-      ul(class: "list-unstyled flex-bar pl-3 sorter") do
-        render(Components::Navbar::Text.new(element: :li,
-                                            class: "mx-0 hidden-xs")) do
-          plain("#{:sort_by_header.l}:")
+      div(class: "flex-bar sorter") do
+        render(Components::Navbar::Text.new(
+                 class: class_names("mx-0",
+                                    Components::Column.mobile_hide_classes)
+               )) do
+          append_colon(:sort_by_header.l)
         end
         Dropdown(
           id: "sort_nav_toggle",
           menu_id: "sort_nav_menu",
           label: toggle_title.to_s,
+          element: :div,
           wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-2"),
           toggle_variant: :outline, toggle_size: :sm,
           toggle_class: "font-weight-normal",
@@ -59,12 +60,12 @@ module Views::Layouts
     # The mobile-only `Sort by:` header that sits at the top of the
     # dropdown menu on extra-small viewports. Pre-captured to a
     # SafeBuffer so `Components::Dropdown` can splat it into its
-    # `<ul>` via `trusted_html`.
+    # `<div>` via `trusted_html`.
     def mobile_header_html
       capture do
-        li(class: "visible-xs") do
+        div(class: class_names(Components::Column.mobile_only_classes)) do
           a(href: "#", disabled: true, class: "opacity-75") do
-            plain("#{:sort_by_header.l}:")
+            append_colon(:sort_by_header.l)
           end
         end
       end

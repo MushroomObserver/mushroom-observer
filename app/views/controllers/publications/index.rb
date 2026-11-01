@@ -80,12 +80,8 @@ module Views::Controllers::Publications
     end
 
     def admin_cell(pub)
-      return "" unless in_admin_mode? || pub.can_edit?(current_user)
-
       capture do
-        Link(type: :get, name: :edit.ti, target: edit_publication_path(pub))
-        whitespace
-        Button(type: :delete, target: pub)
+        InlineCRUDLinks(target: pub, user: current_user)
       end
     end
   end

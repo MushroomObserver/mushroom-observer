@@ -13,17 +13,84 @@ module InatImportsController::Validators
   private
 
   def params_valid?
-    import_adequately_constrained? &&
+    project_targets_resolved? &&
+      project_url_resolved? &&
+      import_adequately_constrained? &&
       imports_valid? &&
+      project_valid? &&
       consented?
+  end
+
+  # iNat's UI shows a project's page rather than a search for its
+  # observations, so that address is the one someone reaching for "a
+  # URL" has to hand -- and an import cannot take it, since
+  # URLNormalizer accepts only `/observations`. Resolve it to the
+  # search it means. Runs before the other URL checks, which assume a
+  # search.
+  def project_url_resolved?
+    return true unless listing_url?
+    return true unless Inat::ProjectLookup.project_page?(params[:inat_url])
+
+    resolved_project_url?(params[:inat_url])
+  end
+
+  def resolved_project_url?(url)
+    lookup = Inat::ProjectLookup.new(url)
+    found = lookup.resolve
+    unless found
+      # The id or slug, not the URL it came out of: Textile reads a
+      # pasted URL as a link and swallows the quote closing the message.
+      flash_warning(lookup.error.t(project: lookup.token || url))
+      return false
+    end
+
+    params[:inat_url] = "#{Inat::Constants::SITE}/observations" \
+                        "?project_id=#{found.id}"
+    true
+  end
+
+  # Optional target project (#5259). Blank is fine. A chosen project
+  # must exist and be one the user may put observations into (admin,
+  # member, or joinable -- #4932 invariant 4). Typed text that resolves
+  # to no project is refused rather than silently dropped.
+  def project_valid?
+    return true if params[:inat_project_id].blank? &&
+                   params[:inat_project].blank?
+
+    project = resolve_project_param
+    if project.nil?
+      flash_warning(:inat_project_not_recognized.l)
+      false
+    elsif project_usable?(project)
+      true
+    else
+      flash_warning(:inat_project_not_allowed.t(title: project.title))
+      false
+    end
+  end
+
+  def project_usable?(project)
+    project.is_admin?(@user) || project.member?(@user) ||
+      project.can_join?(@user)
+  end
+
+  def resolve_project_param
+    project = Project.safe_find(params[:inat_project_id]) ||
+              Project.find_by(title: params[:inat_project].to_s.strip)
+    params[:inat_project_id] = project&.id&.to_s
+    project
   end
 
   # See InatImport.adequate_constraints?
   def import_adequately_constrained?
     return true if params[:inat_username].present?
-    # Superimporters importing by specific ID list or URL don't need a
-    # username; the filter constraints are sufficient.
-    return true if superimporter_not_own? && (listing_ids? || listing_url?)
+    # An import of others' observations by specific ID list or URL
+    # doesn't need a username; the filter constraints are sufficient.
+    # A project admin gives theirs regardless: they authenticate to
+    # iNaturalist as it, and having an account there is the habit the
+    # arrangement rests on.
+    return true if import_others? && (listing_ids? || listing_url?) &&
+                   !project_admin_import?
 
     flash_warning(:inat_missing_username.l)
     false
@@ -130,23 +197,21 @@ module InatImportsController::Validators
   # unchecked the query uses the licensed filter with no user_login, so
   # there is no "other user" to protect against.
   def not_importing_all_anothers?
-    return true unless InatImport.super_importer?(@user) && importing_all?
-    # Superimporter explicitly opted out of own-only: licensed filter applies.
-    return true if superimporter_not_own?
+    return true unless may_import_others? && importing_all?
+    # Opted into others' observations: the licensed filter applies.
+    return true if import_others?
 
     # user.inat_username can be nil if they've never done an iNat import or
     # if it got clobbered. We have no way to check if the iNat username they
     # entered is their actual iNat username. However, iNat authentication
     # requires them to know the password for that iNat username.
     return true if @user.inat_username.nil? ||
-                   params[:inat_username] == @user.inat_username
+                   params[:inat_username].to_s.strip.casecmp?(
+                     @user.inat_username
+                   )
 
     flash_warning(:inat_importing_all_anothers.t)
     false
-  end
-
-  def superimporter_not_own?
-    InatImport.super_importer?(@user) && params[:import_others] == "1"
   end
 
   def consented?

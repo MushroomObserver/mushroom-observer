@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #
 ## iNat iobervation_photo key/values
 # {:id=>351481052,
@@ -29,6 +30,7 @@
 #  string "original_name", limit: 120, default: ""
 #  boolean "gps_stripped", default: false, null: false
 #  boolean "diagnostic", default: true, null: false
+# rubocop:enable MO/NoLongCommentBlock
 
 # Describes one iNat observation photo (derived from an Inat::Obs)
 # mapping iNat key/values to MO Image attributes and associations
@@ -65,5 +67,8 @@ class Inat
     end
 
     def url = @photo[:photo][:url].sub("square", "original")
+
+    # Enough resolution for a dhash (Image::Dhash is resolution-invariant).
+    def medium_url = @photo[:photo][:url].sub("square", "medium")
   end
 end

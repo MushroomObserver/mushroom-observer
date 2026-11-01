@@ -32,8 +32,8 @@ module Projects
       get(:index, params: { project_id: @project.id })
       assert_response(:success)
       assert_not_nil(assigns(:project_aliases))
-      assert_select("#index_project_alias_table",
-                    text: /#{Regexp.escape(location.display_name(roy))}/)
+      assert_select_text_includes("#index_project_alias_table",
+                                  location.display_name(roy))
     end
 
     def test_show_displays_the_requested_project_alias
@@ -75,7 +75,8 @@ module Projects
                  name: "Walk 2",
                  project_id: @project.id,
                  target_type: "Location",
-                 location_id: locations(:albion).id
+                 location_id: locations(:albion).id,
+                 modal: "true"
                }
              }, format: :turbo_stream)
       end
@@ -146,7 +147,8 @@ module Projects
              project_alias: { name: "", project_id: } # Invalid params
            })
 
-      assert_response(:success)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_update_modifies_project_alias_with_valid_params
@@ -171,7 +173,12 @@ module Projects
               project_alias: { name: "", project_id: } # Invalid params
             })
 
-      assert_response(:success)
+      assert_unprocessable
+      # Regression: #update didn't set @project before re-rendering the
+      # edit page on validation failure, so the project banner (which
+      # renders nothing at all without a project) silently disappeared.
+      assert_select("#project_tabs")
+      assert_select("form[data-turbo='true']")
     end
 
     def test_update_can_use_turbo_to_modify_project_alias
@@ -179,7 +186,8 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "Updated Name", project_id: }
+              project_alias: { name: "Updated Name", project_id:,
+                               modal: "true" }
             }, format: :turbo_stream)
 
       assert_select(
@@ -194,7 +202,8 @@ module Projects
       patch(:update, params: {
               project_id:,
               id: @project_alias.id,
-              project_alias: { name: "", project_id: } # Invalid params
+              # Invalid params
+              project_alias: { name: "", project_id:, modal: "true" }
             }, format: :turbo_stream)
 
       assert_response(:success)

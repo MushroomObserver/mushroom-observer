@@ -12,6 +12,9 @@ module Views::Controllers::CollectionNumbers
     def test_new_record_form
       html = render_form(model: CollectionNumber.new)
 
+      assert_html(
+        html, "input[name='observation_id'][value='#{@observation.id}']"
+      )
       assert_html(html, "input[name='collection_number[name]']")
       assert_html(html, "input[name='collection_number[number]']")
       assert_html(html, "button[type='submit']", text: :add.ti)
@@ -22,6 +25,7 @@ module Views::Controllers::CollectionNumbers
       record = collection_numbers(:coprinus_comatus_coll_num)
       html = render_form(model: record)
 
+      assert_html(html, "input[name='observation_id']", count: 0)
       assert_html(html, "button[type='submit']", text: :save.ti)
     end
 
@@ -34,9 +38,9 @@ module Views::Controllers::CollectionNumbers
     end
 
     def test_local_form_omits_turbo
-      html = render_form(model: CollectionNumber.new, local: true)
+      html = render_form(model: CollectionNumber.new, turbo: false)
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_auto_url_for_new_record
@@ -54,12 +58,12 @@ module Views::Controllers::CollectionNumbers
 
     private
 
-    def render_form(model:, action: "/test_action", local: false)
+    def render_form(model:, action: "/test_action", turbo: true)
       render(Form.new(model,
                       observation: @observation,
                       action: action,
                       id: "collection_number_form",
-                      local: local))
+                      turbo: turbo))
     end
   end
 end

@@ -12,7 +12,7 @@ class NavTabsTest < ComponentTestCase
     # Outer structure: <ul class="nav nav-tabs"> with one <li class="nav-item">
     # per tab, each containing an <a class="nav-link">.
     assert_html(html, "ul.nav.nav-tabs")
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 2)
+    assert_html(html, "ul.nav-tabs > .nav-item", count: 2)
     assert_html(html, "a.nav-link[href='/summary']", text: "Summary")
     assert_html(html, "a.nav-link[href='/details']", text: "Details")
   end
@@ -44,6 +44,7 @@ class NavTabsTest < ComponentTestCase
     assert_no_html(html, "a.nav-link.active")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_link_class_appended_to_every_tab_link
     html = render_with(link_class: "mt-3") do |tabs|
       tabs.tab("One", "/one", key: "one")
@@ -57,8 +58,7 @@ class NavTabsTest < ComponentTestCase
   end
 
   def test_attributes_forwarded_to_ul
-    html = render_with(attributes: { id: "my_tabs",
-                                     data: { x: "v" } }) do |tabs|
+    html = render_with(id: "my_tabs", data: { x: "v" }) do |tabs|
       tabs.tab("One", "/one")
     end
 
@@ -107,12 +107,10 @@ class NavTabsTest < ComponentTestCase
     project = projects(:bolete_project)
     collection = Tab::Project::AdminSubtabs.new(project: project)
 
-    html = render(Components::NavTabs.new(
-                    current: "members", tabs: collection
-                  ))
+    html = render_with(current: "members", tabs: collection)
 
     # Collection contributed 4 tabs; the one keyed "members" is active.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 4)
+    assert_html(html, "ul.nav-tabs > .nav-item", count: 4)
     assert_html(html, "a.nav-link.active.members_link")
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.aliases_link")
@@ -123,13 +121,13 @@ class NavTabsTest < ComponentTestCase
     project = projects(:bolete_project)
     collection = Tab::Project::AdminSubtabs.new(project: project)
 
-    html = render(Components::NavTabs.new) do |tabs|
+    html = render_with do |tabs|
       tabs.add_all(collection)
       tabs.tab("Extra", "/extra", key: "extra")
     end
 
     # Collection's 4 tabs + 1 ad-hoc = 5 total, in declaration order.
-    assert_html(html, "ul.nav-tabs > li.nav-item", count: 5)
+    assert_html(html, "ul.nav-tabs > .nav-item", count: 5)
     assert_html(html, "a.nav-link.details_link")
     assert_html(html, "a.nav-link.members_link")
     assert_html(html, "a.nav-link.aliases_link")

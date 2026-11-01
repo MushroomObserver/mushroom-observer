@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #  = Query Record Model
 #
 #  Query Records store the parameters of recent user queries for quicker access.
@@ -20,6 +21,7 @@
 #  == Class methods
 #
 #  QueryRecord.cleanup::     Removes all query_records older than one day.
+# rubocop:enable MO/NoLongCommentBlock
 
 # access query records saved in the db
 class QueryRecord < ApplicationRecord

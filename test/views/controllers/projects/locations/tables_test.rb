@@ -22,7 +22,7 @@ module Views::Controllers::Projects::Locations
         assert_includes(html, :project_target_locations_title.l)
         # Burbank is a target, should have remove button
         assert_html(html, "form[action*='target_location']")
-        assert_html(html, ".glyphicon-remove")
+        assert_html(html, "svg.mo-icon-x")
       end
 
       def test_non_admin_sees_no_target_column

@@ -5,11 +5,11 @@
 # `Downloads::Form` (the format / encoding / submit form).
 module Views::Controllers::Observations::Downloads
   class New < Views::FullPageBase
-    prop :query_param, _Nilable(Hash), default: nil
+    prop :query, ::Query
 
     def view_template
       add_page_title(:download_observations_title.t)
-      render(Form.new(query_param: @query_param))
+      render(Form.new(query: @query))
     end
   end
 end

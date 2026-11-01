@@ -1,0 +1,23 @@
+# Never bake a local secret into the image -- production reaches the
+# database via db/docker/database.yml (see docker/entrypoint.production.sh)
+# and the master key via RAILS_MASTER_KEY, not either of these files.
+/config/database.yml
+/config/master.key
+
+/.git
+/log/*
+/tmp/*
+/coverage
+/public/assets
+# Runtime-uploaded images (docker/entrypoint.sh creates these) --
+# tracked files directly under public/images/ (facebook_icon.png,
+# .gitignore) are not touched.
+/public/images/thumb
+/public/images/320
+/public/images/640
+/public/images/960
+/public/images/1280
+/public/images/orig
+
+/.bundle
+/node_modules

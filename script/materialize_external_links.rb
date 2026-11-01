@@ -1,7 +1,8 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
-# Materialize MO<->iNat correspondences as typed ExternalLinks (#4565), from
+# rubocop:disable MO/NoLongCommentBlock
+# Materialize MO<->iNat correspondences as typed ExternalLinks, from
 # the iNat "Mushroom Observer URL" observation field (5005) report.
 #
 # An MO obs may correspond to several iNat obs (iNat-side duplicates of one
@@ -30,6 +31,7 @@
 # Dry run by default; APPLY=1 writes. Idempotent.
 #   bin/rails runner script/materialize_external_links.rb
 #   APPLY=1 bin/rails runner script/materialize_external_links.rb --csv FILE
+# rubocop:enable MO/NoLongCommentBlock
 
 require "csv"
 require "optparse"
@@ -41,9 +43,6 @@ class MaterializeExternalLinks
               (?:observations/|obs/|observer/show_observation/)?(\d+)}x
   MIRROR_RE = /Mirrored on iNaturalist/i
   MANUAL_RE = /inaturalist\.org/i
-  # Pre-#4299 manual links stored only a url (no external_id); recover the
-  # iNat obs id from it so dedup compares correctly.
-  INAT_URL_RE = %r{inaturalist\.org/observations/(\d+)}
   # The iNat-team copy service ran through 2021 (multi-user machine bursts). An
   # iNat obs created on/after this in the residual bucket is a hand-set link on
   # the iNat side (remote_manual), not a copy. See #4565.
@@ -168,10 +167,9 @@ class MaterializeExternalLinks
     set
   end
 
-  # The iNat obs id a link points at: its external_id, or — for legacy manual
-  # links that only stored a url — parsed from the url.
+  # The iNat obs id a link points at.
   def link_inat_id(link)
-    (link.external_id.presence || link.url.to_s[INAT_URL_RE, 1]).to_s
+    link.external_id.to_s
   end
 
   def create_link(obs, row, type)

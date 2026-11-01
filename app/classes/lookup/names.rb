@@ -60,17 +60,25 @@ class Lookup::Names < Lookup
   end
 
   def map_matches
-    @vals.map do |val|
-      if val.is_a?(@model)
-        val
-      elsif val.is_a?(AbstractModel)
-        raise("Passed a #{val.class} to LookupIDs for #{@model}.")
-      elsif /^\d+$/.match?(val.to_s) # from an id
-        Name.where(id: val).select(*minimal_name_columns)
-      else # from a string
-        find_matching_names(val)
-      end
-    end.flatten.uniq.compact
+    @unmatched = []
+    @vals.map { |val| match_one(val) }.flatten.uniq.compact
+  end
+
+  def match_one(val)
+    if val.is_a?(@model)
+      val
+    elsif val.is_a?(AbstractModel)
+      raise("Passed a #{val.class} to LookupIDs for #{@model}.")
+    elsif /^\d+$/.match?(val.to_s) # from an id
+      Name.where(id: val).select(*minimal_name_columns)
+    else # from a string
+      # Materialize before checking emptiness -- checking a
+      # still-unloaded Relation, then flattening it, would query
+      # twice (an EXISTS probe, then loading the records).
+      found = find_matching_names(val).to_a
+      @unmatched << val if found.empty?
+      found
+    end
   end
 
   def numeric_list?(list)
@@ -90,6 +98,7 @@ class Lookup::Names < Lookup
   # NOTE: Name.parse_name returns a ParsedName instance, not an Name instance.
   # A ParsedName is a hash of segments and formatted strings of the name.
   def find_matching_names(val)
+    val = val.to_s.strip_textile_for_names
     parse = Name.parse_name(val)
     srch_str = if parse
                  parse.search_name

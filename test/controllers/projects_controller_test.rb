@@ -3,16 +3,29 @@
 require("test_helper")
 
 class ProjectsControllerTest < FunctionalTestCase
-  def build_params(
-    title, summary, start_date: nil, end_date: nil,
-    dates_any: "false"
-  )
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Projects, :Project,
+      overrides: {
+        id_in_set: projects(:bolete_project).id,
+        by_users: rolf.id,
+        members: rolf.id
+      }
+    )
+  end
+
+  def build_params(title, summary, start_date: nil, end_date: nil, **opts)
     {
       project: {
         title: title,
         summary: summary,
         field_slip_prefix: "",
-        place_name: "",
+        place_name: opts.fetch(:place_name, ""),
         open_membership: false,
         "start_date(1i)" => start_date&.year,
         "start_date(2i)" => start_date&.month,
@@ -20,7 +33,7 @@ class ProjectsControllerTest < FunctionalTestCase
         "end_date(1i)" => end_date&.year,
         "end_date(2i)" => end_date&.month,
         "end_date(3i)" => end_date&.day,
-        dates_any: dates_any,
+        dates_any: opts.fetch(:dates_any, "false"),
         upload: {
           license_id: licenses(:ccnc25).id,
           copyright_holder: "Someone Else",
@@ -34,6 +47,8 @@ class ProjectsControllerTest < FunctionalTestCase
   def add_project_helper(title, summary)
     post_requires_login(:create, build_params(title, summary))
     assert_form_action(action: :create)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def edit_project_helper(title, project)
@@ -41,6 +56,8 @@ class ProjectsControllerTest < FunctionalTestCase
     params[:id] = project.id
     put_requires_user(:update, { action: :show }, params)
     assert_form_action(action: :update, id: project.id)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def destroy_project_helper(project, changer)
@@ -90,11 +107,9 @@ class ProjectsControllerTest < FunctionalTestCase
     get(:show, params: { id: project.id })
 
     assert_response(:success)
-    assert_select(
-      "form button", { text: /#{Regexp.escape(:show_project_join.l)}/,
-                       count: 1 },
-      "Join button should be present for non-member on open project"
-    )
+    msg = "Join button should be present for non-member on open project"
+    assert_select_text_includes("form button", :show_project_join.l,
+                                count: 1, msg: msg)
   end
 
   def test_show_project_without_banner
@@ -236,7 +251,7 @@ class ProjectsControllerTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: project.id })
 
-    assert_select("a[href*=?]", project_violations_path(project_id: project.id),
+    assert_select("a[href*=?]", project_violations_path(project.id),
                   { minimum: 1 }, "Page is missing a link to violations")
   end
 
@@ -255,6 +270,26 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert_select("body.projects__index .list-group")
     assert_page_title(:projects.ti)
+  end
+
+  def test_index_member_single_match_redirects
+    project = projects(:lone_wolf_project)
+    assert(Project.members(lone_wolf.id).one?)
+
+    login
+    get(:index, params: { member: lone_wolf.id })
+
+    assert_redirected_to(project_path(project.id))
+  end
+
+  def test_index_member_bad_id_redirects_to_projects_index
+    login
+    bogus_id = User.maximum(:id).to_i + 1000
+
+    get(:index, params: { member: bogus_id })
+
+    assert_flash_error
+    assert_redirected_to(projects_path)
   end
 
   def test_index_pattern_search_multiple_hits
@@ -298,7 +333,7 @@ class ProjectsControllerTest < FunctionalTestCase
     )
 
     assert_select(
-      "input[type=radio][id=project_dates_any_true][checked=checked]",
+      "input[type=radio][id=project_dates_any_true][checked]",
       { count: 1 },
       "'Any' dates radio button should be checked by default"
     )
@@ -335,6 +370,23 @@ class ProjectsControllerTest < FunctionalTestCase
     admin_group = UserGroup.find_by(name: "#{title}.admin")
     assert(admin_group)
     assert_equal([rolf], admin_group.users)
+  end
+
+  # The creator is a project admin by definition, and every other way
+  # of becoming one grants "editing". Leaving the creator lower made
+  # them the one admin whose observations their co-admins could not
+  # edit -- in a project they set up so those people could work on it.
+  def test_create_project_trusts_the_creator_with_editing
+    title = "Trusting Project"
+
+    post_requires_login(:create, build_params(title, "summary"))
+
+    project = Project.find_by(title: title)
+    assert_not_nil(project, "Cannot find Project")
+    member = ProjectMember.find_by(project: project, user: rolf)
+    assert_not_nil(member, "Cannot find ProjectMember")
+    assert_equal("editing", member.trust_level)
+    assert_flash_success([:add_project_success, :add_members_with_editing])
   end
 
   def test_create_project_with_any_dates
@@ -466,6 +518,8 @@ class ProjectsControllerTest < FunctionalTestCase
     # the user can correct the dates without leaving the Admin tab.
     assert_select("input[name='project[title]']", true,
                   "Form should be re-rendered after validation failure")
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_destroy_project
@@ -590,6 +644,112 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_nil(Project.find_by(title: title))
   end
 
+  # A narrower version of #2248: a title/group-name conflict never
+  # reaches create_project (and thus never sets @raw_place_name) --
+  # the entered location used to revert to blank on this reload even
+  # though the failure had nothing to do with it.
+  def test_create_project_blank_title_preserves_entered_location
+    where = "Springvale, Wyoming, USA"
+    params = build_params("", "a summary")
+    params[:project][:place_name] = where
+    post_requires_login(:create, params)
+
+    assert_select("input[name='project[place_name]'][value=?]", where)
+  end
+
+  # A dubious place_name reloads with the entered title/place_name
+  # intact and an approved_where hidden field, matching every other
+  # model with this confirm flow.
+  #
+  # Also covers ProjectsController::Creation#cleanup_failed_project_creation
+  # as a Turbo re-render path: a separate call site from #create's
+  # early guard clauses, reached once creation has started (member/
+  # admin UserGroups created) and then fails on the location lookup.
+  # Needs render_new_view_invalid (422 + data-turbo="true"), not a
+  # plain 200 (see .claude/rules/turbo_submit_forms.md).
+  def test_create_project_dubious_place_name_preserves_entries_and_confirms
+    where = "Old Rd, Ohio, USA"
+    title = "Dubious Location Project"
+    params = build_params(title, "a summary")
+    params[:project][:place_name] = where
+    login(rolf.login)
+
+    post(:create, params: params)
+    assert_nil(Project.find_by(title: title))
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
+    assert_select("#dubious_location_messages")
+    assert_select("input[name='project[title]'][value=?]", title)
+    assert_select("input[name='project[place_name]'][value=?]", where)
+    assert_select("input[name='approved_where'][value=?]", where)
+
+    post(:create, params: params.merge(approved_where: where))
+    project = Project.find_by(title: title)
+    assert_not_nil(project)
+    assert_nil(project.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
+  # A clean name with no exact Location match isn't dubious -- Project
+  # can't create a new Location inline (no bounding-box UI), so it
+  # saves without one and sends the user to build it, the same
+  # offramp herbaria/profile use on their own no-match path.
+  def test_create_project_clean_unmatched_location_redirects_to_new_location
+    where = "Springvale, Wyoming, USA"
+    title = "Clean Unmatched Location Project"
+    params = build_params(title, "a summary")
+    params[:project][:place_name] = where
+    post_requires_login(:create, params)
+
+    project = Project.find_by(title: title)
+    assert_not_nil(project)
+    assert_nil(project.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
+  # Same #2248 regression, on the update/edit path (Validators#valid_where
+  # shares the bug with Creation#find_location).
+  def test_update_project_dubious_place_name_preserves_entries_and_confirms
+    where = "Old Rd, Ohio, USA"
+    project = projects(:eol_project)
+    params = build_params(project.title, project.summary)
+    params[:id] = project.id
+    params[:project][:place_name] = where
+    login(rolf.login)
+
+    put(:update, params: params)
+    assert_nil(project.reload.location)
+    assert_select("#dubious_location_messages")
+    assert_select("input[name='project[title]'][value=?]", project.title)
+    assert_select("input[name='project[place_name]'][value=?]", where)
+    assert_select("input[name='approved_where'][value=?]", where)
+
+    put(:update, params: params.merge(approved_where: where))
+    assert_nil(project.reload.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
+  def test_update_project_clean_unmatched_location_redirects_to_new_location
+    where = "Springvale, Wyoming, USA"
+    project = projects(:eol_project)
+    params = build_params(project.title, project.summary)
+    params[:id] = project.id
+    params[:project][:place_name] = where
+    login(rolf.login)
+
+    put(:update, params: params)
+    assert_nil(project.reload.location)
+    assert_redirected_to(
+      new_location_path(where: where, set_project: project.id)
+    )
+  end
+
   def test_project_save_fail
     title = "Bad Project"
     project = projects(:eol_project)
@@ -703,5 +863,74 @@ class ProjectsControllerTest < FunctionalTestCase
         put(:update, params: params)
       end
     end
+  end
+
+  def test_index_sort_options_includes_recent_observation
+    assert_includes(ProjectsController.new.index_sort_options,
+                    ["recent_observation", :sort_by_recent_observation.l])
+  end
+
+  # --- iNaturalist alert subscriptions ---------------------------------
+  #
+  # A site admin says a project may be alerted on; each of its admins
+  # says whether to be emailed, on the same form as everything else
+  # (#5416).
+
+  def alerting_project_site(project)
+    ProjectExternalSite.create!(
+      project: project, external_site: external_sites(:inaturalist),
+      use_constraints: true, alerting: true
+    )
+  end
+
+  def update_params_for(project, **extra)
+    params = build_params(project.title, project.summary.to_s)
+    params[:id] = project.id
+    params.merge(extra)
+  end
+
+  def test_saving_the_project_subscribes_the_admin
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    login(admin.login)
+
+    put(:update, params: update_params_for(
+      project, alert_subscriptions: { site.id.to_s => "1" }
+    ))
+
+    assert(site.reload.alerts?(admin),
+           "Saving with the box ticked should subscribe the admin")
+  end
+
+  # An unticked box submits the hidden "0".
+  def test_saving_the_project_unsubscribes_the_admin
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    site.alerts_for(admin, true)
+    login(admin.login)
+
+    put(:update, params: update_params_for(
+      project, alert_subscriptions: { site.id.to_s => "0" }
+    ))
+
+    assert_not(site.reload.alerts?(admin),
+               "Saving with the box unticked should unsubscribe the admin")
+  end
+
+  # Saving the form from a page that never showed the checkbox leaves
+  # whoever is subscribed alone.
+  def test_saving_without_the_checkbox_changes_nothing
+    project = projects(:eol_project)
+    site = alerting_project_site(project)
+    admin = project.admin_group.users.first
+    site.alerts_for(admin, true)
+    login(admin.login)
+
+    put(:update, params: update_params_for(project))
+
+    assert(site.reload.alerts?(admin),
+           "A form with no subscription field should not unsubscribe")
   end
 end

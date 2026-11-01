@@ -38,7 +38,7 @@ module Views::Controllers::Locations
 
       def render_to_string_link(tab_class)
         capture do
-          Link(type: :icon, tab: tab_class.new(location: @location))
+          Link(type: :get, tab: tab_class.new(location: @location))
         end
       end
     end

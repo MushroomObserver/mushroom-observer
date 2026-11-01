@@ -64,15 +64,15 @@ class Image
       # (already-rotated) renditions hash alike.
       #
       # Open3.capture3 is called in argv (list) form, so no shell is
-      # spawned and each argument reaches convert verbatim — the
-      # interpolations cannot be interpreted as shell syntax. `path` is
-      # never user input either: it is an internally built absolute path
-      # (Image#full_filepath, or a Tempfile) so it can't begin with "-"
-      # and be mistaken for an option. (Brakeman command-injection warning
-      # ignored on this basis in config/brakeman.ignore.)
+      # spawned and each argument reaches convert verbatim. `path` is
+      # an internally built absolute path (Image#full_filepath, or a
+      # Tempfile), not user input, so it can't be mistaken for an
+      # option (Brakeman's command-injection warning is ignored on
+      # this basis in config/brakeman.ignore).
       def grayscale_pixels(path)
         out, err, status = Open3.capture3(
-          "convert", "#{path}[0]", "-auto-orient", "-colorspace", "Gray",
+          magick_binary, "#{path}[0]", "-auto-orient",
+          "-colorspace", "Gray",
           "-resize", "#{WIDTH}x#{HEIGHT}!", "-depth", "8", "gray:-"
         )
         unless status.success? && out.bytesize == WIDTH * HEIGHT
@@ -81,6 +81,18 @@ class Image
         end
 
         out.bytes
+      end
+
+      # IMv7 renamed the CLI to `magick` (its `convert` shim prints a
+      # deprecation warning on every call); the production servers run
+      # IMv6, which has only `convert`.
+      def magick_binary
+        @magick_binary ||=
+          if system("which", "magick", out: File::NULL, err: File::NULL)
+            "magick"
+          else
+            "convert"
+          end
       end
     end
   end

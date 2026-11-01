@@ -5,12 +5,12 @@
 # to the index (`BackToIndex`); otherwise back to whatever
 # `back_object` is (typically the parent Observation).
 class Tab::CollectionNumber::FormEdit < Tab::Collection
-  def initialize(collection_number:, back:, back_object:, q_param: nil)
+  def initialize(collection_number:, back:, back_object:, index_filter: nil)
     super()
     @collection_number = collection_number
     @back = back
     @back_object = back_object
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   private
@@ -23,7 +23,7 @@ class Tab::CollectionNumber::FormEdit < Tab::Collection
 
   def back_to_index
     Tab::CollectionNumber::BackToIndex.new(
-      collection_number: @collection_number, q_param: @q_param
+      collection_number: @collection_number, index_filter: @index_filter
     )
   end
 end

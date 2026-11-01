@@ -8,6 +8,7 @@ class Tab::Name::Wikipedia < Tab::Name::ExternalBase
   end
 
   def path
-    "https://en.wikipedia.org/w/index.php?search=#{@name.sensu_stricto}"
+    "https://en.wikipedia.org/w/index.php?search=" \
+      "#{url_encode(@name.sensu_stricto)}"
   end
 end

@@ -3,6 +3,11 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      # Explicit, not relying on stage order in the Dockerfile -- an
+      # unspecified target defaults to whichever stage is declared
+      # last, which is `production` now that the Dockerfile is
+      # multi-stage (#5345).
+      target: development
 
     volumes:
       - .:/app
@@ -36,8 +41,8 @@ services:
       MYSQL_PASSWORD: mo_password
 
     command:
-      - --character-set-server=utf8
-      - --collation-server=utf8_general_ci
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_general_ci
       - --default-authentication-plugin=mysql_native_password
 
     volumes:

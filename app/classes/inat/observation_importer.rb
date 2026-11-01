@@ -7,21 +7,36 @@ class Inat
   class ObservationImporter
     include Inat::Constants
 
+    # Transient iNat/AWS failures worth retrying with backoff before
+    # giving up on the writeback (and, ultimately, on the just-created
+    # MO Observation). See #4589.
+    RETRYABLE_WRITEBACK_ERRORS = [
+      RestClient::ServiceUnavailable, RestClient::TooManyRequests,
+      RestClient::BadGateway, RestClient::GatewayTimeout,
+      RestClient::RequestTimeout, RestClient::ServerBrokeConnection
+    ].freeze
+    MAX_WRITEBACK_RETRIES = 3       # on a retryable writeback failure
+    WRITEBACK_RETRY_BASE_SLEEP = 2  # seconds; doubles each retry (2, 4, 8)
+    MAX_RETRY_AFTER_WAIT = 8        # iNat's Retry-After honored up to this
+
     attr_reader :inat_import, :user, :job,
-                :unlicensed_obs_count, :skipped_images_count, :image_ids
+                :unlicensed_obs_count, :image_ids
+
+    include Standardization
+    include Writeback
 
     def initialize(inat_import, user, job = nil)
       @inat_import = inat_import
       @user = user
       @job = job
       @unlicensed_obs_count = 0
-      @skipped_images_count = 0
       @image_ids = []
     end
 
     def import_page(page)
       page["results"].each do |result|
         return false if inat_import.reload.canceled?
+        return false if inat_import.reached_import_cap?
 
         import_one_result(JSON.generate(result))
       end
@@ -30,20 +45,34 @@ class Inat
     def import_one_result(result)
       @inat_obs = Inat::Obs.new(result)
       @observation = nil
-      return if unimportable?
-      return if date_missing?
-      return if unlicensed_other?
-      return if already_linked?
-      return if crosslinked_to_live_mo_obs?
+      return skipped if skip?
 
       builder = create_mo_observation
       return unless @observation
 
       accumulate_counts(builder)
+      standardize_for_project
       finalize_import
     end
 
     private
+
+    # Each check logs and counts the skip it finds, so the order matters.
+    def skip?
+      unimportable? || date_missing? || opted_out_other? ||
+        unlicensed_other? || already_linked? || crosslinked_to_live_mo_obs?
+    end
+
+    # The per-obs clock measures the gap since the last observation this
+    # run finished with, and a skip is one of those. Leaving it running
+    # charges the next import for every skip before it: a re-run that
+    # skipped a whole page priced its first import at the length of that
+    # page, both in the remaining-time estimate and in the user's
+    # historical average.
+    def skipped
+      @inat_import.reset_last_obs_start
+      nil
+    end
 
     def unimportable?
       return false if @inat_obs.taxon_importable?
@@ -63,29 +92,58 @@ class Inat
       true
     end
 
-    # Safety net for import-others. This check is what actually stops an
-    # unlicensed observation belonging to another iNat user from being
-    # imported. Own-obs imports are never gated here.
+    # Safety net for import-others:
+    # Prevent a **full** import of an
+    # unlicensed observation of another iNat user. It is skipped,
+    # or imported as a skeleton when the import creates skeletons.
+    # Imports of the user's obss are not filtered here.
     def unlicensed_other?
       return false unless inat_import.import_others
       return false if @inat_obs[:license_code].present?
+      return false if inat_import.create_skeletons
 
       log("Skipped #{@inat_obs[:id]} unlicensed (import-others)")
-      inat_import.add_ignored_obs(:unlicensed)
+      inat_import.add_ignored_obs(:unlicensed, inat_id: @inat_obs[:id])
       true
     end
 
-    # The real duplicate check: any typed iNat ExternalLink for this iNat
-    # obs (import / mirror / copy / remote_manual / manual) means it already
-    # corresponds to an MO observation, so importing it would create a
-    # duplicate. With #4565's materialization the link set is complete, so
-    # this MO-side check is what actually stops a duplicate — the iNat-side
-    # `without_field` filter only trims how many observations iNat sends
-    # back (and it's skipped entirely for explicit id lists and recheck_all
-    # runs). The import ExternalLink's unique index (one import per target)
-    # is still what prevents a duplicate if two imports race each other;
-    # this check just keeps that race from surfacing as a noisy
-    # RecordNotUnique exception.
+    # An observer who opted out of MO (Inat::OptOut) is imported the way an
+    # unlicensed observation of another user is: skipped from an
+    # import-others run unless it creates skeletons, a skeleton otherwise --
+    # including from the observer themself.
+    def opted_out_other?
+      @opted_out = Inat::OptOut.opted_out?(@inat_obs[:user])
+      return false unless @opted_out
+
+      report_opted_out
+      return false unless inat_import.import_others
+      return false if inat_import.create_skeletons
+
+      log("Skipped #{@inat_obs[:id]} observer opted out")
+      true
+    end
+
+    # Once per observer per import.
+    def report_opted_out
+      message = :inat_user_opted_out.l(login: @inat_obs[:user].to_h[:login])
+      return if inat_import.response_errors.to_s.include?(message)
+
+      inat_import.add_response_error(message)
+    end
+
+    def skeleton?
+      return true if @opted_out
+
+      inat_import.import_others && inat_import.create_skeletons &&
+        @inat_obs[:license_code].blank?
+    end
+
+    # What stops a duplicate: any typed iNat ExternalLink for this obs
+    # already corresponds to an MO observation. The iNat-side
+    # `without_field` filter only trims how much iNat sends back, and
+    # is skipped for explicit id lists and recheck_all runs. The
+    # import ExternalLink's unique index is the backstop if two
+    # imports race each other.
     def already_linked?
       return false unless ExternalLink.exists?(
         target_type: "Observation",
@@ -153,8 +211,7 @@ class Inat
 
     def create_mo_observation
       builder = Inat::MoObservationBuilder.new(
-        inat_obs: @inat_obs, user: @user,
-        import_others: @inat_import.import_others,
+        inat_obs: @inat_obs, user: @user, skeleton: skeleton?,
         external_site: inat_site,
         inat_import: @inat_import
       )
@@ -177,16 +234,18 @@ class Inat
 
     def accumulate_counts(builder)
       @unlicensed_obs_count += builder.unlicensed_obs
-      @skipped_images_count += builder.skipped_images
       @image_ids.concat(builder.created_image_ids)
+      record_unlicensed_images(builder)
       return unless builder.unlicensed_obs == 1
+      return if skeleton?
 
       inat_import.add_license_added_obs(inat_id: @inat_obs[:id])
     end
 
     def finalize_import
       update_inat_observation unless skip_inat_writeback?
-      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}")
+      log("Imported iNat #{@inat_obs[:id]} as MO #{@observation.id}" \
+          "#{" (skeleton)" if skeleton?}")
       increment_imported_counts
       update_timings
     rescue StandardError => e
@@ -197,48 +256,10 @@ class Inat
       nil
     end
 
-    # Stamp the MO observation's URL onto the source iNat observation. Only
-    # called when writing back: `finalize_import` gates this on
-    # `skip_inat_writeback?` (skipped by default in development so a local
-    # import never annotates a real iNat observation; production writes back,
-    # and the test suite is isolated from iNat by WebMock). Admins can override
-    # per import via a checkbox on the import form (InatImport#writeback).
-    def update_inat_observation
-      update_mushroom_observer_url_field
-      sleep(1) # Avoid hitting iNat API rate limits
-    end
-
-    def skip_inat_writeback?
-      return Rails.env.development? if @inat_import.writeback_default?
-
-      @inat_import.writeback_skip?
-    end
-
-    def update_mushroom_observer_url_field
-      update_inat_observation_field(
-        observation_id: @inat_obs[:id],
-        field_id: MO_URL_OBSERVATION_FIELD_ID,
-        value: "#{MO.http_domain}/#{@observation.id}"
-      )
-    end
-
-    def update_inat_observation_field(observation_id:, field_id:, value:)
-      payload = { observation_field_value: { observation_id: observation_id,
-                                             observation_field_id: field_id,
-                                             value: value } }
-      Inat::APIRequest.new(@inat_import.token).
-        request(method: :post,
-                path: "observation_field_values",
-                payload: payload)
-    rescue ::RestClient::ExceptionWithResponse => e
-      error = { error: e.http_code, payload: payload }.to_json
-      log_with_response_error(error)
-      raise(e)
-    end
-
     def increment_imported_counts
       @inat_import.increment!(:imported_count)
       @inat_import.increment!(:total_imported_count)
+      @inat_import.increment!(:skeleton_imported_count) if skeleton?
     end
 
     # Use cumulative moving average to update user's historical avg import time

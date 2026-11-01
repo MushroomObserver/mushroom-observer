@@ -25,11 +25,10 @@ module Views::Controllers::Observations::Namings::Suggestions
       confident = ::Suggestion.new("Coprinus comatus", 80)
       borderline = ::Suggestion.new("Agrocybe arvalis", 25)
 
-      html = render(Show.new(observation: @observation, user: @user,
-                             suggestions: [confident, borderline]))
+      html = render_show(suggestions: [confident, borderline])
 
-      # Two `<h3>` section headings, one per group.
-      assert_html(html, "h3", count: 2)
+      # Two suggestion tables, one per group.
+      assert_html(html, ".table-namings", count: 2)
       # One propose link per suggestion (each picks up the
       # `new_observation_naming_path` for its name).
       assert_html(html,
@@ -46,8 +45,7 @@ module Views::Controllers::Observations::Namings::Suggestions
       existing_name = @observation.namings.first.name
       sugg = ::Suggestion.new(existing_name.text_name, 80)
 
-      html = render(Show.new(observation: @observation, user: @user,
-                             suggestions: [sugg]))
+      html = render_show(suggestions: [sugg])
 
       assert_includes(html, :suggestions_already_proposed.t)
       assert_no_html(html, "a[href*='new_observation_naming']")
@@ -55,13 +53,12 @@ module Views::Controllers::Observations::Namings::Suggestions
 
     def test_useless_suggestions_are_filtered_out
       # `useless?` removes anything below 5% — neither group
-      # renders so no `<h3>` heading appears.
+      # renders so no suggestion table appears.
       useless = ::Suggestion.new("Coprinus comatus", 3)
 
-      html = render(Show.new(observation: @observation, user: @user,
-                             suggestions: [useless]))
+      html = render_show(suggestions: [useless])
 
-      assert_no_html(html, "h3")
+      assert_no_html(html, ".table-namings")
     end
 
     def test_confidence_lines_show_avg_when_observation_has_multiple_images
@@ -71,8 +68,7 @@ module Views::Controllers::Observations::Namings::Suggestions
       assert(@observation.images.length > 1, "fixture sanity")
       sugg = ::Suggestion.new("Coprinus comatus", 80)
 
-      html = render(Show.new(observation: @observation, user: @user,
-                             suggestions: [sugg]))
+      html = render_show(suggestions: [sugg])
 
       assert_includes(html, :suggestions_max.t)
       assert_includes(html, :suggestions_avg.t)
@@ -87,8 +83,7 @@ module Views::Controllers::Observations::Namings::Suggestions
       assert_equal(1, single_image_obs.images.length, "fixture sanity")
       sugg = ::Suggestion.new("Coprinus comatus", 80)
 
-      html = render(Show.new(observation: single_image_obs, user: @user,
-                             suggestions: [sugg]))
+      html = render_show(observation: single_image_obs, suggestions: [sugg])
 
       doc = Nokogiri::HTML(html)
       sugg_col = doc.at_css(".obs-suggestions-column")
@@ -102,10 +97,15 @@ module Views::Controllers::Observations::Namings::Suggestions
       # (which falls into "good"); push above 80 here.
       sugg = ::Suggestion.new("Coprinus comatus", 85)
 
-      html = render(Show.new(observation: @observation, user: @user,
-                             suggestions: [sugg]))
+      html = render_show(suggestions: [sugg])
 
       assert_includes(html, :suggestions_excellent.t)
+    end
+
+    private
+
+    def render_show(observation: @observation, **)
+      render(Show.new(observation: observation, user: @user, **))
     end
   end
 end

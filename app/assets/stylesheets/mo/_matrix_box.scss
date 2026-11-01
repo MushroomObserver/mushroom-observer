@@ -46,11 +46,25 @@
 
 // To make way for floating ID
 .rss-heading {
-  @extend .d-flex, .justify-content-between, .align-items-start;
+  @extend .d-flex, .justify-content-between, .align-items-start, .gap-3;
 
-  .rss-name {
-    margin-right: 7.5rem;
+  // Flex items don't shrink below their content's min-content width by
+  // default -- without this, a long nowrap author line below (see the
+  // `.rss-name small.text-nowrap` override) forces this whole row,
+  // badge included, past the box's edge instead of wrapping.
+  > a {
+    min-width: 0;
   }
+}
+
+// `.text-nowrap` (`String#small_author`, see app/extensions/string.rb)
+// keeps an author citation from splitting mid-phrase when it shares a
+// line with the name elsewhere in the app. In a matrix box,
+// `String#break_name` already forces the author onto its own line
+// below the name -- so here the citation itself needs to be free to
+// wrap across multiple lines, or a long one overflows the box.
+.rss-name small.text-nowrap {
+  white-space: normal !important;
 }
 
 h5.rss-heading {

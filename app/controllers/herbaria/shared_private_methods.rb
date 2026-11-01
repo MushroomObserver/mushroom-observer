@@ -8,7 +8,7 @@ module Herbaria
     # ---------- Filters -------------------------------------------------------
 
     def keep_track_of_referrer
-      @back = params[:back] || request.referer
+      @back = params.permit(:back)[:back] || request.referer
     end
 
     def redirect_to_referrer

@@ -58,7 +58,7 @@ class FieldSlipsIntegrationTest < CapybaraIntegrationTestCase
 
     project_checkbox = "observation_project_ids_#{project.id}"
     check(project_checkbox)
-    assert_selector("##{project_checkbox}[checked='checked']")
+    assert_selector("##{project_checkbox}[checked]")
     fill_in(:where.ti, with: wrong_location.name, visible: :any)
     # this is what counts, would be handled by js
     find_field(id: "observation_location_id",

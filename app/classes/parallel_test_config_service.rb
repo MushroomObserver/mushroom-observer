@@ -61,12 +61,15 @@ class ParallelTestConfigService
       output_handler.puts(
         "ERROR: config/database.yml not found. " \
         "Please copy from db/macos/database.yml or " \
-        "db/vagrant/database.yml"
+        "db/ubuntu/database.yml"
       )
       return nil
     end
 
-    database_config = YAML.load_file(config_path)
+    # aliases: true -- config/database.yml merges shared credentials
+    # via YAML anchors (`<<: *credentials`); Psych's safe-load default
+    # rejects alias nodes.
+    database_config = YAML.load_file(config_path, aliases: true)
     test_config = database_config["test"]
 
     unless test_config

@@ -7,8 +7,7 @@ module FieldSlipsController::Index
   end
 
   # Overrides `ApplicationController::Indexes#render_index_view` so
-  # `show_index_of_objects` renders the Phlex `Index` class instead
-  # of `field_slips/index.html.erb` (deleted).
+  # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
     render(Views::Controllers::FieldSlips::Index.new(
              objects: @objects, query: @query, project: @project,
@@ -19,31 +18,10 @@ module FieldSlipsController::Index
 
   private
 
-  def default_sort_order
-    ::Query::FieldSlips.default_order # :date
-  end
-
-  def index_active_params
-    [:project, :by_user, :by, :q, :id].freeze
-  end
-
-  # Display list of FieldSlips attached to a given project.
-  def project
-    return unless (
-      project = find_or_goto_index(Project, params[:project].to_s)
-    )
-
-    query = create_query(:FieldSlip, projects: project)
-    @project = project
-    [query, { always_index: true }]
-  end
-
-  # Displays list of User's FieldSlips, by date.
-  def by_user
-    return unless (user = find_or_goto_index(User, params[:by_user]))
-
-    query = create_query(:FieldSlip, by_users: user)
-    [query, {}]
+  # Hook runs before template displayed. Must return query.
+  def filtered_index_final_hook(query, _display_opts)
+    derive_ivar_from_query(:@project, query, :projects, Project)
+    query
   end
 
   # `show_index_of_objects` consumes `:include` as an array of

@@ -63,7 +63,7 @@ module Views::Controllers::Observations::ExternalLinks
                    sibling_site_links: [sibling_link(link, sibling)])
       )
 
-      assert_html(html, "a[href='#{link.url}']")
+      assert_html(html, "a[href='#{link.link_url}']")
       assert_no_html(html, "button.destroy_external_link_link_#{link.id}")
     end
 
@@ -86,6 +86,30 @@ module Views::Controllers::Observations::ExternalLinks
       assert_no_html(
         html, "a[data-modal='modal_#{link.type_tag}_#{link.id}']"
       )
+    end
+
+    def test_placeholder_import_link_shows_placeholder_notes
+      link, obs = placeholder_link_and_obs
+      login = obs.skeleton_omissions["login"]
+
+      html = render(frame_with(obs: obs, site_links: [link],
+                               user: users(:rolf)))
+
+      assert_html(html, ".reflection-placeholder-note",
+                  text: :observation_placeholder_source.l(login: login))
+      assert_html(html, ".reflection-not-imported-note")
+    end
+
+    def test_regular_reflection_shows_no_placeholder_notes
+      link, obs = placeholder_link_and_obs
+      obs.placeholder = false
+
+      html = render(frame_with(obs: obs, site_links: [link],
+                               user: users(:rolf)))
+
+      assert_html(html, ".reflection-read-only-note")
+      assert_no_html(html, ".reflection-placeholder-note")
+      assert_no_html(html, ".reflection-not-imported-note")
     end
 
     # ONE occurrence-wide "Sync now" button (#4215), shown to any
@@ -117,6 +141,29 @@ module Views::Controllers::Observations::ExternalLinks
       )
     end
 
+    def test_reflection_pane_shows_when_the_occurrence_last_synced
+      link = external_links(:imported_inat_obs_inat_link)
+      obs = link.observation
+      obs.update_column(:reflected_at, Time.zone.now)
+      user = users(:rolf)
+
+      html = render(frame_with(obs: obs, site_links: [link], user: user))
+      assert_html(html, ".reflection-last-synced",
+                  text: :observation_never_synced.l)
+
+      synced_at = Time.zone.now.change(usec: 0)
+      link.update_column(:last_synced_at, synced_at)
+      html = render(frame_with(obs: obs.reload, site_links: [link],
+                               user: user))
+
+      assert_html(
+        html,
+        ".reflection-last-synced [data-controller='local-time']" \
+        "[data-local-time-utc-value='#{synced_at.utc.iso8601}']",
+        text: synced_at.display_time
+      )
+    end
+
     def test_reflection_pane_hides_sync_button_when_logged_out
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       obs = link.observation
@@ -125,6 +172,7 @@ module Views::Controllers::Observations::ExternalLinks
       html = render(frame_with(obs: obs, site_links: [link], user: nil))
 
       assert_no_html(html, ".reflection-sync-button")
+      assert_no_html(html, ".reflection-last-synced")
     end
 
     # From a non-reflection member's page, a sibling reflection's row
@@ -147,7 +195,7 @@ module Views::Controllers::Observations::ExternalLinks
                    sibling_site_links: [sibling_link(link, sibling)])
       )
 
-      assert_html(html, "li .reflection-read-only-note",
+      assert_html(html, ".reflection-read-only-note",
                   text: :observation_reflection_read_only_note.l)
       assert_html(html, "form[action='#{path}'][method='post']")
     end
@@ -156,6 +204,19 @@ module Views::Controllers::Observations::ExternalLinks
 
     def sibling_link(link, observation)
       InfoFrame::SiblingLink.new(link: link, observation: observation)
+    end
+
+    # A placeholder reflection and its iNat import link.
+    def placeholder_link_and_obs
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      link.relationship = :import
+      obs = link.observation
+      obs.reflected_at = Time.zone.now
+      obs.placeholder = true
+      obs.skeleton_omissions = { "login" => "inat_observer", "images" => 2,
+                                 "obs_fields" => 0, "description" => true,
+                                 "sequences" => false }
+      [link, obs]
     end
 
     def frame_with(obs:, site_links:, user:, sibling_site_links: [])

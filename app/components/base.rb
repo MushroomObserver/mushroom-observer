@@ -5,6 +5,9 @@ class Components::Base < Phlex::HTML
 
   # Include any helpers you want to be available across all components
   include ScalarParams
+  # `TO_ID` / `TO_ID_ARRAY` -- shared Literal `prop` coercion blocks
+  # for id/id-array props sourced from raw HTTP params.
+  include LiteralIDCoercion
   include Phlex::Rails::Helpers::Routes
   include Phlex::Rails::Helpers::AssetPath
   include Phlex::Rails::Helpers::LinkTo
@@ -50,6 +53,7 @@ class Components::Base < Phlex::HTML
   register_value_helper :url_for
   register_value_helper :add_q_param
   register_value_helper :q_param
+  register_value_helper :index_filter
   # The Query for "what the user is currently looking at" — pulled
   # from the controller's `@query` ivar, the URL's `q` param, or the
   # session's stored query_record (in that order, via

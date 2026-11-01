@@ -25,7 +25,7 @@ class Views::Layouts::Sidebar
 
       # Should have heading with icon and "Account:" text
       assert_includes(html, :app_account.t)
-      assert_html(html, "span.glyphicon.glyphicon-user")
+      assert_html(html, "svg.mo-icon-user")
 
       # Should include navigation links
       assert_html(html, ".login_link")
@@ -41,7 +41,7 @@ class Views::Layouts::Sidebar
     def test_heading_has_correct_css_classes
       html = render_component
 
-      # Heading should have the disabled and font-weight-bold classes
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 
@@ -49,8 +49,9 @@ class Views::Layouts::Sidebar
       html = render_component
 
       # Should have icon before text
-      assert_html(html, "div.list-group-item span.glyphicon.glyphicon-user")
-      assert_html(html, "div.list-group-item span")
+      assert_html(html,
+                  ".list-group-item svg.mo-icon-user")
+      assert_html(html, ".list-group-item span")
     end
 
     private

@@ -134,15 +134,81 @@ class OccurrenceTest < UnitTestCase
     new_occ = @obs2.reload.occurrence
     assert_not_equal(old_occ.id, new_occ.id)
 
-    # Move obs1 to fs2 — triggers cleanup_old_occurrence
+    # Move obs1 to fs2 — the abandoned occurrence empties; even with a
+    # field slip it cannot survive without a valid primary, so it is
+    # destroyed and the slip freed.
     @obs1.update!(field_slip: fs2)
     @obs1.reload
     assert_equal(new_occ.id, @obs1.occurrence_id,
                  "obs1 should now belong to new occurrence")
-    # Old occurrence retains field_slip link, so destroy_if_incomplete!
-    # preserves it; but cleanup_old_occurrence still ran (coverage).
-    assert(Occurrence.exists?(old_occ.id),
-           "Old occurrence with field_slip should survive")
+    assert_not(Occurrence.exists?(old_occ.id),
+               "Emptied occurrence should be destroyed")
+  end
+
+  def test_move_to_other_occurrence_reassigns_abandoned_primary
+    @obs1.update!(specimen: true)
+    [@obs2, @obs3, @obs4].each { |obs| obs.update!(specimen: false) }
+    occ_a = create_occurrence(@obs1, @obs2, @obs3)
+    occ_b = create_occurrence(@obs4)
+    occ_a.recompute_has_specimen!
+    assert(occ_a.reload.has_specimen)
+
+    @obs1.update!(occurrence: occ_b)
+
+    occ_a.reload
+    assert_not_equal(@obs1.id, occ_a.primary_observation_id,
+                     "Primary should be reassigned off the departed obs")
+    assert(occ_a.observations.exists?(id: occ_a.primary_observation_id),
+           "Reassigned primary should be a remaining member")
+    assert_not(occ_a.has_specimen,
+               "has_specimen cache should be refreshed after the move")
+    assert(occ_b.reload.has_specimen,
+           "Destination occurrence's has_specimen cache should pick up " \
+           "the arriving specimen")
+  end
+
+  def test_move_to_other_occurrence_destroys_incomplete_abandoned
+    occ_a = create_occurrence(@obs1, @obs2)
+    occ_b = create_occurrence(@obs3, @obs4)
+
+    @obs1.update!(occurrence: occ_b)
+
+    assert_not(Occurrence.exists?(occ_a.id),
+               "Occurrence reduced below 2 members should be destroyed")
+    assert_nil(@obs2.reload.occurrence_id)
+  end
+
+  # A thumbnail borrowed from a sibling stops being reachable once the
+  # borrower leaves that sibling's occurrence.
+  def test_move_to_other_occurrence_resets_borrowed_thumbnail
+    borrowed = images(:in_situ_image)
+    assert_includes(@obs3.image_ids, borrowed.id, "premise: obs3's image")
+    assert_empty(@obs1.image_ids, "premise: obs1 has no images")
+    create_occurrence(@obs3, @obs1, @obs2)
+    occ_b = create_occurrence(@obs4)
+    @obs1.update!(thumb_image: borrowed)
+
+    @obs1.update!(occurrence: occ_b)
+
+    assert_empty(occ_b.observations.flat_map(&:image_ids),
+                 "premise: nothing to borrow in the new occurrence")
+    assert_nil(@obs1.reload.thumb_image_id,
+               "the borrowed thumbnail is dropped, not left dangling")
+  end
+
+  def test_move_to_other_occurrence_resets_siblings_borrowed_thumbnail
+    borrowed = images(:in_situ_image)
+    assert_includes(@obs3.image_ids, borrowed.id, "premise: obs3's image")
+    occ_a = create_occurrence(@obs1, @obs2, @obs3)
+    occ_b = create_occurrence(@obs4)
+    @obs2.update!(thumb_image: borrowed)
+
+    @obs3.update!(occurrence: occ_b)
+
+    assert(Occurrence.exists?(occ_a.id), "two members remain")
+    assert_equal(images(:connected_coprinus_comatus_image).id,
+                 @obs2.reload.thumb_image_id,
+                 "the sibling falls back to a photo it owns")
   end
 
   def test_single_obs_occurrence_not_destroyed
@@ -617,6 +683,29 @@ class OccurrenceTest < UnitTestCase
       msgs.any? { |m| m.include?("Occurrence ##{occ.id}") },
       "Should not report when already correct"
     )
+  end
+
+  def test_refresh_has_specimen_cache_continues_past_broken_row
+    [@obs1, @obs2, @obs3, @obs4].each { |obs| obs.update!(specimen: false) }
+    broken = create_occurrence(@obs1, @obs2)
+    stale = create_occurrence(@obs3, @obs4)
+    # Corrupt `broken` the way bad production rows looked: primary
+    # belongs to another occurrence, cache wrong (update_columns
+    # bypasses the validation that normally prevents this).
+    broken.update_columns(primary_observation_id: @obs3.id,
+                          has_specimen: true)
+    stale.update_column(:has_specimen, true)
+
+    failures = []
+    msgs = Occurrence.refresh_has_specimen_cache { |msg| failures << msg }
+
+    assert_equal(1, failures.size)
+    assert_match(/Occurrence ##{broken.id}.*failed/, failures.first)
+    assert(msgs.any? { |m| m.include?("Occurrence ##{stale.id}") })
+    assert_not(stale.reload.has_specimen,
+               "Rows after the broken one should still be repaired")
+    assert(broken.reload.has_specimen,
+           "Broken row should be left unchanged")
   end
 
   # == Coverage: check_multiple_occurrences! ==
@@ -1126,6 +1215,10 @@ class OccurrenceTest < UnitTestCase
 
     merged = occ.merged_notes
 
+    # Regression: merged_notes returning a bare Hash instead of
+    # NotesHash would pass every other test silently (they only check
+    # hash content).
+    assert_instance_of(NotesHash, merged)
     assert_equal("primary red", merged[:Cap])       # primary wins
     assert_equal("primary note", merged[:Other])
     assert_equal("wood", merged[:Substrate])        # inherited from sibling

@@ -1,0 +1,488 @@
+# frozen_string_literal: true
+
+require("test_helper")
+
+class FieldSlipExtractTest < UnitTestCase
+  def setup
+    @obs = observations(:minimal_unknown_obs)
+    @image = images(:in_situ_image)
+    @obs.images << @image unless @obs.images.include?(@image)
+  end
+
+  DEFAULT_RESULT = { provider: "gemini", model: "m", template: "mo",
+                     raw: { "ok" => true } }.freeze
+
+  def result(fields: {}, confidence: {}, **overrides)
+    FieldSlip::Extractor::Result.new(
+      **DEFAULT_RESULT, fields: fields, confidence: confidence, **overrides
+    )
+  end
+
+  def record(fields: {}, confidence: {}, **)
+    FieldSlipExtract.record(image: @image, user: rolf, prompt_version: "1",
+                            result: result(fields:, confidence:, **))
+  end
+
+  # One row per image: pressing the button again replaces the previous
+  # read rather than accumulating versions nobody reviews.
+  # A read of a specimen photo is stored like any other, but marked, so
+  # a consumer can tell "nothing on this slip" from "no slip here".
+  def test_record_stores_the_no_slip_flag
+    assert(record(slip_present: false).no_slip?)
+    assert_not(record(slip_present: true).no_slip?)
+    assert_not(record.no_slip?, "an unreported flag is not evidence")
+  end
+
+  # Both boxes come back null; only one is worth another photo.
+  def test_record_stores_which_fields_were_unreadable
+    extract = record(fields: { "Substrate" => nil, "Habit" => nil },
+                     unreadable: ["Substrate"])
+
+    assert_equal(["Substrate"], extract.unreadable)
+    assert(extract.unreadable?("Substrate"))
+    assert_not(extract.unreadable?("Habit"))
+    assert_empty(record.unreadable, "nothing reported means nothing missing")
+  end
+
+  def test_record_replaces_rather_than_accumulates
+    first = record(fields: { "Collector" => "A" })
+    second = record(fields: { "Collector" => "B" })
+
+    assert_equal(first.id, second.id)
+    assert_equal(1, FieldSlipExtract.where(image_id: @image.id).count)
+    assert_equal("B", second.value_for("Collector"))
+  end
+
+  def test_record_stores_provenance_and_raw_response
+    extract = record(fields: { "Collector" => "A" }, model: "gemini-3.6-flash")
+
+    assert_equal("gemini", extract.provider)
+    assert_equal("gemini-3.6-flash", extract.model)
+    assert_equal("1", extract.prompt_version)
+    assert_equal({ "ok" => true }, extract.data["raw"])
+  end
+
+  # ---------- lifecycle ----------
+
+  # Existing rows (and every `record`) read as complete; only the
+  # background-extraction path ever writes the other two.
+  def test_record_is_complete
+    extract = record(fields: { "Collector" => "A" })
+
+    assert(extract.complete?)
+    assert_not(extract.pending?)
+  end
+
+  def test_start_marks_pending_and_record_completes_it
+    started = FieldSlipExtract.start!(image: @image, user: rolf)
+
+    assert(started.pending?)
+
+    completed = record(fields: { "Collector" => "A" })
+
+    assert_equal(started.id, completed.id, "same one-row-per-image slot")
+    assert(completed.complete?)
+  end
+
+  def test_fail_keeps_the_error_for_the_reviewer
+    extract = FieldSlipExtract.fail!(image: @image, user: rolf,
+                                     error: "429 quota exceeded")
+
+    assert(extract.failed?)
+    assert_equal("429 quota exceeded", extract.error)
+  end
+
+  # A failure after a completed read must not orphan the row's
+  # provider provenance (they are NOT NULL columns).
+  def test_fail_over_an_existing_row_keeps_its_provenance
+    record(fields: { "Collector" => "A" })
+    extract = FieldSlipExtract.fail!(image: @image, user: rolf,
+                                     error: "boom")
+
+    assert(extract.failed?)
+    assert_equal("m", extract.model, "provenance of the last real read")
+  end
+
+  # ---------- template ----------
+
+  def test_record_stores_which_template_was_read
+    assert_instance_of(FieldSlip::Template::Dbg,
+                       record(template: "dbg").template)
+  end
+
+  # Reads stored before templates existed were all of MO's own slip.
+  def test_template_defaults_to_mo_for_old_rows
+    extract = record(fields: { "Collector" => "A" })
+    extract.update!(data: extract.data.except("template"))
+
+    assert_instance_of(FieldSlip::Template::Mo, extract.reload.template)
+  end
+
+  def test_template_mismatch_only_on_explicit_false
+    assert(record(slip_present: true, template_matched: false).
+           template_mismatch?)
+    assert_not(record(template_matched: true).template_mismatch?)
+    assert_not(record.template_mismatch?, "unreported is not evidence")
+  end
+
+  # No slip at all is not a layout mismatch -- different message,
+  # different fix.
+  def test_no_slip_is_not_a_template_mismatch
+    extract = record(slip_present: false, template_matched: false)
+
+    assert(extract.no_slip?)
+    assert_not(extract.template_mismatch?)
+  end
+
+  # The dbg slip names its fields differently; the helpers must follow
+  # the stored template's labels.
+  def test_location_helpers_follow_the_stored_template
+    extract = record(template: "dbg",
+                     fields: { "Location/Foray" => "EB2" })
+
+    assert_equal("EB2", extract.unknown_location_alias)
+  end
+
+  def test_confidence_defaults_to_low_when_unusable
+    extract = record(fields: { "Collector" => "A" },
+                     confidence: { "Collector" => "wildly sure" })
+
+    assert_equal("low", extract.confidence_for("Collector"))
+    assert_equal("low", extract.confidence_for("Date"), "absent -> low")
+  end
+
+  def test_confidence_passes_through_known_levels
+    extract = record(fields: { "Date" => "2026-07-30" },
+                     confidence: { "Date" => "HIGH" })
+
+    assert_equal("high", extract.confidence_for("Date"))
+  end
+
+  # An extract describes one image, so it goes when the image does
+  # rather than lingering as an orphan for the integrity job to sweep.
+  def test_destroyed_with_its_image
+    record(fields: { "Collector" => "A" })
+    image = Image.find(@image.id)
+    image.current_user = image.user
+
+    assert_difference("FieldSlipExtract.count", -1) { image.destroy }
+  end
+
+  # ---------- code mismatch ----------
+
+  def test_code_mismatch_nil_when_codes_agree
+    slip = FieldSlip.create!(code: "NEMF-10222", user: @obs.user)
+    attach_slip(slip)
+    extract = record(fields: { "Field Slip Code" => "NEMF-10222" })
+
+    assert_nil(extract.code_mismatch)
+  end
+
+  # A case-only difference is not a mismatch -- field slip codes are
+  # case-insensitive (#5199): a hand-made slip photographed as
+  # "nemf-10222" still matches the attached "NEMF-10222".
+  def test_code_mismatch_nil_when_codes_differ_only_in_case
+    slip = FieldSlip.create!(code: "NEMF-10222", user: @obs.user)
+    attach_slip(slip)
+    extract = record(fields: { "Field Slip Code" => "nemf-10222" })
+
+    assert_nil(extract.code_mismatch)
+  end
+
+  # The strongest signal that this photo is not this observation's slip.
+  def test_code_mismatch_reports_both_codes
+    slip = FieldSlip.create!(code: "NEMF-10222", user: @obs.user)
+    attach_slip(slip)
+    extract = record(fields: { "Field Slip Code" => "NEMF-99999" })
+
+    assert_equal(%w[NEMF-99999 NEMF-10222], extract.code_mismatch)
+  end
+
+  def test_code_mismatch_nil_without_an_attached_slip
+    @obs.update!(occurrence: nil)
+
+    assert_nil(@obs.reload.field_slip, "premise: no slip attached")
+    extract = record(fields: { "Field Slip Code" => "NEMF-99999" })
+
+    assert_nil(extract.code_mismatch)
+  end
+
+  def test_code_mismatch_nil_when_nothing_was_read
+    slip = FieldSlip.create!(code: "NEMF-10222", user: @obs.user)
+    attach_slip(slip)
+
+    assert_nil(record(fields: { "Field Slip Code" => "" }).code_mismatch)
+  end
+
+  # ---------- unknown location alias ----------
+
+  # "EB2" for "Early Bird 2" where the project only defines "2": naming
+  # it is what lets an admin add the alias, which then improves every
+  # later slip, since the prompt is built from the same table.
+  def test_unknown_location_alias_names_an_undefined_abbreviation
+    extract = record(fields: { "Location" => "EB2" })
+
+    assert_equal("EB2", extract.unknown_location_alias)
+  end
+
+  def test_unknown_location_alias_nil_when_the_project_defines_it
+    project = projects(:eol_project)
+    project.observations << @obs unless project.observations.include?(@obs)
+    ProjectAlias.create!(project: project, name: "Walk 9",
+                         target: locations(:albion))
+    extract = record(fields: { "Location" => "Walk 9" })
+
+    assert_nil(extract.reload.unknown_location_alias)
+  end
+
+  # The reported bug (obs 664208): a spare slip -- its project released
+  # after a constraint violation -- stopped resolving its event's
+  # aliases, so "EB2" warned as undefined while the event's project
+  # defined it. The printed prefix still names the event.
+  def test_unknown_location_alias_uses_a_spare_slips_event_project
+    project = projects(:eol_project)
+
+    assert_not_includes(project.observations, @obs,
+                        "premise: membership is not what resolves it")
+
+    ProjectAlias.create!(project: project, name: "EB2",
+                         target: locations(:albion))
+    @obs.field_slip.update_columns(project_id: nil)
+    extract = record(fields: { "Location" => "EB2" })
+
+    assert_nil(extract.reload.unknown_location_alias)
+  end
+
+  def test_unknown_location_alias_nil_when_it_matches_the_location
+    extract = record(fields: { "Location" => @obs.location.name })
+
+    assert_nil(extract.unknown_location_alias)
+  end
+
+  def test_unknown_location_alias_nil_when_nothing_was_read
+    assert_nil(record(fields: {}).unknown_location_alias)
+  end
+
+  # The applier resolves aliases across every project the observation
+  # is in, so an alias defined in a sibling project (not the slip's
+  # own) must not warn either -- the warning may never contradict what
+  # applying would do.
+  def test_unknown_location_alias_consults_all_the_obs_projects
+    sibling = projects(:eol_project)
+    sibling.observations << @obs unless sibling.observations.include?(@obs)
+    @obs.field_slip.update_columns(
+      project_id: projects(:open_membership_project).id
+    )
+    ProjectAlias.create!(project: sibling, name: "EB2",
+                         target: locations(:albion))
+
+    assert_nil(record(fields: { "Location" => "EB2" }).
+               reload.unknown_location_alias)
+  end
+
+  # The reported bug: an observation in two projects warned "no
+  # abbreviation defined for EB2" although the slip's own project
+  # defined it -- the check consulted `projects.first` instead of the
+  # attached slip's project.
+  def test_unknown_location_alias_consults_the_slips_project
+    project = projects(:eol_project)
+    project.observations << @obs unless project.observations.include?(@obs)
+    slip_project = projects(:open_membership_project)
+    @obs.field_slip.update_columns(project_id: slip_project.id)
+    ProjectAlias.create!(project: slip_project, name: "EB2",
+                         target: locations(:albion))
+
+    extract = record(fields: { "Location" => "EB2" })
+
+    assert_nil(extract.reload.unknown_location_alias)
+  end
+
+  # A full MO location name is not an unknown abbreviation, alias or no
+  # alias -- warning about one would tell the reviewer that something MO
+  # already knows is unrecognized, and offer to define an alias for it.
+  def test_unknown_location_alias_nil_for_a_real_location_name
+    other = locations(:albion)
+
+    assert_not_equal(other, @obs.location, "premise: not this obs's location")
+    assert_nil(record(fields: { "Location" => other.name }).
+               unknown_location_alias)
+  end
+
+  # ---------- location suggestion ----------
+
+  # "Fulton, Co" against a project already sitting in "Fulton Co.,
+  # Pennsylvania, USA": punctuation and case differ, the words do not.
+  def test_suggests_a_location_the_project_already_uses
+    target = project_using(locations(:albion))
+    written = target.name.split(",").first.downcase
+
+    extract = record(fields: { "Location" => written })
+
+    assert_equal(target, extract.location_suggestion)
+  end
+
+  def test_no_suggestion_when_nothing_matches
+    project_using(locations(:albion))
+
+    assert_nil(record(fields: { "Location" => "Zzz" }).location_suggestion)
+  end
+
+  # A guess must not pick between two plausible sites, so an ambiguous
+  # abbreviation suggests nothing at all. "Albion" prefixes both
+  # "Albion, California, USA" and the twin created here.
+  def test_no_suggestion_when_several_match
+    albion = locations(:albion)
+    project_using(albion)
+    add_to_project(observations(:coprinus_comatus_obs), twin_of(albion))
+    written = albion.name.split(",").first
+
+    assert_nil(record(fields: { "Location" => written }).location_suggestion)
+  end
+
+  # A full name still resolves when a longer sibling exists, because
+  # matching is a prefix test on the CANDIDATE: "Albion, California,
+  # USA" is not a prefix of "Albion Annex, California, USA".
+  def test_a_full_name_resolves_despite_a_longer_sibling
+    albion = locations(:albion)
+    project_using(albion)
+    add_to_project(observations(:coprinus_comatus_obs), twin_of(albion))
+
+    assert_equal(albion,
+                 record(fields: { "Location" => albion.name }).
+                 location_suggestion)
+  end
+
+  def test_no_suggestion_without_a_project
+    assert_nil(record(fields: { "Location" => "Anything" }).
+               location_suggestion)
+  end
+
+  def test_no_suggestion_when_nothing_was_read
+    project_using(locations(:albion))
+
+    assert_nil(record(fields: {}).location_suggestion)
+  end
+
+  # ---------- permitted? ----------
+
+  def test_permitted_for_site_admin
+    assert(FieldSlipExtract.permitted?(image: @image, user: dick,
+                                       site_admin: true))
+  end
+
+  # A foray's organizers get in -- but through edit rights on the
+  # observation, so the collector must have trusted the project with
+  # editing (Observation#can_edit?, via Project.user_admin_via_project?).
+  def test_permitted_for_admin_of_the_observations_project
+    project = projects(:eol_project)
+    project.observations << @obs unless project.observations.include?(@obs)
+
+    assert(@obs.reload.can_edit?(rolf), "premise: rolf can edit the obs")
+    assert(FieldSlipExtract.permitted?(image: @image.reload, user: rolf))
+  end
+
+  # The collector reviews -- and can rescan -- the slip on their own
+  # observation, even when it is in no project. The field-scanner case
+  # a constraint-violating location produced: the slip's observation
+  # was left out of its project, which used to lock the collector out
+  # of the review. Permission is edit rights on the observation, not
+  # ownership of the photo.
+  def test_permitted_for_the_observation_owner
+    assert_equal(mary, @obs.user, "premise: mary owns the observation")
+    assert(@obs.can_edit?(mary))
+
+    assert(FieldSlipExtract.permitted?(image: @image, user: mary))
+  end
+
+  # Owning the photo is not enough: the review writes the transcribed
+  # values onto the observation, so a user who cannot edit it is
+  # refused even on an image they uploaded (Copilot + Nathan review,
+  # PR #5240). Here katrina's photo hangs on mary's observation, which
+  # katrina cannot edit.
+  def test_not_permitted_for_an_image_owner_who_cannot_edit_the_obs
+    image = images(:amateur_image)
+    @obs.images << image unless @obs.images.include?(image)
+
+    assert_equal(katrina, image.user, "premise: katrina owns the image")
+    assert_not(@obs.can_edit?(katrina), "premise: katrina cannot edit it")
+    assert_not(FieldSlipExtract.permitted?(image: image.reload,
+                                           user: katrina))
+  end
+
+  def test_not_permitted_for_a_plain_member
+    project = projects(:eol_project)
+    project.observations << @obs unless project.observations.include?(@obs)
+
+    assert_not(project.is_admin?(katrina))
+    assert_not(FieldSlipExtract.permitted?(image: @image.reload,
+                                           user: katrina))
+  end
+
+  # An image can carry several observations, and permission is granted
+  # by ANY of them -- `in_situ_image` also belongs to an observation in
+  # the Bolete Project, which is why the stranger here has to be someone
+  # who administers none of them.
+  def test_not_permitted_for_a_stranger
+    stranger = katrina
+    admin_of = @image.reload.observations.flat_map(&:projects).
+               select { |project| project.is_admin?(stranger) }
+
+    assert_empty(admin_of, "premise: stranger administers none of them")
+    assert_not(FieldSlipExtract.permitted?(image: @image, user: stranger))
+  end
+
+  def test_not_permitted_without_a_user_even_in_admin_mode
+    assert_not(FieldSlipExtract.permitted?(image: @image, user: nil,
+                                           site_admin: true))
+  end
+
+  # Permission comes from any of the image's observations, not only the
+  # one the review would write to.
+  def test_permitted_via_a_second_observation_on_the_same_image
+    other = @image.observations.find { |obs| obs.id != @obs.id }
+
+    assert(other, "premise: the image carries a second observation")
+    assert(other.can_edit?(dick), "premise: dick can edit the other obs")
+    assert(FieldSlipExtract.permitted?(image: @image, user: dick))
+  end
+
+  private
+
+  # Puts a second observation in the project at a known location, so a
+  # suggestion has something to match against.
+  def project_using(location)
+    project = projects(:eol_project)
+    project.observations << @obs unless project.observations.include?(@obs)
+    other = observations(:detailed_unknown_obs)
+    project.observations << other unless project.observations.include?(other)
+    other.update!(location: location)
+    location
+  end
+
+  def add_to_project(obs, location)
+    project = projects(:eol_project)
+    project.observations << obs unless project.observations.include?(obs)
+    obs.update!(location: location)
+    location
+  end
+
+  # A second Location whose name starts with the first's, so a written
+  # abbreviation matches both.
+  def twin_of(location)
+    head, tail = location.name.split(",", 2)
+    twin_name = "#{head} Annex,#{tail}"
+    twin = Location.new(user: rolf, name: twin_name,
+                        scientific_name: Location.reverse_name(twin_name),
+                        north: location.north, south: location.south,
+                        east: location.east, west: location.west)
+    twin.current_user = rolf
+    twin.save!
+    twin
+  end
+
+  def attach_slip(slip)
+    occ = Occurrence.create!(user: @obs.user, primary_observation: @obs,
+                             field_slip: slip)
+    @obs.update!(occurrence: occ)
+  end
+end

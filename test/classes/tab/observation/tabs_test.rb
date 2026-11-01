@@ -40,6 +40,40 @@ module Tab::Observation
       assert_equal(:add, tab.html_options[:icon])
     end
 
+    def test_attach_field_slip
+      tab = Tab::Observation::AttachFieldSlip.new(observation: @obs)
+
+      assert_equal(:field_slip_attach_tooltip.l, tab.title)
+      assert_equal(routes.edit_observation_field_slip_path(@obs.id), tab.path)
+      assert_equal(:add, tab.html_options[:icon])
+      assert_equal("attach_observation_to_field_slip", tab.alt_title)
+    end
+
+    def test_field_slip_scan
+      tab = Tab::Observation::FieldSlipScan.new(observation: @obs)
+
+      assert_equal(:field_slip_scan_tooltip.l, tab.title)
+      assert_equal(routes.field_slip_scan_observation_path(@obs.id), tab.path)
+      assert_equal(:qrcode, tab.html_options[:icon])
+      assert_equal("scan_observation_field_slip", tab.alt_title)
+    end
+
+    def test_manage_projects
+      tab = Tab::Observation::ManageProjects.new(observation: @obs)
+
+      assert_equal(:show_observation_manage_projects.l, tab.title)
+      assert_equal(routes.edit_observation_projects_path(@obs.id), tab.path)
+      assert_equal(:manage_lists, tab.html_options[:icon])
+    end
+
+    def test_add_to_project
+      tab = Tab::Observation::AddToProject.new(observation: @obs)
+
+      assert_equal(:show_observation_add_to_project.l, tab.title)
+      assert_equal(routes.edit_observation_projects_path(@obs.id), tab.path)
+      assert_equal(:add, tab.html_options[:icon])
+    end
+
     def test_matching_observations
       occurrence = occurrences(:occ_field_slip_one)
       tab = Tab::Observation::MatchingObservations.new(occurrence: occurrence)
@@ -68,26 +102,15 @@ module Tab::Observation
     def test_of_look_alikes
       tab = Tab::Observation::OfLookAlikes.new(name: @name)
 
-      assert_equal(routes.observations_path(name: @name.id,
-                                            look_alikes: "1"),
+      assert_equal(routes.observations_path(look_alikes: @name.id),
                    tab.path)
     end
 
     def test_of_related_taxa
       tab = Tab::Observation::OfRelatedTaxa.new(name: @name)
 
-      assert_equal(routes.observations_path(name: @name.id,
-                                            related_taxa: "1"),
+      assert_equal(routes.observations_path(related_taxa: @name.id),
                    tab.path)
-    end
-
-    def test_hide_thumbnail_map
-      tab = Tab::Observation::HideThumbnailMap.new(observation: @obs)
-
-      assert_equal(:show_observation_hide_map.l, tab.title)
-      assert_equal(routes.javascript_hide_thumbnail_map_path(id: @obs.id),
-                   tab.path)
-      assert_equal(:hide, tab.html_options[:icon])
     end
 
     def test_reuse_images
@@ -136,9 +159,23 @@ module Tab::Observation
 
     def test_index
       tab = Tab::Observation::Index.new
+      with_filter = Tab::Observation::Index.new(
+        index_filter: { by_user: 1 }
+      )
+      # Array-valued filters go through Query.merge_index_filters_into_url
+      # (via with_index_filter), a different code path than the plain
+      # Hash#merge the other migrated Tab classes use -- confirm it
+      # round-trips correctly too.
+      with_array_filter = Tab::Observation::Index.new(
+        index_filter: { by_users: [1, 2] }
+      )
 
       assert_equal(:cancel_to_index.t(type: :observation), tab.title)
       assert_equal(routes.observations_path, tab.path)
+      assert_equal(routes.observations_path(by_user: 1), with_filter.path)
+      assert_equal(
+        routes.observations_path(by_users: [1, 2]), with_array_filter.path
+      )
     end
 
     def test_edit

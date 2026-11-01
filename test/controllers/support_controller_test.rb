@@ -27,6 +27,7 @@ class SupportControllerTest < FunctionalTestCase
     get(:donate)
     assert_select("body.support__donate")
     assert_select("form input[value=\"#{users(:rolf).name}\"]")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_confirm_post
@@ -41,7 +42,9 @@ class SupportControllerTest < FunctionalTestCase
     params = donation_params(amount, rolf, anon, recurring)
     params[:donation][:other_amount] = other_amount
     post(:confirm, params: params)
+    assert_unprocessable
     assert_select("body.support__confirm")
+    assert_select("form#donate_form[data-turbo='false']")
     assert_donations(donations + 1, final_amount, false, params[:donation])
   end
 

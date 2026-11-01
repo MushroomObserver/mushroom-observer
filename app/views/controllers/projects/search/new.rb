@@ -1,14 +1,13 @@
 # frozen_string_literal: true
 
 # Action template for `Projects::SearchController#new` — the
-# faceted projects-search form page. Replaces
-# `app/views/controllers/projects/search/new.erb`. Renders
+# faceted projects-search form page. Renders
 # `Components::Form::Search` against the controller's `@search`
 # (a `Query::Projects` instance).
 module Views::Controllers::Projects::Search
   class New < Views::FullPageBase
     prop :search, ::Query::Projects
-    prop :local, _Boolean, default: true
+    prop :context, _Union(:page, :dropdown), default: :page
 
     def view_template
       add_new_title(:search_object, :projects)
@@ -18,7 +17,7 @@ module Views::Controllers::Projects::Search
         render(::Components::Form::Search.new(
                  @search,
                  search_controller: controller,
-                 local: @local
+                 context: @context
                ))
       end
     end

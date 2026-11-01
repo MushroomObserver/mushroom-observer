@@ -6,6 +6,7 @@ module Observations::Images
 
     layout false
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Uploading images for an observation is a multi-stage thing.
     # First, each selected image with its EXIF data is read and displayed in
     # the create obs form, where the user can reconcile dates and locations
@@ -21,6 +22,7 @@ module Observations::Images
     # owns inline — needed for the turbo_stream insertion path because
     # there's no primitive context there.)
     # was multi_image_template
+    # rubocop:enable MO/NoLongCommentBlock
     def new
       @licenses = License.available_names_and_ids(@user.license)
       @image = Image.new(user: @user, when: Time.zone.now,
@@ -49,9 +51,9 @@ module Observations::Images
         "added_images",
         ::Components::Form::UploadGallery::TurboStreamSlide.new(
           user: @user, image: @image,
-          img_id: params[:img_id],
-          file_name: params[:file_name],
-          file_size: params[:file_size]
+          img_id: params.permit(:img_id)[:img_id],
+          file_name: params.permit(:file_name)[:file_name],
+          file_size: params.permit(:file_size)[:file_size]
         )
       )
     end
@@ -60,14 +62,17 @@ module Observations::Images
       turbo_stream.prepend(
         "added_thumbnails",
         ::Components::Form::UploadGallery::TurboStreamThumb.new(
-          user: @user, image: @image, img_id: params[:img_id]
+          user: @user, image: @image,
+          img_id: params.permit(:img_id)[:img_id]
         )
       )
     end
 
-    def render_image(image, args)
-      name = args[:original_name].to_s
-      flash_notice(:runtime_image_uploaded.t(name: name))
+    def render_image(image, _args)
+      # No per-upload success flash: uploads now run concurrently (#5238),
+      # and MO's session-based flash loses writes under parallel requests.
+      # The created observation page already shows the uploaded images, so
+      # the per-image confirmation was redundant.
       render(json: image)
     end
 

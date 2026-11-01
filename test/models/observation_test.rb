@@ -22,6 +22,14 @@ class ObservationTest < UnitTestCase
   ##############################################################################
 
   # Add an observation to the database
+  def test_show_url_uses_permanent_obs_form
+    obs = observations(:minimal_unknown_obs)
+
+    assert_equal("#{MO.http_domain}/obs/#{obs.id}", obs.show_url,
+                 "Observation URLs that leave the site must use the " \
+                 "/obs/ form, the only one open to logged-out visitors")
+  end
+
   def test_create
     create_new_objects
     assert_kind_of(Observation, observations(:minimal_unknown_obs))
@@ -78,6 +86,68 @@ class ObservationTest < UnitTestCase
     obs.remove_image(remaining)
     last = ([img2, img3] - [remaining]).first
     assert_equal(last, obs.thumb_image)
+  end
+
+  # #5314 follow-up: an observation should not be saved with images
+  # and a null thumbnail (which renders as a blank index box). The
+  # before_save self-heals when the images are loaded.
+  def test_ensure_thumb_image_present_on_save
+    img1 = images(:commercial_inquiry_image)
+    img2 = images(:disconnected_coprinus_comatus_image)
+    obs = observations(:minimal_unknown_obs)
+    obs.images = [img1, img2]
+    obs.thumb_image_id = nil
+
+    obs.save!
+
+    assert_equal([img1, img2].min_by(&:id).id, obs.reload.thumb_image_id,
+                 "Saving with images but no thumb should set the oldest " \
+                 "image as the thumbnail")
+  end
+
+  # A chosen thumbnail is left alone.
+  def test_ensure_thumb_image_present_keeps_existing_thumb
+    img1 = images(:commercial_inquiry_image)
+    img2 = images(:disconnected_coprinus_comatus_image)
+    obs = observations(:minimal_unknown_obs)
+    obs.images = [img1, img2]
+    obs.thumb_image = img2
+
+    obs.save!
+
+    assert_equal(img2.id, obs.reload.thumb_image_id)
+  end
+
+  # An imageless observation saves with a nil thumbnail, untouched.
+  def test_ensure_thumb_image_present_no_op_without_images
+    obs = observations(:minimal_unknown_obs)
+    obs.images = []
+    obs.thumb_image_id = nil
+
+    obs.save!
+
+    assert_nil(obs.reload.thumb_image_id)
+  end
+
+  # #5317: an imageless observation in an occurrence takes a sibling's
+  # image as its thumbnail, so it is not blank in the index.
+  def test_ensure_thumb_image_present_uses_occurrence_sibling
+    sibling = observations(:coprinus_comatus_obs)
+    assert(sibling.images.any?, "fixture sibling should have images")
+    imageless = observations(:minimal_unknown_obs)
+    imageless.images = []
+    imageless.update_columns(thumb_image_id: nil)
+    occ = Occurrence.create!(user: sibling.user, primary_observation: sibling)
+    sibling.update!(occurrence: occ)
+    imageless.update!(occurrence: occ)
+
+    imageless.thumb_image_id = nil
+    imageless.save!
+
+    assert_equal(sibling.images.min_by(&:id).id,
+                 imageless.reload.thumb_image_id,
+                 "An imageless occurrence member should adopt a sibling's " \
+                 "oldest image as its thumbnail")
   end
 
   # ------------------------------------------
@@ -388,7 +458,7 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       new_naming = Naming.create(
         observation: obs.reload,
-        name: names(:agaricus_campestris),
+        name: names(:conocybe_filaris),
         vote_cache: 0,
         user: mary
       )
@@ -470,7 +540,7 @@ class ObservationTest < UnitTestCase
     assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
       Naming.create(
         observation: observations(:coprinus_comatus_obs),
-        name: names(:agaricus_campestris),
+        name: names(:conocybe_filaris),
         vote_cache: 0,
         user: mary
       )
@@ -1504,6 +1574,16 @@ class ObservationTest < UnitTestCase
                         observations(:peltigera_obs))
   end
 
+  # `this_name` backs Tab::Name::ObsLink::ThisName and the observations
+  # index's `name` subaction -- a bare `names(lookup:)` preset, no
+  # synonym/subtaxa expansion.
+  def test_scope_this_name
+    assert_includes(Observation.this_name(names(:peltigera).id),
+                    observations(:peltigera_obs))
+    assert_not_includes(Observation.this_name(names(:fungi).id),
+                        observations(:peltigera_obs))
+  end
+
   def test_scope_clade
     assert_includes(Observation.clade("Agaricales"),
                     observations(:coprinus_comatus_obs))
@@ -1521,6 +1601,20 @@ class ObservationTest < UnitTestCase
     # test the scope can handle a name instance
     assert_includes(Observation.clade(names(:coprinus)),
                     observations(:coprinus_comatus_obs))
+  end
+
+  def test_scope_identify_filter
+    clade_result = Observation.identify_filter(type: "clade",
+                                               term: "Agaricales")
+    assert_includes(clade_result, observations(:coprinus_comatus_obs))
+    assert_equal(Observation.clade("Agaricales").to_a, clade_result.to_a)
+
+    region_result = Observation.identify_filter(type: "region",
+                                                term: "South America")
+    assert_equal(Observation.region("South America").to_a,
+                 region_result.to_a)
+
+    assert_empty(Observation.identify_filter(type: "bogus", term: "x"))
   end
 
   def test_scope_by_users
@@ -2151,7 +2245,7 @@ class ObservationTest < UnitTestCase
     assert_equal("mo_website", obs.source)
 
     obs = observations(:amateur_obs)
-    assert_equal("mo_iphone_app", obs.source)
+    assert_equal("mo_api", obs.source)
     assert(obs.source_noteworthy?)
 
     obs = observations(:imported_inat_obs)
@@ -2205,6 +2299,24 @@ class ObservationTest < UnitTestCase
            "every member of an occurrence with a reflection is syncable")
   end
 
+  def test_last_synced_at_is_the_occurrences_latest_sync
+    obs = observations(:imported_inat_obs)
+    obs.update_column(:reflected_at, Time.zone.now)
+    assert_nil(obs.last_synced_at, "an unsynced reflection has no sync time")
+
+    primary = observations(:minimal_unknown_obs)
+    [primary, obs].each { |o| o.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user,
+                             primary_observation: primary)
+    primary.update!(occurrence: occ)
+    obs.update!(occurrence: occ)
+    synced_at = 1.hour.ago.change(usec: 0)
+    obs.import_link.update_column(:last_synced_at, synced_at)
+
+    assert_equal(synced_at, primary.reload.last_synced_at,
+                 "every member reports the occurrence's sync time")
+  end
+
   # ----- Coverage gap tests for app/models/observation.rb -----
 
   # field_slip= is a no-op when the slip arg is nil — the early
@@ -2217,6 +2329,49 @@ class ObservationTest < UnitTestCase
     obs.field_slip = nil
     assert_equal(starting_occurrence, obs.occurrence,
                  "Setting field_slip to nil should not alter occurrence")
+  end
+
+  # A reflection's Edit-companion sits in an occurrence with no slip.
+  # A new slip lands on that occurrence, so the reflection stays under
+  # it, instead of a second occurrence being built around the
+  # companion alone (which dissolved the shared one -- obs 670589).
+  def test_field_slip_setter_adopts_slipless_occurrence
+    companion = observations(:coprinus_comatus_obs)
+    reflection = observations(:minimal_unknown_obs)
+    [companion, reflection].each { |o| o.update_column(:occurrence_id, nil) }
+    shared = Occurrence.create!(user: companion.user,
+                                primary_observation: companion)
+    [companion, reflection].each { |o| o.update!(occurrence: shared) }
+    slip = field_slips(:field_slip_no_obs)
+    assert_nil(slip.occurrence, "premise: slip has no occurrence")
+
+    companion.field_slip = slip
+    companion.save!
+
+    assert_equal(shared.id, companion.reload.occurrence_id)
+    assert_equal(slip.id, shared.reload.field_slip_id)
+    assert_equal(shared.id, reflection.reload.occurrence_id)
+  end
+
+  # An occurrence that already carries a slip keeps it: a different
+  # new slip still moves the observation into a separate occurrence.
+  def test_field_slip_setter_leaves_occurrence_that_has_a_slip
+    obs = observations(:coprinus_comatus_obs)
+    other = observations(:minimal_unknown_obs)
+    [obs, other].each { |o| o.update_column(:occurrence_id, nil) }
+    old_slip = FieldSlip.find_or_create_by_code("EOL-7777", obs.user)
+    taken = Occurrence.create!(user: obs.user, primary_observation: other,
+                               field_slip: old_slip)
+    [obs, other].each { |o| o.update!(occurrence: taken) }
+    slip = field_slips(:field_slip_no_obs)
+
+    obs.field_slip = slip
+    obs.save!
+
+    assert_not_equal(taken.id, obs.reload.occurrence_id)
+    assert_equal(slip.id, obs.occurrence.field_slip_id)
+    assert_equal(old_slip.id, taken.reload.field_slip_id)
+    assert_equal(taken.id, other.reload.occurrence_id)
   end
 
   # destroy_orphaned_collection_numbers wipes any collection_number
@@ -2242,17 +2397,19 @@ class ObservationTest < UnitTestCase
     assert_equal(obs.when.strftime("%Y-%m-%d"), obs.when_str)
   end
 
-  # other_notes reads the canonical "Other" key (line 673) and
-  # other_notes= writes through it (lines 677-678).
+  # other_notes reads the "Other" key and other_notes= writes
+  # through it. The setter only round-trips reliably when notes is
+  # already a populated Hash: on a fresh record, `notes[key] = val`
+  # doesn't persist, since the serialize-coder returns a fresh hash
+  # on each read until something is written through `notes=`.
   #
-  # Note: the setter only round-trips reliably when notes is already
-  # a populated Hash (AR caches the deserialized hash and tracks
-  # mutations). On a fresh record the line `self.notes ||= {}` does
-  # run, but the subsequent `notes[key] = val` mutation doesn't
-  # persist because the serialize-coder returns a fresh hash on each
-  # read until something is written through `notes=`. This test
-  # exercises both code paths for coverage and asserts the
-  # round-trip on the populated path.
+  # Regression: #notes returning a bare Hash instead of NotesHash
+  # would pass every other test silently, but would break the
+  # Literal-typed props NotesHash exists to enable.
+  def test_notes_returns_a_notes_hash
+    assert_instance_of(NotesHash, observations(:detailed_unknown_obs).notes)
+  end
+
   def test_other_notes_getter_and_setter
     populated = observations(:detailed_unknown_obs)
     assert_equal(populated.notes[Observation.other_notes_key],
@@ -2537,6 +2694,23 @@ class ObservationTest < UnitTestCase
     assert_not(obs.collector_unrecorded?)
   end
 
+  def test_inat_collector_login
+    obs = observations(:minimal_unknown_obs)
+    obs.assign_attributes(collector: "outdoor_dad", collector_user_id: nil,
+                          reflected_at: Time.zone.now)
+    assert_equal("outdoor_dad", obs.inat_collector_login)
+
+    obs.collector = "Jane Forager"
+    assert_nil(obs.inat_collector_login, "names are not logins")
+
+    obs.assign_attributes(collector: "outdoor_dad", reflected_at: nil)
+    assert_nil(obs.inat_collector_login, "only imports carry iNat logins")
+
+    obs.assign_attributes(reflected_at: Time.zone.now,
+                          collector_user_id: rolf.id)
+    assert_nil(obs.inat_collector_login, "a linked MO user wins")
+  end
+
   def test_build_observation_skips_collector_default
     obs = Observation.build_observation(
       locations(:burbank), names(:fungi), {}, Time.zone.now, mary
@@ -2693,6 +2867,47 @@ class ObservationTest < UnitTestCase
     obs.update!(occurrence: occ)
 
     assert_not(obs.shows_merged_notes?)
+  end
+
+  def test_define_a_location_updates_matching_observations
+    obs = observations(:minimal_unknown_obs)
+    obs.update_columns(where: "Deadlock Test Town, USA", location_id: nil)
+    loc = locations(:albion)
+
+    Observation.define_a_location(loc, "Deadlock Test Town, USA")
+
+    obs.reload
+    assert_equal(loc.id, obs.location_id)
+    assert_equal(loc.name, obs.where)
+  end
+
+  def test_define_a_location_retries_once_on_deadlock
+    calls = 0
+    relation = Object.new
+    relation.define_singleton_method(:update_all) do |*_args|
+      calls += 1
+      raise(ActiveRecord::Deadlocked) if calls == 1
+
+      1
+    end
+
+    Observation.stub(:where, relation) do
+      Observation.define_a_location(locations(:albion), "Nowhere, USA")
+    end
+    assert_equal(2, calls, "update should be retried after one deadlock")
+  end
+
+  def test_define_a_location_reraises_repeated_deadlock
+    relation = Object.new
+    relation.define_singleton_method(:update_all) do |*_args|
+      raise(ActiveRecord::Deadlocked)
+    end
+
+    Observation.stub(:where, relation) do
+      assert_raises(ActiveRecord::Deadlocked) do
+        Observation.define_a_location(locations(:albion), "Nowhere, USA")
+      end
+    end
   end
 
   private

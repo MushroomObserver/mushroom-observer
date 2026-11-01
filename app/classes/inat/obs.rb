@@ -40,6 +40,8 @@
 #  name
 #  name_id
 #  notes
+#  skeleton_notes
+#  skeleton_omissions
 #  text_name
 #  when
 #  where
@@ -98,16 +100,55 @@ class Inat
     ########## MO attributes
 
     # disable cop because gps_hidden is a pseudo-attribute
-    def gps_hidden = @obs[:geoprivacy].present? # rubocop:disable Naming/PredicateMethod
+    # rubocop:disable-next Naming/PredicateMethod
+    def gps_hidden = @obs[:geoprivacy].present?
+
+    # True when iNat has blurred the public coordinate for any reason --
+    # user geoprivacy OR automatic taxon geoprivacy (which #gps_hidden,
+    # reading only :geoprivacy, misses). iNat's :obscured folds both. A
+    # missing flag is treated as obscured, so an unexpected response keeps
+    # a blurred coordinate from overwriting MO's accurate one (#4215).
+    def obscured? = @obs[:obscured] != false
 
     def license = Inat::License.new(@obs[:license_code]).mo_license
 
     def notes
-      # Observation form requires a "normalized" key (no spaces) for Notes parts
-      snapshot_key = Observation.notes_normalized_key(:inat_snapshot_caption.l)
       { snapshot_key => snapshot,
         Other: cleaned_description }
     end
+
+    # A skeleton copies no copyrightable content -- neither Description
+    # nor Observation Field(s) -- only the factual snapshot.
+    def skeleton_notes
+      { snapshot_key => snapshot(obs_fields: false) }
+    end
+
+    # What a skeleton of this obs leaves out, for its "On iNaturalist"
+    # panel. String keys, since Observation#skeleton_omissions is a JSON
+    # column. imported_photo_ids: iNat photo ids the skeleton already has
+    # an MO image of (see Inat::PhotoImporter.imported_photo_ids).
+    # opted_out: the observer opted out of MO, so every photo is left out.
+    def skeleton_omissions(imported_photo_ids: [], opted_out: false)
+      { "login" => self[:user][:login],
+        "images" => omitted_photo_count(imported_photo_ids, opted_out),
+        "obs_fields" => without_mo_url_field(inat_obs_fields).size,
+        "description" => cleaned_description.present?,
+        "sequences" => sequences.present? }
+    end
+
+    def omitted_photo_count(imported_photo_ids, opted_out)
+      Array(self[:observation_photos]).count do |obs_photo|
+        opted_out || (obs_photo.dig(:photo, :license_code).blank? &&
+          imported_photo_ids.exclude?(obs_photo[:photo_id].to_s))
+      end
+    end
+    private :omitted_photo_count
+
+    # Observation form requires a "normalized" key (no spaces) for Notes parts
+    def snapshot_key
+      Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    end
+    private :snapshot_key
 
     # Pattern matches the legacy back-link annotations MO/Pulk's mirror
     # script wrote into iNat observation descriptions. Re-importing one
@@ -306,30 +347,46 @@ class Inat
         find { |field| field[:name] =~ /^Provisional Species Name/ }
     end
 
-    def snapshot
+    def snapshot(obs_fields: true)
       # add a newline to separate snapshot caption from its subparts
-      "\n#{snapshot_raw_str.gsub(/^\s+/, "")}".
-        chomp # revent extra blank line before Other part
+      "\n#{snapshot_raw_str(obs_fields).gsub(/^\s+/, "")}".
+        chomp # prevent extra blank line before Other part
     end
 
-    def snapshot_raw_str
+    def snapshot_raw_str(include_obs_fields)
       result = "#{copyright}\n"
-      {
-        user: self[:user][:login],
-        observed: self.when,
-        show_observation_inat_lat_lng: lat_lon_accuracy,
-        place: self[:place_guess],
-        id: inat_taxon_name,
-        dqa: dqa,
-        show_observation_inat_suggested_ids: suggested_id_names,
-        observation_fields: obs_fields(inat_obs_fields)
-      }.each do |label, value|
+      snapshot_parts(include_obs_fields).each do |label, value|
         result += "#{label.to_sym.l.upcase_first}: #{value}\n"
       end
       result.
         chomp # prevent blank line between Snapshot and :Other Notes fields
     end
     private :snapshot_raw_str
+
+    def snapshot_parts(include_obs_fields)
+      parts = {
+        user: self[:user][:login],
+        observed: self.when,
+        show_observation_inat_lat_lng: lat_lon_accuracy,
+        place: snapshot_place,
+        id: inat_taxon_name,
+        dqa: dqa,
+        show_observation_inat_suggested_ids: suggested_id_names
+      }
+      return parts unless include_obs_fields
+
+      parts.merge(observation_fields: obs_fields(inat_obs_fields))
+    end
+    private :snapshot_parts
+
+    def snapshot_place
+      if @obs[:geoprivacy] == "private"
+        :inat_geoprivacy_private.l
+      else
+        self[:place_guess]
+      end
+    end
+    private :snapshot_place
 
     def copyright
       name = self[:user][:name].presence || self[:user][:login]
@@ -367,11 +424,22 @@ class Inat
       "#{self[:location]} +/-#{self[:public_positional_accuracy]} m"
     end
 
+    # Excludes MO's own "Mushroom Observer URL" back-link (field 5005): MO
+    # writes it onto the iNat obs after import, so keeping it here would
+    # make every back-linked reflection's snapshot differ from its stored
+    # (pre-back-link) form on the first resync. The snapshot mirrors iNat's
+    # own data, not MO's annotations of it.
     def obs_fields(fields)
+      fields = without_mo_url_field(fields)
       return :none.t if fields.empty?
 
       "\n#{one_line_per_field(fields)}"
     end
+
+    def without_mo_url_field(fields)
+      Array(fields).reject { |f| f[:field_id] == MO_URL_OBSERVATION_FIELD_ID }
+    end
+    private :without_mo_url_field
 
     def one_line_per_field(fields)
       fields.map { |f| "&nbsp;&nbsp;#{f[:name]}: #{f[:value]}" }.

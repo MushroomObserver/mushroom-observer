@@ -66,7 +66,7 @@
 #  languages::
 #  bonuses::
 #
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class UserStats < ApplicationRecord
   belongs_to :user
 
@@ -112,6 +112,7 @@ class UserStats < ApplicationRecord
       ALL_FIELDS.select { |_f, e| e[:weight].positive? }
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # This is called every time any object (not just one we care about) is
     # created or destroyed.  Figure out what kind of object from the class name,
     # and then update the owner's contribution as appropriate.
@@ -125,6 +126,7 @@ class UserStats < ApplicationRecord
     # NOTE: This is a universal callback on save so `obj` could be anything,
     # including records we don't count
     # 2) pass in field name, when it's not ::model
+    # rubocop:enable MO/NoLongCommentBlock
     def update_contribution(mode, obj, user_id = nil, num = 1)
       user_id ||= obj.current_user&.id if obj.respond_to?(:current_user)
       if obj.is_a?(ActiveRecord::Base)
@@ -231,10 +233,15 @@ class UserStats < ApplicationRecord
     # This runs after the migration, to copy columns from users to user_stats
     # It's a batch insert, so it's fast.
     def create_user_stats_for_all_users_without
+      # Verified users only: unverified accounts can't contribute and
+      # are culled after a month (User.cull_unverified_users), so a
+      # stats row would just become nightly churn.
       records = User.where.missing(:user_stats).
+                where.not(verified: nil).
                 pluck(:id).map do |id|
                   { user_id: id }
                 end
+      return if records.empty?
 
       UserStats.insert_all(records)
     end
@@ -377,6 +384,7 @@ class UserStats < ApplicationRecord
   end
 
   ##############################################################################
+  # rubocop:disable MO/NoLongCommentBlock
   #
   #
   #    METHODS TO REFRESH USER_STATS COLUMNS FOR A SINGLE USER
@@ -388,6 +396,7 @@ class UserStats < ApplicationRecord
   #   data = UserStats.new.refresh_user_stats(user_id)
   #   num_images = data[:images]
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def self.refresh_user_stats(user_id)
     @user_stats = UserStats.find_by(user_id: user_id) ||
                   UserStats.new(user_id: user_id)
@@ -558,4 +567,3 @@ class UserStats < ApplicationRecord
     metric
   end
 end
-# rubocop:enable Metrics/ClassLength

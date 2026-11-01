@@ -17,6 +17,43 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  # A read-only reflection's edit icon is a plain edit link: the edit
+  # action itself steers to the occurrence's editable member or creates
+  # one, flashing what it did. No choice modal is rendered.
+  def test_show_reflection_edit_icon_links_to_edit
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    occ = Occurrence.create!(user: user, primary_observation: reflection)
+    reflection.update_column(:occurrence_id, occ.id)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("a[href*='/observations/#{reflection.id}/edit']")
+    assert_select("[data-toggle='modal'][href='#']", count: 0)
+  end
+
+  # Same for a reflection with no occurrence yet: a plain edit link,
+  # nothing to choose from.
+  def test_show_occurrenceless_reflection_edit_icon_links_to_edit
+    user = users(:rolf)
+    reflection = observations(:coprinus_comatus_obs)
+    reflection.update_columns(user_id: user.id, collector_user_id: user.id,
+                              occurrence_id: nil,
+                              reflected_at: Time.zone.now)
+    login(user.login)
+
+    get(:show, params: { id: reflection.id })
+
+    assert_response(:success)
+    assert_select("a[href*='/observations/#{reflection.id}/edit']")
+    assert_select("[data-toggle='modal'][href='#']", count: 0)
+  end
+
   def test_show_no_login_with_flow
     obs = observations(:deprecated_name_obs)
     get(:show, params: { id: obs.id, flow: "next" })
@@ -58,6 +95,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_response(:success)
     assert_select("#matching_observations")
     assert_select("a[href*='occurrences/#{occ.id}']")
+  end
+
+  # Any image in the occurrence can be the thumbnail; when it belongs
+  # to a sibling it still leads the carousel (issue #5160).
+  def test_show_observation_sibling_image_as_thumbnail
+    login("rolf")
+    primary = observations(:two_img_obs)
+    sibling = observations(:fungi_obs)
+    thumb = images(:plane_image_example)
+    assert_includes(sibling.images, thumb)
+    assert_not_includes(primary.images, thumb)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ, thumb_image: thumb)
+    sibling.update!(occurrence: occ)
+
+    get(:show, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#observation_images .carousel-inner " \
+                  ".carousel-item:first-child#carousel_item_#{thumb.id}")
+    assert_select("#observation_images .carousel-item",
+                  count: primary.images.count + sibling.images.count)
   end
 
   def test_show_observation_noteless_image
@@ -102,8 +161,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:owner_accepts_general_questions)
     project = obs.projects[0]
     get(:show, params: { id: obs.id })
-    assert_select("#observation_projects",
-                  text: /#{Regexp.escape(project.title)}/)
+    assert_select_text_includes("#observation_projects", project.title)
   end
 
   def test_show_observation_change_thumbnail_size
@@ -118,28 +176,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
   def test_show_observation_vague_location
     login
     obs1 = observations(:california_obs)
-    vague_re = /#{Regexp.escape(:show_observation_vague_location.l)}/
-    improve_re = /#{Regexp.escape(:show_observation_improve_location.l)}/
+    vague = :show_observation_vague_location.l
+    improve = :show_observation_improve_location.l
     get(:show, params: { id: obs1.id })
-    assert_select(".vague-location-notice", text: vague_re)
-    assert_select(".vague-location-notice", text: improve_re, count: 0)
+    assert_select_text_includes(".vague-location-notice", vague)
+    assert_select_text_includes(".vague-location-notice", improve, count: 0)
 
     # Make sure it suggests choosing a better location if owner is current user
     login("dick")
     get(:show, params: { id: obs1.id })
-    assert_select(".vague-location-notice", text: vague_re)
-    assert_select(".vague-location-notice", text: improve_re)
+    assert_select_text_includes(".vague-location-notice", vague)
+    assert_select_text_includes(".vague-location-notice", improve)
 
     # Make sure it doesn't show for observations with non-vague location
     obs2 = observations(:amateur_obs)
     get(:show, params: { id: obs2.id })
-    assert_select(".vague-location-notice", text: vague_re, count: 0)
+    assert_select_text_includes(".vague-location-notice", vague, count: 0)
   end
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_lng)
     gps_re = /34\.1622|118\.3521/
-    hidden_re = /#{Regexp.escape(:show_observation_gps_hidden.l)}/
+    hidden = :show_observation_gps_hidden.l
 
     login
     get(:show, params: { id: obs.id })
@@ -152,7 +210,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: obs.id })
     assert_select(".obs-where-gps", text: gps_re)
-    assert_select(".obs-where-gps i", text: hidden_re)
+    assert_select_text_includes(".obs-where-gps i", hidden)
 
     # roy admins current_project (which contains this obs). Per #4439, a
     # project admin can reveal hidden GPS only when the owner is a
@@ -165,7 +223,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
                           user: obs.user, trust_level: "hidden_gps")
     get(:show, params: { id: obs.id })
     assert_select(".obs-where-gps", text: gps_re)
-    assert_select(".obs-where-gps i", text: hidden_re)
+    assert_select_text_includes(".obs-where-gps i", hidden)
   end
 
   def test_show_obs_view_stats
@@ -220,9 +278,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_select(
-      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/
-    )
+    assert_select_text_includes("a", :herbarium_record_collection.l)
     assert_select("a[href=?]", herbarium_record.mcp_url, true,
                   "Missing link to MyCoPortal record")
   end
@@ -242,9 +298,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_select(
-      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/
-    )
+    assert_select_text_includes("a", :herbarium_record_collection.l)
     assert_select("a[href=?]", herbarium_record.mcp_url, true,
                   "Missing link to MyCoPortal record")
   end
@@ -262,9 +316,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_select(
-      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/, count: 0
-    )
+    assert_select_text_includes("a", :herbarium_record_collection.l,
+                                count: 0)
     assert_select(
       "a[href=?]", herbarium_record.mcp_url, false,
       "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \
@@ -767,8 +820,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     # Test that prev/next links do not have :q, and index link does
     get(:show, params: { id: o_chron.third.id })
-    next_href = observation_path(o_chron.fourth.id)
-    prev_href = observation_path(o_chron.second.id)
+    next_href = permanent_observation_path(o_chron.fourth.id)
+    prev_href = permanent_observation_path(o_chron.second.id)
     index_href = observations_path(params: { id: o_chron.third.id, q: })
     assert_select("a.next_object_link[href='#{next_href}']")
     assert_select("a.prev_object_link[href='#{prev_href}']")
@@ -855,31 +908,27 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("rolf")
     minimal_unknown = observations(:minimal_unknown_obs)
 
-    # No interest in this observation yet.
-    #
-    # <img[^>]+watch.*\.png[^>]+>[\w\s]*
+    # No interest in this observation yet -- both are creates (POST).
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /watch.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
-    )
-    assert_image_link_in_html(
-      /ignore.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
-    )
+    assert_interest_button_in_html("interest_watch", method: :post,
+                                                     path: interests_path,
+                                                     state: 1)
+    assert_interest_button_in_html("interest_ignore", method: :post,
+                                                      path: interests_path,
+                                                      state: -1)
 
     # Turn interest on and make sure there is an icon linked to delete it.
     Interest.create(target: minimal_unknown, user: rolf, state: true)
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /halfopen.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete,
+                           path: interest_path(minimal_unknown.id)
     )
-    assert_image_link_in_html(
-      /ignore.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: -1)
+    assert_interest_button_in_html(
+      "interest_ignore", method: :patch,
+                         path: interest_path(minimal_unknown.id), state: -1
     )
 
     # Destroy that interest, create new one with interest off.
@@ -887,13 +936,13 @@ class ObservationsControllerShowTest < FunctionalTestCase
     Interest.create(target: minimal_unknown, user: rolf, state: false)
     get(:show, params: { id: minimal_unknown.id })
     assert_response(:success)
-    assert_image_link_in_html(
-      /halfopen.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 0)
+    assert_interest_button_in_html(
+      "interest_halfopen", method: :delete,
+                           path: interest_path(minimal_unknown.id)
     )
-    assert_image_link_in_html(
-      /watch.*\.png/,
-      set_interest_path(type: "Observation", id: minimal_unknown.id, state: 1)
+    assert_interest_button_in_html(
+      "interest_watch", method: :patch,
+                        path: interest_path(minimal_unknown.id), state: 1
     )
   end
 
@@ -941,9 +990,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("body.observations__show")
     assert_select("form#naming_vote_form_#{naming1.id} " \
                   "select#vote_value_#{naming1.id}>" \
-                  "option[selected=selected][value='#{vote1.value}']")
+                  "option[selected][value='#{vote1.value}']")
     assert_select("form#naming_vote_form_#{naming2.id} " \
                   "select#vote_value_#{naming2.id}>" \
-                  "option[selected=selected][value='#{vote2.value}']")
+                  "option[selected][value='#{vote2.value}']")
   end
 end

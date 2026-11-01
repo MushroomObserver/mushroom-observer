@@ -15,7 +15,7 @@ module SpeciesLists
         @projects = projects_to_manage
         @object_states = manage_object_states
         @project_states = manage_project_states
-        render_edit_page
+        render_edit_view
       else
         redirect_to(species_list_path(@list.id))
       end
@@ -91,17 +91,19 @@ module SpeciesLists
       else
         flash_error("Invalid submit button: #{params[:commit].inspect}")
       end
-      render_edit_page
+      render_edit_view_invalid
     end
 
-    def render_edit_page
+    def render_edit_view(status: :ok, **render_opts)
       render(
         Views::Controllers::SpeciesLists::Projects::Edit.new(
           list: @list,
           projects: @projects,
           object_states: @object_states,
           project_states: @project_states
-        )
+        ),
+        status: status,
+        **render_opts
       )
     end
 

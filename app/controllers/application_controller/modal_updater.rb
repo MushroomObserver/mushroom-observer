@@ -4,10 +4,6 @@
 #
 #  Two helpers used by controllers whose CRUD actions write to a
 #  Bootstrap modal opened by the user without unloading the page.
-#  Both used to live as `shared/_modal_flash_update.erb` and
-#  `shared/_modal_form_reload.erb` partials that every modal
-#  controller rendered via
-#  `render(partial: "shared/modal_...", locals: { identifier: ..., ... })`.
 #
 #  - `render_modal_flash_update(identifier)` — for actions that
 #    fail validation but don't need to reload the form: just push
@@ -27,8 +23,24 @@
 #    it instead of on the page, so the modal never closes and just
 #    sits there looking stuck (see #3791).
 #
+#  A third helper, `modal_submission?(param_key)` -- for a form that
+#  also has a standalone full-page equivalent, tells a modal
+#  submission from a standalone one. Only a POST/PATCH/PUT (an actual
+#  form submission) has this ambiguity -- `request.format.
+#  turbo_stream?` is true for both once the form is Turbo-enabled.
+#  A GET (e.g. a permission check in `new`/`edit`) or DELETE (a
+#  destroy button, which has no competing standalone-page form) can
+#  still trust `request.format.turbo_stream?`.
+#
 module ApplicationController::ModalUpdater
   private
+
+  def modal_submission?(param_key)
+    return params.dig(param_key, :modal) == "true" if
+      request.post? || request.patch? || request.put?
+
+    request.format.turbo_stream?
+  end
 
   def render_modal_flash_update(identifier)
     render(turbo_stream: turbo_stream_flash_update("modal_#{identifier}_flash"))

@@ -62,6 +62,27 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_field("query_observations_by_users", with: "Roy Halling (roy)")
   end
 
+  # Regression: a login that shares no word with the user's name (e.g.
+  # "second_roy" for "Roy Rogers") must still surface the user. The
+  # client-side word-boundary filter used to require a literal space
+  # before a match, but the login sits inside parens in the displayed
+  # "Name (login)" string -- "(second_roy" -- so it was silently
+  # dropped even though the server-side query matched it correctly.
+  def test_observation_search_user_autocompleter_matches_by_login
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    find_field("query_observations_by_users").click
+    @browser.keyboard.type("second")
+    assert_selector(".auto_complete") # wait
+    assert_selector(".auto_complete ul li a", text: "Roy Rogers")
+    @browser.keyboard.type(:down, :tab)
+    assert_field("query_observations_by_users",
+                 with: "Roy Rogers (second_roy)")
+  end
+
   # https://github.com/MushroomObserver/mushroom-observer/issues/3374
   def test_clearing_autocompleter_clears_hidden_id
     login!(@roy)
@@ -281,6 +302,23 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #  Test that the green checkmark appears when values are selected
   # ---------------------------------------------------------------
 
+  # Regression: the checkmark must stay hidden on a freshly loaded,
+  # blank field -- it should only appear once the field has a
+  # matched id, not by default.
+  def test_blank_autocompleter_hides_checkmark
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_by_users")
+    autocompleter = field.ancestor(".autocompleter")
+
+    within(autocompleter) do
+      assert_no_selector(".has-id-indicator", visible: :visible)
+    end
+  end
+
   def test_multi_value_autocompleter_shows_checkmark_after_selections
     login!(@roy)
 
@@ -325,10 +363,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Checkmark should be visible
     within(autocompleter) do
-      indicator = find(".has-id-indicator", visible: :all)
-      style = indicator.style("display")
-      assert_equal("inline-block", style["display"],
-                   "Checkmark should be visible after multiple selections")
+      assert_selector(".has-id-indicator", visible: true)
     end
   end
 
@@ -380,10 +415,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Checkmark should be visible
     autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
-      indicator = find(".has-id-indicator", visible: :all)
-      style = indicator.style("display")
-      assert_equal("inline-block", style["display"],
-                   "Checkmark should be visible after pasting matching names")
+      assert_selector(".has-id-indicator", visible: true)
     end
   end
 
@@ -421,10 +453,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Checkmark should be visible
     autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
-      indicator = find(".has-id-indicator", visible: :all)
-      style = indicator.style("display")
-      assert_equal("inline-block", style["display"],
-                   "Checkmark should be visible for prefilled values")
+      assert_selector(".has-id-indicator", visible: true)
     end
   end
 

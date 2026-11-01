@@ -126,6 +126,7 @@ class Comment < AbstractModel
     }, foreign_key: "target_id", inverse_of: :comments
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Action Cable broadcasts that keep the comments list group on
   # show pages live across browser windows / users.
   #
@@ -154,6 +155,7 @@ class Comment < AbstractModel
   # `layout: false` keeps the renderer from wrapping the broadcast
   # payload in the application layout — we want the Phlex component's
   # HTML and nothing else.
+  # rubocop:enable MO/NoLongCommentBlock
   after_create_commit lambda { |comment|
     comment.broadcast_action_to(
       [comment.target, :comments],
@@ -189,6 +191,7 @@ class Comment < AbstractModel
   scope :order_by_default,
         -> { order_by(::Query::Comments.default_order) }
 
+  # rubocop:disable MO/NoLongCommentBlock
   # This scope starts with a `where`, and chains subsequent `where` clauses
   # with `or`. So, rather than separately assembling `target_ids`, that would
   # execute multiple db queries:
@@ -208,6 +211,7 @@ class Comment < AbstractModel
   #         target_id: Location.where(user: user)).
   #   or(where(target_type: :name,
   #            target_id: Name.where(user: user))) etc.
+  # rubocop:enable MO/NoLongCommentBlock
   scope :for_user, lambda { |user|
     ALL_TYPES.reduce(nil) do |scope, model|
       scope2 = where(target_type: model.name.underscore.to_sym,
@@ -218,14 +222,13 @@ class Comment < AbstractModel
   # Pass either { type:, id: } or a commentable model instance.
   # Scope makes sure instance exists.
   scope :target, lambda { |target|
-    if target.is_a?(Hash) && target[:type] && target[:id]
-      type = target[:type]
-      return none unless (model = Comment.safe_model_from_name(type))
+    if target.is_a?(Hash)
+      return none unless target[:type] && target[:id]
+      return none unless (model = Comment.safe_model_from_name(target[:type]))
 
       target = model.safe_find(target[:id])
     elsif target.is_a?(AbstractModel)
-      type = target.class.name
-      return none unless Comment.safe_model_from_name(type)
+      return none unless Comment.safe_model_from_name(target.class.name)
     end
 
     where(target:)
@@ -238,8 +241,10 @@ class Comment < AbstractModel
         ->(phrase) { search_columns(Comment[:comment], phrase) }
 
   scope :pattern, lambda { |phrase|
-    cols = (Comment[:summary] + Comment[:comment].coalesce(""))
-    search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = (Comment[:summary] + Comment[:comment].coalesce(""))
+      search_columns(cols, phrase)
+    end
   }
 
   scope :search_content, lambda { |phrase|
@@ -259,16 +264,12 @@ class Comment < AbstractModel
   scope :index_includes, -> { strict_loading.includes(index_includes_tree) }
 
   # `show`/`edit`/`update`/`destroy` all reach a single Comment via
-  # this same tree (`find_or_goto_index`). Deliberately as shallow as
-  # index_includes_tree: `target` is polymorphic and what it needs
-  # beyond itself differs per action (destroy/update's `log_*` need
-  # `target.rss_log`; show's `register_target_names` needs
-  # `target.namings` for Observations or `target.synonyms` for
-  # Names) - no single eager tree can cover every target type's
-  # branch without raising on the types that lack that association.
-  # Those few call sites opt out of strict_loading individually
-  # instead (see Comment#log_destroy and
-  # Views::Controllers::Comments::Show#register_target_names).
+  # this same tree. Deliberately as shallow as index_includes_tree:
+  # `target` is polymorphic, and what it needs beyond itself differs
+  # per action, so no single eager tree covers every target type
+  # without raising on types that lack that association. Those few
+  # call sites opt out of strict_loading individually instead (see
+  # Comment#log_destroy).
   def self.show_includes_tree
     index_includes_tree
   end

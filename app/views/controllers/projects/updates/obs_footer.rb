@@ -8,12 +8,9 @@
 # (which also un-excludes). Otherwise, both Add and Exclude are shown.
 module Views::Controllers::Projects::Updates
   class ObsFooter < Views::Base
-    def initialize(project:, obs:, show_excluded:)
-      super()
-      @project = project
-      @obs = obs
-      @show_excluded = show_excluded
-    end
+    prop :project, ::Project
+    prop :obs, ::Observation
+    prop :show_excluded, _Boolean
 
     def view_template
       div(id: "update_footer_#{@obs.id}", class: "text-center") do

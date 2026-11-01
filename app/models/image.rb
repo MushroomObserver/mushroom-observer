@@ -231,6 +231,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # glossary unused-image cleanup).
   has_many :external_links, as: :target, dependent: :delete_all
 
+  # The machine-read of a field slip photo (#4932) describes this image
+  # specifically, so it goes with it. delete_all for the same reason as
+  # external_links above: no destroy callbacks, and a bulk DELETE avoids
+  # loading the association under strict loading.
+  has_many :field_slip_extracts, dependent: :delete_all
+
   # The import ExternalLink for this image (its source photo), if any.
   def import_link
     if external_links.loaded?
@@ -247,22 +253,12 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   after_update :track_copyright_changes
   before_destroy :update_thumbnails
 
-  # Turbo Stream broadcasts that keep the image-show page (the only
-  # subscriber -- see broadcast_processed_update) live once background
-  # processing (RotateImageJob/TransferImagesJob) finishes, without a
-  # full page reload. Fires only on the columns processing
-  # flips -- an unrelated Image edit (copyright, notes, vote) never
-  # re-renders anything. (gps_stripped currently only changes
-  # synchronously at upload, before any page could be subscribed --
-  # kept as a trigger so the pages catch up if that ever goes async.)
-  # Gated on transferred becoming TRUE (not any flip): processing
-  # starts by setting transferred false (Image::Processor#
-  # update_image_record_width_height_and_transferred) BEFORE the
-  # renditions are regenerated, so broadcasting there would push a
-  # new-token URL at stale files -- and would duplicate the explicit
-  # end-of-processing broadcast RotateImageJob already sends. The two
-  # files-consistent moments are processing completion (explicit, in
-  # the job) and transfer completion (this callback).
+  # Turbo Stream broadcast keeping the image-show page live once
+  # background processing finishes, without a full reload. Fires
+  # only when `transferred` flips to true, not on any column change:
+  # processing sets `transferred` false before renditions regenerate,
+  # so broadcasting then would push a new-token URL at stale files
+  # and duplicate RotateImageJob's end-of-processing broadcast.
   after_update_commit lambda { |image|
     became_transferred = image.saved_change_to_transferred? &&
                          image.transferred
@@ -271,42 +267,29 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   }
 
-  # Renders for an anonymous viewer -- there's no request-scoped
-  # current_user to reflect here, same limitation Comment's and
-  # InatImport's own broadcasts accept. A call site with heavier
-  # per-user customization (vote highlighting, an admin-only
-  # affordance) catches up on the next real page load, not via this
-  # broadcast.
+  # Renders for an anonymous viewer, same limitation Comment's and
+  # InatImport's broadcasts accept -- per-user customization (vote
+  # highlighting, admin affordances) catches up on the next page load
+  # instead.
   #
-  # The only subscriber is the image-show page
-  # (Views::Controllers::Images::Show::ImagePanel) -- rotate/mirror
-  # only happens there, so only there does a live update make sense.
-  # Index matrix boxes and the obs-show carousel deliberately do NOT
-  # subscribe (cross-tab updates aren't a supported config; those
-  # pages catch up on the next load via the #4808 URL token), which is
-  # also why there is no carousel-slide broadcast here.
+  # The only subscriber is the image-show page -- rotate/mirror only
+  # happens there. Index matrix boxes and the obs-show carousel
+  # deliberately don't subscribe (not a supported config); those
+  # pages catch up on the next load instead.
   def broadcast_processed_update
     broadcast_interactive_sizes
   end
 
-  # One broadcast per size Interactive might be showing on any given
-  # page (see INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits
-  # the re-render to just the image itself (src/data-src) -- the model
-  # has no way to know which page-specific image_link/votes/
-  # extra_classes/identify props a given subscriber originally
-  # rendered with, so replaying the *whole* Interactive with defaults
-  # would silently change those (e.g. a matrix-box thumbnail's
-  # image_link falls back to the image's own show page instead of the
-  # parent Observation it was actually pointing at). The link/votes/
-  # overlays stay exactly as the page first rendered them; only the
-  # image source needs to catch up once resized copies exist.
-  #
-  # This is a deliberate tradeoff, not an oversight: carrying every
-  # subscriber's original per-page props through the broadcast (rather
-  # than falling back to media_only) isn't possible without threading
-  # that context through the model layer. Whether media_only is the
-  # right long-term answer (vs. e.g. a per-page prop cache) is still
-  # open.
+  # One broadcast per size Interactive might show on any page (see
+  # INTERACTIVE_BROADCAST_SIZES). `media_only: true` limits the
+  # re-render to just the image source, since the model can't know
+  # which page-specific image_link/votes/props a subscriber
+  # originally rendered with -- replaying the whole Interactive with
+  # defaults would change those (e.g. a matrix-box thumbnail's
+  # image_link falling back to the image show page instead of the
+  # parent Observation). Deliberate tradeoff: carrying per-page props
+  # through the broadcast isn't possible without threading that
+  # context through the model layer.
   def broadcast_interactive_sizes
     INTERACTIVE_BROADCAST_SIZES.each do |size|
       html = ApplicationController.renderer.render(
@@ -360,15 +343,15 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #   "**__Agaricus campestris__** L. & **__Agaricus californicus__** Peck. (3)"
   #
   def unique_format_name(_user = nil)
-    # format_name returns the joined subject titles, or "" when there are
-    # none — never the bare :image.l ("image") string — so the id always
-    # renders in the "(id)" form here.
     [format_name, "(#{id || "?"})"].safe_join(" ")
   end
 
   # Do the same without the ID, for new page titles that generate an ID UI
   def format_name(_user = nil)
-    title_subjects || :image.l
+    title = title_subjects
+    return :image.ti if title.blank?
+
+    :image_title_with_subject.l(subject: title)
   end
 
   # How this image is refered to in the rss logs.
@@ -834,18 +817,13 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     false
   end
 
-  # Runs Image::Processor synchronously (skipped in test, see
-  # test/models/image/processor_test.rb for direct coverage) to produce a
-  # completed set of local files -- #process also computes the perceptual
-  # hash inline from the just-written small rendition, so there is no
-  # separate dhash job to race the transfer (#4796). Then enqueues
-  # TransferImagesJob (gets those files onto the configured image
-  # server(s) -- see #4791, deliberately decoupled from upload success: a
-  # transfer failure alerts asynchronously instead of failing the upload).
-  # Only after resizing has succeeded: enqueueing earlier would transfer
-  # an image whose upload ultimately failed. GPS stripping already
-  # happened synchronously in #process_image above, before this runs --
-  # see Image::Processor.strip_original_gps for why.
+  # Runs Image::Processor synchronously (skipped in test) to produce
+  # a completed set of local files -- #process also computes the
+  # perceptual hash inline, so no separate dhash job races the
+  # transfer. Then enqueues TransferImagesJob, decoupled from upload
+  # success: a transfer failure alerts asynchronously instead of
+  # failing the upload. Only after resizing succeeds, since
+  # enqueueing earlier would transfer an image whose upload failed.
   def process_and_enqueue_jobs(ext, set_size)
     unless Rails.env.test?
       Image::Processor.new(image: self, ext: ext, set_size: set_size).process
@@ -855,7 +833,21 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   rescue StandardError => e
     Rails.logger.error("Image::Processor failed for image #{id}: " \
                        "#{e.full_message(highlight: false)}")
+    notify_image_process_failure(e)
     fail_image_process
+  end
+
+  # Same Slack routing (and gating) job failures get via ApplicationJob's
+  # rescue_from. Processing runs synchronously in the web request and its
+  # failure is rescued into a validation error above, so without this the
+  # exception never reaches exception_notification's middleware and
+  # nothing but production.log records it (#4974) -- while every
+  # neighbouring pipeline step (TransferImagesJob, StaleImageFilesJob,
+  # GpsLeakDetectorJob) alerts on failure.
+  def notify_image_process_failure(error)
+    return unless ExceptionNotifier.notifiers.any?
+
+    ExceptionNotifier.notify_exception(error, data: { image: id })
   end
 
   def fail_image_process # rubocop:disable Naming/PredicateMethod
@@ -914,17 +906,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     RotateImageJob.perform_later(id, original_extension, operator)
   end
 
-  # Compute and store the perceptual hash (Image::Dhash) for this image
-  # (#4585/#4673). Derived data, hence update_column — recomputing a hash
-  # is not an edit. dHash is resolution-invariant, so any rendition
-  # serves: hash the small (then medium) local rendition and NEVER the
-  # full-size original — decoding a large original with ImageMagick can
-  # exhaust the host (a routine 25 MP upload froze the site for ~3.5 min,
-  # #4796). Image::Processor#process calls this inline right after it
-  # generates the small rendition, so the local file is present on fresh
-  # uploads and rotations. Batch/backfill callers reach it with no local
-  # rendition (e.g. after the originals are cleaned up), so it falls back
-  # to fetching the transferred small rendition (see local_dhash_source).
+  # Compute and store the perceptual hash (Image::Dhash). Derived
+  # data, hence update_column -- recomputing a hash is not an edit.
+  # Hashes the small (then medium) local rendition, not the
+  # full-size original -- decoding a large original with ImageMagick
+  # can exhaust the host (a routine 25 MP upload froze the site for
+  # ~3.5 min). Batch/backfill callers with no local rendition fall
+  # back to fetching the transferred small rendition (see
+  # local_dhash_source).
   def compute_dhash!
     source = local_dhash_source
     value = if source
@@ -944,6 +933,48 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       map { |size| full_filepath(size) }.
       find { |path| File.exist?(path) }
   end
+
+  # Ids below this have their originals only in the GCS archive bucket,
+  # not on the images server, so script/strip_exif cannot reach them.
+  GPS_STRIP_RETRY_MIN_ID = 1_600_000
+
+  # Nightly retry of GPS strips still pending on images attached to a
+  # gps_hidden observation. A failed strip only flashes an error at the
+  # submitting user (see strip_gps! callers), so without this sweep it
+  # is not retried and the original keeps its GPS. Yields a message per
+  # still-failing image so the caller can alert. The per-run cap keeps
+  # a pathological backlog from turning the nightly job into thousands
+  # of ssh execs; the remainder is reported, not silently dropped.
+  def self.retry_failed_gps_strips(dry_run: false,
+                                   min_id: GPS_STRIP_RETRY_MIN_ID,
+                                   limit: 200)
+    scope = joins(observation_images: :observation).
+            where(observations: { gps_hidden: true }).
+            where(gps_stripped: false).
+            where(id: min_id..).
+            distinct
+    total = scope.count
+    msgs = scope.order(:id).limit(limit).map do |img|
+      retry_gps_strip(img, dry_run) { |failure| yield(failure) if block_given? }
+    end
+    if total > limit
+      msgs << "GPS strip retries capped at #{limit}/#{total}; " \
+              "the rest run on later nights"
+    end
+    msgs
+  end
+
+  def self.retry_gps_strip(img, dry_run)
+    return "Image ##{img.id}: would retry GPS strip" if dry_run
+
+    error = img.strip_gps!
+    return "Image ##{img.id}: GPS strip retried" unless error
+
+    failure = "Image ##{img.id}: GPS strip retry failed - #{error}"
+    yield(failure)
+    failure
+  end
+  private_class_method :retry_gps_strip
 
   # Attempt to strip GPS data from original image. Returns error message as
   # string if it fails.
@@ -982,30 +1013,63 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # remotely. Returns nil if it fails. Costly.
   # @param hide_gps [Boolean, nil] Override GPS hiding. If nil, checks
   #   observations to determine whether to hide GPS.
-  #
-  # No Shellwords.escape needed here -- Open3.capture2e's array form
-  # (`cmd, *flags, path`) execs directly, bypassing the shell entirely,
-  # so nothing ever interprets shell metacharacters. Escaping anyway
-  # used to be harmless (no argument here ever contained one), but
-  # original_url now carries a `?<version>` cache-buster (#4808) --
-  # Shellwords.escape turned that `?` into a literal `\?` in the
-  # argument itself (array form never strips the backslash back out),
-  # so every remote (transferred) EXIF re-read silently 404'd.
   def read_exif_data(flags = [], hide_gps: nil)
     hide_gps = observations.any?(&:gps_hidden) if hide_gps.nil?
 
-    if transferred
-      cmd = "script/exiftool_remote"
-      path = original_url
-    else
-      cmd = "exiftool"
-      path = full_filepath("orig")
-    end
-    result, status = Open3.capture2e(cmd, *flags, path)
+    result, status = if transferred
+                       remote_exif(flags)
+                     else
+                       Open3.capture2e("exiftool", *flags,
+                                       full_filepath("orig"))
+                     end
 
     data = status.success? ? self.class.parse_exif_data(result, hide_gps) : nil
     [data, status, result]
   end
+
+  # A stand-in for Process::Status when the fetch fails before
+  # exiftool runs -- only `.success?` is needed by callers. A single
+  # reusable class, not `Struct.new(:success?)` inline in the rescue
+  # below, which would define a new anonymous class on every failure.
+  FailedFetchStatus = Struct.new(:success?)
+  private_constant :FailedFetchStatus
+
+  # A transferred image's bytes live wherever it was imported from, not
+  # locally. MO's resized derivatives strip EXIF entirely, so this has
+  # to fetch the full original and run exiftool against it (#5369) --
+  # unlike the local branch above, there's no file path to hand
+  # exiftool directly.
+  #
+  # open_timeout/timeout bound the fetch so an unreachable or stalled
+  # host can't hang the caller indefinitely (#5369).
+  def remote_exif(flags)
+    Tempfile.create(["exif_remote", ".img"], binmode: true) do |file|
+      file.write(fetch_remote_bytes)
+      file.flush
+      Open3.capture2e("exiftool", *flags, file.path)
+    end
+  rescue RestClient::Exception, SocketError, Errno::ECONNREFUSED,
+         Errno::ENOENT, Net::OpenTimeout, Net::ReadTimeout => e
+    [e.message, FailedFetchStatus.new(false)]
+  end
+
+  # original_url is a `file://` URL in dev/test -- MO.image_sources'
+  # file-based stand-in for a transferred image (config/image_config.yml)
+  # -- so read it directly instead of over HTTP, stripping the `?
+  # <version>` cache-buster query string (#4808) that isn't part of the
+  # filesystem path. In production it's an https:// URL, fetched over
+  # the network with a timeout.
+  def fetch_remote_bytes
+    url = original_url
+    if url.start_with?("file://")
+      File.binread(url.delete_prefix("file://").sub(/\?.*\z/, ""))
+    else
+      RestClient::Request.execute(
+        method: :get, url: url, open_timeout: 5, timeout: 15
+      ).body
+    end
+  end
+  private :remote_exif, :fetch_remote_bytes
 
   # This returns a { lat:, lng:, ... } hash if the image has GPS data in EXIF.
   # Returns nil if it fails. Note that it only reads these fields.
@@ -1028,7 +1092,9 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     return nil unless lat && lng
 
     if date
-      date = DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").strftime("%d-%B-%Y")
+      date = SimpleDate.from_date(
+        DateTime.strptime(date, "%Y:%m:%d %H:%M:%S").to_date
+      )
     end
 
     file_size = "#{(file_size.to_i / 1024).to_i}kb" if file_size
@@ -1124,10 +1190,19 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
     # Save changes unless there were already pending changes to be saved
     # (meaning the caller is presumably about to save the changes anyway so
-    # we don't need to do it twice).  No need to update +updated_at+ or do any
-    # of the other callbacks, either, since this doesn't result in emails,
-    # contribution changes, or rss log entries.
-    save_without_our_callbacks if save_changes
+    # we don't need to do it twice).  vote_cache is derived data: keep
+    # updated_at (and the cache-busting URL token derived from it, which
+    # would invalidate every browser's cached renditions) stable.
+    # Suppressed on this instance only -- the class-level flag is shared
+    # across threads and would leak into unrelated concurrent saves.
+    if save_changes
+      begin
+        self.record_timestamps = false
+        save_without_our_callbacks
+      ensure
+        self.record_timestamps = true
+      end
+    end
     # update +updated_at+ for any associated observations, in order to update
     # the cached interactive_image in the matrix_box (contrast with the above)
     observations&.touch_all
@@ -1174,6 +1249,23 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     Project.can_edit?(self, user)
   end
 
+  # #4989: broader than `can_edit?` -- also grants admins of any
+  # project an observation belongs to, regardless of owner trust.
+  def can_transform?(user, site_admin: false)
+    return true if site_admin
+    return false unless user
+
+    can_edit?(user) ||
+      observations.any? { |obs| obs_transformable?(obs, user) }
+  end
+
+  def obs_transformable?(obs, user)
+    obs.can_edit?(user) || obs.projects.any? do |project|
+      project.is_admin?(user)
+    end
+  end
+  private :obs_transformable?
+
   ##############################################################################
   #
   #  :section: Callbacks and Logging
@@ -1196,10 +1288,14 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Log destruction in associated observations, glossary terms, etc.
-  def log_destroy
+  # touch: false logs without moving the objects up the activity feed, so
+  # it skips objects with no log: a new one would start at the top.
+  def log_destroy(touch: true)
     (glossary_terms + observations).each do |object|
+      next unless touch || object.rss_log
+
       object.log(:log_image_destroyed, user: current_user, name: log_name,
-                                       touch: true)
+                                       touch: touch)
     end
   end
 
@@ -1279,6 +1375,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Returns a hash that groups all the images of a given copyright holder
   # and license type intoa single row.  This lets you change all Rolf's
   # licenses in one stroke.
@@ -1302,6 +1399,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   #    "license_id"=>3},
   #   {"license_count"=>1, "copyright_holder"=>"Tim Wheeler", "license_id"=>2}]
   #   map(&:attributes) gives you a hash of your selects with their keys
+  # rubocop:enable MO/NoLongCommentBlock
 
   def self.licenses_for_user_by_type(user)
     display_names = {}

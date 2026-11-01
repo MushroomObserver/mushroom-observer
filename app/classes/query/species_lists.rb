@@ -5,7 +5,8 @@ class Query::SpeciesLists < Query
   query_attr(:updated_at, [:time])
   query_attr(:date, [:date])
   query_attr(:id_in_set, [SpeciesList])
-  query_attr(:by_users, [User])
+  query_attr(:by_users, [User], param_alias: :by_user,
+                                always_index: false)
   query_attr(:editable_by_user, User)
   query_attr(:title_has, :string)
   query_attr(:has_notes, :boolean)
@@ -15,7 +16,7 @@ class Query::SpeciesLists < Query
   query_attr(:search_where, :string)
   query_attr(:region, :string) # accepts multiple values for :search_where
   query_attr(:pattern, :string)
-  query_attr(:locations, [Location])
+  query_attr(:locations, [Location], param_alias: :location)
   query_attr(:names, { lookup: [Name],
                        include_synonyms: :boolean,
                        include_subtaxa: :boolean,
@@ -23,7 +24,8 @@ class Query::SpeciesLists < Query
                        exclude_original_names: :boolean,
                        include_all_name_proposals: :boolean,
                        exclude_consensus: :boolean })
-  query_attr(:projects, [Project])
+  query_attr(:projects, [Project], param_alias: :project,
+                                   redirect_to: :model_index)
   query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by

@@ -73,7 +73,7 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      # _update_matrix_box.erb deleted; controller emits inline streams.
+      # Controller emits inline streams.
       assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       post_propose_naming_assertions(args)
@@ -86,13 +86,12 @@ module Observations
 
       login("rolf")
       post(:create, params:, format: :turbo_stream)
-      # _update_matrix_box.erb deleted; controller emits inline streams.
+      # Controller emits inline streams.
       assert_select("turbo-stream[target='box_title_#{args[:obs].id}']")
 
       # Check that turbo_stream replace action is in response
-      assert_match(
-        /turbo-stream.*action="replace".*target="box_title_#{obs.id}"/,
-        @response.body
+      assert_select(
+        "turbo-stream[action='replace'][target='box_title_#{obs.id}']"
       )
 
       post_propose_naming_assertions(args)
@@ -302,7 +301,8 @@ module Observations
       }
       login("dick")
       post(:create, params: params)
-      assert_response(:success) # really means failed
+      assert_unprocessable # really means failed
+      assert_select("form[data-turbo='true']")
       what = @controller.instance_variable_get(:@given_name)
       assert_equal("Agaricus campestris L.", what)
     end
@@ -344,7 +344,7 @@ module Observations
       }
       login("dick")
       post(:create, params: params)
-      assert_response(:success) # really means failed
+      assert_unprocessable # really means failed
     end
 
     def test_propose_naming_automatic_author_bug
@@ -365,8 +365,8 @@ module Observations
       name.reload
       assert_equal(old_author, name.author)
       assert_flash_error
-      assert_response(:success, "Was expecting it to re-serve the form " \
-                                "because the name wasn't recognized.")
+      assert_unprocessable("Was expecting it to re-serve the form " \
+                           "because the name wasn't recognized.")
     end
 
     def test_propose_naming_automatic_case_correction
@@ -428,7 +428,7 @@ module Observations
       params = { observation_id: nam.observation_id, id: nam.id.to_s }
       login(nam.user.login)
       get(:edit, params: params)
-      assert_select('option[selected="selected"][value="3.0"]',
+      assert_select('option[selected][value="3.0"]',
                     text: "I'd Call It That")
     end
 
@@ -494,7 +494,7 @@ module Observations
         naming: { name: new_name }
       }
       put(:update, params: params)
-      assert_select('option[selected="selected"][value="3.0"]',
+      assert_select('option[selected][value="3.0"]',
                     text: "I'd Call It That")
     end
 
@@ -815,12 +815,13 @@ module Observations
     def test_create_turbo_stream_form_errors_render_modal_reload
       login("rolf")
       obs = observations(:detailed_unknown_obs)
-      post(:create, params: { observation_id: obs.id, naming: {} },
-                    as: :turbo_stream)
+      post(:create,
+           params: { observation_id: obs.id, naming: { modal: "true" } },
+           as: :turbo_stream)
 
       assert_match("turbo-stream", @response.media_type)
-      assert_match(/<turbo-stream[^>]*action="update"/, @response.body)
-      assert_match(/<turbo-stream[^>]*action="replace"/, @response.body)
+      assert_select("turbo-stream[action='update']")
+      assert_select("turbo-stream[action='replace']")
     end
 
     # PUT update without changing the vote value drops into

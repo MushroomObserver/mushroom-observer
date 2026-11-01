@@ -58,39 +58,6 @@ module Names
 
     private
 
-    def default_sort_order
-      ::Query::NameDescriptions.default_order # :name
-    end
-
-    # Used by ApplicationController to dispatch #index to a private method
-    def index_active_params
-      [:by_author, :by_editor, :by, :q, :id].freeze
-    end
-
-    # Display list of name_descriptions that a given user is author on.
-    def by_author
-      user = find_obj_or_goto_index(
-        model: User, obj_id: params[:by_author].to_s,
-        index_path: name_descriptions_index_path
-      )
-      return unless user
-
-      query = create_query(:NameDescription, by_author: user)
-      [query, {}]
-    end
-
-    # Display list of name_descriptions that a given user is editor on.
-    def by_editor
-      user = find_obj_or_goto_index(
-        model: User, obj_id: params[:by_editor].to_s,
-        index_path: name_descriptions_index_path
-      )
-      return unless user
-
-      query = create_query(:NameDescription, by_editor: user)
-      [query, {}]
-    end
-
     # Hook runs before template displayed. Must return query.
     def filtered_index_final_hook(query, _display_opts)
       store_query_in_session(query)
@@ -117,8 +84,7 @@ module Names
       return if performed?
 
       render(Views::Controllers::Names::Descriptions::Show.new(
-               description: @description, user: @user,
-               versions: @versions, projects: @projects
+               description: @description, user: @user, versions: @versions
              ))
     end
 
@@ -138,7 +104,6 @@ module Names
     def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
-      @projects = users_projects_which_dont_have_desc_of_this(@name)
       @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
@@ -161,9 +126,13 @@ module Names
       initialize_description_source
       return if performed?
 
+      @project_chosen = @description.project.present?
+      set_project_ivar
+
       render(Views::Controllers::Names::Descriptions::New.new(
                name: @name, description: @description,
-               user: @user, licenses: @licenses
+               user: @user, licenses: @licenses, project: @project,
+               project_chosen: @project_chosen
              ))
     end
 
@@ -191,10 +160,10 @@ module Names
       @name = Name.find(@description.parent_id.to_s)
     end
 
-    def render_edit
+    def render_edit_view(status: :ok, **render_opts)
       render(Views::Controllers::Names::Descriptions::Edit.new(
                description: @description, user: @user, licenses: @licenses
-             ), location: edit_name_description_path(@name.id))
+             ), status: status, **render_opts)
     end
 
     # called by :create
@@ -229,9 +198,7 @@ module Names
       find_description_parent
       find_licenses
 
-      render(Views::Controllers::Names::Descriptions::Edit.new(
-               description: @description, user: @user, licenses: @licenses
-             ))
+      render_edit_view
     end
 
     def update
@@ -269,7 +236,9 @@ module Names
     def save_updated_description_if_changed_or_flash
       unless @description.changed?
         flash_warning(:runtime_edit_name_description_no_change.t)
-        return render_edit
+        return render_edit_view_invalid(
+          location: edit_name_description_path(@name.id)
+        )
       end
 
       @description.current_user = @user

@@ -65,6 +65,9 @@ module Account
       assert_select("#account_reverify_link", false)
       assert(@request.session[:user_id])
       assert(user.reload.verified)
+      # Same-URL re-render needs non-2xx or Turbo hangs (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_unprocessable
     end
 
     def test_create_verify_with_invalid_auth_code

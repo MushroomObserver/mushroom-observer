@@ -27,16 +27,31 @@ case "$COMMAND" in
   *) exit 0 ;;
 esac
 
-BRANCH="$(git rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
+# This hook runs as its own process, so its cwd is always the primary
+# checkout -- a `cd <dir> &&`/`cd <dir>;` prefix on the command (e.g.
+# operating on a `git worktree add`'d directory) changes where the
+# ACTUAL command runs without changing where THIS check looks, unless
+# we detect that prefix and point `git -C` at it too.
+WORKDIR="."
+CD_PREFIX="$(printf '%s' "$COMMAND" |
+  grep -oE '^[[:space:]]*cd[[:space:]]+[^&;]+[[:space:]]*(&&|;)' || true)"
+if [ -n "$CD_PREFIX" ]; then
+  CD_TARGET="$(printf '%s' "$CD_PREFIX" |
+    sed -E 's/^[[:space:]]*cd[[:space:]]+//; s/[[:space:]]*(&&|;)[[:space:]]*$//' |
+    sed -E 's/^"(.*)"$/\1/; s/^'"'"'(.*)'"'"'$/\1/')"
+  [ -d "$CD_TARGET" ] && WORKDIR="$CD_TARGET"
+fi
+
+BRANCH="$(git -C "$WORKDIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo "")"
 [ -z "$BRANCH" ] && exit 0
 [ "$BRANCH" = "main" ] || [ "$BRANCH" = "master" ] && exit 0
 
 # Fetch quietly so the check reflects current remote state.
-git fetch origin main --quiet 2>/dev/null || true
+git -C "$WORKDIR" fetch origin main --quiet 2>/dev/null || true
 
 # If origin/main is not an ancestor of HEAD, we're behind main.
-if ! git merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
-  BEHIND="$(git rev-list --count HEAD..origin/main 2>/dev/null || echo "?")"
+if ! git -C "$WORKDIR" merge-base --is-ancestor origin/main HEAD 2>/dev/null; then
+  BEHIND="$(git -C "$WORKDIR" rev-list --count HEAD..origin/main 2>/dev/null || echo "?")"
 
   # Split on whichever of the two risky invocations occurs first.
   PREFIX_PUSH="${COMMAND%%git push*}"

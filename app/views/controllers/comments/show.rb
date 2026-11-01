@@ -61,21 +61,21 @@ module Views::Controllers::Comments
 
     def render_created_at
       p do
-        plain("#{:comment_show_created_at.t}: ")
+        trusted_html(append_colon(:comment_show_created_at.t))
         plain(@comment.created_at.web_time)
       end
     end
 
     def render_author
       p do
-        plain("#{:comment_show_by.t}: ")
+        trusted_html(append_colon(:comment_show_by.t))
         Link(type: :user, user: @comment.user)
       end
     end
 
     def render_summary
       p do
-        plain("#{:comment_show_summary.t}: ")
+        trusted_html(append_colon(:comment_show_summary.t))
         trusted_html(@comment.summary.tl)
       end
     end
@@ -84,9 +84,9 @@ module Views::Controllers::Comments
       # Keep single-textile-render shape so paragraph break
       # placement matches.
       trusted_html(
-        # rubocop:disable Rails/OutputSafety -- mirrors the legacy
-        # ERB: textile rendering needs raw markup; comment author
-        # input is sanitized upstream.
+        # rubocop:disable Rails/OutputSafety -- textile rendering
+        # needs raw markup; comment author input is sanitized
+        # upstream.
         "#{:comment_show_comment.l}: #{@comment.comment.to_s.html_safe}".tpl
         # rubocop:enable Rails/OutputSafety
       )

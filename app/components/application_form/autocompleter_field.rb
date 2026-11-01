@@ -11,8 +11,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [
-      :name, :user, :location, :herbarium, :project, :species_list,
-      :clade, :region
+      :name, :user, :location, :herbarium, :project, :user_project,
+      :species_list, :clade, :region
     ].freeze
 
     slot :append
@@ -87,10 +87,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    # Only emit an outer-wrap id when the caller explicitly passes one
-    # (matches ERB `autocompleter_field`). Forms that need a stable
-    # CSS-selector handle (e.g. map outlets) pass `controller_id:`;
-    # forms that don't shouldn't get noise.
+    # Only emit an outer-wrap id when the caller explicitly passes one.
+    # Forms that need a stable CSS-selector handle (e.g. map outlets)
+    # pass `controller_id:`; forms that don't shouldn't get noise.
     def controller_id
       custom_controller_id
     end
@@ -152,44 +151,57 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # `mix` concatenates colliding String values (not just `class`),
+    # so a caller-supplied `placeholder:` would otherwise land as
+    # "Start typing... <caller's text>" instead of replacing it --
+    # omit the default when the caller already supplied one.
     def autocompleter_field_attributes
-      mix({ placeholder: :start_typing.l,
-            autocomplete: "off",
-            data: input_data_attributes },
-          attributes)
+      defaults = { autocomplete: "off", data: input_data_attributes }
+      unless attributes.key?(:placeholder)
+        defaults[:placeholder] =
+          :start_typing.l
+      end
+      mix(defaults, attributes)
     end
 
     def input_data_attributes
       # Use string "true" (not boolean true) so Phlex emits
       # `data-autocompleter="true"` instead of the boolean shorthand
-      # `data-autocompleter`. Matches ERB `autocompleter_field` helper output.
-      # Functionally equivalent — autocompleter base_controller overwrites this
-      # to `"connected"` on connect — but normalizes the rendered HTML between
-      # the two emission paths.
+      # `data-autocompleter`. autocompleter base_controller overwrites
+      # this to `"connected"` on connect regardless.
       { target_attr_key => "input", autocompleter: "true" }.merge(extra_data)
     end
 
     def autocompleter_wrapper_options
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
-        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown"),
+        **addon_wrapper_options
       )
     end
 
+    # With `label: false`, there's no label row for has-id-indicator +
+    # find/keep/create buttons to attach to (that's what
+    # add_label_appends_slot targets), so route the same content into
+    # the field's input-group-addon instead, beside the input.
+    def addon_wrapper_options
+      return {} if wrapper_options[:label] != false
+
+      { addon: capture { render_label_after } }
+    end
+
     def add_slots_to_field(field_component, &block)
-      # Add label_after buttons to between slot (after label)
-      # Also include user's custom between content if provided
-      field_component.with_between do
-        render(between_slot) if between_slot
-        render_label_after
-      end
+      add_label_appends_slot(field_component)
 
       # Add label_end buttons to label_end slot — only when content is
-      # actually present. Registering an empty slot makes
-      # `label_end_present?` return true and forces the label row into
-      # the d-flex path with an empty right side (see
-      # FieldLabelRow#render_label_row).
+      # present. Registering an empty slot makes `label_end_present?`
+      # return true and forces the label row into the d-flex path
+      # with an empty right side (see FieldLabelRow#render_label_row).
       field_component.with_label_end { render_label_end } if create_text
+
+      # The caller's between content (block, between label row and
+      # field) passes straight through.
+      field_component.with_between { render(between_slot) } if between_slot
 
       # Pass through help slot to inner field
       field_component.with_help { render(help_slot) } if help_slot
@@ -198,12 +210,21 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_append(&block) if block
     end
 
+    # has-id-indicator + find/keep/edit buttons sit inline with the
+    # label, inside the label row's flex container -- only when a
+    # label row will render. With `label: false`, addon_wrapper_options
+    # routes the same content into an input-group-addon instead.
+    def add_label_appends_slot(field_component)
+      return if wrapper_options[:label] == false
+
+      field_component.with_label_appends { render_label_after }
+    end
+
     # Renders all label_after elements (goes in between slot after label)
     def render_label_after
       render_has_id_indicator
       render_find_button if find_text
-      render_keep_box_button if keep_text
-      render_edit_box_button if keep_text
+      render_keep_edit_toggle if keep_text
     end
 
     # Renders all label_end elements (goes in label_end slot)
@@ -213,73 +234,97 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
+    # A bare <svg> can't take padding -- it eats into the rendered
+    # content area instead of adding space around it, shrinking the
+    # checkmark. Spacing and the show/hide toggle (see
+    # _autocomplete.scss) go on this wrapping span instead. The
+    # tooltip lives here too -- `title:` on Icon alone doesn't give a
+    # bare svg a working tooltip.
     def render_has_id_indicator
-      Icon(
-        type: :check,
-        title: :autocompleter_has_id.l,
-        class: "px-2 text-success has-id-indicator",
-        data: { target_attr_key => "hasIdIndicator" }
-      )
+      title = :autocompleter_has_id.l
+      span(class: "ml-3 has-id-indicator d-none inline-flex-center",
+           title: title,
+           data: { target_attr_key => "hasIdIndicator",
+                   tooltip_target: "tip", placement: "top" }) do
+        Icon(type: :check, class: "text-success")
+      end
     end
 
+    # These four are plain `Button`s, not `Link`s -- none has a
+    # destination; they're client-side toggles (show/hide a map box,
+    # swap in create fields). `variant: :link, class: "... p-0"`
+    # gives Bootstrap's `.btn-link` reset with zero padding, without
+    # baking that padding in as a site-wide default (see
+    # `Components::Button::Styling`).
+    #
+    # `Link::Get` auto-wires a tooltip when `icon:` is present; plain
+    # `Button` doesn't, so each one builds the same tooltip_data shape
+    # by hand.
     def render_find_button
       return unless find_text
 
-      Link(type: :icon,
-           content: find_text, path: "#",
-           icon: :find_on_map, show_text: false,
-           icon_class: "text-primary",
-           name: "find_#{autocompleter_type}",
-           class: "ml-3 find-btn d-none",
-           data: { map_target: "showBoxBtn",
-                   action: "map#showBox:prevent" })
+      Button(name: find_text,
+             icon: :find_on_map, show_label: :hidden,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 find-btn d-none p-0",
+             title: find_text,
+             data: { map_target: "showBoxBtn",
+                     action: "map#showBox",
+                     tooltip_target: "tip", placement: "top",
+                     title: find_text })
     end
 
-    def render_keep_box_button
+    # One button, two appearances: "Use these bounds..." (apply icon)
+    # while the rectangle is draggable, swapping to "Edit this
+    # locality" (edit icon) once map#toggleBoxLock locks it -- CSS
+    # keys the swap off the `.active` class toggleBoxLock sets on this
+    # element (`_icons.scss`'s `.stateful-link` rule), so no Stimulus
+    # controller has to coordinate with another one to drive it.
+    # `active_title:` lets tooltip_controller.js swap the tooltip the
+    # same way, from the same `.active` signal -- `Link::Get` wires
+    # this automatically from `active_content:`; plain `Button` doesn't
+    # (see `render_find_button`'s comment), so it's passed by hand.
+    def render_keep_edit_toggle
       return unless keep_text
 
-      Link(type: :icon,
-           content: keep_text, path: "#",
-           icon: :apply, show_text: false,
-           icon_class: "text-primary",
-           name: "keep_#{autocompleter_type}",
-           class: "ml-3 keep-btn d-none",
-           data: { target_attr_key => "keepBtn",
-                   map_target: "lockBoxBtn",
-                   action: "map#toggleBoxLock:prevent " \
-                           "form-exif#showFields" })
-    end
-
-    def render_edit_box_button
-      return unless keep_text
-
-      Link(type: :icon,
-           content: edit_text, path: "#",
-           icon: :edit, show_text: false,
-           icon_class: "text-primary",
-           name: "edit_#{autocompleter_type}",
-           class: "ml-3 edit-btn d-none",
-           data: { target_attr_key => "editBtn",
-                   map_target: "editBoxBtn",
-                   action: "map#toggleBoxLock:prevent " \
-                           "form-exif#showFields" })
+      Button(name: keep_text,
+             icon: :apply, active_icon: :edit, active_content: edit_text,
+             show_label: :hidden,
+             icon_class: "text-primary",
+             variant: :link,
+             class: "ml-3 keep-edit-toggle d-none p-0",
+             title: keep_text,
+             data: { target_attr_key => "keepOrEditBtn",
+                     map_target: "boxLockToggle",
+                     action: "map#toggleBoxLock " \
+                             "form-exif#showFields",
+                     tooltip_target: "tip", placement: "top",
+                     active_title: edit_text,
+                     title: keep_text })
     end
 
     def render_create_button
       return if !create_text || create.present?
 
-      Link(type: :icon,
-           content: create_text, path: "#",
-           id: "create_#{autocompleter_type}_btn",
-           class: "ml-3 create-button",
-           icon: :plus, show_text: true,
-           icon_class: "text-primary",
-           name: "create_#{autocompleter_type}",
-           data: { target_attr_key => "createBtn",
-                   action: "#{stimulus_controller_name}" \
-                           "#swapCreate:prevent" })
+      Button(name: create_text,
+             id: "create_#{autocompleter_type}_btn",
+             class: "ml-3 create-button d-none p-0",
+             icon: :plus, show_label: :responsive,
+             icon_class: "text-primary",
+             variant: :link,
+             title: create_text,
+             data: { target_attr_key => "createBtn",
+                     action: "#{stimulus_controller_name}#swapCreate",
+                     tooltip_target: "tip", placement: "top",
+                     title: create_text })
     end
 
+    # Unlike render_create_button, this link isn't has-id/offer-create
+    # gated -- it stays visible once rendered, so it needs a separate
+    # target, not createBtn (cssHasIdOrNo and the matches-based
+    # debounce in base_controller.js both toggle createBtnTarget's
+    # d-none, which would otherwise hide this on a blank/no-match form).
     def render_modal_create_link
       return unless create_text && create.present? && create_path.present?
 
@@ -287,10 +332,10 @@ class Components::ApplicationForm < Superform::Rails::Form
            modal_id: create,
            name: create_text,
            target: create_path,
-           icon: :plus, show_text: true,
+           icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
            class: "ml-3 create-link",
-           data: { target_attr_key => "createBtn" })
+           data: { target_attr_key => "createLink" })
     end
 
     def render_dropdown
@@ -355,6 +400,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Returns the model prefix and leaf-key segments of the field's
     # `dom.name`. Splits on the LAST `[…]` group so the result is
     # correct whether `field.key` is a Symbol (model-bound, leaf
@@ -367,6 +413,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # | `list[members]`           | `list`         | `members` |
     # | `member[notes][Cap]`      | `member[notes]`| `Cap`     |
     # | `approved_rank` (no `[]`) | `""`           | `approved_rank` |
+    # rubocop:enable MO/NoLongCommentBlock
     def name_parts
       @name_parts ||= begin
                         name = field.dom.name.to_s

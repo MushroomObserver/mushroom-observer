@@ -9,7 +9,9 @@
 #     and either `Views::Layouts::TopNav::UserNav` or
 #     `Views::Layouts::TopNav::Login` depending on
 #     `@user.nil?`)
-#   - the collapsible search-bar row
+#
+# The collapsible search-bar row itself is a sibling, not a child --
+# see `Views::Layouts::SearchNav`.
 #
 # Helpers from `Header::TogglesHelper` (`left_nav_toggle`,
 # `search_nav_toggle`) and `Header::RubricHelper` (`nav_rubric`,
@@ -25,18 +27,15 @@ class Views::Layouts::TopNav < Views::Base
 
   prop :user, _Nilable(::User), default: nil
   prop :query, _Nilable(::Query), default: nil
+  # The current site banner, if any -- gates the "show announcements"
+  # button. Shared with `Views::Layouts::App::Banners` via the same
+  # `banner` Stimulus controller instance, hoisted onto their common
+  # ancestor (`#main_container`, see `Views::Layouts::Application`).
+  prop :banner, _Nilable(::Banner), default: nil
 
-  # Controllers / actions where the search-help dropdown is available
-  SEARCH_HELP_TYPES = [:names, :observations, :locations].freeze
-  SEARCH_FORM_TYPES = [
-    :names, :observations, :locations,
-    :projects, :herbaria, :species_lists
-  ].freeze
-
-  # Container classes shared by the top-nav row and the search-nav
-  # row. `w-100` is load-bearing since #top_nav is now `display: flex`
-  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it these two
-  # rows would share one line instead of each getting its own.
+  # `w-100` is load-bearing since #top_nav is `display: flex`
+  # (mo/_top_nav.scss's BS3->BS4 bridge rule) -- without it this row
+  # would shrink to content width instead of filling the navbar.
   # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
   # between` + `align-items-center` alias.
   CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
@@ -65,9 +64,9 @@ class Views::Layouts::TopNav < Views::Base
   ].freeze
 
   def view_template
-    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav") do
+    Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav",
+           aria: { label: :app_top_nav_label.l }) do
       render_top_row
-      render_search_row
     end
   end
 
@@ -90,8 +89,8 @@ class Views::Layouts::TopNav < Views::Base
     render_search_nav_toggle
     render_nav_scan_qr_code
     ul(class: class_names("nav", Components::Navbar::NAV_CLASS,
-                          Components::Navbar::RIGHT_CLASS,
-                          "hidden-xs mr-0")) do
+                          Components::Navbar::RIGHT_CLASS, "mr-0",
+                          Components::Column.mobile_hide_classes)) do
       # `content_for(:context_nav)` (no-block) returns the previously
       # stashed SafeBuffer; `trusted_html` emits it into Phlex's
       # buffer (a no-op `content_for` call would only read it).
@@ -99,39 +98,16 @@ class Views::Layouts::TopNav < Views::Base
       render(UserNav.new(user: @user)) if @user
     end
     render(Login.new) if @user.nil?
-  end
-
-  def render_search_row
-    div(class: class_names(CONTAINER_CLASSES)) do
-      Collapsible(id: "search_nav", class: "w-100",
-                  data: {
-                    controller: "search-type",
-                    # Stimulus Array values must be JSON. Rails' tag
-                    # helper JSON-encodes arrays automatically; Phlex
-                    # space-joins them ("a b"), which breaks
-                    # JSON.parse in the controller and silently
-                    # disables the help/advanced-search forms (#4492).
-                    search_type_help_types_value: SEARCH_HELP_TYPES.to_json,
-                    search_type_form_types_value: SEARCH_FORM_TYPES.to_json
-                  }) do
-        # Identify pages get their own filter bar; everything else
-        # gets the pattern-search bar.
-        if controller.controller_name == "identify"
-          render(::Views::Controllers::Observations::Identify::FormFilter.new)
-        else
-          render(SearchBar.new(
-                   search_help_types: SEARCH_HELP_TYPES,
-                   search_form_types: SEARCH_FORM_TYPES
-                 ))
-        end
-      end
-    end
+    render_show_banner_button
   end
 
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: "visible-xs visible-sm pr-3 pr-sm-4") do
+    div(class: class_names("pr-3 pr-sm-4",
+                           Components::Column.visibility_classes(
+                             show_at: :xs, hide_at: :md
+                           ))) do
       Button(
         variant: :outline,
         class: "rounded-circle overflow-hidden p-0",
@@ -155,9 +131,12 @@ class Views::Layouts::TopNav < Views::Base
         type: :collapse_toggle,
         target_id: "search_nav",
         variant: :outline, size: :sm,
-        class: "top_nav_button",
+        class: "top_nav_button top_nav_icon_button",
         aria: { expanded: "false", controls: "search_nav" }
-      ) { Icon(type: :search, title: :search.ti) }
+      ) do
+        Icon(type: :search, title: :search.ti, center_tooltip: true,
+             data: { placement: :bottom })
+      end
     end
   end
 
@@ -223,9 +202,15 @@ class Views::Layouts::TopNav < Views::Base
     Button(**nav_create_button_options)
   end
 
+  # Excludes :new/:create -- those actions render the create form
+  # itself, so a "+ Add" button pointing right back at the page
+  # already showing would be pointless. A failed :create re-renders
+  # the same new-form template, hence checking both actions rather
+  # than just :new.
   def nav_create_visible?
     @user && controller.methods.include?(:new) &&
-      NAV_CREATABLES.include?(controller.controller_name)
+      NAV_CREATABLES.include?(controller.controller_name) &&
+      %w[new create].exclude?(controller.action_name)
   end
 
   def nav_create_button_options
@@ -233,12 +218,12 @@ class Views::Layouts::TopNav < Views::Base
     { type: :new,
       target: url_for(controller: "/#{controller.controller_path}",
                       action: :new),
-      name: :add.ti, label: true,
+      name: :add.ti, show_label: :responsive,
       variant: :success, size: :sm,
-      class: "ml-1 mr-0 mx-sm-3 top_nav_button",
+      class: "ml-1 mr-0 mx-sm-3 top_nav_button new_object_button",
       title: full_label,
       aria: { label: full_label },
-      data: { tooltip_target: "tip" } }
+      data: { tooltip_target: "tip", placement: :bottom } }
   end
 
   def nav_create_label
@@ -260,7 +245,25 @@ class Views::Layouts::TopNav < Views::Base
       icon: :qrcode,
       target: field_slips_qr_reader_new_path,
       variant: :outline, size: :sm,
-      class: "mx-0 mx-sm-2 top_nav_button"
+      class: "mx-0 mx-sm-2 top_nav_button top_nav_icon_button",
+      data: { placement: :bottom }
     )
+  end
+
+  # Toggles the dismissed site banner back open. Starts `d-none`; the
+  # `banner` Stimulus controller (see `Views::Layouts::App::Banners`
+  # and `Views::Layouts::Application#main_container_data`) flips it
+  # to `d-block` only when the banner is currently dismissed.
+  def render_show_banner_button
+    return unless @banner
+
+    Button(
+      variant: :success, size: :sm,
+      class: "mr-0 ml-2 top_nav_button top_nav_icon_button d-none",
+      data: { banner_target: "showButton" }
+    ) do
+      Icon(type: :interests, title: :banner_show_tooltip.t,
+           center_tooltip: true, data: { placement: :bottom })
+    end
   end
 end

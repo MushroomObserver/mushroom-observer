@@ -2,8 +2,7 @@
 
 # The project-alias index table. Rendered from
 # `Views::Controllers::Projects::Aliases::Index` and from the
-# turbo_stream re-render in `_target_update.erb` after a CRUD on
-# any one alias.
+# turbo_stream re-render after a CRUD on any one alias.
 #
 # Composes via `Components::Table` in column mode; each column block
 # emits the cell's content via Phlex DSL.
@@ -15,10 +14,7 @@ module Views::Controllers::Projects::Aliases
     # `Link(type: :get, name: ..., target: alias_.target)` cell
     # doesn't trigger N+1 queries. The `Projects::AliasesController`
     # paths supply that.
-    def initialize(project_aliases:)
-      super()
-      @project_aliases = project_aliases
-    end
+    prop :project_aliases, _Array(::ProjectAlias)
 
     # Must stay `render(::Components::Table.new(...))`, not bare
     # `Table(...)` Kit syntax -- this view class is itself named

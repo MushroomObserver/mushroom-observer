@@ -92,6 +92,7 @@ class Textile < String
       sub(%r{\A<p[^>]*>(.*?)</p>.*}m, '\\1')
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Textilizes the string using RedCloth, doing a little extra processing:
   # 1. it fixes long urls by turning them into links and abbreviating the
   #    text actually shown.
@@ -111,6 +112,7 @@ class Textile < String
   # tl::   Do 't' and check for links.
   # tp::   Wrap 't' in a <p> block.
   # tpl::  Wrap 't' in a <p> block AND do links.
+  # rubocop:enable MO/NoLongCommentBlock
   def textilize(do_object_links: false, sanitize: true)
     preprocess_object_links if do_object_links
 

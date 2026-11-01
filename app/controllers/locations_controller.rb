@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #  :index
 #   params:
 #   advanced_search:
@@ -14,10 +15,13 @@
 #  :edit,
 #  :update,
 #  :destroy
+# rubocop:enable MO/NoLongCommentBlock
 
 # Locations controller.
-# rubocop:disable Metrics/ClassLength
+# rubocop:disable-next Metrics/ClassLength
 class LocationsController < ApplicationController
+  include ::Locationable
+
   before_action :store_location, except: [:index, :destroy]
   before_action :login_required
 
@@ -26,6 +30,14 @@ class LocationsController < ApplicationController
   #
   def index
     build_index_with_query
+  end
+
+  # Browsing all locations defaults to most-recently-modified first; a
+  # filtered/search index (by_user, region, pattern, etc.) doesn't call
+  # this and falls back to `Query::Locations.default_order` (alphabetical)
+  # instead.
+  def unfiltered_index_opts
+    { query_args: { order_by: :updated_at }, display_opts: {} }.freeze
   end
 
   # Sort options for the index page. Swaps `updated_at` for
@@ -41,152 +53,6 @@ class LocationsController < ApplicationController
       ["num_views",                          :sort_by_num_views.t],
       ["box_area",                           :sort_by_box_area.t]
     ]
-  end
-
-  private
-
-  def default_sort_order
-    ::Query::Locations.default_order # :name
-  end
-
-  def unfiltered_index_opts
-    super.merge(display_opts: { link_all_sorts: true })
-  end
-
-  # ApplicationController uses this to dispatch #index to a private method
-  def index_active_params
-    [:pattern, :country, :project, :by_user, :by_editor,
-     :by, :q, :id].freeze
-  end
-
-  # Displays a list of all locations whose country matches the param.
-  def country
-    query = create_query(:Location, regexp: "#{params[:country]}$")
-    [query, { link_all_sorts: true }]
-  end
-
-  # Displays a list of locations of obs whose project matches the param.
-  def project
-    obs_query = create_query(:Observation,
-                             projects: Project.find(params[:project]))
-    query = create_query(:Location, observation_query: obs_query.params)
-    [query, { link_all_sorts: true }]
-  end
-
-  # Display list of locations that a given user created.
-  def by_user
-    user = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_user].to_s,
-      index_path: locations_path
-    )
-    return unless user
-
-    query = create_query(:Location, by_users: user)
-    [query, { link_all_sorts: true }]
-  end
-
-  # Display list of locations that a given user is editor on.
-  def by_editor
-    editor = find_obj_or_goto_index(
-      model: User, obj_id: params[:by_editor].to_s,
-      index_path: locations_path
-    )
-    return unless editor
-
-    query = create_query(:Location, by_editor: editor)
-    [query, {}]
-  end
-
-  # Hook runs before template displayed. Must return query.
-  def filtered_index_final_hook(query, display_opts)
-    # Matching undefined locations is meaningless in a box.
-    # (Undefined locations don't have a box!)
-    return query if query.params[:in_box].present?
-
-    # Get matching *undefined* locations.
-    set_matching_undefined_location_ivars(query, display_opts)
-    query
-  end
-
-  # Paginate the defined locations using the usual helper.
-  def index_display_opts(opts, _query)
-    { always_index: @undef_pages&.num_total&.positive? }.merge(opts)
-  end
-
-  def set_matching_undefined_location_ivars(query, display_opts)
-    unless (query2 = create_query_for_obs_undefined_where_strings(query))
-      @undef_pages = nil
-      @undef_data = nil
-      return false
-    end
-
-    @undef_location_format = @user.location_format
-    if display_opts[:link_all_sorts]
-      # (This tells it to say "by name" and "by frequency" by the subtitles.
-      # If user has explicitly selected the order, then this is disabled.)
-      @default_orders = true
-    end
-    @undef_pages = letter_pagination_data(:letter2, :page2,
-                                          display_opts[:num_per_page] || 50)
-    @undef_data = query2.paginate(@undef_pages)
-    @undef_pages.used_letters = @undef_data.map { |obs| obs[:where][0, 1] }.uniq
-    if (letter = params[:letter2].to_s.downcase) != ""
-      @undef_data = @undef_data.select do |obs|
-        obs[:where][0, 1].downcase == letter
-      end
-    end
-    @undef_pages.num_total = @undef_data.length
-    @undef_data = @undef_data[@undef_pages.from..@undef_pages.to]
-    # `Observation.location_undefined` already groups by `where`, so
-    # each row in `@undef_data` is the representative observation for
-    # one unique unmatched location string. `Query#paginate` strips
-    # the per-group count during ID rehydration, so look up the per-
-    # `where` count via a single aggregated query, then emit
-    # `[representative_obs, count]` tuples — what the view expects.
-    @undef_data = attach_undef_counts(@undef_data)
-  end
-
-  def attach_undef_counts(observations)
-    # `observations` is the Array returned by paginate; can't pluck.
-    wheres = observations.map { |obs| obs[:where] } # rubocop:disable Rails/Pluck
-    counts = ::Observation.where(where: wheres, location_id: nil).
-             group(:where).count
-    observations.map { |obs| [obs, counts[obs[:where]] || 1] }
-  end
-
-  ##############################################################################
-
-  public # for test!
-
-  # Try to turn this into a query on observations.where instead.
-  # Yes, still a kludge, but a little better than tweaking SQL by hand...
-  def create_query_for_obs_undefined_where_strings(query)
-    args   = query.params.dup.except(:observation_query)
-    # Location params not handled by Observation. (does handle :by_user)
-    # If these are passed, we're not looking for undefined locations.
-    return nil if [:by_editor, :regexp].any? { |key| args[key] }
-
-    # # Select only observations with undefined location.
-    # args[:where] = [args[:where]].flatten.compact
-
-    # "By name" means something different to observation.
-    nosorts = ["name", "box_area", "reverse_name", "reverse_box_area", ""]
-    args[:order_by] = "where" if nosorts.include?(args[:order_by])
-
-    args[:search_where] ||= ""
-    if args[:pattern]
-      args[:search_where] += args[:pattern]
-      args.delete(:pattern)
-    end
-
-    # Create query if okay.  (Still need to tweak select and group clauses.)
-    result = create_query(:Observation, args.merge(location_undefined: true))
-
-    # Also make sure the sql doesn't reference locations anywhere.  This would
-    # presumably be the result of customization of one of the above.
-    result = nil if /\Wlocations\./.match?(result.sql)
-
-    result
   end
 
   ##############################################################################
@@ -218,7 +84,6 @@ class LocationsController < ApplicationController
     # Save two lookups in comments_for_object
     @comments = @location.comments&.sort_by(&:created_at)&.reverse
     @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
-    init_projects_ivar
     render_show_view
   end
 
@@ -263,7 +128,7 @@ class LocationsController < ApplicationController
 
     # If done, update any observations at @display_name,
     # and set user's primary location if called from profile.
-    return render_new unless done
+    return render_new_view_invalid unless done
 
     if @original_name.present?
       db_name = Location.user_format(@user, @original_name)
@@ -329,19 +194,9 @@ class LocationsController < ApplicationController
 
   ##############################################################################
 
-  private
-
   def find_location!
     @location = Location.show_includes.safe_find(params[:id]) ||
                 flash_error_and_goto_index(Location, params[:id])
-  end
-
-  def render_new
-    render_new_view
-  end
-
-  def render_edit
-    render_edit_view
   end
 
   def render_show_view
@@ -349,8 +204,7 @@ class LocationsController < ApplicationController
              location: @location,
              description: @description,
              versions: @versions,
-             comments: @comments.to_a,
-             projects: @projects
+             comments: @comments.to_a
            ))
   end
 
@@ -359,10 +213,7 @@ class LocationsController < ApplicationController
     render(Views::Controllers::Locations::Index.new(
              query: @query, locations: locations,
              pagination_data: @pagination_data,
-             undef_pages: @undef_pages || ::PaginationData.new,
-             undef_data: @undef_data || [],
-             observation_counts: known_observation_counts(locations),
-             default_orders: @default_orders || false
+             observation_counts: known_observation_counts(locations)
            ))
   end
 
@@ -394,7 +245,7 @@ class LocationsController < ApplicationController
     ::SpeciesList.safe_find(species_lists[0])
   end
 
-  def render_new_view
+  def render_new_view(status: :ok, **render_opts)
     render(Views::Controllers::Locations::New.new(
              location: @location,
              display_name: @display_name,
@@ -403,16 +254,17 @@ class LocationsController < ApplicationController
              set_species_list: @set_species_list,
              set_user: @set_user,
              set_herbarium: @set_herbarium,
+             set_project: @set_project,
              dubious_where_reasons: @dubious_where_reasons
-           ))
+           ), status: status, **render_opts)
   end
 
-  def render_edit_view
+  def render_edit_view(status: :ok, **render_opts)
     render(Views::Controllers::Locations::Edit.new(
              location: @location,
              display_name: @display_name,
              dubious_where_reasons: @dubious_where_reasons
-           ))
+           ), status: status, **render_opts)
   end
 
   def init_description_ivar(desc_id)
@@ -426,23 +278,12 @@ class LocationsController < ApplicationController
     end
   end
 
-  def init_projects_ivar
-    # Get a list of projects the user can create drafts for.
-    @projects = @user&.projects_member&.select do |project|
-      @location.descriptions.none? { |d| d.belongs_to_project?(project) }
-    end
-  end
-
   def init_caller_ivars_for_new
     # Original name passed in when arrive here with express purpose of
     # defining a given location. (e.g., clicking on "define this location",
     # or after create_observation with unknown location)
     # Note: names are in user's preferred order unless explicitly otherwise.)
     @original_name = string_param(:where)
-
-    # Previous value of place name: ignore warnings if unchanged
-    # (i.e., resubmit same name).
-    @approved_name = params[:approved_where]
 
     # This is the latest value of place name.
     @display_name = begin
@@ -452,10 +293,13 @@ class LocationsController < ApplicationController
                     end
 
     # Where to return after successfully creating location.
-    @set_observation  = params[:set_observation]
-    @set_species_list = params[:set_species_list]
-    @set_user         = params[:set_user]
-    @set_herbarium    = params[:set_herbarium]
+    set_params = params.permit(:set_observation, :set_species_list,
+                               :set_user, :set_herbarium, :set_project)
+    @set_observation  = set_params[:set_observation]
+    @set_species_list = set_params[:set_species_list]
+    @set_user         = set_params[:set_user]
+    @set_herbarium    = set_params[:set_herbarium]
+    @set_project      = set_params[:set_project]
   end
 
   def create_location_ivar_and_save(done)
@@ -464,9 +308,7 @@ class LocationsController < ApplicationController
     @location.display_name = @display_name # (strip_squozen)
 
     # Validate name.
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @display_name, approved: @approved_name
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(@display_name)
 
     if @dubious_where_reasons.empty?
       if @location.save
@@ -480,26 +322,30 @@ class LocationsController < ApplicationController
     done
   end
 
+  # Every branch validates its id via `safe_find` (not just presence)
+  # before redirecting, and always falls through to the next
+  # candidate -- and ultimately to the location itself -- rather than
+  # issuing no redirect at all for a stale or tampered set_* id.
   def return_to_caller
-    if @set_observation
-      redirect_to(observation_path(@set_observation))
-    elsif @set_species_list
-      redirect_to(species_list_path(@set_species_list))
-    elsif @set_herbarium
-      if (herbarium = Herbarium.safe_find(@set_herbarium))
-        herbarium.location = @location
-        herbarium.save
-        redirect_to(herbarium_path(@set_herbarium))
-      end
-    elsif @set_user
-      if (user = User.safe_find(@set_user))
-        user.location = @location
-        user.save
-        redirect_to(user_path(user))
-      end
+    if (observation = Observation.safe_find(@set_observation))
+      redirect_to(permanent_observation_path(observation))
+    elsif (species_list = SpeciesList.safe_find(@set_species_list))
+      redirect_to(species_list_path(species_list))
+    elsif (herbarium = Herbarium.safe_find(@set_herbarium))
+      attach_location_and_redirect(herbarium, herbarium_path(herbarium))
+    elsif (user = User.safe_find(@set_user))
+      attach_location_and_redirect(user, user_path(user))
+    elsif (project = Project.safe_find(@set_project))
+      attach_location_and_redirect(project, project_path(project))
     else
       redirect_to(location_path(@location.id))
     end
+  end
+
+  def attach_location_and_redirect(record, path)
+    record.location = @location
+    record.save
+    redirect_to(path)
   end
 
   # Merge this location with another.
@@ -518,9 +364,15 @@ class LocationsController < ApplicationController
                                                      that: new_name))
       redirect_to(@location.show_link_args)
     else
+      # Explicit `format: :html`: see the matching comment in
+      # HerbariaController#redirect_to_create_location -- the target
+      # action's `respond_to` picks `format.turbo_stream` by Accept
+      # header alone, and this redirect can be reached from a
+      # Turbo-submitted form (see #5055).
       redirect_to(
         new_admin_emails_merge_requests_path(
-          type: :Location, old_id: @location.id, new_id: merge.id
+          type: :Location, old_id: @location.id, new_id: merge.id,
+          format: :html
         )
       )
     end
@@ -533,7 +385,7 @@ class LocationsController < ApplicationController
     @location.notes = params[:location][:notes].to_s.strip
     @location.locked = params[:location][:locked] == "1" if in_admin_mode?
     determine_and_check_location if !@location.locked || in_admin_mode?
-    return render_edit unless @dubious_where_reasons.empty?
+    return render_edit_view_invalid unless @dubious_where_reasons.empty?
 
     save_flash_and_redirect_or_render!
   end
@@ -546,10 +398,7 @@ class LocationsController < ApplicationController
     @location.high  = params[:location][:high]  if params[:location][:high]
     @location.low   = params[:location][:low]   if params[:location][:low]
     @location.display_name = @display_name
-    @dubious_where_reasons = Location.dubious_reasons_for(
-      user: @user, place_name: @display_name,
-      approved: params[:approved_where]
-    )
+    @dubious_where_reasons = dubious_where_reasons_for(@display_name)
   end
 
   def save_flash_and_redirect_or_render!
@@ -560,7 +409,7 @@ class LocationsController < ApplicationController
       redirect_to(location_path(@location.id))
     elsif !@location.save
       flash_object_errors(@location)
-      render_edit
+      render_edit_view_invalid
     else
       flash_notice(:runtime_edit_location_success.t(id: @location.id))
       redirect_to(location_path(@location.id))
@@ -635,4 +484,3 @@ class LocationsController < ApplicationController
              :notes, :hidden)
   end
 end
-# rubocop:enable Metrics/ClassLength

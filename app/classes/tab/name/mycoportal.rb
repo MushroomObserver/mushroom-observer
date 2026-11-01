@@ -9,6 +9,6 @@ class Tab::Name::Mycoportal < Tab::Name::ExternalBase
 
   def path
     "http://mycoportal.org/portal/taxa/index.php?taxauthid=1&taxon=" \
-      "#{@name.sensu_stricto}"
+      "#{url_encode(@name.sensu_stricto)}"
   end
 end

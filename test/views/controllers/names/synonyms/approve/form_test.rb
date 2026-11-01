@@ -18,7 +18,7 @@ module Views::Controllers::Names::Synonyms::Approve
       assert_includes(html, :name_approve_comments.l)
 
       # Help text (check that the div is present)
-      assert_html(html, "div.help-block")
+      assert_html(html, ".help-block")
     end
 
     def test_form_with_approved_names
@@ -42,7 +42,8 @@ module Views::Controllers::Names::Synonyms::Approve
     def render_form(name:, approved_names: nil)
       model = FormObject::ApproveSynonym.new
       render(Form.new(
-               model, name: name, approved_names: approved_names
+               model, name: name, approved_names: approved_names,
+                      user: users(:rolf)
              ))
     end
   end

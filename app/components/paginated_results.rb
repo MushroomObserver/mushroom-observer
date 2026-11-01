@@ -11,9 +11,7 @@ class Components::PaginatedResults < Components::Base
   prop :html_id, String, default: "results"
 
   def view_template(&block)
-    encoded_q = URI.parse(observations_path(q: q_param)).query
-
-    div(id: @html_id, data: { q: encoded_q }) do
+    div(id: @html_id) do
       trusted_html(content_for(:index_pagination_top)) if
         content_for?(:index_pagination_top)
       yield

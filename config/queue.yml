@@ -32,6 +32,16 @@ default: &default
       threads: 2
       processes: 1
       polling_interval: 1
+    # The iNat alert cycle (#5416) runs every ten minutes and is the
+    # urgent half of that work -- a rare-species alert is worth getting
+    # out promptly. Its own single-threaded pool so the import half
+    # (which holds a thread for minutes at a time) and the maintenance
+    # jobs above cannot delay it. The job's own limits_concurrency
+    # keeps two cycles from overlapping.
+    - queues: alerts
+      threads: 1
+      processes: 1
+      polling_interval: 1
 
 development:
   <<: *default

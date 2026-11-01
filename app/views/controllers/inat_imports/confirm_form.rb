@@ -5,18 +5,28 @@ module Views::Controllers::InatImports
   # and Proceed/Go Back buttons. Hidden fields carry form data
   # through the confirmation step. Rendered by `confirm.rb`.
   class ConfirmForm < ::Components::ApplicationForm
+    prop :expected, _Nilable(::Integer), default: nil
+    prop :unlicensed_obs, _Nilable(::Integer), default: nil
+    prop :inat_import, _Nilable(::InatImport), default: nil
+    prop :requested, _Nilable(::Integer), default: nil
+    prop :after_taxon, _Nilable(::Integer), default: nil
+    prop :not_yet_imported, _Nilable(::Integer), default: nil
+    prop :estimate_with_date, _Nilable(::Integer), default: nil
+    prop :estimated_at, ::Time, default: -> { Time.current }
+    prop :urls, ::Inat::ConfirmURLBuilder
+
     def initialize(model, expected: nil, unlicensed_obs: nil,
                    breakdown: {}, **)
-      @expected = expected
-      @unlicensed_obs = unlicensed_obs
-      @inat_import = breakdown[:inat_import]
-      @requested = breakdown[:requested]
-      @after_taxon = breakdown[:after_taxon]
-      @not_yet_imported = breakdown[:not_yet_imported]
-      @estimate_with_date = breakdown[:estimate_with_date]
-      @estimated_at = Time.current
-      @urls = ::Inat::ConfirmURLBuilder.new(model)
-      super(model, **)
+      super(model,
+            expected: expected,
+            unlicensed_obs: unlicensed_obs,
+            inat_import: breakdown[:inat_import],
+            requested: breakdown[:requested],
+            after_taxon: breakdown[:after_taxon],
+            not_yet_imported: breakdown[:not_yet_imported],
+            estimate_with_date: breakdown[:estimate_with_date],
+            urls: ::Inat::ConfirmURLBuilder.new(model),
+            **)
     end
 
     def view_template
@@ -43,7 +53,7 @@ module Views::Controllers::InatImports
           count_expected_line
           render_nothing_to_import_notice
           br
-          unlicensed_obs_line unless import_others?
+          render_unlicensed_info_line
           br
           time_estimate_line
         end
@@ -90,16 +100,18 @@ module Views::Controllers::InatImports
         ignored_row_data.each do |row|
           render_ignored_row(row[:key], row[:count], row[:url])
         end
-        unlicensed_ignored_row if import_others?
+        unlicensed_ignored_row if unlicensed_ignored?
+        render_over_cap_line
       end
       br
     end
 
     def show_ignored_section?
       ignored_row_data.any? ||
-        # Import-others' unlicensed obs are never imported. So they
-        # belong here rather than own-import's informational-only line.
-        import_others?
+        # Import-others without skeletons never imports unlicensed obs.
+        # They belong here, not in information-only line.
+        unlicensed_ignored? ||
+        over_cap_count.positive?
     end
 
     def ignored_row_data
@@ -145,10 +157,15 @@ module Views::Controllers::InatImports
 
     def import_others? = model.import_others == "1"
 
+    def create_skeletons? = model.create_skeletons == "1"
+
+    def unlicensed_ignored? = import_others? && !create_skeletons?
+
     def render_ignored_total
       return unless @requested && (@estimate_with_date || @expected)
 
-      total = @requested.to_i - (@estimate_with_date || @expected).to_i
+      total = @requested.to_i - (@estimate_with_date || @expected).to_i +
+              over_cap_count
       b { plain(:inat_import_confirm_ignored_total_caption.l) }
       plain(": ")
       span(id: "total_ignored_count") { plain(total.to_s) }
@@ -163,12 +180,16 @@ module Views::Controllers::InatImports
     end
 
     def ignored_rows_count
-      ignored_row_data.size + (import_others? ? 1 : 0)
+      if unlicensed_ignored?
+        ignored_row_data.size + 1
+      else
+        ignored_row_data.size
+      end
     end
 
     def render_ignored_row(caption_key, count, url)
       div(class: "mb-1") do
-        b { plain("#{caption_key.l}: ") }
+        b { append_colon(caption_key.l) }
         if url
           render(Components::Link::External.new(content: count.to_s,
                                                 path: url))
@@ -178,58 +199,52 @@ module Views::Controllers::InatImports
       end
     end
 
-    # Import-others' unlicensed obs are never imported, so this renders inside
-    # the Total Ignored Observations breakdown rather than as its own
-    # always-visible line. Import execution defaults `licensed` to true unless
-    # the stored URL explicitly sets it (see PageParser#add_ownership_filter).
-    # Rendered unconditionally (even when the count is blank/zero) so a failed
-    # estimate is visible as blank, distinguishable from a genuine zero.
-    def unlicensed_ignored_row
-      div(class: "mb-1") do
-        b { plain("#{:inat_import_confirm_unlicensed_obs_caption.l}: ") }
-        span(id: "unlicensed_obs_count") { render_unlicensed_count }
-        if @unlicensed_obs.to_i.positive?
-          whitespace
-          plain(unlicensed_note_key.l)
-        end
+    def unlicensed_ignored_row = render_unlicensed_line(:ignored)
+
+    # Own-obs imports and skeleton imports both import unlicensed obs, so
+    # their count is informational, outside the ignored breakdown.
+    def render_unlicensed_info_line
+      if create_skeletons?
+        render_unlicensed_line(:skeleton)
+      elsif !import_others?
+        render_unlicensed_line(:self_import)
       end
     end
 
-    def render_unlicensed_count
-      url = unlicensed_obs_url
-      if url
-        render(Components::Link::External.new(content: @unlicensed_obs.to_s,
-                                              path: url))
-      else
-        plain(@unlicensed_obs.to_s)
-      end
-    end
-
-    def unlicensed_obs_url = @urls.unlicensed_obs_url
-
-    def unlicensed_note_key
-      if import_others?
-        :inat_import_confirm_unlicensed_others_note
-      else
-        :inat_import_confirm_unlicensed_obs_note
-      end
+    def render_unlicensed_line(mode)
+      render(UnlicensedLine.new(count: @unlicensed_obs,
+                                url: @urls.unlicensed_obs_url, mode: mode))
     end
 
     def count_expected_line
-      b { plain(:inat_import_confirm_expected_caption.l) }
-      plain(": ")
-      span(id: "expected_count") do
-        url = expected_obs_url
-        count = (@estimate_with_date || @expected).to_s
-        if url
-          render(Components::Link::External.new(content: count, path: url))
-        else
-          plain(count)
+      span(id: "expected_count_line") do
+        b { plain(:inat_import_confirm_expected_caption.l) }
+        plain(": ")
+        span(id: "expected_count") do
+          url = expected_obs_url
+          count = capped_expected_count.to_s
+          if url
+            render(Components::Link::External.new(content: count, path: url))
+          else
+            plain(count)
+          end
         end
       end
     end
 
     def expected_obs_url = @urls.expected_obs_url
+
+    def expected_count = (@estimate_with_date || @expected).to_i
+
+    def capped_expected_count
+      [expected_count, InatImport::MAX_IMPORTABLE].min
+    end
+
+    def over_cap_count = InatImport.excess_over_cap(expected_count)
+
+    def render_over_cap_line
+      render(OverCapLine.new(count: over_cap_count))
+    end
 
     def render_nothing_to_import_notice
       # Match the count that drives the display and the Proceed button, so
@@ -239,24 +254,16 @@ module Views::Controllers::InatImports
       p { plain(:inat_import_confirm_nothing_to_import.l) }
     end
 
-    def unlicensed_obs_line
-      b { plain(:inat_import_confirm_unlicensed_obs_caption.l) }
-      plain(": ")
-      span(id: "unlicensed_obs_count") { render_unlicensed_count }
-      return unless @unlicensed_obs.to_i.positive?
-
-      whitespace
-      plain(unlicensed_note_key.l)
-    end
-
     def time_estimate_line
-      b { plain(:inat_import_confirm_time_estimate_caption.l) }
-      plain(": ")
-      span(id: "estimated_time") { plain(estimated_time) }
+      span(id: "estimated_time_line") do
+        b { plain(:inat_import_confirm_time_estimate_caption.l) }
+        plain(": ")
+        span(id: "estimated_time") { plain(estimated_time) }
+      end
     end
 
     def estimated_time
-      format_hms((@estimate_with_date || @expected) * avg_import_seconds)
+      format_hms(capped_expected_count * avg_import_seconds)
     end
 
     def format_hms(seconds)
@@ -275,17 +282,27 @@ module Views::Controllers::InatImports
 
     def render_hidden_fields
       [:inat_username, :inat_ids, :import_all, :consent, :import_others,
+       :create_skeletons,
        :inat_url, :original_inat_url, :recheck_all,
-       :skip_inat_writeback].each do |f|
+       :skip_inat_writeback, :inat_project, :inat_project_id,
+       :project_site].each do |f|
         hidden_field(f)
       end
     end
 
     def render_buttons
       div(class: "mt-3") do
+        # data-turbo="false": this submit redirects to iNaturalist's
+        # OAuth authorize page (an external host). Turbo Drive's
+        # fetch-based form submission follows redirects as fetch
+        # requests, not real navigations -- a cross-origin redirect
+        # there doesn't land the browser on iNat's login page the way
+        # a plain form submit does. Opting this one button out of
+        # Turbo keeps the redirect a normal top-level navigation.
         submit(:inat_import_confirm_proceed.l, as: :button,
                                                name: "confirmed", value: "1",
-                                               disabled: nothing_to_import?)
+                                               disabled: nothing_to_import?,
+                                               data: { turbo: "false" })
         whitespace
         submit(:inat_import_confirm_go_back.l, as: :button,
                                                name: "go_back", value: "1")

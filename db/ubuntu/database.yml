@@ -1,0 +1,64 @@
+# SENSITIVE INFORMATION: This file should not be checked into subversion
+
+# MySQL (default setup).  Versions 4.1 and 5.0 are recommended.
+#
+# Get the fast C bindings:
+#   gem install trilogy
+#   (on OS X: gem install mysql -- --include=/usr/local/lib)
+# And be sure to use new-style password hashing:
+#   http://dev.mysql.com/doc/refman/5.0/en/old-client.html
+
+shared:
+  adapter: trilogy
+  # Matches most tables -- Issue #4625 (converting all tables to
+  # utf8mb4_0900_ai_ci) is still open; only a few are there yet.
+  encoding: utf8mb4
+  collation: utf8mb4_general_ci
+  # Default (works for MacOS X)
+  # socket: /tmp/mysql.sock
+  # For Ubuntu/Debian
+  socket: /var/run/mysqld/mysqld.sock
+  # For Fedora
+  # socket: /var/lib/mysql/mysql.sock
+  # Connect on a TCP socket.  If omitted, the adapter will connect on the
+  # domain socket given by socket instead.
+  #host: localhost
+  #port: 3306
+  # For mysql >= 5.7.5
+  # Do not require SELECT list to include ORDER BY columns in DISTINCT queries,
+  # And do not not require ORDER BY to include the DISTINCT column.
+  variables:
+    sql_mode: TRADITIONAL
+
+# Every role/env connects with the same user.
+credentials: &credentials
+  username: mo
+  password: mo
+
+development:
+  primary:
+    <<: *credentials
+    database: mo_development
+    # Must exceed Solid Queue's thread need -- see queue_config_test.rb.
+    pool: 10
+  cache:
+    <<: *credentials
+    database: cache_development
+    host: localhost
+    migrations_paths: "db/cache/migrate"
+
+# Warning: The database defined as 'test' will be erased and
+# re-generated from your development database when you run 'rake'.
+# Do not set this db to the same as development or production.
+#
+# TEST_ENV_NUMBER selects mo_test-0, mo_test-1, etc. for parallel
+# testing; MO_TEST_DATABASE overrides for manual testing.
+test:
+  <<: *credentials
+  database: "<%= ENV['MO_TEST_DATABASE'] || (ENV['TEST_ENV_NUMBER'].to_s.empty? ? 'mo_test' : 'mo_test-' + ENV['TEST_ENV_NUMBER']) %>"
+  # Must exceed Solid Queue's thread need -- see queue_config_test.rb.
+  pool: 10
+
+production:
+  <<: *credentials
+  database: mo_development

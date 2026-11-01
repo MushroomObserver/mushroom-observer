@@ -136,10 +136,10 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "rss-what") do
       h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-        a(href: url_for(@data[:what].show_link_args)) do
-          render_title
-        end
-        render_id_badge(@data[:what])
+        Link(type: :get, name: @data[:name],
+             target: @data[:what].show_link_args) { render_title }
+        whitespace
+        IDBadge(object: @data[:what], size: :md, extra_class: nil)
       end
 
       render_identify_ui if @identify
@@ -154,11 +154,6 @@ class Components::Matrix::Box < Components::Base
            ))
   end
 
-  def render_id_badge(obj)
-    whitespace
-    IDBadge(object: obj, size: :md, extra_class: nil)
-  end
-
   def render_occurrence_link
     return unless (occ = @data[:occurrence])
 
@@ -171,7 +166,8 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "small mt-3") do
       Link(type: :get, target: occurrence_path(occ),
-           name: :matrix_box_occurrence.l, icon: :matrix, label: true,
+           name: :matrix_box_occurrence.l, icon: :matrix,
+           show_label: :responsive,
            class: "occurrence-link")
     end
   end
@@ -228,10 +224,16 @@ class Components::Matrix::Box < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        Link(type: :user,
-             user: @data[:who],
-             attributes: { class: "rss-who" })
+        render_who
       end
+    end
+  end
+
+  def render_who
+    if @data[:who_obs]
+      render(Components::Matrix::Box::Who.new(obs: @data[:who_obs]))
+    else
+      span(class: "rss-who") { Link(type: :user, user: @data[:who]) }
     end
   end
 
@@ -249,7 +251,8 @@ class Components::Matrix::Box < Components::Base
 
   # External imports get a Phlex-rendered link so we can set
   # target="_blank" / rel="noopener" — textile has no syntax for
-  # those attributes. Enum credits keep going through .tpl.
+  # those attributes. Enum credits go through .tl (inline, no <div>
+  # wrapper -- needed to sit next to the bold "via" on one line).
   # `source_noteworthy?` (the caller's guard) guarantees `source` is
   # present whenever `import_link` isn't, so the enum branch is safe
   # without its own presence check.
@@ -257,7 +260,9 @@ class Components::Matrix::Box < Components::Base
     if (link = target.import_link)
       render_external_credit_link(link)
     else
-      :"source_credit_#{target.source}".l.tpl
+      b { plain(:via.l) }
+      whitespace
+      trusted_html(:"source_credit_#{target.source}".l.tl)
     end
   end
 

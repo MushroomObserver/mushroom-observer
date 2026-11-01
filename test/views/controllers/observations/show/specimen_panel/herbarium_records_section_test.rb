@@ -21,14 +21,10 @@ class Views::Controllers::Observations::Show::SpecimenPanel
             first
       skip("Need an obs fixture without herbarium_records") unless obs
 
-      html = render(
-        HerbariumRecordsSection.new(
-          obs: obs, user: obs.user, has_sibling_records: true
-        )
-      )
+      html = render(panel_with(obs, obs.user, has_sibling_records: true))
 
       assert_includes(html, "#{:herbarium_records.ti}:")
-      assert_no_html(html, "li")
+      assert_no_html(html, "#herbarium_records_list")
     end
 
     # Empty + can-edit path with NO sibling records: the generic
@@ -37,14 +33,10 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       obs = ::Observation.where.missing(:herbarium_records).first
       skip("Need an obs fixture without herbarium_records") unless obs
 
-      html = render(
-        HerbariumRecordsSection.new(
-          obs: obs, user: obs.user, has_sibling_records: false
-        )
-      )
+      html = render(panel_with(obs, obs.user))
 
       assert_includes(html, :no_objects.t(type: :herbarium_record))
-      assert_no_html(html, "li")
+      assert_no_html(html, "#herbarium_records_list")
     end
 
     def test_readonly_list_when_viewer_cannot_add
@@ -55,20 +47,16 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       stranger = users(:lone_wolf)
       skip("lone_wolf curates herbaria") if stranger.curated_herbaria.any?
 
-      html = render(
-        HerbariumRecordsSection.new(
-          obs: obs, user: stranger, has_sibling_records: false
-        )
-      )
+      html = render(panel_with(obs, stranger))
 
       assert_no_html(html, "a[data-modal*='herbarium_record']")
     end
 
     private
 
-    def panel_with(obs, user = @user)
+    def panel_with(obs, user = @user, has_sibling_records: false)
       HerbariumRecordsSection.new(
-        obs: obs, user: user, has_sibling_records: false
+        obs: obs, user: user, has_sibling_records: has_sibling_records
       )
     end
   end

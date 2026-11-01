@@ -314,7 +314,7 @@ amateur_obs:
     :Other: "A friend showed me this."
   lat: 34.1622
   lng: -118.3521
-  source: <%= Observation.sources[:mo_iphone_app] %>
+  source: <%= Observation.sources[:mo_api] %>
 
 peltigera_obs:
   <<: *DEFAULTS

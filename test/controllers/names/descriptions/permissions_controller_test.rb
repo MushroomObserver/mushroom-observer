@@ -125,7 +125,9 @@ module Names::Descriptions
           { name: "nonexistent_user_xyz" }],
          :runtime_description_adjust_permissions_no_changes]
       )
+      assert_unprocessable
       assert_select("form")
+      assert_select("form[data-turbo='true']")
     end
 
     # Cover no changes made

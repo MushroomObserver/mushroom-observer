@@ -3,14 +3,32 @@
 require("test_helper")
 
 class NamesControllerIndexTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   tests NamesController
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::Names, :Name,
+      overrides: {
+        id_in_set: names(:fungi).id,
+        by_users: rolf.id,
+        by_editor: rolf.id,
+        within_locations: locations(:burbank).id,
+        species_lists: species_lists(:first_species_list).id
+      }
+    )
+  end
 
   # ----------------------------
   #  Index tests.
   # ----------------------------
   #
   # Tests arranged as follows:
-  # default subaction; then other subactions in order of index_active_params
+  # unfiltered index; then each recognized filter param; then
   # miscellaneous tests using get(:index)
   def test_index
     login
@@ -64,15 +82,19 @@ class NamesControllerIndexTest < FunctionalTestCase
     { q: { model: :Name, pattern: } }
   end
 
-  # The pattern param is maintained only for backwards compatibility.
-  # Should redirect to SearchController#pattern
-  def test_index_pattern_param_redirected_to_search
+  # Via PatternSearch::Name.
+  def test_index_pattern_param_builds_query_directly
     pattern = "Agaricus"
 
     login
     get(:index, params: { pattern: })
-    assert_redirected_to(
-      search_pattern_path(pattern_search: { pattern:, type: :names })
+    assert_page_title(:names.ti)
+    assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+    assert_select(
+      "#results a:match('href', ?)", %r{^#{names_path}/\d+},
+      { count: Name.where(Name[:text_name] =~ /#{pattern}/i).
+               with_correct_spelling.count },
+      "Wrong number of (correctly spelled) Names"
     )
   end
 

@@ -51,8 +51,9 @@ module Account::Profile
       login("rolf")
       post(:attach, params: { id: rolf.id, img_id: "99999999" })
 
-      assert_response(:success)
+      assert_unprocessable
       assert_flash_error(:runtime_image_reuse_invalid_id, id: "99999999")
+      assert_select("form[data-turbo='true']")
     end
   end
 end

@@ -10,7 +10,7 @@ module Views::Controllers::Descriptions
     prop :versions, _Array(_Interface(:user_id))
 
     def view_template
-      div(class: "text-center") do
+      div(id: "authors_and_editors_panel", class: "text-center") do
         render(Views::Layouts::AuthorsAndEditors.new(
                  obj: @description, versions: @versions, user: @user
                ))

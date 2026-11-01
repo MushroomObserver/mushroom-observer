@@ -16,7 +16,7 @@ class NamingObserverMailerTest < MailerTestCase
     assert_html_mail(mail)
     body = mail.body.to_s
     assert_includes(body,
-                    "https://mushroomobserver.org/#{naming.observation_id}")
+                    "https://mushroomobserver.org/obs/#{naming.observation_id}")
   end
 
   def test_build_text

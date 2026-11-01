@@ -11,6 +11,8 @@
 // - A. xanthodermus (Yellow Stainer)
 // ==================================================
 
+@import "color_derivation";
+
 // ==================================================
 // SECTION 1: THEME COLOR PALETTE
 // ==================================================
@@ -26,11 +28,11 @@ $terracotta:    #B4725F; // lilaceps_stain
 $tan:           #BC9D89; // semotus_cap
 $mustard:       #D4A833; // xanthodermus_stain
 
-// Derived grays (mixed from theme colors)
-$light_gray:      mix($dark_brown, $pale_agaricus, 10%);
+// Derived grays (mixed from theme colors). $light_gray/$dark_gray/
+// $muted_border are defined below, after $BODY_TEXT_COLOR/$BODY_BG_COLOR
+// -- they're mixes of those two, via the shared functions in
+// color_derivation.scss.
 $gray_border:     rgba($dark_brown, 0.4);
-$muted_border:    rgba($dark_brown, 0.2);
-$dark_gray:       mix($dark_brown, $pale_agaricus, 50%);
 $muted_brown:     scale-color($dark_brown, $lightness: 36%);
 $palest_agaricus: scale-color($pale_agaricus, $lightness: 50%);
 
@@ -65,6 +67,10 @@ $DANGER_COLOR:    $terracotta;
 
 $BODY_TEXT_COLOR:                   $DARK_COLOR;
 $BODY_BG_COLOR:                     $LIGHT_COLOR;
+
+$light_gray:   panel_background();
+$dark_gray:    muted_text();
+$muted_border: muted_border();
 
 // --------------------------------------------------
 // Links
@@ -159,4 +165,4 @@ $PROGRESS_TEXT_COLOR:               $dark_brown;
 $PANEL_TEXT_COLOR:                  $BODY_TEXT_COLOR;
 $PANEL_BG_COLOR:                    $palest_agaricus;
 $PANEL_BORDER_COLOR:                $muted_border;
-$PANEL_FOOTER_BG_COLOR:             $BODY_BG_COLOR;
+$PANEL_FOOTER_BG_COLOR:             panel_footer();

@@ -31,8 +31,7 @@ module Views::Controllers::HerbariumRecords
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`) — matches
-    # the bare-table markup of the original ERB.
+    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
       Table(@objects, class: "table-striped",
                       show_headers: false) do |t|
@@ -74,7 +73,7 @@ module Views::Controllers::HerbariumRecords
     def render_observation_links(rec)
       rec.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: observation_path(obs.id)) do
+        a(href: permanent_observation_path(obs.id)) do
           trusted_html(viewer_aware_unique_format_name(obs).t)
         end
       end

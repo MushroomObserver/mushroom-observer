@@ -16,7 +16,7 @@ class ConsensusChangeMailerTest < MailerTestCase
     assert_includes(mail.to, mary.email)
     assert_html_mail(mail)
     body = mail.body.to_s
-    assert_includes(body, "https://mushroomobserver.org/#{observation.id}")
+    assert_includes(body, "https://mushroomobserver.org/obs/#{observation.id}")
     assert_includes(body, "type=observations_consensus")
   end
 

@@ -19,6 +19,89 @@ module Admin
       assert_false(session[:admin])
     end
 
+    # Turning admin mode off while viewing an admin-only page (e.g. a
+    # License) must not redirect_back into it -- that page would
+    # immediately deny access with a startling flash. Should go
+    # straight to "/" instead, with no flash set.
+    def test_turn_admin_off_from_admin_only_referer_skips_denial_flash
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+      post(:create, params: { turn_on: true })
+      assert_true(session[:admin])
+
+      @request.env["HTTP_REFERER"] = license_url(licenses(:ccnc25).id)
+      post(:create, params: { turn_off: true })
+
+      assert_false(session[:admin])
+      assert_redirected_to("/")
+      assert_nil(session[:notice])
+    end
+
+    # Nested admin controllers (route controller path "admin/blocked_ips")
+    # must resolve too -- camelize turns the slash into "::",
+    # producing "Admin::BlockedIpsController".
+    def test_turn_admin_off_from_nested_admin_only_referer_skips_denial_flash
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+      post(:create, params: { turn_on: true })
+
+      @request.env["HTTP_REFERER"] = edit_admin_blocked_ips_url
+      post(:create, params: { turn_off: true })
+
+      assert_false(session[:admin])
+      assert_redirected_to("/")
+      assert_nil(session[:notice])
+    end
+
+    # A referer pointing at an ordinary (non-admin-only) page keeps
+    # the existing redirect_back behavior.
+    def test_turn_admin_off_from_ordinary_referer_redirects_back
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+      post(:create, params: { turn_on: true })
+
+      referer = observation_url(observations(:minimal_unknown_obs).id)
+      @request.env["HTTP_REFERER"] = referer
+      post(:create, params: { turn_off: true })
+
+      assert_false(session[:admin])
+      assert_redirected_to(referer)
+    end
+
+    # No referer at all (e.g. a direct request) falls through to the
+    # same "/" default redirect_back_or_to already uses -- must not
+    # raise trying to parse a nil referer.
+    def test_turn_admin_off_with_no_referer
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+      post(:create, params: { turn_on: true })
+
+      @request.env["HTTP_REFERER"] = nil
+      post(:create, params: { turn_off: true })
+
+      assert_false(session[:admin])
+      assert_redirected_to("/")
+    end
+
+    # A referer that doesn't match any route must not raise -- falls
+    # through the rescue to the existing redirect_back_or_to behavior.
+    def test_turn_admin_off_with_unroutable_referer
+      login(:rolf)
+      rolf.admin = true
+      rolf.save!
+      post(:create, params: { turn_on: true })
+
+      @request.env["HTTP_REFERER"] = "http://test.host/no/such/route"
+      post(:create, params: { turn_off: true })
+
+      assert_false(session[:admin])
+      assert_response(:redirect)
+    end
+
     def test_switch_users
       get(:edit)
       assert_response(:redirect)

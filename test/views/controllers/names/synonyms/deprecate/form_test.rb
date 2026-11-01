@@ -32,7 +32,7 @@ module Views::Controllers::Names::Synonyms::Deprecate
     def render_form(name:, **options)
       defaults = { proposed_name: nil, is_misspelling: false, comment: nil,
                    names: [], valid_names: [], suggest_corrections: false,
-                   parent_deprecated: nil }
+                   parent_deprecated: nil, user: users(:rolf) }
       render(Form.new(
                name: name, **defaults.merge(options)
              ))

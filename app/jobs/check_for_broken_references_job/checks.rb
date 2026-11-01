@@ -47,11 +47,20 @@ class CheckForBrokenReferencesJob
       [CopyrightChange,              :license,              :alert],
       [CopyrightChange,              :user,                 :alert],
       [Donation,                     :user,                 :alert],
+      [ExcludedInatUser,             :user,                 :nil],
       [ExternalLink,                 :external_site,        :alert],
       [ExternalLink,                 :user,                 :alert],
       [ExternalSite,                 :project,              :alert],
+      # :alert, not :delete -- the usage history is kept deliberately for
+      # reporting (#5416), so orphaned accounting rows are for a human to
+      # look at rather than something to clean up silently.
+      [ExternalSiteUsage,            :external_site,        :alert],
       [FieldSlip,                    :project,              :nil],
       [FieldSlip,                    :user,                 :alert],
+      # An extract describes one image; without it there is nothing left
+      # to review, so it goes rather than lingering as an orphan.
+      [FieldSlipExtract,             :image,                :delete],
+      [FieldSlipExtract,             :user,                 :alert],
       [FieldSlipJobTracker,          :user,                 :alert],
       [GlossaryTerm,                 :rss_log,              :nil],
       [GlossaryTerm,                 :thumb_image,          :alert],
@@ -69,7 +78,10 @@ class CheckForBrokenReferencesJob
       [Image,                        :license,              :alert],
       # [Image,                      :reviewer,             :alert],
       [Image,                        :user,                 :alert],
+      [InatImport,                   :project,              :nil],
       [InatImport,                   :user,                 :alert],
+      [ContentPurge,                   :target_user,          :nil],
+      [ContentPurge,                   :user,                 :nil],
       [ImageVote,                    :image,                :delete],
       [ImageVote,                    :user,                 :delete],
       [Interest,                     :user,                 :delete],
@@ -122,6 +134,7 @@ class CheckForBrokenReferencesJob
       [NameDescriptionWriter,        :user_group,           :delete],
       [NameTracker,                  :name,                 :delete],
       [NameTracker,                  :user,                 :delete],
+      [Naming,                       :external_site,        :alert],
       [Naming,                       :name,                 :delete],
       [Naming,                       :observation,          :delete],
       [Naming,                       :user,                 :alert],
@@ -151,6 +164,10 @@ class CheckForBrokenReferencesJob
       [Project,                      :user,                 :alert],
       [Project,                      :user_group,           :alert],
       [ProjectAlias,                 :project,              :alert],
+      [ProjectExternalSite,          :external_site,        :alert],
+      [ProjectExternalSite,          :project,              :delete],
+      [ProjectExternalSiteAlert,     :external_site,        :alert],
+      [ProjectExternalSiteAlert,     :project,              :delete],
       [ProjectExcludedObservation,   :observation,          :delete],
       [ProjectExcludedObservation,   :project,              :delete],
       [ProjectImage,                 :image,                :delete],
@@ -197,6 +214,7 @@ class CheckForBrokenReferencesJob
       [VisualGroup,                  :visual_model,         :alert],
       [VisualGroupImage,             :image,                :delete],
       [VisualGroupImage,             :visual_group,         :delete],
+      [Vote,                         :external_site,        :alert],
       [Vote,                         :naming,               :delete],
       [Vote,                         :observation,          :delete],
       [Vote,                         :user,                 :delete]

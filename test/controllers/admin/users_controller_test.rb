@@ -22,6 +22,9 @@ module Admin
       make_admin
       post(:update, params: { id: user.id, val: "wong format 7" })
       assert_flash_error
+      # Same-URL re-render needs non-2xx or Turbo hangs (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_unprocessable
       user.reload
       assert_empty(user_stats.bonuses)
       assert_equal(old_contribution, user.contribution)

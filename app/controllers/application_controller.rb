@@ -32,9 +32,12 @@ class ApplicationController < ActionController::Base
   include FlashNotices
   include NameValidation
   include Queries
+  include QueryParams
   include ControllerLabels
   include Indexes
+  include PatternSearchState
   include SectionUpdater
+  include RequestStats
   include ModalUpdater
   include ViewerAwareFormat
 
@@ -57,6 +60,7 @@ class ApplicationController < ActionController::Base
   before_action :apply_user_theme_change
   before_action :reset_user_group_cache
   before_action :reset_textile_cache
+  before_action :reset_external_site_cache
 
   # Disable most filters to streamline some actions, e.g., API.
   def self.disable_filters
@@ -131,23 +135,14 @@ class ApplicationController < ActionController::Base
     change_theme_to(change) if change.present?
   end
 
-  # UserGroup.all_users/reviewers/one_user memoize per request
-  # (Thread.current[...], not a class ivar) -- reset it here so a
-  # request that never touches these doesn't inherit stale groups
-  # left behind by whatever request ran on this same pooled thread
-  # before it. See UserGroup::THREAD_KEYS.
-  def reset_user_group_cache
-    UserGroup.reset_request_cache
-  end
+  # See UserGroup::THREAD_KEYS.
+  def reset_user_group_cache = UserGroup.reset_request_cache
 
-  # Textile::THREAD_KEYS's name-lookup cache is thread-local -- isolated
-  # across concurrent requests, but not auto-reset between sequential
-  # requests pooled onto the same thread. Without this, a request that
-  # primes the cache (Textile.register_name) leaks its abbreviations
-  # into whatever request runs next on that same thread. See #3589.
-  def reset_textile_cache
-    Textile.clear_textile_cache
-  end
+  # See Textile::THREAD_KEYS.
+  def reset_textile_cache = Textile.clear_textile_cache
+
+  # See ExternalSite.select_options.
+  def reset_external_site_cache = ExternalSite.reset_request_cache
 
   def change_theme_to(change)
     if MO.themes.member?(change)
@@ -162,38 +157,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  # Catch errors for integration tests, and report stats re completed request.
-  def catch_errors_and_log_request_stats
-    clear_user_globals
-    stats = request_stats
-    yield
-    IpStats.log_stats(stats, @user&.id)
-    logger.warn(request_stats_log_message(stats))
-  rescue StandardError => e
-    raise(@error = e)
-  end
-
-  def request_stats
-    {
-      time: Time.current,
-      controller: params[:controller],
-      action: params[:action],
-      api_key: params[:api_key],
-      robot: browser.bot? ? "robot" : "user",
-      ip: request.try(&:remote_ip),
-      url: request.try(&:url),
-      ua: browser.try(&:ua)
-    }
-  end
-
-  def request_stats_log_message(stats)
-    "TIME: #{Time.current - stats[:time]} #{status} " \
-    "#{stats[:controller]} #{stats[:action]} " \
-    "#{stats[:robot]} #{stats[:ip]}\t#{stats[:url]}\t#{stats[:ua]}"
-  end
-
-  private :request_stats, :request_stats_log_message
-
   # Keep track of localization strings so users can edit them (sort of) in situ.
   def track_translations
     @language = Language.find_by(locale: I18n.locale)
@@ -205,10 +168,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
+  # Redirects a bad/alternate domain (MO.bad_domains) to MO.domain.
+  # Checks an explicit allowlist rather than `HTTP_HOST != MO.domain`,
+  # so a config mistake can't loop infinitely. Needed because
+  # browsers store cookies per domain -- without this, a
+  # fully-specified link (e.g. in a comment) to a bad domain forces
+  # a re-login.
+  #
   # Redirect from www.mo.org to mo.org.
   #
   # This would be much easier to check if HTTP_HOST != MO.domain, but if this
-  # ever were to break we'd get into an infinite loop too easily that way.
+  # breaks we'd get into an infinite loop too easily that way.
   # I think this is a lot safer.  MO.bad_domains would be something like:
   #
   #   MO.bad_domains = [
@@ -222,10 +193,12 @@ class ApplicationController < ActionController::Base
   # a comment's body is different.  This results in you having to re-login
   # when you click on these embedded links.
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def fix_bad_domains
     if (request.method == "GET") &&
        MO.bad_domains.include?(request.env["HTTP_HOST"])
-      redirect_to("#{MO.http_domain}#{request.fullpath}")
+      redirect_to("#{MO.http_domain}#{request.fullpath}",
+                  allow_other_host: true)
     end
   end
 
@@ -326,6 +299,9 @@ class ApplicationController < ActionController::Base
     tab = controller_name
     # Checklist page with location_id is really a locations tab
     tab = "locations" if tab == "checklists" && params.include?("location_id")
+    # A species-list checklist is really an observation-lists tab
+    tab = "species_lists" if tab == "checklists" &&
+                             params.include?("species_list_id")
     tab
   end
   helper_method :active_project_tab
@@ -353,6 +329,23 @@ class ApplicationController < ActionController::Base
   ##############################################################################
 
   private
+
+  # Turbo requires a non-2xx status on a failed form re-render; a
+  # 200 there is a silent no-op instead of a redisplay. Dispatches
+  # to the including controller's `render_new_view`/`render_edit_view`
+  # with no status: kwarg, since some controllers (ArticlesController,
+  # LocationsController, PublicationsController) still define a
+  # zero-arg version that would raise ArgumentError on one. Setting
+  # status after render works regardless of the subclass signature.
+  def render_new_view_invalid(**)
+    render_new_view(**)
+    self.status = :unprocessable_content
+  end
+
+  def render_edit_view_invalid(**)
+    render_edit_view(**)
+    self.status = :unprocessable_content
+  end
 
   # defined here because used by both images_controller and
   # observations_controller

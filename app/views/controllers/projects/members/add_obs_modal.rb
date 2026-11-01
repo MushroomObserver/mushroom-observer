@@ -8,13 +8,10 @@ module Views::Controllers::Projects::Members
   # Submit button row in `.modal-footer`. Renders nothing in the
   # body when count is zero except the "none match" message.
   class AddObsModal < Views::Base
-    def initialize(project:, candidate:, count:, batch_limit:)
-      super()
-      @project = project
-      @candidate = candidate
-      @count = count
-      @batch_limit = batch_limit
-    end
+    prop :project, ::Project
+    prop :candidate, ::User
+    prop :count, Integer
+    prop :batch_limit, Integer
 
     def view_template
       Modal(id: "modal_add_obs",

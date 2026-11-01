@@ -154,6 +154,7 @@ module Descriptions::Moves
         redirect_to(desc.show_link_args)
       else
         flash_object_errors(desc)
+        redirect_to(action: :new, id: @src.id)
       end
     end
 

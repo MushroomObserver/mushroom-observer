@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Extract the most recent N requests for a given route (controller + action)
 # from the (gzipped) production logs, with full params and timing.
 #
@@ -24,6 +25,7 @@
 #   ruby script/route_examples.rb CONTROLLER ACTION [-n N] [--logdir DIR]
 # e.g.
 #   ruby script/route_examples.rb observations/species_lists edit -n 20
+# rubocop:enable MO/NoLongCommentBlock
 
 require "date"
 require "zlib"

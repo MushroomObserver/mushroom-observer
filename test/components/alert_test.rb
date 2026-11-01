@@ -8,7 +8,7 @@ class AlertTest < ComponentTestCase
       Components::Alert.new(message: "Test message")
     )
 
-    assert_html(html, "div.alert.alert-warning", text: "Test message")
+    assert_html(html, ".alert.alert-warning", text: "Test message")
   end
 
   def test_renders_alert_with_success_level
@@ -16,7 +16,7 @@ class AlertTest < ComponentTestCase
       Components::Alert.new(message: "Success!", level: :success)
     )
 
-    assert_html(html, "div.alert.alert-success", text: "Success!")
+    assert_html(html, ".alert.alert-success", text: "Success!")
   end
 
   def test_renders_alert_with_info_level
@@ -24,7 +24,7 @@ class AlertTest < ComponentTestCase
       Components::Alert.new(message: "Info", level: :info)
     )
 
-    assert_html(html, "div.alert.alert-info", text: "Info")
+    assert_html(html, ".alert.alert-info", text: "Info")
   end
 
   def test_renders_alert_with_warning_level
@@ -32,7 +32,7 @@ class AlertTest < ComponentTestCase
       Components::Alert.new(message: "Warning", level: :warning)
     )
 
-    assert_html(html, "div.alert.alert-warning", text: "Warning")
+    assert_html(html, ".alert.alert-warning", text: "Warning")
   end
 
   def test_renders_alert_with_danger_level
@@ -40,14 +40,14 @@ class AlertTest < ComponentTestCase
       Components::Alert.new(message: "Error!", level: :danger)
     )
 
-    assert_html(html, "div.alert.alert-danger", text: "Error!")
+    assert_html(html, ".alert.alert-danger", text: "Error!")
   end
 
   def test_renders_empty_block
     component = Components::Alert.new(level: :info)
     html = render(component) { nil }
 
-    assert_html(html, "div.alert.alert-info")
+    assert_html(html, ".alert.alert-info")
   end
 
   def test_renders_alert_with_custom_id
@@ -63,7 +63,7 @@ class AlertTest < ComponentTestCase
       Components::Alert.new(message: "Test", class: "my-custom-class")
     )
 
-    assert_html(html, "div.alert.alert-warning.my-custom-class")
+    assert_html(html, ".alert.alert-warning.my-custom-class")
   end
 
   def test_renders_alert_with_data_attributes
@@ -73,7 +73,7 @@ class AlertTest < ComponentTestCase
       )
     )
 
-    assert_html(html, "div.alert",
+    assert_html(html, ".alert",
                 attribute: { "data-controller" => "alert",
                              "data-target" => "message" })
   end
@@ -95,6 +95,6 @@ class AlertTest < ComponentTestCase
 
   def test_default_level_is_warning
     html = render_component(Components::Alert.new(message: "Test"))
-    assert_html(html, "div.alert.alert-warning")
+    assert_html(html, ".alert.alert-warning")
   end
 end

@@ -7,11 +7,8 @@
 # reference this view by its full namespace.
 module Views::Controllers::Projects::FieldSlips
   class TrackerRow < Views::Base
-    def initialize(tracker:, user:)
-      super()
-      @tracker = tracker
-      @user = user
-    end
+    prop :tracker, ::FieldSlipJobTracker
+    prop :user, ::User
 
     def view_template
       tr(id: dom_id(@tracker), **tracker_data) do

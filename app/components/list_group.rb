@@ -70,27 +70,25 @@
 #     end
 #   end
 class Components::ListGroup < Components::Base
-  # @param id [String] `id=` for the container element. Use to make
-  #   the container a Turbo Stream target.
-  # @param flush [Boolean] add `list-group-flush` for borderless
-  #   nesting inside a Panel body. Defaults to false.
-  # @param element [Symbol] container element — `:div` (default) or
-  #   `:ul`. Items take the matching child element (`:div` → `<div>`,
-  #   `:ul` → `<li>`).
-  # @param class [String] CSS classes appended to the default
-  #   `list-group` (+ `list-group-flush` when `flush: true`).
-  # @param attributes [Hash] arbitrary HTML attrs forwarded to the
-  #   container element (`data:` for Stimulus, ARIA, etc.).
-  def initialize(id: nil, flush: false, element: :div,
-                 class: nil, attributes: {})
-    super()
-    @html_id = id
-    @flush = flush
-    @element = element
-    @html_class = grab(class:)
-    @attributes = attributes
+  # `id=` for the container element. Use to make the container a
+  # Turbo Stream target.
+  prop :id, _Nilable(String), default: nil
+  # Adds `list-group-flush` for borderless nesting inside a Panel body.
+  prop :flush, _Boolean, default: false
+  # Container element — `:div` (default) or `:ul`. Items take the
+  # matching child element (`:div` → `<div>`, `:ul` → `<li>`).
+  prop :element, _Union(:div, :ul), default: :div
+  # Catch-all for class:, data:, aria:, and any other HTML attrs on
+  # the container element -- matches Icon/Collapsible's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
+  # `@items`/`@empty_block` are builder-accumulated state (populated
+  # by `item`/`link_item`/`empty` during `vanish`), not constructor
+  # props -- see the class docs above.
+  def initialize(**)
     @items = []
     @empty_block = nil
+    super
   end
 
   def view_template(&block)
@@ -122,34 +120,16 @@ class Components::ListGroup < Components::Base
     nil
   end
 
-  # Register a "linked" item — for rows where the interactive
-  # element itself (an `<a>` from `Link(...)`, a `<button>` from
-  # `Button(...)`) should carry `list-group-item`, rather than
-  # being wrapped in a separate item container. Renders via
-  # `Components::ListGroup::Item`'s sibling `LinkItem` — see that
-  # class for why the wrapper doesn't work for linked rows.
+  # Registers a "linked" item -- for rows where the interactive
+  # element itself (an `<a>`/`<button>`) should carry
+  # `list-group-item` rather than being wrapped. Renders via
+  # `Components::ListGroup::Item`'s sibling `LinkItem`; the block
+  # gets the composed class string and must apply it itself.
   #
-  # The block is called with the composed class string
-  # (`"list-group-item <extra>"`) and must apply it to whatever it
-  # renders — there's no wrapper to apply it for you.
-  #
-  # Only use this inside an iterated `ListGroup(...) do |list| ... end`
-  # block where linked and wrapped items are mixed in one ordered
-  # sequence. If the row isn't part of such an iteration (e.g. it
-  # sits inside a `cache(...) do ... end` fragment), render
-  # `Components::ListGroup::LinkItem` standalone instead — this
-  # builder method defers rendering via Phlex's `vanish` until after
-  # the whole block finishes, which silently breaks fragment caching
-  # wrapped around it (a cache hit would skip the registration
-  # entirely). `Views::Layouts::Sidebar` does exactly that for its
-  # cached sections.
-  #
-  # @example
-  #   list.link_item(class: "indent") do |css_class|
-  #     Link(type: :active, content: title, path: url, class: css_class)
-  #   end
-  #
-  # @return [nil] so the call doesn't accidentally emit anything
+  # Use only inside an iterated `ListGroup(...) do |list| ... end`
+  # block -- it defers rendering via Phlex's `vanish`, which breaks
+  # fragment caching (see phlex_reference.md's builder/vanish
+  # caching note). Returns nil so the call emits nothing itself.
   def link_item(class: nil, &block)
     @items << { wrap: false, class: grab(class:), block: block }
     nil
@@ -170,9 +150,9 @@ class Components::ListGroup < Components::Base
 
   def container_attrs
     classes = class_names(
-      "list-group", ("list-group-flush" if @flush), @html_class
+      "list-group", ("list-group-flush" if @flush), @attributes[:class]
     )
-    { class: classes, id: @html_id }.compact.merge(@attributes)
+    { class: classes, id: @id }.compact.merge(@attributes.except(:class))
   end
 
   def item_element
@@ -183,7 +163,7 @@ class Components::ListGroup < Components::Base
     if item[:wrap]
       render(Item.new(
                element: item_element, class: item[:class],
-               id: item[:id], attributes: item[:attrs]
+               id: item[:id], **item[:attrs]
              ), &item[:block])
     else
       render(LinkItem.new(class: item[:class]), &item[:block])

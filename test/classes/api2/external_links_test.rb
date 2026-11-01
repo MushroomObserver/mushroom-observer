@@ -14,14 +14,16 @@ class API2::ExternalLinksTest < UnitTestCase
   #  :section: ExternalLink Requests
   # ----------------------------------
 
+  def api2_model = ExternalLink
+
   def test_getting_external_links
     other_obs = observations(:agaricus_campestris_obs)
     link1 = external_links(:coprinus_comatus_obs_mycoportal_link)
     link2 = external_links(:coprinus_comatus_obs_inaturalist_link)
     link3 = ExternalLink.create!(user: rolf, observation: other_obs,
                                  external_site: link1.external_site,
-                                 url: "#{link1.external_site.base_url}876876")
-    params = { method: :get, action: :external_link }
+                                 external_id: "876876")
+    params = params_get
 
     assert_api_pass(params.merge(id: link2.id))
     assert_api_results([link2])
@@ -42,9 +44,6 @@ class API2::ExternalLinksTest < UnitTestCase
 
     assert_api_pass(params.merge(external_site: "mycoportal"))
     assert_api_results([link1, link3])
-
-    assert_api_pass(params.merge(url: link2.url))
-    assert_api_results([link2])
   end
 
   def test_posting_external_links
@@ -54,15 +53,9 @@ class API2::ExternalLinksTest < UnitTestCase
     marys_key = api_keys(:marys_api_key)
     rolfs_key = api_keys(:rolfs_api_key)
     site = external_sites(:mycoportal)
-    base_url = site.base_url
-    params = {
-      method: :post,
-      action: :external_link,
-      api_key: rolfs_key.key,
-      observation: rolfs_obs.id,
-      external_site: site.id,
-      url: "#{base_url}blah"
-    }
+    url = site.observation_url("112233")
+    params = params_post(api_key: rolfs_key.key, observation: rolfs_obs.id,
+                         external_site: site.id, url: url)
     assert_api_pass(params)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:observation))
@@ -71,11 +64,13 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_api_fail(params.merge(api_key: "spammer"))
     assert_api_fail(params.merge(observation: "spammer"))
     assert_api_fail(params.merge(external_site: "spammer"))
+    # Not url-shaped -- the API's `url` param requires a url, not a bare id.
     assert_api_fail(params.merge(url: "spammer"))
     assert_api_fail(params.merge(observation: marys_obs.id))
     # The model allows multiple links per (obs, site), but the API rejects an
-    # exact duplicate (same obs/site/url) (#4565). mary is permitted via her
-    # mycoportal membership, so this fails on duplication, not permission.
+    # exact duplicate (same obs/site/external_id) (#4565). mary is permitted
+    # via her mycoportal membership, so this fails on duplication, not
+    # permission.
     assert_api_fail(params.merge(api_key: marys_key.key))
     assert_api_pass(params.merge(api_key: marys_key.key,
                                  observation: katys_obs.id))
@@ -87,29 +82,23 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_users_equal(rolf, link.observation.user)
     assert_false(link.external_site&.project&.member?(dick))
     site = external_sites(:mycoportal)
-    base_url = site.base_url
-    new_url = "#{base_url}something_else"
-    params = {
-      method: :patch,
-      action: :external_link,
-      api_key: @api_key.key,
-      id: link.id,
-      set_url: new_url
-    }
+    new_url = site.observation_url("222333")
+    params = params_patch(id: link.id, set_url: new_url)
     @api_key.update!(user: dick)
     assert_api_fail(params)
     @api_key.update!(user: rolf)
     assert_api_fail(params.merge(set_url: ""))
+    assert_api_fail(params.merge(set_url: "not-a-url"))
     assert_api_pass(params)
-    assert_equal(new_url, link.reload.url)
+    assert_equal("222333", link.reload.external_id)
     @api_key.update!(user: mary)
-    assert_api_pass(params.merge(set_url: "#{new_url}2"))
-    assert_equal("#{new_url}2", link.reload.url)
+    assert_api_pass(params.merge(set_url: site.observation_url("222334")))
+    assert_equal("222334", link.reload.external_id)
     @api_key.update!(user: dick)
     user_group = link.external_site&.project&.user_group
     user_group.users << dick if user_group
-    assert_api_pass(params.merge(set_url: "#{new_url}3"))
-    assert_equal("#{new_url}3", link.reload.url)
+    assert_api_pass(params.merge(set_url: site.observation_url("222335")))
+    assert_equal("222335", link.reload.external_id)
   end
 
   def test_deleting_external_links
@@ -118,17 +107,12 @@ class API2::ExternalLinksTest < UnitTestCase
     assert_users_equal(rolf, link.observation.user)
     assert_false(link.external_site&.project&.member?(dick))
     site = link.external_site
-    params = {
-      method: :delete,
-      action: :external_link,
-      api_key: @api_key.key,
-      id: link.id
-    }
+    params = params_delete(id: link.id)
     recreate_params = {
       user: mary,
       observation: link.observation,
       external_site: site,
-      url: link.url
+      external_id: link.external_id
     }
     @api_key.update!(user: dick)
     assert_api_fail(params)

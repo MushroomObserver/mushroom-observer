@@ -7,13 +7,11 @@ module Views::Controllers::Sequences
   # controller's `new.rb` and `edit.rb`, and dynamically
   # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, observation: nil, back: nil, **)
-      @observation = observation
-      @back = back
-      super(model, **)
-    end
+    prop :observation, _Nilable(::Observation), default: nil
+    prop :back, _Nilable(String), default: nil
 
     def view_template
+      render_observation_field unless model.persisted?
       render_locus_field
       render_locus_help
       render_bases_field
@@ -25,11 +23,15 @@ module Views::Controllers::Sequences
 
     private
 
+    def render_observation_field
+      hidden_field("observation_id", value: observation.id)
+    end
+
     def render_locus_field
       textarea_field(:locus,
                      rows: 1,
                      label: :locus.ti,
-                     between: :required,
+                     label_appends: :required,
                      wrap_class: "w-100")
     end
 
@@ -89,7 +91,7 @@ module Views::Controllers::Sequences
       textarea_field(:notes,
                      rows: 3,
                      label: :notes.ti,
-                     between: :optional)
+                     label_appends: :optional)
     end
 
     def render_notes_help
@@ -113,7 +115,6 @@ module Views::Controllers::Sequences
         url_for(
           controller: "sequences",
           action: :create,
-          observation_id: observation.id,
           only_path: true
         )
       end

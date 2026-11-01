@@ -136,9 +136,11 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   }
 
   scope :pattern, lambda { |phrase|
-    cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
-           Location[:name].coalesce(SpeciesList[:where])
-    left_outer_joins(:location).search_columns(cols, phrase)
+    exact_match_or(phrase) do
+      cols = SpeciesList[:title] + SpeciesList[:notes].coalesce("") +
+             Location[:name].coalesce(SpeciesList[:where])
+      left_outer_joins(:location).search_columns(cols, phrase)
+    end
   }
 
   scope :editable_by_user, lambda { |user|
@@ -204,16 +206,12 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # Sync this species_list's project membership against
-  # `submitted_project_ids` (typically the `project_ids[]` array a
-  # form posted). Only toggles among projects the given `user` is a
-  # member of — non-member projects already attached to the list are
-  # preserved (the form disables those checkboxes; the iteration
-  # excludes them too).
-  #
-  # Returns an array of `[project, :added | :removed]` pairs so the
-  # caller can emit per-change notifications. Returns `[]` when
-  # `submitted_project_ids` is nil (no `project_ids[]` field on the
-  # submission), or when nothing actually changed.
+  # `submitted_project_ids` (the `project_ids[]` array a form
+  # posted). Only toggles projects the given `user` is a member of;
+  # non-member projects already attached to the list are preserved.
+  # Returns `[project, :added | :removed]` pairs for the caller to
+  # notify on; `[]` when `submitted_project_ids` is nil or nothing
+  # changed.
   def sync_projects(submitted_project_ids, user:)
     return [] if submitted_project_ids.nil?
 
@@ -423,7 +421,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
   #     :specimen               => false
   #   )
   #
-  # rubocop:disable Metrics/MethodLength
+  # rubocop:disable-next Metrics/MethodLength
   def construct_observation(name, args = {})
     raise("missing or invalid name: #{name.inspect}") unless name.is_a?(Name)
 
@@ -469,7 +467,6 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
 
     observations << obs
   end
-  # rubocop:enable Metrics/MethodLength
 
   ##############################################################################
   #

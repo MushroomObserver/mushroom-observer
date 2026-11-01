@@ -39,6 +39,8 @@ module Name::Parse
   F_ABBR       = / forma | form\.? | fo\.? | f\.?          /xi
   GROUP_ABBR   = / group | gr\.? | gp\.? | clade | complex /xi
 
+  # Abbrev prefix -> rank, for provisional genus-and-up names with no
+  # guessable suffix (e.g. a quoted, undescribed "Ord. 'Whateverales'").
   PROV_RANKS = {
     "Gen." => "Genus",
     "Subfam." => "Subfamily",
@@ -46,6 +48,7 @@ module Name::Parse
     "Subtrib." => "Subtribe",
     "Subord." => "Suborder",
     "Ord." => "Order",
+    "Superord." => "Superorder",
     "Subcl." => "Subclass",
     "Cl." => "Class",
     "Subphyl." => "Subphylum",
@@ -126,11 +129,12 @@ module Name::Parse
   UNQUOTED_PROV = /^(?:[a-z]+-)*[A-Z][A-Z0-9]*$/
   LOWER_WORD = /
     (?!(?:sensu|van|de)\b) [a-z][a-zë-]*[a-zë] |
-    (?:sp\. \s)?['"]\w[\wë\-. ]*[\wë.]['"] |
-    (?:sp\. \s)?(?:[a-z]+-)*[A-Z][A-Z0-9]* /x
+    (?:sp\.?\s)?['"]\w[\wë\-. ]*[\wë.]['"] |
+    (?:sp\.?\s)?(?:[a-z]+-)*[A-Z][A-Z0-9]* /x
   BINOMIAL   = / #{UPPER_WORD} \s #{LOWER_WORD} /x
-  LOWER_WORD_OR_SP_NOV = / (?! sp\s|sp$|species) #{LOWER_WORD} |
-                           sp\.\s\S*\d\S* /x
+  LOWER_WORD_OR_SP_NOV = / (?! sp\.?\s(?!['"]|[A-Z]) | sp\.?$ | species )
+                           #{LOWER_WORD} |
+                           sp\.?\s\S*\d\S* /x
 
   # Matches the last epithet in a (standardized) name,
   # including preceding abbreviation if there is one.

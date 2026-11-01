@@ -16,6 +16,9 @@ module Projects
       get(:index, params: { project_id: @project.id })
 
       assert_response(:success)
+      # GET forms aren't Turbo-safe by default either (see
+      # .claude/rules/turbo_submit_forms.md).
+      assert_select("form.show-excluded-form[data-turbo='false']")
     end
 
     def test_index_with_pagination
@@ -52,7 +55,8 @@ module Projects
     def test_index_show_excluded
       @project.exclude_observation(@matching_obs)
 
-      get(:index, params: { project_id: @project.id, show_excluded: "1" })
+      get(:index, params: { project_id: @project.id,
+                            show_excluded: "1" })
 
       assert_response(:success)
     end
@@ -106,8 +110,8 @@ module Projects
 
       assert_response(:success)
       assert_includes(@project.observations.reload, @matching_obs)
-      assert_includes(@response.body, %(<turbo-stream action="remove"))
-      assert_includes(@response.body, %(<turbo-stream action="update"))
+      assert_select("turbo-stream[action='remove']")
+      assert_select("turbo-stream[action='update']")
     end
 
     def test_exclude_observation_turbo_stream
@@ -118,8 +122,8 @@ module Projects
 
       assert_response(:success)
       assert_includes(@project.excluded_observations.reload, @matching_obs)
-      assert_includes(@response.body, %(<turbo-stream action="remove"))
-      assert_includes(@response.body, %(<turbo-stream action="update"))
+      assert_select("turbo-stream[action='remove']")
+      assert_select("turbo-stream[action='update']")
     end
 
     def test_exclude_observation_not_found
@@ -145,8 +149,9 @@ module Projects
     def test_add_all_with_show_excluded
       @project.exclude_observation(@matching_obs)
 
-      post(:add_all, params: { project_id: @project.id,
-                               show_excluded: "1" })
+      post(:add_all,
+           params: { project_id: @project.id,
+                     show_excluded: "1" })
 
       assert_includes(@project.observations.reload, @matching_obs)
       assert_not_includes(@project.excluded_observations.reload, @matching_obs)
@@ -158,6 +163,49 @@ module Projects
                      id: 999_999 })
 
       assert_response(:not_found)
+    end
+
+    # Nothing listed is nothing to add.
+    def test_add_all_is_offered_only_when_something_matches
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("form[action^=?]",
+                    add_all_project_updates_path(project_id: @project.id))
+
+      @project.add_observation(@matching_obs)
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("form[action^=?]",
+                    add_all_project_updates_path(project_id: @project.id),
+                    count: 0)
+    end
+
+    # A site admin says a project may be imported from; its admins are
+    # then the people who start one (#5416). This page is where
+    # observations are added to the project, so it is where fetching
+    # more of them from elsewhere belongs.
+    def test_an_importing_project_offers_a_link_to_the_import
+      site = ProjectExternalSite.create!(
+        project: @project, external_site: external_sites(:inaturalist),
+        use_constraints: true, importing: true
+      )
+
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("a[href=?]",
+                    new_inat_import_path(project_site: site.id))
+    end
+
+    def test_a_site_not_importing_offers_no_link
+      site = ProjectExternalSite.create!(
+        project: @project, external_site: external_sites(:inaturalist),
+        use_constraints: true, alerting: true
+      )
+
+      get(:index, params: { project_id: @project.id })
+
+      assert_select("a[href=?]",
+                    new_inat_import_path(project_site: site.id), count: 0)
     end
 
     private

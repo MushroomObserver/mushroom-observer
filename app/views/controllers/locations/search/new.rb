@@ -5,7 +5,7 @@ module Views::Controllers::Locations
     # Locations search form page.
     class New < Views::FullPageBase
       prop :search, ::Query
-      prop :local, _Boolean, default: true
+      prop :context, _Union(:page, :dropdown), default: :page
 
       def view_template
         add_new_title(:search_object, :locations)
@@ -15,7 +15,7 @@ module Views::Controllers::Locations
           render(::Components::Form::Search.new(
                    @search,
                    search_controller: controller,
-                   local: @local
+                   context: @context
                  ))
         end
       end

@@ -23,62 +23,47 @@ module Views::Layouts
     end
 
     def test_renders_nothing_when_no_query
-      html = render(Header::Sorter.new(query: nil, sorts: @sorts))
+      html = render_sorter(query: nil)
 
       assert_equal("", html)
     end
 
     def test_renders_nothing_when_no_sorts
-      html = render(Header::Sorter.new(query: query_with(num_results: 5),
-                                       sorts: nil))
+      html = render_sorter(query: query_with(num_results: 5), sorts: nil)
 
       assert_equal("", html)
     end
 
     def test_renders_nothing_when_only_one_result
-      html = render(Header::Sorter.new(query: query_with(num_results: 1),
-                                       sorts: @sorts))
+      html = render_sorter(query: query_with(num_results: 1))
 
       assert_equal("", html)
     end
 
-    def test_renders_outer_ul_with_label_and_dropdown
-      html = render(Header::Sorter.new(query: query_with(num_results: 5),
-                                       sorts: @sorts))
+    def test_renders_label_and_dropdown
+      html = render_sorter(query: query_with(num_results: 5))
 
-      # Outer is a `<ul>`, not a `<div>` — semantically a list of nav
-      # items (label + dropdown).
-      assert_html(html, "ul.flex-bar.sorter")
-      # The label is the first `<li>`.
-      assert_html(html, "ul.sorter > li.navbar-text",
+      assert_html(html, ".sorter .navbar-text",
                   text: "#{:sort_by_header.l}:")
-      # The dropdown is the second `<li>`; Components::Dropdown
-      # renders its outer wrapper as `<li class="dropdown d-inline-block">`
-      # and the Sorter passes `wrapper_class: "navbar-form px-2"` for
-      # navbar spacing.
-      assert_html(html, "ul.sorter > li.dropdown.navbar-form")
-      # Toggle `<a>` carries the btn styling the legacy sort-bar used.
-      assert_html(html, "li.dropdown a.dropdown-toggle.btn.btn-outline-default")
-      # Menu carries the `sorts` extra class.
-      assert_html(html, "ul.dropdown-menu.sorts")
+      assert_html(html, ".sorter .dropdown a.dropdown-toggle")
+      # Menu carries the `sorts` extra class, the scope `assert_sorted_by`
+      # (test/general_extensions.rb) selects within.
+      assert_html(html, ".dropdown-menu.sorts")
     end
 
     def test_menu_contains_mobile_only_sort_by_header
-      html = render(Header::Sorter.new(query: query_with(num_results: 5),
-                                       sorts: @sorts))
+      html = render_sorter(query: query_with(num_results: 5))
 
-      # `menu_header:` slot — visible-xs `<li>` rendered above the
-      # section's links.
-      assert_html(html, "ul.dropdown-menu.sorts > li.visible-xs",
+      # `menu_header:` slot -- a mobile-only row (visible only below
+      # the `sm` breakpoint) rendered above the section's links.
+      assert_html(html, ".dropdown-menu.sorts .d-block.d-sm-none",
                   text: "#{:sort_by_header.l}:")
     end
 
     def test_active_sort_is_marked_active_and_disabled
-      html = render(Header::Sorter.new(
-                      query: query_with(num_results: 5,
-                                        order_by: "created_at"),
-                      sorts: @sorts
-                    ))
+      html = render_sorter(
+        query: query_with(num_results: 5, order_by: "created_at")
+      )
 
       # `args[:active] = true` in the Sorter's tuples flows through
       # `Components::Dropdown#render_link`: the current sort gets
@@ -90,11 +75,9 @@ module Views::Layouts
     end
 
     def test_reverse_link_is_appended
-      html = render(Header::Sorter.new(
-                      query: query_with(num_results: 5,
-                                        order_by: "created_at"),
-                      sorts: @sorts
-                    ))
+      html = render_sorter(
+        query: query_with(num_results: 5, order_by: "created_at")
+      )
 
       # `Reverse` is always the last tuple in the menu, with the
       # `<plural>_by_reverse_<current>_link` id-style class.
@@ -103,11 +86,10 @@ module Views::Layouts
     end
 
     def test_link_all_skips_active_disabled_state
-      html = render(Header::Sorter.new(
-                      query: query_with(num_results: 5,
-                                        order_by: "created_at"),
-                      sorts: @sorts, link_all: true
-                    ))
+      html = render_sorter(
+        query: query_with(num_results: 5, order_by: "created_at"),
+        link_all: true
+      )
 
       # With `link_all: true`, no tuple is `.active`; every option
       # stays a live, undisabled link.
@@ -117,6 +99,10 @@ module Views::Layouts
     end
 
     private
+
+    def render_sorter(sorts: @sorts, **)
+      render(Header::Sorter.new(sorts: sorts, **))
+    end
 
     # Real `Query` instance — Sorter's prop type rejects duck-typed
     # stubs. `num_results` is stubbed via `define_singleton_method`

@@ -3,9 +3,9 @@
 # Action-nav for the new species_list form: Name Lister + cancel
 # to index.
 class Tab::SpeciesList::FormNew < Tab::Collection
-  def initialize(q_param: nil)
+  def initialize(index_filter: nil)
     super()
-    @q_param = q_param
+    @index_filter = index_filter
   end
 
   private
@@ -13,7 +13,7 @@ class Tab::SpeciesList::FormNew < Tab::Collection
   def tabs
     [
       Tab::SpeciesList::NameLister.new,
-      Tab::SpeciesList::Index.new(q_param: @q_param)
+      Tab::SpeciesList::Index.new(index_filter: @index_filter)
     ]
   end
 end

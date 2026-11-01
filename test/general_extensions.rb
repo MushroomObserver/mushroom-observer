@@ -504,10 +504,9 @@ module GeneralExtensions
 
     # `assert_template("index")` doesn't work for Phlex action views
     # (they render outside the ActionView template lookup chain).
-    # The `application/_top_nav.erb` layout stamps a unique
+    # The application layout stamps a unique
     # `<body class="<controller_name>__<action_name>">` class on
-    # every page — use that as the action marker, works for both
-    # ERB and Phlex views.
+    # every page — use that as the action marker instead.
     assert_select("body.#{@controller.controller_name}__index")
     assert_sorted_by(sort_order.to_s)
   end
@@ -617,16 +616,57 @@ module GeneralExtensions
     template.split("\n").each do |line|
       next unless line.include?("IGNORE")
 
+      # rubocop:disable MO/NoRegexpEscape -- deliberately builds a
+      # wildcard pattern (IGNORE -> ".*") around the escaped literal
+      # line, not a plain substring/equality check.
       pattern = Regexp.escape(line).gsub("IGNORE", ".*")
       str.sub!(/^#{pattern}$/, line)
+      # rubocop:enable MO/NoRegexpEscape
     end
     str == template
   end
 
+  # Regex-free substring check for what assert_select's `text:` option
+  # otherwise needs a Regexp for -- translated/localized content needs
+  # substring matching (an anchor's text is often a label plus
+  # surrounding content this test doesn't care about), and
+  # interpolating Regexp.escape(value) into a dynamic regex just to
+  # express "contains" is indirect. `count:` defaults to "at least one
+  # match"; pass `count: 0` to assert none of the matched elements
+  # contain `substring`.
+  def assert_select_text_includes(selector, substring, count: nil, msg: nil)
+    substring = substring.as_displayed
+    matches = css_select(selector).select do |el|
+      el.text.as_displayed.include?(substring)
+    end
+
+    if count
+      assert_equal(count, matches.size,
+                   msg || "Expected #{count} #{selector.inspect} " \
+                          "element(s) containing #{substring.inspect}, " \
+                          "found #{matches.size}")
+    else
+      # rubocop:disable Minitest/AssertWithExpectedArgument -- the
+      # second arg is a failure message, not an expected value.
+      assert(matches.any?,
+             msg || "Expected at least one #{selector.inspect} element " \
+                    "containing #{substring.inspect}, found none")
+      # rubocop:enable Minitest/AssertWithExpectedArgument
+    end
+  end
+
+  # ActiveJob::Base.logger holds its own reference, copied from
+  # Rails.logger once at boot -- it's not a live delegate, so a
+  # job's log output (e.g. ActiveJob::LogSubscriber's own
+  # retry-exhaustion/discard messages) wouldn't be captured by
+  # swapping Rails.logger alone.
   def with_captured_logger
     log_output = StringIO.new
     old_logger = Rails.logger
-    Rails.logger = Logger.new(log_output)
+    old_job_logger = ActiveJob::Base.logger
+    new_logger = Logger.new(log_output)
+    Rails.logger = new_logger
+    ActiveJob::Base.logger = new_logger
 
     yield
 
@@ -634,6 +674,22 @@ module GeneralExtensions
     log_output.string
   ensure
     Rails.logger = old_logger
+    ActiveJob::Base.logger = old_job_logger
+  end
+
+  # Minitest 5's own assert_equal(nil, ...) deprecation warning
+  # doesn't include a caller location in this app's test output, so a
+  # stray leftover call is unfindable by grep -- its nil-ness only
+  # shows up at runtime. Preview Minitest 6's actual future behavior
+  # now (fails outright via refute_nil -- see minitest/assertions.rb)
+  # instead of Minitest 5's silent warning: a real assertion failure
+  # comes with a full backtrace automatically, pointing straight at
+  # the offending call site.
+  def assert_equal(exp, act, msg = nil)
+    return assert_not_nil(exp, msg || "Use assert_nil if expecting nil.") if
+      exp.nil?
+
+    super
   end
 
   # assert_equal raises a deprecation warning in Minitest 5 when the

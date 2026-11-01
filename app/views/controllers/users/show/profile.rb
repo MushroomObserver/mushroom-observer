@@ -66,23 +66,21 @@ module Views::Controllers::Users
 
       def render_primary_location
         p do
-          strong { "#{:show_user_primary_location.l}:" }
-          whitespace
+          strong { append_colon(:show_user_primary_location.l) }
           Link(type: :location, location: @show_user.location)
         end
       end
 
       def render_mailing_address
         p do
-          strong { "#{:show_user_mailing_address.l}:" }
-          plain(" #{@show_user.mailing_address}")
+          strong { append_colon(:show_user_mailing_address.l) }
+          plain(@show_user.mailing_address.to_s)
         end
       end
 
       def render_personal_herbarium
         p do
-          strong { "#{:show_user_personal_herbarium.l}:" }
-          whitespace
+          strong { append_colon(:show_user_personal_herbarium.l) }
           Link(type: :get, name: @show_user.personal_herbarium.name,
                target: @show_user.personal_herbarium.show_link_args) do
             trusted_html(@show_user.personal_herbarium.name.t)

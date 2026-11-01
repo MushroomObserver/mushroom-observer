@@ -12,6 +12,9 @@ module Views::Controllers::HerbariumRecords
     def test_new_record_form
       html = render_form(model: HerbariumRecord.new)
 
+      assert_html(
+        html, "input[name='observation_id'][value='#{@observation.id}']"
+      )
       assert_html(html, "input[name='herbarium_record[herbarium_name]']")
       assert_html(html, "input[data-autocompleter--herbarium-target='input']")
       assert_html(html, "input[name='herbarium_record[initial_det]']")
@@ -25,6 +28,7 @@ module Views::Controllers::HerbariumRecords
       record = herbarium_records(:interesting_unknown)
       html = render_form(model: record)
 
+      assert_html(html, "input[name='observation_id']", count: 0)
       assert_html(html, "button[type='submit']", text: :save.ti)
     end
 
@@ -37,9 +41,9 @@ module Views::Controllers::HerbariumRecords
     end
 
     def test_local_form_omits_turbo
-      html = render_form(model: HerbariumRecord.new, local: true)
+      html = render_form(model: HerbariumRecord.new, turbo: false)
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     def test_auto_url_for_new_record
@@ -57,12 +61,12 @@ module Views::Controllers::HerbariumRecords
 
     private
 
-    def render_form(model:, action: "/test_action", local: false)
+    def render_form(model:, action: "/test_action", turbo: true)
       render(Form.new(model,
                       observation: @observation,
                       action: action,
                       id: "herbarium_record_form",
-                      local: local))
+                      turbo: turbo))
     end
   end
 end

@@ -10,9 +10,7 @@ class API2::SpeciesListsTest < UnitTestCase
   #  :section: SpeciesList Requests
   # ---------------------------------
 
-  def params_get(**)
-    { method: :get, action: :species_list }.merge(**)
-  end
+  def api2_model = SpeciesList
 
   def spl_sample
     @spl_sample ||= SpeciesList.all.sample
@@ -161,15 +159,8 @@ class API2::SpeciesListsTest < UnitTestCase
     @location = locations(:burbank)
     @where    = locations(:burbank).name
     @notes    = "some notes"
-    params = {
-      method: :post,
-      action: :species_list,
-      api_key: @api_key.key,
-      title: @title,
-      date: "2017-11-17",
-      location: @location.id,
-      notes: @notes
-    }
+    params = params_post(title: @title, date: "2017-11-17",
+                         location: @location.id, notes: @notes)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:title))
     assert_api_fail(params.merge(title: SpeciesList.first.title))
@@ -182,12 +173,7 @@ class API2::SpeciesListsTest < UnitTestCase
     @location = Location.unknown
     @where    = Location.unknown.name
     @notes    = nil
-    params = {
-      method: :post,
-      action: :species_list,
-      api_key: @api_key.key,
-      title: @title
-    }
+    params = params_post(title: @title)
     assert_api_pass(params)
     assert_last_species_list_correct
 
@@ -196,13 +182,7 @@ class API2::SpeciesListsTest < UnitTestCase
     @location = nil
     @where    = "Bogus, Arkansas, USA"
     @notes    = nil
-    params = {
-      method: :post,
-      action: :species_list,
-      api_key: @api_key.key,
-      title: @title,
-      location: @where
-    }
+    params = params_post(title: @title, location: @where)
     assert_api_pass(params)
     assert_last_species_list_correct
   end
@@ -217,16 +197,10 @@ class API2::SpeciesListsTest < UnitTestCase
     @location = locations(:mitrula_marsh)
     @where    = locations(:mitrula_marsh).name
     @notes    = "new notes"
-    params = {
-      method: :patch,
-      action: :species_list,
-      api_key: @api_key.key,
-      id: rolfs_spl.id,
-      set_title: @title,
-      set_date: "2017-11-17",
-      set_location: @location.display_name,
-      set_notes: @notes
-    }
+    params = params_patch(id: rolfs_spl.id, set_title: @title,
+                          set_date: "2017-11-17",
+                          set_location: @location.display_name,
+                          set_notes: @notes)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_spl.id))
     assert_api_fail(
@@ -243,11 +217,7 @@ class API2::SpeciesListsTest < UnitTestCase
   def test_deleting_species_lists
     rolfs_spl = species_lists(:first_species_list)
     marys_spl = species_lists(:unknown_species_list)
-    params = {
-      method: :delete,
-      action: :species_list,
-      api_key: @api_key.key
-    }
+    params = params_delete
     assert_api_fail(params.merge(id: marys_spl.id))
     assert_api_pass(params.merge(id: rolfs_spl.id))
     assert_not_nil(SpeciesList.safe_find(marys_spl.id))

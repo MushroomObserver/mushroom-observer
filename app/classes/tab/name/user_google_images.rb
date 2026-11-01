@@ -16,6 +16,6 @@ class Tab::Name::UserGoogleImages < Tab::Name::ExternalBase
 
   def path
     format("https://images.google.com/images?q=%s",
-           @name.real_text_name(@user))
+           url_encode(@name.real_text_name(@user)))
   end
 end

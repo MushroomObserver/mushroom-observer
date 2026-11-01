@@ -4,19 +4,16 @@
 # Rendered by `names/{new,edit}.rb`.
 module Views::Controllers::Names
   class Form < ::Components::ApplicationForm
-    def initialize(model, **options)
-      @user = options.delete(:user)
-      @name_string = options.delete(:name_string) || ""
-      @misspelling = options.delete(:misspelling)
-      @correct_spelling = options.delete(:correct_spelling)
-      @approved_rank = options.delete(:approved_rank)
-      super(model, **options) # rubocop:disable Style/SuperArguments
+    prop :user, ::User
+    prop :name_string, String, default: "" do |value|
+      value || ""
     end
+    prop :misspelling, _Nilable(_Boolean), default: nil
+    prop :correct_spelling, _Nilable(String), default: nil
+    prop :approved_rank, _Nilable(String), default: nil
 
     def view_template
       super do
-        submit(button_text, center: true)
-
         render_approved_rank_field
         render_admin_locked_checkbox if in_admin_mode?
 
@@ -90,21 +87,17 @@ module Views::Controllers::Names
                      label: :form_names_text_name,
                      value: @name_string,
                      rows: 1,
-                     data: { autofocus: true }) do |f|
-        f.with_append do
-          Help(element: :p, content: :form_names_text_name_help.l)
-        end
-      end
+                     help: :form_names_text_name_help.l,
+                     help_collapse: true,
+                     data: { autofocus: true })
     end
 
     def render_author_field
       textarea_field(:author,
                      label: :authority.ti,
-                     rows: 2) do |f|
-        f.with_append do
-          Help(element: :p, content: :form_names_author_help.l)
-        end
-      end
+                     rows: 2,
+                     help: :form_names_author_help.l,
+                     help_collapse: true)
     end
 
     def render_locked_fields
@@ -153,13 +146,10 @@ module Views::Controllers::Names
     def render_citation_field
       textarea_field(:citation,
                      label: :citation.ti,
-                     rows: 3) do |f|
-        f.with_append do
-          Help(element: :p,
-               content: [:form_names_citation_help.l,
-                         :form_names_citation_textilize_note.l].safe_join)
-        end
-      end
+                     rows: 3,
+                     help: [:form_names_citation_help.l,
+                            :form_names_citation_textilize_note.l].safe_join,
+                     help_collapse: true)
     end
 
     def render_misspelling_fields

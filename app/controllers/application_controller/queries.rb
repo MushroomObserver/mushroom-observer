@@ -7,8 +7,7 @@
 #
 #  update_stored_query::    Saves a passed query and stores id in the session.
 #  clear_query_in_session:: Clears out Query stored in session below.
-#  store_query_in_session:: Stores Query in session for use by
-#                           create_species_list.
+#  store_query_in_session:: Stores Query in session for create_species_list.
 #  query_from_session::     Gets Query that was stored in the session above.
 #
 #  current_query::          Returns @query, #query_from_q_param or
@@ -17,6 +16,7 @@
 #  query_from_session::     Query instance from the session[:query_record]
 #  add_q_param::            Adds :q param to path or hash. Accepts passed query.
 #  q_param::                Returns :q param hash. Accepts passed query.
+#  index_filter::           Flat, same-model q_param -- see Query#index_filter.
 #  redirect_to_next_object:: Find next object from a Query and redirect to its
 #                            show page.
 #
@@ -24,7 +24,7 @@ module ApplicationController::Queries
   def self.included(base)
     base.helper_method(
       :query_from_session, :query_params, :add_q_param, :q_param,
-      :find_or_create_query, :current_query
+      :index_filter, :find_or_create_query, :current_query
     )
   end
 
@@ -113,23 +113,15 @@ module ApplicationController::Queries
       query.params.any? { |arg, val| new_args[arg] != val }
   end
 
-  # Turn old query into a new query for given model — re-use the
-  # old query as-is when its model matches; otherwise try to bridge
-  # via a subquery (e.g. an Observation query landing on the Images
-  # index becomes an Image query with `observation_query: {...}`).
-  # Returns nil only when no bridge is defined for the
-  # filter→target pair (see `RELATED_QUERIES` in
-  # `Query::Modules::Subqueries`).
-  #
-  # Bug fix for #4360: previously this method returned nil for any
-  # model mismatch, causing the caller to fall back to the
-  # unfiltered index. So a URL like
-  # `/images?q[model]=Observation&q[pattern]=Foo` (which is a
-  # legitimate cross-model search produced by MO's search links)
-  # silently rendered the full Image index — a >60s response that
-  # could trigger downtime alerts. The bridge below resolves to a
-  # proper Image query that returns 0 hits when no Observations
-  # match.
+  # Turn old query into a new query for given model -- re-use the
+  # old query as-is when its model matches; otherwise bridge via a
+  # subquery (e.g. an Observation query landing on the Images index
+  # becomes an Image query with `observation_query: {...}`). Returns
+  # nil only when no bridge is defined for the filter->target pair
+  # (see `RELATED_QUERIES` in `Query::Modules::Subqueries`) -- the
+  # caller then falls back to the unfiltered index, which for a
+  # cross-model search link is wrong (and, unbridged, was slow
+  # enough to trigger downtime alerts).
   def find_new_query_for_model(model, old_query)
     return nil unless old_query
     return old_query if old_query_correct_for_model(model, old_query)
@@ -190,13 +182,9 @@ module ApplicationController::Queries
 
   ##############################################################################
   #
-  #  :section: Query parameters and session[:query_record]
-  #
-  #  The general idea is that the user executes a search or requests an index,
-  #  then clicks on a result.  This takes the user to a show_object page.
-  #  This page "knows" about the search or index via session[:query_record].
-  #  When the user then clicks on "prev" or "next", it can then step through
-  #  the query results.
+  #  :section: Query parameters and session[:query_record] -- lets a
+  #  show_object page step through the search/index results that led
+  #  to it, via "prev"/"next".
   #
   ##############################################################################
 
@@ -230,6 +218,18 @@ module ApplicationController::Queries
     query = @query || query_from_q_param || query_from_session
     query.viewer = @user if query
     query
+  end
+
+  # Extracts just the order_by choice carried by an incoming `q[...]`
+  # round trip (what `Sorter`'s links send) without inheriting any
+  # of that query's other filters -- for actions that always force
+  # a base filter (e.g. `editable_by_user:`) and only let the sort
+  # choice vary from the URL.
+  def sort_order_from_params(model, default = nil)
+    q = query_from_q_param
+    return default unless q && q.model.name.to_sym == model.to_sym
+
+    q.params[:order_by] || default
   end
 
   # Opposite is `q_param` below
@@ -289,7 +289,7 @@ module ApplicationController::Queries
     return path_or_params if browser.bot? || !(q_param = q_param(query))
 
     if path_or_params.is_a?(String) # i.e., if "path_or_params" arg is a path
-      append_q_param_to_path(path_or_params, q_param)
+      Query.merge_q_param_into_url(path_or_params, q_param)
     else
       path_or_params[:q] = q_param
       path_or_params
@@ -305,19 +305,13 @@ module ApplicationController::Queries
     klass.is_a?(Class) && klass < Query
   end
 
-  def append_q_param_to_path(path, q_param)
-    return path unless q_param
+  # Shared by q_param/index_filter: nil for bots, else the passed
+  # query (saved first if unsaved) or current_query.
+  def resolve_query_param(query)
+    return nil if browser.bot?
 
-    # Figure out if there's an existing URI query_string, like "flow=next"
-    # This query_string is not our q param, it's all the other params.
-    uri = URI.parse(path)
-    query_string = uri.query
-
-    # Parse the query_string as a Ruby hash, and add `q`
-    hash = query_string ? Rack::Utils.parse_query(query_string) : {}
-    hash["q"] = q_param
-    uri.query = hash.to_query
-    uri.to_s
+    query.save if query && !query.id
+    query || current_query
   end
 
   public
@@ -326,13 +320,25 @@ module ApplicationController::Queries
   #   link_to(@object.show_link_args.merge(q: q_param))
   # Saves the query, but does not set session[:query_record]
   def q_param(query = nil)
-    return nil if browser.bot?
-
-    query.save if query && !query.id
-    query ||= current_query
-    query&.q_param
+    resolve_query_param(query)&.q_param
   end
   # helper_method :q_param # defined in application_controller.rb
+
+  # Same as q_param, but returns the flat filter hash (no :model) --
+  # see Query#index_filter. Unlike q_param, `model` is required: the
+  # ambient `current_query` fallback can be leftover state from a
+  # different model (e.g. last search was Observations, now viewing
+  # a Name edit page). q_param tags a mismatched query with :model
+  # for the receiving page to reconcile, but a flat index_filter hash
+  # carries no tag, so an unchecked mismatch could apply an unrelated
+  # model's filter attrs. Returns nil when the models don't match.
+  def index_filter(model, query = nil)
+    resolved = resolve_query_param(query)
+    return nil unless resolved && resolved.model.name.to_sym == model.to_sym
+
+    resolved.index_filter
+  end
+  # helper_method :index_filter
 
   # NOTE: these two methods add q: param to urls built from controllers/actions.
   def redirect_with_query(args, query = nil)
@@ -364,22 +370,16 @@ module ApplicationController::Queries
     end
   end
 
-  # This is the common code for all the 'prev/next_object' actions.  Pass in
-  # the current object and direction (:prev or :next), and it looks up the
-  # query, grabs the next object, and redirects to the appropriate
-  # 'show_object' action.
+  # Common code for the 'prev/next_object' actions: looks up the
+  # query, grabs the next object, and redirects to 'show_object'.
   #
   #   def next_image
   #     redirect_to_next_object(:next, Image, params[:id].to_s)
   #   end
   #
-  # Returns truthy on both branches so callers chaining `... and return`
-  # don't silently fall through when the object isn't found (the
-  # not-found path internally redirects to the index via
-  # `find_or_goto_index`; before this change it then returned nil
-  # because of the implicit-return guard, which combined with the
-  # caller's `and return` walked control into `show`'s body without
-  # `@object` set).
+  # Returns truthy on both branches so a caller chaining
+  # `... and return` doesn't fall through into `show`'s body with
+  # `@object` unset when the object isn't found.
   def redirect_to_next_object(method, model, id)
     return true unless (object = find_or_goto_index(model, id))
 

@@ -47,6 +47,12 @@ if detail
       other_images << image
     end
   end
+  # The thumbnail may be an occurrence sibling's image, not one of
+  # this observation's own.
+  if object.thumb_image_id && other_images.length == object.images.length &&
+     object.thumb_image
+    json.primary_image(json_image(object.thumb_image))
+  end
   json.images(other_images.map { |x| json_image(x) }) \
     if other_images.any?
   json.comments(object.comments.map { |x| json_comment(x) }) \

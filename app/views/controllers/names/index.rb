@@ -18,11 +18,11 @@ module Views::Controllers::Names
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Name)
     prop :user, _Nilable(::User), default: nil
-    # The `needs_description` subaction sets `@help` to a
-    # translation key Symbol; other subactions leave it nil.
+    # A translation key Symbol when the active query filters on
+    # `needs_description`; nil otherwise.
     prop :help, _Nilable(Symbol), default: nil
-    # Set by the `has_descriptions` subaction; per-row descriptions
-    # columns render only when this is true.
+    # True when the active query filters on `has_descriptions`;
+    # per-row descriptions columns render only then.
     prop :has_descriptions, _Boolean, default: false
     # Pattern-search-with-zero-results path: the controller fills
     # this with alternate spellings to suggest.

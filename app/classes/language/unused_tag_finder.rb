@@ -77,6 +77,7 @@ class Language::UnusedTagFinder
     rss_one_ visual_group_count_ show_location_ search_value_
     search_term_ pattern_ email_subject_occurrence_
     email_object_change_reason_ api_ source_credit_ log_
+    field_slip_attach_reason_
   ].freeze
   KNOWN_DYNAMIC_SUFFIXES = %w[_help _with_text _success _note].freeze
   KNOWN_DYNAMIC_SUBSTRINGS = %w[_term_ _title_].freeze

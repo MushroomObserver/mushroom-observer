@@ -4,10 +4,7 @@
 # `Projects::AdminRequestsController#new`.
 module Views::Controllers::Projects::AdminRequests
   class Form < ::Components::ApplicationForm
-    def initialize(model, project:, **)
-      @project = project
-      super(model, **)
-    end
+    prop :project, ::Project
 
     def view_template
       raw(:admin_request_note.tp) # rubocop:disable Rails/OutputSafety

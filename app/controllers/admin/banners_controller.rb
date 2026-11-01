@@ -3,7 +3,7 @@
 class Admin::BannersController < AdminController
   def index
     @banner = Banner.current || Banner.new
-    render(Views::Controllers::Admin::Banners::Index.new(banner: @banner))
+    render_index_view
   end
 
   def create
@@ -15,17 +15,24 @@ class Admin::BannersController < AdminController
     else
       flash_error(:banner_update_failure.t)
       @banner = Banner.current || @banner
-      render(Views::Controllers::Admin::Banners::Index.new(banner: @banner))
+      render_index_view_invalid
     end
   end
 
   private
 
-  def banner_params
-    params.require(:banner).permit(:message).merge(version: next_version)
+  def render_index_view(status: :ok, **render_opts)
+    render(Views::Controllers::Admin::Banners::Index.new(banner: @banner),
+           status: status, **render_opts)
   end
 
-  def next_version
-    (Banner.maximum(:version) || 0) + 1
+  def render_index_view_invalid(**)
+    render_index_view(**)
+    self.status = :unprocessable_content
+  end
+
+  def banner_params
+    params.require(:banner).permit(:message).
+      merge(version: Banner.next_version)
   end
 end

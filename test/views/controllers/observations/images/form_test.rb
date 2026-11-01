@@ -126,13 +126,11 @@ module Views::Controllers::Observations::Images
       )
     end
 
-    def test_renders_two_submit_buttons
+    def test_renders_submit_button
       img = images(:agaricus_campestris_image)
       html = render_form(image: img)
 
-      # One above the fields, one in the footer.
-      assert_html(html, "button[type='submit']", text: :save_edits.ti,
-                                                 count: 2)
+      assert_html(html, "button[type='submit']", text: :save_edits.ti)
     end
 
     private

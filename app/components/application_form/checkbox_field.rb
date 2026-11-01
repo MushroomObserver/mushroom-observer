@@ -58,24 +58,20 @@ class Components::ApplicationForm < Superform::Rails::Form
         # form control).
         render_boolean_with_wrapper(label_for: nil) { yield(self) }
       else
-        render_boolean_with_wrapper { render_boolean_inputs }
+        render_boolean_with_wrapper(label_for: boolean_label_for) do
+          render_boolean_inputs
+        end
       end
     end
 
-    # Replaces the upstream `Superform::Rails::Components::Checkbox`
-    # boolean-mode rendering so the hidden sidecar gets `autocomplete="off"`
-    # (matching Rails' `form.check_box` output — browsers otherwise
-    # repopulate the hidden's "0" on back-button and silently clobber a
-    # checked box).
-    #
-    # `checked_value:` and `unchecked_value:` kwargs mirror Rails'
-    # `form.check_box(field, options, checked, unchecked)` positional
-    # args, so callers can use "yes"/"no" or other non-boolean values
-    # without falling back to bare `input(type: :checkbox)`.
-    #
-    # When `disabled: true` is passed, the hidden sidecar is omitted —
-    # disabled inputs aren't submitted, so the sidecar would be dead
-    # markup (and the checkbox itself never toggles).
+    # Replaces upstream `Superform::Rails::Components::Checkbox`'s
+    # boolean-mode rendering so the hidden sidecar gets
+    # `autocomplete="off"` (matches Rails' `form.check_box`) -- without
+    # it, browsers repopulate the hidden "0" on back-button and
+    # clobber a checked box. `checked_value:`/`unchecked_value:`
+    # mirror Rails' checked/unchecked positional args, for values
+    # like "yes"/"no". `disabled: true` omits the sidecar, since
+    # disabled inputs aren't submitted.
     def render_boolean_inputs
       unless disabled?
         input(name: field.dom.name, type: :hidden,
@@ -151,20 +147,12 @@ class Components::ApplicationForm < Superform::Rails::Form
       )
     end
 
-    # Emit the array-mode input directly rather than delegating to
-    # upstream's `Superform::Rails::Components::Checkbox`. Upstream's
-    # `Checkbox` decides which of {boolean, collection, array} branch
-    # to render based on `field.parent.is_a?(Superform::Field)`; when
-    # called from this iteration the parent is the form root, so
-    # upstream picks the boolean branch — which renders all per-option
-    # inputs with the bare `dom.id` (duplicate ids) and a hidden 0/1
-    # pair per option (wrong for an array submission).
-    #
-    # The shape emitted here mirrors MO's existing block-mode
-    # `option(value)` helper above: one `<input type="checkbox"
-    # id="{field_id}_{index}" name="{field_name}[]" value="{value}">`
-    # per option, wrapped in a `<label for="{id}">` so click-focus and
-    # screen-reader association both work.
+    # Emits the array-mode input directly instead of delegating to
+    # upstream's `Superform::Rails::Components::Checkbox`: upstream
+    # picks its boolean branch when `field.parent` isn't a
+    # `Superform::Field` (true here, since the parent is the form
+    # root), which renders duplicate bare `dom.id`s and a hidden 0/1
+    # pair per option — wrong for an array submission.
     def render_checkbox_option(choice)
       value_str = choice.value.to_s
       input_id = option_input_id(value_str)
@@ -202,14 +190,15 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # --- Boolean mode wrapper ---
 
+    # The help trigger renders as a sibling of `<label>`, not nested
+    # inside it -- a click anywhere inside a checkbox's `<label>`
+    # toggles the checkbox itself.
     def render_boolean_with_wrapper(label_for: checkbox_id, &checkbox_block)
       div(class: boolean_wrap_class) do
         label_attrs = label_attributes
         label_attrs = label_attrs.merge(for: label_for) if label_for
-        label(**label_attrs) do
-          render_boolean_content(&checkbox_block)
-          render_help_in_label_row
-        end
+        label(**label_attrs) { render_boolean_content(&checkbox_block) }
+        render_help_in_label_row
         render_help_after_field
         render(append_slot) if append_slot
       end
@@ -238,6 +227,19 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Use custom ID if provided, otherwise use Superform's generated ID
     def checkbox_id
       @attributes[:id] || field.dom.id
+    end
+
+    # Defaults to an explicit `for="<checkbox_id>"` (unchanged
+    # behavior), but a caller can pass `label_for: nil` when the
+    # checkbox's id isn't guaranteed unique on the page (e.g. content
+    # that gets cloned elsewhere in the DOM, like lightGallery's
+    # caption snapshot) -- an explicit `for=` pointing at a duplicated
+    # id makes browsers' label-click activation ambiguous even though
+    # the checkbox is ALSO nested inside this same label, which is a
+    # sufficient (and unambiguous) association on its own per the
+    # HTML label-activation spec.
+    def boolean_label_for
+      wrapper_options.fetch(:label_for) { checkbox_id }
     end
 
     def label_position_before?

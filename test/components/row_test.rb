@@ -4,30 +4,30 @@ require("test_helper")
 
 class RowTest < ComponentTestCase
   def test_default_is_a_plain_row_div
-    html = render(Components::Row.new)
+    html = render_row
 
-    assert_html(html, "div.row")
+    assert_html(html, ".row")
   end
 
+  # rubocop:disable-next MO/RedundantTagInSelector
   def test_element_renders_alternate_tag
-    html = render(Components::Row.new(element: :ul))
+    html = render_row(element: :ul)
 
     assert_html(html, "ul.row")
     assert_no_html(html, "div.row")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_extra_class_merges_with_row_class
-    html = render(Components::Row.new(class: "mt-3 align-items-center"))
+    html = render_row(class: "mt-3 align-items-center")
 
-    assert_html(html, "div.row.mt-3.align-items-center")
+    assert_html(html, ".row.mt-3.align-items-center")
   end
 
   def test_other_attrs_pass_through
-    html = render(Components::Row.new(
-                    id: "main_row", data: { controller: "foo" }
-                  ))
+    html = render_row(id: "main_row", data: { controller: "foo" })
 
-    assert_html(html, "div.row#main_row[data-controller='foo']")
+    assert_html(html, ".row#main_row[data-controller='foo']")
   end
 
   def test_yields_content
@@ -35,10 +35,14 @@ class RowTest < ComponentTestCase
       render(Components::Row.new) { plain("hello") }
     end)
 
-    assert_html(html, "div.row", text: "hello")
+    assert_html(html, ".row", text: "hello")
   end
 
   private
+
+  def render_row(**, &block)
+    render(Components::Row.new(**), &block)
+  end
 
   # Returns an anonymous Components::Base instance whose view_template
   # runs the given block in Phlex context (so `plain`, `div`, `render`

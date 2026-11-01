@@ -4,8 +4,14 @@ module InatImportsController::FormBuilders
   # Params carried verbatim from the new form through the confirm page.
   PASSTHROUGH_PARAM_KEYS = [
     :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
-    :recheck_all, :skip_inat_writeback
+    :recheck_all, :skip_inat_writeback, :inat_project, :inat_project_id,
+    :project_site
   ].freeze
+
+  # Params that are literally "1" when checked/selected, absent or any
+  # other value otherwise -- read verbatim, no per-field branching.
+  CHECKBOX_FLAG_PARAMS = [:all, :consent, :import_others,
+                          :recheck_all].freeze
 
   private
 
@@ -13,80 +19,104 @@ module InatImportsController::FormBuilders
     FormObject::InatImportConfirm.new(
       **PASSTHROUGH_PARAM_KEYS.index_with { |key| params[key] },
       import_all: params[:all],
-      import_others: (import_others? ? "1" : nil)
+      import_others: ("1" if import_others?),
+      create_skeletons: ("1" if create_skeletons?)
     )
   end
 
-  def reload_form
-    render_new_form(submitted: reload_form_params)
-  end
-
-  def reload_form_params
-    base_reload_params.merge(constraint_reload_params)
-  end
-
-  def base_reload_params
-    {
-      username: params[:inat_username],
-      consent: params[:consent],
-      import_others: params[:import_others],
-      recheck_all: params[:recheck_all],
-      skip_writeback: params[:skip_inat_writeback]
-    }
-  end
-
-  def constraint_reload_params
-    {
-      inat_ids: params[:inat_ids],
-      inat_url: params[:original_inat_url] || params[:inat_url],
-      all: params[:all],
-      choose_method: params[:choose_method]
-    }
-  end
-
-  def render_new_form(submitted: {})
+  def render_new_view(status: :ok, **render_opts)
     render(
       Views::Controllers::InatImports::New.new(
-        form: build_new_form(submitted),
+        form: build_new_form,
         super_importer: InatImport.super_importer?(@user),
         admin: in_admin_mode?,
+        project_site: scoped_project_site,
         has_prior_imports: InatImport.exists?(user: @user)
-      )
+      ),
+      status: status, **render_opts
     )
   end
 
-  def build_new_form(submitted)
+  # `params[...]` naturally carries a resubmission's values forward
+  # (Superform's namespaced fields are already flattened to top-level
+  # by flatten_new_form_params/flatten_confirm_params), and is
+  # naturally blank on a fresh GET -- so this needs no separate
+  # "fresh vs. reload" branch, just `params` read directly with the
+  # same fallbacks either way.
+  def build_new_form
     FormObject::InatImport.new(
-      inat_username: submitted.fetch(:username, @user.inat_username),
-      inat_ids: submitted[:inat_ids],
-      inat_url: submitted[:inat_url],
-      all: ("1" if submitted[:all] == "1"),
-      choose_method: submitted[:choose_method] ||
-                     derive_choose_method(submitted),
-      consent: ("1" if submitted[:consent] == "1"),
-      import_others: ("1" if submitted[:import_others] == "1"),
-      recheck_all: ("1" if submitted[:recheck_all] == "1"),
-      skip_inat_writeback: initial_skip_writeback(submitted)
+      inat_username: params[:inat_username] || @user.inat_username,
+      inat_ids: params[:inat_ids],
+      inat_url: reload_inat_url,
+      choose_method: params[:choose_method] || derive_choose_method,
+      **project_form_params,
+      **checkbox_flag_params, **defaulted_checkbox_params
     )
   end
 
-  def derive_choose_method(submitted)
-    return "all" if submitted[:all] == "1"
-    return "ids" if submitted[:inat_ids].present?
-    return "url" if submitted[:inat_url].present?
+  def project_form_params
+    { inat_project: params[:inat_project],
+      inat_project_id: params[:inat_project_id],
+      project_site: params[:project_site] }
+  end
+
+  def checkbox_flag_params
+    CHECKBOX_FLAG_PARAMS.index_with { |key| "1" if params[key] == "1" }
+  end
+
+  # Checkboxes whose fresh-form state is not simply unchecked.
+  def defaulted_checkbox_params
+    { skip_inat_writeback: initial_skip_writeback,
+      create_skeletons: initial_create_skeletons,
+      import_others: initial_import_others }
+  end
+
+  # A project admin's import covers the project's observations,
+  # whoever made them, so it arrives turned on (#5416). On reload the
+  # checkbox's hidden "0" field keeps the key, so honor its value.
+  def initial_import_others
+    return ("1" if params[:import_others] == "1") if
+      params.key?(:import_others)
+
+    ("1" if project_admin_import?)
+  end
+
+  # `normalize_inat_url_param!` overwrites params[:inat_url] in place
+  # with the normalized query string, saving the pre-normalized value
+  # to params[:original_inat_url] first -- prefer that original text
+  # for redisplay so the user sees what they actually typed.
+  def reload_inat_url
+    params[:original_inat_url] || params[:inat_url]
+  end
+
+  def derive_choose_method
+    return "all" if params[:all] == "1"
+    return "ids" if params[:inat_ids].present?
+    return "url" if reload_inat_url.present?
 
     "all"
   end
 
-  # The fresh form (no :skip_writeback key) pre-checks the box to mirror the
-  # default that will apply if the admin doesn't touch it: skip in
-  # development, write back in production. On reload, honor the submitted
-  # state.
-  def initial_skip_writeback(submitted)
+  # The fresh form (a GET with no params submitted at all, so
+  # :skip_inat_writeback is absent from params entirely) pre-checks the
+  # box to mirror the default that will apply if the admin doesn't
+  # touch it: skip in development, write back in production. On reload
+  # (after a POST), the key is always present -- CheckboxField's hidden
+  # "0" field means an unchecked box still submits the key, just with
+  # value "0" -- so honor the submitted state instead.
+  def initial_skip_writeback
     return ("1" if Rails.env.development?) unless
-      submitted.key?(:skip_writeback)
+      params.key?(:skip_inat_writeback)
 
-    ("1" if submitted[:skip_writeback] == "1")
+    ("1" if params[:skip_inat_writeback] == "1")
+  end
+
+  # Pre-checked on the fresh form (no :create_skeletons key); on reload
+  # the checkbox's hidden "0" field keeps the key, so honor its value.
+  def initial_create_skeletons
+    return "1" unless params.key?(:create_skeletons)
+
+    ("1" if params[:create_skeletons] == "1")
   end
 
   # Superform namespaces hidden fields under the model key.
@@ -95,7 +125,7 @@ module InatImportsController::FormBuilders
     confirm = params[:inat_import_confirm]
     return unless confirm
 
-    (PASSTHROUGH_PARAM_KEYS + [:import_others]).each do |key|
+    (PASSTHROUGH_PARAM_KEYS + [:import_others, :create_skeletons]).each do |key|
       merge_form_param(confirm, key)
     end
     params[:all] ||= confirm[:import_all]
@@ -112,7 +142,7 @@ module InatImportsController::FormBuilders
     return unless new_form
 
     keys = PASSTHROUGH_PARAM_KEYS - [:original_inat_url] +
-           [:import_others, :choose_method]
+           [:import_others, :create_skeletons, :choose_method]
     keys.each { |key| merge_form_param(new_form, key) }
     params[:all] = "1" if params[:choose_method] == "all"
     params[:all] ||= new_form[:all]

@@ -8,11 +8,13 @@ import "jquery" // this import first, then your other imports that use `$`
 import "bootstrap"
 
 import "@hotwired/turbo-rails"
-// Must setFormMode("optin") or all forms will need to provide a turbo response.
-// https://stackoverflow.com/questions/70921317/how-can-i-disable-hotwire-turbo-the-turbolinks-replacement-for-all-forms-in
-// form, or button like delete/patch: set data-turbo="true" to opt in
-// link_to with GET: set data-turbo-stream="true" to opt in
-Turbo.config.forms.mode = "optin"
+// Rails 8 default: every form submits via Turbo unless it (or an
+// ancestor) carries data-turbo="false". Components::ApplicationForm's
+// `turbo:` prop always emits an explicit data-turbo attribute per
+// form, so this global mode only matters for the handful of raw
+// <form> tags outside that framework -- each of those already sets
+// data-turbo="false" explicitly where needed.
+Turbo.config.forms.mode = "on"
 // https://stackoverflow.com/a/77434363/3357635
 // use: <%= turbo_stream.close_modal("modal_#{obs.id}_naming") %>
 Turbo.StreamActions.close_modal = function () {
@@ -48,6 +50,26 @@ Turbo.StreamActions.prepend_once = function () {
   this.targetElements.forEach((target) => {
     target.prepend(this.templateContent.cloneNode(true))
   });
+}
+
+// A page refresh (refetched with the viewer's session) that keeps the
+// flash in the stream's template, which the refetched page would
+// otherwise replace with its empty #page_flash. Used by
+// Inat::ObservationResyncer. The listener skips preview renders of a
+// cached snapshot, and drops out if the viewer has navigated elsewhere.
+Turbo.StreamActions.refresh_with_flash = function () {
+  const flash = this.templateContent
+  const url = document.baseURI
+  const carryFlash = (event) => {
+    if (document.documentElement.hasAttribute("data-turbo-preview")) return
+
+    document.removeEventListener("turbo:before-render", carryFlash)
+    if (window.location.href !== url) return
+
+    event.detail.newBody.querySelector("#page_flash")?.replaceChildren(flash)
+  }
+  document.addEventListener("turbo:before-render", carryFlash)
+  Turbo.session.refresh(url)
 }
 
 import "@rails/request.js"

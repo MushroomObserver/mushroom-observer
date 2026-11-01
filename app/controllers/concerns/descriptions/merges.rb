@@ -19,9 +19,7 @@ module Descriptions::Merges
 
       # render the form, if have permission
       if in_admin_mode? || @src.is_reader?(@user)
-        klass = "Views::Controllers::#{controller_path.camelize}::New".
-                constantize
-        render(klass.new(description: @description, user: @user))
+        render_new_view
         return
       end
 
@@ -87,43 +85,26 @@ module Descriptions::Merges
 
       flash_error(:runtime_edit_description_denied.t)
       @description = @src
+      render_new_view_invalid
+      false
+    end
+
+    def render_new_view(status: :ok, **render_opts)
       klass = "Views::Controllers::#{controller_path.camelize}::New".
               constantize
-      render(klass.new(description: @description, user: @user))
-      false
+      render(klass.new(description: @description, user: @user),
+             status: status, **render_opts)
     end
 
     # Attempt to merge one description into another, deleting the old one
     # if requested.  It will only do so if there is no conflict on any of the
     # description fields, i.e. one or the other is blank for any given field.
     def perform_merge
-      src_notes  = @src.all_notes
-      dest_notes = @dest.all_notes
-      result = false
+      return false unless @dest.mergeable_notes?(@src)
 
-      # Mergeable if there are no fields which are non-blank in
-      # both descriptions.
-      if @src.class.all_note_fields.none? \
-           { |f| src_notes[f].present? && dest_notes[f].present? }
-        result = true
-
-        # Copy over all non-blank descriptive fields.
-        src_notes.each do |f, val|
-          @dest.send(:"#{f}=", val) if val.present?
-        end
-
-        # Save changes to destination.
-        @dest.save
-
-        # Copy over authors and editors.
-        @src.authors.each { |user| @dest.add_author(user) }
-        @src.editors.each { |user| @dest.add_editor(user) }
-
-        # Delete old description if requested.
-        delete_src_description_and_update_parent if @delete_after
-      end
-
-      result
+      @dest.merge_notes_from(@src)
+      delete_src_description_and_update_parent if @delete_after
+      true
     end
 
     def log_the_merge_flash_and_redirect
@@ -149,12 +130,32 @@ module Descriptions::Merges
       # derived from `@src.show_controller`. The model-side
       # `show_controller` returns a leading-slash string (e.g.
       # `/names/descriptions`); strip it before camelizing.
+      render_merge_conflict_view_invalid
+    end
+
+    # Dispatch to the parent controller's Phlex Edit view --
+    # `names/descriptions/edit` or `locations/descriptions/edit`,
+    # derived from `@src.show_controller`. The model-side
+    # `show_controller` returns a leading-slash string (e.g.
+    # `/names/descriptions`); strip it before camelizing.
+    def render_merge_conflict_view(status: :ok, **render_opts)
       controller_segment = @src.show_controller.to_s.sub(%r{^/}, "")
       klass = "Views::Controllers::#{controller_segment.camelize}::Edit".
               constantize
       render(klass.new(description: @description, user: @user,
                        licenses: @licenses, merge: @merge,
-                       old_desc_id: @old_desc_id))
+                       old_desc_id: @old_desc_id),
+             status: status, **render_opts)
+    end
+
+    # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+    # (confirmed against a real browser -- see turbo_submit_forms.md);
+    # needs a non-2xx status even though nothing "failed" -- the merge
+    # just can't complete without the user resolving the conflict by
+    # hand.
+    def render_merge_conflict_view_invalid(**)
+      render_merge_conflict_view(**)
+      self.status = :unprocessable_content
     end
 
     # Tentatively merge the fields by sticking src's notes after dest's wherever

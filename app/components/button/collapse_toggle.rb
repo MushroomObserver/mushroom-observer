@@ -23,16 +23,21 @@
 class Components::Button::CollapseToggle < Components::Button
   include Components::Button::CollapseContent
 
-  def initialize(target_id:, open_text: nil, closed_text: nil,
-                 collapsed: true, **opts)
-    @target_id   = target_id
-    @open_text   = open_text
-    @closed_text = closed_text
-    @collapsed   = collapsed
-    extra_data   = opts.delete(:data) || {}
-    opts[:data]  = { toggle: "collapse",
-                     target: "##{target_id}" }.merge(extra_data)
-    super(**opts)
+  prop :target_id, String
+  prop :open_text, _Nilable(String), default: nil
+  prop :closed_text, _Nilable(String), default: nil
+  prop :collapsed, _Boolean, default: true
+
+  # `validate_no_btn_classes!` is called explicitly here since
+  # declaring new props on this subclass makes Literal's generated
+  # super chain skip Button's own hand-written initialize body (see
+  # Button::CRUDBase for the same gotcha).
+  def initialize(target_id:, **opts)
+    extra_data  = opts.delete(:data) || {}
+    opts[:data] = { toggle: "collapse",
+                    target: "##{target_id}" }.merge(extra_data)
+    validate_no_btn_classes!(opts[:class])
+    super
   end
 
   private

@@ -102,7 +102,7 @@ class API2
     end
 
     def validate_unique_code!(code, exclude: nil)
-      existing = FieldSlip.find_by(code: code)
+      existing = FieldSlip.find_by(code: code.to_s.upcase)
       return unless existing && existing != exclude
 
       raise(CodeAlreadyUsed.new(code))

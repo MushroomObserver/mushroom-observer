@@ -79,8 +79,8 @@ module Names
       }
       post(:create, params: { query_names: params })
 
-      assert_redirected_to(controller: "/names", action: :index,
-                           params: { q: { model: :Name, **params } })
+      assert_search_redirected_to(controller: "/names",
+                                  params: params)
     end
 
     def test_create_names_search_nested
@@ -108,8 +108,8 @@ module Names
         misspellings: :include,
         created_at: %w[2007-01-01 2007-12-31]
       }
-      assert_redirected_to(controller: "/names", action: :index,
-                           params: { q: { model: :Name, **validated_params } })
+      assert_search_redirected_to(controller: "/names",
+                                  params: validated_params)
     end
 
     # ---------------------------------------------------------------
@@ -128,11 +128,9 @@ module Names
       post(:create, params: { query_names: params })
 
       # Should be sorted as [lower, higher] = ["Species", "Genus"]
-      assert_redirected_to(
-        controller: "/names", action: :index,
-        params: {
-          q: { model: :Name, rank: %w[Species Genus] }
-        }
+      assert_search_redirected_to(
+        controller: "/names",
+        params: { rank: %w[Species Genus] }
       )
     end
 
@@ -146,11 +144,9 @@ module Names
       post(:create, params: { query_names: params })
 
       # Should remain as ["Form", "Species"]
-      assert_redirected_to(
-        controller: "/names", action: :index,
-        params: {
-          q: { model: :Name, rank: %w[Form Species] }
-        }
+      assert_search_redirected_to(
+        controller: "/names",
+        params: { rank: %w[Form Species] }
       )
     end
 
@@ -194,11 +190,9 @@ module Names
       post(:create, params: { query_names: params })
 
       # Should filter out the blank value and create query with single rank
-      assert_redirected_to(
-        controller: "/names", action: :index,
-        params: {
-          q: { model: :Name, rank: ["Species"] }
-        }
+      assert_search_redirected_to(
+        controller: "/names",
+        params: { rank: "Species" }
       )
     end
 
@@ -212,11 +206,9 @@ module Names
       post(:create, params: { query_names: params })
 
       # Should filter out the blank value and create query with single rank
-      assert_redirected_to(
-        controller: "/names", action: :index,
-        params: {
-          q: { model: :Name, rank: ["Genus"] }
-        }
+      assert_search_redirected_to(
+        controller: "/names",
+        params: { rank: "Genus" }
       )
     end
 
@@ -231,11 +223,9 @@ module Names
       post(:create, params: { query_names: params })
 
       # Should create query without rank parameter
-      assert_redirected_to(
-        controller: "/names", action: :index,
-        params: {
-          q: { model: :Name, has_author: true }
-        }
+      assert_search_redirected_to(
+        controller: "/names",
+        params: { has_author: true }
       )
     end
   end

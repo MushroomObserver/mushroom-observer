@@ -17,6 +17,7 @@ module SpeciesLists
       get(:edit, params: params)
       assert_response(:success)
       assert_input_value(:species_list_title, "")
+      assert_select("form[data-turbo='true']")
 
       get(:edit, params: params.merge(species_list: { title: "blah" }))
       assert_response(:success)
@@ -37,7 +38,7 @@ module SpeciesLists
       # make sure we are actually trying to add some observations!
       assert(new_count > old_count)
       # make sure some of the query results are already in there
-      assert(query.results & spl.observations != [])
+      assert_not_equal(query.results & spl.observations, [])
 
       # The form does not require any starting species_list or obs
       put_requires_login(:update)

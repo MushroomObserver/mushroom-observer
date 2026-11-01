@@ -21,7 +21,7 @@ module FieldSlipsController::ObservationHandling
       @field_slip.adopt_user_from(obs)
       check_for_species_list(obs, params[:species_list])
       name_flash_for_project(name, @field_slip.project)
-      redirect_to(observation_url(obs.id))
+      redirect_to(permanent_observation_url(obs.id))
     else
       redirect_to(new_observation_url(field_code: @field_slip.code,
                                       place_name:, date:, notes:))

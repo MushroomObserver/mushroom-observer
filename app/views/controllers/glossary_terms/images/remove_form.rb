@@ -2,40 +2,37 @@
 
 module Views::Controllers::GlossaryTerms::Images
   # Bulk image-removal form: shows a matrix of images with a
-  # checkbox under each, plus matching top/bottom submit buttons.
+  # checkbox under each, plus a submit button below the matrix.
   # The controller action receives `params[:selected][image_id] =
   # "yes"` for selected images (and `"no"` for unselected, via the
   # hidden sidecar).
   #
-  # Generic across any model with an `.images` collection — currently
-  # only glossary terms use it, hence its location under the nested
-  # glossary_terms/images controller subtree.
+  # Lives under the nested glossary_terms/images controller subtree
+  # since a GlossaryTerm is the only model this is wired up for today.
   #
-  # @param model [#images] the parent object (e.g. a GlossaryTerm)
-  # @param form_action [String, Hash] URL or url_for-compatible hash
-  #   for the PUT request
+  # @param model [::GlossaryTerm] the parent object
   # @param user [User] current user (passed through to InteractiveImage)
   class RemoveForm < ::Components::ApplicationForm
-    def initialize(model, form_action:, user:, **)
-      @form_action_url = form_action
-      @user = user
-      # PUT request; Superform handles `_method` hidden field.
-      super(model, method: :put, **)
-    end
+    prop :model, ::GlossaryTerm, :positional
+    prop :user, ::User
 
-    def form_action
-      @form_action_url
+    def initialize(model, **attrs)
+      # PUT request; Superform handles `_method` hidden field.
+      super(model, method: :put, **attrs)
     end
 
     def view_template
       super do
-        submit_remove
         render_image_matrix
         submit_remove
       end
     end
 
     private
+
+    def form_action
+      detach_image_from_glossary_term_path(model.id)
+    end
 
     def submit_remove
       submit(:image_remove_remove.l, center: true)

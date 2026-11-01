@@ -54,13 +54,12 @@ module Views::Controllers::VisualGroups
 
     def render_description_and_approval
       p do
-        strong { plain("#{:description.ti}:") }
+        strong { append_colon(:description.ti) }
         br
         plain(@visual_group.description.to_s)
       end
       p do
-        strong { plain("#{:approved.ti}:") }
-        whitespace
+        strong { append_colon(:approved.ti) }
         plain(@visual_group.approved.to_s)
       end
     end
@@ -78,7 +77,7 @@ module Views::Controllers::VisualGroups
         plain(:visual_group_count_included.t(count: count))
       end
       p do
-        strong { plain("#{:visual_group_includes_names.t}:") }
+        strong { append_colon(:visual_group_includes_names.t) }
         br
         render_distinct_name_links
       end

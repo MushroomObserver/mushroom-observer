@@ -30,7 +30,7 @@ class Name
 
       Name.transaction do
         move_observations(old_name)
-        move_namings(old_name)
+        move_namings(user, old_name)
         move_mispellings(user, old_name)
         move_followings(old_name) # move Interest and Tracking
         move_descriptions(user, old_name)
@@ -41,22 +41,13 @@ class Name
         # Re-snapshot right before destroying: a concurrent request
         # could have pointed a different Name's correct_spelling at
         # old_name after move_mispellings' query ran above. A plain
-        # `Name.where` bypasses old_name's own association reader
-        # entirely, so it neither triggers a StrictLoadingViolationError
-        # (old_name.misspellings may already be eager-loaded via
-        # Name.merge_includes) nor requires old_name.reload (which
-        # would also wipe out move_descriptions' in-memory
-        # `rss_log = nil`, un-orphaning it and causing do_log_destroy
-        # to log a duplicate destroy entry). Catches anything that
-        # slipped in during the merge, keeping correct_spelling_id
-        # from ever dangling once old_name is gone.
-        #
-        # This still isn't watertight: nothing stops another
-        # transaction from pointing correct_spelling_id at old_name
-        # after this re-snapshot but before this transaction commits -
-        # that needs a DB-level constraint (FK with ON DELETE
-        # SET NULL/RESTRICT), not application code. Tracked as a
-        # follow-up rather than expanding this PR into a migration.
+        # `Name.where` bypasses old_name's association reader, so it
+        # neither triggers StrictLoadingViolationError nor requires
+        # old_name.reload (which would wipe out move_descriptions'
+        # in-memory `rss_log = nil`). Not watertight: a transaction
+        # could still point correct_spelling_id at old_name after
+        # this snapshot but before commit -- that needs a DB-level
+        # constraint, not application code.
         stragglers = Name.where(correct_spelling_id: old_name.id)
         move_mispellings(user, old_name, misspellings: stragglers)
 
@@ -75,11 +66,27 @@ class Name
       end
     end
 
-    def move_namings(old_name)
-      old_name.namings.each do |name|
-        name.name = self
-        name.save!
+    def move_namings(user, old_name)
+      old_name.namings.each do |naming|
+        if (existing = duplicate_naming_for(naming))
+          # This user already has a naming for the surviving name on this
+          # observation, so re-pointing would duplicate it -- fold the two
+          # into one instead (#5186).
+          existing.current_user = user
+          naming.current_user = user
+          existing.absorb(naming)
+        else
+          naming.name = self
+          naming.save!
+        end
       end
+    end
+
+    # A naming by the same user for the surviving name (self) on the same
+    # observation as `naming`, or nil.
+    def duplicate_naming_for(naming)
+      Naming.find_by(observation_id: naming.observation_id,
+                     user_id: naming.user_id, name_id: id)
     end
 
     def move_mispellings(user, old_name, misspellings: old_name.misspellings)

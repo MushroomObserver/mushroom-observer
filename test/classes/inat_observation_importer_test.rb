@@ -3,6 +3,8 @@
 require("test_helper")
 
 class InatObservationImporterTest < UnitTestCase
+  include Inat::Constants
+
   # update_timings keeps a cumulative moving average (CMA) of per-observation
   # import time for the current job. After obs #1 with elapsed T: avg = T.
   # After obs #2 with elapsed S: avg = (T + S) / 2.
@@ -44,6 +46,65 @@ class InatObservationImporterTest < UnitTestCase
     assert_equal([123, 456], importer.image_ids)
   end
 
+  # #5259: photos skipped for a missing license are recorded with the
+  # iNat id, login, and license choice.
+  def test_accumulate_counts_records_unlicensed_image_event
+    import = inat_imports(:rolf_inat_import)
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    importer.instance_variable_set(
+      :@inat_obs, { id: 777, user: { login: "flick" }, license_code: nil }
+    )
+    fake_builder = Object.new
+    fake_builder.define_singleton_method(:unlicensed_obs) { 0 }
+    fake_builder.define_singleton_method(:skipped_images) { 3 }
+    fake_builder.define_singleton_method(:created_image_ids) { [] }
+
+    importer.send(:accumulate_counts, fake_builder)
+
+    event = import.reload.unlicensed_image_events.first
+    assert_equal(777, event["inat_id"])
+    assert_equal("flick", event["login"])
+    assert_nil(event["license_code"])
+    assert_equal(3, event["count"])
+  end
+
+  # #5259: the inline standardization files the new observation into
+  # the import's target project.
+  def test_standardize_for_project_adds_observation_to_project
+    import = inat_imports(:rolf_inat_import)
+    project = projects(:open_membership_project)
+    import.update!(project: project)
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    obs = observations(:minimal_unknown_obs)
+    obs.update_column(:occurrence_id, nil)
+    importer.instance_variable_set(:@inat_obs, { id: 424_242 })
+    importer.instance_variable_set(:@observation, obs)
+
+    importer.send(:standardize_for_project)
+
+    assert_includes(project.observations.reload, obs)
+  end
+
+  # A standardization failure is recorded and does not raise -- the
+  # observation's import still counts.
+  def test_standardize_for_project_logs_errors_and_continues
+    import = inat_imports(:rolf_inat_import)
+    import.update!(project: projects(:open_membership_project))
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    importer.instance_variable_set(:@inat_obs, { id: 424_243 })
+    importer.instance_variable_set(:@observation,
+                                   observations(:minimal_unknown_obs))
+    std = importer.send(:standardizer)
+    def std.standardize(*)
+      raise("boom")
+    end
+
+    importer.send(:standardize_for_project)
+
+    assert_match(/Standardization failed for iNat 424243/,
+                 import.reload.response_errors)
+  end
+
   def test_canceled
     import = inat_imports(:ollie_inat_import)
     assert(import.canceled?, "Test needs a canceled InatImport fixture")
@@ -59,5 +120,212 @@ class InatObservationImporterTest < UnitTestCase
     ) do
       importer.import_page(page)
     end
+  end
+
+  def test_reached_import_cap
+    import = inat_imports(:rolf_inat_import)
+    import.update_columns(imported_count: InatImport::MAX_IMPORTABLE)
+    user = import.user
+    mock_inat_response = File.read("test/inat/calostoma_lutescens.txt")
+    page = JSON.parse(mock_inat_response)
+
+    importer = ::Inat::ObservationImporter.new(import, user)
+    assert_no_difference(
+      "Observation.count",
+      "ObservationImporter should stop importing once MAX_IMPORTABLE " \
+      "is reached, even within a single page"
+    ) do
+      importer.import_page(page)
+    end
+  end
+
+  # ---------- update_inat_observation_field: 503 writeback retry (#4589) ----
+
+  def test_writeback_ignores_503_when_field_already_written
+    importer, args = writeback_call_args
+    stub_writeback_post(status: 503)
+    stub_writeback_verification_get(args, written: true)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_requested(:post, writeback_post_url, times: 1)
+    assert_requested(:get, writeback_get_url(args[:observation_id]),
+                     times: 1)
+  end
+
+  def test_writeback_retries_503_with_default_backoff_then_succeeds
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503 }, { status: 200 })
+    stub_writeback_verification_get(args, written: false)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_requested(:post, writeback_post_url, times: 2)
+    assert_equal([2], sleeps,
+                 "First retry should use the default doubling backoff " \
+                 "when iNat sends no Retry-After header")
+  end
+
+  def test_writeback_honors_retry_after_within_budget
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503, headers: { "Retry-After" => "3" } },
+                { status: 200 })
+    stub_writeback_verification_get(args, written: false)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_equal([3], sleeps,
+                 "Should sleep iNat's Retry-After value when it's " \
+                 "within the retry budget, instead of the doubling default")
+  end
+
+  def test_writeback_ignores_retry_after_over_budget
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503, headers: { "Retry-After" => "30" } },
+                { status: 200 })
+    stub_writeback_verification_get(args, written: false)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_equal([2], sleeps,
+                 "A Retry-After above the retry budget should be " \
+                 "ignored in favor of the doubling default")
+  end
+
+  def test_writeback_raises_after_exhausting_retries
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_writeback_post(status: 503)
+    stub_writeback_verification_get(args, written: false)
+
+    assert_raises(RestClient::ServiceUnavailable,
+                  "Should give up and raise once retries are exhausted " \
+                  "and the field is still unconfirmed") do
+      importer.send(:update_inat_observation_field, **args)
+    end
+
+    assert_requested(
+      :post, writeback_post_url,
+      times: ::Inat::ObservationImporter::MAX_WRITEBACK_RETRIES + 1
+    )
+    assert_equal([2, 4, 8], sleeps,
+                 "Should back off 2s/4s/8s across the 3 retries")
+  end
+
+  def test_writeback_treats_failed_verification_as_unconfirmed
+    importer, args = writeback_call_args
+    sleeps = stub_sleep_spy(importer)
+    stub_request(:post, writeback_post_url).
+      to_return({ status: 503 }, { status: 200 })
+    stub_request(:get, writeback_get_url(args[:observation_id])).
+      to_return(status: 500)
+
+    importer.send(:update_inat_observation_field, **args)
+
+    assert_requested(:post, writeback_post_url, times: 2)
+    assert_equal([2], sleeps,
+                 "A failed verification GET should be treated as " \
+                 "unconfirmed and fall through to a normal retry")
+  end
+
+  def test_writeback_raises_immediately_on_non_retryable_error
+    importer, args = writeback_call_args
+    stub_writeback_post(status: 401)
+
+    assert_raises(RestClient::Unauthorized,
+                  "Non-retryable errors should raise without retrying " \
+                  "or checking iNat for the written field") do
+      importer.send(:update_inat_observation_field, **args)
+    end
+
+    assert_requested(:post, writeback_post_url, times: 1)
+    assert_not_requested(:get, writeback_get_url(args[:observation_id]))
+  end
+
+  # #5416: the importer already treated a lost race as "already
+  # imported", but the index it relied on could not catch one -- each
+  # racing import builds its own MO observation, so neither collides on
+  # a per-target index. With the per-remote-observation index in place,
+  # the loser raises what the importer rescues, and the half-built
+  # observation goes with it.
+  def test_a_second_import_of_one_remote_observation_is_refused
+    site = external_sites(:inaturalist)
+    obs = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: rolf, target: obs, external_site: site,
+                         external_id: "987654321", relationship: :import)
+    builder = link_builder(site, rolf)
+
+    assert_raises(ActiveRecord::RecordNotUnique) do
+      builder.send(:create_import_link,
+                   observations(:agaricus_campestris_obs), "987654321")
+    end
+  end
+
+  # A link that fails validation for some other reason is logged and
+  # the import carries on, as it did before.
+  def test_another_invalid_link_is_logged_rather_than_raised
+    site = external_sites(:inaturalist)
+    builder = link_builder(site, rolf)
+    logged = nil
+
+    Rails.logger.stub(:warn, ->(message) { logged = message }) do
+      builder.send(:create_import_link,
+                   observations(:agaricus_campestris_obs), "not a number")
+    end
+
+    assert_match(/failed to create ExternalLink/, logged)
+  end
+
+  # The builder's link step, with the two collaborators it reads.
+  def link_builder(site, user)
+    builder = ::Inat::MoObservationBuilder.allocate
+    builder.instance_variable_set(:@external_site, site)
+    builder.define_singleton_method(:user) { user }
+    builder
+  end
+
+  private
+
+  def writeback_call_args
+    import = inat_imports(:rolf_inat_import)
+    importer = ::Inat::ObservationImporter.new(import, import.user)
+    args = { observation_id: 123, field_id: MO_URL_OBSERVATION_FIELD_ID,
+             value: "#{MO.http_domain}/456" }
+    [importer, args]
+  end
+
+  # Replace `sleep` on the importer instance with a spy that records the
+  # requested durations instead of sleeping the test thread.
+  def stub_sleep_spy(importer)
+    sleeps = []
+    importer.define_singleton_method(:sleep) { |secs| sleeps << secs }
+    importer.define_singleton_method(:warn) { |*| } # quiet retry logging
+    sleeps
+  end
+
+  def writeback_post_url
+    "#{API_BASE}/observation_field_values"
+  end
+
+  def writeback_get_url(observation_id)
+    "#{API_BASE}/observations/#{observation_id}"
+  end
+
+  def stub_writeback_post(status:)
+    stub_request(:post, writeback_post_url).to_return(status: status)
+  end
+
+  def stub_writeback_verification_get(args, written:)
+    ofvs = written ? [{ field_id: args[:field_id], value: args[:value] }] : []
+    body = { results: [{ id: args[:observation_id], ofvs: ofvs }] }.to_json
+
+    stub_request(:get, writeback_get_url(args[:observation_id])).
+      to_return(status: 200, body: body)
   end
 end

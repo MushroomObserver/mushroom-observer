@@ -7,7 +7,12 @@ class Query::RssLogs < Query
   # via `extra_parameter_declarations` below.
   query_attr(:updated_at, [:time])
   query_attr(:id_in_set, [RssLog])
-  query_attr(:type, :string)
+  # `type` (singular) is the legacy scalar URL shortcut, still a
+  # working alias -- `?type=observation` resolves to `types:
+  # ["observation"]`. `RssLog.types` (the scope) tolerates a
+  # space-separated string inside a single array element too, so an
+  # old `?type=observation+name` bookmark still normalizes correctly.
+  query_attr(:types, [:string], param_alias: :type)
   # query_attr(:clade, :string) # content filter
   # query_attr(:lichen, :boolean) # content filter
   # query_attr(:region, :string) # content filter

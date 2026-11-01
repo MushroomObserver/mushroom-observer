@@ -31,7 +31,7 @@ module Views::Controllers::Translations
       return if versions_to_show.empty?
 
       render_header_once
-      h5(class: "underline mb-1") { "#{ttag}:" }
+      h5(class: "underline mb-1") { append_colon(ttag.to_s) }
       render_versions_table(versions_to_show)
     end
 
@@ -50,7 +50,7 @@ module Views::Controllers::Translations
 
       hr(class: "my-5")
       h4(class: "mb-4 font-weight-bold") do
-        "#{:edit_translations_old_versions.l}:"
+        append_colon(:edit_translations_old_versions.l)
       end
       @done_header = true
     end

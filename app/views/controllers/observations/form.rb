@@ -46,6 +46,8 @@ module Views::Controllers::Observations
       submitted_list_ids: nil,
       error_checked_projects: [],
       suspect_checked_projects: [],
+      cross_prefix_projects: [],
+      slip_target_project: nil,
       field_code: nil
     }.freeze
 
@@ -64,12 +66,12 @@ module Views::Controllers::Observations
     end
 
     def view_template
-      submit(button_name, center: true)
       render_images_details_panel
       render_naming_specimen_panel
       render_notes_panel
       render_projects_panel if show_projects?
       render_lists_panel if show_lists?
+      submit(button_name, center: true, disable_with: :submitting.ti)
     end
 
     private
@@ -265,7 +267,7 @@ module Views::Controllers::Observations
 
     def show_projects?
       @projects.any? || @error_checked_projects.any? ||
-        @suspect_checked_projects.any?
+        @suspect_checked_projects.any? || @cross_prefix_projects.any?
     end
 
     def render_projects_panel
@@ -277,7 +279,9 @@ module Views::Controllers::Observations
                projects: @projects,
                submitted_project_ids: @submitted_project_ids,
                error_checked_projects: @error_checked_projects,
-               suspect_checked_projects: @suspect_checked_projects
+               suspect_checked_projects: @suspect_checked_projects,
+               cross_prefix_projects: @cross_prefix_projects,
+               slip_target_project: @slip_target_project
              ))
     end
 

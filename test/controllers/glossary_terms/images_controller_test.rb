@@ -76,6 +76,8 @@ module GlossaryTerms
         end
       end
       assert_flash_error
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_reuse_image_for_glossary_bad_image_id
@@ -85,6 +87,8 @@ module GlossaryTerms
       post_requires_login(:attach, params)
 
       assert_flash(:runtime_image_reuse_invalid_id, id: params[:img_id])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     def test_remove_images_from_glossary_term
@@ -97,6 +101,8 @@ module GlossaryTerms
 
       put(:detach, params: { id: glossary_term.id.to_s, selected: "" })
       assert_flash_error(:runtime_no_save, type: :glossary_term)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
 
       selected = {}
       selected[glossary_term.thumb_image_id.to_s] = "yes"

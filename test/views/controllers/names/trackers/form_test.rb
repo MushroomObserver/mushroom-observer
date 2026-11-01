@@ -17,9 +17,10 @@ module Views::Controllers::Names::Trackers
       assert_html(html, "button[type='submit']", text: :enable.ti)
 
       # Note template checkbox and help
-      assert_html(html, "body", text: :email_tracking_note.l)
+      assert_html(html, "#name_tracker_form", text: :email_tracking_note.l)
       assert_html(html, "input[name='name_tracker[note_template_enabled]']")
-      assert_html(html, "body", text: :email_tracking_note_help.tp.as_displayed)
+      assert_html(html, "#name_tracker_form",
+                  text: :email_tracking_note_help.tp.as_displayed)
 
       # Note template textarea
       assert_html(html, "textarea[name='name_tracker[note_template]']")

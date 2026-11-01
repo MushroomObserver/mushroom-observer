@@ -24,7 +24,6 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
   def view_template
     h4(**title_attributes) do
       render_label if @identify
-      whitespace
       render_link
       whitespace
       trusted_html(@obs.format_name(@user).t.small_author)
@@ -45,7 +44,7 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
   end
 
   def render_label
-    span(class: "font-weight-normal") { "#{:observation.ti}: " }
+    span(class: "font-weight-normal") { append_colon(:observation.ti) }
   end
 
   def render_link

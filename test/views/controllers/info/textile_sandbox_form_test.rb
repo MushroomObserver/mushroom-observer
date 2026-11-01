@@ -25,8 +25,8 @@ module Views::Controllers::Info
       assert_no_html(html, ".sandbox")
       assert_no_html(html, ".sandbox-up-ptr")
 
-      # Quick reference section — strong wrapped in <p> inside .mt-3
-      assert_html(html, ".mt-3 p strong",
+      # Quick reference section — strong wrapped in <p>
+      assert_html(html, "p strong",
                   text: "#{:sandbox_quick_ref.t}:")
       assert_html(html, "pre")
       assert_includes(html, "&micro;")
@@ -77,6 +77,10 @@ module Views::Controllers::Info
       assert_html(html, "button[type='submit']", count: 2)
     end
 
+    # The <li> tags are the contract under test here -- this test
+    # verifies textile list syntax converts to list markup instead
+    # of staying escaped.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_textile_renders_as_html
       html = render_form(code: "# Woof\n# Bark\n# Meow",
                          show_result: true,

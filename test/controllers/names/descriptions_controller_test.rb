@@ -4,6 +4,24 @@ require("test_helper")
 
 module Names
   class DescriptionsControllerTest < FunctionalTestCase
+    include QueryParamRoundTripTestHelpers
+
+    # See QueryParamRoundTripTestHelpers.
+    def test_create_query_from_url_params_recognizes_every_top_level_param
+      login
+
+      assert_all_top_level_params_survive(
+        Query::NameDescriptions, :NameDescription,
+        overrides: {
+          id_in_set: name_descriptions(:agaricus_campestras_desc).id,
+          by_users: rolf.id,
+          by_author: rolf.id,
+          by_editor: rolf.id,
+          projects: projects(:bolete_project).id
+        }
+      )
+    end
+
     def empty_notes
       NameDescription.all_note_fields.index_with do |_field|
         ""
@@ -148,8 +166,8 @@ module Names
       params = { "id" => desc.id.to_s }
       login
       get(:show, params: params)
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
     end
 
     def test_next_description
@@ -183,7 +201,7 @@ module Names
       login
       get(:show, params: { id: desc.id })
       assert_no_flash
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
     end
 
     # This is a bit confusing: create and edit draft are handled here,
@@ -194,7 +212,7 @@ module Names
       params = {
         name_id: name.id,
         source: "project",
-        project: project.id
+        project_id: project.id
       }
       requires_login(:new, params, user.login)
       if success
@@ -287,8 +305,8 @@ module Names
       draft = name_descriptions(:draft_coprinus_comatus)
       login(draft.user.login)
       get(:show, params: { id: draft.id })
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
     end
 
     # Ensure that an admin can see a draft they don't own,
@@ -298,8 +316,8 @@ module Names
       assert_not_equal(draft.user, mary)
       login(mary.login)
       get(:show, params: { id: draft.id })
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
 
       # Admin should see all description_change_links buttons
       did = draft.id
@@ -320,8 +338,8 @@ module Names
       assert_not_equal(draft.user, katrina)
       login(katrina.login)
       get(:show, params: { id: draft.id })
-      assert_select("#description_details_and_alts")
-      assert_select("#description_details_and_alts")
+      assert_select("#description_details")
+      assert_select("#description_details")
     end
 
     # Ensure that a non-member cannot see a draft
@@ -338,6 +356,55 @@ module Names
     def test_create_draft_member
       create_draft_tester(projects(:eol_project),
                           names(:coprinus_comatus), katrina)
+    end
+
+    # `NewDraftForm` (project autocompleter + submit) renders above
+    # the main form on `new` -- but not when `?project_id=` is
+    # already given: that's a confirmed choice, the main form is
+    # already locked to it, nothing left to pick.
+    def test_new_description_hides_draft_form_when_project_chosen
+      name = names(:coprinus_comatus)
+      project = projects(:eol_project)
+
+      login("katrina") # project member
+      get(:new, params: { name_id: name.id, project_id: project.id })
+
+      assert_select("input[name='project']", count: 0)
+    end
+
+    # A bare `?project=` isn't a confirmed choice, just a suggestion
+    # -- `NewDraftForm` renders, prefilled, without locking the main
+    # form to it.
+    def test_new_description_prefills_draft_form_from_flat_project_param
+      name = names(:coprinus_comatus)
+      project = projects(:eol_project)
+
+      login("katrina")
+      get(:new, params: { name_id: name.id, project: project.id })
+
+      assert_select("input[name='project'][value=?]", project.title)
+      assert_select("input[name='project_id'][value=?]", project.id.to_s)
+      desc = assigns(:description)
+      assert_not_equal("project", desc.source_type)
+    end
+
+    # Same suggestion-only behavior, but derived from the ambient
+    # query the user arrived with (e.g. an index filtered to one
+    # project) instead of a direct flat param.
+    def test_new_description_prefills_draft_form_from_ambient_query_project
+      name = names(:coprinus_comatus)
+      project = projects(:eol_project)
+
+      login("katrina")
+      get(:new, params: {
+            name_id: name.id,
+            q: { model: "NameDescription", projects: [project.id] }
+          })
+
+      assert_select("input[name='project'][value=?]", project.title)
+      assert_select("input[name='project_id'][value=?]", project.id.to_s)
+      desc = assigns(:description)
+      assert_not_equal("project", desc.source_type)
     end
 
     def test_create_draft_admin
@@ -421,7 +488,7 @@ module Names
       # Test draft creation by project member.
       login("rolf") # member
       project = projects(:eol_project)
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
@@ -432,7 +499,7 @@ module Names
 
       # Test draft creation by project non-member.
       login("dick")
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_redirected_to(project_path(project.id))
       assert_flash_error
     end
@@ -453,7 +520,7 @@ module Names
       # Test draft creation by project member.
       login("katrina") # member
       project = projects(:eol_project)
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
@@ -464,7 +531,7 @@ module Names
 
       # Test draft creation by project non-member.
       login("dick")
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_redirected_to(project_path(project.id))
       assert_flash_error
 
@@ -649,6 +716,8 @@ module Names
       put(:update, params: params)
       assert_flash_warning([:runtime_description_public_write_wrong,
                             :runtime_edit_name_description_no_change])
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
     end
 
     # Cover resolve_merge_conflicts_and_delete_old_description

@@ -18,7 +18,7 @@ class Tab::Sequence::Destroy < Tab::Base
 
   def html_options
     { button: :destroy,
-      back: observation_path(@sequence.observation) }
+      back: permanent_observation_path(@sequence.observation) }
   end
 
   def model

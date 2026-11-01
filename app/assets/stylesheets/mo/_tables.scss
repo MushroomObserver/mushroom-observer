@@ -10,6 +10,7 @@ thead tr {
 .table-curators,
 .table-description-permissions,
 .table-herbarium,
+.table-interests,
 .table-license-updater,
 .table-location-help,
 .table-manage-species-lists,
@@ -21,6 +22,33 @@ thead tr {
     padding-left: 0.5em;
     padding-right: 0.5em;
   }
+}
+
+// Combine with `.table` on the same <table> element to cascade
+// vertical-align: middle onto every cell -- overrides Bootstrap 3's
+// `th, td { vertical-align: top }` default.
+.table-align-middle.table {
+  > thead > tr > th,
+  > thead > tr > td,
+  > tbody > tr > th,
+  > tbody > tr > td,
+  > tfoot > tr > th,
+  > tfoot > tr > td {
+    vertical-align: middle !important;
+  }
+}
+
+// Actions column (the button group) only needs its content's width
+// -- shrink-to-fit it so the summary column gets all the extra row
+// width, instead of the two splitting it evenly. The toggle button's
+// label varies in width ("Mute notifications" vs "Resume
+// notifications"), which stretches the shrink-to-fit column to the
+// widest row -- right-align keeps the Delete button flush against
+// the row's trailing edge on every row instead of drifting with it.
+.table-interests > tbody > tr > td:last-child {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .table-naming-votes {

@@ -69,7 +69,7 @@ class Components::Map::Popup < Components::Base
   def render_thumbnail_media_left(obs)
     return unless obs.respond_to?(:thumb_image_id) && obs.thumb_image_id
 
-    url = observation_path(id: obs.id, params: query_path_params)
+    url = permanent_observation_path(id: obs.id, params: query_path_params)
     div(class: "media-left") do
       label = obs.text_name.presence || "Observation ##{obs.id}"
       Link(type: :get,
@@ -149,14 +149,16 @@ class Components::Map::Popup < Components::Base
 
   def render_observation_header
     div(class: "map-popup-header") do
-      plain("#{@set.observations.length} #{:observations.ti} ")
+      plain("#{@set.observations.length} #{:observations.ti}")
+      whitespace
       render_associated_links(:observation)
     end
   end
 
   def render_location_header
     div(class: "map-popup-header") do
-      plain("#{@set.underlying_locations.length} #{:locations.ti} ")
+      plain("#{@set.underlying_locations.length} #{:locations.ti}")
+      whitespace
       render_associated_links(:location)
     end
   end
@@ -197,8 +199,8 @@ class Components::Map::Popup < Components::Base
   def render_observation_link(obs)
     Link(type: :get,
          name: obs.text_name.presence || "Observation ##{obs.id}",
-         target: observation_path(id: obs.id,
-                                  params: query_path_params),
+         target: permanent_observation_path(id: obs.id,
+                                            params: query_path_params),
          new_tab: true) { render_observation_label(obs) }
   end
 

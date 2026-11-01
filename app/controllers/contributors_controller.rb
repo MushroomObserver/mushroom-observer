@@ -31,17 +31,13 @@ class ContributorsController < ApplicationController
 
   private
 
-  # Phlex action template — no ERB resolver in phlex-rails 2.x, so the
+  # phlex-rails 2.x has no implicit action-template resolver, so the
   # render is explicit. See `.claude/rules/phlex_reference.md`.
   def render_index_view
     render(Views::Controllers::Contributors::Index.new(
              query: @query, pagination_data: @pagination_data,
              objects: @objects
            ))
-  end
-
-  def default_sort_order
-    :contribution # ::Query::Users.default_order is :name
   end
 
   def unfiltered_index_opts

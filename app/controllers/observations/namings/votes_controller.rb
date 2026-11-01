@@ -10,20 +10,20 @@ module Observations::Namings
     # Has its own route for non-js access and testing.
     # The HTML response renders the Phlex `Index` view (which
     # derives consensus internally from `naming.observation`); the
-    # turbo response renders the Phlex `Table` inside a Modal.
+    # turbo response renders the Phlex `Tally` inside a Modal.
     def index
       @naming = find_or_goto_index(Naming, params[:naming_id].to_s)
       return unless @naming
 
       respond_to do |format|
         format.turbo_stream { render_votes_modal }
-        format.html { render_phlex_index }
+        format.html { render_index_view }
       end
     end
 
     private
 
-    def render_phlex_index
+    def render_index_view
       render(Views::Controllers::Observations::Namings::Votes::Index.new(
                naming: @naming
              ))
@@ -41,7 +41,8 @@ module Observations::Namings
       render(Views::Controllers::Observations::Namings::Votes::Modal.new(
                naming: display_naming, user: @user,
                modal_id: "modal_naming_votes_#{@naming.id}",
-               title: "#{:show_namings_consensus.t} "
+               title: "#{:show_namings_consensus.t} ",
+               consensus: consensus
              ))
     end
 
@@ -63,8 +64,8 @@ module Observations::Namings
     # HTML requests: Redirects to show_observation.
     # Turbo requests: depends on params[:context]
     # when namings_table (show_observation)
-    #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
-    #   and stimulus naming-vote_controller, which handles <select> bindings
+    #   Updates namings_table (+ maybe obs title) via turbo_stream and
+    #   stimulus naming-vote_controller, which handles <select> bindings
     # when matrix_box (help_identify)
     #   updates the lightbox and matrix_box
 

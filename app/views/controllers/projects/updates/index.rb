@@ -2,16 +2,23 @@
 
 module Views::Controllers::Projects::Updates
   class Index < Views::FullPageBase
-    def initialize(project:, user:, results:, show_excluded:)
-      super()
-      @project = project
-      @user = user
-      @observations = results[:observations]
-      @pagination = results[:pagination]
-      @request_url = results[:request_url]
-      @form_action_url = results[:form_action_url]
-      @current_count = results[:current_count]
-      @show_excluded = show_excluded
+    prop :project, ::Project
+    prop :user, ::User
+    prop :observations, _Array(::Observation)
+    prop :pagination, ::PaginationData
+    prop :request_url, String
+    prop :current_count, Integer
+    prop :show_excluded, _Boolean
+
+    # `results:` bundles four values the controller computes together
+    # (see Projects::UpdatesController#build_index_results) -- split
+    # them into individual props here so callers still pass one hash.
+    def initialize(results:, **)
+      super(observations: results[:observations],
+            pagination: results[:pagination],
+            request_url: results[:request_url],
+            current_count: results[:current_count],
+            **)
     end
 
     def view_template
@@ -21,6 +28,7 @@ module Views::Controllers::Projects::Updates
 
       render_toolbar
       render_pagination
+      render_add_all_button
       render_matrix
       render_pagination
     end
@@ -31,8 +39,27 @@ module Views::Controllers::Projects::Updates
       div(class: "d-flex justify-content-between " \
                  "align-items-center mb-3 flex-wrap") do
         render_count_and_toggle
-        div { render_add_all_button }
+        div { render_import_buttons }
       end
+    end
+
+    # A site admin says whether a project may be imported from; its
+    # admins are then the people who start one (#5416). This page is
+    # where observations are added to the project, so it is where
+    # fetching more of them from elsewhere belongs.
+    def render_import_buttons
+      import_sites.each do |project_site|
+        Button(
+          type: :get,
+          name: :project_import_start.l,
+          target: new_inat_import_path(project_site: project_site.id)
+        )
+      end
+    end
+
+    def import_sites
+      @import_sites ||= @project.project_external_sites.importing.
+                        includes(:external_site).to_a
     end
 
     def render_count_and_toggle
@@ -40,7 +67,9 @@ module Views::Controllers::Projects::Updates
         span(id: "project_updates_count", class: "mr-3") do
           plain(count_label)
         end
-        render_show_excluded_toggle
+        render(ExcludedToggleForm.new(
+                 project: @project, show_excluded: @show_excluded
+               ))
       end
     end
 
@@ -54,33 +83,21 @@ module Views::Controllers::Projects::Updates
       :project_updates_count
     end
 
-    def render_show_excluded_toggle
-      form(
-        action: project_updates_path(project_id: @project.id),
-        method: "get",
-        class: "form-inline mb-0 show-excluded-form",
-        data: { controller: "autosubmit",
-                autosubmit_delay_value: "0" }
-      ) do
-        label(class: "checkbox-inline") do
-          input(type: "checkbox", name: "show_excluded", value: "1",
-                checked: @show_excluded,
-                data: { action: "change->autosubmit#submit" })
-          plain(" #{:project_updates_show_excluded.t}")
-        end
-      end
-    end
-
+    # Nothing listed is nothing to add, so the button says nothing.
     def render_add_all_button
-      Button(
-        type: :post,
-        name: :project_updates_add_all.t,
-        target: add_all_project_updates_path(
-          project_id: @project.id,
-          show_excluded: @show_excluded
-        ),
-        confirm: :project_updates_confirm_add_all.t
-      )
+      return if @current_count.zero?
+
+      div(class: "mb-3") do
+        Button(
+          type: :post,
+          name: :project_updates_add_all.t,
+          target: add_all_project_updates_path(
+            project_id: @project.id,
+            show_excluded: @show_excluded
+          ),
+          confirm: :project_updates_confirm_add_all.t
+        )
+      end
     end
 
     def render_pagination
@@ -88,9 +105,7 @@ module Views::Controllers::Projects::Updates
 
       render(Views::Layouts::Header::IndexPaginationNav.new(
                pagination_data: @pagination,
-               request_url: @request_url,
-               form_action_url: @form_action_url,
-               letter_param: nil
+               request_url: @request_url
              ))
     end
 

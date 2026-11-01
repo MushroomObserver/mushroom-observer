@@ -14,7 +14,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     fill_in("project_title", with: title)
     fill_in(:where.ti, with: locations(:unknown_location).name)
     assert_selector(
-      "input[type='radio'][id='project_dates_any_true'][checked='checked']"
+      "input[type='radio'][id='project_dates_any_true'][checked]"
     )
     assert_selector("input[type='radio'][id='project_dates_any_false']")
 
@@ -35,7 +35,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     fill_in(:where.ti, with: locations(:unknown_location).name)
     choose("project_dates_any_false")
     assert_selector(
-      "input[type='radio'][id='project_dates_any_false'][checked='checked']"
+      "input[type='radio'][id='project_dates_any_false'][checked]"
     )
 
     default_start_and_end_date = Time.zone.today
@@ -60,7 +60,7 @@ class ProjectsIntegrationTest < CapybaraIntegrationTestCase
     click_on(:show_project_admin_tab.l)
     choose("project_dates_any_true")
     assert_selector(
-      "input[type='radio'][id='project_dates_any_true'][checked='checked']"
+      "input[type='radio'][id='project_dates_any_true'][checked]"
     )
     click_on(:save_edits.ti)
 

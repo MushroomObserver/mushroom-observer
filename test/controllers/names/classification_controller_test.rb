@@ -52,7 +52,8 @@ module Names
       put(:update,
           params: { id: name.id, name: { classification: "bogus" } })
       assert_flash_error
-      assert_response(:success)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       assert_textarea_value(:name_classification, "bogus")
 
       # Make sure we can do simple case.

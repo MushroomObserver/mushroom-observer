@@ -31,6 +31,7 @@ module ObservationsController::Create
   #
 
   def create
+    normalize_observation_param
     # Create a bare observation
     @observation = create_observation_object(params[:observation])
     # Set license/image defaults again, in case they are not defined
@@ -240,9 +241,22 @@ module ObservationsController::Create
   end
 
   def redirect_to_next_page
+    return if redirected_to_field_slip_review?
+
+    warn_no_field_slip_detected
     if @observation.location_id.nil?
+      flash_warning(
+        :runtime_location_not_found.t(name: @observation.place_name(@user))
+      )
+      # Explicit `format: :html`: Turbo Drive's fetch for this
+      # Turbo-submitted form carries a turbo-stream-preferring Accept
+      # header that survives this redirect, so without forcing the
+      # format, LocationsController#new would negotiate its
+      # modal-only turbo_stream branch for what needs to be a real
+      # page navigation (JoeCohen review, #5055).
       redirect_to(new_location_path(where: @observation.place_name(@user),
-                                    set_observation: @observation.id))
+                                    set_observation: @observation.id,
+                                    format: :html))
     else
       redirect_to(permanent_observation_path(@observation.id))
     end
@@ -258,8 +272,7 @@ module ObservationsController::Create
     init_project_vars
     init_project_vars_for_reload
     init_list_vars_for_reload
-    render(Views::Controllers::Observations::New.new(**new_view_attrs),
-           location: new_observation_path)
+    render_new_view_invalid(location: new_observation_path)
   end
 
   # The observation is already saved by the time the field slip is applied,
@@ -279,6 +292,12 @@ module ObservationsController::Create
   def init_location_var_for_reload
     # Preserve the user's place_name input for form re-render
     @default_place_name = @observation.place_name(@user)
+    # A flagged name re-renders with `approved_where` embedded in the
+    # form action (Form#form_action reads @place_name), so resubmitting
+    # unchanged passes `dubious_reasons_for`'s approved gate. Without
+    # this the "Click Create to use this location name" confirmation
+    # loops forever -- nothing else ever assigns @place_name.
+    @place_name = @default_place_name if @dubious_where_reasons.present?
 
     # keep location_id if it's -1 (new)
     if @location || @observation.location_id.nil? ||

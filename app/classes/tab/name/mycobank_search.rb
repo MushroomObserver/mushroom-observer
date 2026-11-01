@@ -12,6 +12,15 @@ class Tab::Name::MycobankSearch < Tab::Name::ExternalBase
 
   def path
     "#{MYCOBANK_HOST}#{MYCOBANK_BASIC_SEARCH_PATH}" \
-      "/field/Taxon%20name/#{@name.sensu_stricto.gsub(" ", "%20")}"
+      "/field/Taxon%20name/#{url_encode(taxon_name)}"
+  end
+
+  private
+
+  def taxon_name
+    return @name.sensu_stricto unless @name.Subgenus?
+
+    # MycoBank abbreviates Subgenus as "subgen.", not "subg."
+    @name.sensu_stricto.sub("subg.", "subgen.")
   end
 end

@@ -19,7 +19,7 @@ class Views::Controllers::Names::Show::AltDescriptionsPanel < Views::Base
   private
 
   def heading_links
-    Link(type: :icon, tab: Tab::Name::NewDescription.new(name: @name))
+    Link(type: :get, tab: Tab::Name::NewDescription.new(name: @name))
   end
 
   def render_descriptions_list

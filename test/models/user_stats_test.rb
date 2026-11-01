@@ -80,6 +80,15 @@ class UserStatsTest < UnitTestCase
     assert_equal(mary.votes.size, mary_stats.votes)
   end
 
+  def test_refresh_all_user_stats_skips_unverified_users
+    UserStats.refresh_all_user_stats
+    assert_nil(
+      UserStats.find_by(user_id: users(:unverified).id),
+      "Unverified users should not get a stats row (they get culled, " \
+      "orphaning it)"
+    )
+  end
+
   # Regression test for the sign bug where a :del incremented the
   # per-field user_stats counter instead of decrementing it (issue #4638).
   # users.contribution was correctly signed all along; both must move

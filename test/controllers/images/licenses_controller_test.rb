@@ -47,7 +47,12 @@ module Images
       }
       put_requires_login(:update, params)
       # assert_redirected_to(images_edit_licenses_path)
+      # update always re-renders this same page rather than
+      # redirecting; Turbo needs a non-2xx status for that to be a
+      # real redisplay, not a silent no-op.
+      assert_unprocessable
       assert_select("body.licenses__edit")
+      assert_select("form[data-turbo='true']")
       assert_equal(10, rolf.reload.contribution)
 
       target_count_after = Image.

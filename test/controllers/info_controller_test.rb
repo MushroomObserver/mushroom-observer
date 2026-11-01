@@ -27,7 +27,8 @@ class InfoControllerTest < FunctionalTestCase
     post(:textile_sandbox_create,
          params: { textile_sandbox: { code: "**bold**" },
                    commit: :sandbox_test.l })
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_normal_permissions
@@ -38,7 +39,7 @@ class InfoControllerTest < FunctionalTestCase
     assert_equal(200, @response.status)
     post(:textile_sandbox_create,
          params: { textile_sandbox: { code: "test" } })
-    assert_equal(200, @response.status)
+    assert_equal(422, @response.status)
   end
 
   def test_allowed_robot_permissions
@@ -89,7 +90,8 @@ class InfoControllerTest < FunctionalTestCase
     assert_select("title").text.include?(:show_site_stats_title.l)
     assert_select("#title", { text: :show_site_stats_title.l },
                   "Displayed title should be #{:show_site_stats_title.l}")
-    assert_match(/#{:site_stats_contributing_users.l}/, @response.body,
-                 "Page is missing #{:site_stats_contributing_users.l}")
+    assert_select("#site_stats_table",
+                  /#{:site_stats_contributing_users.l}/,
+                  "Page is missing #{:site_stats_contributing_users.l}")
   end
 end

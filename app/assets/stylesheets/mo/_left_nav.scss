@@ -87,9 +87,13 @@
   color: $panel-default-text;
   background-color: $list-group-bg;
 
+  // `$list-group-hover-bg` maps to the same theme variable as
+  // `$list-group-bg` in every MO theme (see
+  // _map_theme_vars_to_bootstrap_vars.scss), making it a no-op --
+  // darken the base color directly instead.
   &:hover,
   &:focus {
     color: $panel-default-text;
-    background-color: $list-group-hover-bg;
+    background-color: darken($list-group-bg, 5%);
   }
 }

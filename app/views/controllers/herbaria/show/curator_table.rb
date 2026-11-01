@@ -12,7 +12,7 @@ module Views::Controllers::Herbaria
       def view_template
         Table(@herbarium.curators,
               variant: :striped, identifier: "curators") do |t|
-          t.heading { plain("#{heading_label}:") }
+          t.heading { trusted_html(append_colon(heading_label)) }
           t.column("delete") { |user| render_delete_cell(user) } if can_delete?
           t.column("user") { |user| render_user_cell(user) }
         end

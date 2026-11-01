@@ -311,4 +311,27 @@ class SpeciesListTest < UnitTestCase
     assert_equal(:validate_species_list_user_missing.t,
                  spl.errors[:user].first)
   end
+
+  def test_order_by_recent_observation
+    user = users(:rolf)
+    loc = locations(:albion)
+    older = SpeciesList.create!(title: "Older Activity #{SecureRandom.hex(4)}",
+                                location: loc, user: user)
+    newer = SpeciesList.create!(title: "Newer Activity #{SecureRandom.hex(4)}",
+                                location: loc, user: user)
+    inactive = SpeciesList.create!(
+      title: "No Activity #{SecureRandom.hex(4)}", location: loc, user: user
+    )
+    older_obs = Observation.create!(user: user, when: Date.current)
+    older_obs.update_column(:created_at, 2.days.ago)
+    newer_obs = Observation.create!(user: user, when: Date.current)
+    newer_obs.update_column(:created_at, 1.hour.ago)
+    older.observations << older_obs
+    newer.observations << newer_obs
+
+    ordered = SpeciesList.where(id: [older.id, newer.id, inactive.id]).
+              order_by(:recent_observation).to_a
+
+    assert_equal([newer, older, inactive], ordered)
+  end
 end

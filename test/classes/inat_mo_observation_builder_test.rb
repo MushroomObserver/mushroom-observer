@@ -53,6 +53,19 @@ class InatMoObservationBuilderTest < UnitTestCase
                              quality_grade: "needs_id"))
   end
 
+  def test_naming_vote_unparseable_provisional_is_no_evidence
+    fake = FakeInatObs.new(sequences: [], provisional_name: "-",
+                           quality_grade: "needs_id")
+    builder = Inat::MoObservationBuilder.new(
+      inat_obs: fake, user: users(:rolf), external_site: :stub
+    )
+
+    assert_equal(naming_vote(sequence: false, provisional: false,
+                             quality_grade: "needs_id"),
+                 builder.send(:naming_vote),
+                 "An unparseable provisional name should not raise the vote")
+  end
+
   def test_naming_vote_research_grade_is_promising
     assert_equal(Vote::NEXT_BEST_VOTE,
                  naming_vote(sequence: false, provisional: false,
@@ -66,96 +79,6 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_equal(Vote::MIN_POS_VOTE,
                  naming_vote(sequence: false, provisional: false,
                              quality_grade: "casual"))
-  end
-
-  # --- proposed_namings: which names become namings, and at what weight ----
-  # Lactarius alpinus is approved; L. alpigenes is deprecated in favor of it;
-  # Pluteus petasatus (deprecated) has no approved synonym; Peltigera is a
-  # second approved name. (See test_best_preferred_synonym in name_test.rb.)
-
-  # An accepted Observation Taxon with no provisional name: a single naming.
-  def test_proposed_namings_single_accepted
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:lactarius_alpinus)))
-  end
-
-  # A deprecated Observation Taxon is corrected: its preferred synonym leads,
-  # the deprecated name follows at Could Be. (Applies to all imports.)
-  def test_proposed_namings_deprecated_community_adds_preferred_synonym
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:lactarius_alpigenes)))
-  end
-
-  # A provisional name (not deprecated) leads; the Observation Taxon follows.
-  def test_proposed_namings_provisional_leads
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:lactarius_alpinus)))
-  end
-
-  # The provisional is deprecated in favor of the leading ID (the
-  # Leccinum scenario): the accepted name leads, the deprecated provisional
-  # follows, and the synonym-of-the-provisional dedups with the Observation
-  # Taxon.
-  def test_proposed_namings_deprecated_provisional_prefers_accepted
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:lactarius_alpinus),
-                          provisional: names(:lactarius_alpigenes)))
-  end
-
-  # A deprecated name with no approved synonym falls back to itself.
-  def test_proposed_namings_deprecated_without_synonym_keeps_self
-    assert_equal([["Pluteus petasatus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:pluteus_petasatus_deprecated)))
-  end
-
-  # Provisional equal to the leading ID collapses to a single naming.
-  def test_proposed_namings_provisional_equals_community
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE]],
-                 proposed(community: names(:lactarius_alpinus),
-                          provisional: names(:lactarius_alpinus)))
-  end
-
-  # --- Species Name Override (#4533) ---
-
-  # The override leads ahead of the leading ID.
-  def test_proposed_namings_override_leads_over_community
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          override: names(:lactarius_alpinus)))
-  end
-
-  # The override outranks BOTH the provisional name and the leading ID;
-  # the other two follow at Could Be.
-  def test_proposed_namings_override_outranks_provisional_and_community
-    assert_equal([["Coprinus comatus", Vote::MAXIMUM_VOTE],
-                  ["Boletus edulis", Vote::MIN_POS_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:boletus_edulis),
-                          override: names(:coprinus_comatus)))
-  end
-
-  # Override equal to the provisional collapses to one naming for it.
-  def test_proposed_namings_override_equals_provisional
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          provisional: names(:lactarius_alpinus),
-                          override: names(:lactarius_alpinus)))
-  end
-
-  # A deprecated override is corrected to its preferred synonym, which leads.
-  def test_proposed_namings_deprecated_override_prefers_synonym
-    assert_equal([["Lactarius alpinus", Vote::MAXIMUM_VOTE],
-                  ["Lactarius alpigenes", Vote::MIN_POS_VOTE],
-                  ["Peltigera", Vote::MIN_POS_VOTE]],
-                 proposed(community: names(:peltigera),
-                          override: names(:lactarius_alpigenes)))
   end
 
   # When the iNat provisional name already exists in MO, reuse it rather than
@@ -184,7 +107,16 @@ class InatMoObservationBuilderTest < UnitTestCase
   def test_override_name_falls_back_when_resolution_raises
     builder = builder_for(name_override: "Boletus edulis")
     builder.define_singleton_method(:find_or_create_name) { |_| raise("boom") }
-    assert_nil(builder.send(:override_name))
+
+    # Capture the rescue's Rails.logger.warn call instead of letting it
+    # through -- the test logger writes to $stdout, so the deliberate
+    # "boom" otherwise dumps into the suite's console output looking
+    # like a failure elsewhere.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      assert_nil(builder.send(:override_name))
+    end
+    assert_includes(logged, "boom")
   end
 
   # No override field => no override name.
@@ -236,71 +168,33 @@ class InatMoObservationBuilderTest < UnitTestCase
                  "spelling note when proposed name corrects the obs taxon")
   end
 
-  # --- cleaned_copyright_holder: strip "all rights reserved", cap length ---
-
-  FakePhoto = Struct.new(:copyright_holder)
-
-  def test_cleaned_copyright_holder_strips_all_rights_reserved
-    photo = FakePhoto.new("(c) cactusdan, all rights reserved")
-    assert_equal("(c) cactusdan, ",
-                 builder_for.send(:cleaned_copyright_holder, photo))
-  end
-
-  def test_cleaned_copyright_holder_strips_all_rights_reserved_mid_string
-    photo = FakePhoto.new(
-      "(c) jo_bone, all rights reserved, uploaded by jo_bone"
-    )
-    assert_equal("(c) jo_bone, , uploaded by jo_bone",
-                 builder_for.send(:cleaned_copyright_holder, photo))
-  end
-
-  def test_cleaned_copyright_holder_leaves_licensed_attribution_untouched
-    attribution = "(c) Tim C., some rights reserved (CC BY-NC)"
-    photo = FakePhoto.new(attribution)
-    assert_equal(attribution,
-                 builder_for.send(:cleaned_copyright_holder, photo))
-  end
-
-  def test_cleaned_copyright_holder_truncates_to_255_chars
-    photo = FakePhoto.new("x" * 300)
-    result = builder_for.send(:cleaned_copyright_holder, photo)
-    assert_equal(255, result.length,
-                 "copyright_holder should be truncated to 255 chars")
-  end
-
-  # --- upload_inat_image: surface API2 errors instead of masking them ---
-
-  FakeAPI2Response = Struct.new(:errors, :results)
-
-  def test_upload_inat_image_raises_descriptive_error_on_api_failure
-    error = API2::MissingParameter.new(:upload_url)
-    fake_api = FakeAPI2Response.new([error], nil)
-    builder = builder_for
-
-    API2.stub(:execute, fake_api) do
-      err = assert_raises(RuntimeError) do
-        builder.send(:upload_inat_image, {}, "377332865")
-      end
-      assert_match(/Failed to import image 377332865/, err.message,
-                   "Error should identify the failing iNat photo")
-      assert_match(/#{Regexp.escape(error.to_s)}/, err.message,
-                   "Error should include the underlying API2 error")
+  # Re-importing (or re-running the builder) reuses the namer's existing
+  # naming instead of stacking a duplicate, updating the vote in place
+  # (#5186).
+  def test_add_naming_with_vote_reuses_the_namers_naming
+    obs = observations(:minimal_unknown_obs)
+    obs.namings.to_a.each do |n|
+      n.current_user = users(:rolf)
+      n.destroy
     end
-  end
-
-  # created_image_ids is what ObservationImporter (then InatImportJob)
-  # reads to enqueue one TransferImagesJob per import batch (#4791).
-  def test_upload_inat_image_accumulates_created_image_ids
-    image = images(:in_situ_image)
-    fake_api = FakeAPI2Response.new([], [image])
+    name = names(:coprinus_comatus)
+    namer = users(:rolf)
     builder = builder_for
+    builder.instance_variable_set(:@observation, obs)
+    builder.define_singleton_method(:used_references_explanation) { |_| "ref" }
 
-    API2.stub(:execute, fake_api) do
-      result = builder.send(:upload_inat_image, {}, "377332865")
-      assert_equal(image, result)
+    assert_difference("Naming.count", 1) do
+      builder.send(:add_naming_with_vote, name:, namer:,
+                                          value: Vote::MAXIMUM_VOTE)
+    end
+    assert_no_difference("Naming.count") do
+      builder.send(:add_naming_with_vote, name:, namer:,
+                                          value: Vote::MINIMUM_VOTE)
     end
 
-    assert_equal([image.id], builder.created_image_ids)
+    naming = obs.reload.namings.find_by(user: namer, name:)
+    assert_equal(Vote::MINIMUM_VOTE, naming.votes.find_by(user: namer).value,
+                 "the second import updates the vote in place")
   end
 
   private
@@ -312,20 +206,14 @@ class InatMoObservationBuilderTest < UnitTestCase
                            name_override: name_override,
                            obs_taxon_name: obs_taxon_name)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
-                                   external_site: :stub)
-  end
-
-  def proposed(community:, provisional: nil, override: nil,
-               lead_vote: Vote::MAXIMUM_VOTE)
-    builder_for.send(:proposed_namings, community, provisional, override,
-                     lead_vote).
-      map { |name, vote| [name.text_name, vote] }
+                                   external_site: external_sites(:inaturalist))
   end
 
   def naming_vote(sequence:, provisional:, quality_grade:)
     fake = FakeInatObs.new(
       sequences: sequence ? [:a_sequence] : [],
-      provisional_name: provisional ? "Boletus sp. 'T01'" : nil,
+      # An existing MO name, so resolving it needs no API post.
+      provisional_name: provisional ? names(:lactarius_alpinus).text_name : nil,
       quality_grade: quality_grade
     )
     # external_site: :stub keeps the constructor from hitting

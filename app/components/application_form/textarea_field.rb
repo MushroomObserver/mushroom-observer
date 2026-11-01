@@ -10,13 +10,14 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     slot :between
     slot :label_end
+    slot :label_appends
     slot :prepend
     slot :append
     slot :help
 
     # Make slot accessors public (Phlex::Slotable makes them private by default)
-    public :between_slot, :label_end_slot, :prepend_slot, :append_slot,
-           :help_slot
+    public :between_slot, :label_end_slot, :label_appends_slot,
+           :prepend_slot, :append_slot, :help_slot
 
     def initialize(field, wrapper_options: {}, **attributes)
       super(field, **attributes)
@@ -35,9 +36,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     private
 
     # `wrapper_options[:monospace] == true` appends `text-monospace` to
-    # the textarea's class chain. Matches the ERB `text_area_with_label`
-    # helper's `:monospace` option so callers (and direct component
-    # instantiators) get the same emission either way.
+    # the textarea's class chain.
     def textarea_class
       mono = "text-monospace" if wrapper_options[:monospace]
       class_names(attributes[:class], "form-control", mono)

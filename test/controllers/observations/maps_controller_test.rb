@@ -84,7 +84,7 @@ module Observations
       assert_includes(json["html"], obs.name.text_name,
                       "popup html should render the observation's name")
       assert_includes(
-        json["html"], "/observations/#{obs.id}",
+        json["html"], "/obs/#{obs.id}",
         "popup html should link back to the observation show page"
       )
     end

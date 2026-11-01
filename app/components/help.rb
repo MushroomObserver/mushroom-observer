@@ -31,9 +31,9 @@
 #
 # Pure kwargs — no positional-arg shorthand. The old
 # `Components::Help::Block` / `Help::Note` accepted a legacy
-# `(element, string)` positional pair (an ERB-helper holdover); this
-# was the last component in the codebase still doing that, everything
-# else (`Link`, `Button`, etc.) is kwargs-only, so the merge dropped it.
+# `(element, string)` positional pair; this was the last component in
+# the codebase still doing that, everything else (`Link`, `Button`,
+# etc.) is kwargs-only, so the merge dropped it.
 #
 # Renders nothing when there's neither a block nor `content:` to show
 # — empty wrappers are noise no caller needs; opt out by not calling
@@ -126,8 +126,11 @@ class Components::Help < Components::Base
 
     div(class: classes.join(" "), id: @id) do
       emit_content(&block)
-      # `hidden-xs` keeps the arrow desktop-only.
-      div(class: "arrow-#{@arrow} hidden-xs") if @arrow
+      # Hidden at xs keeps the arrow desktop-only.
+      if @arrow
+        div(class: class_names("arrow-#{@arrow}",
+                               Components::Column.mobile_hide_classes))
+      end
     end
   end
 

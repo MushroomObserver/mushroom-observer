@@ -47,6 +47,11 @@ class Query::SpeciesListsTest < UnitTestCase
     assert_query(expects, :SpeciesList, order_by: :rss_log)
   end
 
+  def test_species_list_order_by_recent_observation
+    expects = SpeciesList.order_by(:recent_observation).to_a
+    assert_query(expects, :SpeciesList, order_by: :recent_observation)
+  end
+
   def test_species_list_by_users
     ids = SpeciesList.by_users(mary).order_by_default
     assert_query(ids, :SpeciesList, by_users: mary)

@@ -15,4 +15,15 @@ module ScalarParams
     value = params[key]
     value if value.is_a?(String)
   end
+
+  # Safely coerces an already-scalar param value (e.g. from a
+  # `.permit`-filtered hash, so String or nil -- never a nested Hash)
+  # to an Integer. A non-numeric String degrades to nil rather than
+  # raising, since this sits at a request boundary handling untrusted
+  # input.
+  def safe_integer(value)
+    Integer(value) if value.is_a?(String) || value.is_a?(Integer)
+  rescue ArgumentError
+    nil
+  end
 end

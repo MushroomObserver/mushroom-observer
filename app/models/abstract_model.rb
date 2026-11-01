@@ -9,6 +9,8 @@
 #
 #  ==== Extensions to "find"
 #  safe_find::          Same as <tt>find(id)</tt> but return nil if not found.
+#  exact_match::        Does a phrase identify a single record outright
+#                       (id, or a class-specific override)?
 #  find_object::        Look up an object by class name and id.
 #  find_by_sql_with_limit::
 #                       Add limit to a SQL query, then pass it to find_by_sql.
@@ -72,7 +74,7 @@ class AbstractModel < ApplicationRecord
   # (attribution) or looking at this (viewer-aware formatting),
   # set explicitly by the controller/caller before save/render. No
   # ambient global fallback (no Current.user) - every model gets
-  # this accessor for free so callers never need to add their own.
+  # this accessor for free, so callers don't need to add one.
   attr_accessor :current_user
 
   # Language tag for name, e.g. :observation, :rss_log, etc.
@@ -106,6 +108,15 @@ class AbstractModel < ApplicationRecord
     find(id)
   rescue ActiveRecord::RecordNotFound
     nil
+  end
+
+  # Does `phrase` identify a single record, without a fuzzy `pattern`
+  # search? Used by `exact_match_or` to prioritize an identifier match
+  # ahead of the fuzzy scope. Override where a class has another
+  # unambiguous identifier (User overrides for verified email).
+  def self.exact_match(phrase)
+    phrase = phrase.to_s.strip
+    safe_find(phrase) if /^\d+$/.match?(phrase)
   end
 
   # At minimum this list should include all objects that can have
@@ -243,6 +254,7 @@ class AbstractModel < ApplicationRecord
   # Return id from before destroy.
   attr_reader :id_was
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
@@ -258,6 +270,7 @@ class AbstractModel < ApplicationRecord
   # *NOTE*: this saves the old stats for the page footer of show_observation,
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def update_view_stats(_current_user = nil)
     return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
@@ -321,6 +334,7 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Return the name of the controller (as a string! see below)
   # that handles the "show_<object>" for this object.
   #
@@ -340,12 +354,14 @@ class AbstractModel < ApplicationRecord
   # cases `show_controller` is practical - some actions handle a polyvalent
   # object whose path cannot be easily interpolated. - AN 10/2022
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def self.show_controller
     "/#{name.pluralize.underscore}" # Rails standard for most controllers
   end
 
   delegate :show_controller, to: :class
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Return the name of the "index_<object>" action (as a symbol)
   # that displays search index for this object.
   #
@@ -364,6 +380,7 @@ class AbstractModel < ApplicationRecord
   #   Best: each such controller has just one index action.
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
+  # rubocop:enable MO/NoLongCommentBlock
   def self.index_action
     :index
   end
@@ -400,6 +417,7 @@ class AbstractModel < ApplicationRecord
 
   delegate :show_action, to: :class
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
@@ -412,6 +430,7 @@ class AbstractModel < ApplicationRecord
   # NOTE: show_controller now has leading forward slash,
   # to account for namespacing
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def self.show_url(id)
     "#{MO.http_domain}#{show_controller}/#{id}"
   end

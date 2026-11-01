@@ -46,8 +46,8 @@ module Projects
       }
       post(:create, params: { query_projects: params })
 
-      assert_redirected_to(controller: "/projects", action: :index,
-                           params: { q: { model: :Project, **params } })
+      assert_search_redirected_to(controller: "/projects",
+                                  params: params)
     end
   end
 end

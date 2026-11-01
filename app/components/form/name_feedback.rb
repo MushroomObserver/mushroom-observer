@@ -21,7 +21,14 @@ class Components::Form::NameFeedback < Components::Base
   prop :parent_deprecated, _Nilable(Name), default: nil
 
   def view_template
-    if @valid_names
+    # `@valid_names` can be a non-nil but EMPTY array when no
+    # corrections/synonyms were found (e.g. Naming::NameResolver's
+    # Name.suggest_alternate_spellings comes up empty for a
+    # completely unrecognized name) -- `if @valid_names` alone is
+    # true for `[]`, wrongly routing there instead of the "not
+    # recognized" branch below (whose help text always renders,
+    # JoeCohen review on #5055).
+    if @valid_names&.any?
       render_warning_alert
     elsif @names && @names.empty?
       render_not_recognized_error
@@ -76,7 +83,7 @@ class Components::Form::NameFeedback < Components::Base
   end
 
   def render_synonyms_header
-    div { "#{:form_naming_valid_synonyms.t}:" }
+    div { append_colon(:form_naming_valid_synonyms.t) }
   end
 
   # ----- Error alerts -----

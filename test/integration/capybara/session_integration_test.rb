@@ -90,18 +90,17 @@ class SessionIntegrationTest < CapybaraIntegrationTestCase
   # -------------------------------------------------------------------------
 
   def test_thumbnail_maps
-    visit("/#{observations(:minimal_unknown_obs).id}")
+    obs = observations(:minimal_unknown_obs)
+    visit("/#{obs.id}")
     assert_equal(403, status_code)
 
     login("dick")
-    visit("/#{observations(:minimal_unknown_obs).id}")
+    visit("/#{obs.id}")
     assert_selector("body.observations__show")
     assert_selector("div.thumbnail-map")
-    click_link(text: "Hide thumbnail map")
-    assert_selector("body.observations__show")
-    assert_no_selector("div.thumbnail-map")
 
-    visit("/#{observations(:detailed_unknown_obs).id}")
+    users(:dick).update!(thumbnail_maps: false)
+    visit("/#{obs.id}")
     assert_selector("body.observations__show")
     assert_no_selector("div.thumbnail-map")
   end

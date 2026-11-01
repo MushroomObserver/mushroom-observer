@@ -46,12 +46,12 @@ module Views::FullPageBase::LayoutClasses
     column_classes
   end
 
-  # ----- Vertical padding inside the main container ----------------
+  # ----- Padding inside the main container --------------------------
 
   def content_padding(content_has = nil)
     content_has ||= action_name.in?(%w[index show]) ? :panels : :no_panels
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "p-3" : "p-0"
+      content_has == :no_panels ? "px-3" : "p-0"
     end
   end
 

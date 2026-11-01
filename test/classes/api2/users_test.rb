@@ -15,9 +15,7 @@ class API2::UsersTest < UnitTestCase
   #  :section: User Requests
   # --------------------------
 
-  def params_get(**)
-    { method: :get, action: :user }.merge(**)
-  end
+  def api2_model = User
 
   def test_getting_users
     assert_api_pass(params_get(detail: :low))
@@ -44,14 +42,7 @@ class API2::UsersTest < UnitTestCase
     @image = nil
     @address = ""
     @new_key = nil
-    params = {
-      method: :post,
-      action: :user,
-      api_key: @api_key.key,
-      login: @login,
-      email: @email,
-      password: "secret"
-    }
+    params = params_post(login: @login, email: @email, password: "secret")
     # No API key requested, so no VerifyAccount email should be queued
     api = API2.execute(params)
     assert_no_errors(api, "Errors while posting user")
@@ -78,22 +69,11 @@ class API2::UsersTest < UnitTestCase
     @image = Image.last
     @address = " I live here "
     @new_key = "  Blah  Blah  Blah  "
-    params = {
-      method: :post,
-      action: :user,
-      api_key: @api_key.key,
-      login: @login,
-      name: @name,
-      email: @email,
-      password: "supersecret",
-      locale: @locale,
-      notes: @notes,
-      license: @license.id,
-      location: @location.id,
-      image: @image.id,
-      mailing_address: @address,
-      create_key: @new_key
-    }
+    params = params_post(login: @login, name: @name, email: @email,
+                         password: "supersecret", locale: @locale,
+                         notes: @notes, license: @license.id,
+                         location: @location.id, image: @image.id,
+                         mailing_address: @address, create_key: @new_key)
     # With create_key, VerifyAccount email should be queued
     assert_enqueued_with(
       job: ActionMailer::MailDeliveryJob,
@@ -113,18 +93,12 @@ class API2::UsersTest < UnitTestCase
   end
 
   def test_patching_users
-    params = {
-      method: :patch,
-      action: :user,
-      api_key: @api_key.key,
-      id: rolf.id,
-      set_locale: "pt",
-      set_notes: "some notes",
-      set_mailing_address: "somewhere, USA",
-      set_license: licenses(:publicdomain).id,
-      set_location: locations(:burbank).id,
-      set_image: images(:peltigera_image).id
-    }
+    params = params_patch(id: rolf.id, set_locale: "pt",
+                          set_notes: "some notes",
+                          set_mailing_address: "somewhere, USA",
+                          set_license: licenses(:publicdomain).id,
+                          set_location: locations(:burbank).id,
+                          set_image: images(:peltigera_image).id)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(set_image: mary.images.first.id))
     assert_api_fail(params.merge(set_locale: ""))
@@ -140,11 +114,7 @@ class API2::UsersTest < UnitTestCase
   end
 
   def test_deleting_users
-    params = {
-      method: :delete,
-      action: :user,
-      api_key: @api_key.key # (rolf's)
-    }
+    params = params_delete # (rolf's)
 
     # Rolf can't delete Mary.
     assert_api_fail(params.merge(id: mary.id))

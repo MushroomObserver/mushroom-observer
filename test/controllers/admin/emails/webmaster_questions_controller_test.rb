@@ -14,6 +14,7 @@ module Admin
         # webmaster-question form (id derived by ApplicationForm from
         # the Views::Controllers::* namespace).
         assert_select("form#admin_email_webmaster_question_form")
+        assert_select("form[data-turbo='true']")
         assert_form_action(action: :create)
       end
 
@@ -105,7 +106,7 @@ module Admin
       end
 
       def ask_webmaster_test(email, args)
-        response = args[:response] || :success
+        response = args[:response] || :unprocessable_content
         flash_tag = args[:flash_tag]
         post(:create,
              params: {

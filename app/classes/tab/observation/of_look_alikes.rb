@@ -11,7 +11,7 @@ class Tab::Observation::OfLookAlikes < Tab::Base
   end
 
   def path
-    observations_path(name: @name.id, look_alikes: "1")
+    observations_path(look_alikes: @name.id)
   end
 
   def model

@@ -14,9 +14,7 @@ class API2::CollectionNumbersTest < UnitTestCase
   #  :section: Collection Number Requests
   # ---------------------------------------
 
-  def params_get(**)
-    { method: :get, action: :collection_number }.merge(**)
-  end
+  def api2_model = CollectionNumber
 
   def test_getting_collection_numbers_created_at
     nums = CollectionNumber.where(CollectionNumber[:created_at].year.eq(2006))
@@ -83,14 +81,8 @@ class API2::CollectionNumbersTest < UnitTestCase
     @name      = "Someone Else"
     @number    = "13579a"
     @user      = rolf
-    params = {
-      method: :post,
-      action: :collection_number,
-      api_key: @api_key.key,
-      observation: @obs.id,
-      collector: @name,
-      number: @number
-    }
+    params = params_post(observation: @obs.id, collector: @name,
+                         number: @number)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.except(:observation))
     assert_api_fail(params.except(:number))
@@ -111,14 +103,8 @@ class API2::CollectionNumbersTest < UnitTestCase
     rolfs_num = collection_numbers(:coprinus_comatus_coll_num)
     marys_num = collection_numbers(:minimal_unknown_coll_num)
     rolfs_rec = herbarium_records(:coprinus_comatus_rolf_spec)
-    params = {
-      method: :patch,
-      action: :collection_number,
-      api_key: @api_key.key,
-      id: rolfs_num.id,
-      set_collector: "New",
-      set_number: "42"
-    }
+    params = params_patch(id: rolfs_num.id, set_collector: "New",
+                          set_number: "42")
     assert_equal("Rolf Singer 1", rolfs_rec.accession_number)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_num.id))
@@ -130,12 +116,7 @@ class API2::CollectionNumbersTest < UnitTestCase
     old_obs   = rolfs_num.observations.first
     rolfs_obs = observations(:agaricus_campestris_obs)
     marys_obs = observations(:detailed_unknown_obs)
-    params = {
-      method: :patch,
-      action: :collection_number,
-      api_key: @api_key.key,
-      id: rolfs_num.id
-    }
+    params = params_patch(id: rolfs_num.id)
     assert_api_fail(params.merge(add_observation: marys_obs.id))
     assert_api_pass(params.merge(add_observation: rolfs_obs.id))
     assert_obj_arrays_equal([old_obs, rolfs_obs], rolfs_num.reload.observations,
@@ -151,13 +132,7 @@ class API2::CollectionNumbersTest < UnitTestCase
     num2 = collection_numbers(:agaricus_campestris_coll_num)
     obs1 = num1.observations.first
     obs2 = num2.observations.first
-    params = {
-      method: :patch,
-      action: :collection_number,
-      api_key: @api_key.key,
-      id: num1.id,
-      set_number: num2.number
-    }
+    params = params_patch(id: num1.id, set_number: num2.number)
     assert_api_pass(params)
     assert_obj_arrays_equal(obs1.reload.collection_numbers,
                             obs2.reload.collection_numbers)
@@ -167,12 +142,7 @@ class API2::CollectionNumbersTest < UnitTestCase
   def test_deleting_collection_numbers
     rolfs_num = collection_numbers(:coprinus_comatus_coll_num)
     marys_num = collection_numbers(:minimal_unknown_coll_num)
-    params = {
-      method: :delete,
-      action: :collection_number,
-      api_key: @api_key.key,
-      id: rolfs_num.id
-    }
+    params = params_delete(id: rolfs_num.id)
     assert_api_fail(params.except(:api_key))
     assert_api_fail(params.merge(id: marys_num.id))
     assert_api_pass(params)

@@ -7,10 +7,7 @@
 # For existing members: renders status-change buttons.
 module Views::Controllers::Projects::Members
   class Form < ::Components::ApplicationForm
-    def initialize(model, project:, **)
-      @project = project
-      super(model, **)
-    end
+    prop :project, ::Project
 
     def view_template
       if model.persisted?

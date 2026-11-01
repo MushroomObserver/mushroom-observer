@@ -2,6 +2,7 @@
 
 # see observations_controller.rb
 module ObservationsController::Show
+  # rubocop:disable MO/NoLongCommentBlock
   # Display observation and related namings, comments, votes, images, etc.
   # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:
@@ -19,6 +20,7 @@ module ObservationsController::Show
   #   @mappable
   #   @other_sites
   #   @votes
+  # rubocop:enable MO/NoLongCommentBlock
   def show
     return if check_for_spider_block(request, params)
 
@@ -44,10 +46,10 @@ module ObservationsController::Show
     load_occurrence_data
     @images = occurrence_images
 
-    render_phlex_show
+    render_show_view
   end
 
-  def render_phlex_show
+  def render_show_view
     render(Views::Controllers::Observations::Show.new(
              observation: @observation, user: @user,
              consensus: @consensus, comments: @comments.to_a,
@@ -83,6 +85,8 @@ module ObservationsController::Show
                             ).to_a
   end
 
+  # The thumbnail may be a sibling's image (any image in the occurrence
+  # can be chosen), so it leads the combined list, not just its owner's.
   def occurrence_images
     return @observation.images_sorted unless @occurrence
 
@@ -90,7 +94,14 @@ module ObservationsController::Show
     sibling_images = @sibling_observations.
                      flat_map(&:images).uniq -
                      primary_images
-    primary_images + sibling_images
+    thumb_first(primary_images + sibling_images)
+  end
+
+  def thumb_first(images)
+    thumb = images.find { |img| img.id == @observation.thumb_image_id }
+    return images unless thumb
+
+    [thumb] + (images - [thumb])
   end
 
   def load_observation_for_show_observation_page

@@ -6,23 +6,20 @@ module Images
     skip_before_action :login_required, only: [:show]
 
     # Renders just the vote interface for one image, fresh and
-    # uncached -- meant to be fetched via a lazy Turbo Frame so a
-    # viewer's own vote state never gets baked into `Matrix::Box`'s
-    # shared fragment cache (#4895). Anonymous viewers can load this
-    # too (`.require-user` CSS-hides it), matching the overlay copy's
-    # existing render-regardless-of-`@user` behavior.
+    # uncached -- fetched via a lazy Turbo Frame so a viewer's vote
+    # state stays out of `Matrix::Box`'s shared fragment cache.
+    # Anonymous viewers can load this too (`.require-user` CSS-hides
+    # it), matching the overlay copy's render-regardless-of-`@user`
+    # behavior.
     #
-    # Deliberately not `find_or_goto_index` -- that flashes an error
-    # and redirects to the model's index, which is right for a normal
-    # page load but wrong for a frame-only fetch: the frame would try
-    # to swap in a full index page's markup (or just break), and the
-    # flash would linger to surprise the user on their next real
-    # navigation. A plain 404 leaves the frame empty and leaks nothing.
+    # Not `find_or_goto_index`: that flashes and redirects to the
+    # index, wrong for a frame-only fetch -- the frame would try to
+    # swap in a full index page. A plain 404 leaves the frame empty.
     def show
       @image = Image.find_by(id: params[:image_id])
       return head(:not_found) unless @image
 
-      @context = params[:context]&.to_sym || :overlay
+      @context = normalized_context
       render(Views::Controllers::Images::Votes::Show.new(
                image: @image, user: @user, context: @context
              ), layout: false)
@@ -39,6 +36,7 @@ module Images
       @value = value == "0" ? nil : Image.validate_vote(value)
       anon = (@user.votes_anonymous == "yes")
       @image.change_vote(@user, @value, anon: anon)
+      @context = normalized_context
 
       respond_to do |format|
         # Change user's vote (on anyone's image) and go to next image.
@@ -57,42 +55,35 @@ module Images
 
     private
 
-    # Was `render(partial: "images/votes/update")`, the partial just
-    # emitted a single `turbo_stream.update("image_vote_#{id}")`
-    # wrapping `Components::ImageFragment::VoteInterface` — inlined
-    # here. Two targets, not one: the lightbox caption's copy
-    # (`context: :lightbox`) lives under a `lightbox_`-prefixed id
-    # (see `VoteInterface#vote_html_id`) inside the hidden caption
-    # element that's always in the DOM now (#4894), so this update
-    # reaches it whether the lightbox is open or closed.
-    #
-    # `replace`, not `update` -- `VoteInterface`'s own render output
-    # IS the full `<div id="...">` wrapper, so `update` (which swaps
-    # inner content only) would nest a duplicate-id div inside the
-    # original instead of swapping it.
-    #
-    # The target may currently be the lazy `<turbo-frame>` (#4895) --
-    # its content hasn't loaded, or has loaded and the div underneath
-    # shares the same id (Turbo's own `getElementById`-based lookup
-    # returns whichever is first in document order, i.e. the frame,
-    # its ancestor). Either way `replace` swaps the frame for a plain
-    # `VoteInterface` div, same id -- correct: once voted, that
-    # instance has fresh, correct data and no longer needs to be
-    # lazily reloadable.
+    # Two targets: the lightbox caption's copy (`context: :lightbox`)
+    # lives under a `lightbox_`-prefixed id, always in the DOM, so
+    # this reaches it whether the lightbox is open or closed. Also
+    # swaps out the lazy `<turbo-frame>` target if it hasn't loaded
+    # yet.
     def vote_interface_streams
       [
         turbo_stream.replace("image_vote_#{@image.id}",
-                             vote_interface),
+                             vote_interface(context: @context)),
         turbo_stream.replace("lightbox_image_vote_#{@image.id}",
                              vote_interface(context: :lightbox))
       ]
     end
 
-    def vote_interface(context: :overlay)
+    def vote_interface(context: :matrix)
       ::Components::ImageFragment.new(
         type: :vote_interface,
         user: @user, image: @image, votes: true, context: context
       )
+    end
+
+    # `:overlay` was VoteInterface's context name before it was
+    # renamed to `:matrix` -- mapped here so an old cached
+    # LazyVoteInterface turbo-frame (whose src= URL still has
+    # `context=overlay` baked in) doesn't 404 or fall into the
+    # unstyled `vote-section-inline` branch.
+    def normalized_context
+      value = params[:context]&.to_sym
+      value == :overlay ? :matrix : (value || :matrix)
     end
   end
 end

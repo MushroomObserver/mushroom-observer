@@ -44,7 +44,7 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
 
     Row do
       render_image_column
-      render_form_column unless @sibling
+      render_form_column
       render_control_buttons
     end
   end
@@ -60,22 +60,43 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
           class: @data[:img_class],
           data: @data[:img_data]
         )
+        render_upload_status_overlay if @upload
       end
     end
   end
 
+  # Hidden until the image-upload JS shows it (issue #5068 option 1):
+  # a spinner while this item's own upload POST is in flight, swapped
+  # to a checkmark on success. Both icons are pre-rendered server-side
+  # and toggled by class -- JS only flips visibility, it doesn't
+  # construct icon markup (the sprite URL is build-hashed).
+  def render_upload_status_overlay
+    div(class: "upload-status-overlay ab-fab d-none",
+        data: { form_images_target: "uploadStatus" }) do
+      Icon(type: :spinner, class: "spinner-right upload-status-spinner")
+      Icon(type: :check, class: "upload-status-check d-none")
+    end
+  end
+
+  # A sibling image belongs to another occurrence member (an iNat
+  # reflection); its fields aren't editable here, but the read-only
+  # camera-info panel still shows so the editor can copy the
+  # reflection's location onto the native via "Use this info" (#5317).
   def render_form_column
     Column(xs: 12, md: 6) do
       div(class: "form-panel") do
-        render(Components::Form::UploadGallery::Fields.new(
-                 user: @user,
-                 image: @img_instance,
-                 img_id: @img_id,
-                 upload: @upload
-               ))
+        unless @sibling
+          render(Components::Form::UploadGallery::Fields.new(
+                   user: @user,
+                   image: @img_instance,
+                   img_id: @img_id,
+                   upload: @upload
+                 ))
+        end
 
         render(Components::Form::CameraInfo.new(
                  img_id: @img_id,
+                 upload: @upload,
                  **@camera_info
                ))
       end
@@ -91,17 +112,16 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
     div(class: "top-left p-4") { button_to_set_thumb_img }
   end
 
-  # Real `observation[thumb_image_id]` radio — browser-native radio
-  # group across carousel items submits the checked value directly,
-  # no Stimulus round-trip via a separate hidden field. A static
-  # hidden default with the same name (see
-  # `ObservationFormUpload#render_thumb_image_id_field`) ensures the
-  # param is always submitted (so removing the current thumb image
-  # without picking another one clears the model field).
+  # A browser-native `observation[thumb_image_id]` radio group across
+  # carousel items submits the checked value directly, no Stimulus
+  # round-trip. A static hidden default with the same name (see
+  # `ObservationFormUpload#render_thumb_image_id_field`) keeps the
+  # param submitted, so removing the thumb image without picking
+  # another clears the model field.
   #
-  # The visual "pressed" state on the selected button is CSS-only
+  # The "pressed" state on the selected button is CSS-only
   # (`.thumb_img_btn:has(input[type="radio"]:checked)` in
-  # `_carousel.scss`) — no JS to toggle `.active`.
+  # `_carousel.scss`) -- no JS toggles `.active`.
   def button_to_set_thumb_img
     value = @img_instance&.id || "true"
     checked = @obs_thumb_id&.== @img_instance&.id
@@ -111,9 +131,8 @@ class Components::Form::UploadGallery::Item < Components::Image::Base
              value: value,
              id: "thumb_image_id_#{@img_id}",
              checked: checked,
-             size: :sm,
-             label: { class: "thumb_img_btn" },
-             class: "mr-3"
+             size: :sm, label_wrap: true,
+             label: { class: "thumb_img_btn mr-3" }
            )) do
       span(class: "set_thumb_img_text") { :image_set_default.l }
       span(class: "is_thumb_img_text") { :image_add_default.l }

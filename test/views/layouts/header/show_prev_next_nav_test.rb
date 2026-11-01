@@ -20,19 +20,13 @@ module Views::Layouts
     end
 
     def test_renders_nothing_when_no_object
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: nil,
-                      query: @query
-                    ))
+      html = render_nav(object: nil, query: @query)
 
       assert_equal("", html)
     end
 
     def test_renders_nothing_when_no_query
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: nil
-                    ))
+      html = render_nav(object: @middle_obs, query: nil)
 
       assert_equal("", html)
     end
@@ -40,16 +34,16 @@ module Views::Layouts
     def test_renders_basic_structure
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
-      # Main container
-      assert_includes(html, 'class="nav flex-bar object_pager"')
+      # Root is a labeled <nav> landmark wrapping the button group.
+      assert_html(html, "nav[aria-label='#{:app_object_pager_label.l}']")
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
+      assert_html(html, "nav > .btn-group.object_pager[role='group']")
 
-      # Three li elements
-      assert_html(html, "ul.object_pager > li", count: 3)
+      # Three direct button-group children
+      # rubocop:disable-next MO/NoCosmeticClassAssertion
+      assert_html(html, ".btn-group.object_pager > a", count: 3)
 
       # Prev, index, and next links
       assert_includes(html, "prev_object_link")
@@ -60,10 +54,7 @@ module Views::Layouts
     def test_prev_link_disabled_when_first_item
       @query.current_id = @first_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @first_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @first_obs, query: @query)
 
       # Prev link should have disabled class
       assert_html(html, "a.prev_object_link.disabled")
@@ -75,10 +66,7 @@ module Views::Layouts
     def test_next_link_disabled_when_last_item
       @query.current_id = @last_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @last_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @last_obs, query: @query)
 
       # Next link should have disabled class
       assert_html(html, "a.next_object_link.disabled")
@@ -90,10 +78,7 @@ module Views::Layouts
     def test_both_links_enabled_when_middle_item
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
       assert_html(html, "a.prev_object_link:not(.disabled)")
       assert_html(html, "a.next_object_link:not(.disabled)")
@@ -102,13 +87,10 @@ module Views::Layouts
     def test_prev_link_has_correct_href
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
       # Get the prev_id from the query
-      expected_href = "/observations/#{@query.prev_id}"
+      expected_href = "/obs/#{@query.prev_id}"
       assert_html(html, "a.prev_object_link",
                   attribute: { href: expected_href })
     end
@@ -116,13 +98,10 @@ module Views::Layouts
     def test_next_link_has_correct_href
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
       # Get the next_id from the query
-      expected_href = "/observations/#{@query.next_id}"
+      expected_href = "/obs/#{@query.next_id}"
       assert_html(html, "a.next_object_link",
                   attribute: { href: expected_href })
     end
@@ -134,10 +113,7 @@ module Views::Layouts
       # translation tags are lowercase-only (#4843).
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
       assert_includes(html, :prev_object.t(type: "Observation"))
       assert_includes(html, :next_object.t(type: "Observation"))
@@ -146,16 +122,13 @@ module Views::Layouts
     def test_index_link_uses_grid_icon_for_observations
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
       # Grid icon for observations
       assert_nested(
         html,
         parent_selector: "a.index_object_link",
-        child_selector: "span.glyphicon-th"
+        child_selector: "svg.mo-icon-grid"
       )
     end
 
@@ -165,47 +138,35 @@ module Views::Layouts
       middle_name = Name.find(name_ids[1])
       name_query.current_id = middle_name.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: middle_name,
-                      query: name_query
-                    ))
+      html = render_nav(object: middle_name, query: name_query)
 
       # List icon for non-observations
       assert_nested(
         html,
         parent_selector: "a.index_object_link",
-        child_selector: "span.glyphicon-list"
+        child_selector: "svg.mo-icon-list"
       )
     end
 
+    # Framed as buttons via Link::Get's button:/size: kwargs, not via
+    # raw btn/btn-lg strings. :link (not :default) removes the
+    # background/border while keeping button padding -- plain
+    # icon-only nav buttons, not filled buttons.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_links_are_styled_as_large_link_buttons
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
-      # Framed as buttons via Link::Icon's button:/size: kwargs, not
-      # via raw btn/btn-lg strings in Navbar::LINK_CLASSES. :link
-      # (not :default) removes the background/border while keeping
-      # button padding — plain icon-only nav buttons, not filled
-      # buttons. (:strip would remove padding too.)
       assert_html(html, "a.prev_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.index_object_link.btn.btn-link.btn-lg")
       assert_html(html, "a.next_object_link.btn.btn-link.btn-lg")
-      # navbar-left comes from Components::Navbar::LEFT_CLASS, not a
-      # raw literal.
-      assert_html(html, "a.prev_object_link.navbar-left")
     end
 
     def test_links_have_tooltips
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
       # All links should have tooltip data attributes
       assert_html(html, "a.prev_object_link[data-tooltip-target='tip']")
@@ -216,23 +177,20 @@ module Views::Layouts
     def test_link_nesting_structure
       @query.current_id = @middle_obs.id
 
-      html = render(Views::Layouts::Header::ShowPrevNextNav.new(
-                      object: @middle_obs,
-                      query: @query
-                    ))
+      html = render_nav(object: @middle_obs, query: @query)
 
-      # Links should be nested in li elements
+      # Links are direct children of the button group -- no wrapping <li>
       assert_nested(
         html,
-        parent_selector: "ul.object_pager",
-        child_selector: "li"
+        parent_selector: "div.object_pager",
+        child_selector: "a.prev_object_link"
       )
 
       # Icon should be nested in link
       assert_nested(
         html,
         parent_selector: "a.prev_object_link",
-        child_selector: "span.glyphicon"
+        child_selector: "svg.mo-icon-prev"
       )
 
       # SR-only text should be in link
@@ -241,6 +199,12 @@ module Views::Layouts
         parent_selector: "a.prev_object_link",
         child_selector: "span.sr-only"
       )
+    end
+
+    private
+
+    def render_nav(**)
+      render(Views::Layouts::Header::ShowPrevNextNav.new(**))
     end
   end
 end

@@ -3,7 +3,7 @@
 # Turbo-stream wrapper for the per-naming vote-breakdown modal —
 # the response body for `votes#index` when requested with
 # `format: :turbo_stream`. Composes `Components::Modal` with the
-# `Table` in the body slot.
+# `Tally` table in the body slot.
 #
 # Lives as a thin wrapper because `ActionController#render` treats
 # a trailing `do |x| … end` block as a layout block rather than
@@ -18,6 +18,12 @@ module Views::Controllers::Observations::Namings::Votes
     prop :user, _Nilable(::User), default: nil
     prop :modal_id, String
     prop :title, String
+    # Optional. Lets a caller that already built a NamingConsensus
+    # (e.g. VotesController#render_votes_modal, which needs one to
+    # resolve the display naming) pass it through to `Tally` instead
+    # of `Tally` silently constructing its own second one.
+    prop :consensus, _Nilable(::Observation::NamingConsensus),
+         default: nil
 
     def view_template
       # Must stay `render(::Components::Modal.new(...))`, not bare
@@ -33,7 +39,7 @@ module Views::Controllers::Observations::Namings::Votes
           trusted_html(@naming.display_name_brief_authors(@user).t.small_author)
         end
         modal.with_body do
-          render(Table.new(naming: @naming))
+          render(Tally.new(naming: @naming, consensus: @consensus))
         end
       end
     end

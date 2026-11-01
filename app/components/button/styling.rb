@@ -18,11 +18,11 @@
 # `variant: :strip` renders no Bootstrap button framing at all. Omit
 # `variant:` (or pass `nil`) for the standard grey button (`btn btn-default`).
 # `:default` is also accepted as an explicit synonym for nil/omitted —
-# `Components::Link`/`Link::Icon` need to distinguish "no button framing
-# at all" (nil, a plain link) from "framed as the default button"
-# (`:default`, a different state at that layer), so `btn_class` treats
-# both the same rather than making every such caller translate `:default`
-# to `nil` itself.
+# `Components::Link` needs to distinguish "no button framing at all"
+# (nil, a plain link) from "framed as the default button" (`:default`,
+# a different state at that layer), so `btn_class` treats both the
+# same rather than making every such caller translate `:default` to
+# `nil` itself.
 module Components::Button::Styling
   extend ActiveSupport::Concern
 

@@ -72,10 +72,7 @@ module Views::Controllers::Descriptions
         assert_html(html, "textarea[name='description[#{field}]']")
       end
 
-      # Two submit buttons (top + bottom), value = CREATE for a new record.
-      assert_html(html,
-                  "button[type='submit']", text: :create.ti,
-                                           count: 2)
+      assert_html(html, "button[type='submit']", text: :create.ti)
     end
 
     def test_admin_mode_renders_all_source_types
@@ -101,10 +98,8 @@ module Views::Controllers::Descriptions
       assert_html(html,
                   "input[type='hidden'][name='description[source_type]']")
 
-      # Submit buttons read SAVE_EDITS, not CREATE, for an existing record.
-      assert_html(html,
-                  "button[type='submit']", text: :save_edits.ti,
-                                           count: 2)
+      # Submit button reads SAVE_EDITS, not CREATE, for an existing record.
+      assert_html(html, "button[type='submit']", text: :save_edits.ti)
     end
 
     # Regression for #4491: project/foreign descriptions show the source
@@ -145,7 +140,7 @@ module Views::Controllers::Descriptions
     def test_merge_opts_renders_merge_hidden_fields
       html = render_form(
         description: @existing_name_desc,
-        merge_opts: { merge: true, old_desc_id: 42, delete_after: "1" }
+        merge_opts: { merge: true, old_desc_id: 42, delete_after: true }
       )
 
       # `render_flat_hidden_field` uses the raw name (no `description[...]`
@@ -153,7 +148,7 @@ module Views::Controllers::Descriptions
       assert_html(html,
                   "input[type='hidden'][name='old_desc_id'][value='42']")
       assert_html(html,
-                  "input[type='hidden'][name='delete_after'][value='1']")
+                  "input[type='hidden'][name='delete_after'][value='true']")
     end
 
     def test_merge_opts_omitted_when_not_merging

@@ -31,7 +31,7 @@ class Components::ObservationFragment::Who < Components::Base
   # collector is the entering user; when they differ it moves to the
   # "Entered by:" line (you email the MO account, not a free-text name).
   def render_collector
-    plain("#{:collector.ti}: ")
+    trusted_html(append_colon(:collector.ti))
     render_collector_identity
     return if @obs.collector_differs_from_creator?
 
@@ -39,7 +39,7 @@ class Components::ObservationFragment::Who < Components::Base
   end
 
   def render_entered_by
-    plain("#{:entered_by.ti}: ")
+    trusted_html(append_colon(:entered_by.ti))
     render_user_link(@obs.user)
     render_send_question_link if show_send_question?
   end

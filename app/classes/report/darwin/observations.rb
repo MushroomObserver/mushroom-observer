@@ -52,7 +52,7 @@ module Report
         ids.append(row.obs_id)
         [
           row.obs_id,
-          "#{MO.http_domain}/#{row.obs_id}",
+          row.obs_url,
           "HumanObservation",
           row.obs_updated_at,
           "MushroomObserver",

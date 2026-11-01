@@ -24,9 +24,15 @@
 #   rooted layout shell with mixed-shape rows. `rows` arg is
 #   unused / can be nil in this mode.
 #
-# Table-level HTML attrs (`data:`, `cols:`, ARIA attrs, etc.) go in
-# the `attributes:` Hash. `class:` and `id:` are first-class init
-# args.
+# Table-level HTML attrs (`class:`, `data:`, `cols:`, ARIA attrs,
+# etc.) are all plain kwargs forwarded to the `<table>` element.
+# `id:` is a first-class init arg.
+#
+# `t.footer { ... }` adds an optional `<tfoot>` row (one `<td
+# colspan="N">`, N = number of columns) after the body, independent
+# of column/row/body mode — use it for a table-level action row
+# that should turbo-stream-replace along with the rest of the table
+# rather than sit outside it as a separately-targeted element.
 #
 # @example Column mode (uniform rows)
 #   Table(@users, variant: :striped) do |t|
@@ -39,7 +45,9 @@
 #         variant: :striped,
 #         identifier: "user-list") do |t|
 #     t.column("Name", width: "33%") { |user| user.name }
-#     t.column("Actions", class: "text-right") { |u| destroy_button(u) }
+#     t.column("Actions", class: "text-right") do |u|
+#       Button(type: :delete, target: u)
+#     end
 #   end
 #
 # @example Row mode (Stimulus-rooted rows)
@@ -53,7 +61,7 @@
 # @example Body mode (table-level data attrs + mixed rows)
 #   Table(
 #     class: "name-lister",
-#     attributes: { data: { controller: "name-list" } }
+#     data: { controller: "name-list" }
 #   ) do |t|
 #     t.column(:name.ti, width: "20%")
 #     t.column(:options.ti, width: "80%")
@@ -63,38 +71,39 @@
 #     end
 #   end
 class Components::Table < Components::Base
-  # @param rows [Enumerable, nil] rows passed to each column/row
-  #   block (unused in body mode)
-  # @param class [String] extra CSS classes appended after the
-  #   component-managed classes
-  # @param id [String] `id=` for the `<table>` element
-  # @param show_headers [Boolean] render the `<thead>` (default true)
-  # @param tbody_id [String] `id=` for the `<tbody>` element (use to
-  #   make the tbody a Turbo Stream target)
-  # @param attributes [Hash] arbitrary HTML attrs forwarded to the
-  #   `<table>` element (`data:`, `cols:`, ARIA attrs, etc.)
-  # @param variant [Symbol, Array<Symbol>] Bootstrap table modifier(s)
-  #   (:striped, :condensed, :hover, :bordered) → adds "table-striped"
-  #   etc. to the class list
-  # @param identifier [String] stable identifier slug → adds
-  #   "table-{identifier}" class for test/JS targeting
-  #   (e.g. `identifier: "location-help"` → `class="… table-location-help"`)
-  def initialize(rows = nil, class: nil, id: nil, show_headers: true, # rubocop:disable Metrics/ParameterLists
-                 tbody_id: nil, attributes: {}, variant: nil, identifier: nil)
-    super()
-    @rows = rows
+  # Rows passed to each column/row block (unused in body mode).
+  prop :rows, _Nilable(_Interface(:each)), :positional, default: nil
+  # `id=` for the `<table>` element.
+  prop :id, _Nilable(String), default: nil
+  # Render the `<thead>`.
+  prop :show_headers, _Boolean, default: true
+  # `id=` for the `<tbody>` element (use to make the tbody a Turbo
+  # Stream target).
+  prop :tbody_id, _Nilable(String), default: nil
+  # Bootstrap table modifier(s) (:striped, :condensed, :hover,
+  # :bordered) — adds "table-striped" etc. to the class list.
+  prop :variant, _Nilable(_Union(Symbol, _Array(Symbol))), default: nil
+  # Stable identifier slug — adds "table-{identifier}" class for
+  # test/JS targeting (e.g. `identifier: "location-help"` →
+  # `class="… table-location-help"`).
+  prop :identifier, _Nilable(String), default: nil
+  # Catch-all for class:, data:, cols:, ARIA attrs, and any other
+  # HTML attrs forwarded to the `<table>` element -- matches
+  # Icon/Collapsible's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
+
+  # `@columns`/`@row_block`/`@body_blocks`/`@heading_block`/
+  # `@heading_attrs` are builder-accumulated state (populated by
+  # `column`/`row`/`body`/`heading` during `vanish`), not constructor
+  # props -- see the class docs above.
+  def initialize(*, **)
     @columns = []
     @row_block = nil
     @body_blocks = []
     @heading_block = nil
     @heading_attrs = {}
-    @show_headers = show_headers
-    @tbody_id = tbody_id
-    @html_class = grab(class:)
-    @html_id = id
-    @attributes = attributes
-    @variant = variant
-    @identifier = identifier
+    @footer_block = nil
+    super
   end
 
   def view_template(&block)
@@ -106,9 +115,11 @@ class Components::Table < Components::Base
     table(**table_attributes) do
       render_thead if @show_headers
       render_tbody
+      render_tfoot if @footer_block
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Define a column. In column mode, the block is called for each
   # row to produce the cell content. In row / body mode, the block
   # is ignored — only the `header` and per-column attrs are used,
@@ -120,7 +131,8 @@ class Components::Table < Components::Base
   #   `data: { foo: "bar" }`) forwarded to both the `<th>` and `<td>`
   #   elements for this column
   # @yield [row] block that receives each row and returns cell content
-  # @return [nil] returns nil to prevent ERB output
+  # @return [nil] -- a non-nil return from a builder block is rendered
+  # rubocop:enable MO/NoLongCommentBlock
   def column(header, class: nil, **attributes, &content)
     @columns << {
       header: header,
@@ -158,6 +170,7 @@ class Components::Table < Components::Base
     nil
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Register a section heading row — a single `<th>` with
   # `colspan` = number of columns, rendered inside the `<thead>`
   # instead of the standard per-column header row. Use for tables
@@ -174,19 +187,34 @@ class Components::Table < Components::Base
   #   heading `<th>` (`class:`, `data:`, etc.)
   # @yield block that renders the heading cell content
   # @return [nil]
+  # rubocop:enable MO/NoLongCommentBlock
   def heading(**attributes, &block)
     @heading_block = block
     @heading_attrs = attributes
     nil
   end
 
+  # Register a `<tfoot>` row rendered after the body — a single
+  # `<td>` with `colspan` = number of columns, for a table-level
+  # action row (a "create new" trigger + form, etc.) that gets
+  # swept up whenever the whole table is turbo-stream-replaced,
+  # instead of living as a separate element outside the table with
+  # a separate turbo-stream target.
+  #
+  # @yield block that renders the footer cell content
+  # @return [nil]
+  def footer(&block)
+    @footer_block = block
+    nil
+  end
+
   private
 
   def table_attributes
-    attrs = @attributes.dup
+    attrs = @attributes.except(:class)
     attrs[:class] = class_names("table", variant_classes, identifier_class,
-                                @html_class)
-    attrs[:id] = @html_id if @html_id
+                                @attributes[:class])
+    attrs[:id] = @id if @id
     attrs
   end
 
@@ -239,6 +267,12 @@ class Components::Table < Components::Base
       @columns.each do |column|
         td(**column[:attributes]) { column[:content].call(row) }
       end
+    end
+  end
+
+  def render_tfoot
+    tfoot do
+      tr { td(colspan: @columns.length, &@footer_block) }
     end
   end
 end

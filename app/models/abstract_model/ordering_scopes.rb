@@ -15,6 +15,7 @@ module AbstractModel::OrderingScopes
   # Two line stabby lambdas are OK, it's just the declaration line that will
   # always show as covered.
   included do
+    # rubocop:disable MO/NoLongCommentBlock
     # Dispatcher for Query's :order_by param. Expects a (method) arg.
     # Example:
     #   create_query(:Observation, order_by: :created_at)
@@ -34,6 +35,7 @@ module AbstractModel::OrderingScopes
     # IMPORTANT: USE THIS SCOPE whenever possible in the app and tests.
     # The private methods called by it do not include the last step that
     # resolves order within grouped results consistently.
+    # rubocop:enable MO/NoLongCommentBlock
     scope :order_by, lambda { |method, viewer: nil|
       return all if method.to_sym == :none
 
@@ -152,6 +154,12 @@ module AbstractModel::OrderingScopes
       end
     end
 
+    def order_by_external_id
+      return all unless self == ExternalLink
+
+      order(ExternalLink[:external_id].asc)
+    end
+
     def order_by_herbarium_label
       return all unless self == HerbariumRecord
 
@@ -261,6 +269,13 @@ module AbstractModel::OrderingScopes
               Observation[:vote_cache].desc)
     end
 
+    def order_by_recent_observation
+      return all unless [Project, SpeciesList].include?(self)
+
+      left_outer_joins(:observations).group(arel_table[:id]).distinct.
+        order(Observation[:created_at].maximum.desc)
+    end
+
     def order_by_records
       return all unless self == Herbarium
 
@@ -287,6 +302,12 @@ module AbstractModel::OrderingScopes
       order(arel_table[:summary].asc)
     end
 
+    def order_by_target_type
+      return all unless column_names.include?("target_type")
+
+      order(arel_table[:target_type].asc)
+    end
+
     def order_by_thumbnail_quality
       return all unless self == Observation
 
@@ -305,12 +326,6 @@ module AbstractModel::OrderingScopes
       return all unless column_names.include?("updated_at")
 
       order(arel_table[:updated_at].desc)
-    end
-
-    def order_by_url
-      return all unless self == ExternalLink
-
-      order(ExternalLink[:url].asc)
     end
 
     def order_by_user

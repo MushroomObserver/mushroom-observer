@@ -131,6 +131,11 @@ module Locations::Descriptions
       end
 
       assert_flash_error
+      # Must redirect -- previously fell through with no render or
+      # redirect at all (see .claude/rules/turbo_submit_forms.md).
+      assert_redirected_to(
+        new_move_location_description_path(id: public_desc.id)
+      )
     end
 
     # Cover check_src_exists! returning false

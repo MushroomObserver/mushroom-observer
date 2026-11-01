@@ -23,4 +23,10 @@ class Tab::Name::ExternalBase < Tab::Base
   def model
     @name
   end
+
+  private
+
+  def url_encode(str)
+    ERB::Util.url_encode(str)
+  end
 end

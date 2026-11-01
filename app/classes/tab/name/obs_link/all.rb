@@ -37,8 +37,7 @@ class Tab::Name::ObsLink::All < Tab::Collection
 
   def standard_tabs
     SPECS.map do |klass, count_method|
-      klass.new(name: @name, count: @obss.send(count_method).size,
-                controller: @controller)
+      klass.new(name: @name, count: @obss.send(count_method).size)
     end
   end
 

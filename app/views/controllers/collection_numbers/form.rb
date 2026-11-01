@@ -7,20 +7,26 @@ module Views::Controllers::CollectionNumbers
   # `new.rb` and `edit.rb`, and dynamically by
   # `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, observation: nil, back: nil, **)
-      @observation = observation || model.observations.first
-      @back = back
-      super(model, **)
+    prop :observation, ::Observation
+    prop :back, _Nilable(String), default: nil
+
+    def initialize(model, observation: nil, **)
+      super(model, observation: observation || model.observations.first, **)
     end
 
     def view_template
       render_multiple_observations_warning if show_warning?
+      render_observation_field unless model.persisted?
       render_name_field
       render_number_field
       submit(submit_text, center: true)
     end
 
     private
+
+    def render_observation_field
+      hidden_field("observation_id", value: @observation.id)
+    end
 
     def render_multiple_observations_warning
       Alert(
@@ -39,14 +45,14 @@ module Views::Controllers::CollectionNumbers
     def render_name_field
       text_field(:name,
                  label: :collection_number_name,
-                 between: :required,
+                 label_appends: :required,
                  data: { autofocus: true })
     end
 
     def render_number_field
       text_field(:number,
                  label: :collection_number_number,
-                 between: :required)
+                 label_appends: :required)
     end
 
     def submit_text
@@ -67,7 +73,6 @@ module Views::Controllers::CollectionNumbers
         url_for(
           controller: "collection_numbers",
           action: :create,
-          observation_id: @observation.id,
           only_path: true
         )
       end

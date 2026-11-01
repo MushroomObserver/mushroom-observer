@@ -3,6 +3,24 @@
 require("test_helper")
 
 class SpeciesListsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::SpeciesLists, :SpeciesList,
+      overrides: {
+        id_in_set: species_lists(:first_species_list).id,
+        by_users: rolf.id,
+        editable_by_user: rolf.id,
+        locations: locations(:burbank).id,
+        projects: projects(:bolete_project).id
+      }
+    )
+  end
+
   # NOTE: I don't know how to grab the DEFAULT from the fixture set and
   #   User.find(ActiveRecord::FixtureSet.identify(:rolf)).contribution
   # blows up in CI with
@@ -37,9 +55,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
   private :assert_create_species_list
 
   def assert_edit_species_list
-    # `edit.html.erb` and its child form partial are both Phlex now
-    # (`Views::Controllers::SpeciesLists::Edit` →
-    # `Components::SpeciesListForm`). Phlex views don't appear in
+    # `Views::Controllers::SpeciesLists::Edit` renders
+    # `Components::SpeciesListForm`. Phlex views don't appear in
     # `assert_template`'s rendered-list — use the layout's
     # `<body class="species_lists__edit">` action marker instead.
     assert_select("body.species_lists__edit")
@@ -163,6 +180,17 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_displayed_filters("#{:query_by_users.l}: #{user.name}")
   end
 
+  def test_index_by_user_single_match_redirects
+    user = lone_wolf
+    spl = SpeciesList.where(user: user).first
+    assert(SpeciesList.where(user: user).one?)
+
+    login
+    get(:index, params: { by_user: user.id })
+
+    assert_redirected_to(species_list_path(spl.id))
+  end
+
   def test_index_by_user_with_no_species_lists
     user = users(:zero_user)
 
@@ -194,9 +222,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # there's no banner for this project
     assert_page_title(:species_lists.ti)
     spl = project.species_lists.first
-    assert_select(
-      "a[href*='species_lists/#{spl.id}?project=#{project.id}']",
-      text: /#{Regexp.escape(spl.title)}/
+    assert_select_text_includes(
+      "a[href*='species_lists/#{spl.id}?project=#{project.id}']", spl.title
     )
   end
 
@@ -267,10 +294,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = spl.projects[0]
 
     get(:show, params: { id: spl.id, project: project.id })
-    assert_select("#project_banner",
-                  text: /#{Regexp.escape(project.title)}/)
+    assert_select_text_includes("#project_banner", project.title)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id, project: project.id),
+      { count: 1 },
+      "Names button should carry the project context to the checklist"
+    )
   end
 
   # Regression test for bug where params[:q] as a String (saved query ID)
@@ -302,22 +334,19 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_arrays_equal([], spl.projects)
 
-    proj1_re = /#{Regexp.escape(proj1.title)}/
-    proj2_re = /#{Regexp.escape(proj2.title)}/
-
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re, count: 0)
-    assert_select("#list_details", text: proj2_re, count: 0)
+    assert_select_text_includes("#list_details", proj1.title, count: 0)
+    assert_select_text_includes("#list_details", proj2.title, count: 0)
 
     proj1.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re)
-    assert_select("#list_details", text: proj2_re, count: 0)
+    assert_select_text_includes("#list_details", proj1.title)
+    assert_select_text_includes("#list_details", proj2.title, count: 0)
 
     proj2.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re)
-    assert_select("#list_details", text: proj2_re)
+    assert_select_text_includes("#list_details", proj1.title)
+    assert_select_text_includes("#list_details", proj2.title)
   end
 
   def test_show_species_list_edit_links
@@ -454,10 +483,11 @@ class SpeciesListsControllerTest < FunctionalTestCase
          })
     # No save (validation re-renders the form).
     assert_nil(SpeciesList.find_by(title: "Dubious place test"))
-    assert_response(:success)
+    assert_unprocessable
     # `@dubious_where_reasons` was populated and is now in the
     # FormLocationFeedback component.
     assert_select("#dubious_location_messages")
+    assert_select("form[data-turbo='true']")
   end
 
   # Cover the `redirect_to(new_location_path(...))` branch in
@@ -485,7 +515,9 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_nil(spl.location_id,
                "Test scenario requires unresolved location_id")
     assert_redirected_to(new_location_path(where: novel,
-                                           set_species_list: spl.id))
+                                           set_species_list: spl.id,
+                                           format: :html))
+    assert_flash_warning
   end
 
   # Test constructing species_lists in various ways.
@@ -671,6 +703,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
         }
       }
     )
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
     assert_project_checks(@proj1.id => :checked, @proj2.id => :unchecked)
 
     login("dick")
@@ -699,5 +733,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     initial_count = spl.observations.count
     put(:clear, params: { id: spl.id })
     assert_equal(initial_count, spl.observations.count)
+  end
+
+  def test_sort_options_includes_recent_observation
+    assert_includes(SpeciesListsController.sort_options,
+                    ["recent_observation", :sort_by_recent_observation.t])
   end
 end

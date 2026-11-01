@@ -13,16 +13,11 @@
 # toggles each one based on whether its id is in the submitted array.
 module Views::Controllers::Observations::Images
   class Form < ::Components::ApplicationForm
-    # Render state is bundled into the `**state` splat so the init
-    # stays under Metrics/ParameterLists. Callers still pass each
-    # piece as a named kwarg (projects:, submitted_project_ids:).
-    def initialize(image, user:, licenses:, **state)
-      @user = user
-      @licenses = licenses
-      @projects = state[:projects] || []
-      @submitted_project_ids = state[:submitted_project_ids]
-      super(image, **state.except(:projects, :submitted_project_ids))
-    end
+    prop :user, ::User
+    prop :licenses, _Array(Array)
+    prop :projects, _Array(::Project), default: -> { [] }
+    prop :submitted_project_ids, _Nilable(_Array(Integer)),
+         default: nil, &TO_ID_ARRAY
 
     # Explicit form action — `image_path(model)` via the
     # `observations/images` controller. PUT update.
@@ -32,7 +27,6 @@ module Views::Controllers::Observations::Images
 
     def view_template
       super do
-        submit(:save_edits.ti, center: true)
         render_image_fields
         render_project_checkboxes if @projects.any?
         render_footer_buttons
@@ -69,30 +63,29 @@ module Views::Controllers::Observations::Images
     end
 
     def render_project_checkboxes
-      div(class: "form-group") do
-        p(class: "font-weight-bold") { plain("#{:projects.ti}:") }
-        Help(content: :form_images_project_help.t)
-        div(class: "form-group") do
-          # Sentinel: ensures `image[project_ids]` is always present in
-          # params even when every checkbox is unchecked (Rack drops
-          # empty arrays). Controller `compact_blank`s this empty value.
-          input(type: "hidden", name: "image[project_ids][]",
-                value: "", autocomplete: "off")
-          @projects.each { |project| render_project_checkbox(project) }
-        end
-      end
+      render(
+        Components::Form::CheckboxPanel.new(
+          form: self,
+          type: :project,
+          form_object_name: "image",
+          objects: @projects,
+          checked_ids: checked_project_ids,
+          disabled_ids: disabled_project_ids,
+          help_text: :form_images_project_help.t
+        )
+      )
     end
 
-    def render_project_checkbox(project)
-      checkbox_field(:project_ids,
-                     label: false,
-                     disabled: cannot_modify_project?(project)) do |cb|
-        cb.option(project.id,
-                  checked: project_checked?(project.id)) do
-          whitespace
-          Link(type: :object, object: project)
-        end
-      end
+    def checked_project_ids
+      @submitted_project_ids || model.project_ids
+    end
+
+    # The image's owner can always toggle membership; non-owners can
+    # only toggle projects they're already members of.
+    def disabled_project_ids
+      return [] if model.user_id == @user.id
+
+      @projects.reject { |project| project.member?(@user) }.map(&:id)
     end
 
     def render_footer_buttons
@@ -104,20 +97,6 @@ module Views::Controllers::Observations::Images
           target: image_path(model.id),
           class: "ml-2"
         )
-      end
-    end
-
-    # Only the image owner
-    # or a member of the project can toggle.
-    def cannot_modify_project?(project)
-      model.user_id != @user.id && !project.member?(@user)
-    end
-
-    def project_checked?(project_id)
-      if @submitted_project_ids
-        @submitted_project_ids.map(&:to_i).include?(project_id.to_i)
-      else
-        model.project_ids.include?(project_id)
       end
     end
   end

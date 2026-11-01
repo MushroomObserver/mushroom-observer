@@ -11,11 +11,27 @@
 # is supplied by the controller rather than built locally — the
 # observations-subtaxa query is also used elsewhere on the page
 # (header pager scope), so duplicating the construction would be
-# wasteful.
-class Tab::Name::ObsLink::Subtaxa < Tab::Name::ObsLink
+# wasteful. Inherits `Tab::QueryLink` directly rather than
+# `Tab::Name::ObsLink` -- the other 5 build a plain route-helper
+# path with no Query, so they no longer share a base with this one.
+class Tab::Name::ObsLink::Subtaxa < Tab::QueryLink
   def initialize(name:, count:, controller:, query:)
+    super(controller: controller)
+    @name = name
+    @count = count
     @injected_query = query
-    super(name: name, count: count, controller: controller)
+  end
+
+  def title
+    "#{label_key.t} (#{@count})"
+  end
+
+  def alt_title
+    label_key.to_s
+  end
+
+  def linked?
+    @count.positive?
   end
 
   private
@@ -26,5 +42,9 @@ class Tab::Name::ObsLink::Subtaxa < Tab::Name::ObsLink
 
   def build_query
     @injected_query
+  end
+
+  def target_params
+    observations_path
   end
 end

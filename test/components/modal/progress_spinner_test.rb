@@ -3,6 +3,9 @@
 require("test_helper")
 
 class ModalProgressSpinnerTest < ComponentTestCase
+  # Centering the caption/spinner is the documented layout here (a
+  # progress spinner's point is a centered indicator).
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_renders_non_dismissible_modal_with_spinner
     html = render(Components::Modal::ProgressSpinner.new)
 
@@ -36,6 +39,7 @@ class ModalProgressSpinnerTest < ComponentTestCase
                 "#modal_progress_spinner_body.modal-body.text-center " \
                 "> #modal_progress_spinner_caption")
     assert_html(html,
-                "#modal_progress_spinner_body > span.spinner-right.mx-2")
+                "#modal_progress_spinner_body > " \
+                "svg.mo-icon.mo-icon-reuse.spinner-right")
   end
 end

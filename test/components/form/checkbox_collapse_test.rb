@@ -45,13 +45,14 @@ class FormCheckboxCollapseTest < ComponentTestCase
     assert_no_html(html, "input[data-toggle='collapse']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_attributes_forwarded_to_checkbox_field
     html = render_collapse(
       attributes: { wrap_class: "mt-0", help: "Some help text" }
     )
 
     assert_html(html, ".mt-0 input[type='checkbox']")
-    assert_html(html, "body", text: "Some help text")
+    assert_html(html, ".help-block", text: "Some help text")
   end
 
   def test_input_data_in_attributes_goes_to_input_not_label
@@ -82,9 +83,32 @@ class FormCheckboxCollapseTest < ComponentTestCase
     assert_html(html, "label", text: :approved.ti)
   end
 
+  # The box and the section are one state. Deriving the box from the
+  # field breaks when the field is not a real attribute -- the
+  # observation form's `has_geolocation` is only a scope, so the box
+  # rendered unchecked over an open section (#5002).
+  def test_checkbox_is_checked_when_expanded
+    html = render_collapse(expanded: true)
+
+    assert_html(html, "input[type='checkbox'][checked]")
+  end
+
+  def test_checkbox_is_unchecked_when_collapsed
+    html = render_collapse(expanded: false)
+
+    assert_no_html(html, "input[type='checkbox'][checked]")
+  end
+
+  def test_checked_can_be_overridden_by_the_caller
+    html = render_collapse(expanded: true, attributes: { checked: false })
+
+    assert_no_html(html, "input[type='checkbox'][checked]")
+  end
+
   private
 
-  def render_collapse(expanded: false, attributes: {}, label: "Specimen")
+  def render_collapse(expanded: false, attributes: {},
+                      label: "Specimen")
     form = TestForm.new(@obs, action: "/observations")
     the_form = form
     form.render_block = proc do

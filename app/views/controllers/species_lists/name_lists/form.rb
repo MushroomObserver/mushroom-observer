@@ -7,11 +7,13 @@ module Views::Controllers::SpeciesLists::NameLists
   # The user picks an output format via one of four submit buttons;
   # `params[:commit]` is dispatched by the controller.
   class Form < ::Components::ApplicationForm
-    def initialize(name_strings:, user:, **)
-      @name_strings = name_strings
-      @user = user
+    prop :user, ::User
+
+    def initialize(name_strings:, user:)
+      # Permanently turbo: false -- 3 of 4 buttons send_data downloads
+      # (see .claude/rules/turbo_submit_forms.md).
       super(FormObject::NameLister.new(results: name_strings.join("\n")),
-            id: "name_lister_form")
+            user: user, id: "name_lister_form", turbo: false)
     end
 
     def view_template

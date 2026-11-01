@@ -5,9 +5,7 @@ require("test_helper")
 class LocationLinkTest < ComponentTestCase
   def test_renders_show_location_link_when_location_given
     burbank = locations(:burbank)
-    html = render(Components::Link::Location.new(
-                    where: burbank.name, location: burbank
-                  ))
+    html = render_location(where: burbank.name, location: burbank)
 
     # Asserted attribute-by-attribute so the test pins behavior
     # (where it links, what selector class it carries) rather than
@@ -16,16 +14,14 @@ class LocationLinkTest < ComponentTestCase
     assert_html(html, "a.show_location_link_#{burbank.id}")
     # Postal + scientific spans wrap the name so per-user formatting
     # CSS can hide whichever the user didn't pick.
-    assert_html(html, "a span.location-postal", text: burbank.name)
-    assert_html(html, "a span.location-scientific",
+    assert_html(html, "a .location-postal", text: burbank.name)
+    assert_html(html, "a .location-scientific",
                 text: Location.reverse_name(burbank.name))
   end
 
   def test_count_suffix_appended
     burbank = locations(:burbank)
-    html = render(Components::Link::Location.new(
-                    where: burbank.name, location: burbank, count: 7
-                  ))
+    html = render_location(where: burbank.name, location: burbank, count: 7)
 
     # Locations index uses count to show "<name> (7)".
     assert_includes(html, "(7)")
@@ -33,34 +29,32 @@ class LocationLinkTest < ComponentTestCase
 
   def test_click_appends_map_icon_link
     burbank = locations(:burbank)
-    html = render(Components::Link::Location.new(
-                    where: burbank.name, location: burbank, click: true
-                  ))
+    html = render_location(where: burbank.name, location: burbank,
+                           click: true)
 
     location_href = routes.location_path(id: burbank.id)
     # A standalone icon link, distinct from the label's own anchor --
-    # same href, but carrying the globe glyph + tooltip.
-    assert_html(html, "a[href='#{location_href}'] .glyphicon-globe")
+    # same href, but carrying the map glyph + tooltip.
+    assert_html(html,
+                "a[href='#{location_href}'] svg.mo-icon-map")
     assert_html(html, "a[data-title='#{:click_for_map.l}']")
   end
 
   def test_without_location_renders_observations_index_link
     where = "Some Place, USA"
-    html = render(Components::Link::Location.new(where: where))
+    html = render_location(where: where)
 
     # Fallback: no resolved Location → link to observations index
     # filtered by `where=`, with a distinct selector class.
     assert_html(html, "a[href='#{routes.observations_path(where: where)}']")
     assert_html(html, "a.index_observations_at_where_link")
-    assert_html(html, "a span.location-postal", text: where)
+    assert_html(html, "a .location-postal", text: where)
   end
 
   def test_query_param_forwarded_on_location_link
     burbank = locations(:burbank)
     query = Query.lookup_and_save(:Location)
-    html = render(Components::Link::Location.new(
-                    location: burbank, query: query
-                  ))
+    html = render_location(location: burbank, query: query)
 
     # query: is forwarded via add_q_param — href gets a ?q[...] query string
     base_path = routes.location_path(id: burbank.id)
@@ -68,10 +62,14 @@ class LocationLinkTest < ComponentTestCase
   end
 
   def test_click_on_where_link_appends_search_suffix
-    html = render(Components::Link::Location.new(
-                    where: "Some Place, USA", click: true
-                  ))
+    html = render_location(where: "Some Place, USA", click: true)
 
     assert_includes(html, :search.ti)
+  end
+
+  private
+
+  def render_location(**)
+    render(Components::Link::Location.new(**))
   end
 end

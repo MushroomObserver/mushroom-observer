@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Nested hash of permissible controllers and actions. Each entry as follows,
 # with missing element meaning use default:
 #
@@ -16,6 +17,7 @@
 #
 # Note that the hash of attributes is not yet actually used.
 #
+# rubocop:enable MO/NoLongCommentBlock
 ACTIONS = {
   # The v1 API (`api`) was retired: its APIController was removed long
   # ago, but these routes lingered, so every /api* request matched a
@@ -39,6 +41,7 @@ ACTIONS = {
     location_descriptions: {},
     names: {},
     name_descriptions: {},
+    namings: {},
     observations: {},
     occurrences: {},
     projects: {},
@@ -272,10 +275,10 @@ MushroomObserver::Application.routes.draw do
     get("signup", to: "/account#new") # alternate path
 
     resource :login, only: [:new, :create], controller: "login"
-    unresourced_login_gets = %w[email_new_password test_autologin].freeze
-    unresourced_login_gets.each { |action| get(action, controller: "login") }
+    get("test_autologin", controller: "login")
     resource :logout, only: [:show, :create], controller: "logout"
-    post("new_password_request", controller: "login")
+    resource :password_reset, only: [:new, :create],
+                              controller: "password_resets"
 
     resource :preferences, only: [:edit, :update]
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
@@ -287,6 +290,9 @@ MushroomObserver::Application.routes.draw do
                                  as: "profile_update_image")
     put("profile/images(/:id)", to: "profile/images#detach",
                                 as: "profile_remove_image")
+    resource :inat_link, only: [:new]
+    resource :inat_opt_out, only: [:update]
+    resource :content_purge, only: [:new, :create]
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -315,6 +321,10 @@ MushroomObserver::Application.routes.draw do
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
+    resources :excluded_inat_users, only: [:index, :create, :destroy] do
+      resource :content_purge, only: [:new, :create],
+                               controller: "excluded_inat_users/content_purges"
+    end
     namespace :emails do
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"
@@ -431,6 +441,9 @@ MushroomObserver::Application.routes.draw do
       post("emails", to: "images/emails#create",
                      as: "send_commercial_inquiry_for")
     end
+    # Singular: one field slip extract per image, replaced on re-run.
+    resource(:field_slip_extract, only: [:create, :edit, :update],
+                                  controller: "images/field_slip_extracts")
     put("/vote", to: "images/votes#update", as: "vote")
     get("/vote", to: "images/votes#show", as: "vote_interface")
   end
@@ -473,7 +486,6 @@ MushroomObserver::Application.routes.draw do
   get("/javascript/turn_javascript_on", to: "javascript#turn_javascript_on")
   get("/javascript/turn_javascript_off", to: "javascript#turn_javascript_off")
   get("/javascript/turn_javascript_nil", to: "javascript#turn_javascript_nil")
-  get("/javascript/hide_thumbnail_map", to: "javascript#hide_thumbnail_map")
 
   resources :licenses, id: /\d+/
 
@@ -510,6 +522,9 @@ MushroomObserver::Application.routes.draw do
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
+  # Undefined Locations: index
+  get("locations/undefined", to: "locations/undefined#index",
+                             as: "undefined_locations")
 
   # ----- Names: a lot of actions  ----------------------------
   namespace :names do
@@ -625,6 +640,7 @@ MushroomObserver::Application.routes.draw do
                 only: [:show, :new, :create, :edit, :update, :destroy],
                 shallow: true, controller: "observations/external_links"
 
+      get("field_slip_scan", to: "observations/field_slip_scans#show")
       get("map", to: "observations/maps#show")
       get("map_popup", to: "observations/maps#popup")
       get("suggestions", to: "observations/namings/suggestions#show",
@@ -662,6 +678,20 @@ MushroomObserver::Application.routes.draw do
         to: "observations/species_lists#update",
         via: [:put, :patch],
         as: "observation_species_list")
+  get("/observations/:id/field_slip/edit",
+      to: "observations/field_slips#edit",
+      as: "edit_observation_field_slip")
+  match("/observations/:id/field_slip",
+        to: "observations/field_slips#update",
+        via: [:put, :patch],
+        as: "observation_field_slip")
+  get("/observations/:id/projects/edit",
+      to: "observations/projects#edit",
+      as: "edit_observation_projects")
+  match("/observations/:id/projects/:project_id(/:commit)",
+        to: "observations/projects#update",
+        via: [:put, :patch],
+        as: "observation_project")
   # These are in observations because they share private methods with
   # :new and :create, which are currently observation-specific
   get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
@@ -671,6 +701,11 @@ MushroomObserver::Application.routes.draw do
 
   # ----- Policy: one route  --------------------------------------------------
   get("/policy/privacy")
+
+  # ----- Locale: one route (issue #5074) --------------------------------
+  # POST, not GET, so the language switcher can't be replayed by crawlers,
+  # browser history, or bookmarks -- see LocalesController.
+  post("/locale", to: "locales#update", as: "switch_locale")
 
   namespace :projects do
     resource :search, only: [:new, :create]
@@ -696,6 +731,14 @@ MushroomObserver::Application.routes.draw do
       end
     end
     resources :aliases, controller: "projects/aliases"
+    resources :external_sites, only: [:index, :create, :update],
+                               controller: "projects/external_sites"
+    # The observation a QR code on a printed label should lead to: the
+    # project is in the path, the name is the thing being looked up,
+    # and the answer is whichever observation the project holds now
+    # (#5416). Kept short because the URL has to fit in a QR code.
+    get("names/:name_id", to: "projects/best_observations#show",
+                          as: :name_observation)
     resources :target_names, only: [:create, :destroy],
                              controller: "projects/target_names"
     resources :target_locations, only: [:create, :destroy],
@@ -710,25 +753,19 @@ MushroomObserver::Application.routes.draw do
         post :add_all
       end
     end
-    resources :violations, only: [:index],
-                           controller: "projects/violations" do
-      collection do
-        # GET endpoint that returns the Add-Target-Location modal as a
-        # turbo-stream so each open sees fresh DB state (#4304).
-        get :target_location_modal
-      end
-    end
   end
-  # resourceful route won't work because it requires an additional id.
-  # Accept both PATCH and PUT — PATCH is the Rails-idiomatic verb for
-  # updates and what Superform defaults to for a persisted model
-  # (e.g. TargetLocationForm). PUT is kept so the legacy button_to
-  # calls (Exclude/Extend/Add Target Name) and any external callers
-  # continue to work without modification.
-  match("/projects/:project_id/violations",
+  # Project::Violation instances are computed Structs, not persisted
+  # records, so they have no ids. Route here under the Project's :id,
+  # rather than building a :project_id nested resource.
+  get("/projects/:id/violations", to: "projects/violations#index",
+                                  as: "project_violations")
+  match("/projects/:id/violations/resolve",
         to: "projects/violations#update",
-        as: "project_violations_update",
-        via: [:put, :patch])
+        as: "resolve_project_violations",
+        via: [:patch, :put])
+  get("/projects/:id/violations/target_location_modal",
+      to: "projects/violations#target_location_modal",
+      as: "target_location_modal_project_violations")
 
   # ----- Publications: standard actions  -------------------------------------
   resources :publications
@@ -784,45 +821,6 @@ MushroomObserver::Application.routes.draw do
       post("write_in", to: "species_lists/write_in#create", as: "write_in")
     end
   end
-
-  # put("/species_lists/:id/clear", to: "species_lists#clear",
-  #                                 as: "clear_species_list")
-
-  # get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
-  #                                       as: "new_species_list_name_lister")
-  # post("/species_lists/name_lister", to: "species_lists/name_lists#create",
-  #                                    as: "species_list_name_lister")
-  # get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
-  #                                       as: "new_species_list_upload")
-  # post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
-  #                                    as: "species_list_uploads")
-  # get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
-  #                                         as: "new_species_list_download")
-  # post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
-  #                                      as: "species_list_downloads")
-  # post("/species_lists/:id/downloads/print_labels",
-  #      to: "species_lists/downloads#print_labels",
-  #      as: "species_list_download_print_labels")
-  # get("/species_lists/observations/edit",
-  #     to: "species_lists/observations#edit",
-  #     as: "edit_species_list_observations")
-  # match("/species_lists/observations(/:commit)",
-  #       to: "species_lists/observations#update",
-  #       via: [:put, :patch],
-  #       as: "species_list_observations")
-  # get("/species_lists/:id/projects",
-  #     to: "species_lists/projects#edit",
-  #     as: "edit_species_list_projects")
-  # match("/species_lists/:id/projects",
-  #       to: "species_lists/projects#update",
-  #       via: [:put, :patch],
-  #       as: "species_list_projects")
-  # get("/species_lists/:id/write_in/new",
-  #     to: "species_lists/write_in#new",
-  #     as: "new_species_list_write_in")
-  # post("/species_lists/:id/write_in",
-  #      to: "species_lists/write_in#create",
-  #      as: "species_list_write_in")
 
   # ----- Test if server is up  -------------------------------------
   resources :test, only: [:index], controller: "test"

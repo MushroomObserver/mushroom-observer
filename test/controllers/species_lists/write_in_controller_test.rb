@@ -41,9 +41,61 @@ module SpeciesLists
       login("rolf")
       contrib = rolf.contribution
       post(:create, params: params)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
       assert_equal(contrib, rolf.reload.contribution)
       assert_not(synonym_name.reload.deprecated)
       assert_nil(synonym_name.synonym_id)
+    end
+
+    # Approving the synonym side of a "<name> = <synonym>" line makes
+    # construct_approved_names deprecate the approved synonym, even though
+    # the species list creation as a whole still fails (synonyms still
+    # require a separate confirmation step -- see test above).
+    def test_construct_species_list_synonym_approved
+      species_list = species_lists(:first_species_list)
+      name = names(:macrolepiota_rachodes)
+      synonym_name = names(:lepiota_rachodes)
+      assert_not(synonym_name.deprecated)
+
+      params = {
+        id: species_list.id,
+        list: { members: "#{name.text_name} = #{synonym_name.text_name}" },
+        approved_names: synonym_name.text_name
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_unprocessable
+
+      assert(
+        synonym_name.reload.deprecated,
+        "Approving the synonym name should have deprecated it"
+      )
+    end
+
+    # If the synonym side of a "<name> = <synonym>" line doesn't parse as a
+    # name, construct_approved_names should flash an error instead of
+    # creating anything.
+    def test_construct_species_list_synonym_unparseable
+      species_list = species_lists(:first_species_list)
+      name = names(:macrolepiota_rachodes)
+      unparseable_synonym = "12345"
+
+      params = {
+        id: species_list.id,
+        list: { members: "#{name.text_name} = #{unparseable_synonym}" },
+        approved_names: unparseable_synonym
+      }
+      login("rolf")
+      post(:create, params: params)
+      assert_unprocessable
+      assert_flash_error(
+        on_fail: "Unparseable approved synonym name should flash an error"
+      )
+      assert_nil(
+        Name.find_by(text_name: unparseable_synonym),
+        "Unparseable synonym text should not create a Name"
+      )
     end
 
     def test_construct_species_list_nonalpha_multiple
@@ -470,6 +522,7 @@ module SpeciesLists
       contrib = spl.user.contribution
       post(:create, params: params)
       assert_flash_error
+      assert_unprocessable
       assert_equal(contrib, spl.user.reload.contribution)
       assert_equal(sp_count, spl.reload.observations.size)
       assert_not(spl.name_included?(name))
@@ -531,6 +584,40 @@ module SpeciesLists
       assert_redirected_to(species_list_path(spl.id))
       spl.reload
       assert_equal(place_name, spl.observations.last.location.text_name)
+    end
+
+    # Regression: the controller read params[:approved_where], but the
+    # form never sent it back -- write_in/form.rb#render_approval_hiddens
+    # only emitted approved_names/approved_deprecated_names. Resubmitting
+    # an unchanged dubious place_name looped forever instead of
+    # accepting it, the same bug class fixed for observations/#3032.
+    def test_create_with_dubious_place_name_approved
+      spl = species_lists(:first_species_list)
+      where = "Old Rd, Ohio, USA"
+      params = {
+        id: spl.id,
+        list: { members: "Coprinus comatus\r\nAgaricus campestris" },
+        place_name: where
+      }
+      login("rolf")
+
+      # First submission: dubious ("Old Rd" is a flagged bad term),
+      # rejected -- no redirect, nothing created. The reload must
+      # itself emit the approved_where hidden field with the unchanged
+      # name, or a real browser resubmit (unlike this test's next call,
+      # which sets approved_where directly) could never carry it back.
+      post(:create, params: params)
+      assert_unprocessable
+      assert_select("form[data-turbo='true']")
+      assert_select("#dubious_location_messages")
+      assert_select("input[name='approved_where'][value=?]", where)
+      assert_equal(0, spl.reload.observations.size)
+
+      # Resubmission with approved_where matching the unchanged
+      # place_name: the dubious check is skipped, the list is created.
+      post(:create, params: params.merge(approved_where: where))
+      assert_redirected_to(species_list_path(spl.id))
+      assert_equal(2, spl.reload.observations.size)
     end
 
     def test_create_species_list_new_name

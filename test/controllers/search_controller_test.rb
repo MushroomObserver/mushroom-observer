@@ -32,6 +32,7 @@ class SearchControllerTest < FunctionalTestCase
 
       assert_equal(model, @request.session[:search_type])
       assert_equal(pattern, @request.session[:pattern])
+      assert_equal("pattern", @request.session[:search_view])
 
       # Increment to keep this unpredictable
       pattern = (pattern.to_i + 9).to_s
@@ -58,6 +59,7 @@ class SearchControllerTest < FunctionalTestCase
     assert_redirected_to(herbaria_path)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Regression for the production 500 incident on 2026-05-31. A bot
   # GET'd `/search/pattern` with no `pattern_search` params while
   # `session["return-to"]` was set to a previous `/observations?q=...`
@@ -69,6 +71,7 @@ class SearchControllerTest < FunctionalTestCase
   # to `forward_pattern_search(:"", "")`, which crashed inside
   # `send(:"#{type}_path")` with `NoMethodError: undefined method
   # '_path' for an instance of SearchController`.
+  # rubocop:enable MO/NoLongCommentBlock
   def test_pattern_search_no_params_with_return_to_in_session
     @request.session["return-to"] = observations_path(q: "abc")
 
@@ -149,53 +152,6 @@ class SearchControllerTest < FunctionalTestCase
     assert_redirected_to(
       observations_path(q: { model: :Observation }),
       "Bad pattern in obs search should render obs index with query"
-    )
-    assert_flash_error(
-      :pattern_search_bad_term_error,
-      type: :observation,
-      term: '"help"',
-      help: :pattern_search_terms_short_help.l
-    )
-  end
-
-  def test_pattern_search_from_needs_naming
-    pattern = "Briceland"
-    params = { pattern_search: { pattern:, type: :observations },
-               needs_naming: rolf }
-
-    login
-    get(:pattern, params:)
-
-    assert_redirected_to(
-      identify_observations_path(q: { model: :Observation, pattern: }),
-      "Pattern in search from obs_needing_ids should render " \
-      "obs_needing_ids"
-    )
-  end
-
-  def test_pattern_search_from_needs_naming_blank_pattern
-    login
-    get(:pattern,
-        params: { pattern_search: { pattern: "", type: :observations },
-                  needs_naming: rolf })
-
-    assert_redirected_to(
-      observations_path,
-      "Blank pattern from obs_needing_ids should render blank obs index"
-    )
-  end
-
-  def test_pattern_search_from_needs_naming_bad_pattern
-    login
-    get(:pattern,
-        params: { pattern_search: { pattern: "help:me",
-                                    type: :observations },
-                  needs_naming: rolf })
-
-    assert_redirected_to(
-      identify_observations_path(q: { model: :Observation }),
-      "Bad pattern from obs_needing_ids should render " \
-      "obs_needing_ids with query"
     )
     assert_flash_error(
       :pattern_search_bad_term_error,

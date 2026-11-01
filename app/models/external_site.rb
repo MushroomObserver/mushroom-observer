@@ -10,6 +10,24 @@
 #  project::       Project which talks about the website and whose members
 #                  may edit external_links to this site for any observation.
 #
+#  == Rate limits
+#
+#  A site's published limits, and the hosts it serves media from, are
+#  attributes rather than constants in Ruby, so that adding a source is a
+#  row rather than a code change (#5416). Nil means "no published limit",
+#  which is different from a limit of zero.
+#
+#  requests_per_minute_limit::    what the site asks for, not what it
+#                                 enforces, where those differ
+#  requests_per_day_limit::
+#  bytes_in_per_hour_limit::
+#  bytes_in_per_day_limit::
+#  media_hosts::                  comma-separated hostnames serving the
+#                                 site's media
+#
+#  media_host_list::              those hosts as an Array
+#  ExternalSite.serving_media::   the site serving a given host, or nil
+#
 class ExternalSite < AbstractModel
   INATURALIST_NAME = "iNaturalist"
   MYCOPORTAL_NAME = "MyCoPortal"
@@ -17,6 +35,10 @@ class ExternalSite < AbstractModel
   belongs_to :project
   has_many   :external_links
   has_many   :observations, through: :external_links
+  # No `dependent:` on purpose: usage history outlives the site row it
+  # describes, and CheckForBrokenReferencesJob reports the orphan rather
+  # than deleting it (see its Checks entry).
+  has_many   :external_site_usages
 
   validates :name, presence: true, length: { maximum: 100 },
                    uniqueness: { case_sensitive: false }
@@ -34,6 +56,22 @@ class ExternalSite < AbstractModel
 
     where(project: Project.user_is_member(user_id))
   }
+
+  # Request-scoped memo (Thread.current, not a class ivar) for the
+  # select-options list -- matches UserGroup::THREAD_KEYS's pattern,
+  # isolated per request/thread rather than persisting stale data
+  # across requests pooled onto the same thread. Reset once per HTTP
+  # request via ApplicationController#reset_external_site_cache, and
+  # once per unit test (test_helper.rb's setup) for tests that call
+  # this directly without going through a request.
+  def self.select_options
+    Thread.current[:mo_external_site_select_options] ||=
+      order(:name).pluck(:name, :id)
+  end
+
+  def self.reset_request_cache
+    Thread.current[:mo_external_site_select_options] = nil
+  end
 
   def check_url_syntax
     return if format_base_url
@@ -61,6 +99,33 @@ class ExternalSite < AbstractModel
     find_by!(name: MYCOPORTAL_NAME)
   end
 
+  # Which site, if any, serves media from this host. MO downloads by URL
+  # from places that belong to no site, so nil is an ordinary answer.
+  def self.serving_media(host)
+    return nil if host.blank?
+
+    wanted = host.to_s.downcase
+    where.not(media_hosts: [nil, ""]).find do |site|
+      site.media_host_list.include?(wanted)
+    end
+  end
+
+  def media_host_list
+    media_hosts.to_s.split(",").map { |host| host.strip.downcase }.
+      reject(&:empty?)
+  end
+
+  # What MO holds that points at this site, by what the link targets.
+  # One grouped count rather than a query per type.
+  LinkCounts = Data.define(:total, :observations, :images)
+
+  def link_counts
+    by_type = external_links.group(:target_type).count
+    LinkCounts.new(total: by_type.values.sum,
+                   observations: by_type["Observation"].to_i,
+                   images: by_type["Image"].to_i)
+  end
+
   # URL of the per-record page on this site for the given external_id
   # (#4299). Built from `url_template` with its `{id}` placeholder
   # substituted; falls back to appending the id to `base_url` when no
@@ -81,6 +146,17 @@ class ExternalSite < AbstractModel
   def id_from_url(url)
     return nil if url.blank?
 
+    id = id_from_url_unchecked(url)
+    # iNat's template is just base_url + "{id}" -- unlike MyCoPortal's
+    # query-param shape, its capture group would happily match trailing
+    # non-numeric junk (".../observations/notanumber") as if it were a
+    # valid id. iNat ids are always numeric, so enforce that here.
+    return nil if name == INATURALIST_NAME && !id.to_s.match?(/\A\d+\z/)
+
+    id
+  end
+
+  def id_from_url_unchecked(url)
     template = url_template.presence || "#{base_url}{id}"
     # -1 limit: {id} is usually the last token, and split drops trailing
     # empty strings by default -- losing the empty string after it means
@@ -88,6 +164,33 @@ class ExternalSite < AbstractModel
     pattern = template.split("{id}", -1).
               map { |part| Regexp.escape(part) }.join("(.+)")
     /\A#{pattern}\z/.match(url)&.captures&.first
+  end
+  private :id_from_url_unchecked
+
+  # True when url is a MyCoPortal catalog-number search page
+  # (list.php?catnum=...) -- id-addressable only via a live crawl of the
+  # results page (see script/resolve_mycoportal_links.rb), not from the
+  # url alone the way `id_from_url`'s permalink shape is.
+  def mycoportal_list_search?(url)
+    return false unless name == MYCOPORTAL_NAME
+
+    uri = self.class.safe_parse_url(url)
+    return false unless uri && mycoportal_host?(uri)
+
+    uri.path.end_with?("/list.php") && uri.query.to_s.include?("catnum=")
+  end
+
+  # `end_with?("mycoportal.org")` alone would also match a host like
+  # "evilmycoportal.org" -- no dot boundary. Require an exact match or
+  # a proper subdomain.
+  def mycoportal_host?(uri)
+    uri.host == "mycoportal.org" || uri.host&.end_with?(".mycoportal.org")
+  end
+
+  def self.safe_parse_url(url)
+    URI.parse(url)
+  rescue URI::InvalidURIError
+    nil
   end
 
   def member?(user)
@@ -107,6 +210,6 @@ class ExternalSite < AbstractModel
       all
     else
       user_is_site_project_member(user.id)
-    end
+    end.to_a
   end
 end

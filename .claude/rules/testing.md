@@ -296,6 +296,23 @@ For local checking before pushing, SimpleCov writes `coverage/index.html`
 and `coverage/.last_run.json` after each test run. Open the HTML report
 or jq the JSON to find missed lines on any file.
 
+### New files get no exemption
+
+A file created in this PR needs its own 100% coverage — "a sibling
+file has the identical gap" is not a reason to leave it uncovered.
+The "pre-existing debt, defer to Coveralls" exemption above applies
+only to lines you did not write, in files that existed before your
+change. If you wrote the line this PR, in a file this PR created,
+close it now.
+
+Concretely: after implementing, run the local coverage check (per
+the workflow above) against any file you created from scratch, not
+just the diff as a whole. If a line needs a specific condition to
+reach — a `detail: "high"` param, an `order_by:` that resolves to a
+non-default sort, a request routed through the actual controller
+instead of a direct `API2.execute` call — add that case. Don't
+defer a new file's own gaps to "check later."
+
 ## Component Test Structure
 
 **IMPORTANT**: Follow this pattern for all Phlex component tests.

@@ -2,11 +2,14 @@
 
 require("test_helper")
 
-# Integration test for the `Query::Observations` instances that
-# the 5 `Tab::Name::ObsLink::*` subclasses build. Constructs the
-# 2-name synonymized x 3-consensus-arrangement fixture grid (6
-# observations, 6 namings) and asserts that each Tab's query
-# returns exactly the right rows. Migrated from
+# Integration test for the `Query::Observations` attrs the 5
+# `Tab::Name::ObsLink::*` subclasses link to (`any_name`,
+# `other_names`, `look_alikes`, `name_proposed`). The Tabs
+# themselves build a plain route-helper path now, not a Query, so
+# this asserts each attr's query directly via `Query.lookup`.
+# Constructs the 2-name synonymized x 3-consensus-arrangement
+# fixture grid (6 observations, 6 namings) and asserts each query's
+# rows against it. Migrated from
 # `NamesHelperTest#test_observations_of_queries` after the
 # observation-link helpers moved into the Tab POROs.
 class Tab::Name::ObsLinkQueryIntegrationTest < UnitTestCase
@@ -95,27 +98,27 @@ class Tab::Name::ObsLinkQueryIntegrationTest < UnitTestCase
     obs
   end
 
-  def query_for(klass, name)
-    klass.new(name: name, count: 1, controller: nil).query
+  def query_for(attr, name)
+    Query.lookup(:Observation, attr => name.id)
   end
 
   def assert_any_name_query(name, includes:, excludes:)
-    results = query_for(Tab::Name::ObsLink::AnyName, name).results
+    results = query_for(:any_name, name).results
     assert_query_returns(results, includes: includes, excludes: excludes)
   end
 
   def assert_other_names_query(name, includes:, excludes:)
-    results = query_for(Tab::Name::ObsLink::OtherNames, name).results
+    results = query_for(:other_names, name).results
     assert_query_returns(results, includes: includes, excludes: excludes)
   end
 
   def assert_taxon_proposed_query(name, includes:, excludes:)
-    results = query_for(Tab::Name::ObsLink::TaxonProposed, name).results
+    results = query_for(:look_alikes, name).results
     assert_query_returns(results, includes: includes, excludes: excludes)
   end
 
   def assert_name_proposed_query(name, includes:, excludes:)
-    results = query_for(Tab::Name::ObsLink::NameProposed, name).results
+    results = query_for(:name_proposed, name).results
     assert_query_returns(results, includes: includes, excludes: excludes)
   end
 

@@ -16,7 +16,8 @@ module Views::Controllers::Names::Descriptions::Permissions
                       ))
 
       render(Views::Controllers::Descriptions::Permissions::Form.new(
-               description: @description, groups: @groups, data: @data
+               description: @description, groups: @groups, data: @data,
+               turbo: true
              ))
     end
   end

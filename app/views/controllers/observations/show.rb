@@ -3,43 +3,45 @@
 # Main observation show page — the parent that composes every
 # obs-show sub-panel (`Components::ImageGallery`,
 # `Details`, `NameInfoPanel`, `SpeciesListsPanel`, `ProjectsPanel`,
-# `MatchingObservationsPanel`, `ThumbnailMapPanel`, namings
-# partial, comments partial, `Views::Layouts::ObjectFooter`) into a
-# two-column layout.
+# `MatchingObservationsPanel`, namings partial, comments partial,
+# `Views::Layouts::ObjectFooter`) into a two-column layout.
 #
-# Renders `add_show_title` + owner-naming line + pager / interest /
-# edit icons (logged-in only) into the page chrome, then a `.row`
-# with the carousel on the left and observation details / name
-# info / species lists / projects / matching obs on the right.
-# Second `.row` below: namings table + comments on the left,
-# thumbnail map on the right (logged-in only).
+# Renders `add_show_title` (with the owner-naming line) + pager /
+# interest / edit icons (logged-in only) into the page chrome, then
+# one `.row`: the wide left column (carousel, namings, comments) and
+# the narrow right column (details + the rest). The two columns keep
+# the same relative order on mobile (Bootstrap stacks the whole left
+# column, then the whole right column), except Details, which
+# belongs right after the carousel on mobile instead of first in the
+# right column — the `obs-show-layout` Stimulus controller
+# (`app/javascript/controllers/obs-show-layout_controller.js`)
+# relocates that one element across the `md` breakpoint; everything
+# else needs no JS.
 #
 # `owner_naming_line` is now `Observations::OwnerNamingLine`;
 # `link_to_display_name_brief_authors` is now
 # `Observations::DisplayNameBriefAuthorsLink`. The PORO callsites
-# are inside `add_owner_naming` (`title_helper.rb`) and the
-# obs-title chain in `observations_helper.rb`.
+# are inside `add_show_title`'s `owner_naming:` handling
+# (`title_helper.rb`) and the obs-title chain in
+# `observations_helper.rb`.
 module Views::Controllers::Observations
   class Show < Views::FullPageBase
-    # rubocop:disable Metrics/ParameterLists
-    # The show page consumes every obs-derived ivar the controller
-    # builds; the param list mirrors the controller's `@ivar`s.
-    def initialize(observation:, user: nil, consensus: nil,
-                   comments: [], images: [], other_sites: nil,
-                   sibling_observations: nil, occurrence: nil,
-                   owner_name: nil)
-      super()
-      @observation = observation
-      @user = user
-      @consensus = consensus
-      @comments = comments
-      @images = images
-      @other_sites = other_sites
-      @sibling_observations = sibling_observations || []
-      @occurrence = occurrence
-      @owner_name = owner_name
+    prop :observation, ::Observation
+    prop :user, _Nilable(::User), default: nil
+    prop :consensus, _Nilable(::Observation::NamingConsensus), default: nil
+    prop :comments, _Array(::Comment), default: -> { [] }
+    prop :images, _Array(::Image), default: -> { [] }
+    prop :other_sites, _Nilable(_Array(::ExternalSite)), default: nil
+    prop :sibling_observations, _Array(::Observation)
+    prop :occurrence, _Nilable(::Occurrence), default: nil
+    prop :owner_name, _Nilable(::Name), default: nil
+
+    # sibling_observations: only gets computed by the controller when
+    # there's an @occurrence -- normalize nil to [] here so callers
+    # (and this class's own methods) never need a nil-guard.
+    def initialize(sibling_observations: nil, **)
+      super(sibling_observations: sibling_observations || [], **)
     end
-    # rubocop:enable Metrics/ParameterLists
 
     def view_template
       add_chrome
@@ -48,16 +50,14 @@ module Views::Controllers::Observations
       # channel. See Inat::ObservationResyncer#broadcast.
       turbo_stream_from([@observation, :external_link_sync]) if
         @observation.syncable?
-      render_main_row
-      render_secondary_row
+      render_body_row
       render_footer if @user
     end
 
     private
 
     def add_chrome
-      add_show_title(@observation, user: @user)
-      add_owner_naming(observation: @observation, user: @user)
+      add_show_title(@observation, user: @user, owner_naming: true)
       if @user
         add_pager_for(@observation)
         add_interest_icons(@user, @observation)
@@ -67,13 +67,28 @@ module Views::Controllers::Observations
       column_classes(:eight_four)
     end
 
-    # ---- main row: carousel | obs details / name / lists -----
+    # ---- one row, two independently-flowing columns ----
+    # See class comment -- `obs-show-layout` moves Details across
+    # the `md` breakpoint; everything else needs no JS.
 
-    def render_main_row
-      Row do
-        div(class: content_for(:left_columns)) { render_carousel }
-        div(class: content_for(:right_columns)) { render_right_column }
+    def render_body_row
+      Row(data: { controller: "obs-show-layout" }) do
+        div(class: content_for(:left_columns)) { render_left_column }
+        div(class: content_for(:right_columns),
+            data: { obs_show_layout_target: "rightColumn" }) do
+          render_right_column
+        end
       end
+    end
+
+    def render_left_column
+      render_carousel_cell
+      render_namings if @user
+      render_comments
+    end
+
+    def render_carousel_cell
+      div(data: { obs_show_layout_target: "carousel" }) { render_carousel }
     end
 
     def render_carousel
@@ -88,53 +103,11 @@ module Views::Controllers::Observations
       return "" unless permission?(@observation)
 
       capture do
-        Link(type: :icon,
+        Link(type: :get,
              tab: ::Tab::Observation::ReuseImages.new(
                observation: @observation
              ))
       end
-    end
-
-    def render_right_column
-      render(Details.new(
-               obs: @observation, consensus: @consensus, user: @user,
-               sites: @other_sites&.to_a, siblings: @sibling_observations
-             ))
-      return unless @user
-
-      render(SpecimenPanel.new(
-               obs: @observation, user: @user,
-               siblings: @sibling_observations
-             ))
-      render(NameInfoPanel.new(obs: @observation, user: @user))
-      render(SpeciesListsPanel.new(obs: @observation, user: @user))
-      render(ProjectsPanel.new(obs: @observation))
-      render(MatchingObservationsPanel.new(
-               obs: @observation, occurrence: @occurrence,
-               siblings: @sibling_observations
-             ))
-    end
-
-    # ---- secondary row: namings + comments | thumbnail map ----
-
-    def render_secondary_row
-      Row do
-        div(class: content_for(:left_columns)) do
-          render_namings_and_comments
-        end
-        div(class: content_for(:right_columns)) do
-          if @user&.thumbnail_maps
-            render(ThumbnailMapPanel.new(obs: @observation))
-          end
-          render(NotesPanel.new(obs: @observation, user: @user))
-        end
-      end
-    end
-
-    def render_namings_and_comments
-      render_namings if @user
-      render_comments
-      render_source_credit if show_source_credit?
     end
 
     def render_namings
@@ -149,15 +122,35 @@ module Views::Controllers::Observations
              ))
     end
 
-    def show_source_credit?
-      @observation.source_noteworthy? && !@observation.import_link
+    def render_right_column
+      render_details_cell
+      render_user_only_right_column_panels if @user
+      render(NotesPanel.new(obs: @observation, user: @user))
     end
 
-    # show_source_credit? (above) guarantees no import_link, so
-    # @observation.source is guaranteed present here (source_noteworthy?
-    # requires import_link.present? || source.present?).
-    def render_source_credit
-      trusted_html(:"source_credit_#{@observation.source}".l.tpl)
+    def render_details_cell
+      div(data: { obs_show_layout_target: "details" }) { render_details }
+    end
+
+    def render_details
+      render(Details.new(
+               obs: @observation, consensus: @consensus, user: @user,
+               sites: @other_sites, siblings: @sibling_observations
+             ))
+    end
+
+    def render_user_only_right_column_panels
+      render(SpecimenPanel.new(
+               obs: @observation, user: @user,
+               siblings: @sibling_observations
+             ))
+      render(NameInfoPanel.new(obs: @observation, user: @user))
+      render(SpeciesListsPanel.new(obs: @observation, user: @user))
+      render(ProjectsPanel.new(obs: @observation, user: @user))
+      render(MatchingObservationsPanel.new(
+               obs: @observation, occurrence: @occurrence,
+               siblings: @sibling_observations
+             ))
     end
 
     def render_footer

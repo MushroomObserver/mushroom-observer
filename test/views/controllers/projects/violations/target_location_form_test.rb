@@ -91,16 +91,15 @@ module Views::Controllers::Projects::Violations
                   "[data-dismiss='modal']")
     end
 
-    def test_form_action_is_violations_path_with_patch_method
+    def test_form_action_is_resolve_violations_path_with_patch_method
       html = render_form
 
-      expected_action = "/projects/#{@project.id}/violations"
+      expected_action = "/projects/#{@project.id}/violations/resolve"
       assert_html(html,
                   "form[action='#{expected_action}'][method='post']")
-      # Superform picks PATCH for the persisted Project model. The route
-      # accepts both PATCH and PUT — see config/routes.rb where
-      # `project_violations_update` is registered with
-      # `via: [:put, :patch]`.
+      # Superform picks PATCH for the persisted Project model. The
+      # `resolve_project_violations_path` route accepts both PATCH and
+      # PUT for `#update` — see config/routes.rb.
       assert_html(html,
                   "input[type='hidden'][name='_method'][value='patch']")
     end
@@ -189,24 +188,18 @@ module Views::Controllers::Projects::Violations
         name: Name.unknown
       )
 
-      html = render(TargetLocationForm.new(
-                      obs: obs, project: @project,
-                      existing_locations: existing_for(obs)
-                    ))
+      html = render_form(obs: obs)
 
       assert_html(html, "input[type='radio'][disabled]")
 
-      # Create link uses ?where=<suffix> (not display_name=), opens in
-      # a new tab, AND dismisses the parent modal via
-      # data-action="click->modal#hide" — these together let the admin
-      # create the missing Location and see the radio enabled on next
-      # "Add Target Location" click without a page reload. The link
-      # lives INSIDE the disabled radio's `.radio` div (per-row
-      # append), not as a sibling above the radio group.
-      #
-      # `data-action` is used in place of Bootstrap's `data-dismiss`
-      # because the latter's handler chain preventDefaults the click
-      # and suppresses the new tab.
+      # Create link uses ?where=<suffix>, opens in a new tab, and
+      # dismisses the parent modal via data-action="click->modal#hide"
+      # (not Bootstrap's data-dismiss, whose handler chain
+      # preventDefaults the click and suppresses the new tab) -- so
+      # the admin can create the missing Location and see the radio
+      # enabled on the next "Add Target Location" click, with no page
+      # reload. The link lives inside the disabled radio's `.radio`
+      # div, not as a sibling above the radio group.
       create_link = ".radio a[href*='/locations/new?where=']" \
                     "[target='_blank']" \
                     "[rel='noopener noreferrer']" \
@@ -225,10 +218,7 @@ module Views::Controllers::Projects::Violations
         name: Name.unknown
       )
 
-      html = render(TargetLocationForm.new(
-                      obs: obs, project: @project,
-                      existing_locations: existing_for(obs)
-                    ))
+      html = render_form(obs: obs)
 
       encoded = "Unique+County+X42%2C+California%2C+USA"
       assert_html(html,
@@ -250,10 +240,7 @@ module Views::Controllers::Projects::Violations
       original_stderr = $stderr
       $stderr = stderr_io
       begin
-        render(TargetLocationForm.new(
-                 obs: obs, project: @project,
-                 existing_locations: existing_for(obs)
-               ))
+        render_form(obs: obs)
       ensure
         $stderr = original_stderr
       end
@@ -262,10 +249,10 @@ module Views::Controllers::Projects::Violations
 
     private
 
-    def render_form
+    def render_form(obs: @obs)
       render(TargetLocationForm.new(
-               obs: @obs, project: @project,
-               existing_locations: existing_for(@obs)
+               obs: obs, project: @project,
+               existing_locations: existing_for(obs)
              ))
     end
 

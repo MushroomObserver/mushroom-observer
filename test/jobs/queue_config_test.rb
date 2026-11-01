@@ -20,7 +20,13 @@ class QueueConfigTest < UnitTestCase
   def test_actionmailer_deliver_later_queue_is_covered_by_a_worker
     skip if all_queues_covered?
 
-    mailer_queue = ActionMailer::Base.deliver_later_queue_name.to_s
+    # `deliver_later_queue_name` defaults to nil since Rails 6.1 --
+    # ActiveJob::QueueName#queue_name_from_part then falls back to
+    # ActiveJob::Base.default_queue_name, matching what
+    # ActionMailer::MailDeliveryJob's queue_as block resolves to.
+    mailer_queue =
+      (ActionMailer::Base.deliver_later_queue_name ||
+       ActiveJob::Base.default_queue_name).to_s
     assert_includes(configured_worker_queues, mailer_queue,
                     "No worker in config/queue.yml listens to the " \
                     "ActionMailer deliver_later queue " \
@@ -28,30 +34,54 @@ class QueueConfigTest < UnitTestCase
                     "deliver_later would never send in production")
   end
 
-  # Regression guard for the incident on 2026-07-09: config/queue.yml's
-  # busiest worker pool needed more threads than config/database.yml's
-  # connection pool had, so Solid Queue's own startup validation
-  # (SolidQueue::Configuration#ensure_correctly_sized_thread_pool) failed
-  # every single time the supervisor (re)started, crash-looping forever --
-  # no queue, including "mailers", was ever claimed again after that.
-  # Nothing in the app raises on this at boot; it only surfaces if
-  # something actually asks Solid Queue to validate its own configuration,
-  # which is exactly what this test does.
+  # SolidQueue::Configuration#valid? reflects only `errors`. An
+  # undersized config/database.yml connection pool for
+  # config/queue.yml's configured worker threads surfaces in
+  # `warnings` instead -- SolidQueue::Supervisor.start logs those but
+  # boots anyway -- so this test checks both. Nothing in the app
+  # raises on this at boot; it only surfaces when something asks
+  # Solid Queue to validate its configuration, which is what this
+  # test does.
   def test_database_pool_is_large_enough_for_configured_worker_threads
     config = SolidQueue::Configuration.new
     valid = config.valid?
 
-    # config.error_messages is a failure MESSAGE (already a String), not
-    # an expected value -- assert_equal(valid, config.error_messages)
-    # (what the cop suggests, and what a prior Copilot-suggested edit
-    # actually shipped) compares a boolean against a String and can
-    # never pass.
-    # rubocop:disable Minitest/AssertWithExpectedArgument
-    assert(valid, config.error_messages)
+    # rubocop:disable Minitest/AssertWithExpectedArgument -- the
+    # second arg is a failure message, not an expected value.
+    assert(valid, config.errors.full_messages.join(", "))
     # rubocop:enable Minitest/AssertWithExpectedArgument
+    assert_empty(config.warnings.full_messages,
+                 "Solid Queue configuration warning(s) - see " \
+                 "config/queue.yml and config/database.yml")
+  end
+
+  # test_database_pool_is_large_enough_for_configured_worker_threads only
+  # checks the pool for RAILS_ENV, which is always "test" here -- it can't
+  # catch a template whose development/production pool is too small for
+  # config/queue.yml's workers (the exact gap that let a Solid Queue
+  # supervisor boot crash slip through: the "test" pool got fixed to 10,
+  # "development" didn't, until the alerts queue in #5416 pushed it over).
+  def test_db_templates_development_pool_matches_test_pool
+    test_pool = db_template_pool("db/ubuntu/database.yml", "test")
+
+    %w[db/macos/database.yml db/docker/database.yml
+       db/ubuntu/database.yml].each do |path|
+      dev_pool = db_template_pool(path, "development")
+      assert(dev_pool && dev_pool >= test_pool,
+             "#{path}'s development.primary.pool (#{dev_pool.inspect}) " \
+             "must be at least as large as its test pool " \
+             "(#{test_pool.inspect}) -- both run the same " \
+             "config/queue.yml workers")
+    end
   end
 
   private
+
+  def db_template_pool(relative_path, env)
+    rendered = ERB.new(Rails.root.join(relative_path).read).result
+    config = YAML.safe_load(rendered, aliases: true)
+    (config.dig(env, "primary", "pool") || config.dig(env, "pool"))&.to_i
+  end
 
   def all_queues_covered?
     configured_worker_queues.include?("*")

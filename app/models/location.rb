@@ -89,8 +89,18 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   require("acts_as_versioned")
 
   include Scopes
+  include Interested
 
-  belongs_to :description, class_name: "LocationDescription" # (main one)
+  # Shared with LocationDescription#notify_users, which gets each
+  # role's user list a different way (admins/authors/etc. directly,
+  # vs. this file's descriptions.map(&:role) aggregate) but notifies
+  # on the same preference flags.
+  ROLE_PREFS = { admin: :email_locations_admin,
+                 author: :email_locations_author,
+                 editor: :email_locations_editor }.freeze
+
+  belongs_to :description, class_name: "LocationDescription", # (main one)
+                           optional: true
   belongs_to :rss_log
   belongs_to :user
 
@@ -137,6 +147,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     "hidden"
   )
 
+  before_validation :derive_missing_name_field
   before_save :calculate_box_area_and_center
   before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
@@ -154,18 +165,15 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
   after_save :award_version_contribution
 
-  # Deliberately NOT overriding `current_user` itself to fall back to
-  # User.admin - AbstractModel's generic contribution/logging hooks
-  # (update_contribution, do_log_update, do_log_destroy) all check
-  # `respond_to?(:current_user)` and prefer it over the record's own
-  # `user_id` when present. A blanket fallback here would misattribute
-  # those (e.g. the destroy step of a merge re-fetches a fresh
-  # instance with no current_user set, so the fallback would credit/
-  # debit the admin instead of falling through to the real owner via
-  # `user_id`, as those generic hooks expect when current_user is nil).
-  # The version-attribution fallback (this model's own long-standing
-  # behavior for scripts/background jobs with no real session) is
-  # applied narrowly in set_version_current_user below instead.
+  # Deliberately not overriding `current_user` to fall back to
+  # User.admin: AbstractModel's generic contribution/logging hooks
+  # check `respond_to?(:current_user)` and prefer it over the
+  # record's `user_id` when present. A blanket fallback here would
+  # misattribute those (e.g. a merge's destroy step re-fetches a
+  # fresh instance with no current_user set, so the fallback would
+  # credit the admin instead of the owner via `user_id`). The
+  # version-attribution fallback is applied narrowly in
+  # set_version_current_user below instead.
   def set_version_current_user
     return unless saved_version_changes?
 
@@ -305,7 +313,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def found_here?(obs)
-    return true if obs.location == self
     return contains?(obs.lat, obs.lng) if obs.lat && obs.lng
 
     loc = obs.location
@@ -334,17 +341,11 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     (official_unknown + :unknown_locations.l.split(/, */)).uniq
   end
 
-  # We always include the English words for "unknown", even when
-  # viewing the site in another language, so that e.g. "Unknown"
-  # (typed by an English-speaking user long ago, or hardcoded
-  # somewhere) still matches regardless of the viewer's locale.
-  #
-  # This is static data (en.txt's `unknown_locations` key: "Unknown,
-  # Earth, World, Worldwide, Anywhere, Everywhere") that's already
-  # loaded in memory by I18n -- the same source :unknown_locations.l
-  # above reads for the current locale, just pinned to :en here
-  # instead. No DB round-trip (Language.official.translation_strings),
-  # so nothing worth caching.
+  # Always includes the English words for "unknown", even in another
+  # locale, so a hardcoded or long-ago-typed "Unknown" still matches.
+  # Static data (en.txt's `unknown_locations` key) already loaded in
+  # memory by I18n, just pinned to :en instead of the current
+  # locale -- no DB round-trip, so nothing worth caching.
   def self.official_unknown
     I18n.t("#{MO.locale_namespace}.unknown_locations", locale: :en).
       split(/, */)
@@ -567,10 +568,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     UNDERSTOOD_CONTINENTS[a_continent]
   end
 
-  def self.countries_by_count
-    CountryCounter.new.countries_by_count
-  end
-
   def self.location_name_cache
     Rails.cache.fetch(:location_names, expires_in: 15.minutes) do
       (Location.pluck(:name) + Observation.pluck(:where) +
@@ -607,11 +604,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # `approved:` is the value of the `approved_where` form field the
   # user submitted to skip this check after confirming. When non-nil
   # and equal to `place_name`, returns `[]` immediately.
-  #
-  # Centralizes a pattern that lived as 2-3 lines in 4 controllers:
-  #   db_name = Location.user_format(user, place_name)
-  #   Location.dubious_name?(db_name, true)
-  # with an optional "skip if approved" gate around it.
   def self.dubious_reasons_for(user:, place_name:, approved: nil)
     return [] if !approved.nil? && place_name == approved
 
@@ -726,15 +718,6 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     result
   end
 
-  def self.dubious_country?(name)
-    !understood_country?(country(name))
-  end
-
-  def self.fix_country(name)
-    c = country(name)
-    name[0..(name.rindex(c) - 1)] + COUNTRY_FIXES[c]
-  end
-
   def self.find_by_name_with_wildcards(str)
     find_using_wildcards("name", str)
   end
@@ -803,7 +786,8 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
 
     sender = current_user
     recipients = notification_recipients
-    send_location_change_emails(sender, recipients)
+    send_location_change_emails(sender,
+                                finalize_recipients!(recipients, sender))
   end
 
   # Must run before save: once VersionedByCurrentUser's after_save hook
@@ -898,12 +882,20 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     move_remaining_descriptions(old_loc)
   end
 
+  # A conflict (both sides have a non-blank value for the same note
+  # field) is left alone -- old_loc's description survives the
+  # location merge as a secondary description (see
+  # `move_remaining_descriptions`) for manual resolution via the
+  # descriptions/merges UI, same as a controller-driven description
+  # merge (Descriptions::Merges#perform_merge) would leave it.
   def merge_primary_descriptions(old_loc)
     return unless description && old_loc.description
-    return unless description.source_type == :public
-    return unless old_loc.description.source_type == :public
+    return unless description.source_type == "public"
+    return unless old_loc.description.source_type == "public"
+    return unless description.mergeable_notes?(old_loc.description)
 
-    description.merge(old_loc.description)
+    description.merge_notes_from(old_loc.description)
+    old_loc.description.destroy
   end
 
   def move_remaining_descriptions(old_loc)
@@ -930,41 +922,21 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def notification_recipients
-    recipients = collect_description_subscribers
-    collect_interested_users(recipients)
-    recipients.reject!(&:no_emails)
-    recipients
-  end
-
-  def collect_description_subscribers
     recipients = []
-    { admins: :email_locations_admin,
-      authors: :email_locations_author,
-      editors: :email_locations_editor }.each do |role, pref|
-      descriptions.map(&role).each do |user_list|
-        user_list.each do |user|
-          recipients.push(user) if user.public_send(pref)
-        end
-      end
-    end
-    recipients
-  end
-
-  def collect_interested_users(recipients)
-    interests.each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
+    collect_role_recipients(
+      [[descriptions.map(&:admins), ROLE_PREFS[:admin]],
+       [descriptions.map(&:authors), ROLE_PREFS[:author]],
+       [descriptions.map(&:editors), ROLE_PREFS[:editor]]],
+      recipients
+    )
+    Interest.update_recipients!(interests, recipients)
   end
 
   # Calculate versions now while saved_changes? is still accurate.
   def send_location_change_emails(sender, recipients)
     old_loc_ver = saved_changes? ? version - 1 : version
     desc = description
-    (recipients.uniq - [sender]).each do |receiver|
+    recipients.each do |receiver|
       LocationChangeMailer.build(
         sender:, receiver:, location: self, old_loc_ver:,
         new_loc_ver: version, description: desc,
@@ -985,6 +957,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     validate_elevation
     validate_user
     validate_name
+    validate_scientific_name
   end
 
   def check_hidden
@@ -1029,11 +1002,29 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     errors.add(:user, :validate_location_user_missing)
   end
 
+  def derive_missing_name_field
+    if name.present? && scientific_name.blank?
+      self.scientific_name = Location.reverse_name(name)
+    elsif scientific_name.present? && name.blank?
+      self.name = Location.reverse_name(scientific_name)
+    end
+  end
+
   def validate_name
     if name.to_s.size > 1024
       errors.add(:name, :validate_location_name_too_long)
-    elsif name.empty?
+    elsif name.to_s.empty?
       errors.add(:name, :validate_missing, field: :name)
+    end
+  end
+
+  def validate_scientific_name
+    if scientific_name.to_s.size > 1024
+      errors.add(:scientific_name, :validate_too_long,
+                 field: :scientific_name, max: 1024)
+    elsif scientific_name.to_s.empty?
+      errors.add(:scientific_name, :validate_missing,
+                 field: :scientific_name)
     end
   end
 end

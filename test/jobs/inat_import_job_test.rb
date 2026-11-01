@@ -39,6 +39,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Add objects which are not included in fixtures
     loc = Location.create(user: @user,
                           name: "Sevier Co., Tennessee, USA",
+                          scientific_name: "USA, Tennessee, Sevier Co.",
                           north: 36.043571, south: 35.561849,
                           east: -83.253046, west: -83.794123)
     before_total_imported_count = @inat_import.total_imported_count.to_i
@@ -59,6 +60,11 @@ class InatImportJobTest < ActiveJob::TestCase
     # This iNat obs has only 1 suggested ID.
     # The suggester is the person who made the iNat observation.
     proposed_name = obs.namings.first
+    assert_equal(ExternalSite.inaturalist.id, proposed_name.external_site_id,
+                 "the import stamps its naming with the source site")
+    assert_equal([ExternalSite.inaturalist.id],
+                 proposed_name.votes.map(&:external_site_id).uniq,
+                 "the import stamps its vote with the source site")
     used_references = 2
     assert(
       proposed_name.reasons.key?(used_references),
@@ -115,6 +121,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -168,15 +175,22 @@ class InatImportJobTest < ActiveJob::TestCase
 
     stub_inat_interactions
     raiser = ->(*) { raise(ActiveRecord::RecordInvalid.new(ExternalLink.new)) }
-    ExternalLink.stub(:create!, raiser) do
-      assert_no_difference(
-        "Observation.count",
-        "A cross-referenced iNat obs is skipped even when the " \
-        "self-heal link fails"
-      ) do
-        InatImportJob.perform_now(@inat_import)
+    # Inat::ObservationImporter#create_crosslink logs the validation
+    # failure via Rails.logger.warn -- capture it instead of letting it
+    # print to the test suite's console.
+    logged = nil
+    Rails.logger.stub(:warn, ->(msg) { logged = msg }) do
+      ExternalLink.stub(:create!, raiser) do
+        assert_no_difference(
+          "Observation.count",
+          "A cross-referenced iNat obs is skipped even when the " \
+          "self-heal link fails"
+        ) do
+          InatImportJob.perform_now(@inat_import)
+        end
       end
     end
+    assert_includes(logged, "failed to create remote_manual ExternalLink")
 
     assert_nil(
       ExternalLink.find_by(external_id: @parsed_results.first[:id].to_s,
@@ -224,6 +238,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -256,6 +271,7 @@ class InatImportJobTest < ActiveJob::TestCase
     # Add objects which are not included in fixtures
     Location.create(user: user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -293,6 +309,7 @@ class InatImportJobTest < ActiveJob::TestCase
     loc = Location.create(
       user: @user,
       name: "Troutdale, Multnomah Co., Oregon, USA",
+      scientific_name: "USA, Oregon, Multnomah Co., Troutdale",
       north: 45.5609, south: 45.5064,
       east: -122.367, west: -122.431
     )
@@ -560,6 +577,26 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(name, obs.name, "Wrong consensus id")
   end
 
+  # A rank MO can't reliably infer from the name string: iNat's declared
+  # rank is authoritative, using the same trusted-rank fallback as the
+  # ambiguous-suffix case above.
+  def test_import_job_superorder_rank
+    create_ivars_from_filename("stemonitidia")
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Failed to create observation") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.last
+    name = Name.find_by(text_name: "Stemonitidia", rank: "Superorder")
+    assert_not_nil(
+      name, "Failed to create Name at iNat's declared rank Superorder"
+    )
+    assert_equal(name, obs.name, "Wrong consensus id")
+  end
+
   # Prove that Namings, Votes, Identification are correct
   # when iNat obs has provisional name that wasn't in MO
   # `johnplischke` NEMF, DNA, notes, 2 identifications with same id;
@@ -756,7 +793,7 @@ class InatImportJobTest < ActiveJob::TestCase
            "Test requires user to be a super_importer")
 
     create_ivars_from_filename("donadinia_PNW01")
-    @inat_import.update(import_others: true)
+    @inat_import.update(import_others: true, create_skeletons: false)
 
     stub_inat_interactions
 
@@ -769,6 +806,203 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_equal(1, @inat_import.reload.ignored_unlicensed_count,
                  "Should count the unlicensed obs as ignored")
+    assert_equal([@parsed_results.first[:id]],
+                 @inat_import.unlicensed_inat_ids,
+                 "Should record the id of the ignored unlicensed obs")
+  end
+
+  # iNat returns license_code "" for some obss with no license.
+  def test_job_skips_empty_license_obs_for_others_import
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    use_empty_obs_license
+    @inat_import.update(import_others: true, create_skeletons: false)
+    stub_inat_interactions
+
+    assert_no_difference(
+      "Observation.count",
+      "An obs with an empty license must not be imported in full"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_equal([@parsed_results.first[:id]],
+                 @inat_import.reload.unlicensed_inat_ids,
+                 "An empty-license obs should be listed as unlicensed")
+  end
+
+  def test_job_imports_empty_license_obs_as_skeleton
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    use_empty_obs_license
+    @inat_import.update(import_others: true, create_skeletons: true)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "An empty-license obs should import as a skeleton") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the skeleton Observation")
+    assert(obs.placeholder?, "An empty-license obs should be a placeholder")
+  end
+
+  # Superimporter import of another user's unlicensed obs, skeletons on:
+  # the obs fields are read (namings, collector) but not copied, and the
+  # description and unlicensed photos are left out.
+  def test_job_imports_unlicensed_obs_as_skeleton_for_others_import
+    collector = "Skeleton Test Collector"
+    create_skeleton_ivars(collector: collector)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1,
+                      "Unlicensed obs should import as a skeleton") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the skeleton Observation")
+    inat_obs = Inat::Obs.new(JSON.generate(@parsed_results.first))
+    assert(obs.placeholder?, "Skeleton should be marked as a placeholder")
+    assert_equal(inat_obs.skeleton_omissions, obs.skeleton_omissions,
+                 "Skeleton should record what it did not import")
+    assert_skeleton_notes(obs, inat_obs, collector)
+    assert_empty(obs.sequences, "Skeleton should not copy sequences")
+    assert_equal(collector, obs.collector,
+                 "Skeleton should take its collector from the obs field")
+    prov_name = Name.parse_name(inat_obs.provisional_name).text_name
+    assert_includes(obs.namings.map { |n| n.name.text_name }, prov_name,
+                    "Skeleton should propose the provisional name")
+    assert_equal(expected_imported_photo_count, obs.images.length,
+                 "Skeleton should import only the licensed photos")
+    assert_skeleton_import_counts(@inat_import)
+  end
+
+  # An unlicensed photo MO already has an image of is attached to the
+  # skeleton, so it is not listed as not imported.
+  def test_skeleton_omissions_skip_a_reused_photo
+    create_skeleton_ivars(collector: "Skeleton Test Collector")
+    photos = @parsed_results.first[:observation_photos]
+    reused = photos.find { |p| p[:photo][:license_code].blank? }
+    image = images(:in_situ_image)
+    ExternalLink.create!(user: @user, target: image,
+                         external_site: external_sites(:inaturalist),
+                         external_id: reused[:photo_id].to_s,
+                         relationship: :import)
+    stub_inat_interactions
+
+    InatImportJob.perform_now(@inat_import)
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the skeleton Observation")
+    assert_includes(obs.images, image,
+                    "The skeleton should reuse the image MO already has")
+    unlicensed = photos.count { |p| p[:photo][:license_code].blank? }
+    assert_equal(unlicensed - 1, obs.skeleton_omissions["images"],
+                 "A reused photo should not be counted as not imported")
+  end
+
+  # A user who opted out on their profile, importing their iNat obs: the
+  # facts come in as a placeholder, with no images and no notes.
+  def test_job_imports_opted_out_users_obs_as_placeholder
+    create_ivars_from_filename("donadinia_PNW01")
+    @user.update!(inat_import_opt_out: true)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
+    assert(obs.placeholder?, "An opted-out user's obs should be a placeholder")
+    assert_empty(obs.images, "No photo of an opted-out user is imported")
+    photos = @parsed_results.first[:observation_photos]
+    assert_equal(photos.size, obs.skeleton_omissions["images"],
+                 "Every photo should be listed as not imported")
+    inat_obs = Inat::Obs.new(JSON.generate(@parsed_results.first))
+    assert_equal(inat_obs.skeleton_notes, obs.notes,
+                 "The notes should be only the snapshot")
+    assert_includes(@inat_import.reload.response_errors,
+                    :inat_user_opted_out.l(login: @inat_import.inat_username),
+                    "The importer should be told the user opted out")
+  end
+
+  # An excluded iNat user's obs, imported by someone else without
+  # placeholders: skipped, and the importer is told why.
+  def test_job_skips_excluded_inat_users_obs_for_others_import
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    @inat_import.update(import_others: true, create_skeletons: false)
+    inat_user = @parsed_results.first[:user]
+    excluded = ExcludedInatUser.create!(inat_login: inat_user[:login])
+    stub_inat_interactions(login: "dick_on_inat")
+
+    assert_no_difference("Observation.count") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_includes(@inat_import.reload.response_errors,
+                    :inat_user_opted_out.l(login: inat_user[:login]))
+    assert_equal(inat_user[:id], excluded.reload.inat_user_id,
+                 "The first sighting should record the iNat user's id")
+  end
+
+  # An excluded iNat user who imports the obs they posted, consenting to
+  # the licensing on the import form, comes off the list, and the import
+  # brings in their photos.
+  def test_importing_as_the_excluded_user_removes_the_exclusion
+    create_ivars_from_filename("donadinia_PNW01")
+    login = @parsed_results.first[:user][:login]
+    @user.update_columns(inat_username: nil)
+    ExcludedInatUser.create!(inat_login: login)
+    stub_inat_interactions(login: login)
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_not(ExcludedInatUser.exists?(inat_login: login),
+               "Importing as that iNat user should end the exclusion")
+    @user.reload
+    assert_equal(login, @user.inat_username)
+    assert_not(@user.inat_import_opt_out,
+               "The exclusion should not move to the user's profile")
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
+    assert_not(obs.placeholder?)
+    assert_not_empty(obs.images)
+  end
+
+  # A skeleton that fails to import is reported like any other failure.
+  def test_job_reports_failed_skeleton_import
+    create_skeleton_ivars(collector: "Skeleton Test Collector")
+    stub_inat_interactions
+
+    # Fail the upload of the skeleton's licensed photo.
+    original_execute = API2.method(:execute)
+    API2.singleton_class.define_method(:execute) do |params|
+      if params[:action] == :image && params[:method] == :post
+        api = API2.new(params)
+        api.errors << API2::MissingParameter.new(:upload_url)
+        api
+      else
+        original_execute.call(params)
+      end
+    end
+
+    assert_no_difference("Observation.count",
+                         "A failed skeleton import should create no obs") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    @inat_import.reload
+    assert_match(/Failed to import iNat #{@parsed_results.first[:id]}/,
+                 @inat_import.response_errors,
+                 "Should log which skeleton failed to import")
+    assert_equal(0, @inat_import.skeleton_imported_count,
+                 "A failed skeleton should not count as imported")
+  ensure
+    API2.singleton_class.define_method(:execute, original_execute)
   end
 
   # Not-own superimporter import: a *licensed* obs still imports even when
@@ -800,16 +1034,13 @@ class InatImportJobTest < ActiveJob::TestCase
       InatImportJob.perform_now(@inat_import)
     end
 
-    obs = Observation.last
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
     assert_equal(photos.length - 1, obs.images.length,
                  "Only the licensed photos should be imported")
     assert_equal(0, @inat_import.reload.ignored_unlicensed_count,
                  "A licensed obs must not count as an ignored/unlicensed obs")
-    assert_match(
-      :inat_skipped_images_summary.t(count: 1),
-      @inat_import.response_errors,
-      "Should log a summary of the 1 skipped unlicensed image"
-    )
+    assert_unlicensed_photos_listed_not_errors(@inat_import, skipped: 1)
   end
 
   # Inat Prov Species Name "Hygrocybe sp. 'conica-CA06'" (epithet single-quoted)
@@ -926,6 +1157,7 @@ class InatImportJobTest < ActiveJob::TestCase
 
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -961,11 +1193,12 @@ class InatImportJobTest < ActiveJob::TestCase
     )
     ExternalLink.create!(
       user: @user, observation: obs, external_site: site,
-      relationship: :import, external_id: inat_id.to_s,
-      url: "#{site.base_url}#{inat_id}"
+      relationship: :import, external_id: inat_id.to_s
     )
 
     stub_inat_interactions
+    started = 1.hour.ago
+    @inat_import.update!(last_obs_start: started)
 
     assert_no_difference(
       "Observation.count",
@@ -976,6 +1209,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_match(/Skipped #{inat_id} already linked/, job_log_file.read,
                  "Should log a skip message when the obs is already imported")
+    assert_operator(@inat_import.reload.last_obs_start, :>, started,
+                    "A skip should restart the per-obs clock, so the next " \
+                    "import is not charged for the time spent skipping")
   end
 
   # If a simultaneous import job inserts the same iNat obs between
@@ -988,6 +1224,7 @@ class InatImportJobTest < ActiveJob::TestCase
     @user.update(inat_username: @inat_import.inat_username)
     Location.create(user: @user,
                     name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
 
@@ -1024,8 +1261,9 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJob.perform_now(@inat_import)
 
     assert_equal(
-      updated_inat_username, @user.reload.inat_username,
-      "Failed to update User's inat_username after successful import"
+      updated_inat_username.downcase, @user.reload.inat_username,
+      "Failed to update User's inat_username (normalized to lowercase) " \
+      "after successful import"
     )
   end
 
@@ -1210,14 +1448,40 @@ class InatImportJobTest < ActiveJob::TestCase
                "must not be persisted")
   end
 
+  # A record saved before inat_username was normalized to lowercase can
+  # hold the login with different case; the logged-in-user check must
+  # not treat it as a different account (iNat logins are lowercase).
+  def test_import_mixed_case_username_matches_logged_in_user
+    create_ivars_from_filename("calostoma_lutescens")
+    lowercase_login = @inat_import.inat_username
+    @inat_import.update_columns(inat_username: lowercase_login.capitalize)
+
+    Location.create(user: @user,
+                    name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
+                    north: 36.043571, south: 35.561849,
+                    east: -83.253046, west: -83.794123)
+    stub_inat_interactions(login: lowercase_login)
+
+    assert_difference(
+      "Observation.count", 1,
+      "The same iNat account differing only by case should import"
+    ) do
+      InatImportJob.perform_now(@inat_import)
+    end
+    assert_equal(lowercase_login, @user.reload.inat_username,
+                 "Persisted username should be normalized to lowercase")
+  end
+
+  # The entered username is someone else's; the authorized login is the
+  # super importer's, and that is what gets recorded.
   def test_super_importer_anothers_observation
     @user = users(:dick)
-    inat_username = @user.inat_username
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
 
     create_ivars_from_filename("calostoma_lutescens")
-    stub_inat_interactions
+    stub_inat_interactions(login: "dick_on_inat")
 
     assert_difference(
       "Observation.count", 1,
@@ -1227,8 +1491,9 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
-    assert_equal(inat_username, @user.reload.inat_username,
-                 "SuperImporter's inat_username should not change")
+    assert_equal("dick_on_inat", @user.reload.inat_username,
+                 "A SuperImporter's inat_username is the login they " \
+                 "authorized as, not the one entered")
   end
 
   def test_super_importer_all_inat_fungal_observations
@@ -1294,6 +1559,35 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_requested(obs_stub)
   end
 
+  # Regression: an import that listed no ids leaves the column nil, and
+  # the id check runs ahead of the URL check it is waiting for. A
+  # project admin's import is the one that arrives this way.
+  def test_url_mode_with_no_id_list_reaches_page_parser
+    @user = users(:dick)
+    inat_import = InatImport.find_or_create_by(user: @user)
+    inat_import.update(
+      state: "Authorizing", inat_url: "place_id=1", inat_ids: nil,
+      import_all: false, import_others: true,
+      inat_username: @user.inat_username, token: "MockCode",
+      importables: nil, imported_count: 0,
+      avg_import_time: InatImport::BASE_AVG_IMPORT_SECONDS,
+      response_errors: "", log: [], last_obs_start: Time.now.utc,
+      ended_at: nil
+    )
+
+    stub_token_requests
+    stub_check_username_match(@user.inat_username)
+    obs_stub = stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+               to_return(status: 200,
+                         body: { total_results: 0, results: [] }.to_json)
+
+    WebMock.reset_executed_requests!
+    InatImportJob.perform_now(inat_import)
+
+    assert_requested(obs_stub)
+    assert_empty(inat_import.reload.response_errors)
+  end
+
   def test_import_canceled
     create_ivars_from_filename("listed_ids") # importing multiple observations
     # override ivar because this test wants to import multiple observations
@@ -1316,6 +1610,38 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Import should be Done")
     assert(@inat_import.canceled?,
            "Import should remain canceled")
+  end
+
+  # reached_import_cap? must be checked per-observation, not just between
+  # pages -- otherwise a page/batch already in progress when the cap is
+  # hit would overshoot it by up to a full page.
+  def test_import_respects_max_importable_mid_page
+    create_ivars_from_filename("listed_ids") # importing multiple observations
+    @inat_import = InatImport.create(user: @user,
+                                     inat_ids: "231104466,195434438",
+                                     token: "MockCode",
+                                     inat_username: "anything")
+    stub_inat_interactions
+
+    saved_max = InatImport.const_get(:MAX_IMPORTABLE)
+    InatImport.send(:remove_const, :MAX_IMPORTABLE)
+    InatImport.const_set(:MAX_IMPORTABLE, 1)
+
+    begin
+      assert_difference(
+        "Observation.count", 1,
+        "Should stop importing once MAX_IMPORTABLE is reached, " \
+        "even mid-page"
+      ) do
+        InatImportJob.perform_now(@inat_import)
+      end
+
+      assert_equal(1, @inat_import.reload.imported_count,
+                   "imported_count should not exceed MAX_IMPORTABLE")
+    ensure
+      InatImport.send(:remove_const, :MAX_IMPORTABLE)
+      InatImport.const_set(:MAX_IMPORTABLE, saved_max)
+    end
   end
 
   def test_oauth_failure
@@ -1457,6 +1783,7 @@ class InatImportJobTest < ActiveJob::TestCase
     create_ivars_from_filename("calostoma_lutescens")
     @user.update(inat_username: @inat_import.inat_username)
     Location.create(user: @user, name: "Sevier Co., Tennessee, USA",
+                    scientific_name: "USA, Tennessee, Sevier Co.",
                     north: 36.043571, south: 35.561849,
                     east: -83.253046, west: -83.794123)
     stub_inat_interactions
@@ -1617,6 +1944,70 @@ class InatImportJobTest < ActiveJob::TestCase
   # For own-obs imports (default), all photos are imported (unlicensed ones
   # use the user's default license). For not-own superimporter imports, only
   # licensed photos are imported.
+  # An unlicensed obs of another iNat user (donadinia_PNW01), imported by a
+  # superimporter with skeletons on. Its first photo is licensed and it
+  # has a collector obs field.
+  def use_empty_obs_license
+    parsed = JSON.parse(@mock_inat_response, symbolize_names: true)
+    parsed[:results].first[:license_code] = ""
+    @mock_inat_response = JSON.generate(parsed)
+    @parsed_results = parsed[:results]
+  end
+
+  def create_skeleton_ivars(collector:)
+    @user = users(:dick) # Dick is a superimporter
+    assert(InatImport.super_importer?(@user),
+           "Test requires user to be a super_importer")
+    create_ivars_from_filename("donadinia_PNW01")
+    parsed = JSON.parse(@mock_inat_response, symbolize_names: true)
+    result = parsed[:results].first
+    assert_nil(result[:license_code], "Fixture obs should be unlicensed")
+    result[:observation_photos].first[:photo][:license_code] = "cc-by"
+    result[:ofvs] << { name: "Collector's name", value: collector }
+    @mock_inat_response = JSON.generate(parsed)
+    @parsed_results = parsed[:results]
+    @inat_import = create_inat_import(import_others: true,
+                                      create_skeletons: true)
+  end
+
+  # Only the snapshot: no description and no obs field values.
+  def assert_skeleton_notes(obs, inat_obs, collector)
+    notes_text = obs.notes.values.join("\n")
+    assert_includes(notes_text, inat_obs[:user][:login],
+                    "Skeleton notes should include the iNat snapshot")
+    assert_not_includes(notes_text, inat_obs.cleaned_description,
+                        "Skeleton notes should omit the description")
+    assert_not_includes(notes_text, collector,
+                        "Skeleton notes should omit obs field values")
+    assert_equal(inat_obs.skeleton_notes, obs.notes,
+                 "Skeleton notes should be only the snapshot")
+  end
+
+  def assert_skeleton_import_counts(inat_import)
+    inat_import.reload
+    assert_equal(1, inat_import.skeleton_imported_count,
+                 "Should count the skeleton")
+    assert_equal(0, inat_import.ignored_unlicensed_count,
+                 "A skeleton should not count as ignored")
+    assert_empty(inat_import.license_added_inat_ids,
+                 "A skeleton should not be listed as license-added")
+    skipped = @parsed_results.first[:observation_photos].size -
+              expected_imported_photo_count
+    assert_unlicensed_photos_listed_not_errors(inat_import, skipped: skipped)
+  end
+
+  # Skipped unlicensed photos go on the status page's list, not into the
+  # import's errors.
+  def assert_unlicensed_photos_listed_not_errors(inat_import, skipped:)
+    event = inat_import.unlicensed_image_events.
+            find { |e| e["inat_id"] == @parsed_results.first[:id] }
+    assert_not_nil(event, "Skipped photos should be recorded for the list")
+    assert_equal(skipped, event["count"],
+                 "The list should count every skipped photo")
+    assert_empty(inat_import.response_errors.to_s.strip,
+                 "Skipped unlicensed photos should not be reported as errors")
+  end
+
   def expected_imported_photo_count
     obs_photos = @parsed_results.first[:observation_photos]
     return obs_photos.length unless @inat_import.import_others

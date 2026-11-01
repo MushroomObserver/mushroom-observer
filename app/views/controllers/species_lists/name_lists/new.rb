@@ -14,11 +14,8 @@
 # `attributes:`.
 module Views::Controllers::SpeciesLists::NameLists
   class New < Views::FullPageBase
-    def initialize(name_strings:, user:)
-      super()
-      @name_strings = name_strings
-      @user = user
-    end
+    prop :name_strings, _Array(String)
+    prop :user, ::User
 
     def view_template
       add_page_title(:name_lister_title.t)
@@ -44,7 +41,7 @@ module Views::Controllers::SpeciesLists::NameLists
     def render_lister_table
       Table(
         class: "name-lister mt-3 w-100",
-        attributes: { cols: "3", data: lister_data }
+        cols: "3", data: lister_data
       ) do |t|
         t.column(:name_lister_genera.t, width: "20%")
         t.column(:name_lister_species.t, width: "40%")

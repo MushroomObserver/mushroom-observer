@@ -85,6 +85,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
                  @response.request.fullpath)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Herbarium to Herbaria ------------------------------------------------------
   #
   # legacy Herbarium action (method)  upddated Herbaria action (method)
@@ -108,6 +109,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   # show_herbarium (post)             Herbaria::Curators#create (post)
   # * == legacy action is not redirected
   # See https://tinyurl.com/ynapvpt7
+  # rubocop:enable MO/NoLongCommentBlock
 
   def test_herbarium_search
     login
@@ -212,25 +214,22 @@ class RedirectsIntegrationTest < IntegrationTestCase
   end
 
   # ActivityLogs (RssLogs) old-style type param  ------------------------------
-  def test_activity_logs_old_style_type_param_redirects_and_checks_boxes
+  # `:type` is a plain param_alias for Query::RssLogs' `types` attr
+  # now (see .claude 5139 sweep) -- top-level params are a first-class
+  # URL form, so this renders directly instead of redirecting to a
+  # `q[]` URL.
+  def test_activity_logs_old_style_type_param_no_longer_redirects
     login
 
-    # Visit old-style URL with top-level type param
-    # The type param triggers the `type` action which redirects to q[type]
-    # Integration tests automatically follow redirects
     get(activity_logs_path(params: { type: "observation" }))
     assert_response(:success)
 
-    # Verify we ended up at the correct URL with q params
-    assert_match(/q%5Bmodel%5D=RssLog/, request.fullpath)
-    assert_match(/q%5Btype%5D=observation/, request.fullpath)
-
     # The observation checkbox should be checked
-    assert_select("input[type='checkbox'][name='q[type][]']" \
-                  "[value='observation'][checked='checked']")
+    assert_select("input[type='checkbox'][name='q[types][]']" \
+                  "[value='observation'][checked]")
 
     # Other checkboxes should NOT be checked
-    assert_select("input[type='checkbox'][name='q[type][]']" \
+    assert_select("input[type='checkbox'][name='q[types][]']" \
                   "[value='name']:not([checked])")
   end
 end

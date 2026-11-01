@@ -34,6 +34,9 @@
 #                          reset in InatImportsController#authorization_response
 #                          and in Job after each observation import
 #  cancel/canceled::       Did the user requested canceling the Job
+#  create_skeletons::      Import-others only: import another user's
+#                          unlicensed iNat obss as placeholder skeletons
+#  skeleton_imported_count:: skeletons imported by the associated job
 #
 # == Class Methods
 #  super_importers         users who can import other users' iNat obss
@@ -68,11 +71,19 @@ class InatImport < ApplicationRecord
   }, prefix: true
 
   belongs_to :user
+  # Target project for the import's project/field-slip standardization
+  # (#5259); blank for ordinary user-driven imports.
+  belongs_to :project, optional: true
   has_many :observations, dependent: :nullify
+
+  include NormalizesInatUsername
 
   serialize :log, type: Array, coder: YAML
   serialize :date_missing_inat_ids, coder: JSON
   serialize :license_added_inat_ids, coder: JSON
+  serialize :constraint_violation_obs_ids, coder: JSON
+  serialize :unlicensed_image_events, coder: JSON
+  serialize :unlicensed_inat_ids, coder: JSON
 
   after_update_commit lambda { |inat_import|
     html = ApplicationController.renderer.render(
@@ -142,7 +153,7 @@ class InatImport < ApplicationRecord
     when :not_importable   then increment!(:ignored_not_importable_count)
     when :date_missing     then append_date_missing(inat_id)
     when :already_imported then increment!(:ignored_already_imported_count)
-    when :unlicensed       then increment!(:ignored_unlicensed_count)
+    when :unlicensed       then append_unlicensed(inat_id)
     else raise(ArgumentError.new("Unknown ignored reason: #{reason.inspect}"))
     end
   end
@@ -152,8 +163,63 @@ class InatImport < ApplicationRecord
     update!(license_added_inat_ids: license_added_inat_ids + [inat_id])
   end
 
+  # Serialized-JSON columns are NULL until first written.
+  def constraint_violation_obs_ids
+    super || []
+  end
+
+  def unlicensed_image_events
+    super || []
+  end
+
+  def unlicensed_inat_ids
+    super || []
+  end
+
+  # An observation the standardizer kept out of the target project
+  # because it violates the project's constraints (#5259). The inline
+  # pass and a later slip-attach reconcile can both record the same
+  # observation, so appends are deduplicated.
+  def add_constraint_violation_obs(obs_id)
+    reload
+    return if constraint_violation_obs_ids.include?(obs_id)
+
+    update!(constraint_violation_obs_ids:
+      constraint_violation_obs_ids + [obs_id])
+  end
+
+  # One imported observation whose photo(s) were skipped for lacking an
+  # iNat license -- recorded with the details needed to review the
+  # pattern (who, which license choice).
+  def add_unlicensed_image_event(inat_id:, login:, license_code:, count:)
+    reload
+    event = { "inat_id" => inat_id, "login" => login,
+              "license_code" => license_code, "count" => count }
+    update!(unlicensed_image_events: unlicensed_image_events + [event])
+  end
+
   def reached_import_cap?
     imported_count.to_i >= MAX_IMPORTABLE
+  end
+
+  # This run will never import more than MAX_IMPORTABLE, regardless of how
+  # many observations are actually available.
+  def capped_total_importables
+    [total_importables.to_i, MAX_IMPORTABLE].min
+  end
+
+  # Observations beyond MAX_IMPORTABLE that a single run of this size
+  # won't import. 0 when count is at or under the cap.
+  def self.excess_over_cap(count)
+    [count.to_i - MAX_IMPORTABLE, 0].max
+  end
+
+  # url for re-filling the import form "search URL" field
+  def reimport_url
+    original_inat_url.presence ||
+      # Records predating presence column lack an original_inat_url
+      # So rebuild a best-effort UI URL
+      legacy_reimport_url
   end
 
   def ignored_total_count
@@ -190,7 +256,7 @@ class InatImport < ApplicationRecord
   # If user has no import history, use system-wide average import time.
   # If no system-wide history, use BASE_AVG_IMPORT_SECONDS.
   def total_expected_time
-    total_importables.to_i * initial_avg_import_seconds
+    capped_total_importables * initial_avg_import_seconds
   end
 
   def initial_avg_import_seconds
@@ -222,17 +288,39 @@ class InatImport < ApplicationRecord
 
   def estimated_remaining_time
     return 0 if Done?
-    return nil unless total_importables.to_i.positive? && started_at
-    return total_expected_time if imported_count.to_i.zero?
+    return nil unless capped_total_importables.positive? && started_at
+    return total_expected_time if processed_count.zero?
 
     [extrapolated_remaining_time, 0].max
   end
 
-  # Observed rate (elapsed per imported obs) times obs still to import, so
-  # the estimate tracks real progress instead of a fixed up-front guess.
+  # Observations this run has finished with, imported or not. The total
+  # it is measured against counts every observation iNat will return, so
+  # the queue has to shrink by skips too: a run that skips most of what
+  # it fetches (a re-run, where already_imported carries the page)
+  # otherwise shows no progress and holds its opening estimate until it
+  # ends.
+  def processed_count
+    imported_count.to_i + ignored_total_count.to_i
+  end
+
+  # Skips shrink the queue but do not set the pace. A skip is an
+  # ExternalLink lookup and an import is a round trip with photos, so
+  # dividing the whole elapsed time by everything processed would price
+  # the imports still to come at the speed of skipping. avg_import_time
+  # is a moving average updated only when an obs imports, which is the
+  # rate the observations left are going to cost.
+  def observed_import_seconds
+    return initial_avg_import_seconds unless avg_import_time.to_f.positive?
+
+    avg_import_time
+  end
+
+  # Uses the capped total, not the raw estimate -- this run imports at
+  # most MAX_IMPORTABLE however many are available.
   def extrapolated_remaining_time
-    remaining = total_importables.to_i - imported_count.to_i
-    (remaining * elapsed_time.to_f / imported_count).round
+    remaining = [capped_total_importables - processed_count, 0].max
+    (remaining * observed_import_seconds).round
   end
 
   #########
@@ -262,10 +350,26 @@ class InatImport < ApplicationRecord
     self.license_added_inat_ids ||= []
   end
 
+  # inat_url is stored as a normalized query string with no record of
+  # which iNat host it came from; assume the UI host, since that's what
+  # every reimport link produced before original_inat_url existed.
+  def legacy_reimport_url
+    return nil if inat_url.blank?
+
+    "#{Inat::Constants::SITE}/observations?#{inat_url}"
+  end
+
   def append_date_missing(inat_id)
     reload
     self.ignored_date_missing_count = ignored_date_missing_count + 1
     self.date_missing_inat_ids = date_missing_inat_ids + [inat_id].compact
+    save!
+  end
+
+  def append_unlicensed(inat_id)
+    reload
+    self.ignored_unlicensed_count = ignored_unlicensed_count + 1
+    self.unlicensed_inat_ids = unlicensed_inat_ids + [inat_id].compact
     save!
   end
 end

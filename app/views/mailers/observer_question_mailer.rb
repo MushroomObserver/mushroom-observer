@@ -32,7 +32,7 @@ class Views::Mailers::ObserverQuestionMailer < Views::Mailers::Base
 
   def links
     [[:email_links_show_object.t(type: :observation),
-      "#{MO.http_domain}/#{@observation.id}"],
+      @observation.show_url],
      [:email_links_stop_sending.t,
       "#{MO.http_domain}/account/no_email/#{@receiver.id}" \
       "?type=general_question"],

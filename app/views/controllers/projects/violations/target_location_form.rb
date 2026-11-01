@@ -8,9 +8,9 @@
 #
 # The form posts `do=add_target_location`, `obs_id=<id>`, and
 # `location_id=<id>` (the radio selection — the comma-suffix the
-# user picked) to `project_violations_update_path` with PUT. The
-# route only accepts PUT, not PATCH, so we override Superform's
-# default `_method` value via `method: :put` in the initializer.
+# user picked) to `resolve_project_violations_path` with PATCH
+# (Superform's default for a persisted model) — the route also
+# accepts PUT, for the legacy button_to callers in `Form`.
 #
 # Two render modes inside `.modal-body`:
 #
@@ -83,24 +83,26 @@ module Views::Controllers::Projects::Violations
       (0..(parts.length - 1)).map { |i| parts[i..].join(", ") }
     end
 
-    def initialize(obs:, project:, existing_locations:, **)
-      @obs = obs
-      @project = project
-      # `name => Location` for every suffix that already has a row;
-      # pre-loaded by `Projects::ViolationsController#target_location_modal`.
-      @existing_locations = existing_locations
+    prop :obs, ::Observation
+    prop :project, ::Project
+    # `name => Location` for every suffix that already has a row;
+    # pre-loaded by `Projects::ViolationsController#target_location_modal`.
+    prop :existing_locations, _Hash(String, ::Location)
+
+    def initialize(obs:, project:, existing_locations:, **attrs)
       # The project is the thing being mutated (a target_location
       # entry is added to its target_locations list), so it's the
       # natural Superform "model" for dom.id. No fields bind to it —
       # every input is named explicitly. Superform picks PATCH for
-      # the persisted Project model; `project_violations_update_path`
+      # the persisted Project model; `resolve_project_violations_path`
       # accepts both PATCH and PUT (the legacy button_to calls still
       # use PUT).
-      super(project, **)
+      super(project, obs: obs, project: project,
+                     existing_locations: existing_locations, **attrs)
     end
 
     def form_action
-      project_violations_update_path(project_id: @project.id)
+      resolve_project_violations_path(@project.id)
     end
 
     # Callers (Projects::Violations::Form) check `applicable?(obs)`
@@ -159,30 +161,15 @@ module Views::Controllers::Projects::Violations
     end
 
     def suffix_create_link(suffix)
-      # Needs the link as a returned SafeBuffer string (not buffer
-      # output) so it can be passed as RadioField's `:append`
-      # per-choice option — the link renders inside the disabled
-      # row's `.radio` div and not eagerly at the `suffix_options`
-      # call site above the radio group.
-      #
-      # `capture { ... }` returns Phlex's accumulated output as a
-      # SafeBuffer; the leading space is rendered inside the
-      # block via `plain` so the whole return value stays
-      # html_safe (string-+-SafeBuffer concatenation would demote
-      # to a plain String).
-      #
-      # `where:` (not `display_name:`) is the param
-      # `LocationsController#new` reads to pre-populate the form's
-      # display-name field — the `display_name` accessor only exists
-      # on nested form params (#4304).
-      #
-      # We dismiss the modal via `data-action="click->modal#hide"`
-      # instead of Bootstrap's `data-dismiss="modal"` because
-      # Bootstrap 3's dismiss handler chain ends up preventing the
-      # link's default `target="_blank"` action, suppressing the new
-      # tab. `modal#hide` calls `$(modal).modal('hide')` without
-      # passing the event, so no preventDefault — the link's new
-      # tab opens *and* the modal closes.
+      # Returns a SafeBuffer, not buffer output, so it can be passed
+      # as RadioField's `:append` per-choice option -- the link
+      # renders inside the disabled row's `.radio` div, not eagerly
+      # at the `suffix_options` call site. `where:` (not
+      # `display_name:`) is the param `LocationsController#new`
+      # reads to pre-populate the display-name field. Dismisses the
+      # modal via `data-action="click->modal#hide"`, not Bootstrap's
+      # `data-dismiss="modal"`, which prevents the link's
+      # `target="_blank"` default and suppresses the new tab.
       capture do
         whitespace
         Button(

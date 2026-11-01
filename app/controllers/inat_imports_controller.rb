@@ -26,12 +26,16 @@ class InatImportsController < ApplicationController
   include Validators
   include Estimators
   include FormBuilders
+  include ImportOptions
+  include ProjectScope
   include PreviousImports
+  include AccountLinking
   include Inat::Constants
 
   before_action :login_required
   before_action :flatten_confirm_params, only: :create
   before_action :flatten_new_form_params, only: :create
+  before_action :apply_project_scope, only: [:new, :create]
 
   def index
     admin = in_admin_mode? == true
@@ -76,15 +80,19 @@ class InatImportsController < ApplicationController
     pending = InatImport.where(user: @user).
               where(state: %w[Authenticating Importing]).
               order(:updated_at).last
-    return render_new_form unless pending
+    return render_new_view unless pending
 
     flash_warning(:inat_import_tracker_pending.l)
     redirect_to(inat_import_path(pending))
   end
 
   def create
-    return reload_form if params[:go_back] == "1"
-    return reload_form unless params_valid?
+    # Same-URL POST re-render either way -- Turbo Drive needs a non-2xx
+    # status here regardless of whether anything semantically failed,
+    # or it silently hangs instead of redisplaying the response. "Go
+    # Back" isn't a validation failure, but the status still applies.
+    return render_new_view_invalid if params[:go_back] == "1"
+    return render_new_view_invalid unless params_valid?
 
     normalize_inat_ids_param!
     normalize_inat_url_param!
@@ -111,6 +119,7 @@ class InatImportsController < ApplicationController
   def authorization_response
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
+    return link_inat_account(auth_code) if linking_inat_account?
 
     inat_import = InatImport.find_by(id: string_param(:state), user: @user)
     return not_authorized unless inat_import
@@ -141,23 +150,34 @@ class InatImportsController < ApplicationController
   def confirm_import
     @expected = fetch_expected_count
     return inat_unreachable if @expected.nil?
-    return reload_form if @expected == false
+    # Nothing importable -- an availability failure, needs the non-2xx
+    # status.
+    return render_new_view_invalid if @expected == false
 
-    @unlicensed_obs = if import_others?
-                        fetch_unlicensed_others_count
-                      else
-                        fetch_unlicensed_obs_count
-                      end
+    @unlicensed_obs = fetch_unlicensed_count
     @inat_import = InatImport.new(user: @user)
     warn_about_listed_previous_imports
     @confirm_form = build_confirm_form
+    render_confirm_view_invalid
+  end
+
+  def render_confirm_view(status: :ok, **render_opts)
     render(Views::Controllers::InatImports::Confirm.new(
              confirm_form: @confirm_form,
              expected: @expected,
              unlicensed_obs: @unlicensed_obs,
              inat_import: @inat_import,
              **fetch_confirm_counts
-           ))
+           ), status: status, **render_opts)
+  end
+
+  # A same-URL 200 render on a Turbo-enabled form hangs Turbo Drive
+  # (see turbo_submit_forms.md) -- needs a non-2xx status even though
+  # nothing "failed"; this is the normal next step after a valid
+  # New-import submission, just not the same page.
+  def render_confirm_view_invalid(**)
+    render_confirm_view(**)
+    self.status = :unprocessable_content
   end
 
   def fetch_confirm_counts
@@ -171,7 +191,7 @@ class InatImportsController < ApplicationController
 
   def inat_unreachable
     flash_error(:inat_cannot_communicate.l)
-    reload_form
+    render_new_view_invalid
   end
 
   # For storage: extract only digit tokens and join with commas.
@@ -219,7 +239,6 @@ class InatImportsController < ApplicationController
   def url_normalizer(url, keep_taxon_id: false)
     Inat::URLNormalizer.new(
       url,
-      superimporter: InatImport.super_importer?(@user),
       import_others: import_others?,
       keep_taxon_id: keep_taxon_id
     )
@@ -257,7 +276,8 @@ class InatImportsController < ApplicationController
   # A new persistent record per import, so each import's results are kept.
   def init_ivars
     @inat_import = InatImport.create!(
-      new_import_scope_attrs.merge(new_import_bookkeeping_attrs)
+      new_import_scope_attrs.merge(new_import_option_attrs).
+        merge(new_import_bookkeeping_attrs)
     )
   end
 
@@ -269,9 +289,8 @@ class InatImportsController < ApplicationController
       inat_username: params[:inat_username]&.strip,
       inat_ids: clean_inat_ids,
       inat_url: params[:inat_url].presence,
-      import_others: import_others?,
-      recheck_all: recheck_all?,
-      writeback: writeback_policy
+      original_inat_url: params[:original_inat_url].presence,
+      project_id: chosen_project_id
     }
   end
 
@@ -298,29 +317,10 @@ class InatImportsController < ApplicationController
     inat_id_list.length
   end
 
-  # Returns whether this import covers other users' observations.
-  # Always false for regular users; determined by checkbox for superimporters.
-  def import_others?
-    return false unless InatImport.super_importer?(@user)
-
-    params[:import_others] == "1"
-  end
-
-  # Whether an import-all / URL run should re-check observations already
-  # carrying iNat's "Mushroom Observer URL" field (#4565 orphan reimport).
-  # Explicit id lists always re-check regardless of this flag.
-  def recheck_all?
-    params[:recheck_all] == "1"
-  end
-
-  # Admins can toggle the iNat write-back per import via a form checkbox
-  # (checked = skip, unchecked = force it on). Everyone else gets `default`
-  # so the importer applies its environment default (skip in development,
-  # write back in production).
-  def writeback_policy
-    return :default unless in_admin_mode?
-
-    params[:skip_inat_writeback] == "1" ? :skip : :force
+  # Target project for the #5259 standardization; validated by
+  # `project_valid?`, which also fills in the id for a typed title.
+  def chosen_project_id
+    params[:inat_project_id].presence
   end
 
   # Pass the new record's id through the OAuth `state` param; iNat echoes it

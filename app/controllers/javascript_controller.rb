@@ -34,15 +34,4 @@ class JavascriptController < ApplicationController
   rescue ActionController::RedirectBackError
     redirect_to("/")
   end
-
-  def hide_thumbnail_map
-    id = params[:id].to_s
-    if @user
-      @user.update_attribute(:thumbnail_maps, false)
-      flash_notice(:show_observation_thumbnail_map_hidden.t)
-    else
-      session[:hide_thumbnail_maps] = true
-    end
-    redirect_to(permanent_observation_path(id: id))
-  end
 end

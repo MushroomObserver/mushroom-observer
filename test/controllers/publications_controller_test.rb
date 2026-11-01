@@ -16,7 +16,13 @@ class PublicationsControllerTest < FunctionalTestCase
     get(:index)
     assert_response(:success)
     assert_not_nil(assigns(:publications))
-    assert_link_in_html("Edit", action: :edit, id: pub_id)
+    # InlineCRUDLinks (via Tab::Publication::Edit) renders an
+    # icon-only link, not visible "Edit" text -- select on the tab's
+    # own derived class instead of `assert_link_in_html`'s text match.
+    assert_select(
+      "a.edit_publication_link_#{pub_id}" \
+      "[href='#{edit_publication_path(pub_id)}']"
+    )
     # `Button(type: :delete, ...)` renders a POST form (with a hidden
     # `_method=delete` field), not an `<a>` link, so this checks the
     # form/button shape rather than `assert_link_in_html`.
@@ -38,6 +44,24 @@ class PublicationsControllerTest < FunctionalTestCase
     get(:index)
     assert_response(:success)
     assert_select("a[href*='example.org']")
+  end
+
+  # The reference is Textile: an ampersand renders once and ??Journal??
+  # renders as a citation, on both the index and the show page.
+  def test_reference_textile_renders_once
+    pub = publications(:one_pub)
+    pub.update_columns(full: "Smith & Jones. 2020. ??Some Journal?? 1: 2.")
+    login
+
+    get(:index)
+    assert_select("a[href='#{publication_path(pub)}'] cite",
+                  text: "Some Journal")
+    assert_select("a[href='#{publication_path(pub)}']",
+                  text: /\ASmith & Jones\./)
+
+    get(:show, params: { id: pub.id })
+    assert_select("#content p cite", text: "Some Journal")
+    assert_select("#content p", text: /Smith & Jones\./)
   end
 
   def test_should_get_new
@@ -81,6 +105,8 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_no_difference("Publication.count") do
       post(:create, params: { publication: {} })
     end
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_show_publication
@@ -141,8 +167,9 @@ class PublicationsControllerTest < FunctionalTestCase
     login
     put(:update, params: { id: publications(:one_pub).id,
                            publication: { full: "" } })
-    assert_response(:success)
+    assert_unprocessable
     assert_select("body.publications__edit")
+    assert_select("form[data-turbo='true']")
   end
 
   def test_should_not_destroy_publication_without_permission

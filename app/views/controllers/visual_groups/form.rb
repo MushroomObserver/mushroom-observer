@@ -6,10 +6,7 @@ module Views::Controllers::VisualGroups
   # visual classification training. Rendered directly by the
   # visual_groups controller's `edit.rb`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, visual_model:, **)
-      @visual_model = visual_model
-      super(model, local: true, **)
-    end
+    prop :visual_model, ::VisualModel
 
     def view_template
       super do

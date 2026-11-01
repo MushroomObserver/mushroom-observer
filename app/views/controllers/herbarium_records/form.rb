@@ -6,14 +6,16 @@ module Views::Controllers::HerbariumRecords
   # controller's `new.rb` and `edit.rb`, and dynamically
   # by `Components::Modal::TurboForm` via `form_component_class_for`.
   class Form < ::Components::ApplicationForm
-    def initialize(model, observation: nil, back: nil, **)
-      @observation = observation || model.observations.first
-      @back = back
-      super(model, **)
+    prop :observation, _Nilable(::Observation), default: nil
+    prop :back, _Nilable(String), default: nil
+
+    def initialize(model, observation: nil, **)
+      super(model, observation: observation || model.observations.first, **)
     end
 
     def view_template
       render_multiple_observations_warning if model.observations.size > 1
+      render_observation_field unless model.persisted?
       render_herbarium_name_field
       render_initial_det_field
       render_accession_number_field
@@ -34,23 +36,28 @@ module Views::Controllers::HerbariumRecords
       )
     end
 
+    def render_observation_field
+      read_only_field("observation_id", value: @observation.id,
+                                        label: :observation.ti, inline: true)
+    end
+
     def render_herbarium_name_field
       autocompleter_field(:herbarium_name,
                           type: :herbarium,
                           label: :name.ti,
-                          between: :required)
+                          label_appends: :required)
     end
 
     def render_initial_det_field
       text_field(:initial_det,
                  label: :herbarium_record_initial_det,
-                 between: :optional)
+                 label_appends: :optional)
     end
 
     def render_accession_number_field
       text_field(:accession_number,
                  label: :herbarium_record_accession_number,
-                 between: :required)
+                 label_appends: :required)
     end
 
     def render_accession_help
@@ -62,7 +69,7 @@ module Views::Controllers::HerbariumRecords
       textarea_field(:notes,
                      rows: 6,
                      label: :notes.ti,
-                     between: :optional)
+                     label_appends: :optional)
     end
 
     def submit_text
@@ -82,7 +89,6 @@ module Views::Controllers::HerbariumRecords
         url_for(
           controller: "herbarium_records",
           action: :create,
-          observation_id: @observation.id,
           only_path: true
         )
       end

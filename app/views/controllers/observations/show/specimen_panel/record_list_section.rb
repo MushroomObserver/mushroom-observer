@@ -66,7 +66,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     def heading(records)
       if records.any? || @has_sibling_records
-        "#{append_colon(plural_tag.ti)} "
+        append_colon(plural_tag.ti)
       else
         "#{:no_objects.t(type: type_tag)} "
       end
@@ -89,7 +89,9 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     end
 
     def render_editable_rows(records)
-      ul(class: "tight-list") { records.each { |r| render_editable_row(r) } }
+      ul(id: "#{plural_tag}_list", class: "tight-list") do
+        records.each { |r| render_editable_row(r) }
+      end
     end
 
     def render_editable_row(record)
@@ -101,7 +103,9 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     end
 
     def render_readonly_rows(records)
-      ul(class: "tight-list") { records.each { |r| render_readonly_row(r) } }
+      ul(id: "#{plural_tag}_list", class: "tight-list") do
+        records.each { |r| render_readonly_row(r) }
+      end
     end
 
     def render_readonly_row(record)

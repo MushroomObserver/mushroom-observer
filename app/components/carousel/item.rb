@@ -83,9 +83,18 @@ class Components::Carousel::Item < Components::Image::Base
 
   def render_carousel_caption
     div(class: "carousel-caption") do
-      render_image_vote_section
-      render_image_info_section if image_info_visible?
+      div(class: "caption-content") do
+        render_image_vote_section
+        render_image_info_section if image_info_visible?
+      end
     end
+  end
+
+  # See Image::Base#vote_context -- every carousel slide (show-page
+  # gallery, matrix-box mini-carousel) shares this caption layout, so
+  # both need the :carousel tooltip treatment, not just :matrix.
+  def vote_context
+    :carousel
   end
 
   # Side-effect-free predicate. The earlier shape was

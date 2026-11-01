@@ -30,14 +30,16 @@
 // interest eyes
 // --------------------------------------------------
 
-.interest_big {
-  height: 50px;
-  width: 50px;
-}
-
-.interest_small {
-  height: 23px;
-  width: 23px;
+// Same size for the state indicator and the two clickable icons --
+// matches #top_nav .top_nav_icon_button .mo-icon's 1.5em scale. These
+// use the shared .mo-icon class (see _icons.scss) rather than their
+// own sizing; .btn:not(.btn-link) .mo-icon doesn't apply here since
+// these buttons are .btn-link, so this needs its own explicit rule.
+// Visual weight is the wrapping Button's job now (variant/.disabled),
+// not a bigger raster image.
+.interest-eyes .mo-icon {
+  width: 1.5em;
+  height: 1.5em;
 }
 
 //
@@ -107,14 +109,43 @@ ul.tight-list {
 }
 
 .h3.page-title {
-  font-size: 22px;
-
-  .badge-id {
-    font-size: 66% !important
-  }
+  font-size: 18px;
 
   small {
     @extend .ml-3;
     color: $text-color;
+  }
+
+  // 992px -- cutover's BS4 "lg" breakpoint; main's $screen-lg
+  // (1200px) is a different value, so this is hardcoded rather than
+  // reusing that variable.
+  @media screen and (min-width: 992px) {
+    font-size: 22px;
+  }
+}
+
+@media screen and (min-width: $screen-sm-min) {
+  .object_edit {
+    .inline-link-block {
+      margin-top: 0.75rem;
+    }
+  }
+}
+
+// #title_bar's two column wrappers (.title_bar_left_col,
+// .title_bar_right_col) are BS3 float columns, so their stacking
+// order below `md` just follows source order -- left col first,
+// then right col. Between sm and md that pairing reads awkwardly;
+// flex-ify the row and reorder the right column above the left
+// column for just that range, leaving source order (and md+'s
+// side-by-side layout) untouched outside it.
+@media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
+  #title_bar {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .title_bar_right_col {
+    order: -1;
   }
 }

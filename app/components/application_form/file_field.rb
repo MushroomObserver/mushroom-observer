@@ -24,6 +24,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :between
     slot :append
 
+    public :between_slot, :append_slot
+
     attr_reader :wrapper_options
 
     def initialize(field, wrapper_options: {}, **attributes)
@@ -42,7 +44,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_with_wrapper
       div(class: wrapper_class, data: wrapper_data) do
         render_label_row if show_label?
-        render(between_slot) if between_slot
+        render_between_block
         yield
         render_filename_display unless custom_controller?
         render(append_slot) if append_slot

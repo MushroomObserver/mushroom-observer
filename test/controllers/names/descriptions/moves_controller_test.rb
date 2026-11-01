@@ -181,6 +181,9 @@ module Names::Descriptions
       end
 
       assert_flash_error
+      # Must redirect -- previously fell through with no render or
+      # redirect at all (see .claude/rules/turbo_submit_forms.md).
+      assert_redirected_to(new_move_name_description_path(id: rolf_desc.id))
     end
   end
 end

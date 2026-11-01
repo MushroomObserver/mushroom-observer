@@ -7,9 +7,8 @@
 #            comments-for-object panel
 #   - right: observations menu, nomenclature, classification +
 #            lifeform side-by-side, optional notes, alt-descriptions,
-#            optional projects, name footer (authors/editors +
-#            previous-version + export-status), and finally the
-#            ObjectFooter.
+#            name footer (authors/editors + previous-version +
+#            export-status), and finally the ObjectFooter.
 #
 # Side-effects (page chrome) are issued from `view_template` before
 # emission: `Textile.register_name`, `add_show_title`,
@@ -20,12 +19,8 @@ module Views::Controllers::Names
   class Show < Views::FullPageBase
     prop :name, ::Name
     prop :user, _Nilable(::User), default: nil
-    # `best_images` comes from `Name::Observations#best_images` —
-    # an `ActiveRecord::Relation` of `Image` in production; accept
-    # plain `Array` for tests that pass a stubbed list.
-    prop :best_images,
-         _Nilable(_Union(Array, ::ActiveRecord::Relation)),
-         default: nil
+    # Matches Views::Controllers::Users::Show's own best_images prop.
+    prop :best_images, _Array(_Nilable(::Image)), default: -> { [] }
     # The `Description` record (eager-loaded via
     # `Name.show_includes`). Forwarded to `BestDescriptionPanel`,
     # which derives both the body text and the permission gates
@@ -50,7 +45,6 @@ module Views::Controllers::Names
     prop :subtaxa_query, _Nilable(::Query::Observations), default: nil
     prop :children_query, _Nilable(::Query::Names), default: nil
     prop :first_child, _Nilable(::Name), default: nil
-    prop :projects, _Nilable(_Array(::Project)), default: nil
     # `Name#versions` returns an AR-managed `CollectionProxy`.
     prop :versions, _Array(_Interface(:user_id))
 
@@ -84,7 +78,7 @@ module Views::Controllers::Names
 
     def render_left_column
       div(class: content_for(:left_columns).to_s) do
-        render_best_images_carousel if @best_images&.length&.positive?
+        render_best_images_carousel if @best_images.length.positive?
         render(Show::BestDescriptionPanel.new(
                  name: @name, description: @description, user: @user
                ))
@@ -124,9 +118,6 @@ module Views::Controllers::Names
       render_classification_and_lifeform_row
       render(Show::NotesPanel.new(name: @name, user: @user)) if @name.has_notes?
       render(Show::AltDescriptionsPanel.new(user: @user, name: @name))
-      if @projects.present?
-        render(Show::ProjectsPanel.new(name: @name, projects: @projects))
-      end
       render_name_footer_panel
     end
 

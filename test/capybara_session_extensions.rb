@@ -149,38 +149,36 @@ module CapybaraSessionExtensions
     end
   end
 
-  # expect: nil (presence only, no text check), a bare Symbol tag
-  # (resolved via .t, with **args as its interpolation args), or an
-  # Array of tags for a message built from more than one (each entry
-  # either a bare Symbol or a [Symbol, args_hash] pair).
-  #
-  # Each tag is checked as its OWN substring assertion, not joined
-  # into one combined string -- the two Capybara drivers in play here
-  # (:rack_test for test/integration/capybara, Cuprite for
-  # test/system) disagree on what, if anything, appears between two
-  # adjacent flash <p> blocks (rack_test: nothing at all -- words end
-  # up glued together; Cuprite: a newline). A joined multi-tag string
-  # would need to guess that separator and could never be right for
-  # both drivers at once; checking each tag independently sidesteps
-  # the question entirely.
-  def assert_flash(expect = nil, session: self, **args)
-    session.assert_selector("#flash_notices")
+  # expect: nil, a bare Symbol tag (resolved via .t), or an Array of
+  # tags for a multi-part message. Each tag is checked as a separate
+  # substring assertion, not joined into one string -- the two
+  # Capybara drivers disagree on what appears between adjacent flash
+  # <p> blocks (rack_test: nothing; Cuprite: a newline).
+  # wait: overrides Capybara's default_max_wait_time (3s) for this
+  # assertion only, for a known-slow flow, rather than raising the
+  # global default and masking hangs elsewhere.
+  def assert_flash(expect = nil, session: self, wait: nil, **args)
+    wait_opts = wait ? { wait: wait } : {}
+    session.assert_selector("#flash_notices", **wait_opts)
     return if expect.nil?
 
     each_flash_tag(expect, args) do |text|
-      session.assert_selector("#flash_notices", text: text.as_displayed)
+      session.assert_selector("#flash_notices", text: text.as_displayed,
+                                                **wait_opts)
     end
   end
 
-  def assert_flash_success(expect = nil, session: self, **args)
-    session.assert_selector("#flash_notices.alert-success")
-    assert_flash(expect, session:, **args) if expect
+  def assert_flash_success(expect = nil, session: self, wait: nil, **args)
+    session.assert_selector("#flash_notices.alert-success",
+                            **(wait ? { wait: wait } : {}))
+    assert_flash(expect, session:, wait:, **args) if expect
   end
 
-  def assert_flash_error(expect = nil, session: self, **args)
+  def assert_flash_error(expect = nil, session: self, wait: nil, **args)
     session.assert_any_of_selectors("#flash_notices.alert-error",
-                                    "#flash_notices.alert-danger")
-    assert_flash(expect, session:, **args) if expect
+                                    "#flash_notices.alert-danger",
+                                    **(wait ? { wait: wait } : {}))
+    assert_flash(expect, session:, wait:, **args) if expect
   end
 
   def assert_no_flash_errors(session: self)
@@ -188,9 +186,10 @@ module CapybaraSessionExtensions
                                      "#flash_notices.alert-danger")
   end
 
-  def assert_flash_warning(expect = nil, session: self, **args)
-    session.assert_selector("#flash_notices.alert-warning")
-    assert_flash(expect, session:, **args) if expect
+  def assert_flash_warning(expect = nil, session: self, wait: nil, **args)
+    session.assert_selector("#flash_notices.alert-warning",
+                            **(wait ? { wait: wait } : {}))
+    assert_flash(expect, session:, wait:, **args) if expect
   end
 
   # Yields each tag's resolved text in turn -- a bare Symbol yields

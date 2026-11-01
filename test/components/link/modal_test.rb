@@ -13,30 +13,30 @@ class ModalLinkTest < ComponentTestCase
                 text: "Edit")
   end
 
+  # Plain link — no btn classes unless button: is passed.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_no_button_styling_by_default
     html = render_modal
 
-    # Plain link — no btn classes unless button: is passed.
     assert_no_html(html, "a.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_button_kwarg_adds_btn_classes
     html = render_modal(button: :outline)
 
     assert_html(html, "a.btn.btn-outline-default[href='/edit']")
   end
 
-  def test_icon_modal_link_renders_through_icon_link
+  def test_icon_modal_link_renders_with_icon_and_modal_wiring
     html = render_modal(icon: :edit)
 
-    # With icon, delegates to Link::Icon — anchor carries modal data attrs
-    # AND the icon-link tooltip wiring.
-    assert_html(html, "a.icon-link[href='/edit']" \
+    assert_html(html, "a[href='/edit']" \
                       "[data-modal='modal_comment']" \
                       "[data-controller='modal-toggle']" \
                       "[data-action='modal-toggle#showModal:prevent']")
-    assert_html(html, "a span.glyphicon-edit")
-    assert_html(html, "a span.sr-only", text: "Edit")
+    assert_html(html, "a svg.mo-icon-edit")
+    assert_html(html, "a .sr-only", text: "Edit")
   end
 
   def test_caller_data_attrs_deep_merge_with_stimulus_attrs
@@ -50,6 +50,13 @@ class ModalLinkTest < ComponentTestCase
     html = render_modal(class: "extra-class")
 
     assert_html(html, "a.extra-class[href='/edit']")
+  end
+
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_size_kwarg_adds_btn_size_class
+    html = render_modal(button: :outline, size: :lg)
+
+    assert_html(html, "a.btn.btn-lg[href='/edit']")
   end
 
   private

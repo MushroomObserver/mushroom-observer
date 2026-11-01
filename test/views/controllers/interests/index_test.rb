@@ -9,6 +9,17 @@ module Views::Controllers::Interests
       controller.instance_variable_set(:@user, users(:rolf))
     end
 
+    # The generic index dispatch already flashes "no matches" when
+    # @objects is empty -- the view's intro/empty-state text would
+    # just repeat that, so neither should render.
+    def test_no_interests_renders_no_intro_or_table
+      html = render_index(types: ["Observation"], selected_type: nil,
+                          interests: [])
+
+      assert_no_html(html, "table")
+      assert_no_html(html, "p", text: :list_interests_intro.l.as_displayed)
+    end
+
     # When `selected_type:` is set, the filter pill strip renders.
     # The active pill is a plain `<span>` (no link); inactive pills
     # wrap a `link_to` inside a `<span>`.
@@ -66,14 +77,39 @@ module Views::Controllers::Interests
                   text: interest.target.summary.t.as_displayed)
     end
 
+    # When `selected_state:` is set, the state-filter strip renders
+    # alongside the type filter.
+    def test_state_filter_renders_with_active_and_inactive_items
+      html = render_index(
+        types: ["Observation"], selected_type: nil,
+        states: [:watching, :ignoring], selected_state: "watching"
+      )
+
+      assert_html(html, "a[href*='state=ignoring']")
+      assert_no_html(html, "a[href*='state=watching']")
+    end
+
+    def test_state_filter_hidden_when_single_state_present
+      html = render_index(
+        types: ["Observation"], selected_type: nil,
+        states: [:watching], selected_state: nil
+      )
+
+      assert_no_html(html, "a[href*='state=']")
+    end
+
     private
 
-    def render_index(types:, selected_type:, interests: [])
+    def render_index(types:, selected_type:, interests: [],
+                     states: [], selected_state: nil)
       render(Index.new(
                interests: interests,
                types: types,
                selected_type: selected_type,
-               pagination_data: PaginationData.new
+               states: states,
+               selected_state: selected_state,
+               pagination_data: PaginationData.new,
+               query: Query.lookup(:Interest, by_users: [users(:rolf).id])
              ))
     end
   end

@@ -26,7 +26,7 @@ module Observations
       return unless check_image_permission?
 
       init_project_vars_for_add_or_edit(@image)
-      render_edit_html
+      render_edit_view
     end
 
     def update
@@ -39,20 +39,20 @@ module Observations
       @image.attributes = permitted_image_params
 
       if image_or_projects_updated
-        # redirect_to(image_path(@image.id))
-        render(
-          Views::Controllers::Images::Show.new(image: @image),
-          location: image_path(@image.id)
-        )
+        # A same-URL 200 render on a Turbo-enabled form hangs Turbo
+        # Drive (see turbo_submit_forms.md) -- `render(...,
+        # location:)` only sets a response header, it isn't a real
+        # redirect, so Turbo never navigates.
+        redirect_to(image_path(@image.id))
       else
         init_project_vars_for_reload(@image)
-        render_edit_html(location: edit_image_path(@image.id))
+        render_edit_view_invalid(location: edit_image_path(@image.id))
       end
     end
 
     private
 
-    def render_edit_html(location: nil)
+    def render_edit_view(status: :ok, **render_opts)
       render(
         Views::Controllers::Observations::Images::Edit.new(
           image: @image,
@@ -61,7 +61,7 @@ module Observations
           submitted_project_ids: @submitted_project_ids,
           user: @user
         ),
-        location: location
+        status: status, **render_opts
       )
     end
 
@@ -114,7 +114,8 @@ module Observations
     # wire shape. `compact_blank` strips the form's sentinel hidden
     # input (value=""), leaving just the integer-string IDs.
     def submitted_project_ids
-      params.dig(:image, :project_ids)&.compact_blank
+      params.permit(image: { project_ids: [] }).
+        dig(:image, :project_ids)&.compact_blank
     end
 
     def image_data_changed?
@@ -140,6 +141,7 @@ module Observations
     def update_related_projects(img, submitted_ids)
       return false unless submitted_ids
 
+      # rubocop:disable MO/NoLongCommentBlock
       # Here's the problem: User can add image to obs he doesn't own
       # if it is attached to one of his projects.
       # Observation can be attached to other projects, too,
@@ -155,6 +157,7 @@ module Observations
       # projects she doesn't belong to...
       # except in the very strict case of uploading images for
       # an observation which belongs to a project he doesn't belong to.
+      # rubocop:enable MO/NoLongCommentBlock
       projects = @user.projects_member
       img.observations.each do |obs|
         obs.projects.each do |project|
@@ -201,7 +204,8 @@ module Observations
       obs_or_img.projects.each do |proj|
         @projects << proj unless @projects.include?(proj)
       end
-      @submitted_project_ids = params.dig(:image, :project_ids)
+      @submitted_project_ids =
+        params.permit(image: { project_ids: [] }).dig(:image, :project_ids)
     end
 
     public
@@ -212,45 +216,92 @@ module Observations
     def reuse
       return unless (@observation = find_observation!)
       return unless check_observation_permission!
+      return redirect_reflection_to_companion if @observation.reflection?
 
       load_images_to_reuse
-      render(Views::Controllers::Observations::Images::Reuse.new(
-               observation: @observation,
-               user: @user,
-               objects: @reuse_images,
-               pagination_data: @reuse_pagination,
-               all_users: @reuse_all_users
-             ))
+      render_reuse_view
     end
 
     # reuse image form buttons POST here
     def attach
       return unless (@observation = find_observation!)
-
       return unless check_observation_permission!
+      return unless (@observation = attach_target)
 
-      img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
-      image = Image.safe_find(img_id)
-      unless image
-        flash_error(:runtime_image_reuse_invalid_id.t(id: img_id))
-        load_images_to_reuse
-        render(Views::Controllers::Observations::Images::Reuse.new(
-                 observation: @observation,
-                 user: @user,
-                 objects: @reuse_images,
-                 pagination_data: @reuse_pagination,
-                 all_users: @reuse_all_users
-               ), location: reuse_images_for_observation_path(@observation.id))
-        return
-      end
+      image = Image.safe_find(reuse_image_id)
+      return render_invalid_image_id unless image
 
       attach_image_to_observation(image)
     end
 
     private
 
+    def render_reuse_view(status: :ok, **render_opts)
+      render(Views::Controllers::Observations::Images::Reuse.new(
+               observation: @observation,
+               user: @user,
+               objects: @reuse_images,
+               pagination_data: @reuse_pagination,
+               all_users: @reuse_all_users
+             ),
+             status: status, **render_opts)
+    end
+
+    def render_reuse_view_invalid(**)
+      render_reuse_view(**)
+      self.status = :unprocessable_content
+    end
+
     def find_observation!
       find_or_goto_index(Observation, params[:id].to_s)
+    end
+
+    def reuse_image_id
+      params.dig(:image_reuse, :img_id).presence || params[:img_id]
+    end
+
+    def render_invalid_image_id
+      flash_error(:runtime_image_reuse_invalid_id.t(id: reuse_image_id))
+      load_images_to_reuse
+      render_reuse_view_invalid(
+        location: reuse_images_for_observation_path(@observation.id)
+      )
+    end
+
+    # A reflection's images mirror its source (#4214), so reusing an image
+    # on one works on its companion, as Edit does.
+    def redirect_reflection_to_companion
+      companion = reflection_companion
+      redirect_to(reuse_images_for_observation_path(companion.id)) if companion
+    end
+
+    # The observation an attach lands on: a reflection's companion, so the
+    # chosen image isn't lost; nil after redirecting on failure.
+    def attach_target
+      @observation.reflection? ? reflection_companion : @observation
+    end
+
+    # The reflection's companion, found or created, with a flash saying
+    # which; nil after redirecting when it can't be created.
+    def reflection_companion
+      companion, notice = find_or_create_reuse_companion
+      flash_notice(notice.t)
+      companion
+    rescue ActiveRecord::RecordInvalid => e
+      flash_error(e.record.errors.full_messages.join("; "))
+      redirect_to(permanent_observation_path(id: @observation.id))
+      nil
+    end
+
+    # [companion, flash tag]
+    def find_or_create_reuse_companion
+      builder = Observation::Companion.new(@observation, @user,
+                                           admin: in_admin_mode?)
+      if (companion = builder.existing)
+        [companion, :image_reuse_on_reflection_companion_existing]
+      else
+        [builder.create, :image_reuse_on_reflection_companion_created]
+      end
     end
 
     def check_observation_permission!

@@ -4,10 +4,13 @@
 # `content_for(:prev_next_object)` by
 # `Header::ShowPrevNextHelper#add_pager_for`. Renders nothing when
 # either prop is nil — the helper already gates on the same.
+#
+# Wraps the button group in a `<nav aria-label="...">` landmark --
+# the only navigation landmark inside `Header::PageTitle`'s title
+# strip (`show_title_nav`/`show_object_nav` are plain `<div>`s).
 module Views::Layouts
   class Header::ShowPrevNextNav < Views::Base
-    BTN_CLASSES = (Components::Navbar::LINK_CLASSES +
-                   [Components::Navbar::LEFT_CLASS]).freeze
+    BTN_CLASSES = ["px-0"].freeze
 
     prop :object, _Nilable(::AbstractModel), default: nil
     prop :query, _Nilable(::Query), default: nil
@@ -15,42 +18,39 @@ module Views::Layouts
     def view_template
       return unless @object && @query
 
-      ul(class: "nav flex-bar object_pager") do
-        li { render_adjacent_link(:prev) }
-        li { render_index_link }
-        li { render_adjacent_link(:next) }
+      nav(aria: { label: :app_object_pager_label.l }) do
+        ButtonGroup(class: "object_pager") do
+          render_adjacent_link(:prev)
+          render_index_link
+          render_adjacent_link(:next)
+        end
       end
     end
 
     private
 
     def render_adjacent_link(dir)
-      hide = no_more?(dir) ? "disabled opacity-0" : ""
-      classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       adjacent_id = @query.send(:"#{dir}_id")
+      hide = adjacent_id.nil? ? "disabled opacity-0" : ""
+      classes = class_names(BTN_CLASSES, "#{dir}_object_link", hide)
       href = adjacent_id ? adjacent_path(adjacent_id) : "#"
 
-      Link(type: :icon, content: adjacent_title(dir), path: href,
+      Link(type: :get, name: adjacent_title(dir), target: href,
            icon: dir, button: :link, size: :lg, class: classes)
     end
 
     def render_index_link
       classes = class_names(BTN_CLASSES, %w[mx-1 index_object_link])
 
-      Link(type: :icon, content: index_title, path: index_path,
+      Link(type: :get, name: index_title, target: index_path,
            icon: index_icon, button: :link, size: :lg, class: classes)
-    end
-
-    def no_more?(dir)
-      if dir == :prev
-        @query.result_ids.first == @object.id
-      else
-        @query.result_ids.last == @object.id
-      end
     end
 
     def adjacent_path(id)
       return activity_log_path(id: id) if type_tag == :rss_log
+      # Observation show links use the logged-out-accessible /obs/ form
+      # (see Observation.show_url).
+      return permanent_observation_path(id: id) if type_tag == :observation
 
       send(:"#{type_tag}_path", id: id)
     end

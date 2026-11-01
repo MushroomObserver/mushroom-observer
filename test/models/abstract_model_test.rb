@@ -163,6 +163,7 @@ class AbstractModelTest < UnitTestCase
 
     loc = Location.new(
       name: "Test Location",
+      scientific_name: "Test Location",
       north: 54,
       south: 53,
       west: -101,
@@ -476,6 +477,22 @@ class AbstractModelTest < UnitTestCase
     )
   end
 
+  def test_exact_match
+    obs = Observation.first
+
+    assert_equal(obs, Observation.exact_match(obs.id.to_s))
+    assert_nil(Observation.exact_match((Observation.maximum(:id) + 1).to_s))
+    assert_nil(Observation.exact_match("not a number"))
+    assert_nil(Observation.exact_match(""))
+    # Non-String callers (an id passed as an Integer, or a blank param
+    # that came through as nil) shouldn't raise.
+    assert_equal(obs, Observation.exact_match(obs.id))
+    assert_nil(Observation.exact_match(nil))
+    # A stray space around a typed-in id (easy to enter by accident)
+    # still counts as an exact match.
+    assert_equal(obs, Observation.exact_match(" #{obs.id} "))
+  end
+
   # fixture for above tests
   class ::Phony < AbstractModel
   end
@@ -497,7 +514,8 @@ class AbstractModelTest < UnitTestCase
     assert_show_url(Location, "/locations")
     assert_show_url(Name, "/names")
     # assert_show_url(Naming, "/observations/show_naming") # there is no show
-    assert_show_url(Observation, "/observations")
+    # Observation overrides show_url to the logged-out-accessible form.
+    assert_show_url(Observation, "/obs")
     assert_show_url(Project, "/projects")
     assert_show_url(Sequence, "/sequences")
     assert_show_url(SpeciesList, "/species_lists")

@@ -126,52 +126,35 @@ class Tab::Base
     [title, path, html_options]
   end
 
-  # Append a `q=<value>` query param to a path string. Pass the
-  # caller-side `q_param` (already resolved — Tab POROs are
-  # request-agnostic, so the caller is responsible for asking the
-  # request context what `q_param` is). When `q_param_value` is nil
-  # or blank, the original path returns unchanged.
+  # Appends a `q=<value>` query param to a path string. The caller
+  # resolves `q_param_value` first -- Tab POROs are request-agnostic,
+  # so they can't ask the request what it is. Nil/blank leaves the
+  # path unchanged.
   #
-  # Use from a Tab PORO's `#path` method when the tab's URL needs to
-  # carry the current Query through (e.g. "back to filtered index"
-  # links on a show page).
-  #
-  # Accepts either:
-  # - a String q_param (the alphabetized-id form — `?q=ABCDE`), or
-  # - a Hash q_param (the model+params form returned by
-  #   `Query#q_param` — `?q[model]=Observation&q[locations][]=1`)
-  #
-  # Uses Rails' `Hash#to_query` (not `Rack::Utils.build_query`)
-  # because Rack stringifies a nested Hash value as a literal Ruby
-  # `inspect` rep; `to_query` recurses correctly into nested
-  # hashes and arrays. Caught by the related_records integration
-  # tests that exercise `Tab::Location::ObservationsAt` — Query#q_param
-  # returns a Hash for newly-created queries, and the resulting URL
-  # was an unparseable literal Ruby Hash rep encoded with `+` for
-  # whitespace.
+  # Use from a Tab's `#path` to carry the current Query through (e.g.
+  # "back to filtered index" links). Shared with
+  # `ApplicationController::Queries#add_q_param`, which resolves the
+  # value from ambient session state instead.
   def with_q_param(path, q_param_value)
-    return path if q_param_value.blank?
+    Query.merge_q_param_into_url(path, q_param_value)
+  end
 
-    uri = URI.parse(path)
-    parsed = uri.query ? Rack::Utils.parse_query(uri.query) : {}
-    parsed["q"] = q_param_value
-    uri.query = parsed.to_query
-    uri.to_s
+  # Same as with_q_param, but flat top-level params (`?project=123`),
+  # not nested under q[...]. Only use this when `path` is a link to
+  # the model `filters` came from -- see Query#index_filter.
+  def with_index_filter(path, filters)
+    Query.merge_index_filters_into_url(path, filters)
   end
 
   # Stable key NavTabs matches against `current:` to decide `.active`.
-  # Defaults to `alt_title` when set (the same short identifier used
-  # for the selector class) — this aligns with the existing MO
-  # convention of `active_project_tab` / `current_subtab` carrying
-  # short forms like "details", "members", "aliases", etc. Falls back
-  # to the demodulized class name underscored when `alt_title` is nil.
+  # Defaults to `alt_title`, matching the MO convention of
+  # `active_project_tab` / `current_subtab` carrying short forms like
+  # "details"/"members".
   #
-  # Override per subclass when the consuming view's current-tab
-  # semantic differs from `alt_title`. Example: `Tab::Project::Summary`
-  # has `alt_title: "summary"` (for the selector class) but its
-  # `nav_key: "projects"` (because the project banner's `current_tab`
-  # is derived from the controller_name, which is "projects" on the
-  # project show page).
+  # Override per subclass when the view's current-tab semantic
+  # differs: `Tab::Project::Summary` has `alt_title: "summary"` but
+  # `nav_key: "projects"`, since the banner derives `current_tab`
+  # from controller_name.
   def nav_key
     alt_title || self.class.name.demodulize.underscore
   end

@@ -4,7 +4,18 @@ require("test_helper")
 
 # functional tests of glossary controller and views
 class GlossaryTermsControllerTest < FunctionalTestCase
+  include QueryParamRoundTripTestHelpers
+
   ESSENTIAL_ATTRIBUTES = %w[name description].freeze
+
+  # See QueryParamRoundTripTestHelpers.
+  def test_create_query_from_url_params_recognizes_every_top_level_param
+    login
+
+    assert_all_top_level_params_survive(
+      Query::GlossaryTerms, :GlossaryTerm, overrides: { by_users: rolf.id }
+    )
+  end
 
   # ---------- Test actions that Display data (index, show, etc.) --------------
 
@@ -43,6 +54,21 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       "a[href *= '#{glossary_term_path(term.id)}']", true,
       "Glossary Index at `P` missing link to #{term.unique_text_name})"
     )
+  end
+
+  # Regression: Views::Controllers::GlossaryTerms::Index::Item called
+  # the removed `destroy_button` helper directly, 500ing for any admin
+  # who visited the index -- no test exercised the index in admin mode.
+  def test_index_admin_delete
+    login
+    make_admin
+    get(:index)
+
+    assert_response(:success)
+    assert_select("form input[value='delete']",
+                  { count: GlossaryTerm.count },
+                  "Page is missing a way for admin to destroy each " \
+                  "glossary term")
   end
 
   def q_pattern(pattern)
@@ -104,10 +130,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_head_title(term.name)
 
-    ESSENTIAL_ATTRIBUTES.each do |attr|
-      assert_select("body", /#{term.send(attr)}/,
-                    "Page is missing glossary term #{attr}")
-    end
+    assert_select("#title", /#{term.name}/,
+                  "Page is missing glossary term name")
+    assert_select(".description", /#{term.description}/,
+                  "Page is missing glossary term description")
     assert_select("a[href='#{prior_version_path}']", true,
                   "Page should have link to prior version")
     assert_select(
@@ -130,7 +156,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     make_admin
     get(:show, params: { id: term.id })
 
-    assert_select("form input[value='delete']", { count: 1 },
+    assert_select(".show_title_nav form input[value='delete']", { count: 1 },
                   "Page is missing a way for admin to destroy glossary term")
   end
 
@@ -265,7 +291,8 @@ class GlossaryTermsControllerTest < FunctionalTestCase
       post(:create, params: params)
     end
     assert_flash(:glossary_error_name_blank)
-    assert_response(:success)
+    assert_unprocessable
+    assert_select("form[data-turbo='true']")
   end
 
   def test_create_glossary_term_no_description_or_image

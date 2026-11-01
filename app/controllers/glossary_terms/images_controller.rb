@@ -15,13 +15,7 @@ module GlossaryTerms
       return unless find_glossary_term!
 
       load_images_to_reuse
-      render(Views::Controllers::GlossaryTerms::Images::Reuse.new(
-               object: @object,
-               user: @user,
-               objects: @reuse_images,
-               pagination_data: @reuse_pagination,
-               all_users: @reuse_all_users
-             ))
+      render_reuse_view
     end
 
     # reuse image form buttons POST here
@@ -48,18 +42,25 @@ module GlossaryTerms
 
     def render_reuse_with_invalid_id_error
       flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
-      render_reuse_page
+      render_reuse_page_invalid
     end
 
-    def render_reuse_page
-      load_images_to_reuse
+    def render_reuse_view(status: :ok, **render_opts)
       render(
         Views::Controllers::GlossaryTerms::Images::Reuse.new(
           object: @object, user: @user, objects: @reuse_images,
           pagination_data: @reuse_pagination, all_users: @reuse_all_users
         ),
-        location: reuse_images_for_glossary_term_path(@object.id)
+        status: status, **render_opts
       )
+    end
+
+    def render_reuse_page_invalid
+      load_images_to_reuse
+      render_reuse_view(location: reuse_images_for_glossary_term_path(
+        @object.id
+      ))
+      self.status = :unprocessable_content
     end
 
     def attach_image_to_glossary_term(image = nil)
@@ -71,7 +72,7 @@ module GlossaryTerms
         redirect_to(glossary_term_path(@object.id))
       else
         flash_error(:runtime_no_save.t(type: :glossary_term)) if image
-        render_reuse_page
+        render_reuse_page_invalid
       end
     end
 
@@ -79,6 +80,7 @@ module GlossaryTerms
 
     ############################################################################
 
+    # rubocop:disable MO/NoLongCommentBlock
     # REMOVE IMAGES. These actions are more or less identical to the ones in
     # Observations::ImagesController. Each image tile has a button that's a
     # form used to remove one or more images from a glossary_term (not destroy!)
@@ -91,13 +93,12 @@ module GlossaryTerms
     # remove_images. No permission check — `GlossaryTerm#can_edit?`
     # returns true for any logged-in user, and `login_required`
     # runs before this action.
+    # rubocop:enable MO/NoLongCommentBlock
     def remove
       return unless (@object = find_or_goto_index(GlossaryTerm,
                                                   params[:id].to_s))
 
-      render(Views::Controllers::GlossaryTerms::Images::Remove.new(
-               object: @object
-             ))
+      render_remove_view
     end
 
     # The remove form submits to this action. Same permission note
@@ -132,10 +133,21 @@ module GlossaryTerms
 
     def rerender_remove_form_with_no_save_error
       flash_error(:runtime_no_save.t(type: :glossary_term))
-      render(
-        Views::Controllers::GlossaryTerms::Images::Remove.new(object: @object),
+      render_remove_view_invalid(
         location: remove_images_from_glossary_term_path(params[:id])
       )
+    end
+
+    def render_remove_view(status: :ok, **render_opts)
+      render(
+        Views::Controllers::GlossaryTerms::Images::Remove.new(object: @object),
+        status: status, **render_opts
+      )
+    end
+
+    def render_remove_view_invalid(**)
+      render_remove_view(**)
+      self.status = :unprocessable_content
     end
   end
 end

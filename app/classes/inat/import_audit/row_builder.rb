@@ -29,7 +29,7 @@ module Inat::ImportAudit
     def base_columns(obs, snapshot, status, external_id)
       {
         mo_id: obs.id,
-        mo_url: "#{MO.http_domain}/#{obs.id}",
+        mo_url: obs.show_url,
         inat_id: external_id,
         inat_url: @site.observation_url(external_id),
         inat_status: status,

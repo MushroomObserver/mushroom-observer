@@ -34,6 +34,9 @@ class Inat
       "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
       "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
 
+    # Shape of an iNat login: lowercase letters, digits, "_" and "-".
+    LOGIN_PATTERN = /\A[a-z][a-z0-9_-]{0,39}\z/
+
     # The iNat API
     API_BASE = "https://api.inaturalist.org/v1"
 
@@ -54,6 +57,9 @@ class Inat
     IMPORTABLE_ICONIC_TAXA_ARG = IMPORTABLE_ICONIC_TAXA.join(",").freeze
 
     MO_URL_OBSERVATION_FIELD_ID = 5005
+    # iNat's `field:` search filter matches on the field name, not id
+    # (field:5005 returns nothing); this is the name of field 5005.
+    MO_URL_OBSERVATION_FIELD_NAME = "Mushroom Observer URL"
 
     # Extracts the MO observation id from a "Mushroom Observer URL" field
     # value, tolerating the URL variants that appear in the wild (current,
@@ -68,20 +74,22 @@ class Inat
       # not already exported from or imported to MO
       # (field written by iNat's defunct Import from MO feature,
       # Pulk's mirror script, and ObservationImporter)
-      without_field: "Mushroom Observer URL"
+      without_field: MO_URL_OBSERVATION_FIELD_NAME
     }.freeze
 
     # A work-around because iNat has no "has a date" filter;
     # an arbitrarily early d1 approximates it.
     EARLIEST_DATE_FILTER = "1000-01-01"
 
-    # Added when importing others' observations (superimporter, not own).
-    # Own-observation imports accept unlicensed obs and apply the user's
-    # default MO license to any unlicensed images.
-    LICENSED_FILTER = { licensed: true }.freeze
+    # iNat's observation license codes.
+    LICENSE_CODES = %w[
+      cc0 cc-by cc-by-nc cc-by-sa cc-by-nd cc-by-nc-sa cc-by-nc-nd
+    ].freeze
 
-    # Kept for backwards compatibility; some callers may still reference this.
-    IMPORT_FILTER_PARAMS = BASE_FILTER_PARAMS.merge(LICENSED_FILTER).freeze
+    # Added when importing others' observations (superimporter, not own).
+    # Lists the codes rather than `licensed: true`: iNat's `licensed`
+    # filter includes obss whose license_code is "" (no license).
+    LICENSED_FILTER = { license: LICENSE_CODES.join(",") }.freeze
 
     # MO adds this string + date to the description of iNat observation
     IMPORTED_BY_MO = "Imported by Mushroom Observer"

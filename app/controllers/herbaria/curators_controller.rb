@@ -21,11 +21,12 @@ module Herbaria
     def create
       @herbarium = find_or_goto_index(Herbarium, params[:id])
       if @user && (@herbarium.curator?(@user) || in_admin_mode?)
-        user = User.lookup_unique_text_name(params[:add_curator])
+        login = params.dig(:herbarium_curator, :login)
+        user = User.lookup_unique_text_name(login)
         if user
           @herbarium.add_curator(user)
         else
-          flash_error(:show_herbarium_no_user.t(login: params[:add_curator]))
+          flash_error(:show_herbarium_no_user.t(login: login))
         end
       end
       redirect_to(herbarium_path(@herbarium))

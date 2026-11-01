@@ -12,6 +12,10 @@ module Views::Controllers::Sequences
     def test_new_form
       html = render_form(model: Sequence.new(observation: @observation))
 
+      assert_html(
+        html, "input[name='observation_id'][value='#{@observation.id}']"
+      )
+
       # Form fields
       assert_html(html, "textarea[name='sequence[locus]']")
       assert_html(html, "textarea[name='sequence[bases]']")
@@ -37,6 +41,7 @@ module Views::Controllers::Sequences
       sequence = sequences(:local_sequence)
       html = render_form(model: sequence)
 
+      assert_html(html, "input[name='observation_id']", count: 0)
       assert_html(html, "button[type='submit']", text: :update.ti)
     end
 
@@ -49,18 +54,18 @@ module Views::Controllers::Sequences
 
     def test_local_form_omits_turbo
       html = render_form(model: Sequence.new(observation: @observation),
-                         local: true)
+                         turbo: false)
 
-      assert_no_html(html, "form[data-turbo]")
+      assert_html(html, "form[data-turbo='false']")
     end
 
     private
 
-    def render_form(model:, action: "/test_action", local: false)
+    def render_form(model:, action: "/test_action", turbo: true)
       render(Form.new(model,
                       action: action,
                       id: "sequence_form",
-                      local: local))
+                      turbo: turbo))
     end
   end
 end

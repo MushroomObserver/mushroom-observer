@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Contract tests for `Views::Layouts::Header::EditDeleteIcons` —
-# the edit/delete icon `<ul>` in the show-page title bar.
+# the edit/delete icon pair in the show-page title bar.
 module Views::Layouts
   class Header::EditDeleteIconsTest < ComponentTestCase
     def setup
@@ -13,40 +13,94 @@ module Views::Layouts
       @non_owner = users(:rolf)
     end
 
-    def test_always_renders_ul
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @non_owner))
+    def test_always_renders_container
+      html = render_icons(user: @non_owner)
 
-      assert_html(html, "ul.object_edit")
+      assert_html(html, ".object_edit")
     end
 
-    def test_renders_empty_ul_when_cannot_edit
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @non_owner))
+    def test_renders_empty_when_cannot_edit
+      html = render_icons(user: @non_owner)
 
-      assert_no_html(html, "ul.object_edit li")
+      assert_no_html(html, ".object_edit .inline-icon-link")
     end
 
-    def test_renders_empty_ul_with_nil_user
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: nil))
+    def test_renders_empty_with_nil_user
+      html = render_icons(user: nil)
 
-      assert_html(html, "ul.object_edit")
-      assert_no_html(html, "ul.object_edit li")
+      assert_html(html, ".object_edit")
+      assert_no_html(html, ".object_edit .inline-icon-link")
     end
 
-    def test_renders_edit_and_delete_li_when_owner
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @owner))
+    def test_renders_edit_and_delete_items_when_owner
+      html = render_icons(user: @owner)
 
-      assert_html(html, "ul.object_edit li", count: 2)
+      assert_html(html, ".object_edit .inline-icon-link", count: 2)
+      edit_href = routes.edit_observation_path(@obs.id)
+      destroy_action = routes.observation_path(@obs.id)
+      assert_html(html, ".object_edit a[href='#{edit_href}']")
+      assert_html(html, ".object_edit form[action='#{destroy_action}']")
     end
 
-    # A read-only reflection (#4214) drops the edit icon (its scalar core
-    # can't be edited on MO) but keeps delete — a separate lifecycle.
-    def test_reflection_suppresses_edit_icon_but_keeps_delete
+    # A read-only reflection (#4214) keeps both icons: Edit opens a
+    # linked companion observation for the changes, and Delete works as
+    # for any observation since a reflection can be reimported (#5180).
+    def test_reflection_keeps_edit_and_delete_icons
       @obs.update_column(:reflected_at, Time.zone.now)
-      html = render(Header::EditDeleteIcons.new(object: @obs, user: @owner))
+      html = render_icons(user: @owner)
+      edit_href = routes.edit_observation_path(@obs.id)
+      destroy_action = routes.observation_path(@obs.id)
 
-      assert_html(html, "ul.object_edit li", count: 1)
-      assert_no_html(html, "a[href$='/edit']",
-                     "a reflection should have no edit-form link")
+      assert_html(html, ".object_edit .inline-icon-link", count: 3)
+      assert_html(html, ".object_edit a[href='#{edit_href}']")
+      assert_html(html, ".object_edit form[action='#{destroy_action}']")
+    end
+
+    def test_reflection_shows_read_only_status_icon
+      @obs.update_column(:reflected_at, Time.zone.now)
+      html = render_icons(user: @owner)
+
+      assert_html(html, ".object_edit .mo-icon-read-only")
+      # Carries InlineLinkBlock's item class -- confirms it rendered
+      # as one of the block's items, with the same spacing/size as
+      # the edit/delete icons beside it, instead of the sprite's
+      # larger default size.
+      assert_html(html, ".object_edit .inline-icon-link .mo-icon-read-only")
+    end
+
+    def test_non_reflection_has_no_read_only_status_icon
+      html = render_icons(user: @owner)
+
+      assert_no_html(html, ".object_edit .mo-icon-read-only")
+    end
+
+    def test_reflection_edit_tooltip_explains_companion_observation
+      @obs.update_column(:reflected_at, Time.zone.now)
+      html = render_icons(user: @owner)
+      edit_href = routes.edit_observation_path(@obs.id)
+
+      assert_html(
+        html,
+        "a[href='#{edit_href}'][title='#{:edit_reflection_tooltip.l}']"
+      )
+    end
+
+    def test_non_reflection_edit_tooltip_is_generic
+      html = render_icons(user: @owner)
+      edit_href = routes.edit_observation_path(@obs.id)
+
+      assert_html(
+        html,
+        "a[href='#{edit_href}']" \
+        "[title='#{:edit_object.t(type: @obs.type_tag)}']"
+      )
+      assert_no_html(html, "a[title='#{:edit_reflection_tooltip.l}']")
+    end
+
+    private
+
+    def render_icons(**)
+      render(Header::EditDeleteIcons.new(object: @obs, **))
     end
   end
 end

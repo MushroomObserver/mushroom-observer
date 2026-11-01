@@ -76,11 +76,6 @@ class FieldSlip < AbstractModel
       where(observations: { id: observation_ids }).distinct
   }
 
-  scope :project, lambda { |project|
-    project_ids = Lookup::Projects.new(project).ids
-    where(project: project_ids)
-  }
-
   scope :projects, lambda { |projects|
     project_ids = Lookup::Projects.new(projects).ids
     where(project: project_ids).distinct
@@ -168,6 +163,18 @@ class FieldSlip < AbstractModel
     update(user: obs.user)
   end
 
+  # The event this slip was printed for: its own project, or -- once a
+  # spare-slip release has cleared that -- the project its printed
+  # prefix names. Alias resolution and prompt building key off the
+  # event, which is a fact of the printed slip, not of current project
+  # membership.
+  def event_project
+    return project if project
+
+    prefix = FieldSlip.prefix_for_code(code)
+    prefix && Project.find_by(field_slip_prefix: prefix)
+  end
+
   def update_project
     prefix = self.class.prefix_for_code(code)
     return unless prefix
@@ -251,13 +258,17 @@ class FieldSlip < AbstractModel
 
   # Location of the user's most recently updated field slip in this
   # project that has a located observation (slips without one are
-  # skipped).
+  # skipped). Requires a project: a nil here would match every
+  # project-less slip the user owns -- an orphaned-spares bucket, not
+  # an event cohort -- and resurrect whatever location a batch job
+  # last touched (a fresh "2026-NAMA-0001" slip once defaulted to a
+  # year-old spare's site this way).
   def users_last_location
-    return nil unless @current_user
+    return nil unless @current_user && project
 
     Location.joins(observations: { occurrence: :field_slip }).
       where(field_slips: { user_id: @current_user.id,
-                           project_id: project&.id }).
+                           project_id: project.id }).
       order(FieldSlip.arel_table[:updated_at].desc,
             FieldSlip.arel_table[:id].desc).first
   end

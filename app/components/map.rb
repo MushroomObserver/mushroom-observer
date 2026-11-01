@@ -141,7 +141,9 @@ class Components::Map < Components::Base
   # so emit through `trusted_html` rather than `plain` which would
   # escape the entities.
   def render_nothing_to_map
-    div(class: "w-100") { trusted_html(nothing_to_map_text) }
+    div(id: "map_nothing_to_map", class: "w-100") do
+      trusted_html(nothing_to_map_text)
+    end
   end
 
   # --------------------------------------------------------------
@@ -157,8 +159,7 @@ class Components::Map < Components::Base
     return if @observations_loaded_count.nil? ||
               @observations_total_count.nil?
 
-    div(id: "map_cap_banner", class: "alert alert-warning mt-2",
-        style: (@capped ? nil : "display:none")) do
+    Alert(**cap_banner_attrs) do
       trusted_html(
         :map_cap_banner.t(
           loaded: @observations_loaded_count.to_fs(:delimited),
@@ -166,6 +167,12 @@ class Components::Map < Components::Base
         )
       )
     end
+  end
+
+  def cap_banner_attrs
+    attrs = { level: :warning, id: "map_cap_banner", class: "mt-2" }
+    attrs[:style] = "display:none" unless @capped
+    attrs
   end
 
   # --------------------------------------------------------------

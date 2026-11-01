@@ -34,9 +34,9 @@ class ListGroupTest < ComponentTestCase
 
     # No extra wrapper div around the link_item's <a> — the anchor
     # itself carries list-group-item, composed with the extra class.
-    assert_html(html, "div.list-group > a.list-group-item.indent",
+    assert_html(html, ".list-group > a.list-group-item.indent",
                 text: "link row")
-    assert_no_html(html, "div.list-group-item > a")
+    assert_no_html(html, ".list-group-item > a")
     # Order preserved: item registered first still renders first.
     fragment = Nokogiri::HTML5.fragment(html)
     children = fragment.at_css("div.list-group").children.
@@ -55,29 +55,31 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_renders_plain_list_group_with_items
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item { "one" }
       list.item { "two" }
     end
 
     # Default `<div>` container with `list-group`; each item is a
     # `<div class="list-group-item">` in declaration order.
-    assert_html(html, "div.list-group")
-    assert_html(html, "div.list-group > div.list-group-item", count: 2)
+    assert_html(html, ".list-group")
+    assert_html(html, ".list-group > .list-group-item", count: 2)
   end
 
   def test_flush_adds_list_group_flush_class
-    html = render(Components::ListGroup.new(flush: true)) do |list|
+    html = render_list(flush: true) do |list|
       list.item { "x" }
     end
 
     # Used when the list nests inside a `Panel` body so the panel's
     # own border owns the outer edge.
-    assert_html(html, "div.list-group.list-group-flush")
+    assert_html(html, ".list-group.list-group-flush")
   end
 
+  # The container/item tag switch (ul -> li) is the contract here.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_ul_element_switches_items_to_li
-    html = render(Components::ListGroup.new(element: :ul)) do |list|
+    html = render_list(element: :ul) do |list|
       list.item { "one" }
       list.item { "two" }
     end
@@ -89,10 +91,8 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_container_id_and_class_extras_flow_through
-    html = render(Components::ListGroup.new(
-                    id: "namings_table_rows",
-                    flush: true, class: "namings"
-                  )) do |list|
+    html = render_list(id: "namings_table_rows", flush: true,
+                       class: "namings") do |list|
       list.item { "x" }
     end
 
@@ -102,33 +102,33 @@ class ListGroupTest < ComponentTestCase
   end
 
   def test_container_data_attributes_pass_through
-    html = render(Components::ListGroup.new(
-                    attributes: { data: { controller: "section-update" } }
-                  )) do |list|
+    html = render_list(
+      data: { controller: "section-update" }
+    ) do |list|
       list.item { "x" }
     end
 
     # Stimulus wiring on the container — namings uses `section-update`
     # to swap rows in via Action Cable.
-    assert_html(html, "div.list-group[data-controller='section-update']")
+    assert_html(html, ".list-group[data-controller='section-update']")
   end
 
   def test_per_item_id_and_class_extras_flow_through
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item(id: "naming_42", class: "consensus-row") { "x" }
     end
 
     # Per-row id + extras are how the namings rows get
     # `id="observation_naming_<id>"` for selector / Turbo targeting.
-    assert_html(html, "div.list-group-item#naming_42.consensus-row")
+    assert_html(html, ".list-group-item#naming_42.consensus-row")
   end
 
   def test_per_item_arbitrary_attributes_pass_through
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item(data: { foo: "bar" }) { "x" }
     end
 
-    assert_html(html, "div.list-group-item[data-foo='bar']")
+    assert_html(html, ".list-group-item[data-foo='bar']")
   end
 
   def test_empty_slot_always_rendered_as_trailing_none_yet_item
@@ -138,27 +138,27 @@ class ListGroupTest < ComponentTestCase
     # `.list-group-item` child — so it shows iff no real rows
     # exist. Works seamlessly with Turbo Stream `append` / `remove`
     # broadcasts that only touch real items.
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.item { "real row" }
       list.empty { "nothing yet" }
     end
 
-    assert_html(html, "div.list-group > div.list-group-item",
+    assert_html(html, ".list-group > .list-group-item",
                 count: 2)
-    assert_html(html, "div.list-group-item.none-yet",
+    assert_html(html, ".list-group-item.none-yet",
                 text: "nothing yet")
-    assert_html(html, "div.list-group-item:not(.none-yet)",
+    assert_html(html, ".list-group-item:not(.none-yet)",
                 text: "real row")
   end
 
   def test_empty_slot_renders_even_without_real_items
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       list.empty { "nothing yet" }
     end
 
     # No real items → the placeholder is the only child → CSS
     # `:only-child` rule lets it show on the page.
-    assert_html(html, "div.list-group > div.list-group-item.none-yet",
+    assert_html(html, ".list-group > .list-group-item.none-yet",
                 text: "nothing yet")
   end
 
@@ -166,28 +166,34 @@ class ListGroupTest < ComponentTestCase
     # Empty list with neither items nor placeholder: just the outer
     # container. Helpful for streamed-in content where items arrive
     # via Turbo later.
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       # intentionally empty — no list.item / list.empty calls
       _ = list
     end
 
-    assert_html(html, "div.list-group")
-    assert_no_html(html, "div.list-group > div.list-group-item")
+    assert_html(html, ".list-group")
+    assert_no_html(html, ".list-group > .list-group-item")
   end
 
   def test_item_blocks_capture_iteration_local
     # Each block must close over its OWN value of `n` from the loop,
     # not a single shared one — proves the deferred-render pattern
     # captures iteration-local bindings correctly.
-    html = render(Components::ListGroup.new) do |list|
+    html = render_list do |list|
       (1..3).each do |n|
         list.item { "row #{n}" }
       end
     end
 
-    assert_html(html, "div.list-group-item", count: 3)
+    assert_html(html, ".list-group-item", count: 3)
     assert_includes(html, "row 1")
     assert_includes(html, "row 2")
     assert_includes(html, "row 3")
+  end
+
+  private
+
+  def render_list(**, &block)
+    render(Components::ListGroup.new(**), &block)
   end
 end

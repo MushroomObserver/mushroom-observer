@@ -34,7 +34,8 @@ module Views::Controllers::Locations
         Column(xs: 4) do
           h4 do
             plain(column_label(key))
-            plain(" (#{column_data(key).length})")
+            whitespace
+            plain("(#{column_data(key).length})")
           end
           column_data(key).each do |country, count|
             render_row(key, country, count)

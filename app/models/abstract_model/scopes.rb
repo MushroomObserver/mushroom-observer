@@ -64,6 +64,7 @@ module AbstractModel::Scopes
         where.not(user: ids).distinct
     }
 
+    # rubocop:disable MO/NoLongCommentBlock
     # `created_at`/`updated_at` are versatile, and handle all Queries currently.
     #
     #   Value handling:
@@ -76,6 +77,7 @@ module AbstractModel::Scopes
     # in Ruby. Parsing of user text values like "yesterday"/"la semana pasada"
     # needs to be done upstream in PatternSearch.
     #
+    # rubocop:enable MO/NoLongCommentBlock
     scope :created_at,
           ->(early, late = nil) { datetime_at(early, late, col: :created_at) }
     scope :updated_at,
@@ -271,7 +273,7 @@ module AbstractModel::Scopes
   # class methods here, `self` included
   module ClassMethods
     # Utility for all subqueries, which are defined on the model
-    # Callers must do their own joins to `model_name` because we can't know
+    # Callers must join to `model_name` themselves because we can't know
     # whether the association (has_one, has_many) is singular or plural.
     def subquery(model_name, params)
       return all if params.blank?
@@ -426,6 +428,7 @@ module AbstractModel::Scopes
       end
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Returns an array of AR conditions describing what a search is looking for.
     #
     # Each array member ["foo", "fah"] gets joined in a chain of AR "where"
@@ -442,6 +445,7 @@ module AbstractModel::Scopes
     #   "AND x LIKE '%surprise!%' AND x NOT LIKE '%bad%' " \
     #   "AND x NOT LIKE '%lost boys%'"
     #
+    # rubocop:enable MO/NoLongCommentBlock
     def search_conditions_good(table_columns, goods)
       conditions = []
       goods.each do |good|
@@ -483,6 +487,21 @@ module AbstractModel::Scopes
         where(table_column.downcase.eq(vals.first))
       elsif vals.length > 1
         where(table_column.downcase.in(*vals))
+      end
+    end
+
+    # Prioritizes an exact identifier match (id, or a subclass's
+    # `exact_match` override) over the fuzzy search the block builds, so
+    # e.g. `Comment.pattern("123")` returns just the record with that id
+    # instead of unioning it with every fuzzy substring match. A bare
+    # digit string is a substring of huge numbers of unrelated records,
+    # so without this, id-based lookup would return a multi-row index
+    # instead of the single intended record for most ids.
+    def exact_match_or(phrase)
+      if (exact = exact_match(phrase))
+        where(id: exact.id)
+      else
+        yield
       end
     end
 

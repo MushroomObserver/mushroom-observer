@@ -4,16 +4,13 @@
 # `Names::Synonyms::ApproveController#new`.
 module Views::Controllers::Names::Synonyms::Approve
   class Form < ::Components::ApplicationForm
-    def initialize(model, name:, approved_names: nil, user: nil, **)
-      @name = name
-      @approved_names = approved_names
-      @user = user
-      super(model, **)
+    prop :name, ::Name
+    prop :approved_names, _Array(::Name), default: -> { [] } do |value|
+      value || []
     end
+    prop :user, ::User
 
     def view_template
-      submit(:approve.ti, center: true)
-
       render_approved_names_section if @approved_names.present?
 
       Help(content: :name_approve_deprecate_help.tp)
@@ -26,6 +23,8 @@ module Views::Controllers::Names::Synonyms::Approve
           name: @name.display_name(@user)
         )
       )
+
+      submit(:approve.ti, center: true)
     end
 
     private

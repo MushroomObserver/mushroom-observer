@@ -11,7 +11,7 @@ module Views::Controllers::FieldSlips::QRReader
     end
 
     def test_renders_qr_code_field
-      assert_html(@html, "body", text: :app_qrcode.l)
+      assert_html(@html, "form#qr_reader_form", text: :app_qrcode.l)
       assert_html(@html, "input[data-qr-reader-target='input']")
       assert_html(@html, "input[data-action='qr-reader#handleInput']")
     end
@@ -22,7 +22,7 @@ module Views::Controllers::FieldSlips::QRReader
 
     def test_form_has_default_id_and_data_controller
       assert_html(@html, "form#qr_reader_form")
-      assert_html(@html, "form[data-controller='qr-reader']")
+      assert_html(@html, "form[data-controller~='qr-reader']")
     end
 
     private

@@ -24,26 +24,27 @@ class Components::Link::External < Components::Base
   # Keys from Tab::Base::ALLOWED_HTML_OPTION_KEYS that must not reach link_to.
   NON_HTML_OPTS = [:external, :button, :back, :icon, :help].freeze
 
+  prop :content, _Nilable(String), default: nil
+  prop :path, _Nilable(String), default: nil
+  prop :site_record_id, _Nilable(String), default: nil
+  prop :site_name, _Nilable(String), default: nil
+  prop :opts, _Hash(Symbol, _Any?), :**
+
   def initialize(content: nil, path: nil, tab: nil, link: nil, **opts)
-    super()
-    @link = link
-    @site_record_id = nil
-    @site_name = nil
+    site_record_id = nil
+    site_name = nil
     if tab
-      @content = tab.title
-      @path = tab.path
-      @opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
+      content = tab.title
+      path = tab.path
+      opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
     elsif link
-      @content = relationship_text
-      @site_record_id = link.site_record_id
-      @site_name = link.site_name
-      @path = link.link_url
-      @opts = opts
-    else
-      @content = content
-      @path = path
-      @opts = opts
+      content = relationship_text(link)
+      site_record_id = link.site_record_id
+      site_name = link.site_name
+      path = link.link_url
     end
+    super(content: content, path: path, site_record_id: site_record_id,
+          site_name: site_name, **opts)
   end
 
   def view_template
@@ -63,21 +64,21 @@ class Components::Link::External < Components::Base
   private
 
   # "<date>: <relationship>" so rows read and sort by date.
-  def relationship_text
-    date = @link.relationship_date
+  def relationship_text(link)
+    date = link.relationship_date
     if date
-      "#{date.web_date}: #{relationship_description}"
+      "#{date.web_date}: #{relationship_description(link)}"
     else
-      relationship_description
+      relationship_description(link)
     end
   end
 
   # Presentational text built here (not on ExternalLink) since this is
   # its only caller -- e.g. "Copied by iNaturalist" / "Imported from
   # iNaturalist".
-  def relationship_description
-    :"external_link_relationship_#{@link.relationship}".l(
-      site: @link.site_name
+  def relationship_description(link)
+    :"external_link_relationship_#{link.relationship}".l(
+      site: link.site_name
     )
   end
 end

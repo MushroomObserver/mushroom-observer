@@ -7,22 +7,6 @@ require("test_helper")
 # helpers. The deleted helper test file had no Phlex equivalent;
 # these tests pin the behaviour those helpers used to cover.
 class Views::Layouts::TopNavTest < ComponentTestCase
-  # Subclass with `render_search_row` neutralized — the search-bar /
-  # identify-filter partials resolve through Rails view-paths that
-  # aren't on the test controller's `append_view_path`. We render the
-  # subclass instead of monkey-patching the real class, so the change
-  # doesn't leak across the test process (an earlier version that
-  # `define_method`'d on `Views::Layouts::TopNav` directly silently
-  # broke the search-bar's `<select>` in every test that ran after
-  # this file).
-  class TopNavWithoutSearchRow < Views::Layouts::TopNav
-    private
-
-    def render_search_row
-      nil
-    end
-  end
-
   def setup
     super
     @user = users(:rolf)
@@ -33,27 +17,29 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   # ---- nav_create (+ Add button) -------------------------------------
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_nav_create_button_renders_for_creatable_controller
     html = render(top_nav(user: @user))
 
-    # `.btn-success` IS contract here (this rule's exception:
-    # the create button's "green" styling is part of its identity).
-    assert_html(html, "a.btn-success[href='#{routes.new_observation_path}']")
+    assert_html(html,
+                ".new_object_button[href='#{routes.new_observation_path}']")
+    # variant: :success is an explicit choice, not an incidental default.
+    assert_html(html, ".new_object_button.btn-success")
     # aria-label and title are the localized "New Observation" string
     full_label = "#{:new.ti} #{:observation.ti}"
-    assert_html(html, "a.btn-success[aria-label='#{full_label}']")
-    assert_html(html, "a.btn-success[title='#{full_label}']")
-    assert_html(html, "a.btn-success[data-tooltip-target='tip']")
+    assert_html(html, ".new_object_button[aria-label='#{full_label}']")
+    assert_html(html, ".new_object_button[title='#{full_label}']")
+    assert_html(html, ".new_object_button[data-tooltip-target='tip']")
     # Responsive content: the word "Add" appears in a span hidden at
     # xs width and shown at sm and up.
-    assert_html(html, "a.btn-success span.d-none.d-sm-inline",
+    assert_html(html, ".new_object_button .d-none.d-sm-inline",
                 text: :add.ti)
   end
 
   def test_nav_create_hidden_when_user_absent
     html = render(top_nav(user: nil))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   def test_nav_create_hidden_for_non_creatable_controller
@@ -64,7 +50,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     html = render(top_nav(user: @user))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
   end
 
   def test_nav_create_hidden_when_controller_has_no_new_action
@@ -72,7 +58,36 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     html = render(top_nav(user: @user))
 
-    assert_no_html(html, "a.btn-success")
+    assert_no_html(html, ".new_object_button")
+  end
+
+  # A "+ Add" button pointing at :new from the :new page itself (or a
+  # failed :create re-rendering that same template) is a redundant
+  # link back to the page already showing.
+  def test_nav_create_hidden_on_new_action
+    define_singleton_action_name!("new")
+
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, ".new_object_button")
+  end
+
+  def test_nav_create_hidden_on_create_action
+    define_singleton_action_name!("create")
+
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, ".new_object_button")
+  end
+
+  # Contrast with the above: other pages on the same (creatable)
+  # controller still show the button.
+  def test_nav_create_shown_on_index_and_show_actions
+    define_singleton_action_name!("index")
+    assert_html(render(top_nav(user: @user)), ".new_object_button")
+
+    define_singleton_action_name!("show")
+    assert_html(render(top_nav(user: @user)), ".new_object_button")
   end
 
   # ---- nav_rubric ----------------------------------------------------
@@ -95,7 +110,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     # On the index page with no filtering query, the rubric is plain
     # text — no link.
-    assert_html(html, "h4#rubric")
+    assert_html(html, "#rubric")
     assert_no_html(html, "#rubric a")
   end
 
@@ -120,6 +135,26 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     html = render(top_nav(user: nil))
 
     assert_no_html(html, "a[href='#{routes.field_slips_qr_reader_new_path}']")
+  end
+
+  # ---- show-banner button ---------------------------------------------
+
+  def test_show_banner_button_hidden_when_no_current_banner
+    html = render(top_nav(user: @user))
+
+    assert_no_html(html, "svg.mo-icon-interests")
+  end
+
+  def test_show_banner_button_present_when_banner_given
+    html = render(top_nav(user: @user, banner: banners(:one)))
+
+    assert_html(html,
+                "button.top_nav_button.top_nav_icon_button" \
+                "[data-banner-target='showButton'] " \
+                "span[aria-label='#{:banner_show_tooltip.t}']")
+    assert_html(html,
+                "button.top_nav_button.top_nav_icon_button" \
+                "[data-banner-target='showButton'] svg.mo-icon-interests")
   end
 
   # ---- nav-toggles (mobile chrome) ----------------------------------
@@ -166,13 +201,14 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
     # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
     # navbar-nav/navbar-right literals.
-    assert_html(html, "ul.nav.navbar-nav.navbar-right.hidden-xs.mr-0")
+    assert_html(html,
+                "ul.nav.navbar-nav.navbar-right.d-none.d-sm-block")
   end
 
   private
 
-  def top_nav(user:, query: nil)
-    TopNavWithoutSearchRow.new(user: user, query: query)
+  def top_nav(user:, query: nil, banner: nil)
+    Views::Layouts::TopNav.new(user: user, query: query, banner: banner)
   end
 
   # Override controller_name on the test controller so methods like
