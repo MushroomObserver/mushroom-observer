@@ -19,13 +19,10 @@ module Views::Controllers::Names::Descriptions
                         description: @description
                       ))
 
-      draft_form = Components::Description::NewDraftForm.new(
-        target: @name, project: @project, project_chosen: @project_chosen
-      )
-      render(draft_form)
-      hr if draft_form.render?
-      render(Views::Controllers::Descriptions::Form.new(
-               @description, licenses: @licenses, user: @user, turbo: true
+      render(Views::Controllers::Descriptions::NewToggle.new(
+               target: @name, description: @description, user: @user,
+               licenses: @licenses, project: @project,
+               project_chosen: @project_chosen
              ))
     end
   end

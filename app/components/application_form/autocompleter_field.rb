@@ -151,11 +151,17 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
+    # `mix` concatenates colliding String values (not just `class`),
+    # so a caller-supplied `placeholder:` would otherwise land as
+    # "Start typing... <caller's text>" instead of replacing it --
+    # omit the default when the caller already supplied one.
     def autocompleter_field_attributes
-      mix({ placeholder: :start_typing.l,
-            autocomplete: "off",
-            data: input_data_attributes },
-          attributes)
+      defaults = { autocomplete: "off", data: input_data_attributes }
+      unless attributes.key?(:placeholder)
+        defaults[:placeholder] =
+          :start_typing.l
+      end
+      mix(defaults, attributes)
     end
 
     def input_data_attributes
@@ -169,14 +175,23 @@ class Components::ApplicationForm < Superform::Rails::Form
     def autocompleter_wrapper_options
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
-        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown")
+        wrap_class: class_names(wrapper_options[:wrap_class], "dropdown"),
+        **addon_wrapper_options
       )
     end
 
+    # With `label: false`, there's no label row for has-id-indicator +
+    # find/keep/create buttons to attach to (that's what
+    # add_label_appends_slot targets), so route the same content into
+    # the field's input-group-addon instead, beside the input.
+    def addon_wrapper_options
+      return {} if wrapper_options[:label] != false
+
+      { addon: capture { render_label_after } }
+    end
+
     def add_slots_to_field(field_component, &block)
-      # has-id-indicator + find/keep/edit buttons sit inline with the
-      # label, inside the label row's flex container.
-      field_component.with_label_appends { render_label_after }
+      add_label_appends_slot(field_component)
 
       # Add label_end buttons to label_end slot — only when content is
       # present. Registering an empty slot makes `label_end_present?`
@@ -193,6 +208,16 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       # Add dropdown and hidden field to append slot
       field_component.with_append(&block) if block
+    end
+
+    # has-id-indicator + find/keep/edit buttons sit inline with the
+    # label, inside the label row's flex container -- only when a
+    # label row will render. With `label: false`, addon_wrapper_options
+    # routes the same content into an input-group-addon instead.
+    def add_label_appends_slot(field_component)
+      return if wrapper_options[:label] == false
+
+      field_component.with_label_appends { render_label_after }
     end
 
     # Renders all label_after elements (goes in between slot after label)

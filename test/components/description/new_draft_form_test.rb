@@ -39,7 +39,7 @@ class Components::Description::NewDraftFormTest < ComponentTestCase
   def test_renders_project_label
     html = render_form(target: locations(:albion))
 
-    assert_html(html, "label", text: :show_description_new_draft_label.t)
+    assert_html(html, "label", text: :project.ti)
   end
 
   # Standard AutocompleterField naming: hidden field is "project_id",

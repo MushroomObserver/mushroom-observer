@@ -5,28 +5,14 @@
 # `Views::Controllers::Descriptions::OtherDescriptionsPanel` so it
 # has independent test coverage.
 #
-# Hand-built flex row, label included, same shape as the top-nav
-# search bar and the identify filter (`Observations::Identify::Form`)
-# -- not an input-group addon (the autocompleter's `append` slot
-# renders below the field, built for a map section), and not
-# Bootstrap's `.form-inline` either: that class only un-stacks a
-# `.form-group`'s label/input when the form-group is a normal
-# block-flow child of the form, and a flex row's `.flex-bar`
-# (`display: flex`) turns the form-group into a flex item instead,
-# which overrides that cascade -- confirmed live (label stayed
-# stacked above the input, submit button pushed to the far end by
-# `.flex-bar`'s `justify-content: space-between`).
-#
 # Standard AutocompleterField naming: a String field key ("project",
-# not a Symbol -- a Symbol key is model-bound and would inherit this
-# form's model namespace, "base" from FormObject::Base, giving
-# "base[project]"/"base[project_id]"; the String path bypasses that)
-# gives the visible field "project" and the hidden field its default
-# "project_id". Submitting that hidden id is a confirmed choice, read
-# by `initialize_description_source`'s `params[:project_id]`
-# (`app/controllers/concerns/descriptions.rb`) -- distinct from the
-# bare `project` param `ApplicationController#set_project_ivar`
-# reads elsewhere as a suggestion, not a confirmed pick.
+# not a Symbol, which would be model-bound and namespaced under this
+# form's "base") gives the visible field "project" and the hidden
+# field "project_id". Submitting that hidden id is a confirmed
+# choice, read by `initialize_description_source`'s
+# `params[:project_id]` -- distinct from the bare `project` param
+# `ApplicationController#set_project_ivar` reads elsewhere as a
+# suggestion, not a confirmed pick.
 class Components::Description::NewDraftForm < Components::ApplicationForm
   # Not named `parent:` -- Superform::Rails::Form's initialize
   # already reserves that keyword for field-nesting context.
@@ -55,10 +41,14 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
     return unless render?
 
     super do
-      div(class: "flex-bar gap-2") do
-        render_label
+      # .flex-bar's align-items-center would vertically center the
+      # button against the label+input stack rather than the input
+      # row -- align-items-end overrides it, kept alongside .flex-bar
+      # so the .autocompleter flex-grow rules still apply.
+      div(class: "flex-bar align-items-end gap-2") do
         render_project_field
-        submit(:create.ti, variant: :outline, size: :sm)
+        submit(:show_description_new_draft_submit.ti,
+               variant: :outline, size: :sm)
       end
     end
   end
@@ -80,15 +70,10 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
 
   private
 
-  def render_label
-    label(for: "project", class: "mb-0 text-nowrap") do
-      plain(append_colon(:show_description_new_draft_label.l))
-    end
-  end
-
   def render_project_field
     autocompleter_field(
-      "project", type: autocompleter_type, label: false,
+      "project", type: autocompleter_type,
+                 label: :project.ti,
                  value: @project&.title, hidden_value: @project&.id
     )
   end
