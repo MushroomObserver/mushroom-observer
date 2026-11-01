@@ -54,19 +54,38 @@ module Observations
     # (no `order_by_or_flash_if_unknown` check) -- an invalid value must
     # still fall back to the model's default_order rather than silently
     # sorting by id: :desc.
-    def test_edit_invalid_by_falls_back_to_default_order
+    def test_edit_invalid_sort_order_falls_back_to_default_order
       obs = observations(:coprinus_comatus_obs)
       login
 
-      get(:edit, params: { id: obs.id, by: "totally_bogus_sort_key" })
+      get(:edit, params: {
+            id: obs.id,
+            q: { model: "SpeciesList", order_by: "totally_bogus_sort_key" }
+          })
 
       assert_response(:success)
       all_lists = assigns(:all_lists)
       assert_nil(
         all_lists.params[:order_by],
-        "Invalid `by` should be cleared, not passed through to Query"
+        "Invalid order_by should be cleared, not passed through to Query"
       )
       assert_equal(Query::SpeciesLists.default_order, all_lists.default_order)
+    end
+
+    # The sorter dropdown's links carry the chosen order via the q[]
+    # round trip (`Views::Layouts::Header::Sorter#sort_tuple`), not a
+    # flat `by` param -- confirms the edit page picks it up.
+    def test_edit_applies_sort_order_from_q_param
+      obs = observations(:coprinus_comatus_obs)
+      login
+
+      get(:edit, params: {
+            id: obs.id,
+            q: { model: "SpeciesList", order_by: "user" }
+          })
+
+      assert_response(:success)
+      assert_equal("user", assigns(:all_lists).params[:order_by])
     end
 
     def test_add_observation_to_species_list
