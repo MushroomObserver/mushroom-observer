@@ -65,7 +65,11 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     session.click_link(text: name.text_name)
     url = name_path(name.id)
     session.assert_text("There are no descriptions")
-    session.click_link(text: project.title)
+    # The project picker is a JS-driven autocompleter
+    # (`Components::Description::NewDraftForm`); `rack_test` can't
+    # interact with it. Visit the URL its submission would produce.
+    session.visit(new_name_description_path(name_id: name.id,
+                                            project_id: project.id))
     session.assert_text(
       ActionController::Base.helpers.strip_tags(
         :create_name_description_title.t(name: name.display_name)

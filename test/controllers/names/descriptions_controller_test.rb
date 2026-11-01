@@ -212,7 +212,7 @@ module Names
       params = {
         name_id: name.id,
         source: "project",
-        project: project.id
+        project_id: project.id
       }
       requires_login(:new, params, user.login)
       if success
@@ -358,6 +358,55 @@ module Names
                           names(:coprinus_comatus), katrina)
     end
 
+    # `NewDraftForm` (project autocompleter + submit) renders above
+    # the main form on `new` -- but not when `?project_id=` is
+    # already given: that's a confirmed choice, the main form is
+    # already locked to it, nothing left to pick.
+    def test_new_description_hides_draft_form_when_project_chosen
+      name = names(:coprinus_comatus)
+      project = projects(:eol_project)
+
+      login("katrina") # project member
+      get(:new, params: { name_id: name.id, project_id: project.id })
+
+      assert_select("input[name='project']", count: 0)
+    end
+
+    # A bare `?project=` isn't a confirmed choice, just a suggestion
+    # -- `NewDraftForm` renders, prefilled, without locking the main
+    # form to it.
+    def test_new_description_prefills_draft_form_from_flat_project_param
+      name = names(:coprinus_comatus)
+      project = projects(:eol_project)
+
+      login("katrina")
+      get(:new, params: { name_id: name.id, project: project.id })
+
+      assert_select("input[name='project'][value=?]", project.title)
+      assert_select("input[name='project_id'][value=?]", project.id.to_s)
+      desc = assigns(:description)
+      assert_not_equal("project", desc.source_type)
+    end
+
+    # Same suggestion-only behavior, but derived from the ambient
+    # query the user arrived with (e.g. an index filtered to one
+    # project) instead of a direct flat param.
+    def test_new_description_prefills_draft_form_from_ambient_query_project
+      name = names(:coprinus_comatus)
+      project = projects(:eol_project)
+
+      login("katrina")
+      get(:new, params: {
+            name_id: name.id,
+            q: { model: "NameDescription", projects: [project.id] }
+          })
+
+      assert_select("input[name='project'][value=?]", project.title)
+      assert_select("input[name='project_id'][value=?]", project.id.to_s)
+      desc = assigns(:description)
+      assert_not_equal("project", desc.source_type)
+    end
+
     def test_create_draft_admin
       create_draft_tester(projects(:eol_project),
                           names(:coprinus_comatus), mary)
@@ -439,7 +488,7 @@ module Names
       # Test draft creation by project member.
       login("rolf") # member
       project = projects(:eol_project)
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
@@ -450,7 +499,7 @@ module Names
 
       # Test draft creation by project non-member.
       login("dick")
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_redirected_to(project_path(project.id))
       assert_flash_error
     end
@@ -471,7 +520,7 @@ module Names
       # Test draft creation by project member.
       login("katrina") # member
       project = projects(:eol_project)
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_select("form")
       assert_select("#name_description_form")
       desc = assigns(:description)
@@ -482,7 +531,7 @@ module Names
 
       # Test draft creation by project non-member.
       login("dick")
-      get(:new, params: params.merge(project: project.id))
+      get(:new, params: params.merge(project_id: project.id))
       assert_redirected_to(project_path(project.id))
       assert_flash_error
 

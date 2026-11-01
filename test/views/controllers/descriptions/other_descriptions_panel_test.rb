@@ -47,34 +47,11 @@ class Views::Controllers::Descriptions::OtherDescriptionsPanelTest <
     )
   end
 
-  def test_renders_new_draft_form
-    desc = name_descriptions(:peltigera_user_desc)
-
-    html = render(new_panel(description: desc))
-
-    # `Components::Description::NewDraftForm` renders a form
-    # targeting the parent name's new-description path.
-    assert_html(html,
-                "form[action='#{routes.new_name_description_path(
-                  name_id: desc.parent.id
-                )}']")
-  end
-
-  def test_passes_incoming_project_to_new_draft_form
-    desc = name_descriptions(:peltigera_user_desc)
-    project = projects(:eol_project)
-
-    html = render(new_panel(description: desc, incoming_project: project))
-
-    assert_html(html, "input[name='project'][value='#{project.id}']")
-  end
-
   private
 
-  def new_panel(description:, user: users(:rolf), incoming_project: nil)
+  def new_panel(description:, user: users(:rolf))
     Views::Controllers::Descriptions::OtherDescriptionsPanel.new(
-      description: description, user: user,
-      incoming_project: incoming_project
+      description: description, user: user
     )
   end
 end

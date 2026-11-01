@@ -8,6 +8,8 @@ module Views::Controllers::Names::Descriptions
     prop :description, ::NameDescription
     prop :user, _Nilable(::User), default: nil
     prop :licenses, _Array(_Tuple(String, Integer)), default: -> { [] }
+    prop :project, _Nilable(::Project), default: nil
+    prop :project_chosen, _Boolean, default: false
 
     def view_template
       add_page_title(:create_name_description_title.t(
@@ -17,6 +19,10 @@ module Views::Controllers::Names::Descriptions
                         description: @description
                       ))
 
+      render(Components::Description::NewDraftForm.new(
+               target: @name, project: @project,
+               project_chosen: @project_chosen
+             ))
       render(Views::Controllers::Descriptions::Form.new(
                @description, licenses: @licenses, user: @user, turbo: true
              ))

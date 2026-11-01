@@ -9,7 +9,6 @@ module Views::Controllers::Locations
     prop :description, _Nilable(::LocationDescription), default: nil
     prop :versions, _Array(_Interface(:user_id))
     prop :comments, _Nilable(_Array(::Comment)), default: nil
-    prop :projects, _Array(::Project)
 
     def view_template
       register_page_chrome
@@ -59,7 +58,7 @@ module Views::Controllers::Locations
       render(Show::Coordinates.new(location: @location))
       render(Show::Notes.new(location: @location))
       render(Show::AltDescriptionsPanel.new(
-               user: current_user, object: @location, projects: @projects
+               user: current_user, object: @location
              ))
       render(Show::Footer.new(location: @location, versions: @versions.to_a))
     end

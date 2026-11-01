@@ -78,9 +78,11 @@ module Descriptions
     def initialize_description_source
       @description.license = @user.license
 
-      # Creating a draft.
-      if params[:project].present?
-        project = Project.find(params[:project])
+      # Creating a draft -- `project_id` is a confirmed choice (from
+      # `NewDraftForm`'s submission), unlike the bare `project` param
+      # `set_project_ivar` reads elsewhere as a suggestion only.
+      if params[:project_id].present?
+        project = Project.find(params[:project_id])
         if @user.in_group?(project.user_group)
           @description.source_type  = "project"
           @description.source_name  = project.title

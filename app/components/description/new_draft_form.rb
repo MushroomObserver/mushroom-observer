@@ -17,29 +17,43 @@
 # stacked above the input, submit button pushed to the far end by
 # `.flex-bar`'s `justify-content: space-between`).
 #
-# The autocompleter's hidden field is explicitly keyed "project"
-# (bare, no model namespace) to match
-# `Locations::DescriptionsController#new` /
-# `Names::DescriptionsController#new`'s existing flat
-# `params[:project]` read
-# (`initialize_description_source`, `app/controllers/concerns/descriptions.rb`)
-# -- no controller-side change needed.
+# Standard AutocompleterField naming: a String field key ("project",
+# not a Symbol -- a Symbol key is model-bound and would inherit this
+# form's model namespace, "base" from FormObject::Base, giving
+# "base[project]"/"base[project_id]"; the String path bypasses that)
+# gives the visible field "project" and the hidden field its default
+# "project_id". Submitting that hidden id is a confirmed choice, read
+# by `initialize_description_source`'s `params[:project_id]`
+# (`app/controllers/concerns/descriptions.rb`) -- distinct from the
+# bare `project` param `ApplicationController#set_project_ivar`
+# reads elsewhere as a suggestion, not a confirmed pick.
 class Components::Description::NewDraftForm < Components::ApplicationForm
   # Not named `parent:` -- Superform::Rails::Form's initialize
   # already reserves that keyword for field-nesting context.
   prop :target, _Union(::Location, ::Name)
+  # Suggested project to prefill the autocompleter with -- not
+  # necessarily the one the main form already committed to (see
+  # `project_chosen:`). Typically derived from the ambient query the
+  # caller arrived with (e.g. browsing a project-filtered
+  # Observations index), not a hard param choice.
   prop :project, _Nilable(::Project), default: nil
+  # True when the main form already committed to a project (an
+  # explicit `?project_id=` was given, not just a query-derived
+  # suggestion). Nothing left to pick, so this renders nothing.
+  prop :project_chosen, _Boolean, default: false
 
   # Declaring new props on a subclass of a class with a hand-written
   # initialize means `super` skips that parent initialize body --
   # Literal re-validates this class's props against what's forwarded
-  # to `super`, so `target:`/`project:` are passed through
-  # explicitly rather than consumed into ivars only.
-  def initialize(target:, project: nil, **)
-    super(::FormObject::Base.new, target:, project:, **)
+  # to `super`, so `target:`/`project:`/`project_chosen:` are passed
+  # through explicitly rather than consumed into ivars only.
+  def initialize(target:, project: nil, project_chosen: false, **)
+    super(::FormObject::Base.new, target:, project:, project_chosen:, **)
   end
 
   def view_template
+    return unless render?
+
     super do
       div(class: "flex-bar gap-2") do
         render_label
@@ -51,22 +65,33 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
 
   private
 
+  # Already committed (arrived with a confirmed project, which
+  # locked the main form to it) -- nothing left to pick. Otherwise,
+  # admins can draft for any project; everyone else needs at least
+  # one membership to have anything to pick from.
+  def render?
+    return false if @project_chosen
+
+    in_admin_mode? || current_user&.projects_member&.any?
+  end
+
   def render_label
-    label(for: project_field_id, class: "mb-0 text-nowrap") do
+    label(for: "project", class: "mb-0 text-nowrap") do
       plain(append_colon(:show_description_new_draft_label.l))
     end
   end
 
-  def project_field_id
-    "project_display"
-  end
-
   def render_project_field
     autocompleter_field(
-      project_field_id, type: :user_project, label: false,
-                        value: @project&.title,
-                        hidden_name: "project", hidden_value: @project&.id
+      "project", type: autocompleter_type, label: false,
+                 value: @project&.title, hidden_value: @project&.id
     )
+  end
+
+  # Admins can draft for any project; everyone else is limited to
+  # the projects they belong to.
+  def autocompleter_type
+    in_admin_mode? ? :project : :user_project
   end
 
   def form_action

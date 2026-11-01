@@ -1,23 +1,20 @@
 # frozen_string_literal: true
 
 # Right-column panel on a description show page: the parent's other
-# descriptions (visible ones, including this one) plus the UI to
-# start a new project-sourced draft. Split out of the old
-# DetailsAndAltsPanel's "alts" column (#5527 review) -- it's a
+# descriptions (visible ones, including this one). Split out of the
+# old DetailsAndAltsPanel's "alts" column (#5527 review) -- it's a
 # separate concept from the description's detail/notes/authors
 # panels, not part of "Detail".
 module Views::Controllers::Descriptions
   class OtherDescriptionsPanel < Views::Base
     prop :description, ::Description
     prop :user, _Nilable(::User), default: nil
-    prop :incoming_project, _Nilable(::Project), default: nil
 
     def view_template
       Panel(panel_id: "other_descriptions") do |panel|
         panel.with_heading { panel_title }
         panel.with_heading_links { render_create_link }
         panel.with_body { render_body }
-        panel.with_footer { render_new_draft_form }
       end
     end
 
@@ -47,12 +44,6 @@ module Views::Controllers::Descriptions
       render(List.new(
                user: @user, object: parent, type: parent_type,
                current: @description, empty_text: alts_empty_text
-             ))
-    end
-
-    def render_new_draft_form
-      render(Components::Description::NewDraftForm.new(
-               target: parent, project: @incoming_project
              ))
     end
 

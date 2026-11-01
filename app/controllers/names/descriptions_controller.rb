@@ -84,8 +84,7 @@ module Names
       return if performed?
 
       render(Views::Controllers::Names::Descriptions::Show.new(
-               description: @description, user: @user,
-               versions: @versions, incoming_project: @incoming_project
+               description: @description, user: @user, versions: @versions
              ))
     end
 
@@ -105,7 +104,6 @@ module Names
     def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
-      @incoming_project = Project.find_by(id: params[:project])
       @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
@@ -128,9 +126,13 @@ module Names
       initialize_description_source
       return if performed?
 
+      @project_chosen = @description.project.present?
+      set_project_ivar
+
       render(Views::Controllers::Names::Descriptions::New.new(
                name: @name, description: @description,
-               user: @user, licenses: @licenses
+               user: @user, licenses: @licenses, project: @project,
+               project_chosen: @project_chosen
              ))
     end
 

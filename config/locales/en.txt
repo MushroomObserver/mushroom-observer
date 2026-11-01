@@ -2083,7 +2083,6 @@
   show_name_propagate_lifeform: Propagate to Subtaxa
   show_name_notes: "[:form_names_taxonomic_notes]"
   show_name_descriptions: "[:descriptions.ti]"
-  show_name_create_draft: Create New Draft for
   show_name_no_descriptions: There are no descriptions for this name yet.
   show_name_description_author: "[:description.ti] author"
   show_description_author_request: Request Authorship Credit
