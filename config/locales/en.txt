@@ -3116,12 +3116,16 @@
 
   # description/merge_descriptions
   merge_descriptions_title: Merge [object]
+  move_descriptions_title: Move [object]
   merge_descriptions_merge_header: Merge with another description
   merge_descriptions_move_header: Move / copy to a synonym
+  merge_descriptions_move_location_header: Move / copy to another location
   merge_descriptions_no_others: "(there are no other descriptions)"
+  merge_descriptions_preview_restricted: "(you do not have permission to view this description)"
   merge_descriptions_delete_after: Delete old description after merge?
   merge_descriptions_merge_help: This will copy any non-blank sections from the source description into the description you select below. If the target description already has text in any of those fields, you will be given an editing form with the text from both descriptions. This will allow you to reconcile any conflicts by hand before saving the form and making the merger official.
   merge_descriptions_move_help: This will move the source description into a synonym. It will just copy it if you elect not to delete the old description. If you wish to merge with an existing description in the other name, you must first move your description into that name, then select [:show_description_merge] again from there.
+  merge_descriptions_move_location_help: This will move the source description into another location. It will just copy it if you elect not to delete the old description. If you wish to merge with an existing description at that location, you must first move your description there, then select [:show_description_merge] again from there.
 
   # species_list/name_lister
   name_lister_bad_submit: Invalid commit button '[BUTTON]'.
@@ -4181,6 +4185,7 @@
   runtime_description_merge_delete_denied: You don't have permission to delete the old description.
   runtime_description_merge_deleted: "The old description was deleted: [old]"
   runtime_description_merge_success: Successfully merged the descriptions.
+  runtime_description_move_same_parent: Pick a different [type] to move the description to.
   runtime_description_move_success: Successfully moved the description.
   runtime_description_private: That description is private!
   runtime_description_removed_admin: Revoked admin permission for [name].

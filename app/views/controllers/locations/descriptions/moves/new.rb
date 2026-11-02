@@ -6,16 +6,14 @@ module Views::Controllers::Locations::Descriptions::Moves
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      add_page_title(:merge_descriptions_title.t(
+      add_page_title(:move_descriptions_title.t(
                        object: @description.format_name
                      ))
       add_context_nav(::Tab::LocationDescription::FormPermissions.new(
                         description: @description
                       ))
 
-      render(Views::Controllers::Descriptions::Moves::Form.new(
-               @description, user: @user, turbo: true
-             ))
+      render(Form.new(@description, user: @user, turbo: true))
     end
   end
 end
