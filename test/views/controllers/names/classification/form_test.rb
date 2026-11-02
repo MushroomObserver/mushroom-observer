@@ -13,13 +13,32 @@ module Views::Controllers::Names::Classification
       assert_html(html, "form[action*='/names/#{name.id}/classification']")
       assert_html(html, "button[type='submit']", text: :save.ti)
 
-      # Classification textarea
-      assert_html(html, "textarea[name='name[classification]']")
-      assert_includes(html, :form_names_classification.l)
-
-      # Help text with rank
+      # Header and help text
+      assert_includes(html, :form_names_classification.t)
       rank = :"rank_#{name.rank.to_s.downcase}".l
       assert_includes(html, :form_names_classification_help.t(rank: rank))
+
+      # One text field per rank above Genus, pre-filled from the
+      # parent's existing classification string.
+      FormObject::NameClassification::RANKS.each do |rank_name|
+        field_name = "name_classification[rank_#{rank_name.downcase}]"
+        assert_html(html, "input[type='text'][name='#{field_name}']")
+      end
+      assert_html(html,
+                  "input[name='name_classification[rank_kingdom]']" \
+                  "[value='Fungi']")
+    end
+
+    def test_blank_ranks_when_classification_is_blank
+      name = names(:conocybe_filaris)
+      assert_predicate(name.classification, :blank?,
+                       "Test needs a name with no classification")
+
+      html = render_form(name)
+
+      assert_html(html,
+                  "input[name='name_classification[rank_kingdom]']" \
+                  "[value='']")
     end
 
     private

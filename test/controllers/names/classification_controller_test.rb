@@ -11,16 +11,11 @@ module Names
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
-      # Make sure (missing and) bogus ids do not crash it.
-      # get(:edit)
-      # assert_response(:redirect)
-      # get(:edit, params: { id: "bogus" }) # Does not work, Rails enforces id
-      # assert_response(:redirect)
-
-      # Make sure form initialized correctly.
+      # Make sure form initialized correctly -- no classification yet,
+      # every rank field blank.
       get(:edit, params: { id: name.id })
       assert_response(:success)
-      assert_textarea_value(:name_classification, "")
+      assert_input_value("name_classification_rank_kingdom", nil)
       assert_select("form[action = '#{classification_of_name_path(name)}']") do
         assert_select("input[value = 'patch']", { count: 1 },
                       "Form should submit via PATCH")
@@ -29,7 +24,7 @@ module Names
       name = names(:agaricus_campestris)
       get(:edit, params: { id: name.id })
       assert_response(:success)
-      assert_textarea_value(:name_classification, name.classification)
+      assert_input_value("name_classification_rank_kingdom", "Fungi")
     end
 
     def test_update_classification
@@ -40,40 +35,37 @@ module Names
       assert_redirected_to(new_account_login_path)
       login("rolf")
 
-      # Make sure bogus requests don't crash.
-      # put(:update)
-      # assert_flash_error
-      # assert_response(:redirect)
-      # put(:update, params: { id: "bogus" }) # Does not work, Rails enforces id
-      # assert_flash_error
-      # assert_response(:redirect)
-
-      # Make sure it is validating the classification.
+      # Make sure it is validating the classification -- rank
+      # guessing isn't applied to Kingdom/Domain, so the mismatch has
+      # to be on a rank between them and Genus.
       put(:update,
-          params: { id: name.id, name: { classification: "bogus" } })
+          params: { id: name.id,
+                    name_classification: { rank_phylum: "bogus" } })
       assert_flash_error
       assert_unprocessable
       assert_select("form[data-turbo='true']")
-      assert_textarea_value(:name_classification, "bogus")
+      assert_input_value("name_classification_rank_phylum", "bogus")
 
-      # Make sure we can do simple case.
+      # Make sure we can do the simple case.
       name = names(:agaricales)
-      new_str = "Kingdom: _Fungi_"
       put(:update,
-          params: { id: name.id, name: { classification: new_str } })
+          params: { id: name.id,
+                    name_classification: { rank_kingdom: "Fungi" } })
       assert_no_flash
       assert_redirected_to(name.show_link_args)
-      assert_equal(new_str, name.reload.classification)
+      assert_equal("Kingdom: _Fungi_", name.reload.classification)
 
-      # Make sure we can do complex case.
+      # Make sure we can do the complex case.
       name = names(:agaricus_campestris)
-      new_str = "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
       put(:update,
-          params: { id: name.id, name: { classification: new_str } })
+          params: { id: name.id,
+                    name_classification: { rank_kingdom: "Fungi",
+                                           rank_phylum: "Ascomycota" } })
       assert_no_flash
       assert_redirected_to(name.show_link_args)
-      assert_equal(new_str, name.reload.classification)
-      assert_equal(new_str, names(:agaricus).classification)
+      expect = "Kingdom: _Fungi_\r\nPhylum: _Ascomycota_"
+      assert_equal(expect, name.reload.classification)
+      assert_equal(expect, names(:agaricus).classification)
       # Description and Observation no longer carry classification
       # caches — both columns dropped in discussion #4163.
     end
