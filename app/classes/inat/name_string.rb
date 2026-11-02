@@ -42,7 +42,7 @@ class Inat
                     else
                       [str[(start + 1)..], ""]
                     end
-      inner = inner.gsub(/\A[\s#{QUOTES}]+|[\s#{QUOTES}]+\z/o, "")
+      inner = trim(inner)
       return nil if inner.include?("×")
 
       open = str[start]
@@ -50,6 +50,17 @@ class Inat
         "#{rest}"
     end
     private_class_method :requote
+
+    # Strips whitespace and quotes from both ends. Single-character
+    # searches keep this linear; an anchored `[...]+\z` is quadratic on a
+    # long run of whitespace.
+    def self.trim(str)
+      first = str.index(/[^\s#{QUOTES}]/o)
+      return "" unless first
+
+      str[first..str.rindex(/[^\s#{QUOTES}]/o)]
+    end
+    private_class_method :trim
 
     def self.parse_with_taxon_rank(str, taxon)
       ranks = Inat::Taxon::INFRASPECIFIC_RANKS

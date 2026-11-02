@@ -34,6 +34,10 @@ class Inat::NameStringTest < UnitTestCase
     assert_nil(Inat::NameString.clean(nil))
   end
 
+  def test_clean_empties_blank_quotes
+    assert_equal("Inocybe sp. ''", Inat::NameString.clean("Inocybe sp. ' \t'"))
+  end
+
   def test_parse_parses_the_repaired_string
     parsed = Inat::NameString.parse("Inocybe sp. ' NY17'")
 
