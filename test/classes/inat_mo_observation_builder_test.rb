@@ -89,6 +89,23 @@ class InatMoObservationBuilderTest < UnitTestCase
     assert_equal(existing, builder.send(:prov_name))
   end
 
+  # #5499: best_mo_homonym needs the same id: :desc tiebreaker as
+  # TaxonSync#parsed_name -- two Names tied on deprecated and
+  # created_at otherwise have no stable resolution, and import
+  # (this class) and resync (TaxonSync) are meant to agree on the
+  # same Name for the same text_name.
+  def test_prov_name_tie_break_matches_taxon_syncs
+    tied_at = 1.day.ago
+    older = duplicate_name("Tiebreakia testia")
+    older.update_column(:created_at, tied_at)
+    newer = duplicate_name("Tiebreakia testia")
+    newer.update_column(:created_at, tied_at)
+
+    builder = builder_for(provisional_name: "Tiebreakia testia")
+
+    assert_equal(newer, builder.send(:prov_name))
+  end
+
   # An override matching an existing MO name reuses it (no API post).
   def test_override_name_reuses_existing_mo_name
     existing = names(:coprinus_comatus)
@@ -198,6 +215,20 @@ class InatMoObservationBuilderTest < UnitTestCase
   end
 
   private
+
+  # A second, independent Name row at the given text_name. Bypasses
+  # Name.create_with_trusted_rank's find-or-create check (which would
+  # just return the first one) and the search_name_indistinct
+  # validation (which blocks a second save through the normal flow,
+  # but duplicate-text_name rows do exist in the production database
+  # from paths that predate or bypass that validation -- #5499).
+  def duplicate_name(text_name)
+    parse = Name.parse_name(text_name, rank: "Species", force_rank: true)
+    name = Name.new(parse.params.merge(user: User.admin))
+    name.current_user = User.admin
+    name.save!(validate: false)
+    name
+  end
 
   def builder_for(provisional_name: nil, name_override: nil,
                   obs_taxon_name: nil)

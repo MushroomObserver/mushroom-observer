@@ -346,9 +346,14 @@ class Inat
       suggestion[:user][:login]
     end
 
+    # id: :desc as a final tiebreaker -- without it, two Names tied
+    # on both deprecated and created_at have no stable order, so
+    # which one .first returns could differ from what
+    # TaxonSync#parsed_name resolves for the same text_name on a
+    # later resync, even though both use the same ordering (#5499).
     def best_mo_homonym(text_name)
       Name.where(text_name: text_name).
-        order(deprecated: :asc, created_at: :desc).
+        order(deprecated: :asc, created_at: :desc, id: :desc).
         first
     end
 

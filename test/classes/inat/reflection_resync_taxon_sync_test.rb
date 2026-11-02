@@ -224,6 +224,35 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(@old, @obs.reload.name)
   end
 
+  # #5499: two Names tied on both `deprecated` and `created_at` (the
+  # column has no fractional-second precision, so same-second ties are
+  # common) need a final tiebreaker, or which one resolves can differ
+  # between two otherwise-identical resyncs.
+  def test_provisional_name_tie_break_is_deterministic
+    tied_at = 1.day.ago
+    older = duplicate_name("Tiebreakia testia")
+    older.update_column(:created_at, tied_at)
+    newer = duplicate_name("Tiebreakia testia")
+    newer.update_column(:created_at, tied_at)
+    provisional = { name: "Provisional Species Name",
+                    value: "Tiebreakia testia" }
+
+    sync(fresh(ofvs: [provisional]))
+    first_pick = @obs.namings.reload.
+                 find_by(name_id: [older.id, newer.id]).name
+
+    @obs.namings.destroy_all
+    Vote.where(observation: @obs).destroy_all
+
+    sync(fresh(ofvs: [provisional]))
+    second_pick = @obs.namings.reload.
+                  find_by(name_id: [older.id, newer.id]).name
+
+    assert_equal(newer, first_pick, "a tie should resolve to the newest Name")
+    assert_equal(first_pick, second_pick,
+                 "the tie-break must be stable across repeated resolutions")
+  end
+
   def test_override_name_missing_from_mo_is_created_and_leads
     assert_nil(Name.find_by(text_name: "Agrocybe yyy"))
     override = { name: "Species Name Override", value: "Agrocybe yyy" }
@@ -275,6 +304,20 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
   end
 
   private
+
+  # A second, independent Name row at the given text_name. Bypasses
+  # Name.create_with_trusted_rank's find-or-create check (which would
+  # just return the first one) and the search_name_indistinct
+  # validation (which blocks a second save through the normal flow,
+  # but duplicate-text_name rows do exist in the production database
+  # from paths that predate or bypass that validation -- #5499).
+  def duplicate_name(text_name)
+    parse = Name.parse_name(text_name, rank: "Species", force_rank: true)
+    name = Name.new(parse.params.merge(user: User.admin))
+    name.current_user = User.admin
+    name.save!(validate: false)
+    name
+  end
 
   def import_naming(name, value)
     naming = Naming.create!(observation: @obs, user: @importer, name: name,
