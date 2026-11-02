@@ -61,7 +61,7 @@ module Views::Controllers::Herbaria
       nonpersonal? ? "" : :user.ti
     end
 
-    # --- 3rd column: name link / merge POST + edit / merge actions --
+    # --- 2nd column: name link / merge POST + edit / merge actions --
 
     def render_name_cell(herbarium)
       render_name_link(herbarium)
