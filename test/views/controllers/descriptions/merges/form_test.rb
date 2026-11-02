@@ -26,7 +26,7 @@ module Views::Controllers::Descriptions::Merges
 
       # Radio buttons for merge targets
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']")
+                        "[name='description_move_or_merge[target_id]']")
 
       # Delete checkbox (admin can delete)
       assert_html(html, "input[type='checkbox']" \
@@ -61,6 +61,56 @@ module Views::Controllers::Descriptions::Merges
       assert_no_html(html, "button[type='submit']")
     end
 
+    # Merge targets can all have the same title ("Public Description")
+    # when none is the default -- each radio expands to a
+    # general-description preview so they can be told apart before
+    # merging.
+    def test_merge_options_reveal_general_description_on_select
+      html = render_form(@description)
+
+      assert_html(html, "[data-controller='collapse-switch']")
+      assert_html(html, "input[type='radio']" \
+                        "[data-action='change->collapse-switch#switch']")
+
+      alt = name_descriptions(:peltigera_alt_desc)
+      assert_html(html,
+                  "[data-collapse-switch-type='#{alt.id}']",
+                  text: alt.gen_desc.tpl.as_displayed)
+    end
+
+    # peltigera_user_desc is private; rolf is not in its reader_groups,
+    # so the preview must not leak its gen_desc -- dick is a reader and
+    # sees the text.
+    def test_merge_option_preview_hides_unreadable_content
+      restricted = name_descriptions(:peltigera_user_desc)
+
+      non_reader_html = render_form(@description, user: users(:rolf))
+      assert_html(non_reader_html,
+                  "[data-collapse-switch-type='#{restricted.id}']",
+                  text: :merge_descriptions_preview_restricted.t.as_displayed)
+      assert_no_html(non_reader_html,
+                     "[data-collapse-switch-type='#{restricted.id}']",
+                     text: restricted.gen_desc.tpl.as_displayed)
+
+      reader_html = render_form(@description, user: users(:dick))
+      assert_html(reader_html,
+                  "[data-collapse-switch-type='#{restricted.id}']",
+                  text: restricted.gen_desc.tpl.as_displayed)
+    end
+
+    def test_merge_option_preview_falls_back_when_blank
+      blank_target = name_descriptions(:coprinus_comatus_desc)
+      assert_predicate(blank_target.gen_desc, :blank?,
+                       "Test requires a merge target with no gen_desc")
+      desc = name_descriptions(:draft_coprinus_comatus)
+
+      html = render_form(desc)
+
+      assert_html(html,
+                  "[data-collapse-switch-type='#{blank_target.id}']",
+                  text: :show_description_empty.t.as_displayed)
+    end
+
     def test_description_title_default_and_restricted
       # Merge from alt_desc: targets include peltigera_desc (default)
       # and peltigera_user_desc (restricted for dick, who can read it)
@@ -79,8 +129,8 @@ module Views::Controllers::Descriptions::Merges
       assert_html(html, "form[action*='/merges']")
     end
 
-    # When the parent has exactly one other description, Form#initialize
-    # sets form_object.target to it directly, pre-selecting that lone
+    # When the parent has one other description, Form#initialize sets
+    # form_object.target_id to it directly, pre-selecting that lone
     # radio button.
     def test_single_merge_target_auto_selects
       # coprinus_comatus has 2 descriptions: coprinus_comatus_desc and
@@ -91,13 +141,18 @@ module Views::Controllers::Descriptions::Merges
 
       html = render_form(desc)
 
-      # Exactly one merge target rendered, and it is auto-checked.
+      # One merge target rendered, and it is auto-checked.
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']",
+                        "[name='description_move_or_merge[target_id]']",
                   count: 1)
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']" \
+                        "[name='description_move_or_merge[target_id]']" \
                         "[value='#{target.id}'][checked]")
+
+      # The auto-checked radio's preview starts expanded -- with only
+      # one radio in the group, no `change` event fires to open it.
+      assert_html(html,
+                  "[data-collapse-switch-type='#{target.id}'].in")
     end
 
     private
