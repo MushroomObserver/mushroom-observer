@@ -72,6 +72,9 @@ module Views::Controllers::Descriptions::Merges
     end
 
     def merge_preview_text(desc)
+      return :merge_descriptions_preview_restricted.tpl unless
+        user_reader?(@user, desc)
+
       desc.gen_desc.presence&.tpl || :show_description_empty.tpl
     end
 

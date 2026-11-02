@@ -73,11 +73,27 @@ module Views::Controllers::Descriptions::Merges
                         "[data-action='change->collapse-switch#switch']")
 
       alt = name_descriptions(:peltigera_alt_desc)
-      restricted = name_descriptions(:peltigera_user_desc)
       assert_html(html,
                   "[data-collapse-switch-type='#{alt.id}']",
                   text: alt.gen_desc.tpl.as_displayed)
-      assert_html(html,
+    end
+
+    # peltigera_user_desc is private; rolf is not in its reader_groups,
+    # so the preview must not leak its gen_desc -- dick is a reader and
+    # sees the text.
+    def test_merge_option_preview_hides_unreadable_content
+      restricted = name_descriptions(:peltigera_user_desc)
+
+      non_reader_html = render_form(@description, user: users(:rolf))
+      assert_html(non_reader_html,
+                  "[data-collapse-switch-type='#{restricted.id}']",
+                  text: :merge_descriptions_preview_restricted.t.as_displayed)
+      assert_no_html(non_reader_html,
+                     "[data-collapse-switch-type='#{restricted.id}']",
+                     text: restricted.gen_desc.tpl.as_displayed)
+
+      reader_html = render_form(@description, user: users(:dick))
+      assert_html(reader_html,
                   "[data-collapse-switch-type='#{restricted.id}']",
                   text: restricted.gen_desc.tpl.as_displayed)
     end
