@@ -64,21 +64,10 @@ class BlankDescriptionPurge
   private
 
   def process(model)
-    model.where(blank_conditions(model)).find_each do |desc|
+    model.find_each do |desc|
       next if desc.notes?
 
       handle(desc)
-    end
-  end
-
-  # All of the model's note fields NULL or empty -- a loose SQL
-  # pre-filter; `desc.notes?` (which also catches whitespace-only
-  # fields) is the final word on whether a row is a candidate.
-  def blank_conditions(model)
-    table = model.arel_table
-    model.all_note_fields.inject(nil) do |cond, field|
-      blank = table[field].eq(nil).or(table[field].eq(""))
-      cond ? cond.and(blank) : blank
     end
   end
 
