@@ -34,8 +34,8 @@ module Views::Controllers::Locations
       assert_html(html, "a[href='#{routes.location_path(burbank.id)}']")
       # count defaults to 0 when the controller's observation_counts
       # hash has no entry for a given location.
-      assert_includes(html, "(3)")
-      assert_includes(html, "(0)")
+      assert_html(html, ".count-badge", text: "3")
+      assert_html(html, ".count-badge", text: "0")
     end
 
     private
