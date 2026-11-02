@@ -16,7 +16,7 @@ module Views::Controllers::Descriptions::Merges
       # construction.
       other_descriptions = description.parent.descriptions - [description]
       form_object = FormObject::DescriptionMoveOrMerge.new
-      form_object.target = other_descriptions.first.id if
+      form_object.target_id = other_descriptions.first.id if
         other_descriptions.length == 1
       form_object.delete = description.is_admin?(user)
       # Keep the explicit DOM id — tests, integration specs, and the
@@ -58,13 +58,13 @@ module Views::Controllers::Descriptions::Merges
 
     def render_merge_radio(desc)
       render(Components::Form::RadioCollapse.new(
-               form: self, field: :target, value: desc.id,
+               form: self, field: :target_id, value: desc.id,
                label: description_title(@user, desc)
              ))
     end
 
     def render_merge_preview(desc)
-      Collapsible(expanded: desc.id == model.target,
+      Collapsible(expanded: desc.id == model.target_id,
                   data: { collapse_switch_target: "panel",
                           collapse_switch_type: desc.id.to_s }) do
         div(class: "ml-4") { trusted_html(merge_preview_text(desc)) }

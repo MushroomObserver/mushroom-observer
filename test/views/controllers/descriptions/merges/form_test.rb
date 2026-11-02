@@ -26,7 +26,7 @@ module Views::Controllers::Descriptions::Merges
 
       # Radio buttons for merge targets
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']")
+                        "[name='description_move_or_merge[target_id]']")
 
       # Delete checkbox (admin can delete)
       assert_html(html, "input[type='checkbox']" \
@@ -129,8 +129,8 @@ module Views::Controllers::Descriptions::Merges
       assert_html(html, "form[action*='/merges']")
     end
 
-    # When the parent has exactly one other description, Form#initialize
-    # sets form_object.target to it directly, pre-selecting that lone
+    # When the parent has one other description, Form#initialize sets
+    # form_object.target_id to it directly, pre-selecting that lone
     # radio button.
     def test_single_merge_target_auto_selects
       # coprinus_comatus has 2 descriptions: coprinus_comatus_desc and
@@ -141,12 +141,12 @@ module Views::Controllers::Descriptions::Merges
 
       html = render_form(desc)
 
-      # Exactly one merge target rendered, and it is auto-checked.
+      # One merge target rendered, and it is auto-checked.
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']",
+                        "[name='description_move_or_merge[target_id]']",
                   count: 1)
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']" \
+                        "[name='description_move_or_merge[target_id]']" \
                         "[value='#{target.id}'][checked]")
 
       # The auto-checked radio's preview starts expanded -- with only
