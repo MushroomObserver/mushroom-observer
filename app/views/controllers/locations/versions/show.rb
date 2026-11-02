@@ -27,7 +27,7 @@ module Views::Controllers::Locations
           ::Tab::Location::VersionActions.new(location: @location)
         )
         container_class(:full)
-        column_classes(:seven_five)
+        column_classes(:six_even)
       end
 
       def render_columns
