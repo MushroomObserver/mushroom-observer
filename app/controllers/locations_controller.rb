@@ -50,7 +50,7 @@ class LocationsController < ApplicationController
       ["name",                               :sort_by_name.t],
       ["created_at",                         :sort_by_created_at.t],
       [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
-      ["num_views",                          :sort_by_num_views.t],
+      ["observations",                       :sort_by_observations.t],
       ["box_area",                           :sort_by_box_area.t]
     ]
   end
@@ -84,7 +84,6 @@ class LocationsController < ApplicationController
     # Save two lookups in comments_for_object
     @comments = @location.comments&.sort_by(&:created_at)&.reverse
     @desc_comments = @description&.comments&.sort_by(&:created_at)&.reverse
-    init_projects_ivar
     render_show_view
   end
 
@@ -205,13 +204,13 @@ class LocationsController < ApplicationController
              location: @location,
              description: @description,
              versions: @versions,
-             comments: @comments.to_a,
-             projects: @projects
+             comments: @comments.to_a
            ))
   end
 
   def render_index_view
     locations = @objects.to_a
+    locations.each(&:strict_loading!)
     render(Views::Controllers::Locations::Index.new(
              query: @query, locations: locations,
              pagination_data: @pagination_data,
@@ -226,9 +225,11 @@ class LocationsController < ApplicationController
   # base Location query.
   def known_observation_counts(locations)
     list = species_list_filter_for(@query)
-    base = ::Observation.where(location: locations)
-    base = base.joins(:species_lists).where(species_lists: { id: list }) if list
-    base.group(:location_id).count
+    return ObservationCounter.counts_for(locations) unless list
+
+    ::Observation.where(location: locations).
+      joins(:species_lists).where(species_lists: { id: list }).
+      group(:location_id).count
   end
 
   # If the query was filtered down to a single species list, only
@@ -277,13 +278,6 @@ class LocationsController < ApplicationController
     else
       flash_error(:runtime_object_not_found.t(type: :description,
                                               id: desc_id))
-    end
-  end
-
-  def init_projects_ivar
-    # Get a list of projects the user can create drafts for.
-    @projects = @user&.projects_member&.select do |project|
-      @location.descriptions.none? { |d| d.belongs_to_project?(project) }
     end
   end
 

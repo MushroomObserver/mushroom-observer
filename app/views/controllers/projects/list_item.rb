@@ -14,10 +14,17 @@ module Views::Controllers::Projects
     prop :remove, _Boolean, default: false
     prop :add, _Boolean, default: false
     prop :violation_kinds, _Array(Symbol), default: -> { [] }
+    # Only the index page passes this -- nil here means "don't show a
+    # badge", not "zero observations".
+    prop :observation_count, _Nilable(Integer), default: nil
 
     def view_template
       render_info
-      render_manage_section if @remove || @add
+      if @remove || @add
+        render_manage_section
+      elsif @observation_count
+        CountBadge(count: @observation_count)
+      end
     end
 
     private

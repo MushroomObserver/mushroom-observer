@@ -17,7 +17,7 @@ module Views::Controllers::Descriptions
         render_panel(field, value)
       end
 
-      trusted_html(:show_description_empty.tpl) unless any_notes
+      render_empty_message unless any_notes
     end
 
     private
@@ -45,6 +45,14 @@ module Views::Controllers::Descriptions
         panel.with_heading { :"form_#{parent_type}s_#{field}".l }
         panel.with_body { trusted_html(value.tpl) }
       end
+    end
+
+    # Bare (no panel wrapper) text, unlike every other section on
+    # this page -- needs padding since the page's
+    # `content_padding(:panels)` default assumes all content is
+    # panel-wrapped.
+    def render_empty_message
+      ContentPadded { trusted_html(:show_description_empty.tpl) }
     end
   end
 end

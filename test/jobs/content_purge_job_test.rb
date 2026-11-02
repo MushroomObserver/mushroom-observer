@@ -39,6 +39,11 @@ class ContentPurgeJobTest < ActiveJob::TestCase
     purge = ContentPurge.create!(user: @mary, target_user: @mary)
     expected = with_inat_name { expected_counts }
 
+    # Nothing clears this between test files in the same parallel-test
+    # worker process, so assert_notices below would otherwise see mail
+    # left over from whichever test ran before this one.
+    ActionMailer::Base.deliveries.clear
+
     with_inat_name do
       perform_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
         ContentPurgeJob.perform_now(purge)

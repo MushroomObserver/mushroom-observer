@@ -83,8 +83,11 @@ class Inat
           return alert("#{label} #{str.inspect} does not parse as a name")
         end
 
+        # id: :desc as a final tiebreaker -- without it, two Names tied
+        # on both deprecated and created_at have no stable order, so
+        # which one .first returns can differ between calls (#5499).
         Name.where(text_name: parsed.text_name).
-          order(deprecated: :asc, created_at: :desc).first ||
+          order(deprecated: :asc, created_at: :desc, id: :desc).first ||
           create_name(name: parsed.search_name, rank: parsed.rank) ||
           alert("#{label} #{str.inspect} could not be created as an MO name")
       end

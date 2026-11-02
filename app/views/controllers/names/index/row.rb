@@ -69,7 +69,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
     count = @counts[@name.id]
     return unless count
 
-    span(class: "badge") { plain(count.to_s) }
+    CountBadge(count: count)
   end
 
   # `has_descriptions` subaction columns: when a description

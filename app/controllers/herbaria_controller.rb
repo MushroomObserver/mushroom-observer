@@ -170,6 +170,7 @@ class HerbariaController < ApplicationController # rubocop:disable Metrics/Class
 
   # Phlex action template — explicit render per the conversion rule.
   def render_index_view
+    @objects.each(&:strict_loading!)
     render(Views::Controllers::Herbaria::Index.new(
              query: @query, pagination_data: @pagination_data,
              objects: @objects, merge: @merge

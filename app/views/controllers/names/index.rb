@@ -33,7 +33,14 @@ module Views::Controllers::Names
          default: -> { {} }
 
     def view_template
-      container_class(:text_image)
+      register_chrome
+      render_names
+    end
+
+    private
+
+    def register_chrome
+      container_class(:full)
       add_index_title(@query)
       add_context_nav(
         Tab::Name::IndexActions.new(
@@ -44,14 +51,14 @@ module Views::Controllers::Names
       # `NamesController#index_sort_options` — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data, @test_pagination_args)
+    end
 
+    def render_names
       render_suggestions_alert if suggest_alternates?
       render_help_blurb if @help
 
       PaginatedResults { render_name_rows }
     end
-
-    private
 
     def suggest_alternates?
       @objects.empty? && @name_suggestions&.any?

@@ -18,15 +18,25 @@ class ProjectsController < ApplicationController
   # Overrides `ApplicationController::Indexes#render_index_view` so
   # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
+    @objects.each(&:strict_loading!)
     render(Views::Controllers::Projects::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects
+             objects: @objects,
+             observation_counts: ObservationCounter.counts_for(@objects)
            ))
   end
 
   # Sort options for the index page. Read by `add_sorter` in the
   # view. Each key must resolve to `Project.order_by_<key>`.
   def index_sort_options
+    self.class.sort_options
+  end
+
+  # Class-level cousin of `#index_sort_options` so foreign callers
+  # can borrow the table without instantiating the controller.
+  # `Observations::ProjectsController#edit` uses it to sort the
+  # `@all_projects` query when listing projects for an observation.
+  def self.sort_options
     [
       ["name",                :sort_by_title.l],
       ["created_at",          :sort_by_created_at.l],
