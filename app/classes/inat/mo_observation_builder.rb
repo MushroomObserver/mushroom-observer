@@ -113,8 +113,7 @@ class Inat
     end
 
     # The MO name for the iNat provisional-name observation field, or nil.
-    # iNat can't use a provisional name as its own identification, so it is a
-    # separate proposal from the Observation Taxon. Creates the MO name if
+    # A separate proposal from the Observation Taxon. Creates the MO name if
     # absent.
     # NOTE: iNat users seem to add a prov name only when there's a sequence.
     def prov_name
@@ -124,8 +123,10 @@ class Inat
     end
 
     def find_or_create_prov_name
-      find_or_create_name(Name.parse_name(inat_obs.provisional_name))
+      find_or_create_name(parse_field(inat_obs.provisional_name))
     end
+
+    def parse_field(str) = Inat::NameString.parse(str, taxon: inat_obs[:taxon])
 
     # The MO name for the iNat "Species Name Override" obs field, or nil. The
     # override outranks the provisional name and the Observation Taxon as the
@@ -139,7 +140,7 @@ class Inat
     end
 
     def find_or_create_override_name
-      find_or_create_name(Name.parse_name(inat_obs.name_override)) ||
+      find_or_create_name(parse_field(inat_obs.name_override)) ||
         log_ignored_override("unparseable or uncreatable name")
     rescue StandardError => e
       log_ignored_override(e.message)
@@ -189,7 +190,7 @@ class Inat
       Inat::NamingPlan.lead_vote_for(
         quality_grade: inat_obs[:quality_grade],
         sequence_evidence: inat_obs.sequences.present?,
-        provisional_evidence: prov_name.present?
+        provisional_evidence: prov_name.present? || inat_obs.provisional_taxon?
       )
     end
 
