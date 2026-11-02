@@ -667,6 +667,9 @@ class Name::TaxonomyTest < UnitTestCase
     name = Name.new(text_name: "Agricales", author: "sensu lato")
     assert(name.unregistrable?, "Names s.l. should be unregistrable")
 
+    name = names(:code_name)
+    assert(name.unregistrable?, "Code names should be unregistrable")
+
     name = Name.new(text_name: "Eukaryota", rank: "Domain")
     assert(name.unregistrable?, "Domains should be unregistrable")
 
@@ -686,6 +689,23 @@ class Name::TaxonomyTest < UnitTestCase
     name = Name.new(text_name: "New species", rank: "Species")
     assert(name.registrable?,
            "Non-group, non-domain kingdom-less names should be registrable")
+  end
+
+  def test_code_name
+    name = Name.new(text_name: "Cortinarius sp. 'IN34'", rank: "Species")
+    assert(name.code_name?, "'sp. ' + quote should be a code name")
+
+    name = names(:coprinus_comatus)
+    assert_not(name.code_name?,
+               "Ordinary binomial names should not be code names")
+
+    name = Name.new(text_name: "Cortinarius sp-IN34", rank: "Species")
+    assert_not(name.code_name?,
+               "'sp' without a period should not be a code name")
+
+    name = Name.new(text_name: 'Cortinarius "quoted"', rank: "Species")
+    assert_not(name.code_name?,
+               "A quoted name without 'sp. ' should not be a code name")
   end
 
   def test_searchability_in_registry
