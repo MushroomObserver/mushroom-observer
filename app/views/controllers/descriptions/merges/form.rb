@@ -39,15 +39,40 @@ module Views::Controllers::Descriptions::Merges
 
     private
 
+    # Every option's title can read identically ("Public Description")
+    # when none of them is the parent's default -- the radios alone
+    # give no way to tell them apart, so each one expands to show its
+    # general description on selection.
     def render_merge_options
       if merges.any?
-        options = merges.map do |desc|
-          [desc.id, description_title(@user, desc)]
+        div(data: { controller: "collapse-switch" }) do
+          merges.each do |desc|
+            render_merge_radio(desc)
+            render_merge_preview(desc)
+          end
         end
-        radio_field(:target, *options)
       else
         p { :merge_descriptions_no_others.t }
       end
+    end
+
+    def render_merge_radio(desc)
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: :target, value: desc.id,
+               label: description_title(@user, desc)
+             ))
+    end
+
+    def render_merge_preview(desc)
+      Collapsible(expanded: false,
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: desc.id.to_s }) do
+        div(class: "ml-4") { trusted_html(merge_preview_text(desc)) }
+      end
+    end
+
+    def merge_preview_text(desc)
+      desc.gen_desc.presence&.tpl || :show_description_empty.tpl
     end
 
     def render_delete_checkbox
