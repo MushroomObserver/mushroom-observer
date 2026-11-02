@@ -50,7 +50,7 @@ class LocationsController < ApplicationController
       ["name",                               :sort_by_name.t],
       ["created_at",                         :sort_by_created_at.t],
       [(rss_log ? "rss_log" : "updated_at"), :sort_by_updated_at.t],
-      ["num_views",                          :sort_by_num_views.t],
+      ["observations",                       :sort_by_observations.t],
       ["box_area",                           :sort_by_box_area.t]
     ]
   end
@@ -210,6 +210,7 @@ class LocationsController < ApplicationController
 
   def render_index_view
     locations = @objects.to_a
+    locations.each(&:strict_loading!)
     render(Views::Controllers::Locations::Index.new(
              query: @query, locations: locations,
              pagination_data: @pagination_data,
@@ -224,9 +225,11 @@ class LocationsController < ApplicationController
   # base Location query.
   def known_observation_counts(locations)
     list = species_list_filter_for(@query)
-    base = ::Observation.where(location: locations)
-    base = base.joins(:species_lists).where(species_lists: { id: list }) if list
-    base.group(:location_id).count
+    return ObservationCounter.counts_for(locations) unless list
+
+    ::Observation.where(location: locations).
+      joins(:species_lists).where(species_lists: { id: list }).
+      group(:location_id).count
   end
 
   # If the query was filtered down to a single species list, only

@@ -45,10 +45,7 @@ module Views::Controllers::Locations::Undefined
       define_title = :list_place_names_undef_define_tooltip.t
       assert_html(html, "a[href='#{define_target}'][title='#{define_title}']")
 
-      # `.list-group-item` is the Bootstrap structural class the
-      # ListGroup wrapper itself depends on -- scoping the count to one
-      # row this way avoids matching against the whole rendered page.
-      assert_html(html, ".list-group-item", text: "(3)")
+      assert_html(html, ".count-badge", text: "3")
     end
 
     private

@@ -27,12 +27,28 @@ module Views::Controllers::SpeciesLists
       assert_html(html, ".list_when")
     end
 
-    # No `remove` / `add` flag → no `.list_manage` slot at all.
+    # No `remove` / `add` flag → no `.list_manage` slot.
     def test_does_not_render_manage_section_by_default
       html = render_listing
 
       assert_no_html(html, ".list_manage")
       assert_no_html(html, "form")
+    end
+
+    # No `observation_count` passed (the observation-attach edit
+    # page's case) → no badge, not a "0" badge.
+    def test_does_not_render_count_badge_by_default
+      html = render_listing
+
+      assert_no_html(html, ".count-badge")
+    end
+
+    # `observation_count` passed (the index page's case) → badge shows
+    # that count, even when `remove`/`add` aren't set.
+    def test_renders_count_badge_when_observation_count_passed
+      html = render_listing(observation_count: 5)
+
+      assert_html(html, ".count-badge", text: "5")
     end
 
     # `remove: true` → put-button with `commit=remove`, modern Turbo
@@ -93,15 +109,9 @@ module Views::Controllers::SpeciesLists
 
     private
 
-    def render_listing(species_list: @species_list,
-                       observation: nil, remove: false, add: false,
-                       project: nil)
+    def render_listing(species_list: @species_list, **)
       render(Views::Controllers::SpeciesLists::Listing.new(
-               species_list: species_list,
-               observation: observation,
-               remove: remove,
-               add: add,
-               project: project
+               species_list: species_list, **
              ))
     end
   end

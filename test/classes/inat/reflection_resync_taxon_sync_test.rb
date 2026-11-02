@@ -224,6 +224,61 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(@old, @obs.reload.name)
   end
 
+  # A provisional Observation Taxon outranks the field (#2892).
+  def test_provisional_taxon_outranks_the_provisional_name
+    provisional = { name: "Provisional Species Name",
+                    value: @old.text_name }
+
+    outcome = sync(fresh(ofvs: [provisional], taxon: { provisional: true }))
+
+    assert_empty(outcome.alerts)
+    assert_nil(@obs.namings.find_by(name: @old),
+               "the field is ignored when iNat's taxon is provisional")
+    assert_equal(@new, @obs.reload.name)
+  end
+
+  # A typing slip in the field still finds the MO name it means (#2892).
+  def test_provisional_name_with_a_quote_slip_leads
+    name = Name.create_with_trusted_rank(User.admin, "Agrocybe sp. 'NY17'",
+                                         "Species")
+    provisional = { name: "Provisional Species Name",
+                    value: "Agrocybe sp. ' NY17'" }
+
+    outcome = sync(fresh(ofvs: [provisional]))
+
+    assert_empty(outcome.alerts)
+    assert_equal(name, @obs.reload.name, "the repaired field leads")
+  end
+
+  # #5499: two Names tied on both `deprecated` and `created_at` (the
+  # column has no fractional-second precision, so same-second ties are
+  # common) need a final tiebreaker, or which one resolves can differ
+  # between two otherwise-identical resyncs.
+  def test_provisional_name_tie_break_is_deterministic
+    tied_at = 1.day.ago
+    older = duplicate_name("Tiebreakia testia")
+    older.update_column(:created_at, tied_at)
+    newer = duplicate_name("Tiebreakia testia")
+    newer.update_column(:created_at, tied_at)
+    provisional = { name: "Provisional Species Name",
+                    value: "Tiebreakia testia" }
+
+    sync(fresh(ofvs: [provisional]))
+    first_pick = @obs.namings.reload.
+                 find_by(name_id: [older.id, newer.id]).name
+
+    @obs.namings.destroy_all
+    Vote.where(observation: @obs).destroy_all
+
+    sync(fresh(ofvs: [provisional]))
+    second_pick = @obs.namings.reload.
+                  find_by(name_id: [older.id, newer.id]).name
+
+    assert_equal(newer, first_pick, "a tie should resolve to the newest Name")
+    assert_equal(first_pick, second_pick,
+                 "the tie-break must be stable across repeated resolutions")
+  end
+
   def test_override_name_missing_from_mo_is_created_and_leads
     assert_nil(Name.find_by(text_name: "Agrocybe yyy"))
     override = { name: "Species Name Override", value: "Agrocybe yyy" }
@@ -250,7 +305,7 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
   end
 
   def test_unknown_taxon_is_left_alone
-    outcome = sync(fresh(ancestor_ids: []))
+    outcome = sync(fresh(taxon: { ancestor_ids: [] }))
 
     assert_not(outcome.changed?)
     assert_empty(outcome.alerts)
@@ -276,6 +331,20 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
   private
 
+  # A second, independent Name row at the given text_name. Bypasses
+  # Name.create_with_trusted_rank's find-or-create check (which would
+  # just return the first one) and the search_name_indistinct
+  # validation (which blocks a second save through the normal flow,
+  # but duplicate-text_name rows do exist in the production database
+  # from paths that predate or bypass that validation -- #5499).
+  def duplicate_name(text_name)
+    parse = Name.parse_name(text_name, rank: "Species", force_rank: true)
+    name = Name.new(parse.params.merge(user: User.admin))
+    name.current_user = User.admin
+    name.save!(validate: false)
+    name
+  end
+
   def import_naming(name, value)
     naming = Naming.create!(observation: @obs, user: @importer, name: name,
                             external_site: @site, reasons: { 2 => "import" })
@@ -289,10 +358,10 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     naming.votes.reload.find_by(user: @importer)
   end
 
+  # taxon: attributes overriding the mock's taxon (ancestor_ids, provisional).
   def fresh(name: "Coprinus comatus", rank: "species", quality: "research",
-            ofvs: [], ancestor_ids: nil)
-    taxon = @raw[:taxon].merge(name: name, rank: rank)
-    taxon[:ancestor_ids] = ancestor_ids unless ancestor_ids.nil?
+            ofvs: [], taxon: {})
+    taxon = @raw[:taxon].merge(name: name, rank: rank, **taxon)
     # No photos: the full-resync test would otherwise import them.
     Inat::Obs.new(JSON.generate(@raw.merge(quality_grade: quality,
                                            taxon: taxon, identifications: [],

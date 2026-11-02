@@ -282,8 +282,7 @@ class InatObsTest < UnitTestCase
     )
   end
 
-  # NOTE: iNat provisional names are not iNat taxa;
-  # Rather, they simply string values of an observation field
+  # The "Provisional Species Name" observation field, as written.
   def test_provisional_name
     mock_inat_obs = mock_observation("arrhenia_sp_NY02")
     prov_name = mock_inat_obs.inat_prov_name
@@ -315,6 +314,19 @@ class InatObsTest < UnitTestCase
       "inat_prov_name should be blank for obs with observation fields, " \
       "but no provisional name field"
     )
+  end
+
+  # A provisional Observation Taxon outranks the field (#2892).
+  def test_provisional_name_yields_to_a_provisional_taxon
+    file = "test/inat/hygrocybe_sp_conica-CA06_ncbi_style.txt"
+    raw = JSON.parse(File.read(file))["results"].first
+    raw["taxon"]["provisional"] = true
+    inat_obs = Inat::Obs.new(JSON.generate(raw))
+
+    assert(inat_obs.provisional_taxon?)
+    assert_nil(inat_obs.provisional_name)
+    assert_equal("Hygrocybe sp. 'conica-CA06'", inat_obs.inat_prov_name,
+                 "the field is still read")
   end
 
   def test_name_override

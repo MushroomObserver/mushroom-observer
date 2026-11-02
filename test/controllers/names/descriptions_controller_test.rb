@@ -562,6 +562,7 @@ module Names
       params = {
         name_id: name.id,
         description: empty_notes.merge(
+          notes: "Some notes.",
           source_type: "public",
           source_name: "",
           public: "1",
@@ -573,7 +574,7 @@ module Names
       assert_response(:redirect)
       assert_equal(0, name.descriptions.length)
 
-      # No desc yet -> make new desc default.
+      # No desc yet, this one has content -> make new desc default.
       login("dick")
       post(:create, params: params)
       assert_flash_success
@@ -614,6 +615,33 @@ module Names
       assert_obj_arrays_equal([UserGroup.all_users], desc.reader_groups)
       assert_equal(true, desc.public)
       assert_equal(true, desc.public_write)
+    end
+
+    # Issue #5585: a description with no content submitted shouldn't
+    # become the Name's permanent default, even when it's otherwise
+    # eligible (no existing default, fully public).
+    def test_create_name_description_public_blank_does_not_become_default
+      name = names(:conocybe_filaris)
+      assert_nil(name.description)
+
+      params = {
+        name_id: name.id,
+        description: empty_notes.merge(
+          source_type: "public",
+          source_name: "",
+          public: "1",
+          public_write: "1"
+        )
+      }
+
+      login("dick")
+      post(:create, params: params)
+      assert_flash_success
+      desc = NameDescription.last
+      assert_equal(desc.name_id, name.id)
+      name.reload
+      assert_nil(name.description)
+      assert_obj_arrays_equal([desc], name.descriptions)
     end
 
     # Classification validation moved with the column to Name itself

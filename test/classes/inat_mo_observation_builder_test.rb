@@ -13,13 +13,15 @@ class InatMoObservationBuilderTest < UnitTestCase
   # MoObservationBuilder reads in these unit tests.
   class FakeInatObs
     FAKE_INAT_ID = 12_345_678
-    def initialize(sequences:, provisional_name:, quality_grade:,
-                   name_override: nil, obs_taxon_name: nil)
+    # fields: name_override, obs_taxon_name (the MO Name the iNat taxon
+    # resolves to), and taxon (the iNat taxon hash).
+    def initialize(sequences:, provisional_name:, quality_grade:, **fields)
       @sequences = sequences
       @provisional_name = provisional_name
       @quality_grade = quality_grade
-      @name_override = name_override
-      @obs_taxon_name = obs_taxon_name
+      @name_override = fields[:name_override]
+      @obs_taxon_name = fields[:obs_taxon_name]
+      @taxon = fields[:taxon]
     end
 
     attr_reader :sequences, :provisional_name, :name_override
@@ -28,9 +30,11 @@ class InatMoObservationBuilderTest < UnitTestCase
       @obs_taxon_name
     end
 
+    def provisional_taxon? = @taxon.to_h[:provisional] == true
+
     def [](key)
       { quality_grade: @quality_grade, license_code: "cc-by",
-        identifications: [], id: FAKE_INAT_ID }[key]
+        identifications: [], id: FAKE_INAT_ID, taxon: @taxon }[key]
     end
   end
 
@@ -87,6 +91,51 @@ class InatMoObservationBuilderTest < UnitTestCase
     existing = names(:lactarius_alpinus)
     builder = builder_for(provisional_name: existing.text_name)
     assert_equal(existing, builder.send(:prov_name))
+  end
+
+  # A typing slip in the field still finds the MO name it means (#2892).
+  def test_prov_name_repairs_a_missing_closing_quote
+    existing = Name.create_with_trusted_rank(User.admin, "Russula sp. 'IN02'",
+                                             "Species")
+    builder = builder_for(provisional_name: "Russula sp. 'IN02")
+    assert_equal(existing, builder.send(:prov_name))
+  end
+
+  # A provisional iNat taxon counts as provisional evidence for the lead's
+  # vote, as the field does (#2892).
+  def test_naming_vote_provisional_taxon_is_promising
+    builder = builder_for(taxon: { provisional: true })
+
+    assert_equal(Vote::NEXT_BEST_VOTE, builder.send(:naming_vote))
+  end
+
+  # An unranked trinomial takes the variety rank from the iNat taxon.
+  def test_override_name_gets_the_rank_of_its_inat_variety
+    existing = Name.create_with_trusted_rank(
+      User.admin, "Mycena epipterygia var. lignicola", "Variety"
+    )
+    builder = builder_for(
+      name_override: "Mycena epipterygia lignicola",
+      taxon: { name: "Mycena epipterygia lignicola", rank: "variety" }
+    )
+    assert_equal(existing, builder.send(:override_name))
+  end
+
+  # #5499: best_mo_homonym needs the same id: :desc tiebreaker as
+  # TaxonSync#parsed_name -- two Names tied on deprecated and
+  # created_at otherwise have no stable resolution, and import
+  # (this class) and resync (TaxonSync) are meant to agree on the
+  # same Name for the same text_name.
+  def test_prov_name_tie_break_matches_taxon_syncs
+    tied_at = 1.day.ago
+    older = duplicate_name("Tiebreakia testia")
+    older.update_column(:created_at, tied_at)
+    newer = duplicate_name("Tiebreakia testia")
+    newer.update_column(:created_at, tied_at)
+
+    builder = builder_for(provisional_name: "Tiebreakia testia")
+
+    assert_equal(newer, builder.send(:prov_name))
   end
 
   # An override matching an existing MO name reuses it (no API post).
@@ -199,12 +248,26 @@ class InatMoObservationBuilderTest < UnitTestCase
 
   private
 
+  # A second, independent Name row at the given text_name. Bypasses
+  # Name.create_with_trusted_rank's find-or-create check (which would
+  # just return the first one) and the search_name_indistinct
+  # validation (which blocks a second save through the normal flow,
+  # but duplicate-text_name rows do exist in the production database
+  # from paths that predate or bypass that validation -- #5499).
+  def duplicate_name(text_name)
+    parse = Name.parse_name(text_name, rank: "Species", force_rank: true)
+    name = Name.new(parse.params.merge(user: User.admin))
+    name.current_user = User.admin
+    name.save!(validate: false)
+    name
+  end
+
   def builder_for(provisional_name: nil, name_override: nil,
-                  obs_taxon_name: nil)
+                  obs_taxon_name: nil, taxon: nil)
     fake = FakeInatObs.new(sequences: [], quality_grade: "needs_id",
                            provisional_name: provisional_name,
                            name_override: name_override,
-                           obs_taxon_name: obs_taxon_name)
+                           obs_taxon_name: obs_taxon_name, taxon: taxon)
     Inat::MoObservationBuilder.new(inat_obs: fake, user: users(:rolf),
                                    external_site: external_sites(:inaturalist))
   end

@@ -180,10 +180,13 @@ module Names
       redirect_to(@description.show_link_args)
     end
 
-    # called by :create. Make this the "default" description
-    # if there isn't one and this is publicly readable and writable.
+    # called by :create. Make this the "default" description if there
+    # isn't one, this is publicly readable and writable, and it has
+    # content -- a blank submission (issue #5585) shouldn't become a
+    # Name's permanent default.
     def set_default_description_if_public
-      return unless !@name.description && @description.fully_public?
+      return unless !@name.description && @description.fully_public? &&
+                    @description.notes?
 
       @name.description = @description
     end
