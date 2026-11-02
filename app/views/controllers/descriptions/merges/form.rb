@@ -64,7 +64,7 @@ module Views::Controllers::Descriptions::Merges
     end
 
     def render_merge_preview(desc)
-      Collapsible(expanded: false,
+      Collapsible(expanded: desc.id == model.target,
                   data: { collapse_switch_target: "panel",
                           collapse_switch_type: desc.id.to_s }) do
         div(class: "ml-4") { trusted_html(merge_preview_text(desc)) }

@@ -132,6 +132,11 @@ module Views::Controllers::Descriptions::Merges
       assert_html(html, "input[type='radio']" \
                         "[name='description_move_or_merge[target]']" \
                         "[value='#{target.id}'][checked]")
+
+      # The auto-checked radio's preview starts expanded -- with only
+      # one radio in the group, no `change` event fires to open it.
+      assert_html(html,
+                  "[data-collapse-switch-type='#{target.id}'].in")
     end
 
     private
