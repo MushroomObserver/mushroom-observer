@@ -45,7 +45,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: rolf_desc.id,
-        description_move_or_merge: { target: mary_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash(:runtime_edit_description_denied)
@@ -57,7 +57,7 @@ module Names::Descriptions
       login("dick")
       params = {
         id: rolf_desc.id,
-        description_move_or_merge: { target: mary_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
       # shouldn't work, there is a conflict. requires manual resolution
@@ -70,7 +70,7 @@ module Names::Descriptions
       # now try with delete. Also shouldn't work, there is a conflict
       params = {
         id: rolf_desc.id,
-        description_move_or_merge: { target: mary_desc.id, delete: 1 }
+        description_move_or_merge: { target_id: mary_desc.id, delete: 1 }
       }
       post(:create, params: params)
       assert_flash(:runtime_description_merge_conflict)
@@ -85,7 +85,7 @@ module Names::Descriptions
       # Merge should work, no delete.
       params = {
         id: rolf_desc.id,
-        description_move_or_merge: { target: mary_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: mary_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash(:runtime_description_merge_success,
@@ -96,7 +96,7 @@ module Names::Descriptions
       # admin -- delete_denied fires alongside merge_success
       params = {
         id: rolf_desc.id,
-        description_move_or_merge: { target: mary_desc.id, delete: 1 }
+        description_move_or_merge: { target_id: mary_desc.id, delete: 1 }
       }
       post(:create, params: params)
       assert_flash(
@@ -126,7 +126,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: rolf_desc.id,
-        description_move_or_merge: { target: "bogus", delete: 0 }
+        description_move_or_merge: { target_id: "bogus", delete: 0 }
       }
       post(:create, params: params)
       assert_flash(
@@ -166,7 +166,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: src_desc.id,
-        description_move_or_merge: { target: dest_desc.id, delete: "1" }
+        description_move_or_merge: { target_id: dest_desc.id, delete: "1" }
       }
       old_format_name = src_desc.format_name
       new_format_name = dest_desc.format_name
@@ -193,7 +193,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: mary_desc.id,
-        description_move_or_merge: { target: rolf_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: rolf_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error(:runtime_description_private)
@@ -205,7 +205,7 @@ module Names::Descriptions
       login("rolf")
       params = {
         id: 999_999,
-        description_move_or_merge: { target: rolf_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: rolf_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error

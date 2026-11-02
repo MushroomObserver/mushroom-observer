@@ -51,18 +51,33 @@ module Locations::Descriptions
       params = {
         id: public_desc.id,
         description_move_or_merge: {
-          target: burbank_location.id, delete: 0
+          target_id: burbank_location.id, delete: 0
         }
       }
       post(:create, params: params)
       assert_flash_success
     end
 
+    def test_move_description_to_same_location
+      login("dick")
+      params = {
+        id: public_desc.id,
+        description_move_or_merge: {
+          target_id: gualala_location.id, delete: 0
+        }
+      }
+      post(:create, params: params)
+      assert_flash_error(:runtime_description_move_same_parent, type: :location)
+      assert_redirected_to(
+        new_move_location_description_path(id: public_desc.id)
+      )
+    end
+
     def test_move_description_to_nonexistant_location
       login("dick")
       params = {
         id: public_desc.id,
-        description_move_or_merge: { target: "bogus", delete: 0 }
+        description_move_or_merge: { target_id: "bogus", delete: 0 }
       }
       post(:create, params: params)
       assert_flash(
@@ -77,7 +92,7 @@ module Locations::Descriptions
       params = {
         id: public_desc.id,
         description_move_or_merge: {
-          target: burbank_location.id, delete: 1
+          target_id: burbank_location.id, delete: 1
         }
       }
 
@@ -101,7 +116,7 @@ module Locations::Descriptions
       params = {
         id: private_desc.id,
         description_move_or_merge: {
-          target: burbank_location.id, delete: 0
+          target_id: burbank_location.id, delete: 0
         }
       }
       post(:create, params: params)
@@ -115,7 +130,7 @@ module Locations::Descriptions
       params = {
         id: public_desc.id,
         description_move_or_merge: {
-          target: burbank_location.id, delete: 0
+          target_id: burbank_location.id, delete: 0
         }
       }
 
@@ -144,7 +159,7 @@ module Locations::Descriptions
       params = {
         id: 999_999,
         description_move_or_merge: {
-          target: burbank_location.id, delete: 0
+          target_id: burbank_location.id, delete: 0
         }
       }
       post(:create, params: params)
