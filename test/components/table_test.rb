@@ -143,6 +143,10 @@ class TableTest < ComponentTestCase
     assert_nil(Components::Table.align_class(nil))
   end
 
+  def test_align_class_rejects_unknown_value
+    assert_raises(ArgumentError) { Components::Table.align_class(:bogus) }
+  end
+
   def test_works_with_activerecord_objects
     user_list = [users(:rolf), users(:mary)]
 

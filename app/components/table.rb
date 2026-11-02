@@ -150,11 +150,19 @@ class Components::Table < Components::Base
     nil
   end
 
+  ALIGNS = [:left, :center, :right].freeze
+
   # Dual access, matching Collapsible.collapse_classes /
   # Button::Styling.btn_class -- callable directly by row/body-mode
   # callers, and used internally by #column above.
   def self.align_class(align)
     return nil unless align
+    unless ALIGNS.include?(align)
+      raise(ArgumentError.new(
+              "Unknown Table align: #{align.inspect}. " \
+              "Valid values: #{ALIGNS.join(", ")}."
+            ))
+    end
 
     "text-#{align}"
   end
