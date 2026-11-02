@@ -4185,6 +4185,7 @@
   runtime_description_merge_delete_denied: You don't have permission to delete the old description.
   runtime_description_merge_deleted: "The old description was deleted: [old]"
   runtime_description_merge_success: Successfully merged the descriptions.
+  runtime_description_move_same_parent: Pick a different [type] to move the description to.
   runtime_description_move_success: Successfully moved the description.
   runtime_description_private: That description is private!
   runtime_description_removed_admin: Revoked admin permission for [name].
