@@ -46,6 +46,24 @@ module Views::Controllers::Projects
       assert_no_html(html, "form")
     end
 
+    # No `observation_count` passed (the observation-attach edit
+    # page's case) → no badge, not a "0" badge.
+    def test_does_not_render_count_badge_by_default
+      project = projects(:eol_project)
+      html = render_item(project: project)
+
+      assert_no_html(html, ".count-badge")
+    end
+
+    # `observation_count` passed (the index page's case) → badge shows
+    # that count, even when `remove`/`add` aren't set.
+    def test_renders_count_badge_when_observation_count_passed
+      project = projects(:eol_project)
+      html = render_item(project: project, observation_count: 7)
+
+      assert_html(html, ".count-badge", text: "7")
+    end
+
     def test_remove_button
       project = projects(:eol_project)
       obs = observations(:coprinus_comatus_obs)

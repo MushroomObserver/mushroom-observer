@@ -121,7 +121,7 @@ module Locations
       assert_page_title(:location_descriptions.ti)
       assert_displayed_filters("#{:query_by_author.l}: #{user.name}")
       assert_equal(
-        assert_select("#results .list-group-item").count,
+        assert_select("#results table tbody tr").count,
         descs_authored_by_user_count
       )
       assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},

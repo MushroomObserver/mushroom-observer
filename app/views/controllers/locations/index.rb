@@ -13,15 +13,13 @@ module Views::Controllers::Locations
     def view_template
       register_chrome
 
-      Container(width: :text_image, class: "mt-3") do
-        render_locations
-      end
+      render_locations
     end
 
     private
 
     def register_chrome
-      container_class(:full)
+      container_class(:wide)
       add_index_title(@query)
       add_context_nav(::Tab::Location::IndexActions.new(
                         query: @query, q_param: q_param(@query),
@@ -40,27 +38,22 @@ module Views::Controllers::Locations
     def render_locations
       return unless @locations.any?
 
-      PaginatedResults do
-        small(class: "d-block text-right px-3 mb-1") do
-          plain(:list_place_names_parenthetical.l)
-        end
-        render_known_list(@observation_counts)
-      end
+      PaginatedResults { render_location_rows }
     end
 
-    def render_known_list(counts)
+    def render_location_rows
       ListGroup do |list|
-        @locations.each { |loc| render_known_item(list, loc, counts) }
-      end
-    end
-
-    def render_known_item(list, location, counts)
-      list.item(class: "d-flex align-items-start") do
-        div(class: "id-badge-col") { IDBadge(object: location, size: :lg) }
-        div(class: "flex-grow-1") do
-          Link(type: :location, where: location.name.t, location: location)
+        @locations.each do |location|
+          list.item(class: "d-flex align-items-start") do
+            div(class: "id-badge-col") { IDBadge(object: location, size: :lg) }
+            div(class: "flex-grow-1") do
+              Link(type: :location, where: location.name.t, location: location)
+            end
+            div(class: "obs-count-col") do
+              CountBadge(count: @observation_counts[location.id].to_i)
+            end
+          end
         end
-        div(class: "obs-count-col") { plain("(#{counts[location.id].to_i})") }
       end
     end
   end
