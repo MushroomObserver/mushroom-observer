@@ -2,6 +2,11 @@
 
 require("test_helper")
 
+# align:'s emitted text-* class is the contract under test here, not
+# incidental paint -- same styling-abstraction exception CrudButton/
+# Panel/Modal tests use. Disabled for the whole file rather than
+# scoped per-assertion, since that's most of what this file covers.
+# rubocop:disable MO/NoCosmeticClassAssertion
 class TableTest < ComponentTestCase
   # Simple test struct for table rows
   TestRow = Struct.new(:name, :age, :url)
@@ -105,6 +110,37 @@ class TableTest < ComponentTestCase
     # column should return nil -- a non-nil return would be rendered
     result = table.column("Header") { |_row| "content" }
     assert_nil(result)
+  end
+
+  # align: is a styling-abstraction option -- the emitted class IS
+  # the contract being tested here, not incidental paint.
+  def test_column_align_sets_th_and_td_class
+    rows = [TestRow.new(name: "Alice", age: 30)]
+
+    html = render_table(rows) do |t|
+      t.column("Name", &:name)
+      t.column("Age", align: :center, &:age)
+    end
+
+    assert_html(html, "th.text-center", text: "Age")
+    assert_html(html, "td.text-center", text: "30")
+    assert_no_html(html, "th.text-center", text: "Name")
+  end
+
+  def test_column_align_combines_with_caller_class
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render_table(rows) do |t|
+      t.column("Name", align: :right, class: "nowrap", &:name)
+    end
+
+    assert_html(html, "th.text-right.nowrap")
+    assert_html(html, "td.text-right.nowrap")
+  end
+
+  def test_align_class_maps_symbol_to_bootstrap_utility
+    assert_equal("text-center", Components::Table.align_class(:center))
+    assert_nil(Components::Table.align_class(nil))
   end
 
   def test_works_with_activerecord_objects
@@ -346,3 +382,4 @@ class MultibodyTestHost < Components::Base
     end
   end
 end
+# rubocop:enable MO/NoCosmeticClassAssertion
