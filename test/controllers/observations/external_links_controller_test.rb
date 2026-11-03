@@ -26,6 +26,18 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
+    def test_new_external_link_form_defaults_to_inaturalist
+      obs = observations(:imported_inat_obs)
+
+      login(obs.user.login)
+      get(:new, params: { id: obs.id })
+
+      assert_select(
+        "select[name='external_link[external_site_id]'] " \
+        "option[selected][value='#{external_sites(:inaturalist).id}']"
+      )
+    end
+
     def test_new_no_permitted_sites
       obs = observations(:coprinus_comatus_obs) # owned by rolf
 

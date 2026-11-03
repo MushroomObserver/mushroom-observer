@@ -72,7 +72,7 @@ module Observations
       @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
-      @site = @sites&.first
+      @site = ExternalSite.default_new_link_site(@sites)
     end
 
     def set_ivars_for_edit
