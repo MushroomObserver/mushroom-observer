@@ -79,6 +79,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_input_field do
           render_dropdown
           render_hidden_field
+          render_has_id_indicator if inline?
         end
         # Render append slot content (e.g., map section)
         render(append_slot) if append_slot
@@ -92,6 +93,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     # pass `controller_id:`; forms that don't shouldn't get noise.
     def controller_id
       custom_controller_id
+    end
+
+    def inline?
+      wrapper_options[:inline] || false
     end
 
     def controller_data
@@ -211,19 +216,20 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_append(&block) if block
     end
 
-    # has-id-indicator + find/keep/edit buttons sit inline with the
-    # label, inside the label row's flex container -- only when a
+    # find/keep/edit buttons sit inline with the label, only when a
     # label row will render. With `label: false`, addon_wrapper_options
-    # routes the same content into an input-group-addon instead.
+    # routes them into an input-group-addon instead. has-id-indicator
+    # is excluded here when inline -- see render_has_id_indicator.
     def add_label_appends_slot(field_component)
       return if wrapper_options[:label] == false
+      return if inline? && !find_text && !keep_text
 
       field_component.with_label_appends { render_label_after }
     end
 
     # Renders all label_after elements (goes in between slot after label)
     def render_label_after
-      render_has_id_indicator
+      render_has_id_indicator unless inline?
       render_find_button if find_text
       render_keep_edit_toggle if keep_text
     end
@@ -235,15 +241,14 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
-    # A bare <svg> can't take padding -- shrinks the checkmark instead
-    # of adding space. Spacing and the show/hide toggle
-    # (_autocomplete.scss) live on this wrapping span instead; the
-    # tooltip lives here too since `title:` on Icon alone doesn't
-    # work on a bare svg.
+    # A bare <svg> can't take padding -- the wrapping element carries
+    # spacing and the show/hide toggle instead. Inline mode renders
+    # this straight into the already-flex .input-group (see
+    # view_template), sitting after the input with no extra box --
+    # that's what keeps the input from shifting when it appears.
     def render_has_id_indicator
-      title = :autocompleter_has_id.l
-      span(class: "ml-3 has-id-indicator d-none inline-flex-center",
-           title: title,
+      span(class: "has-id-indicator ml-3 d-none inline-flex-center",
+           title: :autocompleter_has_id.l,
            data: { target_attr_key => "hasIdIndicator",
                    tooltip_target: "tip", placement: "top" }) do
         Icon(type: :check, class: "text-success")

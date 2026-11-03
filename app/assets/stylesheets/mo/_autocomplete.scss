@@ -22,6 +22,15 @@
   height: 1.3em;
 }
 
+// BS3 squares a .form-control's right corner whenever it's
+// :first-child inside .input-group, assuming an addon/btn follows --
+// not the case here (has-id-indicator is a bare, borderless span),
+// so restore the input's full radius.
+.autocompleter .input-group > .form-control:first-child {
+  border-top-right-radius: $input-border-radius;
+  border-bottom-right-radius: $input-border-radius;
+}
+
 // autocompleter state (do we have a match?) is no longer handled
 // here -- `.has-id-indicator` carries `d-none` by default, same as
 // find-btn/keep-edit-toggle/create-button, and the autocompleter

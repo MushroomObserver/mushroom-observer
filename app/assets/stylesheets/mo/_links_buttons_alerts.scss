@@ -195,6 +195,12 @@ form.button_to {
   }
 }
 
+// Same fix as above, but inline-flex: plain flex is block-level and
+// breaks the line after it, defeating .form-inline.
+.form-inline .input-group {
+  display: inline-flex;
+}
+
 // badges
 
 // Record id badge. No inherent font-size -- every caller states one
