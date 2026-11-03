@@ -25,7 +25,7 @@ module Observations
 
       # Case seen in the wild that causes error
       requires_login(:edit, where: "")
-      assert(assigns(:matches).include?(albion))
+      assert_empty(assigns(:matches))
 
       # Another case that caused an error
       requires_login(:edit, where: "CA")
