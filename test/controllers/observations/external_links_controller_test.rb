@@ -295,6 +295,24 @@ module Observations
       assert_redirected_to(permanent_observation_path(link.observation.id))
     end
 
+    # Image-targeted links are import provenance, not user-facing (see
+    # ExternalLink#observation) -- no "Shared with" UI exists for
+    # images, so this redirects to the image's page instead of
+    # crashing on `link.observation` being nil.
+    def test_show_html_redirects_to_image_for_image_targeted_link
+      image = images(:in_situ_image)
+      link = ExternalLink.create!(
+        user: rolf, target: image,
+        external_site: external_sites(:inaturalist),
+        external_id: "555555"
+      )
+
+      login
+      get(:show, params: { id: link.id })
+
+      assert_redirected_to(image_path(image.id))
+    end
+
     def simulate_turbo_frame_request(link)
       @request.headers["Turbo-Frame"] = "external_link_frame_#{link.id}"
     end
