@@ -14,8 +14,11 @@ module Views::Controllers::Names::Classification::Inherit
                   "form[action*='/names/#{name.id}/classification/inherit']")
       assert_html(html, "button[type='submit']", text: :submit.ti)
 
-      # Parent name text field
+      # Parent name autocompleter: visible text input + hidden id field
       assert_html(html, "input[name='inherit_classification[parent]']")
+      assert_html(html,
+                  "input[type='hidden']" \
+                  "[name='inherit_classification[parent_id]']")
       assert_includes(html, :inherit_classification_parent_name.l)
     end
 
