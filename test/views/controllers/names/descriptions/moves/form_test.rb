@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-module Views::Controllers::Descriptions::Moves
+module Views::Controllers::Names::Descriptions::Moves
   class FormTest < ComponentTestCase
     def setup
       super
@@ -32,7 +32,7 @@ module Views::Controllers::Descriptions::Moves
 
       # Radio buttons for move targets
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']")
+                        "[name='description_move_or_merge[target_id]']")
 
       # Delete checkbox
       assert_html(html, "input[type='checkbox']" \
@@ -61,12 +61,11 @@ module Views::Controllers::Descriptions::Moves
       assert_no_html(html, "button[type='submit']")
     end
 
-    # When the parent has exactly one non-misspelling synonym,
-    # Form#initialize sets form_object.target to it directly,
-    # pre-selecting that lone move target. No fixture matches this
-    # shape, so we create a NameDescription on lactifluus_alpinus
-    # (paired with the deprecated but non-misspelling
-    # lactifluus_subalpinus).
+    # When the parent has one non-misspelling synonym, Form#initialize
+    # sets form_object.target_id to it directly, pre-selecting that
+    # lone move target. No fixture matches this shape, so we create a
+    # NameDescription on lactifluus_alpinus (paired with the
+    # deprecated but non-misspelling lactifluus_subalpinus).
     def test_single_move_target_auto_selects
       parent = names(:lactifluus_alpinus)
       target = names(:lactifluus_subalpinus)
@@ -75,22 +74,17 @@ module Views::Controllers::Descriptions::Moves
 
       html = render_form(desc)
 
-      # Exactly one move target rendered, and it is auto-checked.
+      # One move target rendered, and it is auto-checked.
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']",
+                        "[name='description_move_or_merge[target_id]']",
                   count: 1)
       assert_html(html, "input[type='radio']" \
-                        "[name='description_move_or_merge[target]']" \
+                        "[name='description_move_or_merge[target_id]']" \
                         "[value='#{target.id}'][checked]")
     end
 
-    # MoveForm only makes sense for NameDescriptions since Locations
-    # don't have synonyms. No location test.
-
     private
 
-    # Sibling reference within the namespace — `Form` resolves to
-    # `Views::Controllers::Descriptions::Moves::Form`.
     def render_form(description)
       render(Form.new(description, user: @user))
     end

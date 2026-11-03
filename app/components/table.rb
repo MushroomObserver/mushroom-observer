@@ -126,6 +126,12 @@ class Components::Table < Components::Base
   # and the caller's `row` / `body` block emits the cells.
   #
   # @param header [String] the column header text
+  # @param align [Symbol] `:center`, `:right`, or `:left` -- sets the
+  #   matching Bootstrap text-align utility class on both the `<th>`
+  #   and `<td>` for this column (column mode). Row/body-mode callers
+  #   that hand-roll a `<td>` can reach the same mapping via
+  #   `Components::Table.align_class(:center)` instead of writing the
+  #   utility class string directly.
   # @param class [String] CSS class for the th/td elements
   # @param attributes [Hash] arbitrary HTML attrs (e.g. `width: "33%"`,
   #   `data: { foo: "bar" }`) forwarded to both the `<th>` and `<td>`
@@ -133,13 +139,32 @@ class Components::Table < Components::Base
   # @yield [row] block that receives each row and returns cell content
   # @return [nil] -- a non-nil return from a builder block is rendered
   # rubocop:enable MO/NoLongCommentBlock
-  def column(header, class: nil, **attributes, &content)
+  def column(header, align: nil, class: nil, **attributes, &content)
+    col_class = [self.class.align_class(align), grab(class:)].
+                compact_blank.join(" ").presence
     @columns << {
       header: header,
-      attributes: mix(attributes, class: grab(class:)),
+      attributes: mix(attributes, class: col_class),
       content: content
     }
     nil
+  end
+
+  ALIGNS = [:left, :center, :right].freeze
+
+  # Dual access, matching Collapsible.collapse_classes /
+  # Button::Styling.btn_class -- callable directly by row/body-mode
+  # callers, and used internally by #column above.
+  def self.align_class(align)
+    return nil unless align
+    unless ALIGNS.include?(align)
+      raise(ArgumentError.new(
+              "Unknown Table align: #{align.inspect}. " \
+              "Valid values: #{ALIGNS.join(", ")}."
+            ))
+    end
+
+    "text-#{align}"
   end
 
   # Register a row block for row mode. When set, Table renders the

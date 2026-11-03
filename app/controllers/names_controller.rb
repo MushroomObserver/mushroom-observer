@@ -19,6 +19,7 @@ class NamesController < ApplicationController
   # to render the Phlex Index view directly with the controller-
   # populated ivars as explicit props.
   def render_index_view
+    @objects.each(&:strict_loading!)
     args = {
       query: @query, pagination_data: @pagination_data,
       objects: @objects, user: @user,
@@ -68,7 +69,7 @@ class NamesController < ApplicationController
     {
       letters: true,
       num_per_page: index_num_per_page(query),
-      include: [:description]
+      include: [{ description: :authors }]
     }.merge(opts)
   end
 

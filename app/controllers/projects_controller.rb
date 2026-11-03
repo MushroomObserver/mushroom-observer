@@ -18,9 +18,11 @@ class ProjectsController < ApplicationController
   # Overrides `ApplicationController::Indexes#render_index_view` so
   # `show_index_of_objects` renders the Phlex `Index` class.
   def render_index_view
+    @objects.each(&:strict_loading!)
     render(Views::Controllers::Projects::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects
+             objects: @objects,
+             observation_counts: ObservationCounter.counts_for(@objects)
            ))
   end
 

@@ -31,6 +31,8 @@
 #
 class Inat
   class Taxon
+    INFRASPECIFIC_RANKS = %w[subspecies variety form].freeze
+
     include Inat::Constants
 
     def initialize(taxon)
@@ -72,7 +74,9 @@ class Inat
       # Ex: "Inonotus obliquus sterilis"
       return insert_rank_between_species_and_final_epithet if infraspecific?
 
-      @taxon[:name]
+      # A provisional taxon's name can carry the same quote slips as the
+      # field ("Hohenbuehelia sp. ' tac491'").
+      Inat::NameString.clean(@taxon[:name]) || @taxon[:name]
     end
 
     def importable?
@@ -160,7 +164,7 @@ class Inat
       "#{words[0..1].join(" ")} #{@taxon[:rank]} #{words[2]}"
     end
 
-    def infraspecific? = %w[subspecies variety form].include?(@taxon[:rank])
+    def infraspecific? = INFRASPECIFIC_RANKS.include?(@taxon[:rank])
 
     def taxon_name = @taxon[:name]
 

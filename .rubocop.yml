@@ -526,6 +526,7 @@ Naming/PredicateMethod:
     - cant_make_this_personal_herbarium!
     - check_date
     - check_dest_exists!
+    - check_dest_not_src_parent!
     - check_dest_permission!
     - check_external_link_permission!
     - check_for_qr_code

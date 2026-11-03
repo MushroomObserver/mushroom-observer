@@ -1,13 +1,11 @@
 # frozen_string_literal: true
 
-module Views::Controllers::Descriptions::Moves
-  # Form for moving a description to a synonym of its parent. Only
-  # meaningful for NameDescription since Location has no synonyms.
-  # For LocationDescription, moves will be empty and only the header
-  # shows. Shared between names/descriptions/moves and
-  # locations/descriptions/moves.
+module Views::Controllers::Names::Descriptions::Moves
+  # Form for moving a description to a synonym of its parent. Location
+  # has no synonym concept -- see Locations::Descriptions::Moves::Form
+  # for the location-autocompleter-based move form.
   class Form < ::Components::ApplicationForm
-    prop :description, ::Description
+    prop :description, ::NameDescription
     prop :user, ::User
 
     def initialize(description, user:, **)
@@ -16,19 +14,17 @@ module Views::Controllers::Descriptions::Moves
       # happened yet at this point in construction.
       sorted = self.class.sorted_moves_for(description)
       form_object = FormObject::DescriptionMoveOrMerge.new
-      form_object.target = sorted.first.id if sorted.length == 1
+      form_object.target_id = sorted.first.id if sorted.length == 1
       form_object.delete = description.is_admin?(user)
       # Keep the explicit DOM id — tests rely on it.
       super(form_object, description: description, user: user,
                          id: "move_descriptions_form", **)
     end
 
-    # Location doesn't have synonyms, only Name does. Class methods
-    # (not instance methods reading `@description`) so they're usable
-    # from `initialize`, before prop assignment, as well as after.
+    # Class methods (not instance methods reading `@description`) so
+    # they're usable from `initialize`, before prop assignment, as
+    # well as after.
     def self.moves_for(description)
-      return [] unless description.parent.respond_to?(:synonyms)
-
       description.parent.synonyms.reject do |n|
         n == description.parent || n.is_misspelling?
       end
@@ -54,14 +50,11 @@ module Views::Controllers::Descriptions::Moves
 
     private
 
-    # `sorted_moves` is only ever populated for NameDescription moves
-    # (`moves_for` returns [] when the parent doesn't respond to
-    # `synonyms`, which is only Name) - always Name instances.
     def render_move_options
       options = sorted_moves.map do |name|
         [name.id, name.display_name(@user).t]
       end
-      radio_field(:target, *options)
+      radio_field(:target_id, *options)
     end
 
     def render_delete_checkbox
@@ -80,18 +73,9 @@ module Views::Controllers::Descriptions::Moves
       self.class.sorted_moves_for(@description)
     end
 
-    def name_description?
-      @description.is_a?(NameDescription)
-    end
-
     def form_action
-      if name_description?
-        url_for(controller: "/names/descriptions/moves", action: :create,
-                id: @description.id, only_path: true)
-      else
-        url_for(controller: "/locations/descriptions/moves", action: :create,
-                id: @description.id, only_path: true)
-      end
+      url_for(controller: "/names/descriptions/moves", action: :create,
+              id: @description.id, only_path: true)
     end
 
     def form_method

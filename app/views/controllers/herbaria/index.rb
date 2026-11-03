@@ -45,23 +45,21 @@ module Views::Controllers::Herbaria
     def render_table
       Table(@objects,
             variant: :striped, identifier: "herbarium",
-            class: "w-100") { |t| build_table_columns(t) }
+            class: "w-100 mt-3") { |t| build_table_columns(t) }
     end
 
     def build_table_columns(table)
-      build_count_columns(table)
-      table.column(:herbarium.ti) { |h| render_name_cell(h) }
-      table.column(user_header) { |h| render_user_cell(h) }
-      table.column(:mo_id.ti, class: "text-right") do |h|
-        render_id_badge(h)
-      end
+      build_main_columns(table)
+      table.column(:mo_id.ti, class: "text-right") { |h| render_id_badge(h) }
     end
 
-    def build_count_columns(table)
+    def build_main_columns(table)
       table.column(:herbarium_code.t) { |h| plain(h.code.to_s) }
+      table.column(:herbarium.ti) { |h| render_name_cell(h) }
       table.column(:herbarium_index_records.t) do |h|
-        plain(h.herbarium_records.length)
+        CountBadge(count: h.herbarium_records.length, type: :herbarium_record)
       end
+      table.column(user_header) { |h| render_user_cell(h) }
     end
 
     def render_id_badge(herbarium)
@@ -72,7 +70,7 @@ module Views::Controllers::Herbaria
       nonpersonal? ? "" : :user.ti
     end
 
-    # --- 3rd column: name link / merge POST + edit / merge actions --
+    # --- 2nd column: name link / merge POST + edit / merge actions --
 
     def render_name_cell(herbarium)
       render_name_link(herbarium)

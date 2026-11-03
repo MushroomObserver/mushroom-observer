@@ -63,7 +63,8 @@ class Inat
         Inat::NamingPlan.lead_vote_for(
           quality_grade: @inat_obs[:quality_grade],
           sequence_evidence: sequence_evidence?,
-          provisional_evidence: !provisional.nil?
+          provisional_evidence: !provisional.nil? ||
+                                @inat_obs.provisional_taxon?
         )
       end
 
@@ -77,16 +78,21 @@ class Inat
       def parsed_name(str, label)
         return nil if str.blank?
 
-        parsed = Name.parse_name(str)
+        parsed = parse(str)
         if parsed.nil? || parsed.text_name.blank?
           return alert("#{label} #{str.inspect} does not parse as a name")
         end
 
+        # id: :desc as a final tiebreaker -- without it, two Names tied
+        # on both deprecated and created_at have no stable order, so
+        # which one .first returns can differ between calls (#5499).
         Name.where(text_name: parsed.text_name).
-          order(deprecated: :asc, created_at: :desc).first ||
+          order(deprecated: :asc, created_at: :desc, id: :desc).first ||
           create_name(name: parsed.search_name, rank: parsed.rank) ||
           alert("#{label} #{str.inspect} could not be created as an MO name")
       end
+
+      def parse(str) = Inat::NameString.parse(str, taxon: @inat_obs[:taxon])
 
       def create_name(name:, rank:)
         Name.create_with_trusted_rank(User.admin, name, rank)

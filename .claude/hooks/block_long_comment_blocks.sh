@@ -1,22 +1,11 @@
 #!/usr/bin/env bash
 # Claude Code PostToolUse hook. Fires after Edit/Write/MultiEdit.
-# Reads the saved file from disk and blocks if it contains a run of
-# more than MAX_LINES consecutive comment lines anywhere -- not just
-# in what this edit touched. Personal style rule (terse comments),
-# corrected repeatedly across sessions. See .claude/rules/code_comments.md.
-# Mirrors the real MO/NoLongCommentBlock cop
-# (lib/rubocop/cop/mo/no_long_comment_block.rb + its Max: 10 in
-# .rubocop.yml), kept in sync by hand:
-# - a run directly above a class/module declaration (a docstring)
-# - a run that's mostly YARD tags / RDoc-style reference markup
-#   (not narrative prose)
-# - a run wrapped in its own rubocop:disable/:enable pair for this
-#   cop (or `all`) -- RuboCop's engine honors that regardless of what
-#   the cop itself checks, so the hook must too
-# JS has no such cop to mirror, so it's out of scope here -- a Stimulus
-# controller's own usage-example doc comment (e.g. "Usage with select:"
-# plus an indented HTML snippet) reads as narrative under the Ruby-
-# tuned reference heuristic and would get wrongly mangled.
+# Blocks a run of more than MAX_LINES consecutive comment lines
+# anywhere in the saved file, not just what this edit touched.
+# Mirrors MO/NoLongCommentBlock (lib/rubocop/cop/mo/no_long_comment_block.rb,
+# Max: 10 in .rubocop.yml): exempts class/module docstrings, YARD/RDoc
+# reference runs, and rubocop:disable/:enable-wrapped runs, like that
+# cop does. See .claude/rules/code_comments.md.
 set -euo pipefail
 
 MAX_LINES=10
@@ -31,8 +20,8 @@ esac
 
 FILE="$(printf '%s' "$INPUT" | jq -r '.tool_input.file_path // ""')"
 case "$FILE" in
-  .claude/*|*/.claude/*) exit 0 ;;
-  *.rb|*.rake|*.scss) COMMENT_RE='^[[:space:]]*#' ;;
+  .claude/local/*|*/.claude/local/*) exit 0 ;;
+  *.rb|*.rake|*.scss|*.sh) COMMENT_RE='^[[:space:]]*#' ;;
   *) exit 0 ;;
 esac
 
