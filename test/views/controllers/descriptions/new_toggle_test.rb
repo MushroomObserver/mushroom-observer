@@ -3,6 +3,8 @@
 require "test_helper"
 
 class Views::Controllers::Descriptions::NewToggleTest < ComponentTestCase
+  EXPANDED_COLLAPSE_CLASS = Components::Collapsible::EXPANDED_CLASS
+
   def setup
     super
     @location = locations(:albion)
@@ -28,9 +30,12 @@ class Views::Controllers::Descriptions::NewToggleTest < ComponentTestCase
 
     assert_html(html, "input[value='no'][checked]")
     assert_html(html,
-                "[data-collapse-switch-type='no'].collapse.show")
+                "[data-collapse-switch-type='no'].collapse" \
+                ".#{EXPANDED_COLLAPSE_CLASS}")
     assert_html(html, "[data-collapse-switch-type='yes'].collapse")
-    assert_no_html(html, "[data-collapse-switch-type='yes'].collapse.show")
+    assert_no_html(html,
+                   "[data-collapse-switch-type='yes'].collapse" \
+                   ".#{EXPANDED_COLLAPSE_CLASS}")
   end
 
   def test_radios_wired_to_collapse_switch
