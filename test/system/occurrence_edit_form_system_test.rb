@@ -84,7 +84,7 @@ class OccurrenceEditFormSystemTest < ApplicationSystemTestCase
     # data-action attribute on the checkbox).
     checkbox_for(other1).click
 
-    click_button(:edit_occurrence_submit.l)
+    click_button(:save_changes.ti)
     # Wait for the redirect away from edit (controller redirects to
     # occurrence#show on success, or re-renders edit on project gaps;
     # the assertion below holds in either case).
@@ -112,7 +112,7 @@ class OccurrenceEditFormSystemTest < ApplicationSystemTestCase
     # `primarySelected` fires via data-action on the radio).
     radio_for(secondary_obs).click
 
-    click_button(:edit_occurrence_submit.l)
+    click_button(:save_changes.ti)
     # Wait for the success flash (controller may redirect to
     # occurrence#show OR re-render edit if project_gaps exist; the
     # data-level assertion below holds in either case).

@@ -29,5 +29,41 @@ module Observations::Namings
       assert_in_delta(0.321, data[1].max)
       assert_objs_equal(obs, data[1].image_obs)
     end
+
+    # This endpoint's `names` param is always JS-supplied JSON from the
+    # image classifier (see observations/show/namings/footer_buttons.rb)
+    # -- a direct or stale request with no/bad JSON must redirect
+    # instead of raising JSON::ParserError.
+    def test_suggestions_blank_names_redirects
+      obs = observations(:detailed_unknown_obs)
+
+      login
+      get(:show, params: { id: obs.id })
+
+      assert_redirected_to(permanent_observation_path(obs.id))
+    end
+
+    def test_suggestions_malformed_names_redirects
+      obs = observations(:detailed_unknown_obs)
+
+      login
+      get(:show, params: { id: obs.id, names: "not json" })
+
+      assert_redirected_to(permanent_observation_path(obs.id))
+    end
+
+    # Valid JSON that isn't an Array -- Suggestion.analyze needs an
+    # Array, so these must redirect too, not reach #each and crash.
+    def test_suggestions_non_array_names_redirects
+      obs = observations(:detailed_unknown_obs)
+      login
+
+      ["null", "{}", "false", "0", '"a string"'].each do |names|
+        get(:show, params: { id: obs.id, names: names })
+
+        assert_redirected_to(permanent_observation_path(obs.id),
+                             "names=#{names} should redirect")
+      end
+    end
   end
 end

@@ -18,7 +18,7 @@ module Views::Controllers::Observations::Projects
       add_page_title(
         :project_manage_title.t(
           name: viewer_aware_unique_format_name(@observation)
-        )
+        ).small_author
       )
       add_sorter(@all_projects, ::ProjectsController.sort_options)
       add_context_nav(
