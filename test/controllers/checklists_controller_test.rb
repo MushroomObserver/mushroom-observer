@@ -220,10 +220,9 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_select(".checklist li", text: /\(1\)/)
     assert_select(".checklist a", count: 0)
     assert_select("#title a", count: 0)
-    assert_select("#project_tabs ul.nav-tabs", count: 0)
-    assert_select(
-      "#project_login_prompt a[href='#{new_account_login_path}']"
-    )
+    assert_select("#project_tabs", count: 0)
+    assert_select("#project_login_prompt",
+                  text: :project_banner_login_prompt.l)
     assert_select("#context_nav a", count: 0)
   end
 

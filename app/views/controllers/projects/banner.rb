@@ -21,34 +21,37 @@ module Views::Controllers::Projects
     def view_template
       return unless @project
 
+      render_login_prompt unless @user
       if @project.image
         render_banner_with_image
       else
         render_banner_without_image
       end
-
-      Row do
-        Column(xs: 12, id: "project_tabs") do
-          @user ? render_tabs : render_login_prompt
-        end
-      end
+      render_tabs if @user
     end
 
     private
 
     def render_tabs
-      NavTabs(
-        current: @current_tab, link_class: "mt-3",
-        tabs: ::Tab::Project::Banner.new(project: @project, user: @user)
-      )
+      Row do
+        Column(xs: 12, id: "project_tabs") do
+          NavTabs(
+            current: @current_tab, link_class: "mt-3",
+            tabs: ::Tab::Project::Banner.new(project: @project, user: @user)
+          )
+        end
+      end
     end
 
-    # Only the public checklist renders a banner without a user.
+    # Only the public checklist renders a banner without a user. No
+    # link: the top nav's login button sits just above it.
     def render_login_prompt
-      p(class: "mt-3", id: "project_login_prompt") do
-        plain(:project_banner_login_prompt.l)
-        whitespace
-        a(href: new_account_login_path) { :app_login.l }
+      Row do
+        Column(xs: 12) do
+          p(class: "my-3", id: "project_login_prompt") do
+            plain(:project_banner_login_prompt.l)
+          end
+        end
       end
     end
 

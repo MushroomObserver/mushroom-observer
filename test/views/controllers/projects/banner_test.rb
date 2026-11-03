@@ -197,14 +197,14 @@ module Views::Controllers::Projects
       assert_html(html, ".project_location", text: project.place_name)
       assert_no_html(html, ".project_location a")
       assert_html(html, "img.banner-image")
-      assert_no_html(html, "#project_tabs ul.nav-tabs")
+      assert_no_html(html, "#project_tabs")
       assert_html(html, "#project_login_prompt",
                   text: :project_banner_login_prompt.l.as_displayed)
-      assert_html(
-        html,
-        "#project_login_prompt a[href='#{routes.new_account_login_path}']"
-      )
-      assert_html(html, "a", count: 1)
+      assert_no_html(html, "a")
+      ids = Nokogiri::HTML5.fragment(html).css("[id]").pluck("id")
+      assert_operator(ids.index("project_login_prompt"), :<,
+                      ids.index("project_banner"),
+                      "Login prompt should come before the banner")
     end
 
     private
