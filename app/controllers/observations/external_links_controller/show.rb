@@ -10,6 +10,7 @@ module Observations::ExternalLinksController::Show
   # redirecting to the observation instead of rendering a bare fragment.
   def show
     set_ivars_for_show
+    return if performed?
 
     if request.headers["Turbo-Frame"]
       render_external_link_info_frame
@@ -22,6 +23,8 @@ module Observations::ExternalLinksController::Show
 
   def set_ivars_for_show
     @external_link = ExternalLink.show_includes.find(params[:id])
+    return redirect_to_image_link unless @external_link.observation
+
     # The occurrence's members and their links -- InfoFrame's
     # occurrence-wide Sync button calls `@obs.syncable?` and
     # `@obs.last_synced_at`, which walk the member observations (#4215);
@@ -32,6 +35,15 @@ module Observations::ExternalLinksController::Show
                    find(@external_link.observation.id)
     @site = @external_link.external_site
     @siblings = load_siblings_with_external_links(@observation)
+  end
+
+  # `ExternalLink#observation` is nil for an Image-targeted link --
+  # import provenance only (see the comment on that method). No
+  # "Shared with" UI exists for images yet, so, matching the
+  # observation branch's direct-visit fallback above, redirect to
+  # the target's page instead of rendering anything here.
+  def redirect_to_image_link
+    redirect_to(image_path(@external_link.target))
   end
 
   # `external_site: { project: :user_group }` -- not just `:external_site`
