@@ -68,6 +68,26 @@ module Names
       assert_redirected_to(new_tracker_of_name_path(name))
     end
 
+    # A tracker with no template (e.g. enabled with the checkbox left
+    # unchecked) should suggest the same default template #new offers,
+    # not reopen to a blank textarea.
+    def test_email_tracking_edit_without_template_shows_default_suggestion
+      name = names(:conocybe_filaris)
+      NameTracker.create!(name: name, user: rolf, approved: true,
+                          note_template: "")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_response(:success)
+      expected = :email_tracking_note_template.l(
+        species_name: name.real_text_name,
+        mailing_address: rolf.mailing_address_for_tracking_template,
+        users_name: rolf.legal_name
+      )
+      assert_select("textarea#name_tracker_note_template", text: expected)
+    end
+
     def test_email_tracking_enable_no_note
       name = names(:conocybe_filaris)
       count_before = NameTracker.count
