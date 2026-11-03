@@ -284,7 +284,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     login
     visit(edit_classification_of_name_path(name))
 
-    fill_in("name[classification]", with: "Kingdom: _Fungi_")
+    fill_in("name_classification[rank_kingdom]", with: "Fungi")
     click_on(:save.ti)
 
     assert_match(/Fungi/, name.reload.classification)
