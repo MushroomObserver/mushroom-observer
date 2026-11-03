@@ -2,8 +2,9 @@
 # Claude Code PreToolUse hook.
 # Fires before `Bash` calls. Blocks running rubocop against
 # config/locales/*.txt -- MO's custom key:value translation source
-# files (en.txt, es.txt, etc.), not Ruby, so rubocop's parser just
-# dumps a wall of Lint/Syntax noise.
+# files (en.txt, es.txt, etc.), not Ruby -- and against *.js files --
+# RuboCop only lints Ruby. Both just dump a wall of Lint/Syntax noise
+# with nothing actually checked.
 set -uo pipefail
 
 INPUT="$(cat)"
@@ -21,9 +22,9 @@ case "$COMMAND" in
   *) exit 0 ;;
 esac
 
-# Require the two to appear on the same line, close enough to read as
-# one invocation (rubocop ... config/locales/en.txt), not two
-# unrelated mentions anywhere in a longer command.
+# Require rubocop and the offending path to appear on the same line,
+# close enough to read as one invocation (rubocop ... en.txt / foo.js),
+# not two unrelated mentions anywhere in a longer command.
 if printf '%s' "$COMMAND" |
    grep -qE 'rubocop[^|;&]{0,80}config/locales/[a-zA-Z_-]+\.txt'; then
   cat >&2 <<'EOF'
@@ -33,6 +34,19 @@ These are MO's custom key:value translation source files (en.txt,
 es.txt, ...), not Ruby -- rubocop's parser has nothing to check and
 just dumps a wall of Lint/Syntax noise. There's no lint step for this
 file; edit it and run `bin/rails lang:update` instead.
+EOF
+  exit 2
+fi
+
+if printf '%s' "$COMMAND" |
+   grep -qE 'rubocop[^|;&]{0,80}\.js\b'; then
+  cat >&2 <<'EOF'
+🚫 Don't run rubocop against *.js files.
+
+RuboCop only lints Ruby -- pointing it at a JavaScript file (e.g. a
+Stimulus controller) just dumps a wall of Lint/Syntax parser errors
+with nothing actually checked. There's no lint step for this file via
+rubocop.
 EOF
   exit 2
 fi
