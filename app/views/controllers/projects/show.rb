@@ -15,7 +15,7 @@ module Views::Controllers::Projects
     def view_template
       add_show_title(@project)
       add_project_banner(@project)
-      container_class(:wide)
+      container_class(:text_image)
 
       render_list_search
       render_summary_panel

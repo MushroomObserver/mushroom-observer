@@ -68,12 +68,9 @@ class Components::Icon < Components::Base
   # once the page has scrolled.
   prop :wrap_class, _Nilable(String), default: nil
   # Adds `.inline-flex-center` to the title-tooltip span (only takes
-  # effect when `title:` is present -- that's the only case a span
-  # exists to center). Opt-in: most `title:` callers sit inside
-  # something that already centers its content (a `.btn`, an
-  # autocompleter row), so defaulting this on would be a no-op there
-  # and an unwanted change for callers that have not asked for it.
-  prop :center_tooltip, _Boolean, default: false
+  # effect when `title:` is present). Defaults on -- a `.btn`'s flex
+  # centering doesn't reach the <svg> nested inside this span.
+  prop :center_tooltip, _Boolean, default: true
   # Catch-all for class:, data:, aria:, and any other HTML attrs --
   # matches Components::Navbar/Collapsible's pattern (plain `class:`/
   # `data:` in, no separate `html_class:`/`data:` props needed).

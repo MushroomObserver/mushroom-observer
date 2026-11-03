@@ -48,6 +48,10 @@
   flex-wrap: wrap;
 }
 
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
 .align-items-start {
   align-items: flex-start !important;
 }

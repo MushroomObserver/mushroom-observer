@@ -18,9 +18,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     slot :append
     slot :between
     slot :help
+    # Caller-supplied content for the label row, after the built-in
+    # has-id-indicator / find / keep buttons (see render_label_after).
+    # General-purpose -- any autocompleter_field caller can use this,
+    # not just the one that motivated it (ListGroup::Search's
+    # match-status light).
+    slot :label_append
 
     # Make slot accessor public (Phlex::Slotable makes them private by default)
-    public :append_slot, :between_slot, :help_slot
+    public :append_slot, :between_slot, :help_slot, :label_append_slot
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
                 :find_text, :keep_text, :edit_text, :create_text,
@@ -225,6 +231,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       render_has_id_indicator
       render_find_button if find_text
       render_keep_edit_toggle if keep_text
+      render(label_append_slot) if label_append_slot
     end
 
     # Renders all label_end elements (goes in label_end slot)
@@ -234,15 +241,15 @@ class Components::ApplicationForm < Superform::Rails::Form
                                   create_path.present?
     end
 
-    # A bare <svg> can't take padding -- it eats into the rendered
-    # content area instead of adding space around it, shrinking the
-    # checkmark. Spacing and the show/hide toggle (see
-    # _autocomplete.scss) go on this wrapping span instead. The
-    # tooltip lives here too -- `title:` on Icon alone doesn't give a
-    # bare svg a working tooltip.
+    # A bare <svg> can't take padding -- spacing and the show/hide
+    # toggle (see _autocomplete.scss) go on this wrapping span
+    # instead; its tooltip lives here too. `invisible`, not `d-none`,
+    # keeps this span's box in the layout while hidden, so later
+    # label-row content (find/keep buttons, `label_append`) doesn't
+    # shift position when the checkmark toggles.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
-      span(class: "ml-3 has-id-indicator d-none inline-flex-center",
+      span(class: "ml-3 has-id-indicator invisible inline-flex-center",
            title: title,
            data: { target_attr_key => "hasIdIndicator",
                    tooltip_target: "tip", placement: "top" }) do

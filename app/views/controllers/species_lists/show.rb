@@ -21,9 +21,7 @@ module Views::Controllers::SpeciesLists
 
     def view_template
       add_chrome
-      Row do
-        div(class: content_for(:left_columns)) { render_left_column }
-      end
+      render_content
     end
 
     private
@@ -44,11 +42,10 @@ module Views::Controllers::SpeciesLists
       # observations within this list (which `add_pagination` does).
       add_pager_for(@species_list)
       add_pagination(@pagination_data)
-      container_class(:double)
-      column_classes(:nine_three)
+      container_class(:text_image)
     end
 
-    def render_left_column
+    def render_content
       render(Views::Controllers::SpeciesLists::Details.new(
                species_list: @species_list, query: @query
              ))

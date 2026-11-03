@@ -51,10 +51,12 @@ class Components::ListGroup::Search < Components::ApplicationForm
 
   private
 
-  # The search-status UI is a Stimulus-driven row with three pieces:
-  # a colored status-light indicator (off / red / green), a Field-Slip
-  # quick-add input, and a name autocompleter that drives the status
-  # light based on whether the typed name matches any of `@object_names`.
+  # The search-status UI is a Stimulus-driven block with three pieces:
+  # a name autocompleter whose label row carries the colored
+  # status-light indicator inline (off / red / green, via the
+  # autocompleter's `label_append` slot), and a Field-Slip quick-add
+  # input. The status light drives off whether the typed name matches
+  # any of `@object_names`.
   def render_search_status
     # `search-status-{messages,matches}-value` are Stimulus value attrs
     # that the JS controller parses as JSON. Rails serializes Hash /
@@ -66,48 +68,48 @@ class Components::ListGroup::Search < Components::ApplicationForm
               search_status_messages_value: status_messages.to_json,
               search_status_matches_value: @object_names.to_json }
     ) do
-      div(class: "d-flex flex-row align-items-center form-inline mb-2") do
-        render_status_light
-        render_field_slip_input
+      Row do
+        Column(xs: 12, md: 7) { render_name_autocompleter }
+        Column(xs: 12, md: 5) { render_field_slip_input }
       end
-      render_name_autocompleter
     end
   end
 
   def render_status_light
-    div(class: "status-light-container mb-2 mr-5") do
-      span(class: "status-indicator",
-           data: { search_status_target: "light" })
-      # Initial label is keyed `:name` (the autocompleter field's
-      # type), not `object.type_tag`. The Stimulus controller swaps
-      # the visible message based on user input using the JSON-encoded
-      # `messages_value` below — which IS keyed by `object.type_tag`.
-      span(class: "status-text",
-           data: { search_status_target: "message" }) do
-        plain(:search_status_all_names.l(type: :name))
-      end
+    span(class: "status-indicator ml-3 mr-2",
+         data: { search_status_target: "light" })
+    # Initial label is keyed `:name` (the autocompleter field's
+    # type), not `object.type_tag`. The Stimulus controller swaps
+    # the visible message based on user input using the JSON-encoded
+    # `messages_value` below — which IS keyed by `object.type_tag`.
+    span(class: "status-text",
+         data: { search_status_target: "message" }) do
+      plain(:search_status_all_names.l(type: :name))
     end
   end
 
   def render_field_slip_input
-    div(class: "field-slip-container field-group flex-bar") do
-      label(for: "field_slip",
-            class: "font-weight-normal text-nowrap") do
-        plain("Field Slip:")
+    div(class: "field-slip-container field-group") do
+      label(for: "field_slip", class: "text-nowrap") do
+        trusted_html([:add_object.t(type: :field_slip), ": "].safe_join)
       end
-      # `label: false` skips the form-group wrapper; the outer
-      # explicit `<label>` above plays that role here.
-      text_field("field_slip", label: false,
-                               class: "form-control mx-3", size: 9)
-      submit("Add")
+      div(class: "flex-bar") do
+        # `label: false` skips the form-group wrapper; the explicit
+        # `<label>` above plays that role here.
+        text_field("field_slip", label: false,
+                                 class: "form-control mr-3", size: 9)
+        submit("Add")
+      end
     end
   end
 
   def render_name_autocompleter
     # `wrap_class:` puts the `mb-2` margin on `.form-group.dropdown`,
-    # not on the `<input>`.
+    # not on the `<input>`. The status light renders into the
+    # autocompleter's `label_append` slot, so it shares the label
+    # row, after the (space-reserving) has-id checkmark.
     autocompleter_field(
-      "name", type: :name, label: :search.ti, wrap_class: "mb-2",
+      "name", type: :name, label: :search_status_label.ti,
               data: {
                 search_status_target: "input",
                 action: [
@@ -116,7 +118,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
                   "focus->search-status#checkMatch"
                 ].join(" ")
               }
-    )
+    ) { |f| f.with_label_append { render_status_light } }
   end
 
   # Keyed by the three states the Stimulus controller uses for the
