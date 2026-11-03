@@ -21,7 +21,7 @@ module Names::Classification
     def make_sure_name_is_at_or_above_genus!(name)
       return true unless name.below_genus?
 
-      flash_error("only works at or above genera!")
+      flash_error(:runtime_classification_requires_at_or_above_genus.t)
       redirect_to(name.show_link_args)
       false
     end
@@ -29,7 +29,7 @@ module Names::Classification
     def make_sure_name_is_genus!(name)
       return true if name.rank == "Genus"
 
-      flash_error("only works on genera!")
+      flash_error(:runtime_classification_requires_genus.t)
       redirect_to(name.show_link_args)
       false
     end
@@ -37,7 +37,7 @@ module Names::Classification
     def make_sure_name_below_genus!(name)
       return true if name.below_genus?
 
-      flash_error("only works on taxa below genus!")
+      flash_error(:runtime_classification_requires_below_genus.t)
       redirect_to(name.show_link_args)
       false
     end
