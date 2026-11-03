@@ -10,11 +10,12 @@ set -uo pipefail
 INPUT="$(cat)"
 COMMAND="$(printf '%s' "$INPUT" | jq -r '.tool_input.command // ""')"
 
-# git commit bodies routinely mention "rubocop" and name
-# config/locales/en.txt in prose or in a `git add` -- not an actual
-# rubocop invocation. Leave commits to check_rubocop_staged.sh.
+# git commit bodies, and gh pr/issue titles and bodies, routinely
+# mention "rubocop" and a path like config/locales/en.txt or a *.js
+# filename in prose -- not an actual rubocop invocation. Leave
+# commits to check_rubocop_staged.sh.
 case "$COMMAND" in
-  *"git commit"*) exit 0 ;;
+  *"git commit"*|*"gh pr"*|*"gh issue"*) exit 0 ;;
 esac
 
 case "$COMMAND" in
