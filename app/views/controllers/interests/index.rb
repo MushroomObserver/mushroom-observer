@@ -78,7 +78,7 @@ module Views::Controllers::Interests
       Table(rows, class: "table-striped table-align-middle",
                   identifier: "interests", show_headers: false) do |t|
         t.column("summary") { |item| summary_cell(item) }
-        t.column("actions") { |item| actions_cell(item) }
+        t.column("actions", align: :right) { |item| actions_cell(item) }
       end
     end
 
