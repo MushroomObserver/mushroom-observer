@@ -36,7 +36,7 @@
           },
           {
             "type": "command",
-            "command": "test -x .claude/hooks/block_rubocop_locale_txt.sh && exec .claude/hooks/block_rubocop_locale_txt.sh || exit 0",
+            "command": "test -x .claude/hooks/block_rubocop_non_ruby_files.sh && exec .claude/hooks/block_rubocop_non_ruby_files.sh || exit 0",
             "timeout": 10
           },
           {
