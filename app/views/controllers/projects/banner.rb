@@ -98,7 +98,8 @@ module Views::Controllers::Projects
           if @user
             Link(type: :object, object: @project)
           else
-            trusted_html(@project.title.t)
+            # Plain text: Textile turns links and bare URLs into anchors.
+            plain(@project.title.t.as_displayed)
           end
         end
       end

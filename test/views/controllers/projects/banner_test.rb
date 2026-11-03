@@ -190,9 +190,10 @@ module Views::Controllers::Projects
 
     def test_logged_out_banner_has_no_links_but_a_login_prompt
       project = projects(:albion_project)
+      project.title = "\"Albion\":https://example.com survey"
       html = render_banner(project: project, user: nil)
 
-      assert_html(html, "#title", text: project.title)
+      assert_html(html, "#title", text: "Albion survey")
       assert_no_html(html, "#title a")
       assert_html(html, ".project_location", text: project.place_name)
       assert_no_html(html, ".project_location a")

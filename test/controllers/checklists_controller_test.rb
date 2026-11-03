@@ -103,9 +103,8 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     get(:show, params: { project_id: project.id })
     assert_select(".checklist a", text: /\(1\)/)
-    assert_select(
-      "title", text: /#{:checklist_for_project_title.l(project: project.title)}/
-    )
+    tab_title = :checklist_for_project_title.l(project: project.title)
+    assert_includes(css_select("title").text, tab_title)
     assert_select("h1#title", text: /#{:checklist_for.l}/, count: 0)
 
     prove_checklist_content(expect)
@@ -206,6 +205,16 @@ class ChecklistsControllerTest < FunctionalTestCase
     prove_checklist_content(expect)
   end
 
+  def test_checklist_for_site_with_project_param
+    login
+    project = projects(:one_genus_two_species_project)
+
+    get(:show, params: { project: project.id })
+
+    assert_select("#project_banner")
+    assert_select("h1#title", text: :checklist_for_site_title.l)
+  end
+
   def test_checklist_for_project_logged_out
     project = projects(:one_genus_two_species_project)
     expect = Name.joins(observations: :project_observations).
@@ -248,6 +257,7 @@ class ChecklistsControllerTest < FunctionalTestCase
       { project_id: project.id, sub_locations: "1" },
       { project_id: "#{project.id}x" },
       { project_id: { x: project.id } },
+      { project_id: [project.id] },
       { species_list_id: species_lists(:first_species_list).id,
         project_id: project.id }
     ].each do |params|

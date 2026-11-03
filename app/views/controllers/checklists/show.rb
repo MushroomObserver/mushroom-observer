@@ -47,8 +47,9 @@ module Views::Controllers::Checklists
       end
     end
 
+    # Not `@context.project`: a `project` param sets it on any checklist.
     def project_checklist?
-      @context.project && !@context.show_user && !@context.species_list
+      @data.is_a?(::Checklist::ForProject)
     end
 
     def checklist_show_title
