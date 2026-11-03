@@ -12,15 +12,17 @@
 # - default   — small watch eye + small ignore eye, no big eye.
 #
 # Rendered into `content_for(:interest_icons)` by
-# `Views::FullPageBase::Icons#add_interest_icons`. Always emits
-# a `<ul>` — empty when no user, so the parent flex layout is
-# consistent regardless of login state.
+# `Views::FullPageBase::Icons#add_interest_icons`. A `<div
+# class="btn-toolbar" role="toolbar">` — a toolbar of borderless
+# icon buttons, not a navigation list. Always emits the wrapper —
+# empty when no user, so the parent flex layout is consistent
+# regardless of login state.
 module Views::Layouts
   class Header::InterestIcons < Views::Base
     # Bootstrap's default tooltip `container: false` inserts the
     # floating tooltip as the trigger's next DOM sibling -- trapped
-    # inside the tight `<li>`/`.btn` wrapper here, it gets clipped and
-    # mis-stacked. Anchoring it to the whole `<ul>` instead gives it
+    # inside the tight `.btn` wrapper here, it gets clipped and
+    # mis-stacked. Anchoring it to the whole toolbar instead gives it
     # room (same fix as `ImageFragment::VoteInterface#tooltip_container`).
     TOOLTIP_CONTAINER = ".interest-eyes"
 
@@ -28,7 +30,14 @@ module Views::Layouts
     prop :object, ::AbstractModel
 
     def view_template
-      ul(class: "nav flex-bar interest-eyes h4 my-0") do
+      # `.flex-bar` supplies the horizontal layout -- BS3's
+      # `.btn-toolbar` (bootstrap-sass) is float/clearfix-based, not
+      # flex; only BS4 rewrites it to `display: flex`. `.btn-toolbar`
+      # is kept for its BS margin-between-children rule and for the
+      # `role="toolbar"` semantics, not for layout.
+      div(class: "btn-toolbar flex-bar interest-eyes h4 my-0 ml-2 ml-sm-0",
+          role: "toolbar",
+          aria: { label: :app_interest_icons_label.l }) do
         render_icons if @user
       end
     end
@@ -48,65 +57,60 @@ module Views::Layouts
     end
 
     def render_watching
-      icon_li(:big, "watch", :interest_watching)
-      destroy_li("halfopen", :interest_default_help)
-      update_li(-1, "ignore", :interest_ignore_help)
+      icon_item(:big, "watch", :interest_watching)
+      destroy_item("halfopen", :interest_default_help)
+      update_item(-1, "ignore", :interest_ignore_help)
     end
 
     def render_ignoring
-      icon_li(:big, "ignore", :interest_ignoring)
-      update_li(1, "watch", :interest_watch_help)
-      destroy_li("halfopen", :interest_default_help)
+      icon_item(:big, "ignore", :interest_ignoring)
+      update_item(1, "watch", :interest_watch_help)
+      destroy_item("halfopen", :interest_default_help)
     end
 
     def render_default
-      create_li(1, "watch", :interest_watch_help)
-      create_li(-1, "ignore", :interest_ignore_help)
+      create_item(1, "watch", :interest_watch_help)
+      create_item(-1, "ignore", :interest_ignore_help)
     end
 
     # Inert state indicator, not a control -- `tag: :span` + `.disabled`
-    # (not `Button(type: :post/...)`, which are real form-submitting
-    # controls) gives it a `.btn` box like the two real buttons beside
-    # it, so it doesn't render as a bare, oversized, unpadded image
-    # alongside them. `variant: :outline` (bordered), not `:link`
-    # (borderless, same as the two real buttons) -- the border is what
-    # visually marks this one as "your current state", not clickable.
-    def icon_li(size, kind, alt_key)
-      li do
-        Button(tag: :span, variant: :outline, class: "disabled") do
-          interest_icon(size, kind, alt_key)
-        end
+    # (not `Button(type: :post/...)`, which are form-submitting
+    # controls) gives it a `.btn` box like the two clickable buttons
+    # beside it, so it doesn't render as a bare, oversized, unpadded
+    # image alongside them. `variant: :outline` (bordered), not
+    # `:link` (borderless, same as the two clickable buttons) -- the
+    # border is what visually marks this one as "your current state",
+    # not clickable.
+    def icon_item(size, kind, alt_key)
+      Button(tag: :span, variant: :outline, class: "disabled px-1") do
+        interest_icon(size, kind, alt_key)
       end
     end
 
     # No existing `Interest` row -- `interests_path` has no `:id`
     # segment, so both `id:` and `state:` ride as form params.
-    def create_li(state, kind, alt_key)
+    def create_item(state, kind, alt_key)
       params = { type: @object.class.name, id: @object.id, state: }
-      li { interest_button(:post, interests_path, kind:, alt_key:, params:) }
+      interest_button(:post, interests_path, kind:, alt_key:, params:)
     end
 
     # An `Interest` row already exists and is flipping to the other
     # non-default state -- `:id` in `interest_path` is the WATCHED
     # OBJECT's id, matching what `InterestsController#update` reads
-    # from `params[:id]` (not the `Interest` row's own id).
-    def update_li(state, kind, alt_key)
+    # from `params[:id]` (not the `Interest` row's id).
+    def update_item(state, kind, alt_key)
       params = { type: @object.class.name, state: }
-      li do
-        interest_button(:patch, interest_path(@object.id), kind:, alt_key:,
-                                                           params:)
-      end
+      interest_button(:patch, interest_path(@object.id), kind:, alt_key:,
+                                                         params:)
     end
 
     # Returning to the default (no-opinion) state destroys the
     # `Interest` row outright -- no `state:` param needed, the DELETE
     # verb already says what's happening.
-    def destroy_li(kind, alt_key)
+    def destroy_item(kind, alt_key)
       params = { type: @object.class.name }
-      li do
-        interest_button(:delete, interest_path(@object.id), kind:, alt_key:,
-                                                            params:)
-      end
+      interest_button(:delete, interest_path(@object.id), kind:, alt_key:,
+                                                          params:)
     end
 
     # `variant: :link` (Bootstrap's own `.btn-link` reset), not
@@ -120,30 +124,24 @@ module Views::Layouts
     # button's job now, not the icon's (see `interest_icon`).
     def interest_button(method, path, kind:, alt_key:, params:)
       Button(type: method, target: path, name: alt_key.l(object: type.l),
-             variant: :link, params:, form: { class: "interest-link" },
+             variant: :link, class: "px-1", params:,
+             form: { class: "interest-link" },
              data: { turbo_stream: "true", placement: "bottom",
                      tooltip_container: TOOLTIP_CONTAINER }) do
         interest_icon(:small, kind, alt_key)
       end
     end
 
-    # `size` is `:big` (state-indicator icon, no button wrapper -- it
-    # needs its own tooltip) or `:small` (clickable variant inside a
+    # `size` is `:big` (state-indicator icon, no button wrapper, so
+    # needs a tooltip here) or `:small` (clickable variant inside a
     # `Button`, which already supplies an equivalent tooltip via
-    # `name:` -- adding a second one on the icon itself doubled up
-    # visibly, one above the button and one below). The filename is
-    # `<kind>2.png` for big, `<kind>3.png` for small — matches the
-    # asset naming pre-conversion.
+    # `name:` -- a second one on the icon doubled up visibly). The
+    # filename is `<kind>2.png` for big, `<kind>3.png` for small.
     #
     # `mo-icon` (see _icons.scss) puts these on the same shared sizing
-    # system as every other icon in the app -- `.interest-eyes
-    # .mo-icon` (_content.scss) sets the actual 1.5em square, matching
-    # #top_nav .top_nav_icon_button .mo-icon's scale, same for the big
-    # indicator and the two small buttons alike. `interest_#{kind}`
-    # (watch/ignore/halfopen) is a stable hook for tests -- asserting
-    # against it instead of the image filename means controller-level
-    # tests don't need to change if this ever moves off .png (e.g. to
-    # the SVG sprite).
+    # system as every other icon in the app. `interest_#{kind}`
+    # (watch/ignore/halfopen) is a stable hook for tests, independent
+    # of the image filename.
     def interest_icon(size, kind, alt_key)
       alt = alt_key.l(object: type.l)
       suffix = size == :big ? "2" : "3"

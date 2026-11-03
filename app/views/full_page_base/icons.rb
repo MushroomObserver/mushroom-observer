@@ -6,10 +6,12 @@
 # that owns the actual icon markup; the setter writes the rendered
 # HTML into the `content_for` slot the layout reads.
 module Views::FullPageBase::Icons
-  # Edit / delete icons for the show-page title bar. Permission gating
-  # + button rendering live on `Views::Layouts::Header::EditDeleteIcons`.
+  # Edit / delete icons for the show-page title bar's flush-right
+  # actions slot (`Header::PageTitle#render_title_bar_actions`).
+  # Permission gating + button rendering live on
+  # `Views::Layouts::Header::EditDeleteIcons`.
   def add_edit_icons(object, user)
-    content_for(:edit_icons) do
+    content_for(:title_bar_actions) do
       capture do
         render(::Views::Layouts::Header::EditDeleteIcons.new(
                  object: object, user: user

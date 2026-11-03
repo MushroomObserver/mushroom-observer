@@ -88,6 +88,41 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     end
   end
 
+  # Regression test for a bug where `showOrHideCarouselControls()`
+  # used `querySelector` (singular) against `.carousel-control` --
+  # there are two such elements (left/right arrows), so only the
+  # first got its `d-none` class toggled, leaving the other arrow
+  # permanently visible even with a single image.
+  def test_carousel_controls_hide_with_one_image_show_with_two
+    setup_image_dirs
+    login!(rolf)
+
+    visit(new_observation_path)
+
+    click_attach_file("Coprinus_comatus.jpg")
+    assert_selector(".carousel-item[data-image-status='upload']", count: 1,
+                                                                  wait: 10)
+
+    carousel = "#observation_upload_images_carousel"
+    assert_no_selector("#{carousel} .carousel-control", visible: :visible)
+    assert_selector("#{carousel} .carousel-control", visible: :all, count: 2)
+
+    click_attach_file("geotagged.jpg")
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    count: 2, wait: 10, visible: :all)
+
+    assert_selector("#{carousel} .carousel-control", visible: :visible,
+                                                     count: 2)
+
+    image_wrapper = first(".carousel-item[data-image-status='upload']",
+                          visible: :all)
+    within(image_wrapper) { find(".remove_image_button").click }
+    sleep(1)
+    assert_selector(".carousel-item[data-image-status='upload']",
+                    visible: :all, count: 1)
+    assert_no_selector("#{carousel} .carousel-control", visible: :visible)
+  end
+
   # An image over the upload size limit must block submission with a
   # visible, blocking message naming the file -- never be silently
   # dropped (issue #4872). Stub the limit tiny so a normal test image

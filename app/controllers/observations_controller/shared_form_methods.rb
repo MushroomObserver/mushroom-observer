@@ -339,17 +339,16 @@ module ObservationsController::SharedFormMethods
 
   ##############################################################################
 
-  # `submitted_ids` is `observation[project_ids][]` — the projects
+  # `submitted_ids` is `observation[project_ids][]` -- the projects
   # the user wants the obs attached to. Only `@user.projects_member`
-  # projects are toggled — non-member projects the obs belongs to are
-  # preserved by omission (disabled checkboxes don't submit, and the
-  # id-set comparison below excludes them anyway).
+  # projects are toggled; non-member projects the obs belongs to are
+  # preserved by omission.
   #
   # Compares id arrays (one lightweight `project_ids` query) rather
   # than loading every member project's `observations` to run
   # `@observation.projects.include?` per project -- for a user in
-  # hundreds of projects that eager load dominated the request (#5245).
-  # Only the ids whose membership changed get touched.
+  # hundreds of projects that eager load dominated the request. Only
+  # the ids whose membership changed get touched.
   def update_projects
     submitted_ids =
       params.permit(observation: { project_ids: [] }).

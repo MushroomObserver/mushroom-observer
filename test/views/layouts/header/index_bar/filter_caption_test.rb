@@ -356,6 +356,38 @@ module Views::Layouts
                   "[title='#{:filter_caption_collapse.l}']")
     end
 
+    # `Query::Interests#by_users` is forced to the viewer, not read
+    # from a URL param -- captioning it would print "By users: you"
+    # on every load, so `MODEL_HIDDEN_PARAMS` drops it for the
+    # Interest model.
+    def test_interests_by_users_param_hidden_from_caption
+      query = Query.lookup_and_save(:Interest, by_users: [users(:rolf).id])
+
+      assert_not(
+        Views::Layouts::Header::IndexBar::FilterCaption.filters_present?(query)
+      )
+
+      html = render_for(query)
+
+      assert_html(html, "#caption-truncated", text: :all.ti)
+    end
+
+    # A filter on the same Interest query still renders -- only
+    # `by_users` is hidden, not the whole query.
+    def test_interests_types_param_still_renders_despite_hidden_by_users
+      query = Query.lookup_and_save(
+        :Interest, by_users: [users(:rolf).id], types: [:observation]
+      )
+
+      assert(
+        Views::Layouts::Header::IndexBar::FilterCaption.filters_present?(query)
+      )
+
+      html = render_for(query)
+
+      assert_no_html(html, "#caption-truncated", text: :all.ti)
+    end
+
     private
 
     def render_for(query)

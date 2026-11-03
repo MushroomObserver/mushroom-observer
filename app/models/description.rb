@@ -472,6 +472,14 @@ class Description < AbstractModel
     authors.member?(user)
   end
 
+  # Can the given User add and remove authors? Everyone else may only
+  # request authorship.
+  def can_review_authors?(user)
+    return false unless user
+
+    author?(user) || user.in_group?("reviewers")
+  end
+
   # Is the given User an editor?
   def editor?(user)
     editors.member?(user)

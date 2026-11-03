@@ -6,8 +6,9 @@
 #                         one exists.
 #  pattern_too_long?::    Guard + flash + redirect on an overlong pattern.
 #  save_pattern_if_it_wont_overfill_cookie_store::
-#                         Remember the pattern for the search bar, unless
-#                         doing so would overflow the session cookie.
+#                         Remember the pattern and search view for the
+#                         search bar, unless doing so would overflow
+#                         the session cookie.
 #
 #  Shared by SearchController (the search bar's submission) and
 #  ApplicationController::Indexes#pattern (a model index hit directly
@@ -34,6 +35,7 @@ module ApplicationController::PatternSearchState
 
     session[:pattern] = pattern
     session[:search_type] = type
+    session[:search_view] = "pattern"
   end
 
   # The CookieStore (Default) limit is 4096

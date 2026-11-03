@@ -16,7 +16,7 @@ module Views::Controllers::Descriptions::Merges
       # construction.
       other_descriptions = description.parent.descriptions - [description]
       form_object = FormObject::DescriptionMoveOrMerge.new
-      form_object.target = other_descriptions.first.id if
+      form_object.target_id = other_descriptions.first.id if
         other_descriptions.length == 1
       form_object.delete = description.is_admin?(user)
       # Keep the explicit DOM id — tests, integration specs, and the
@@ -39,15 +39,43 @@ module Views::Controllers::Descriptions::Merges
 
     private
 
+    # Every option's title can read identically ("Public Description")
+    # when none of them is the parent's default -- the radios alone
+    # give no way to tell them apart, so each one expands to show its
+    # general description on selection.
     def render_merge_options
       if merges.any?
-        options = merges.map do |desc|
-          [desc.id, description_title(@user, desc)]
+        div(data: { controller: "collapse-switch" }) do
+          merges.each do |desc|
+            render_merge_radio(desc)
+            render_merge_preview(desc)
+          end
         end
-        radio_field(:target, *options)
       else
         p { :merge_descriptions_no_others.t }
       end
+    end
+
+    def render_merge_radio(desc)
+      render(Components::Form::RadioCollapse.new(
+               form: self, field: :target_id, value: desc.id,
+               label: description_title(@user, desc)
+             ))
+    end
+
+    def render_merge_preview(desc)
+      Collapsible(expanded: desc.id == model.target_id,
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: desc.id.to_s }) do
+        div(class: "ml-4") { trusted_html(merge_preview_text(desc)) }
+      end
+    end
+
+    def merge_preview_text(desc)
+      return :merge_descriptions_preview_restricted.tpl unless
+        user_reader?(@user, desc)
+
+      desc.gen_desc.presence&.tpl || :show_description_empty.tpl
     end
 
     def render_delete_checkbox

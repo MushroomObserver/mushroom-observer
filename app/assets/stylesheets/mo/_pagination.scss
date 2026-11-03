@@ -8,3 +8,10 @@
     color: $text-color;
   }
 }
+
+// Floor, not a fixed size -- this sits in a flex row alongside a
+// variable-width sibling (the rss-log type-filter row) that can
+// otherwise shrink the input below a usable width.
+.page-input .form-control {
+  min-width: 4rem;
+}

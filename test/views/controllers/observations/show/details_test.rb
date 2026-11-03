@@ -28,7 +28,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     html = render(panel_with(obs))
 
     assert_html(html, "#observation_details > " \
-                      ".panel-body.p-0#observation_external_links" \
+                      "#observation_external_links" \
                       "[data-controller='section-update']")
   end
 
@@ -41,7 +41,7 @@ class Views::Controllers::Observations::Show::DetailsTest <
     html = render(panel_with(obs, nil))
 
     assert_html(html, "#observation_details > " \
-                      ".panel-body.p-0#observation_external_links")
+                      "#observation_external_links")
   end
 
   def test_does_not_render_external_links_body_when_nothing_to_show
@@ -49,7 +49,6 @@ class Views::Controllers::Observations::Show::DetailsTest <
 
     html = render(panel_with(@obs))
 
-    assert_no_html(html, ".border-bottom")
     assert_no_html(html, "#observation_external_links")
   end
 

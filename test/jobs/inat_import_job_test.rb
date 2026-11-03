@@ -903,6 +903,76 @@ class InatImportJobTest < ActiveJob::TestCase
                  "A reused photo should not be counted as not imported")
   end
 
+  # A user who opted out on their profile, importing their iNat obs: the
+  # facts come in as a placeholder, with no images and no notes.
+  def test_job_imports_opted_out_users_obs_as_placeholder
+    create_ivars_from_filename("donadinia_PNW01")
+    @user.update!(inat_import_opt_out: true)
+    stub_inat_interactions
+
+    assert_difference("Observation.count", 1) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
+    assert(obs.placeholder?, "An opted-out user's obs should be a placeholder")
+    assert_empty(obs.images, "No photo of an opted-out user is imported")
+    photos = @parsed_results.first[:observation_photos]
+    assert_equal(photos.size, obs.skeleton_omissions["images"],
+                 "Every photo should be listed as not imported")
+    inat_obs = Inat::Obs.new(JSON.generate(@parsed_results.first))
+    assert_equal(inat_obs.skeleton_notes, obs.notes,
+                 "The notes should be only the snapshot")
+    assert_includes(@inat_import.reload.response_errors,
+                    :inat_user_opted_out.l(login: @inat_import.inat_username),
+                    "The importer should be told the user opted out")
+  end
+
+  # An excluded iNat user's obs, imported by someone else without
+  # placeholders: skipped, and the importer is told why.
+  def test_job_skips_excluded_inat_users_obs_for_others_import
+    @user = users(:dick) # Dick is a superimporter
+    create_ivars_from_filename("donadinia_PNW01")
+    @inat_import.update(import_others: true, create_skeletons: false)
+    inat_user = @parsed_results.first[:user]
+    excluded = ExcludedInatUser.create!(inat_login: inat_user[:login])
+    stub_inat_interactions(login: "dick_on_inat")
+
+    assert_no_difference("Observation.count") do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    assert_includes(@inat_import.reload.response_errors,
+                    :inat_user_opted_out.l(login: inat_user[:login]))
+    assert_equal(inat_user[:id], excluded.reload.inat_user_id,
+                 "The first sighting should record the iNat user's id")
+  end
+
+  # An excluded iNat user who imports the obs they posted, consenting to
+  # the licensing on the import form, comes off the list, and the import
+  # brings in their photos.
+  def test_importing_as_the_excluded_user_removes_the_exclusion
+    create_ivars_from_filename("donadinia_PNW01")
+    login = @parsed_results.first[:user][:login]
+    @user.update_columns(inat_username: nil)
+    ExcludedInatUser.create!(inat_login: login)
+    stub_inat_interactions(login: login)
+
+    InatImportJob.perform_now(@inat_import)
+
+    assert_not(ExcludedInatUser.exists?(inat_login: login),
+               "Importing as that iNat user should end the exclusion")
+    @user.reload
+    assert_equal(login, @user.inat_username)
+    assert_not(@user.inat_import_opt_out,
+               "The exclusion should not move to the user's profile")
+    obs = Observation.find_by(inat_import_id: @inat_import.id)
+    assert_not_nil(obs, "Cannot find the imported Observation")
+    assert_not(obs.placeholder?)
+    assert_not_empty(obs.images)
+  end
+
   # A skeleton that fails to import is reported like any other failure.
   def test_job_reports_failed_skeleton_import
     create_skeleton_ivars(collector: "Skeleton Test Collector")
@@ -1127,6 +1197,8 @@ class InatImportJobTest < ActiveJob::TestCase
     )
 
     stub_inat_interactions
+    started = 1.hour.ago
+    @inat_import.update!(last_obs_start: started)
 
     assert_no_difference(
       "Observation.count",
@@ -1137,6 +1209,9 @@ class InatImportJobTest < ActiveJob::TestCase
 
     assert_match(/Skipped #{inat_id} already linked/, job_log_file.read,
                  "Should log a skip message when the obs is already imported")
+    assert_operator(@inat_import.reload.last_obs_start, :>, started,
+                    "A skip should restart the per-obs clock, so the next " \
+                    "import is not charged for the time spent skipping")
   end
 
   # If a simultaneous import job inserts the same iNat obs between
@@ -1398,14 +1473,15 @@ class InatImportJobTest < ActiveJob::TestCase
                  "Persisted username should be normalized to lowercase")
   end
 
+  # The entered username is someone else's; the authorized login is the
+  # super importer's, and that is what gets recorded.
   def test_super_importer_anothers_observation
     @user = users(:dick)
-    inat_username = @user.inat_username
     assert(InatImport.super_importers.include?(@user),
            "Test needs User fixture that's SuperImporter")
 
     create_ivars_from_filename("calostoma_lutescens")
-    stub_inat_interactions
+    stub_inat_interactions(login: "dick_on_inat")
 
     assert_difference(
       "Observation.count", 1,
@@ -1415,8 +1491,9 @@ class InatImportJobTest < ActiveJob::TestCase
     end
 
     assert_empty(@inat_import.response_errors, "There should be no errors")
-    assert_equal(inat_username, @user.reload.inat_username,
-                 "SuperImporter's inat_username should not change")
+    assert_equal("dick_on_inat", @user.reload.inat_username,
+                 "A SuperImporter's inat_username is the login they " \
+                 "authorized as, not the one entered")
   end
 
   def test_super_importer_all_inat_fungal_observations
@@ -1480,6 +1557,35 @@ class InatImportJobTest < ActiveJob::TestCase
     InatImportJob.perform_now(inat_import)
 
     assert_requested(obs_stub)
+  end
+
+  # Regression: an import that listed no ids leaves the column nil, and
+  # the id check runs ahead of the URL check it is waiting for. A
+  # project admin's import is the one that arrives this way.
+  def test_url_mode_with_no_id_list_reaches_page_parser
+    @user = users(:dick)
+    inat_import = InatImport.find_or_create_by(user: @user)
+    inat_import.update(
+      state: "Authorizing", inat_url: "place_id=1", inat_ids: nil,
+      import_all: false, import_others: true,
+      inat_username: @user.inat_username, token: "MockCode",
+      importables: nil, imported_count: 0,
+      avg_import_time: InatImport::BASE_AVG_IMPORT_SECONDS,
+      response_errors: "", log: [], last_obs_start: Time.now.utc,
+      ended_at: nil
+    )
+
+    stub_token_requests
+    stub_check_username_match(@user.inat_username)
+    obs_stub = stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+               to_return(status: 200,
+                         body: { total_results: 0, results: [] }.to_json)
+
+    WebMock.reset_executed_requests!
+    InatImportJob.perform_now(inat_import)
+
+    assert_requested(obs_stub)
+    assert_empty(inat_import.reload.response_errors)
   end
 
   def test_import_canceled

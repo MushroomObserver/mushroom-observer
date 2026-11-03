@@ -13,13 +13,15 @@ class ModalLinkTest < ComponentTestCase
                 text: "Edit")
   end
 
+  # Plain link — no btn classes unless button: is passed.
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_no_button_styling_by_default
     html = render_modal
 
-    # Plain link — no btn classes unless button: is passed.
     assert_no_html(html, "a.btn")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_button_kwarg_adds_btn_classes
     html = render_modal(button: :outline)
 
@@ -34,7 +36,7 @@ class ModalLinkTest < ComponentTestCase
                       "[data-controller='modal-toggle']" \
                       "[data-action='modal-toggle#showModal:prevent']")
     assert_html(html, "a svg.mo-icon-edit")
-    assert_html(html, "a span.sr-only", text: "Edit")
+    assert_html(html, "a .sr-only", text: "Edit")
   end
 
   def test_caller_data_attrs_deep_merge_with_stimulus_attrs
@@ -50,6 +52,7 @@ class ModalLinkTest < ComponentTestCase
     assert_html(html, "a.extra-class[href='/edit']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_size_kwarg_adds_btn_size_class
     html = render_modal(button: :outline, size: :lg)
 

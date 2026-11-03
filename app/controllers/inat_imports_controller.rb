@@ -27,12 +27,15 @@ class InatImportsController < ApplicationController
   include Estimators
   include FormBuilders
   include ImportOptions
+  include ProjectScope
   include PreviousImports
+  include AccountLinking
   include Inat::Constants
 
   before_action :login_required
   before_action :flatten_confirm_params, only: :create
   before_action :flatten_new_form_params, only: :create
+  before_action :apply_project_scope, only: [:new, :create]
 
   def index
     admin = in_admin_mode? == true
@@ -116,6 +119,7 @@ class InatImportsController < ApplicationController
   def authorization_response
     auth_code = params[:code]
     return not_authorized if auth_code.blank?
+    return link_inat_account(auth_code) if linking_inat_account?
 
     inat_import = InatImport.find_by(id: string_param(:state), user: @user)
     return not_authorized unless inat_import
@@ -235,7 +239,6 @@ class InatImportsController < ApplicationController
   def url_normalizer(url, keep_taxon_id: false)
     Inat::URLNormalizer.new(
       url,
-      superimporter: InatImport.super_importer?(@user),
       import_others: import_others?,
       keep_taxon_id: keep_taxon_id
     )

@@ -74,6 +74,56 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(Vote::MAXIMUM_VOTE, naming.votes.find_by(user: rolf).value)
   end
 
+  # The observer is the voter on an import of their observations, so the
+  # vote the engine manages is the one they change by hand. Raising it
+  # and watching the next resync put it back was #5480.
+  def test_a_confidence_the_observer_raised_is_kept
+    naming = import_naming(@new, Vote::MIN_POS_VOTE)
+    Observation::NamingConsensus.new(@obs).
+      change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).source_value,
+                 "the source's value stands while the observer's moves")
+
+    sync(fresh)
+
+    assert_equal(Vote::MAXIMUM_VOTE, importer_vote(naming).value,
+                 "the resync should leave the observer's value alone")
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).source_value,
+                 "and should not restate what the source said")
+    assert_equal(@site.id, importer_vote(naming).external_site_id,
+                 "provenance stays: the row did come from iNat")
+  end
+
+  # The source resumes managing a vote the observer puts back where the
+  # source had it -- the two agreeing is read as agreement.
+  def test_a_confidence_returned_to_the_source_value_follows_again
+    naming = import_naming(@old, Vote::NEXT_BEST_VOTE)
+    consensus = Observation::NamingConsensus.new(@obs)
+    consensus.change_vote(naming, Vote::MAXIMUM_VOTE, @importer)
+    consensus.change_vote(naming, Vote::NEXT_BEST_VOTE, @importer)
+
+    sync(fresh)
+
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Could Be")
+  end
+
+  # The same guard must not freeze a vote the engine has written: it
+  # stamps after writing, and a stamped vote stays under its management.
+  def test_a_vote_the_engine_wrote_still_follows_the_source
+    naming = import_naming(@old, Vote::MAXIMUM_VOTE)
+
+    sync(fresh)
+
+    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Could Be")
+    assert_equal(@site.id, importer_vote(naming).external_site_id)
+  end
+
+  # The naming is adopted and stamped. Its vote is left where it is:
+  # with no source_value the engine cannot account for the value, and
+  # a row it cannot account for might be a person's (#5480). The
+  # repair fills in the ones the import explains.
   def test_importer_naming_predating_the_marker_is_adopted
     naming = Naming.create!(observation: @obs, user: @importer, name: @new,
                             reasons: { 2 => "import" })
@@ -84,7 +134,9 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     assert_equal(0, outcome.added, "adopted, not duplicated")
     assert_equal(@site.id, naming.reload.external_site_id)
-    assert_equal(@site.id, importer_vote(naming).external_site_id)
+    assert_nil(importer_vote(naming).source_value,
+               "the engine leaves a value it cannot account for")
+    assert_equal(Vote::NEXT_BEST_VOTE, importer_vote(naming).value)
   end
 
   # Naming rejects a second proposal of the same name by the same user,
@@ -172,6 +224,61 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(@old, @obs.reload.name)
   end
 
+  # A provisional Observation Taxon outranks the field (#2892).
+  def test_provisional_taxon_outranks_the_provisional_name
+    provisional = { name: "Provisional Species Name",
+                    value: @old.text_name }
+
+    outcome = sync(fresh(ofvs: [provisional], taxon: { provisional: true }))
+
+    assert_empty(outcome.alerts)
+    assert_nil(@obs.namings.find_by(name: @old),
+               "the field is ignored when iNat's taxon is provisional")
+    assert_equal(@new, @obs.reload.name)
+  end
+
+  # A typing slip in the field still finds the MO name it means (#2892).
+  def test_provisional_name_with_a_quote_slip_leads
+    name = Name.create_with_trusted_rank(User.admin, "Agrocybe sp. 'NY17'",
+                                         "Species")
+    provisional = { name: "Provisional Species Name",
+                    value: "Agrocybe sp. ' NY17'" }
+
+    outcome = sync(fresh(ofvs: [provisional]))
+
+    assert_empty(outcome.alerts)
+    assert_equal(name, @obs.reload.name, "the repaired field leads")
+  end
+
+  # #5499: two Names tied on both `deprecated` and `created_at` (the
+  # column has no fractional-second precision, so same-second ties are
+  # common) need a final tiebreaker, or which one resolves can differ
+  # between two otherwise-identical resyncs.
+  def test_provisional_name_tie_break_is_deterministic
+    tied_at = 1.day.ago
+    older = duplicate_name("Tiebreakia testia")
+    older.update_column(:created_at, tied_at)
+    newer = duplicate_name("Tiebreakia testia")
+    newer.update_column(:created_at, tied_at)
+    provisional = { name: "Provisional Species Name",
+                    value: "Tiebreakia testia" }
+
+    sync(fresh(ofvs: [provisional]))
+    first_pick = @obs.namings.reload.
+                 find_by(name_id: [older.id, newer.id]).name
+
+    @obs.namings.destroy_all
+    Vote.where(observation: @obs).destroy_all
+
+    sync(fresh(ofvs: [provisional]))
+    second_pick = @obs.namings.reload.
+                  find_by(name_id: [older.id, newer.id]).name
+
+    assert_equal(newer, first_pick, "a tie should resolve to the newest Name")
+    assert_equal(first_pick, second_pick,
+                 "the tie-break must be stable across repeated resolutions")
+  end
+
   def test_override_name_missing_from_mo_is_created_and_leads
     assert_nil(Name.find_by(text_name: "Agrocybe yyy"))
     override = { name: "Species Name Override", value: "Agrocybe yyy" }
@@ -198,7 +305,7 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
   end
 
   def test_unknown_taxon_is_left_alone
-    outcome = sync(fresh(ancestor_ids: []))
+    outcome = sync(fresh(taxon: { ancestor_ids: [] }))
 
     assert_not(outcome.changed?)
     assert_empty(outcome.alerts)
@@ -224,11 +331,25 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
   private
 
+  # A second, independent Name row at the given text_name. Bypasses
+  # Name.create_with_trusted_rank's find-or-create check (which would
+  # just return the first one) and the search_name_indistinct
+  # validation (which blocks a second save through the normal flow,
+  # but duplicate-text_name rows do exist in the production database
+  # from paths that predate or bypass that validation -- #5499).
+  def duplicate_name(text_name)
+    parse = Name.parse_name(text_name, rank: "Species", force_rank: true)
+    name = Name.new(parse.params.merge(user: User.admin))
+    name.current_user = User.admin
+    name.save!(validate: false)
+    name
+  end
+
   def import_naming(name, value)
     naming = Naming.create!(observation: @obs, user: @importer, name: name,
                             external_site: @site, reasons: { 2 => "import" })
     Vote.create!(naming: naming, user: @importer, observation: @obs,
-                 value: value, external_site: @site)
+                 value: value, external_site: @site, source_value: value)
     Observation::NamingConsensus.new(@obs).calc_consensus
     naming
   end
@@ -237,10 +358,10 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     naming.votes.reload.find_by(user: @importer)
   end
 
+  # taxon: attributes overriding the mock's taxon (ancestor_ids, provisional).
   def fresh(name: "Coprinus comatus", rank: "species", quality: "research",
-            ofvs: [], ancestor_ids: nil)
-    taxon = @raw[:taxon].merge(name: name, rank: rank)
-    taxon[:ancestor_ids] = ancestor_ids unless ancestor_ids.nil?
+            ofvs: [], taxon: {})
+    taxon = @raw[:taxon].merge(name: name, rank: rank, **taxon)
     # No photos: the full-resync test would otherwise import them.
     Inat::Obs.new(JSON.generate(@raw.merge(quality_grade: quality,
                                            taxon: taxon, identifications: [],

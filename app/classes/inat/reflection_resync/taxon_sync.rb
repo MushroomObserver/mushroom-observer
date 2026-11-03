@@ -10,9 +10,10 @@ class Inat
     # that weight counts the whole occurrence: a native sequence on the
     # companion is evidence for the specimen the reflection mirrors.
     #
-    # Only source-derived rows move: namings and votes carrying the
-    # site's external_site_id, stamped by the importer or here. A
-    # person's namings and votes on the reflection are never changed.
+    # Only source-derived rows move. A naming is the source's when it
+    # carries the site's external_site_id; a vote is when it still
+    # holds the value the source wrote, which source_value records. A
+    # person's namings, and any vote they have moved, are left alone.
     # A name the plan needs but MO lacks is created as the admin actor,
     # the resync's owner, trusting iNat's rank.
     class TaxonSync
@@ -62,7 +63,8 @@ class Inat
         Inat::NamingPlan.lead_vote_for(
           quality_grade: @inat_obs[:quality_grade],
           sequence_evidence: sequence_evidence?,
-          provisional_evidence: !provisional.nil?
+          provisional_evidence: !provisional.nil? ||
+                                @inat_obs.provisional_taxon?
         )
       end
 
@@ -76,16 +78,21 @@ class Inat
       def parsed_name(str, label)
         return nil if str.blank?
 
-        parsed = Name.parse_name(str)
+        parsed = parse(str)
         if parsed.nil? || parsed.text_name.blank?
           return alert("#{label} #{str.inspect} does not parse as a name")
         end
 
+        # id: :desc as a final tiebreaker -- without it, two Names tied
+        # on both deprecated and created_at have no stable order, so
+        # which one .first returns can differ between calls (#5499).
         Name.where(text_name: parsed.text_name).
-          order(deprecated: :asc, created_at: :desc).first ||
+          order(deprecated: :asc, created_at: :desc, id: :desc).first ||
           create_name(name: parsed.search_name, rank: parsed.rank) ||
           alert("#{label} #{str.inspect} could not be created as an MO name")
       end
+
+      def parse(str) = Inat::NameString.parse(str, taxon: @inat_obs[:taxon])
 
       def create_name(name:, rank:)
         Name.create_with_trusted_rank(User.admin, name, rank)
@@ -118,13 +125,16 @@ class Inat
         demote_unplanned(voted, proposals)
       end
 
-      # The namings the source currently speaks for: those carrying the
-      # importer's stamped vote. Identified by the vote, not the naming,
-      # because the source also votes on a naming a person proposed first.
+      # The namings the source currently speaks for: those carrying a
+      # vote of the importer that the source has written. Identified by
+      # the vote, not the naming, because the source also votes on a
+      # naming a person proposed first. A vote the observer has since
+      # moved stays in this set -- the source still speaks for the
+      # naming, and set_vote is where it declines to move the value.
       def source_voted_namings
         @obs.namings.joins(:votes).
-          where(votes: { user_id: importer.id,
-                         external_site_id: @site.id }).distinct.to_a
+          where(votes: { user_id: importer.id }).
+          where.not(votes: { source_value: nil }).distinct.to_a
       end
 
       # A name the source no longer proposes keeps its naming; only the
@@ -182,18 +192,39 @@ class Inat
       # demotion only lowers: a vote already at or below Could Be stays.
       def set_vote(naming, value, demote: false)
         vote = naming.votes.find_by(user: importer)
-        return if demote && (vote.nil? || vote.value <= value)
-        return mark_vote(vote) if vote && vote.value == value
+        return if skip_vote?(vote, value, demote)
+        return record(vote, value) if vote && vote.value == value
 
         consensus = Observation::NamingConsensus.new(@obs)
         @reweighted += 1 if consensus.change_vote(naming, value, importer)
-        mark_vote(naming.votes.find_by(user: importer))
+        record(naming.votes.find_by(user: importer), value)
       end
 
-      def mark_vote(vote)
-        return unless vote && vote.external_site_id != @site.id
+      def skip_vote?(vote, value, demote)
+        return true if moved_by_a_person?(vote)
 
-        vote.update_column(:external_site_id, @site.id)
+        demote && (vote.nil? || vote.value <= value)
+      end
+
+      # source_value is the value this class (or the import) last
+      # wrote; the row stays source-owned while vote.value still
+      # matches it. A null source_value (a pre-#5480 row) is left to
+      # its holder rather than risked. Setting the value back to
+      # source_value re-syncs the row to the source.
+      def moved_by_a_person?(vote)
+        return false if vote.nil?
+
+        vote.source_value.nil? || vote.value != vote.source_value
+      end
+
+      # external_site_id says where the row came from and stays put;
+      # source_value says what the source last wrote.
+      def record(vote, value)
+        return unless vote
+
+        attrs = { source_value: value }
+        attrs[:external_site_id] = @site.id if vote.external_site_id.nil?
+        vote.update_columns(**attrs)
       end
     end
   end

@@ -19,6 +19,8 @@ class Inat
       @user = user
       @import_others = inat_import&.import_others || false
       @skeleton = skeleton
+      # The observer opted out of MO, so no photo is imported either.
+      @opted_out = Inat::OptOut.opted_out?(inat_obs[:user])
       @external_site = external_site || ExternalSite.inaturalist
       @inat_import = inat_import
       @skipped_images = 0
@@ -84,7 +86,8 @@ class Inat
                                                          @external_site)
       @observation.update!(
         skeleton_omissions:
-          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids)
+          inat_obs.skeleton_omissions(imported_photo_ids: photo_ids,
+                                      opted_out: @opted_out)
       )
     end
 
@@ -110,8 +113,7 @@ class Inat
     end
 
     # The MO name for the iNat provisional-name observation field, or nil.
-    # iNat can't use a provisional name as its own identification, so it is a
-    # separate proposal from the Observation Taxon. Creates the MO name if
+    # A separate proposal from the Observation Taxon. Creates the MO name if
     # absent.
     # NOTE: iNat users seem to add a prov name only when there's a sequence.
     def prov_name
@@ -121,8 +123,10 @@ class Inat
     end
 
     def find_or_create_prov_name
-      find_or_create_name(Name.parse_name(inat_obs.provisional_name))
+      find_or_create_name(parse_field(inat_obs.provisional_name))
     end
+
+    def parse_field(str) = Inat::NameString.parse(str, taxon: inat_obs[:taxon])
 
     # The MO name for the iNat "Species Name Override" obs field, or nil. The
     # override outranks the provisional name and the Observation Taxon as the
@@ -136,7 +140,7 @@ class Inat
     end
 
     def find_or_create_override_name
-      find_or_create_name(Name.parse_name(inat_obs.name_override)) ||
+      find_or_create_name(parse_field(inat_obs.name_override)) ||
         log_ignored_override("unparseable or uncreatable name")
     rescue StandardError => e
       log_ignored_override(e.message)
@@ -186,7 +190,7 @@ class Inat
       Inat::NamingPlan.lead_vote_for(
         quality_grade: inat_obs[:quality_grade],
         sequence_evidence: inat_obs.sequences.present?,
-        provisional_evidence: prov_name.present?
+        provisional_evidence: prov_name.present? || inat_obs.provisional_taxon?
       )
     end
 
@@ -306,8 +310,12 @@ class Inat
                  reasons: { 2 => used_references_explanation(name) }
                )
 
+      # source_value records what the source said, so a later change
+      # by the observer is visible to the resync as a divergence
+      # rather than needing the stamp to be surrendered (#5480).
       vote = Vote.find_or_initialize_by(naming: naming, user: user)
       vote.update!(observation: @observation, value: value,
+                   source_value: value,
                    external_site: @external_site)
       # An ObservationView is needed even though no one has viewed this obs.
       ObservationView.find_or_create_by(observation: @observation,
@@ -339,9 +347,14 @@ class Inat
       suggestion[:user][:login]
     end
 
+    # id: :desc as a final tiebreaker -- without it, two Names tied
+    # on both deprecated and created_at have no stable order, so
+    # which one .first returns could differ from what
+    # TaxonSync#parsed_name resolves for the same text_name on a
+    # later resync, even though both use the same ordering (#5499).
     def best_mo_homonym(text_name)
       Name.where(text_name: text_name).
-        order(deprecated: :asc, created_at: :desc).
+        order(deprecated: :asc, created_at: :desc, id: :desc).
         first
     end
 

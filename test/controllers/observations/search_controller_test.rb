@@ -31,6 +31,14 @@ module Observations
       login("rolf")
       get(:new, format: :turbo_stream)
       assert_select("#observations_search_form")
+      # Components::SearchTypeTitle, rendered in Components::Form::
+      # Search#render_header -- only in the dropdown (turbo_stream)
+      # context, not the standalone page.
+      assert_select("#search_type_toggle", text: :observations.ti)
+      assert_select(
+        "#search_type_menu a[href='/names/search/new']" \
+        "[data-action='search-type#chooseType'][data-type='names']"
+      )
     end
 
     def test_new_observations_search_with_advanced_retired_flag
@@ -75,6 +83,23 @@ module Observations
       assert_select("select#query_observations_confidence_range",
                     selected: "Form")
       assert_equal(:observations, session[:search_type])
+    end
+
+    # A name stored by id (e.g. a project checklist link) prefills as
+    # plain text, and resubmitting that text matches the same Name.
+    def test_names_lookup_id_prefills_plain_resubmittable_name
+      name = names(:coprinus_comatus)
+      login
+      @controller.find_or_create_query(:Observation,
+                                       names: { lookup: [name.id] })
+      get(:new)
+      assert_select("textarea#query_observations_names_lookup",
+                    text: name.search_name)
+
+      post(:create, params: { query_observations: {
+             names: { lookup: name.search_name }
+           } })
+      assert_no_flash
     end
 
     # Test that multiple users in by_users are properly prefilled
@@ -182,6 +207,7 @@ module Observations
       }
       assert_search_redirected_to(controller: "/observations",
                                   params: validated_params)
+      assert_equal("advanced", session[:search_view])
     end
 
     def test_create_observations_search_with_blank_name_and_include_subtaxa

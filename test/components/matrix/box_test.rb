@@ -13,10 +13,9 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_includes(html, "matrix-box")
-    assert_includes(html, "box_#{obs.id}")
+    assert_html(html, "#box_#{obs.id}.matrix-box")
     # Should include the thumbnail image with the correct CSS class
-    assert_includes(html, "image_#{obs.thumb_image_id}")
+    assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
 
   # Matrix boxes deliberately do NOT subscribe to
@@ -38,8 +37,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_includes(html, "matrix-box")
-    assert_includes(html, "box_#{obs.id}")
+    assert_html(html, "#box_#{obs.id}.matrix-box")
   end
 
   def test_renders_image_object
@@ -47,9 +45,19 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: image)
     html = render(component)
 
-    assert_includes(html, "matrix-box")
-    assert_includes(html, "box_#{image.id}")
-    assert_includes(html, "image_#{image.id}")
+    assert_html(html, "#box_#{image.id}.matrix-box")
+    assert_html(html, "img.image_#{image.id}")
+    # format_name, not unique_format_name -- the IDBadge beside it
+    # already shows the id.
+    assert_html(html, ".rss-name", text: image.format_name.t.as_displayed)
+  end
+
+  def test_renders_image_object_without_subjects
+    image = Image.create(user: @user)
+    component = Components::Matrix::Box.new(user: @user, object: image)
+    html = render(component)
+
+    assert_html(html, ".rss-name", text: :image.ti)
   end
 
   def test_renders_user_object
@@ -57,8 +65,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: user)
     html = render(component)
 
-    assert_includes(html, "matrix-box")
-    assert_includes(html, "box_#{user.id}")
+    assert_html(html, "#box_#{user.id}.matrix-box")
   end
 
   def test_renders_rss_log_with_observation_target
@@ -66,7 +73,17 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: rss_log)
     html = render(component)
 
-    assert_includes(html, "matrix-box")
+    assert_html(html, "#box_#{rss_log.observation_id}.matrix-box")
+  end
+
+  def test_rss_log_observation_names_collector
+    rss_log = RssLog.where.not(observation_id: nil).first
+    rss_log.observation.assign_attributes(collector: "Jane Forager",
+                                          collector_user_id: nil)
+    html = render(Components::Matrix::Box.new(user: @user, object: rss_log))
+
+    assert_html(html, ".rss-who", text: "Jane Forager")
+    assert_no_html(html, ".rss-who a")
   end
 
   def test_renders_with_custom_columns
@@ -78,7 +95,7 @@ class MatrixBoxTest < ComponentTestCase
     )
     html = render(component)
 
-    assert_includes(html, "col-xs-12 col-sm-6")
+    assert_html(html, ".matrix-box.col-xs-12.col-sm-6")
   end
 
   def test_renders_with_extra_class
@@ -90,9 +107,10 @@ class MatrixBoxTest < ComponentTestCase
     )
     html = render(component)
 
-    assert_includes(html, "custom-class")
+    assert_html(html, ".matrix-box.custom-class")
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # NOTE: Testing custom block content requires Phlex DSL context
   # This test is commented out as it requires the block to be evaluated
   # in the component's Phlex context, not the test context
@@ -108,6 +126,7 @@ class MatrixBoxTest < ComponentTestCase
   #   assert_includes(html, "test-class")
   #   assert_includes(html, "Custom content")
   # end
+  # rubocop:enable MO/NoLongCommentBlock
 
   # Test HTML structure and nesting
   def test_wraps_panel_in_list_item
@@ -129,7 +148,6 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # Panel should have panel-sizing wrapper (from sizing: true)
-    assert_includes(html, "panel-sizing")
     assert_nested(
       html,
       parent_selector: "div.panel-sizing",
@@ -162,7 +180,6 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # Details section should have rss-box-details class
-    assert_includes(html, "rss-box-details")
     assert_nested(
       html,
       parent_selector: "div.panel-body.rss-box-details",
@@ -188,8 +205,8 @@ class MatrixBoxTest < ComponentTestCase
       child_selector: "div.rss-where"
     )
     # Should have when/who info (rendered with rss-when and rss-who classes)
-    assert_includes(html, "rss-when")
-    assert_includes(html, "rss-who")
+    assert_html(html, ".rss-when")
+    assert_html(html, ".rss-who")
   end
 
   def test_observation_title_includes_name
@@ -212,7 +229,7 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # Should include location in where section
-    assert_includes(html, obs.where)
+    assert_html(html, ".rss-where", text: obs.where)
   end
 
   def test_rss_log_renders_footer
@@ -224,7 +241,6 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # RssLogs should have log-footer
-    assert_includes(html, "log-footer")
     assert_nested(
       html,
       parent_selector: "div.panel",
@@ -264,7 +280,7 @@ class MatrixBoxTest < ComponentTestCase
     # Should have panel structure
     assert_nested(
       html,
-      parent_selector: "li#box_#{image.id}",
+      parent_selector: "#box_#{image.id}",
       child_selector: "div.panel"
     )
     # Should have thumbnail
@@ -283,7 +299,7 @@ class MatrixBoxTest < ComponentTestCase
     # Should have panel structure
     assert_nested(
       html,
-      parent_selector: "li#box_#{user.id}",
+      parent_selector: "#box_#{user.id}",
       child_selector: "div.panel"
     )
     # Should have user info in body
@@ -304,11 +320,11 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # Should not have identify UI (vote container or propose naming link)
-    assert_not_includes(html, "vote-select-container")
-    assert_not_includes(html, "context=matrix_box")
+    assert_no_html(html, ".vote-select-container")
+    assert_no_html(html, "a[href*='context=matrix_box']")
     # Should not have identify footer
-    assert_not_includes(html, "panel-active")
-    assert_not_includes(html, "box_reviewed")
+    assert_no_html(html, ".panel-active")
+    assert_no_html(html, "#box_reviewed_#{obs.id}")
   end
 
   def test_renders_identify_ui_and_footer_when_identify_is_true
@@ -323,14 +339,10 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # Should have identify UI (vote container or propose naming link)
-    assert(
-      html.include?("vote-select-container") ||
-        html.include?("context=matrix_box"),
-      "Expected identify UI to be rendered"
-    )
+    assert_html(html, ".vote-select-container")
     # Should have identify footer
-    assert_includes(html, "panel-active")
-    assert_includes(html, "box_reviewed")
+    assert_html(html, ".panel-active")
+    assert_html(html, "#box_reviewed_#{obs.id}")
   end
 
   # External-source credit renders the link with target="_blank" /
@@ -340,7 +352,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_includes(html, "Imported from iNaturalist")
+    assert_html(html, ".source-credit", text: "Imported from iNaturalist")
     # link_url is the rendered href (stored override or derived); import
     # links may have a NULL url column, so assert against link_url.
     expected_url = obs.import_link.link_url

@@ -63,9 +63,9 @@ module Observations
     end
 
     def set_list_ivars
-      order_by = params[:by] || :date
       @all_lists = Query.lookup(
-        :SpeciesList, editable_by_user: @user, order_by:
+        :SpeciesList, editable_by_user: @user,
+                      order_by: sort_order_from_params(:SpeciesList)
       )
 
       # Which of these lists already contain the observation, in ONE query

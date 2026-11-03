@@ -22,7 +22,7 @@ module Views::Controllers::Comments
       html = render_item
 
       assert_no_html(html, ".list-group-item")
-      assert_html(html, "div.row")
+      assert_html(html, ".row")
     end
 
     def test_renders_summary_and_body
@@ -76,7 +76,9 @@ module Views::Controllers::Comments
       # a header naming the target it belongs to.
       html = render_item(show_name: true)
 
-      assert_html(html, "h4 a[href*='#{@comment.target.id}']")
+      assert_html(html,
+                  "#comment_target_heading_#{@comment.id} " \
+                  "a[href*='#{@comment.target.id}']")
       assert_includes(
         html, @comment.target.class.name.underscore.to_sym.ti
       )
@@ -105,7 +107,7 @@ module Views::Controllers::Comments
     def test_show_name_false_omits_target_heading
       html = render_item(show_name: false)
 
-      assert_no_html(html, "h4")
+      assert_no_html(html, "#comment_target_heading_#{@comment.id}")
     end
 
     def test_show_name_with_deleted_target_falls_back_to_deleted_text

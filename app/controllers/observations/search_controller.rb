@@ -13,8 +13,7 @@ module Observations
 
     # Both `show` and `new` override the `Searchable` mixin's defaults
     # so the `format.html` / `format.turbo_stream` paths render the
-    # Phlex views directly instead of falling through to the
-    # now-deleted ERB templates.
+    # Phlex views directly.
     def show
       respond_to do |format|
         format.turbo_stream do

@@ -17,7 +17,6 @@ module Views::Controllers::Account::PasswordResets
       assert_html(@html,
                   "input[name='new_user[login]'][type='text']" \
                   "[data-autofocus]")
-      assert_html(@html, ".mt-3")
     end
 
     def test_renders_submit_button

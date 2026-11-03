@@ -66,8 +66,8 @@ class ApplicationControllerTest < FunctionalTestCase
 
     get(:intro)
 
-    assert_redirected_to(/#{Regexp.escape(MO.http_domain)}/,
-                         "GET against a bad domain should redirect")
+    assert_includes(@response.redirect_url, MO.http_domain,
+                    "GET against a bad domain should redirect")
   end
 
   # `reset_user_group_cache` guards against the same landmine pattern

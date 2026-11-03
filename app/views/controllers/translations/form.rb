@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Translations
-  # Phlex form for editing translation strings. Rendered by the
-  # translations controller's `index.erb` and `edit.erb`.
-  # Creates its own FormObject internally (Pattern B). Uses
+  # Phlex form for editing translation strings. Creates a FormObject
+  # internally (Pattern B). Uses
   # FieldProxy for dynamic textarea fields with flat param names.
   class Form < ::Components::ApplicationForm
     prop :lang, ::Language
@@ -102,7 +101,7 @@ module Views::Controllers::Translations
     # --- Language header ---
 
     def render_language_header
-      h4(class: "font-weight-bold mt-3") do
+      h4(id: "translation_language_header", class: "font-weight-bold mt-3") do
         append_colon(@lang.name)
       end
     end

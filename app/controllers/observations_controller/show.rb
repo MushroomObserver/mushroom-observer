@@ -2,6 +2,7 @@
 
 # see observations_controller.rb
 module ObservationsController::Show
+  # rubocop:disable MO/NoLongCommentBlock
   # Display observation and related namings, comments, votes, images, etc.
   # This should be a redirection, not rendered, due to large number of
   # @variables that need to be set up for the view.  Lots of views are used:
@@ -19,6 +20,7 @@ module ObservationsController::Show
   #   @mappable
   #   @other_sites
   #   @votes
+  # rubocop:enable MO/NoLongCommentBlock
   def show
     return if check_for_spider_block(request, params)
 

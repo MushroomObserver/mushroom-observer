@@ -28,7 +28,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
       value = "#{@name.unique_search_name}[##{@name.icn_id}]"
 
       assert_html(html, "label[for='email_name']", text: "#{:name.ti}:")
-      assert_html(html, "label[for='email_name'] + p.form-control-static",
+      assert_html(html, "label[for='email_name'] + .form-control-static",
                   text: value)
     end
 
@@ -38,7 +38,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
       assert_html(html, "label[for='email_new_name_with_icn_id']",
                   text: "#{:new_name.l}:")
       assert_html(html, "label[for='email_new_name_with_icn_id'] " \
-                        "+ p.form-control-static",
+                        "+ .form-control-static",
                   text: @new_name_with_icn_id)
       assert_html(html,
                   "input[type='hidden']" \

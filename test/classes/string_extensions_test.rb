@@ -26,6 +26,12 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(false, "0".to_boolean)
   end
 
+  def test_strip_textile_for_names
+    assert_equal("Amanita Pers.",
+                 "**__Amanita__** Pers.".strip_textile_for_names)
+    assert_equal("Amanita", "Amanita".strip_textile_for_names)
+  end
+
   def test_random_no_seed_string
     srand(314_159)
     random_str = String.random(10)
@@ -56,6 +62,16 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("<i>12</i>3<b>4...</b>",
                  "<i>12</i>3<b>456</b>".truncate_html(5))
     assert_equal("malformatted", "malformatted<; HTML".truncate_html(20))
+  end
+
+  def test_strip_links
+    html = 'A &amp; <a href="/x">B</a>'
+    assert_equal("A &amp; B", html.strip_links)
+    assert_not(html.strip_links.html_safe?)
+
+    stripped = html.html_safe.strip_links # rubocop:disable Rails/OutputSafety
+    assert_equal("A &amp; B", stripped)
+    assert(stripped.html_safe?, "Safe HTML should stay safe")
   end
 
   def test_iconv

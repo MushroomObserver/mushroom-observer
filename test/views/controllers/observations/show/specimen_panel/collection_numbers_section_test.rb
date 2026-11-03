@@ -28,7 +28,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       html = render(panel_with(obs, obs.user, has_sibling_records: true))
 
       assert_includes(html, "#{:collection_numbers.ti}:")
-      assert_no_html(html, "li")
+      assert_no_html(html, "#collection_numbers_list")
     end
 
     # Empty + can-edit path with NO sibling records: the generic
@@ -40,7 +40,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       html = render(panel_with(obs, obs.user))
 
       assert_includes(html, :no_objects.t(type: :collection_number))
-      assert_no_html(html, "li")
+      assert_no_html(html, "#collection_numbers_list")
     end
 
     # Read-only one-liner: obs has collection numbers but the
@@ -55,7 +55,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       # Readonly rows render in the same tight-list shape as the
       # editable list (unified via RecordListSection), just without
       # edit-modal links -- show-link only.
-      assert_html(html, "ul.tight-list li a")
+      assert_html(html, "#collection_number_#{cn.id} a")
       assert_no_html(html, "a[data-modal*='collection_number']")
     end
 

@@ -32,7 +32,9 @@ module InatStubHelpers
   # expression for hostnames". Escaping fixes that; the lookahead ends
   # the match at a path or query boundary, so a stub for `places` does
   # not answer for `places_somewhere` while `places/autocomplete?q=x`
-  # still does.
+  # still does. A URI Template can't match the unencoded `,`/`:` in
+  # iNat's query values, so this stays a Regexp.
+  # rubocop:disable-next MO/NoRegexpEscape
   def inat_api_matcher(path)
     %r{\A#{Regexp.escape("#{API_BASE}/#{path}")}(?=[/?]|\z)}
   end

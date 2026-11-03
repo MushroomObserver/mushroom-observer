@@ -50,10 +50,10 @@ module Views::Controllers::Herbaria
 
     def build_table_columns(table)
       table.column(:herbarium_code.t) { |h| plain(h.code.to_s) }
-      table.column(:herbarium_index_records.t) do |h|
-        plain(h.herbarium_records.length)
-      end
       table.column(:herbarium.ti) { |h| render_name_cell(h) }
+      table.column(:herbarium_index_records.t) do |h|
+        CountBadge(count: h.herbarium_records.length, type: :herbarium_record)
+      end
       table.column(user_header) { |h| render_user_cell(h) }
     end
 
@@ -61,7 +61,7 @@ module Views::Controllers::Herbaria
       nonpersonal? ? "" : :user.ti
     end
 
-    # --- 3rd column: name link / merge POST + edit / merge actions --
+    # --- 2nd column: name link / merge POST + edit / merge actions --
 
     def render_name_cell(herbarium)
       render_name_link(herbarium)

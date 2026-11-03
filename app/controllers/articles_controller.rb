@@ -51,9 +51,8 @@ class ArticlesController < ApplicationController
 
   ##############################################################################
 
-  # Override `ApplicationController::Indexes#render_index_view` to render
-  # the Phlex `Articles::Index` class instead of the deleted
-  # `articles/index.html.erb`.
+  # Override `ApplicationController::Indexes#render_index_view` to
+  # render the Phlex `Articles::Index` class.
   def render_index_view
     render(Views::Controllers::Articles::Index.new(
              query: @query, pagination_data: @pagination_data,

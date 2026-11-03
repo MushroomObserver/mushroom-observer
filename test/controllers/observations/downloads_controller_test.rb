@@ -301,8 +301,10 @@ module Observations
       # \pard is paragraph command in rtf, one paragraph per result
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
       # RTF (not HTML) — use string search rather than assert_select
+      # rubocop:disable MO/NoFullHtmlAssertion
       assert_includes(@response.body, "314159") # fundis id
       assert_includes(@response.body, "Mary Newbie 174") # collection number
+      # rubocop:enable MO/NoFullHtmlAssertion
 
       # Alternative entry point.
       post(
@@ -341,6 +343,7 @@ module Observations
       trusted_hidden = observations(:trusted_hidden)
       untrusted_hidden = observations(:untrusted_hidden)
       # RTF (not HTML) — use string search rather than assert_select
+      # rubocop:disable-next MO/NoFullHtmlAssertion
       assert_includes(@response.body, trusted_hidden.lat.to_s)
       assert_not_includes(@response.body, untrusted_hidden.lat.to_s)
     end

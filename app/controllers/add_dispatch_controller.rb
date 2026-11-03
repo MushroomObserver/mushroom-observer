@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
 # Enables "Add" button on ProjectsController#show and
-# SpeciesListsController#show. Dispatches to either the
-# ObservationsController#new, or FieldSlipsController#new,
-# depending on whether field slip code is provided and
-# whether it already exists.
+# SpeciesListsController#show. A field slip code that already has an
+# observation adds that observation to the page's project and list and
+# shows it; otherwise dispatches to ObservationsController#new or the
+# field slip's /qr/ page.
 class AddDispatchController < ApplicationController
+  include OccurrenceProjectResolvable
+
   before_action :login_required
 
   def new
@@ -15,6 +17,9 @@ class AddDispatchController < ApplicationController
     # This is how the Project context gets passed if it is relevant.
     @project = find_project
     @field_slip_code = find_code(@project, params[:field_slip])
+    slip = used_field_slip
+    return add_existing_observation(slip) if slip
+
     new_params = dispatch_params
 
     if @field_slip_code
@@ -29,6 +34,71 @@ class AddDispatchController < ApplicationController
   end
 
   private
+
+  def used_field_slip
+    return nil unless @field_slip_code
+
+    slip = FieldSlip.find_by(code: @field_slip_code.upcase)
+    slip&.observation ? slip : nil
+  end
+
+  # Adds every observation of the slip's occurrence, so its members stay
+  # in the same collections. The occurrence applies the project rules:
+  # members only, and only admins past a constraint violation. A
+  # collection already holding them all is left out, so it gets "already
+  # in" rather than a refusal or a constraint warning.
+  def add_existing_observation(slip)
+    present, projects, lists = sort_collections(slip.occurrence)
+    result = slip.occurrence.add_all_to_collections(
+      projects:, species_lists: lists, user: @user, site_admin: in_admin_mode?
+    )
+    obs = slip.observation
+    flash_already_in(obs, present)
+    flash_additions(obs, (projects - result[:refused]) + lists)
+    flash_add_all_result(result)
+    redirect_to(permanent_observation_path(obs.id))
+  end
+
+  # [collections already holding the occurrence, projects to add it to,
+  # lists to add it to]
+  def sort_collections(occurrence)
+    present, projects = split_present([@project].compact, occurrence)
+    present_lists, lists = split_present([find_species_list].compact,
+                                         occurrence)
+    [present + present_lists, projects,
+     lists.select { |list| permission!(list) }]
+  end
+
+  # [collections already holding the whole occurrence, the rest]
+  def split_present(collections, occurrence)
+    collections.partition do |collection|
+      (occurrence.observation_ids - collection.observation_ids).empty?
+    end
+  end
+
+  def flash_already_in(obs, collections)
+    collections.each do |collection|
+      flash_notice(:add_dispatch_already_in.t(name: collection_name(collection),
+                                              id: obs.id))
+    end
+  end
+
+  def flash_additions(obs, collections)
+    collections.each do |collection|
+      tag = if collection.is_a?(Project)
+              :runtime_project_add_observation_success
+            else
+              :runtime_species_list_add_observation_success
+            end
+      flash_notice(tag.t(name: collection_name(collection), id: obs.id))
+    end
+  end
+
+  def collection_name(collection)
+    return collection.title if collection.is_a?(Project)
+
+    collection.unique_format_name
+  end
 
   def find_project
     project = Project.safe_find(params[:project])

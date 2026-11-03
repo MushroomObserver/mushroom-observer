@@ -195,7 +195,7 @@ module Views::Controllers::Observations::ExternalLinks
                    sibling_site_links: [sibling_link(link, sibling)])
       )
 
-      assert_html(html, "li .reflection-read-only-note",
+      assert_html(html, ".reflection-read-only-note",
                   text: :observation_reflection_read_only_note.l)
       assert_html(html, "form[action='#{path}'][method='post']")
     end

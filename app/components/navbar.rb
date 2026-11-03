@@ -22,16 +22,18 @@ module Components
   # to the variant union when that migration lands rather than
   # inventing a separate component.
   #
-  # Every instance also gets `navbar-flex` alongside `navbar` — MO's
-  # BS3->BS4 navbar bridge class (unrelated to `.flex-bar`, the plain
-  # 3-utility-class alias used standalone by sorter/search-bar/
-  # pagination/etc — different name specifically so the two don't
-  # read as the same concept). Co-occurring with `navbar` triggers a
-  # compound SCSS rule (`.navbar.navbar-flex` in `mo/_top_nav.scss`)
-  # that overrides the `.navbar` box-model properties BS4 drops or
-  # reshapes (including padding — see `base_class` below), so both
-  # real landmarks stay visually identical today while already being
-  # expressed in BS4-forward terms.
+  # Every instance also gets `navbar-flex` alongside `navbar` by
+  # default — MO's BS3->BS4 navbar bridge class (unrelated to
+  # `.flex-bar`, the plain 3-utility-class alias used standalone by
+  # sorter/search-bar/pagination/etc — different name specifically so
+  # the two don't read as the same concept). Co-occurring with
+  # `navbar` triggers a compound SCSS rule (`.navbar.navbar-flex` in
+  # `mo/_top_nav.scss`) that overrides the `.navbar` box-model
+  # properties BS4 drops or reshapes (including padding — see
+  # `base_class` below), so both landmarks stay visually identical
+  # today while already being expressed in BS4-forward terms. Pass
+  # `flex: false` on a landmark that's also a collapse target —
+  # `.navbar-flex`'s specificity beats `.collapse`'s `display: none`.
   #
   # Also holds several plain string/array constants (not renderable
   # shapes) for other `navbar-*` patterns that recur across the same
@@ -88,6 +90,7 @@ module Components
 
     prop :element, Symbol, default: :nav
     prop :variant, _Union(:default, :inverse)
+    prop :flex, _Boolean, default: true
     # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
     # so a caller passing an explicit `key: nil` (not just omitting the
     # key) would otherwise raise a Literal::TypeError.
@@ -115,7 +118,8 @@ module Components
     # it and expect a predictable winner - that'll need a real
     # mechanism (e.g. a `padding:` prop), not a class override.
     def base_class
-      "navbar navbar-flex navbar-#{@variant} p-0"
+      class_names("navbar", ("navbar-flex" if @flex), "navbar-#{@variant}",
+                  "p-0")
     end
   end
 end

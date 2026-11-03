@@ -78,7 +78,7 @@ module Views::Controllers::Observations
 
       html = render_form(observation: obs, user: user, mode: :create)
 
-      assert_html(html, "label span.unconstrained-label", text: "#{:where.ti}:")
+      assert_html(html, "label .unconstrained-label", text: "#{:where.ti}:")
       assert_no_html(html, "label", text: "#{:where.ti}::")
     end
 

@@ -66,6 +66,25 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
+# `en.yml` is gitignored, so a branch switch leaves it stale against
+# the new `en.txt` -- the same check `script/deploy.sh` runs before a
+# deploy. Only reload when it changed: an unconditional reload (before
+# parallelize forks) would force every child to re-parse locales from
+# scratch. Skipped on CI: the workflow already runs `rake lang:update`
+# once, earlier in the job; a second run later crashes against CI's
+# fixture-only Language table (no row flagged official).
+if ENV["CI"] != "true"
+  en_yml = Rails.root.join("config/locales/en.yml")
+  mtime_before = File.mtime(en_yml) if File.exist?(en_yml)
+
+  unless system("script/lang_update_if_needed.sh")
+    raise("script/lang_update_if_needed.sh failed")
+  end
+
+  mtime_after = File.exist?(en_yml) ? File.mtime(en_yml) : nil
+  I18n.reload! if mtime_before != mtime_after
+end
+
 # MiniExiftool caches its tag list in a pstore file on first use,
 # printing two lines to $stderr while generating it -- invisible on a
 # dev machine where the cache already exists from a prior run, but
@@ -180,27 +199,9 @@ module ActiveSupport
       SimpleCov.result
     end
 
-    ##########################################################################
-    #  Transactional fixtures
-    ##########################################################################
-    # Transactional fixtures accelerate your tests by wrapping each
-    # test method in a transaction that's rolled back on completion.
-    # This ensures that the test database remains unchanged so your
-    # fixtures don't have to be reloaded between every test method.
-    # Fewer database queries means faster tests.
-    #
-    # Read Mike Clark's excellent walkthrough at
-    #   http://clarkware.com/cgi/blosxom/2005/10/24#Rails10FastTesting
-    #
-    # Every Active Record database supports transactions except MyISAM
-    # tables in MySQL.  Turn off transactional fixtures in this case;
-    # however, if you don't care one way or the other, switching from
-    # MyISAM to InnoDB tables is recommended.
-    #
-    # The only drawback to using transactional fixtures is when you
-    # actually need to test transactions.  Since your test is
-    # bracketed by a transaction, any transactions started in your
-    # code will be automatically rolled back. Defaults to true.
+    # Wraps each test in a transaction rolled back on completion, so
+    # fixtures don't reload between tests. MyISAM tables in MySQL
+    # don't support this -- InnoDB is recommended if that matters.
     self.use_transactional_tests = true
 
     # Instantiated fixtures are slow, but give you @david where
@@ -211,7 +212,6 @@ module ActiveSupport
     # true. Defaults to false.
     self.use_instantiated_fixtures = false
     ##########################################################################
-
     # Setup all fixtures in test/fixtures/*.(yml|csv) for all tests in
     # alphabetical order.
     #
@@ -226,11 +226,10 @@ module ActiveSupport
     # assertion only sees tags raised by the test that just ran.
     #
     # Registered as a `setup do` callback rather than `def setup`
-    # so it runs unconditionally — many test classes override
-    # `def setup` without calling `super`, which previously
-    # bypassed these resets and let global state (most notably
-    # I18n.locale and Symbol.missing_tags) leak between tests
-    # within a parallel worker. See #4238.
+    # so it runs unconditionally -- many test classes override
+    # `def setup` without calling `super`, which would otherwise let
+    # global state (I18n.locale, Symbol.missing_tags) leak between
+    # tests within a parallel worker.
     setup do
       # rubocop:disable-next Rails/I18nLocaleAssignment
       I18n.locale = :en if I18n.locale != :en
@@ -246,18 +245,13 @@ module ActiveSupport
       ExternalSite.reset_request_cache
     end
 
-    # Otherwise WebMock accumulates every request made anywhere in this
-    # worker process, so `assert_requested`/`assert_not_requested`
-    # answer "did ANY test make that call?" rather than "did this
-    # one?" -- passing or failing on test order. Clears the request log
-    # only, not stubs a test registered in `setup`.
-    #
-    # A `teardown do` callback rather than the `def teardown` below,
-    # for the same reason `setup do` is used above: several classes
-    # override `def teardown` without calling `super`
-    # (application_system_test_case, image_loader_job_test,
-    # images/originals_controller_test among them), and those are
-    # exactly the WebMock-using tests this needs to cover.
+    # Otherwise WebMock accumulates every request made anywhere in
+    # this worker process, so `assert_requested`/`assert_not_requested`
+    # answer "did any test make that call?" rather than "did this
+    # one?" Clears the request log only, not stubs a test registered
+    # in `setup`. A `teardown do` callback, not `def teardown`, for
+    # the same reason `setup do` is used above: several classes
+    # override `def teardown` without calling `super`.
     teardown { WebMock.reset_executed_requests! }
 
     # Standard teardown to run after every test.  Just makes sure any

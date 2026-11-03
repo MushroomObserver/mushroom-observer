@@ -2,7 +2,7 @@
 
 # Licenses that are available for Images and Descriptions
 # NOTE: inherits from AdminController in order to limit actions to admins
-# NOTE: for badges see, e.g., app/views/controllers/shared/_form_ccbysa30.erb
+# NOTE: for badges see app/components/license_badge.rb
 class LicensesController < AdminController
   before_action :store_location, except: :destroy
 

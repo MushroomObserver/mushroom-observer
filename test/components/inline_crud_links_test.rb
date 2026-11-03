@@ -19,7 +19,6 @@ class InlineCRUDLinksTest < ComponentTestCase
 
     html = render_links(target: cn, observation: @obs, user: stranger)
 
-    assert_no_html(html, "span.text-nowrap")
     assert_equal("", html.strip)
   end
 
@@ -163,8 +162,8 @@ class InlineCRUDLinksTest < ComponentTestCase
     # Icon-only -- the tab's own descriptive title drives the tooltip
     # + sr-only text, not a generic "Add".
     assert_html(html, "a[title='#{tab.title}']")
-    assert_html(html, "a span.sr-only", text: tab.title)
-    assert_no_html(html, "a span.d-sm-inline")
+    assert_html(html, "a .sr-only", text: tab.title)
+    assert_no_html(html, "a .d-sm-inline")
   end
 
   private

@@ -84,6 +84,8 @@ class InatImportTrackerSystemTest < ApplicationSystemTestCase
   # no broadcast, rather than the job racing to finish before the page
   # even renders.
   def delay_observation_response(seconds:)
+    # rubocop:disable-next MO/NoRegexpEscape -- URL-matcher pattern;
+    # see inat_import_confirm_system_test.rb's matching comment.
     stub_request(:get, %r{#{Regexp.escape(API_BASE)}/observations}o).
       with(headers: { "Authorization" => "Bearer MockJWT" }).
       to_return do |_request|

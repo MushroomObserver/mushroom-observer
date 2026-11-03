@@ -82,7 +82,8 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              # label_colon: false -- location_label already embeds its
              # own colon per span (each state's text differs), so the
              # default auto-appended colon would double up.
-             wrapper_options: { label: location_label, label_colon: false },
+             wrapper_options: { label: location_label, label_colon: false,
+                                help_collapse: true },
              value: @default_place_name || @location&.name,
              hidden_name: :location_id,
              hidden_value: @location&.id,
@@ -94,10 +95,15 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              controller_id: "observation_location_autocompleter",
              data: { map_target: "placeInput", action: exif_action }
            )) do |field|
+      field.with_between { render_location_lead }
       field.with_help do
         render(::Views::Controllers::Observations::Form::LocationHelp.new)
       end
     end
+  end
+
+  def render_location_lead
+    div(class: "mb-2") { trusted_html(:form_observations_where_lead.t) }
   end
 
   # Label with multiple span variants for different autocompleter states

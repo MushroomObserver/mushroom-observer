@@ -59,8 +59,7 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     get(:show, params: { species_list_id: list.id, project: project.id })
 
-    assert_select("#project_banner",
-                  text: /#{Regexp.escape(project.title)}/)
+    assert_select_text_includes("#project_banner", project.title)
     assert_select(
       "li.nav-item a.nav-link.active[href=?]",
       species_lists_path(project: project.id),

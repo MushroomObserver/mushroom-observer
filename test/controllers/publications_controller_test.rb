@@ -46,6 +46,24 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_select("a[href*='example.org']")
   end
 
+  # The reference is Textile: an ampersand renders once and ??Journal??
+  # renders as a citation, on both the index and the show page.
+  def test_reference_textile_renders_once
+    pub = publications(:one_pub)
+    pub.update_columns(full: "Smith & Jones. 2020. ??Some Journal?? 1: 2.")
+    login
+
+    get(:index)
+    assert_select("a[href='#{publication_path(pub)}'] cite",
+                  text: "Some Journal")
+    assert_select("a[href='#{publication_path(pub)}']",
+                  text: /\ASmith & Jones\./)
+
+    get(:show, params: { id: pub.id })
+    assert_select("#content p cite", text: "Some Journal")
+    assert_select("#content p", text: /Smith & Jones\./)
+  end
+
   def test_should_get_new
     login
     get(:new)

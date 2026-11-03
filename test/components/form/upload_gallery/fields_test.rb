@@ -25,7 +25,7 @@ module Form
         assert_includes(html, "observation[good_image]")
 
         # No upload messages
-        assert_no_html(html, "div.carousel-upload-messages")
+        assert_no_html(html, ".carousel-upload-messages")
       end
 
       def test_upload_image_excludes_original_name
@@ -44,9 +44,9 @@ module Form
         assert_includes(html, "observation[image]")
 
         # Upload messages container present
-        assert_html(html, "div.carousel-upload-messages")
-        assert_html(html, "span.warn-text")
-        assert_html(html, "span.info-text")
+        assert_html(html, ".carousel-upload-messages")
+        assert_html(html, ".warn-text")
+        assert_html(html, ".info-text")
       end
 
       def test_existing_image_uses_image_values

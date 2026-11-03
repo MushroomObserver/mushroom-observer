@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #
 #  = Language Localization and Export Files
 #
@@ -20,6 +21,7 @@
 #  of these files, and it will update the database and YAML files automatically.
 #
 ################################################################################
+# rubocop:enable MO/NoLongCommentBlock
 
 # Validation methods share mutable instance state; not worth splitting.
 # rubocop:disable-next Metrics/ModuleLength

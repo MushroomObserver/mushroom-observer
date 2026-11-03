@@ -17,7 +17,6 @@
 #  calc_note::         Create body of the email we're about to send.
 #  name::              Return the name we're tracking.
 #  summary::           String summarizing what this Name Tracker is about
-#  link_params::       Hash of link_to options for edit action
 #  text_name::         Alias for +summary+ for debugging
 #
 #  == Callbacks
@@ -70,24 +69,23 @@ class NameTracker < AbstractModel
   end
 
   # Return a string summarizing what this NameTracker is about.
-  # `user` (the tracker's owner) is the only one who ever sees this,
-  # via their own Interests index page.
+  # `user` (the tracker's owner) is the only one who sees this, via
+  # their Interests index page.
   def summary
-    "#{:tracking.ti} #{:name.l}: #{name ? name.display_name(user) : "?"}"
+    "#{summary_prefix}: #{summary_title}"
   end
   alias text_name summary
   alias unique_text_name summary
 
-  # Returns hash of options to pass into link_to to link to edit action:
-  #
-  #   link_to("edit", name_tracker.link_params)
-  #
-  def link_params
-    result = {}
-    result[:controller] = :name
-    result[:action] = :email_tracking
-    result[:id] = name_id
-    result
+  # Split out of `summary` so the Interests index can link just the
+  # Name, not the "Tracking Name" prefix in front of it -- no colon
+  # or trailing space here, the view adds those via `append_colon`.
+  def summary_prefix
+    "#{:tracking.ti} #{:name.l}"
+  end
+
+  def summary_title
+    name ? name.display_name(user) : "?"
   end
 
   ##############################################################################

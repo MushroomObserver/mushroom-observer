@@ -137,6 +137,20 @@ module Descriptions
       assert_user_arrays_equal([rolf], desc.reload.authors)
     end
 
+    # The request email's link names the requester; the add box comes
+    # prefilled so the reviewer only confirms.
+    def test_show_prefills_requester
+      desc = names(:peltigera).description
+      login("rolf")
+
+      get(:show, params: { id: desc.id, type: "NameDescription",
+                           add: katrina.id })
+
+      assert_response(:success)
+      assert_select("input[name='description_author[user]']" \
+                    "[value='#{katrina.unique_text_name}']")
+    end
+
     def test_review_name
       name = names(:peltigera)
       desc = name.description

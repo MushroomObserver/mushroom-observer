@@ -241,7 +241,7 @@ module Views::Controllers::InatImports
                              skeleton_imported_count: count)
       html = render_status
 
-      assert_html(html, "#skeleton_imported.alert-success h5",
+      assert_html(html, "#skeleton_imported.alert-success",
                   text: :inat_import_tracker_skeleton_imported_heading.l)
       assert_html(
         html, "#skeleton_imported div",

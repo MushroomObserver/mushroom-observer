@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Gracefully quiesce SolidQueue ahead of a restart / deploy:
 #
 #   1) Pause every queue so workers stop claiming NEW jobs.
@@ -32,6 +33,7 @@
 # Exit codes:
 #   0 - queues paused and drained (no claimed executions remain)
 #   1 - timed out with jobs still running (queues remain paused)
+# rubocop:enable MO/NoLongCommentBlock
 
 TIMEOUT = Integer(ARGV.first || ENV.fetch("DRAIN_TIMEOUT", "300"))
 POLL_SECONDS = 5

@@ -3,8 +3,7 @@
 require("test_helper")
 
 # Tests for Views::Controllers::SpeciesLists::Form — the Phlex
-# Superform that replaces app/views/controllers/species_lists/_form.html.erb
-# plus the species_lists/form/_fields_for_project.erb sub-partial.
+# Superform for species lists, plus its project-fields sub-view.
 # Covers each field and the conditional rendering branches (clone_id
 # present/absent, projects empty/populated, owner vs non-owner
 # disable rules).

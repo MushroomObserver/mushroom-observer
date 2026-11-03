@@ -2,10 +2,15 @@
 
 class Components::ApplicationForm < Superform::Rails::Form
   # Shared field-wrapper skeleton: the form-group div, its Bootstrap
-  # classes, and the label -> prepend -> [field content] -> help ->
-  # append rendering order. Every simple field type (TextField,
+  # classes, and the label -> prepend -> [field content] -> append ->
+  # help rendering order (help_placement: :above moves help ahead of
+  # prepend instead). Every simple field type (TextField,
   # TextareaField, ...) wants this same skeleton; only the field
-  # content itself (an <input>, a <textarea>, ...) differs.
+  # content itself (an <input>, a <textarea>, ...) differs. Help
+  # renders inside this div, as part of the same form-group -- see
+  # SelectRangeField for the one component that renders it outside
+  # instead (its two side-by-side columns can't host a block-level
+  # help without breaking the one-line layout).
   #
   # `prepend`/`append` are optional per field type -- declare
   # `slot :prepend` (via Phlex::Slotable) only on the types that need
@@ -32,11 +37,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       classes = base
       classes += " form-inline" if inline && base == "form-group"
       classes += " #{wrap_class}" if wrap_class.present?
-      # Help renders as a sibling right after this div, not inside it
-      # (see below) -- .help-block's own top margin already spaces it
-      # from the field, so drop this div's own bottom margin to avoid
-      # doubling up.
-      classes += " mb-0" if help_present?
       classes
     end
 
@@ -48,27 +48,14 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
-    # Only plain help renders an always-visible .help-block sibling
-    # right after this div (what mb-0, above, is compensating for).
-    # help_collapse: true renders a Collapsible that's hidden by
-    # default -- dropping this div's bottom margin there would shrink
-    # the gap to whatever field comes next, with no visible help-block
-    # to justify it. help_placement: :above renders help inside this
-    # div instead of as a trailing sibling, so there's no bottom-margin
-    # doubling to compensate for either.
-    def help_present?
-      respond_to?(:help_slot) && help_slot &&
-        !wrapper_options[:help_collapse] && !help_placement_above?
-    end
-
     def render_with_wrapper(&block)
       div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
         render_between_block
         render_help_after_field if help_placement_above?
         render_wrapper_body(&block)
+        render_help_after_field unless help_placement_above?
       end
-      render_help_after_field unless help_placement_above?
     end
 
     def render_wrapper_body

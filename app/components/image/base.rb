@@ -171,17 +171,15 @@ class Components::Image::Base < Components::Base
     }
   end
 
-  # Render lightbox link button. `div`, not `a` -- the caption sibling
-  # rendered inside it (see `render_lightbox_caption`) contains real
-  # interactive content (vote buttons, propose-naming modal trigger),
-  # and HTML forbids nesting interactive content inside an `<a>`.
-  # lightGallery binds its click listener directly to whatever element
-  # matches its `selector` config (still `.theater-btn`) and reads
-  # `href` off that same element for the full-size image URL --
-  # `convertToData` in the vendored lightgallery.js maps a literal
-  # `href` attribute (not just `data-href`) to `src` -- so this still
-  # works as both the click target and the image-URL source despite no
-  # longer being an anchor. See issue #4894.
+  # `div`, not `a` -- the caption sibling rendered inside it (see
+  # `render_lightbox_caption`) contains interactive content (vote
+  # buttons, propose-naming modal trigger), and HTML forbids nesting
+  # interactive content inside an `<a>`. lightGallery binds its click
+  # listener to whatever matches its `.theater-btn` selector and
+  # reads `href` off that element for the full-size image URL --
+  # vendored lightgallery.js's `convertToData` maps a literal `href`
+  # attribute (not just `data-href`) to `src`, so this works as both
+  # click target and image-URL source without being an anchor.
   def render_lightbox_link
     lightbox_data = @data&.[](:lightbox_data)
     return unless lightbox_data
