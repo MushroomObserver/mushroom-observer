@@ -21,8 +21,10 @@ module Views::Controllers::Names::Classification::Inherit
     def view_template
       render_candidates_alert if @candidates
 
-      text_field(:parent, label: :inherit_classification_parent_name,
-                          data: { autofocus: true }, inline: true)
+      autocompleter_field(:parent, type: :clade,
+                                   label: :inherit_classification_parent_name,
+                                   controller_data: { min_rank: @name.rank },
+                                   data: { autofocus: true }, inline: true)
 
       submit(:submit.ti, center: true)
     end

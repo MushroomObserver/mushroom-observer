@@ -109,5 +109,27 @@ module Names::Classification
       assert_equal(new_str, names(:boletus_edulis).classification)
       # Classification is no longer cached on Observation (#4163).
     end
+
+    # The clade autocompleter sends a direct `parent_id` pick rather
+    # than falling through the fuzzy text-matching path `candidates`
+    # (the disambiguation radio alert) exercises above.
+    def test_post_inherit_classification_via_autocompleter_pick
+      name = names(:boletus)
+      parent = names(:agaricaceae)
+      login("rolf")
+
+      post(:create,
+           params: { id: name.id,
+                     inherit_classification: {
+                       parent: parent.text_name,
+                       parent_id: parent.id
+                     } })
+
+      assert_no_flash
+      assert_redirected_to(name.show_link_args)
+      new_str = "#{parent.classification}\r\n#{parent.rank}: " \
+                "_#{parent.text_name}_\r\n"
+      assert_equal(new_str, name.reload.classification)
+    end
   end
 end
