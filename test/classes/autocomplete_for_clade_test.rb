@@ -40,4 +40,16 @@ class AutocompleteForCladeTest < UnitTestCase
 
     assert_equal(:Genus, auto.min_rank)
   end
+
+  def test_symbol_min_rank_is_valid_and_normalized
+    auto = Autocomplete::ForClade.new(string: "Boletus", min_rank: :Family)
+
+    assert_equal(:Family, auto.min_rank)
+  end
+
+  def test_string_min_rank_is_normalized_to_symbol
+    auto = Autocomplete::ForClade.new(string: "Boletus", min_rank: "Family")
+
+    assert_equal(:Family, auto.min_rank)
+  end
 end

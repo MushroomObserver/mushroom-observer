@@ -44,9 +44,13 @@ class Autocomplete::ForClade < Autocomplete::ByString
   # suggestions to the subject Name's rank, not just above genus.
   # Falls back to :Genus for an absent/invalid value -- untrusted
   # request params shouldn't reach the rank comparison unvalidated.
+  # Name.all_ranks is String-based; normalize to String to validate a
+  # Symbol caller (e.g. a Ruby caller passing :Family) correctly, but
+  # always return a Symbol so min_rank's type stays consistent either
+  # way.
   def valid_min_rank(value)
-    return value if Name.all_ranks.include?(value)
+    return :Genus unless Name.all_ranks.include?(value.to_s)
 
-    :Genus
+    value.to_s.to_sym
   end
 end
