@@ -79,6 +79,8 @@ class Components::Matrix::Table < Components::Base
   # Project context — passed through to each MatrixBox so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
+  # Passed through to each MatrixBox -- see the prop comment there.
+  prop :suppress_occurrence_link, _Boolean, default: false
 
   def view_template(&block)
     Row(
@@ -125,7 +127,8 @@ class Components::Matrix::Table < Components::Base
       else
         render(Components::Matrix::Box.new(
                  user: @user, object: object,
-                 identify: @identify, project: @project
+                 identify: @identify, project: @project,
+                 suppress_occurrence_link: @suppress_occurrence_link
                ))
       end
     end
@@ -160,7 +163,7 @@ class Components::Matrix::Table < Components::Base
   # diverge from the cached non-admin / non-identify markup, so the
   # cache must be bypassed.
   def cacheable_render?(object)
-    !@identify && !project_admin_view? &&
+    !@identify && !project_admin_view? && !@suppress_occurrence_link &&
       self.class.should_cache_object?(object)
   end
 
@@ -172,7 +175,8 @@ class Components::Matrix::Table < Components::Base
     @objects.each do |object|
       render(Components::Matrix::Box.new(
                user: @user, object: object,
-               identify: @identify, project: @project
+               identify: @identify, project: @project,
+               suppress_occurrence_link: @suppress_occurrence_link
              ))
     end
   end

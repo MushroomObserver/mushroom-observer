@@ -141,7 +141,15 @@ module Views::Layouts
     end
 
     def show_right_column?
-      controller.action_name == "show" && !on_project_page?
+      controller.action_name == "show" && !on_project_page? &&
+        right_column_content?
+    end
+
+    # Only Locations/Names/Observations/SpeciesLists show pages call
+    # `add_interest_icons`/`add_pager_for` -- every other model's show
+    # page would otherwise get an empty flex row here.
+    def right_column_content?
+      content_for?(:interest_icons) || content_for?(:prev_next_object)
     end
 
     # Projects render a title inside ProjectBanner — skip ours to

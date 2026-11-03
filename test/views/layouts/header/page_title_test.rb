@@ -94,6 +94,21 @@ module Views::Layouts
       assert_html(html, "#title .title-marker")
     end
 
+    # Only Locations/Names/Observations/SpeciesLists show pages call
+    # add_interest_icons/add_pager_for -- every other model's show
+    # page must not get an empty flex row here (#5348 follow-up).
+    def test_right_column_absent_on_show_action_without_icons_or_pager
+      html = render_page_title("show", with_right_column_content: false)
+
+      assert_no_html(html, ".title_bar_right_col")
+      assert_no_html(html, ".show_object_nav")
+      # Mobile row still omits the (unset) icons/pager, but keeps
+      # the pieces that are set.
+      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
+      assert_no_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
+      assert_no_html(html, ".col-xs-12.d-sm-none .pager-marker")
+    end
+
     def test_suppressed_on_index_action
       html = render_page_title("index")
 
@@ -111,23 +126,26 @@ module Views::Layouts
     # `render_page_title`) rather than `self` -- `controller`/
     # `content_for`/`column_classes` are page-instance methods, not
     # test-instance methods.
-    def populate_slots(page, action)
+    def populate_slots(page, action, with_right_column_content: true)
       page.controller.define_singleton_method(:action_name) { action }
       page.column_classes
       page.content_for(:title) { TITLE }
       page.content_for(:id_badge) { ID_BADGE }
       page.content_for(:title_bar_cta) { CTA }
       page.content_for(:title_bar_actions) { EDIT_ICONS }
+      return unless with_right_column_content
+
       page.content_for(:interest_icons) { INTEREST_ICONS }
       page.content_for(:prev_next_object) { PREV_NEXT }
     end
 
-    def render_page_title(action)
+    def render_page_title(action, with_right_column_content: true)
       captured = nil
       test = self
       StubPage.class_eval do
         define_method(:view_template) do
-          test.send(:populate_slots, self, action)
+          test.send(:populate_slots, self, action,
+                    with_right_column_content: with_right_column_content)
           captured = capture { render(Header::PageTitle.new) }
         end
       end

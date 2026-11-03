@@ -301,7 +301,7 @@ module Views::Controllers::FieldSlips
 
     def render_primary_radio(obs)
       radio_field("field_slip[primary_observation_id]",
-                  [obs.id, :create_occurrence_primary.t],
+                  [obs.id, :primary.ti],
                   value: @primary_id,
                   wrap_class: "my-0",
                   data: { action: "field-slip-form#primarySelected" })
