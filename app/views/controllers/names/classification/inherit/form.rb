@@ -23,6 +23,7 @@ module Views::Controllers::Names::Classification::Inherit
 
       autocompleter_field(:parent, type: :clade,
                                    label: :inherit_classification_parent_name,
+                                   controller_data: { min_rank: @name.rank },
                                    data: { autofocus: true }, inline: true)
 
       submit(:submit.ti, center: true)

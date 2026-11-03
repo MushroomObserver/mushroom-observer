@@ -20,6 +20,8 @@ module Views::Controllers::Names::Classification::Inherit
                   "input[type='hidden']" \
                   "[name='inherit_classification[parent_id]']")
       assert_includes(html, :inherit_classification_parent_name.l)
+      # Scopes suggestions to above the subject Name's rank.
+      assert_html(html, "[data-min-rank='#{name.rank}']")
     end
 
     def test_form_with_candidates
