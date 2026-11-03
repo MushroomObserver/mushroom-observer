@@ -29,17 +29,28 @@ module Views::Controllers::Projects
 
       Row do
         Column(xs: 12, id: "project_tabs") do
-          NavTabs(
-            current: @current_tab, link_class: "mt-3",
-            tabs: ::Tab::Project::Banner.new(
-              project: @project, user: @user
-            )
-          )
+          @user ? render_tabs : render_login_prompt
         end
       end
     end
 
     private
+
+    def render_tabs
+      NavTabs(
+        current: @current_tab, link_class: "mt-3",
+        tabs: ::Tab::Project::Banner.new(project: @project, user: @user)
+      )
+    end
+
+    # Only the public checklist renders a banner without a user.
+    def render_login_prompt
+      p(class: "mt-3", id: "project_login_prompt") do
+        plain(:project_banner_login_prompt.l)
+        whitespace
+        a(href: new_account_login_path) { :app_login.l }
+      end
+    end
 
     def render_banner_with_image
       Row do
@@ -81,7 +92,11 @@ module Views::Controllers::Projects
         div(class: "d-flex align-items-center") do
           IDBadge(object: @project, size: :sm)
           whitespace
-          Link(type: :object, object: @project)
+          if @user
+            Link(type: :object, object: @project)
+          else
+            trusted_html(@project.title.t)
+          end
         end
       end
     end
@@ -101,8 +116,12 @@ module Views::Controllers::Projects
 
       div(class: location_classes) do
         b do
-          a(href: location_path(@project.location.id)) do
-            @project.place_name(current_user)
+          if @user
+            a(href: location_path(@project.location.id)) do
+              @project.place_name(current_user)
+            end
+          else
+            plain(@project.place_name(nil))
           end
         end
       end

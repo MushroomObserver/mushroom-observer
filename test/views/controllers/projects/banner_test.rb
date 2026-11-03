@@ -81,8 +81,9 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       assert_html(html, ".project_location.banner-image-text")
-      assert_html(html, "a[href='/locations/#{project.location.id}']")
-      assert_includes(html, project.place_name)
+      path = routes.location_path(project.location.id)
+      assert_html(html, ".project_location a[href='#{path}']",
+                  text: project.place_name)
     end
 
     def test_does_not_render_project_date_range_when_project_has_no_dates
@@ -97,9 +98,9 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       # past_project has no image, so no banner-image-text class
-      assert_html(html, ".project_date_range")
+      assert_html(html, ".project_date_range",
+                  text: expected_date_range(project))
       assert_no_html(html, ".banner-image-text")
-      assert_includes(html, expected_date_range(project))
     end
 
     def test_renders_both_location_and_date_range_when_both_present
@@ -107,31 +108,29 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       # past_project has no image, so no banner-image-text class
-      assert_html(html, ".project_location")
-      assert_html(html, ".project_date_range")
+      assert_html(html, ".project_location", text: project.place_name)
+      assert_html(html, ".project_date_range",
+                  text: expected_date_range(project))
       assert_no_html(html, ".banner-image-text")
-      assert_includes(html, project.place_name)
-      assert_includes(html, expected_date_range(project))
     end
 
     def test_renders_project_tabs_when_project_has_observations
       project = projects(:eol_project)
       html = render_banner(project: project)
 
-      assert_html(html, "#project_tabs")
-      assert_html(html, "ul.nav.nav-tabs")
-      assert_html(html, "a.nav-link[href='/projects/#{project.id}']")
+      assert_html(html, "#project_tabs ul.nav-tabs")
+      assert_html(html, "a.nav-link[href='#{routes.project_path(project.id)}']")
     end
 
     def test_renders_names_and_locations_tabs_for_empty_project
       project = projects(:empty_project)
       html = render_banner(project: project)
 
-      assert_html(html, "#project_tabs")
-      assert_includes(html, :names.ti)
-      assert_includes(html, :locations.ti)
+      assert_html(html, "#project_tabs a", text: :names.ti.as_displayed)
+      assert_html(html, "#project_tabs a", text: :locations.ti.as_displayed)
       # No targets, so no Update tab
-      assert_not_includes(html, :project_updates_title.l)
+      assert_no_html(html, "#project_tabs a",
+                     text: :project_updates_title.l.as_displayed)
     end
 
     def test_renders_update_tab_for_admin_with_targets
@@ -139,12 +138,9 @@ module Views::Controllers::Projects
       user = users(:rolf) # admin of rare_fungi_project
       html = render_banner(project: project, user: user)
 
-      assert_html(html, "#project_tabs")
-      assert_includes(html, :project_updates_title.l)
-      assert_html(
-        html,
-        "a[href='/projects/#{project.id}/updates']"
-      )
+      path = routes.project_updates_path(project_id: project.id)
+      assert_html(html, "#project_tabs a[href='#{path}']",
+                  text: :project_updates_title.l.as_displayed)
     end
 
     def test_does_not_render_update_tab_for_non_admin
@@ -152,7 +148,8 @@ module Views::Controllers::Projects
       user = users(:mary) # not admin
       html = render_banner(project: project, user: user)
 
-      assert_not_includes(html, :project_updates_title.l)
+      assert_no_html(html, "#project_tabs a",
+                     text: :project_updates_title.l.as_displayed)
     end
 
     def test_renders_admin_tab_for_admin
@@ -160,8 +157,9 @@ module Views::Controllers::Projects
       user = users(:rolf) # admin of rare_fungi_project
       html = render_banner(project: project, user: user)
 
-      assert_html(html, "a[href='/projects/#{project.id}/admin']")
-      assert_includes(html, :show_project_admin_tab.l)
+      path = routes.project_admin_path(project_id: project.id)
+      assert_html(html, "#project_tabs a[href='#{path}']",
+                  text: :show_project_admin_tab.l.as_displayed)
     end
 
     def test_does_not_render_admin_tab_for_non_admin
@@ -169,7 +167,8 @@ module Views::Controllers::Projects
       user = users(:mary) # not admin of rare_fungi_project
       html = render_banner(project: project, user: user)
 
-      assert_no_html(html, "a[href='/projects/#{project.id}/admin']")
+      path = routes.project_admin_path(project_id: project.id)
+      assert_no_html(html, "a[href='#{path}']")
     end
 
     def test_active_tab_highlights_current_tab
@@ -185,13 +184,33 @@ module Views::Controllers::Projects
       html = render_banner(project: project, current_tab: "projects")
 
       # Projects tab (summary) should have active class
-      assert_html(html, "a.nav-link.active[href='/projects/#{project.id}']")
+      path = routes.project_path(project.id)
+      assert_html(html, "a.nav-link.active[href='#{path}']")
+    end
+
+    def test_logged_out_banner_has_no_links_but_a_login_prompt
+      project = projects(:albion_project)
+      html = render_banner(project: project, user: nil)
+
+      assert_html(html, "#title", text: project.title)
+      assert_no_html(html, "#title a")
+      assert_html(html, ".project_location", text: project.place_name)
+      assert_no_html(html, ".project_location a")
+      assert_html(html, "img.banner-image")
+      assert_no_html(html, "#project_tabs ul.nav-tabs")
+      assert_html(html, "#project_login_prompt",
+                  text: :project_banner_login_prompt.l.as_displayed)
+      assert_html(
+        html,
+        "#project_login_prompt a[href='#{routes.new_account_login_path}']"
+      )
+      assert_html(html, "a", count: 1)
     end
 
     private
 
     def render_banner(project: projects(:eol_project),
-                      user: nil, current_tab: nil)
+                      user: users(:mary), current_tab: nil)
       render(Banner.new(project: project,
                         user: user,
                         current_tab: current_tab))

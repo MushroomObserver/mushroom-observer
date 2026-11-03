@@ -4,8 +4,12 @@ module Views::Controllers::Checklists
   # Bundles the rendering context for a checklist page: the viewer, plus
   # the scope indicators (project / user / location / species_list) that
   # determine link targets. Keeps component/view constructors narrow.
+  # `logged_out` is separate from `user` because the Missing Taxa panel
+  # deliberately omits `user` (to hide admin tools) for logged-in
+  # viewers too. Logged-out pages render taxa as text, not links, to
+  # keep crawlers off the observation searches.
   Context = Struct.new(
-    :user, :project, :show_user, :location, :species_list,
+    :user, :project, :show_user, :location, :species_list, :logged_out,
     keyword_init: true
   ) do
     # Argument accepted by `Checklists::Panel#taxon_link_path`.

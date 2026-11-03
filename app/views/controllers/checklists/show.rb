@@ -24,6 +24,8 @@ module Views::Controllers::Checklists
       container_class(:full)
       add_project_banner(@context.project) if @context.project
       add_page_title(checklist_show_title)
+      return if @context.logged_out
+
       list = @context.species_list
       add_context_nav(
         Tab::Checklist::ShowActions.new(

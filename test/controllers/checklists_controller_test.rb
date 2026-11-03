@@ -202,6 +202,58 @@ class ChecklistsControllerTest < FunctionalTestCase
     prove_checklist_content(expect)
   end
 
+  def test_checklist_for_project_logged_out
+    project = projects(:one_genus_two_species_project)
+    expect = Name.joins(observations: :project_observations).
+             where({ observations: { project_observations:
+                      { project_id: project.id } } }).distinct
+
+    get(:show, params: { project_id: project.id })
+
+    assert_response(:success)
+    assert_equal("noindex", response.headers["X-Robots-Tag"])
+    assert_select(".checklist li", count: expect.size)
+    assert_select(".checklist li", text: /\(1\)/)
+    assert_select(".checklist a", count: 0)
+    assert_select("#title a", count: 0)
+    assert_select("#project_tabs ul.nav-tabs", count: 0)
+    assert_select(
+      "#project_login_prompt a[href='#{new_account_login_path}']"
+    )
+    assert_select("#context_nav a", count: 0)
+  end
+
+  def test_checklist_for_species_list_logged_out
+    list = species_lists(:one_genus_three_species_list)
+    project = projects(:bolete_project)
+
+    get(:show, params: { species_list_id: list.id, project: project.id })
+
+    assert_response(:success)
+    assert_select("#project_login_prompt")
+    assert_select(".checklist li", text: /\(\d+\)/)
+    assert_select("#checklist_missing_panel li", text: /Fungi \(1\)/)
+    assert_select(".checklist a", count: 0)
+  end
+
+  def test_checklist_logged_out_requires_login_for_other_requests
+    project = projects(:one_genus_two_species_project)
+    [
+      {},
+      { user_id: users(:rolf).id },
+      { project_id: project.id, location_id: locations(:albion).id },
+      { project_id: project.id, sub_locations: "1" },
+      { project_id: "#{project.id}x" },
+      { project_id: { x: project.id } },
+      { species_list_id: species_lists(:first_species_list).id,
+        project_id: project.id }
+    ].each do |params|
+      get(:show, params:)
+      assert_redirected_to(new_account_login_path,
+                           "Expected login for #{params.inspect}")
+    end
+  end
+
   def prove_checklist_content(expect)
     # Get expected names not included in the displayed checklist links.
     missing_names = expect.each_with_object([]) do |taxon, missing|
