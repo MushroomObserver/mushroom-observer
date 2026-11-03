@@ -1,15 +1,10 @@
 # frozen_string_literal: true
 
-# One-time repair (#5458), and the precondition for the unique index on
-# `name_trackers (user_id, name_id)`.
-#
-# `Names::TrackersController#create` did not look for an existing
-# tracker, so each resubmit of the new-tracker form added another one.
-# With duplicates, Disable removes one and the user keeps getting email
-# from the rest. `create` updates the existing tracker now, so no new
-# duplicates arise. This removes the ones already here: per user and
-# Name it keeps one tracker and destroys the others with their
-# Interests.
+# One-time repair for #5458, and the precondition for the unique
+# index on name_trackers (user_id, name_id). The new-tracker form's
+# resubmission used to add a duplicate NameTracker instead of
+# updating the existing one; this keeps one tracker per user and
+# Name, destroying the rest with their Interests.
 #
 # Dry run (default -- reports, writes nothing):
 #   bin/rails runner script/remove_duplicate_name_trackers.rb
