@@ -11,7 +11,7 @@ module Views::Controllers::Observations::Emails
       add_page_title(
         :ask_observation_question_title.t(
           name: viewer_aware_unique_format_name(@observation)
-        )
+        ).small_author
       )
 
       render(Form.new(observation: @observation, turbo: true))
