@@ -57,10 +57,13 @@ class Views::Controllers::Observations::Show::Namings::FooterButtonsTest <
   def test_consensus_help_collapsed_by_default_visible_at_sm_up
     html = render_footer_buttons
 
-    # `.collapse` with no `.show` -- collapsed below `sm`; `d-sm-block`
-    # forces it visible at `sm`+ regardless (see footer_buttons.rb).
+    # `.collapse` with no expanded class -- collapsed below `sm`;
+    # `d-sm-block` forces it visible at `sm`+ regardless (see
+    # footer_buttons.rb).
     assert_html(html, "#namings_consensus_help.collapse.d-sm-block")
-    assert_no_html(html, "#namings_consensus_help.show")
+    assert_no_html(html,
+                   "#namings_consensus_help" \
+                   ".#{Components::Collapsible::EXPANDED_CLASS}")
   end
 
   def test_mobile_help_toggle_targets_consensus_help
