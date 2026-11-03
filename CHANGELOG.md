@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-11-03 (deploy-2026-11-03-06-00)
+
+- Fix `script/lang_update_if_needed.sh` crashing under `RAILS_ENV=test` ([PR5573](https://github.com/MushroomObserver/mushroom-observer/pull/5573), @nimmolo)
+- Dedup `database.yml` connection boilerplate with YAML anchors ([PR5574](https://github.com/MushroomObserver/mushroom-observer/pull/5574), @nimmolo)
+- Migrate `rss_logs` type-filter hidden-field flattening to `Query#index_filter` ([PR5575](https://github.com/MushroomObserver/mushroom-observer/pull/5575), @nimmolo)
+- Build `Query::Interests` for DRY UI, simplify Interest code ([PR5567](https://github.com/MushroomObserver/mushroom-observer/pull/5567), @nimmolo)
+- Fix dev boot crash from new alerts queue: `development` db pool too small for Solid Queue workers ([PR5577](https://github.com/MushroomObserver/mushroom-observer/pull/5577), @nimmolo)
+- Fix disable-tracking link in Name-tracking emails ([PR5461](https://github.com/MushroomObserver/mushroom-observer/pull/5461), @JoeCohen)
+- Fix duplicate "no interests" message on `/interests` empty state ([PR5579](https://github.com/MushroomObserver/mushroom-observer/pull/5579), @nimmolo)
+- Keep `parse_log` error mail bounded (`extract_log` reprinted bundles per string) ([PR5570](https://github.com/MushroomObserver/mushroom-observer/pull/5570), @mo-nathan)
+- Add `Components::ObservationListManager`, fix sorter and padding bugs on edit pages ([PR5583](https://github.com/MushroomObserver/mushroom-observer/pull/5583), @nimmolo)
+- Redesign Description show pages: split Detail from "other descriptions", new project-draft UI ([PR5582](https://github.com/MushroomObserver/mushroom-observer/pull/5582), @nimmolo)
+- Clear `ActionMailer::Base.deliveries` in `ContentPurgeJobTest` ([PR5587](https://github.com/MushroomObserver/mushroom-observer/pull/5587), @nimmolo)
+- Key lang:update caches on branch, scope `block_long_comment_blocks.sh` tighter ([PR5586](https://github.com/MushroomObserver/mushroom-observer/pull/5586), @nimmolo)
+- Don't let a blank description submission become a Name's default ([PR5590](https://github.com/MushroomObserver/mushroom-observer/pull/5590), @nimmolo)
+- Add dry-run script to purge blank `NameDescription`/`LocationDescription` rows ([PR5589](https://github.com/MushroomObserver/mushroom-observer/pull/5589), @nimmolo)
+- Add `Components::CountBadge` to index pages, unify layouts, redesign description indexes ([PR5588](https://github.com/MushroomObserver/mushroom-observer/pull/5588), @nimmolo)
+- Hide Nomenclature registration column for code names ([PR4948](https://github.com/MushroomObserver/mushroom-observer/pull/4948), @JoeCohen)
+- Add a final tiebreaker to `TaxonSync`'s Name lookup (#5499) ([PR5591](https://github.com/MushroomObserver/mushroom-observer/pull/5591), @nimmolo)
+- Tidy iNat provisional names before parsing (`Inat::NameString`; #2892 part 1) ([PR5584](https://github.com/MushroomObserver/mushroom-observer/pull/5584), @mo-nathan)
+- Send one digest per user for a `Name` merge instead of per-naming emails ([PR5576](https://github.com/MushroomObserver/mushroom-observer/pull/5576), @mo-nathan)
+- Rework `Description` move/merge forms: distinguishable previews, working Location move picker ([PR5592](https://github.com/MushroomObserver/mushroom-observer/pull/5592), @nimmolo)
+- Bump rubocop to 1.92.2 ([PR5598](https://github.com/MushroomObserver/mushroom-observer/pull/5598), @JoeCohen)
+- Add `align:` to `Components::Table` columns ([PR5594](https://github.com/MushroomObserver/mushroom-observer/pull/5594), @nimmolo)
+
 ## 2026-10-29 (deploy-2026-10-29-12-00)
 
 - Fix `Image#format_name` blank-title fallback; check `lang:update` for all tests ([PR5557](https://github.com/MushroomObserver/mushroom-observer/pull/5557), @nimmolo)

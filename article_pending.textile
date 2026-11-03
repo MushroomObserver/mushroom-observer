@@ -1,6 +1,9 @@
-|{white-space:nowrap}. 2026-10-29 | Let Users delete their content and opt out of iNat imports | "PR#5555":https://github.com/MushroomObserver/mushroom-observer/pull/5555 |
-|{white-space:nowrap}. 2026-10-29 | Fix stray HTML and &amp; in Publication references | "PR#5556":https://github.com/MushroomObserver/mushroom-observer/pull/5556 |
-|{white-space:nowrap}. 2026-10-29 | Redesign the Interests page's notification and delete controls | "PR#5564":https://github.com/MushroomObserver/mushroom-observer/pull/5564 |
-|{white-space:nowrap}. 2026-10-27 | Fix the link for requesting credit on a Description | "PR#5547":https://github.com/MushroomObserver/mushroom-observer/pull/5547 |
-|{white-space:nowrap}. 2026-10-27 | Retry emails that fail to send for temporary reasons | "PR#5546":https://github.com/MushroomObserver/mushroom-observer/pull/5546 |
-|{white-space:nowrap}. 2026-10-27 | Fix untitled images showing a blank title instead of "Image" | "PR#5557":https://github.com/MushroomObserver/mushroom-observer/pull/5557 |
+|{white-space:nowrap}. 2026-11-02 | Send one email per user when Names are merged | "PR#5576":https://github.com/MushroomObserver/mushroom-observer/pull/5576 |
+|{white-space:nowrap}. 2026-11-02 | Fix iNat provisional names with stray spaces or quotes | "PR#5584":https://github.com/MushroomObserver/mushroom-observer/pull/5584 |
+|{white-space:nowrap}. 2026-11-02 | Hide Nomenclature registration section for code names | "PR#4948":https://github.com/MushroomObserver/mushroom-observer/pull/4948 |
+|{white-space:nowrap}. 2026-11-02 | Add observation counts to Locations, Names, Projects, and Species Lists pages | "PR#5588":https://github.com/MushroomObserver/mushroom-observer/pull/5588 |
+|{white-space:nowrap}. 2026-11-02 | Fix a blank description no longer becoming a Name's default | "PR#5590":https://github.com/MushroomObserver/mushroom-observer/pull/5590 |
+|{white-space:nowrap}. 2026-11-02 | Improve description merge and move forms | "PR#5592":https://github.com/MushroomObserver/mushroom-observer/pull/5592 |
+|{white-space:nowrap}. 2026-11-01 | Redesign the Description page layout and the new-draft form | "PR#5582":https://github.com/MushroomObserver/mushroom-observer/pull/5582 |
+|{white-space:nowrap}. 2026-10-30 | Fix the disable-tracking link in Name-tracking emails | "PR#5461":https://github.com/MushroomObserver/mushroom-observer/pull/5461 |
+|{white-space:nowrap}. 2026-10-30 | Add type and state filters to the Interests page | "PR#5567":https://github.com/MushroomObserver/mushroom-observer/pull/5567 |
