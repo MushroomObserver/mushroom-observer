@@ -27,7 +27,9 @@ module Views::Controllers::Observations::Locations
     private
 
     def render_matches
-      div(class: "h4 pl-card") { plain(:list_merge_options_near_matches.t) }
+      ContentPadded(class: "py-0") do
+        h4 { plain(:list_merge_options_near_matches.t) }
+      end
       PaginatedResults do
         ListGroup do |list|
           @matches.each { |location| render_match(list, location) }
