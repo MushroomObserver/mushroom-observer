@@ -11,7 +11,8 @@ module Views::Controllers::Names::Classification
 
     def initialize(name, **)
       super(FormObject::NameClassification.new(**prefill(name)),
-            name: name, id: "name_classification_form", **)
+            name: name, id: "name_classification_form",
+            data: { controller: "clear-fields" }, **)
     end
 
     def view_template
@@ -22,7 +23,7 @@ module Views::Controllers::Names::Classification
         render_rank_field(rank)
       end
 
-      submit(:save.ti, center: true)
+      render_buttons
     end
 
     private
@@ -37,7 +38,16 @@ module Views::Controllers::Names::Classification
     def render_rank_field(rank)
       field_name = :"rank_#{rank.downcase}"
       text_field(field_name, label: rank_label(rank), inline: true,
-                             wrap_class: "mb-1")
+                             wrap_class: "mb-1",
+                             data: { "clear-fields-target": "field" })
+    end
+
+    def render_buttons
+      div(class: "text-center mt-3") do
+        Button(name: :clear.ti, class: "mr-3",
+               data: { action: "clear-fields#clear" })
+        submit(:save.ti)
+      end
     end
 
     def rank_label(rank)

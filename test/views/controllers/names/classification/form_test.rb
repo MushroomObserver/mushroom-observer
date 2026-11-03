@@ -41,6 +41,22 @@ module Views::Controllers::Names::Classification
                   "[value='']")
     end
 
+    def test_clear_button_present_and_wired_to_fields
+      name = names(:coprinus_comatus)
+      html = render_form(name)
+
+      assert_html(html, "form[data-controller='clear-fields']")
+      assert_html(html, "button[data-action='clear-fields#clear']",
+                  text: :clear.ti)
+
+      FormObject::NameClassification::RANKS.each do |rank_name|
+        field_name = "name_classification[rank_#{rank_name.downcase}]"
+        assert_html(html,
+                    "input[name='#{field_name}']" \
+                    "[data-clear-fields-target='field']")
+      end
+    end
+
     private
 
     def render_form(name)
