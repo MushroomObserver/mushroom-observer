@@ -35,7 +35,7 @@ class Components::ListGroup::Search < Components::ApplicationForm
     Panel(
       panel_id: "list_search", panel_class: "mt-3"
     ) do |panel|
-      panel.with_heading { plain(:add_object.t(type: :observation)) }
+      panel.with_heading { plain(:list_search_heading.l) }
       panel.with_body { super(&block) }
     end
   end

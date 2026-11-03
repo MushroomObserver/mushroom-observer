@@ -8,7 +8,7 @@ class Components::ListGroup::SearchTest < ComponentTestCase
     html = render_search(object: project, project: project)
 
     assert_html(html, "#list_search .panel-heading",
-                text: :add_object.t(type: :observation))
+                text: :list_search_heading.l)
     assert_html(html, "#list_search .panel-body")
     assert_html(
       html, "form#list_search_form[action='#{routes.add_dispatch_path}']"
