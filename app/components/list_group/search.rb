@@ -75,20 +75,30 @@ class Components::ListGroup::Search < Components::ApplicationForm
     end
   end
 
-  def render_status_light
-    span(class: "status-indicator ml-3 mr-2",
-         data: { search_status_target: "light" })
-    span(class: "status-text",
-         data: { search_status_target: "message" }) do
-      plain(:search_status_all_names.l)
-    end
+  def render_name_autocompleter
+    # The status light renders into the autocompleter's `label_append`
+    # slot, so it shares the label row, after the (space-reserving)
+    # has-id checkmark.
+    autocompleter_field(
+      "name", type: :name, label: :search_status_label.ti,
+              wrap_class: "mb-3 mb-md-0",
+              data: {
+                search_status_target: "input",
+                action: [
+                  "change->search-status#checkMatch",
+                  "keyup->search-status#checkMatch",
+                  "focus->search-status#checkMatch"
+                ].join(" ")
+              }
+    ) { |f| f.with_label_append { render_status_light } }
   end
 
   def render_field_slip_input
     div(class: "field-slip-container field-group") do
       label(for: "field_slip", class: "text-nowrap") do
-        trusted_html([:add_object.t(type: :field_slip), ": "].safe_join)
+        append_colon(:field_slip.ti)
       end
+      Help(element: :span, content: "(#{:optional.l})", class: "ml-2")
       div(class: "flex-bar") do
         # `label: false` skips the form-group wrapper; the explicit
         # `<label>` above plays that role here.
@@ -99,22 +109,13 @@ class Components::ListGroup::Search < Components::ApplicationForm
     end
   end
 
-  def render_name_autocompleter
-    # `wrap_class:` puts the `mb-2` margin on `.form-group.dropdown`,
-    # not on the `<input>`. The status light renders into the
-    # autocompleter's `label_append` slot, so it shares the label
-    # row, after the (space-reserving) has-id checkmark.
-    autocompleter_field(
-      "name", type: :name, label: :search_status_label.ti,
-              data: {
-                search_status_target: "input",
-                action: [
-                  "change->search-status#checkMatch",
-                  "keyup->search-status#checkMatch",
-                  "focus->search-status#checkMatch"
-                ].join(" ")
-              }
-    ) { |f| f.with_label_append { render_status_light } }
+  def render_status_light
+    span(class: "status-indicator ml-3 mr-2",
+         data: { search_status_target: "light" })
+    span(class: "status-text",
+         data: { search_status_target: "message" }) do
+      plain(:search_status_all_names.l)
+    end
   end
 
   # Keyed by the three states the Stimulus controller uses for the

@@ -929,6 +929,10 @@
   .d-md-flex {
     display: flex !important;
   }
+
+  .mb-md-0 {
+    margin-bottom: 0 !important;
+  }
 }
 
 @media screen and (min-width: $screen-lg-min) {
