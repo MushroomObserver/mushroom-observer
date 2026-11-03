@@ -103,6 +103,10 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     get(:show, params: { project_id: project.id })
     assert_select(".checklist a", text: /\(1\)/)
+    assert_select(
+      "title", text: /#{:checklist_for_project_title.l(project: project.title)}/
+    )
+    assert_select("h1#title", text: /#{:checklist_for.l}/, count: 0)
 
     prove_checklist_content(expect)
   end

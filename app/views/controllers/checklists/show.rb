@@ -23,7 +23,7 @@ module Views::Controllers::Checklists
     def render_page_chrome
       container_class(:full)
       add_project_banner(@context.project) if @context.project
-      add_page_title(checklist_show_title)
+      add_checklist_title
       return if @context.logged_out
 
       list = @context.species_list
@@ -33,6 +33,22 @@ module Views::Controllers::Checklists
           permission: list ? permission?(list) : false
         )
       )
+    end
+
+    # A project checklist gets no heading: the banner above it already
+    # names the project.
+    def add_checklist_title
+      if project_checklist?
+        add_page_title("", :checklist_for_project_title.l(
+                             project: @context.project.title
+                           ))
+      else
+        add_page_title(checklist_show_title)
+      end
+    end
+
+    def project_checklist?
+      @context.project && !@context.show_user && !@context.species_list
     end
 
     def checklist_show_title
