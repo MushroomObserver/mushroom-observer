@@ -303,6 +303,7 @@
   observation_fields: observation fields
   occurrence: occurrence
   occurrences: occurrences
+  primary: primary
   primary_observation: primary observation
   of: of
   past_locations: location changes
@@ -2750,14 +2751,11 @@
   field_slips_for_project_title: Create Field Slips for the
 
   occurrence_already_exists: This observation already belongs to an occurrence.
-  occurrence_created: "Occurrence #[ID] created."
   occurrence_locations_differ: "Note: The observations in this occurrence have different locations."
   occurrence_need_two: You must include at least one additional observation to create an occurrence.
   occurrence_observation_not_found: Observation not found.
-  create_occurrence_title: Create Occurrence
+  show_occurrence_title: "[:occurrence.ti] of [name]"
   create_occurrence_source: Source Observation
-  create_occurrence_primary: Primary
-  create_occurrence_submit: Create Occurrence
   in_existing_occurrence: In existing occurrence
   occurrence_field_slip_conflict: "Field slip code conflict: [codes]"
   occurrence_max_observations_exceeded: "Cannot exceed [max] observations"
@@ -2772,9 +2770,7 @@
   show_observation_reflection_read_only: Read-only reflection of an imported source
   show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
-  edit_occurrence_submit: Save Changes
   edit_occurrence_add_heading: Add Recently Viewed Observations
-  edit_occurrence_location: "Location:"
   edit_occurrence_details_heading: Primary Observation Details
   edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
   occurrence_updated: Occurrence updated.

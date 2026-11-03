@@ -70,7 +70,7 @@ module Views::Controllers::Occurrences
     def render_new_layout
       render_source_obs_id_hidden
       render_new_observation_grid
-      submit(:create_occurrence_submit.l, center: true)
+      submit(:create_object.t(type: :occurrence), center: true)
     end
 
     # Flat `observation_id` (form context, not an Occurrence
@@ -116,7 +116,7 @@ module Views::Controllers::Occurrences
 
     def render_edit_layout
       render_details_section
-      submit(:edit_occurrence_submit.l, center: true)
+      submit(:save_changes.ti, center: true)
       render_blank_observation_ids_hidden
       render_edit_observation_grid
       render_candidate_section if @candidates.any?
@@ -172,7 +172,7 @@ module Views::Controllers::Occurrences
       # `distinct_locations` — pass straight through to SelectField.
       render(attrs_ns.field(:location_id).select(
                locations,
-               wrapper_options: { label: :edit_occurrence_location }
+               wrapper_options: { label: :location.ti }
              ))
     end
 
@@ -230,7 +230,7 @@ module Views::Controllers::Occurrences
     # persisted primary on edit render) gets `checked`.
     def render_primary_radio(obs, source: false)
       radio_field(:primary_observation_id,
-                  [obs.id, :create_occurrence_primary.l],
+                  [obs.id, :primary.ti],
                   wrap_class: "my-0",
                   data: primary_radio_data(source: source))
     end
