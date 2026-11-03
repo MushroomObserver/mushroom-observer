@@ -23,14 +23,14 @@ module Views::Controllers::Observations::ExternalLinks
     def initialize(model, observation:, sites:, user:, site: nil,
                    back: nil, **attrs)
       super(model, observation: observation, sites: sites,
-                   site: site || sites&.first, user: user, back: back,
-                   **attrs)
+                   site: site || ExternalSite.default_new_link_site(sites),
+                   user: user, back: back, **attrs)
     end
 
     def view_template
+      render_site_select
       render_external_id_field
       render_hidden_fields
-      render_site_select
       render_relationship_field if model.persisted?
       submit(submit_text, center: true)
     end
@@ -41,9 +41,9 @@ module Views::Controllers::Observations::ExternalLinks
       text_field(:external_id,
                  size: 40,
                  label: :external_id.ti,
-                 wrap_class: "w-100") do |f|
-        f.with_append { :show_observation_add_link_dialog.l }
-      end
+                 help: :show_observation_add_link_dialog.l,
+                 help_placement: :above,
+                 wrap_class: "w-100")
     end
 
     def render_relationship_field
