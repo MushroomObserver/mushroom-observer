@@ -26,6 +26,18 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
+    def test_new_external_link_form_defaults_to_inaturalist
+      obs = observations(:imported_inat_obs)
+
+      login(obs.user.login)
+      get(:new, params: { id: obs.id })
+
+      assert_select(
+        "select[name='external_link[external_site_id]'] " \
+        "option[selected][value='#{external_sites(:inaturalist).id}']"
+      )
+    end
+
     def test_new_no_permitted_sites
       obs = observations(:coprinus_comatus_obs) # owned by rolf
 
@@ -284,6 +296,24 @@ module Observations
       assert_redirected_to(permanent_observation_path(link.observation.id))
     end
 
+    # Image-targeted links are import provenance, not user-facing (see
+    # ExternalLink#observation) -- no "Shared with" UI exists for
+    # images, so this redirects to the image's page instead of
+    # crashing on `link.observation` being nil.
+    def test_show_html_redirects_to_image_for_image_targeted_link
+      image = images(:in_situ_image)
+      link = ExternalLink.create!(
+        user: rolf, target: image,
+        external_site: external_sites(:inaturalist),
+        external_id: "555555"
+      )
+
+      login
+      get(:show, params: { id: link.id })
+
+      assert_redirected_to(image_path(image.id))
+    end
+
     def simulate_turbo_frame_request(link)
       @request.headers["Turbo-Frame"] = "external_link_frame_#{link.id}"
     end
@@ -411,6 +441,22 @@ module Observations
       assert_response(:success)
       assert_select(".modal-form")
       assert_select("form#observation_external_link_form")
+    end
+
+    # Same crash/fix as test_show_html_redirects_to_image_for_image_
+    # targeted_link, but for the edit action's ivar-loading path.
+    def test_edit_redirects_to_image_for_image_targeted_link
+      image = images(:in_situ_image)
+      link = ExternalLink.create!(
+        user: rolf, target: image,
+        external_site: external_sites(:inaturalist),
+        external_id: "555555"
+      )
+
+      login(rolf.login)
+      get(:edit, params: { id: link.id })
+
+      assert_redirected_to(image_path(image.id))
     end
 
     def test_update_external_link
