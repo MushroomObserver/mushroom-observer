@@ -72,8 +72,8 @@ is_reference_run() {
 DISABLE_RE='rubocop:disable[[:space:]]+(MO/NoLongCommentBlock|all)\b'
 ENABLE_RE='rubocop:enable[[:space:]]+(MO/NoLongCommentBlock|all)\b'
 
-# True if the run contains its own disable ... enable pair for this
-# cop -- a prior deliberate exemption, not an oversight.
+# True if the run overlaps a disable/enable region for this cop -- a prior
+# deliberate exemption, not an oversight.
 # RuboCop suppresses an offense whose range overlaps an active
 # disable/enable region at all -- not just a region fully containing
 # the run, and not just the run's start or end line in isolation. A
