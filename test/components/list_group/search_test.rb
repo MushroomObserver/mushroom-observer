@@ -32,7 +32,7 @@ class Components::ListGroup::SearchTest < ComponentTestCase
       "[data-search-status-target='light']"
     )
     assert_html(html, "[data-search-status-target='message']",
-                text: :search_status_all_names.l(type: :name))
+                text: :search_status_all_names.l)
   end
 
   def test_field_slip_quick_add_input

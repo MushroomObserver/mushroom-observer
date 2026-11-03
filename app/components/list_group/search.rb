@@ -78,13 +78,9 @@ class Components::ListGroup::Search < Components::ApplicationForm
   def render_status_light
     span(class: "status-indicator ml-3 mr-2",
          data: { search_status_target: "light" })
-    # Initial label is keyed `:name` (the autocompleter field's
-    # type), not `object.type_tag`. The Stimulus controller swaps
-    # the visible message based on user input using the JSON-encoded
-    # `messages_value` below — which IS keyed by `object.type_tag`.
     span(class: "status-text",
          data: { search_status_target: "message" }) do
-      plain(:search_status_all_names.l(type: :name))
+      plain(:search_status_all_names.l)
     end
   end
 
@@ -125,15 +121,10 @@ class Components::ListGroup::Search < Components::ApplicationForm
   # status-light indicator (off = no input yet, red = no match,
   # green = unique match in `@object_names`).
   def status_messages
-    type = object_type_tag
     {
-      off: :search_status_all_names.l(type: type),
-      red: :search_status_has_no_name.l(type: type),
-      green: :search_status_has_name.l(type: type)
+      off: :search_status_all_names.l,
+      red: :search_status_has_no_name.l,
+      green: :search_status_has_name.l
     }
-  end
-
-  def object_type_tag
-    @object.type_tag
   end
 end
