@@ -442,6 +442,22 @@ module Observations
       assert_select("form#observation_external_link_form")
     end
 
+    # Same crash/fix as test_show_html_redirects_to_image_for_image_
+    # targeted_link, but for the edit action's ivar-loading path.
+    def test_edit_redirects_to_image_for_image_targeted_link
+      image = images(:in_situ_image)
+      link = ExternalLink.create!(
+        user: rolf, target: image,
+        external_site: external_sites(:inaturalist),
+        external_id: "555555"
+      )
+
+      login(rolf.login)
+      get(:edit, params: { id: link.id })
+
+      assert_redirected_to(image_path(image.id))
+    end
+
     def test_update_external_link
       # obs owned by rolf, mary created link and is member of site's project
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
