@@ -305,6 +305,23 @@ class SpeciesListsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_show_species_list_action_tabs
+    spl = species_lists(:unknown_species_list)
+    login(spl.user.login)
+
+    get(:show, params: { id: spl.id })
+
+    assert_select("ul#project_species_list_buttons.nav.nav-tabs")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id), { count: 1 }
+    )
+    # Map, Observations, Names, Locations, Images -- the last two
+    # gate on the Location-via-Observation bridge (Query.related?),
+    # which every observation query satisfies, so all five render.
+    assert_select("#project_species_list_buttons li.nav-item", count: 5)
+  end
+
   # Regression test for bug where params[:q] as a String (saved query ID)
   # caused TypeError: String does not have #dig method in set_project_ivar
   def test_show_species_list_with_saved_query_string

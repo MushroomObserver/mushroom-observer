@@ -27,16 +27,12 @@ module Views::Controllers::Projects
         render_banner_without_image
       end
 
-      Row do
-        Column(xs: 12, id: "project_tabs") do
-          NavTabs(
-            current: @current_tab, link_class: "mt-3",
-            tabs: ::Tab::Project::Banner.new(
-              project: @project, user: @user
-            )
-          )
-        end
-      end
+      NavTabs(
+        id: "project_tabs", class: "mt-3", current: @current_tab,
+        tabs: ::Tab::Project::Banner.new(
+          project: @project, user: @user
+        )
+      )
     end
 
     private

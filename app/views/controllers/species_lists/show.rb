@@ -49,7 +49,7 @@ module Views::Controllers::SpeciesLists
       render(Views::Controllers::SpeciesLists::Details.new(
                species_list: @species_list, query: @query
              ))
-      render_project_buttons
+      render_project_nav_tabs
       render_list_search
       PaginatedResults { render_observations }
       render_comments
@@ -58,57 +58,22 @@ module Views::Controllers::SpeciesLists
              ))
     end
 
-    # Buttons row above the species-list's observation listing.
+    # NavTabs row above the species-list's observation listing.
     # When no list is set there's nothing to render — preserves the
     # pre-Phlex `project_species_list_buttons(list, query)` guard
     # which returned nil for a nil list. Map / Observations / Names
     # always render; Locations / Images render only when the active
     # query supports the Location-via-Observation bridge (the
     # related-query for the two cross-domain indexes).
-    def render_project_buttons
-      return unless @species_list
-
-      div(id: "project_species_list_buttons") do
-        project_button(:map.ti, add_q_param(map_observations_path, @query))
-        project_button(:observations.ti,
-                       add_q_param(observations_path, @query))
-        project_button(:names.ti, checklist_names_path)
-        render_locations_button
-        render_images_button
-      end
-    end
-
-    def checklist_names_path
-      checklist_path(
-        { species_list_id: @species_list.id, project: @project&.id }.compact
+    def render_project_nav_tabs
+      NavTabs(
+        id: "project_species_list_buttons", class: "mt-3",
+        tabs: Tab::SpeciesList::ShowActions.new(
+          species_list: @species_list, project: @project,
+          query: @query, controller: controller,
+          observations_count: @pagination_data.num_total
+        )
       )
-    end
-
-    def render_locations_button
-      return unless related_to_locations?
-
-      project_button(:locations.ti, related_query_path(Location))
-    end
-
-    def render_images_button
-      return unless related_to_locations?
-
-      project_button(:images.ti, related_query_path(::Image))
-    end
-
-    def related_query_path(model)
-      Tab::RelatedQuery.new(
-        model: model, filter: :Observation,
-        current_query: @query, controller: controller
-      ).path
-    end
-
-    def related_to_locations?
-      @query && Query.related?(:Location, :Observation)
-    end
-
-    def project_button(name, target)
-      Button(type: :project, name: name, target: target)
     end
 
     def render_list_search

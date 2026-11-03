@@ -50,8 +50,9 @@ class Components::NavTabs < Components::Base
   # (e.g. `"mt-3"`).
   prop :link_class, _Nilable(String), default: nil
   # Catch-all for arbitrary HTML attrs forwarded to the `<ul>` element
-  # (`data:`, ARIA, etc.) -- matches Icon/Collapsible's pattern. The
-  # `class:` is always `"nav nav-tabs"` and is not overridable here.
+  # (`id:`, `data:`, ARIA, etc.) -- matches Icon/Collapsible's pattern.
+  # A `class:` here is appended to the required `"nav nav-tabs"`, not
+  # a replacement for it.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   # `@tabs` is builder-accumulated state (populated by `tab`/`add_all`
@@ -73,7 +74,8 @@ class Components::NavTabs < Components::Base
     # `tabs.tab(...)` push into `@tabs`) and discards any output —
     # the block configures, the `<ul>` below renders.
     vanish(&block)
-    ul(class: "nav nav-tabs", **@attributes) do
+    ul(class: class_names("nav nav-tabs", @attributes[:class]),
+       **@attributes.except(:class)) do
       @tabs.each { |tab| render_tab(tab) }
     end
   end
@@ -141,10 +143,19 @@ class Components::NavTabs < Components::Base
 
   def render_tab(tab)
     li(class: "nav-item") do
-      a(href: tab[:path], **anchor_attrs(tab)) do
+      a(href: resolved_path(tab[:path]), **anchor_attrs(tab)) do
         trusted_or_plain(tab[:text])
       end
     end
+  end
+
+  # A Tab's `#path` is usually a route-helper String, but
+  # `Tab::QueryLink` subclasses (e.g. `Tab::RelatedQuery`) can return
+  # a `{controller:, action:, ...}` Hash instead -- resolve it to a
+  # URL the same way `url_for` already does for every other `target:`
+  # a Hash reaches in this app (see `Components::Button`).
+  def resolved_path(path)
+    path.is_a?(String) ? path : url_for(path.merge(only_path: true))
   end
 
   def anchor_attrs(tab)

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Sub-tab navigation for the project Admin tab. Renders Details /
-# N Members / N Aliases as Bootstrap tabs, indented under the main
-# tab bar. The current sub-tab is highlighted; the main Admin tab
-# stays selected via the parent banner's current_tab.
+# N Members / N Aliases as Bootstrap tabs below the main tab bar. The
+# current sub-tab is highlighted; the main Admin tab stays selected
+# via the parent banner's current_tab.
 #
 # Shared across the projects admin sub-controllers (admin, members,
 # aliases). Lives in `Views::Controllers::Projects` at the cluster
@@ -15,16 +15,12 @@ module Views::Controllers::Projects
          _Union("details", "members", "aliases", "external_sites")
 
     def view_template
-      Row do
-        Column(xs: 12, class: "pl-4 mt-2 mb-3",
-               id: "project_admin_subtabs") do
-          NavTabs(
-            current: @current_subtab,
-            tabs: ::Tab::Project::AdminSubtabs.new(project: @project,
-                                                   site_admin: in_admin_mode?)
-          )
-        end
-      end
+      NavTabs(
+        id: "project_admin_subtabs", class: "pl-3 mt-2 mb-3",
+        current: @current_subtab,
+        tabs: ::Tab::Project::AdminSubtabs.new(project: @project,
+                                               site_admin: in_admin_mode?)
+      )
     end
   end
 end
