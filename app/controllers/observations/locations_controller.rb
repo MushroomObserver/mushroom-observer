@@ -48,11 +48,14 @@ module Observations
       # This is the string we're looking for in the db, in the `name` column,
       # and we're also assuming "postal" order when splitting the string.
       @where = params[:where].to_s
+      return redirect_to_undefined_locations if @where.blank?
+
       @matches = locations_matching_where
       @pagination_data = paginate_locations!
       render(Views::Controllers::Observations::Locations::Edit.new(
                where: @where,
                matches: @matches,
+               observation_counts: ObservationCounter.counts_for(@matches),
                pagination_data: @pagination_data,
                user: @user
              ))
@@ -82,6 +85,12 @@ module Observations
     end
 
     private
+
+    # Only reachable via a hand-typed or stale URL -- the
+    # undefined-locations index, the one caller, always passes `where`.
+    def redirect_to_undefined_locations
+      redirect_to(undefined_locations_path)
+    end
 
     def locations_matching_where
       matches = Location.name_has(@where)
