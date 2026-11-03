@@ -51,5 +51,19 @@ module Observations::Namings
 
       assert_redirected_to(permanent_observation_path(obs.id))
     end
+
+    # Valid JSON that isn't an Array -- Suggestion.analyze needs an
+    # Array, so these must redirect too, not reach #each and crash.
+    def test_suggestions_non_array_names_redirects
+      obs = observations(:detailed_unknown_obs)
+      login
+
+      ["null", "{}", "false", "0", '"a string"'].each do |names|
+        get(:show, params: { id: obs.id, names: names })
+
+        assert_redirected_to(permanent_observation_path(obs.id),
+                             "names=#{names} should redirect")
+      end
+    end
   end
 end

@@ -10,7 +10,8 @@ module Observations::Namings
       return unless @observation
 
       names = parsed_names
-      return unless names
+      return redirect_to(permanent_observation_path(@observation)) unless
+        names
 
       @suggestions = Suggestion.analyze(names)
       render(Views::Controllers::Observations::Namings::Suggestions::Show.new(
@@ -22,12 +23,15 @@ module Observations::Namings
     private
 
     # `names` is JS-supplied JSON from the image classifier (see
-    # footer_buttons.rb) -- blank or malformed here means a direct or
-    # stale request, not a classifier result.
+    # footer_buttons.rb) -- blank, malformed, or non-Array JSON here
+    # means a direct or stale request, not a classifier result.
+    # Suggestion.analyze requires an Array, so valid-but-wrong-shaped
+    # JSON (null, {}, false, a bare number) must be rejected too, not
+    # just a JSON::ParserError.
     def parsed_names
-      JSON.parse(params[:names].to_s)
+      data = JSON.parse(params[:names].to_s)
+      data if data.is_a?(Array)
     rescue JSON::ParserError
-      redirect_to(permanent_observation_path(@observation))
       nil
     end
   end
