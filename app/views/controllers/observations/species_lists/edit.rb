@@ -18,7 +18,7 @@ module Views::Controllers::Observations::SpeciesLists
       add_page_title(
         :species_list_manage_title.t(
           name: viewer_aware_unique_format_name(@observation)
-        )
+        ).small_author
       )
       # Sort table lives on `SpeciesListsController` (single
       # source of truth — same one the species_lists index uses).

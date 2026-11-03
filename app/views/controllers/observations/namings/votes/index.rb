@@ -14,8 +14,8 @@ module Views::Controllers::Observations::Namings::Votes
 
     def view_template
       add_page_title(:show_votes_title.t(
-                       name: viewer_aware_unique_format_name(@naming)
-                     ))
+        name: viewer_aware_unique_format_name(@naming)
+      ).small_author)
       # Tally derives its own consensus from
       # `naming.observation` when not explicitly passed, so the
       # controller doesn't need to hold one just for this render path.
