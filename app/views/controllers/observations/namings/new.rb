@@ -20,7 +20,7 @@ module Views::Controllers::Observations::Namings
       add_chrome
       Row do
         Column(xs: 12, sm: 8) do
-          div(class: "mt-3") { render_naming_form }
+          ContentPadded { render_naming_form }
         end
         Column(xs: 12, sm: 4) do
           render_images
