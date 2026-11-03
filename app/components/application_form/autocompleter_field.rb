@@ -21,8 +21,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     # Caller-supplied content for the label row, after the built-in
     # has-id-indicator / find / keep buttons (see render_label_after).
     # General-purpose -- any autocompleter_field caller can use this,
-    # not just the one that motivated it (ListGroup::Search's
-    # match-status light).
+    # not just the one that motivated it (ListAdd's match-status
+    # light).
     slot :label_append
 
     # Make slot accessor public (Phlex::Slotable makes them private by default)

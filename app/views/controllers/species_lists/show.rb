@@ -50,7 +50,7 @@ module Views::Controllers::SpeciesLists
                species_list: @species_list, query: @query
              ))
       render_project_nav_tabs
-      render_list_search
+      render_list_add
       PaginatedResults { render_observations }
       render_comments
       render(Views::Layouts::ObjectFooter.new(
@@ -76,12 +76,12 @@ module Views::Controllers::SpeciesLists
       )
     end
 
-    def render_list_search
-      render(Components::ListGroup::Search.new(
-               object: @species_list,
-               object_names: @object_names,
-               project: @project
-             ))
+    def render_list_add
+      ListAdd(
+        object: @species_list,
+        object_names: @object_names,
+        project: @project
+      )
     end
 
     def render_observations

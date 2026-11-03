@@ -1,20 +1,21 @@
 # frozen_string_literal: true
 
-# Bootstrap panel + search-status form for list-style show pages
-# (project show, species_list show).
+# Bootstrap panel + add/search form for list-style show pages
+# (project show, species_list show): a name autocompleter to check
+# whether a species is already in the list, plus a Field Slip quick-
+# add -- both routed through `AddDispatchController#new` to add a new
+# Observation to the page's object.
 #
-# The form posts to `AddDispatchController#new`, which reads flat
-# top-level params (`name`, `field_slip`, `object_id`, `object_type`,
-# `project`) and routes to either a new observation or a field-slip
-# scan depending on which fields are filled in. Because the controller
-# expects flat params, every field on this form uses a String-keyed
-# `name=` (the supported FieldProxy path), not a model-namespaced
-# Symbol. The form has no real backing model — `nil` is passed for the
-# model arg, the form id is set explicitly so `derive_form_id` skips
-# the model-name fallback.
-class Components::ListGroup::Search < Components::ApplicationForm
+# The form posts flat top-level params (`name`, `field_slip`,
+# `object_id`, `object_type`, `project`) to `AddDispatchController`.
+# Because the controller expects flat params, every field on this
+# form uses a String-keyed `name=` (the supported FieldProxy path),
+# not a model-namespaced Symbol. The form has no backing model --
+# `nil` is passed for the model arg, the form id is set explicitly so
+# `derive_form_id` skips the model-name fallback.
+class Components::ListAdd < Components::ApplicationForm
   prop :object, _Union(::Project, ::SpeciesList)
-  # Actually `Observation` records (joined to `Name`, selecting only
+  # These are `Observation` records (joined to `Name`, selecting only
   # `text_name`/`id`) -- see the `object_names` query in
   # ProjectsController/SpeciesListsController#show. Only used here via
   # `.to_json` for the Stimulus autocompleter match list.
@@ -22,20 +23,20 @@ class Components::ListGroup::Search < Components::ApplicationForm
   prop :project, _Nilable(::Project), default: nil
 
   def initialize(**)
-    super(FormObject::ListSearch.new, id: "list_search_form", **)
+    super(FormObject::ListAdd.new, id: "list_add_form", **)
   end
 
   def form_action
     add_dispatch_path
   end
 
-  # Wrap the rendered `<form>` in the list-search panel so the panel
-  # sits outside the form tag.
+  # Wrap the rendered `<form>` in the panel so the panel sits outside
+  # the form tag.
   def around_template(&block)
     Panel(
-      panel_id: "list_search", panel_class: "mt-3"
+      panel_id: "list_add", panel_class: "mt-3"
     ) do |panel|
-      panel.with_heading { plain(:list_search_heading.l) }
+      panel.with_heading { plain(:list_add_heading.l) }
       panel.with_body { super(&block) }
     end
   end
