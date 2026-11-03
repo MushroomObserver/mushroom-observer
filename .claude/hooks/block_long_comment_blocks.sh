@@ -74,15 +74,26 @@ ENABLE_RE='rubocop:enable[[:space:]]+(MO/NoLongCommentBlock|all)\b'
 
 # True if the run contains its own disable ... enable pair for this
 # cop -- a prior deliberate exemption, not an oversight.
+# RuboCop suppresses an offense whose range overlaps an active
+# disable/enable region at all -- not just a region fully containing
+# the run, and not just the run's start or end line in isolation. A
+# leading heading line before the disable marker, or trailing lines
+# after the enable marker, can still be part of one suppressed run as
+# long as SOME line in [start,end] falls inside the disabled region.
+# Scan from the top of the file, tracking disable/enable as a toggle,
+# and flag an overlap whenever the toggle is active at or after start.
 is_disabled_run() {
   local start=$1 end=$2
-  local j has_disable=0 has_enable=0
-  for ((j = start; j <= end; j++)); do
+  local j disabled=0 overlapped=0
+  for ((j = 1; j <= end; j++)); do
     local l="${LINES[$((j - 1))]}"
-    printf '%s' "$l" | grep -qE "$DISABLE_RE" && has_disable=1
-    printf '%s' "$l" | grep -qE "$ENABLE_RE" && has_enable=1
+    printf '%s' "$l" | grep -qE "$DISABLE_RE" && disabled=1
+    if [ "$disabled" -eq 1 ] && [ "$j" -ge "$start" ]; then
+      overlapped=1
+    fi
+    printf '%s' "$l" | grep -qE "$ENABLE_RE" && disabled=0
   done
-  [ "$has_disable" -eq 1 ] && [ "$has_enable" -eq 1 ]
+  [ "$overlapped" -eq 1 ]
 }
 
 VIOLATION_RUN=0
