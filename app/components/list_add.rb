@@ -36,11 +36,10 @@ class Components::ListAdd < Components::ApplicationForm
     Panel(
       panel_id: "list_add", panel_class: "mt-3"
     ) do |panel|
-      panel.with_heading { render_heading }
-      panel.with_body do
-        render_heading_help
-        super(&block)
+      panel.with_heading do
+        plain(:list_add_heading.l(type: interpolation_type))
       end
+      panel.with_body { super(&block) }
     end
   end
 
@@ -58,18 +57,6 @@ class Components::ListAdd < Components::ApplicationForm
 
   def interpolation_type
     @object.is_a?(::Project) ? :project : :list
-  end
-
-  def render_heading
-    plain(:list_add_heading.l(type: interpolation_type))
-    Help(type: :collapse_info_trigger, target_id: "list_add_help",
-         extra_class: "ml-2")
-  end
-
-  def render_heading_help
-    Collapsible(id: "list_add_help") do
-      Help(well: false) { plain(:list_add_help.l(type: interpolation_type)) }
-    end
   end
 
   # The search-status UI is a Stimulus-driven block with three pieces:

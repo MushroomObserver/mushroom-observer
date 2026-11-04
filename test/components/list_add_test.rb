@@ -53,13 +53,10 @@ class Components::ListAddTest < ComponentTestCase
     assert_html(html, "button[type='submit']", text: "Add")
   end
 
-  def test_help_collapsibles
+  def test_field_slip_help_collapsible
     project = projects(:bolete_project)
     html = render_list_add(object: project, project: project)
 
-    assert_html(html, "a.info-collapse-trigger[href='#list_add_help']")
-    assert_html(html, "#list_add_help.collapse",
-                text: :list_add_help.l(type: :project))
     assert_html(html, "a.info-collapse-trigger[href='#field_slip_help']")
     assert_html(html, "#field_slip_help.collapse",
                 text: :field_slip_help.l(type: :project))
