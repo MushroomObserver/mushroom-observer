@@ -36,8 +36,11 @@ class Components::ListAdd < Components::ApplicationForm
     Panel(
       panel_id: "list_add", panel_class: "mt-3"
     ) do |panel|
-      panel.with_heading { plain(:list_add_heading.l(type: heading_type)) }
-      panel.with_body { super(&block) }
+      panel.with_heading { render_heading }
+      panel.with_body do
+        render_heading_help
+        super(&block)
+      end
     end
   end
 
@@ -53,8 +56,20 @@ class Components::ListAdd < Components::ApplicationForm
 
   private
 
-  def heading_type
+  def interpolation_type
     @object.is_a?(::Project) ? :project : :list
+  end
+
+  def render_heading
+    plain(:list_add_heading.l(type: interpolation_type))
+    Help(type: :collapse_info_trigger, target_id: "list_add_help",
+         extra_class: "ml-2")
+  end
+
+  def render_heading_help
+    Collapsible(id: "list_add_help") do
+      Help(well: false) { plain(:list_add_help.l(type: interpolation_type)) }
+    end
   end
 
   # The search-status UI is a Stimulus-driven block with three pieces:
@@ -105,12 +120,19 @@ class Components::ListAdd < Components::ApplicationForm
         append_colon(:field_slip.ti)
       end
       Help(element: :span, content: "(#{:optional.l})", class: "ml-2")
+      Help(type: :collapse_info_trigger, target_id: "field_slip_help",
+           extra_class: "ml-2")
       div(class: "flex-bar") do
         # `label: false` skips the form-group wrapper; the explicit
         # `<label>` above plays that role here.
         text_field("field_slip", label: false,
                                  class: "form-control mr-3", size: 9)
         render_add_submit
+      end
+      Collapsible(id: "field_slip_help") do
+        Help(well: false) do
+          plain(:field_slip_help.l(type: interpolation_type))
+        end
       end
     end
   end

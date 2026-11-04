@@ -925,6 +925,8 @@
   search_status_has_no_name: No match found
   search_status_label: Name
   list_add_heading: Add observation to [type]
+  list_add_help: Use this form to directly add an observation to this [type].
+  field_slip_help: If the field slip has already been scanned, it will be added to the [type]
 
   # These are the keywords the PatternSearch class resolves as Query params,
   # e.g. "date" in "date:today". They should not depend on other translations.
