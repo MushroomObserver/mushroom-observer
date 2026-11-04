@@ -784,7 +784,7 @@ MushroomObserver::Application.routes.draw do
         as: "search_pattern")
 
   # ----- Add dispatch: new -------------------------------------------------
-  post "add_dispatch", to: "add_dispatch#new"
+  post "list_add_dispatch", to: "list_add_dispatch#new"
 
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/

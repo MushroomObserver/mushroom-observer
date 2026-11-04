@@ -62,11 +62,14 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
   def render_item(project)
     li do
       Link(type: :object, object: project)
-      if member_project_ids.include?(project.id)
-        whitespace
-        render_remove_button(project)
-      end
+      InlineLinkBlock(items: remove_button_items(project))
     end
+  end
+
+  def remove_button_items(project)
+    return [] unless member_project_ids.include?(project.id)
+
+    [remove_button(project)]
   end
 
   # manage_link? (called via render_panel? before render_list ever
@@ -78,18 +81,19 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
     @member_project_ids ||= (@user&.projects_member || []).to_set(&:id)
   end
 
-  def render_remove_button(project)
+  def remove_button(project)
     remove_path = observation_project_path(
       id: @obs.id, project_id: project.id, commit: "remove"
     )
-    Button(
+    Components::Button.new(
       type: :put,
       variant: :strip,
       icon: :remove,
       icon_class: "text-danger",
       name: :remove.ti,
       target: remove_path,
-      confirm: :are_you_sure.l
+      confirm: :are_you_sure.l,
+      class: Components::InlineLinkBlock.item_class
     )
   end
 end

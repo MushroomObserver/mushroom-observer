@@ -34,7 +34,7 @@ class ObservationsControllerProjectListTest < FunctionalTestCase
     end
   end
 
-  # AddDispatchController's "Add" button sends an explicit ?project=
+  # ListAddDispatchController's "Add" button sends an explicit ?project=
   # precisely so the page the user pressed it on overrides the project
   # the field slip code's prefix would imply.
   def test_explicit_project_param_overrides_field_slip_project

@@ -5,7 +5,7 @@
 # observation adds that observation to the page's project and list and
 # shows it; otherwise dispatches to ObservationsController#new or the
 # field slip's /qr/ page.
-class AddDispatchController < ApplicationController
+class ListAddDispatchController < ApplicationController
   include OccurrenceProjectResolvable
 
   before_action :login_required
