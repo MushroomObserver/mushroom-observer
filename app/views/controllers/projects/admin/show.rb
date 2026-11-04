@@ -16,19 +16,27 @@ module Views::Controllers::Projects::Admin
     prop :raw_place_name, _Nilable(String), default: nil
 
     def view_template
-      add_project_banner(@project)
-      add_page_title(:show_project_admin_title.l)
-      container_class(:text)
-      content_padding(:no_panels)
+      render_page_chrome
 
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "details"
-             ))
+      render_subtabs
       render_form
       render_danger_zone
     end
 
     private
+
+    def render_page_chrome
+      add_project_banner(@project)
+      add_page_title(:show_project_admin_title.l)
+      container_class(:text)
+      content_padding(:no_panels)
+    end
+
+    def render_subtabs
+      render(Views::Controllers::Projects::AdminSubtabs.new(
+               project: @project, current_subtab: "details"
+             ))
+    end
 
     def render_form
       render(Views::Controllers::Projects::Form.new(

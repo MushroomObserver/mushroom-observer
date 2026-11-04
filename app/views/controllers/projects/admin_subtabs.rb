@@ -16,7 +16,7 @@ module Views::Controllers::Projects
 
     def view_template
       NavTabs(
-        id: "project_admin_subtabs", class: "pl-3 mt-2 mb-3",
+        id: "project_admin_subtabs", class: "mt-2 mb-3 pl-3",
         current: @current_subtab,
         tabs: ::Tab::Project::AdminSubtabs.new(project: @project,
                                                site_admin: in_admin_mode?)

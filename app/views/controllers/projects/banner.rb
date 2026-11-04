@@ -18,6 +18,15 @@ module Views::Controllers::Projects
     prop :user, _Nilable(User), default: nil
     prop :current_tab, _Nilable(String), default: nil
 
+    # Every controller that renders AdminSubtabs below the banner's
+    # tabs (see Tab::Project::AdminSubtabs) -- its mt-2 already
+    # separates it from the banner, so the banner's tabs don't need a
+    # bottom margin too.
+    ADMIN_SUBTAB_CONTROLLERS = [
+      "projects/admin", "projects/members",
+      "projects/aliases", "projects/external_sites"
+    ].freeze
+
     def view_template
       return unless @project
 
@@ -62,7 +71,7 @@ module Views::Controllers::Projects
     end
 
     def render_project_tabs
-      tab_margin_class = project_page? ? "mt-3" : "my-3"
+      tab_margin_class = no_tab_bottom_margin? ? "mt-3" : "my-3"
 
       NavTabs(
         id: "project_tabs", class: tab_margin_class,
@@ -73,9 +82,17 @@ module Views::Controllers::Projects
       )
     end
 
+    def no_tab_bottom_margin?
+      project_page? || project_admin_page?
+    end
+
     def project_page?
       controller.controller_name == "projects" &&
         controller.action_name == "show"
+    end
+
+    def project_admin_page?
+      ADMIN_SUBTAB_CONTROLLERS.include?(controller.controller_path)
     end
 
     def render_banner_title(with_overlay_styling:)

@@ -113,14 +113,16 @@ module Views::Layouts
     def render_right_side(banner:, &block)
       Column(id: "right_side", xs: 12, md: 10) do
         render_nav_chrome(banner: banner)
-        render_project_banner
         render_header_and_main(&block)
       end
     end
 
     # Ahead of `render_header_and_main`'s `content_for(:container_class)`
     # width cap -- a project's banner image/tabs always span the full
-    # page width, regardless of the page's container_class.
+    # page width, regardless of the page's container_class. Ahead of
+    # the flash too, so a flash message from a project-page action
+    # (e.g. after adding a target location) reads below the banner,
+    # not sandwiched between it and the title.
     def render_project_banner
       banner = content_for(:project_banner)
       trusted_html(banner) if banner.present?
@@ -128,13 +130,15 @@ module Views::Layouts
 
     # The page chrome above `#content`: the top nav, the collapsible
     # search-bar row (a sibling, not a child -- see
-    # `Views::Layouts::SearchNav`), and the index bar/flash row.
+    # `Views::Layouts::SearchNav`), the index bar, the project banner,
+    # and the flash row.
     def render_nav_chrome(banner:)
       render(Views::Layouts::TopNav.new(user: current_user,
                                         query: current_query,
                                         banner: banner))
       render(Views::Layouts::SearchNav.new)
       render_index_bar
+      render_project_banner
       render(Views::Layouts::App::PageFlash.new)
     end
 

@@ -206,6 +206,25 @@ module Views::Controllers::Projects
       assert_no_html(html, "#project_tabs.my-3")
     end
 
+    # Every controller that renders AdminSubtabs below the banner's
+    # tabs -- its mt-2 already separates it from the banner, so the
+    # banner's tabs don't need a bottom margin either (same contract
+    # as test_project_tabs_margin_on_projects_show above).
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_project_tabs_margin_on_admin_subtab_pages
+      project = projects(:eol_project)
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+
+      %w[projects/admin projects/members
+         projects/aliases projects/external_sites].each do |path|
+        controller.define_singleton_method(:controller_path) { path }
+        html = render_banner(project: project)
+
+        assert_html(html, "#project_tabs.mt-3")
+      end
+    end
+
     # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_project_tabs_margin_off_projects_show
       project = projects(:eol_project)
