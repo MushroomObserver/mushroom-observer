@@ -47,7 +47,7 @@ module Views::Controllers::Checklists
     end
 
     def render_target_names_widget
-      Container(class: "my-3", width: :text) do
+      Container(class: "mt-3", width: :text) do
         render(Views::Controllers::Projects::TargetNames::Form.new(
                  project: @context.project
                ))

@@ -32,7 +32,7 @@ module Views::Controllers::Projects::Locations
     private
 
     def render_target_location_form
-      Container(class: "my-3", width: :text) do
+      Container(class: "mt-3", width: :text) do
         render(Views::Controllers::Projects::TargetLocations::Form.new(
                  project: @project
                ))
