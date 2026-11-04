@@ -28,7 +28,6 @@ module Views::Controllers::Projects::Updates
 
       render_toolbar
       render_pagination
-      render_add_all_button
       render_matrix
       render_pagination
     end
@@ -36,10 +35,13 @@ module Views::Controllers::Projects::Updates
     private
 
     def render_toolbar
-      div(class: "d-flex justify-content-between " \
-                 "align-items-center mb-3 flex-wrap") do
-        render_count_and_toggle
-        div { render_import_buttons }
+      ContentPadded do
+        div(class: "d-flex justify-content-between " \
+                   "align-items-center mb-3 flex-wrap") do
+          render_count_and_toggle
+          div { render_import_buttons }
+        end
+        render_add_all_button
       end
     end
 
