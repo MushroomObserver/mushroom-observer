@@ -113,8 +113,17 @@ module Views::Layouts
     def render_right_side(banner:, &block)
       Column(id: "right_side", xs: 12, md: 10) do
         render_nav_chrome(banner: banner)
+        render_project_banner
         render_header_and_main(&block)
       end
+    end
+
+    # Ahead of `render_header_and_main`'s `content_for(:container_class)`
+    # width cap -- a project's banner image/tabs always span the full
+    # page width, regardless of the page's container_class.
+    def render_project_banner
+      banner = content_for(:project_banner)
+      trusted_html(banner) if banner.present?
     end
 
     # The page chrome above `#content`: the top nav, the collapsible

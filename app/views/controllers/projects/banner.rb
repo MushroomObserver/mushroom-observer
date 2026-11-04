@@ -27,12 +27,7 @@ module Views::Controllers::Projects
         render_banner_without_image
       end
 
-      NavTabs(
-        id: "project_tabs", class: "mt-3", current: @current_tab,
-        tabs: ::Tab::Project::Banner.new(
-          project: @project, user: @user
-        )
-      )
+      render_project_tabs
     end
 
     private
@@ -64,6 +59,23 @@ module Views::Controllers::Projects
           end
         end
       end
+    end
+
+    def render_project_tabs
+      tab_margin_class = project_page? ? "mt-3" : "my-3"
+
+      NavTabs(
+        id: "project_tabs", class: tab_margin_class,
+        current: @current_tab,
+        tabs: ::Tab::Project::Banner.new(
+          project: @project, user: @user
+        )
+      )
+    end
+
+    def project_page?
+      controller.controller_name == "projects" &&
+        controller.action_name == "show"
     end
 
     def render_banner_title(with_overlay_styling:)

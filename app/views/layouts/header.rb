@@ -1,12 +1,17 @@
 # frozen_string_literal: true
 
 # The header block immediately below the application top nav. Rendered
-# once per page by the application layout. Composes (in order):
+# once per page by the application layout, inside the
+# `content_for(:container_class)` width cap. Composes (in order):
 #
-#   - the optional `:project_banner` content_for slot;
 #   - on non-index actions, the page title strip (`Header::PageTitle`);
 #   - the project observation-buttons row, fed from a content_for
 #     slot.
+#
+# The project banner (`:project_banner` content_for slot) renders
+# separately, in `Views::Layouts::Application#render_right_side`,
+# ahead of this width cap -- a project's banner image/tabs always
+# span the full page width, regardless of the page's container_class.
 #
 # The index filter/pager bar (`Header::IndexBar`) and the rss-log
 # type-filter row no longer render here -- `Header::IndexBar` moved
@@ -18,18 +23,12 @@ module Views::Layouts
   class Header < Views::Base
     def view_template
       header(id: "header") do
-        render_project_banner
         render(PageTitle.new) if controller.action_name != "index"
         render_filter_row
       end
     end
 
     private
-
-    def render_project_banner
-      banner = content_for(:project_banner)
-      trusted_html(banner) if banner.present?
-    end
 
     def render_filter_row
       return unless content_for?(:observation_buttons)
