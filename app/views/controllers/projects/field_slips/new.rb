@@ -40,7 +40,7 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_max_info
-      div do
+      p do
         plain(
           :field_slips_max_for_project.t(
             max: @field_slip_max
