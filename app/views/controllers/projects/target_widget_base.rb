@@ -6,8 +6,7 @@
 # below; the rendering shape is otherwise identical.
 #
 # The DOM id stays distinct per subclass (turbo-stream wrappers
-# replace by id), and `_form_elements.scss` targets those ids for the
-# textarea-width override. Both subclasses also share the
+# replace by id). Both subclasses also share the
 # `project-target-widget` class.
 class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationForm
   prop :project, ::Project
@@ -20,7 +19,7 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
   end
 
   def around_template
-    @attributes[:class] = "form-inline mb-3 project-target-widget"
+    @attributes[:class] = "mb-3 project-target-widget"
     super
   end
 
@@ -30,9 +29,11 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
         field_name,
         type: autocompleter_type,
         textarea: true,
-        label: label_key
+        label: label_key,
+        wrap_class: "d-inline-block",
+        cols: 60
       )
-      submit(submit_key.l, class: "ml-2 mt-2")
+      submit(submit_key.l, class: "d-inline-block ml-3 mt-3")
     end
   end
 
