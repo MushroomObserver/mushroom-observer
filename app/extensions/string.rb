@@ -389,6 +389,15 @@ class String
   # an HTML tag.
   HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}
 
+  # `<!-- ... -->` -- not matched by HTML_TAG_PATTERN, since a comment's
+  # `<!--` isn't followed by a letter. A Phlex component's rendered
+  # output can carry one of these (e.g. a dev-mode source annotation),
+  # and strip_html's callers (title_tag_contents's document_title,
+  # html_to_ascii's plain-text output) need the comment text gone too,
+  # not just hidden -- it isn't a tag, so HTML_TAG_PATTERN alone lets
+  # it through as visible text.
+  HTML_COMMENT_PATTERN = /<!--.*?-->/m
+
   ### Textile-related methods ###
 
   def t(sanitize = true)
@@ -461,10 +470,10 @@ class String
       gsub("\n", '\\n')
   end
 
-  # Remove HTML tags (not entities) from string.  Used to make sure title is
-  # safe for HTML header field.
+  # Remove HTML tags and comments (not entities) from string.  Used to
+  # make sure title is safe for HTML header field.
   def strip_html
-    gsub(HTML_TAG_PATTERN, "")
+    gsub(HTML_COMMENT_PATTERN, "").gsub(HTML_TAG_PATTERN, "")
   end
 
   # Remove hyperlinks from an HTML string. Removing tags from safe HTML
@@ -521,7 +530,8 @@ class String
   # problem, but this seems to work pretty well on the output of RedCloth at
   # least.
   def html_to_ascii
-    gsub(/\s*\n\s*/, " "). # remove all newlines first
+    gsub(HTML_COMMENT_PATTERN, ""). # remove comments before any tags
+      gsub(/\s*\n\s*/, " "). # remove all newlines first
       gsub(%r{</?div[^>]*>}, ""). # divs are messing things up, too
       gsub(%r{<br */> *}, "\n"). # put \n after every line break
       gsub(%r{</li> *}, "\n"). # put \n after every list item
