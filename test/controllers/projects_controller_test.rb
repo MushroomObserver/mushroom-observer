@@ -91,7 +91,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
-    assert_select("form[action=?]", add_dispatch_path, count: 1)
+    assert_select("form[action=?]", list_add_dispatch_path, count: 1)
     assert_select("h1#title", /\S/,
                   "H1 title element should exist and contain content")
     assert_select("div#project_banner", true,

@@ -3,11 +3,11 @@
 # Bootstrap panel + add/search form for list-style show pages
 # (project show, species_list show): a name autocompleter to check
 # whether a species is already in the list, plus a Field Slip quick-
-# add -- both routed through `AddDispatchController#new` to add a new
+# add -- both routed through `ListAddDispatchController#new` to add a new
 # Observation to the page's object.
 #
 # The form posts flat top-level params (`name`, `field_slip`,
-# `object_id`, `object_type`, `project`) to `AddDispatchController`.
+# `object_id`, `object_type`, `project`) to `ListAddDispatchController`.
 # Because the controller expects flat params, every field on this
 # form uses a String-keyed `name=` (the supported FieldProxy path),
 # not a model-namespaced Symbol. The form has no backing model --
@@ -27,7 +27,7 @@ class Components::ListAdd < Components::ApplicationForm
   end
 
   def form_action
-    add_dispatch_path
+    list_add_dispatch_path
   end
 
   # Wrap the rendered `<form>` in the panel so the panel sits outside
@@ -45,7 +45,7 @@ class Components::ListAdd < Components::ApplicationForm
     hidden_field("object_id", value: @object.id)
     hidden_field("object_type", value: @object.class.name)
     # Coerce nil to "" so the `value=""` attribute renders even when
-    # no project context is set. `AddDispatchController` treats nil
+    # no project context is set. `ListAddDispatchController` treats nil
     # and "" identically.
     hidden_field("project", value: @project&.id.to_s)
     render_search_status

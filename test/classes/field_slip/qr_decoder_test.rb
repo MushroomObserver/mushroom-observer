@@ -27,7 +27,7 @@ class FieldSlip::QRDecoderTest < UnitTestCase
                "someone else's /qr/ URL is not MO's")
   end
 
-  # MO's own /qr/ URLs can carry query params (AddDispatchController
+  # MO's own /qr/ URLs can carry query params (ListAddDispatchController
   # appends ?project=...); the code is the path segment alone.
   def test_mo_qr_url_query_params_are_not_part_of_the_code
     assert_equal("OPEN-0219",

@@ -10,7 +10,7 @@ class Components::ListAddTest < ComponentTestCase
     assert_html(html, "#list_add .panel-heading", text: :list_add_heading.l)
     assert_html(html, "#list_add .panel-body")
     assert_html(
-      html, "form#list_add_form[action='#{routes.add_dispatch_path}']"
+      html, "form#list_add_form[action='#{routes.list_add_dispatch_path}']"
     )
     assert_html(html, "input[type='hidden'][name='object_id']" \
                       "[value='#{project.id}']")
