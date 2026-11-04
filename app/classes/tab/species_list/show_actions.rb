@@ -7,8 +7,8 @@
 # cross-domain indexes -- both gated on that single check, not on
 # each model's relation separately). Observations/Names/Locations
 # show counts, matching Tab::Project::Banner; Images doesn't -- no
-# cheap count source exists for it the way `pluck` gives the other
-# two.
+# cheap count source exists for it the way `name_and_location_counts`
+# gives the other two.
 class Tab::SpeciesList::ShowActions < Tab::Collection
   def initialize(species_list:, project:, query:, controller:,
                  observations_count:)
@@ -50,16 +50,19 @@ class Tab::SpeciesList::ShowActions < Tab::Collection
     ]
   end
 
-  # One query instead of two separate `.distinct.count(:name_id)` /
-  # `.distinct.count(:location_id)` calls -- pluck both columns in a
-  # single pass over the list's observations, dedupe in Ruby.
+  # One query, computed in SQL -- two Arel `COUNT(DISTINCT ...)`
+  # nodes in a single `pick`, instead of two separate
+  # `.distinct.count(:name_id)` / `.distinct.count(:location_id)`
+  # round trips, or pulling every observation row into Ruby to
+  # dedupe. `Attribute#count(true)` is Arel's distinct-count builder:
+  # it wraps the column in an `Arel::Nodes::Count` node with its
+  # `distinct` flag set, which the SQL visitor renders as
+  # `COUNT(DISTINCT column)` (`count` with no arg, or `false`,
+  # renders plain `COUNT(column)`).
   def name_and_location_counts
-    @name_and_location_counts ||= begin
-                                    rows = @species_list.observations.pluck(
-                                      :name_id, :location_id
-                                    )
-                                    [rows.map(&:first).uniq.size,
-                                     rows.map(&:last).uniq.size]
-                                  end
+    @name_and_location_counts ||= @species_list.observations.pick(
+      Observation.arel_table[:name_id].count(true),
+      Observation.arel_table[:location_id].count(true)
+    )
   end
 end
