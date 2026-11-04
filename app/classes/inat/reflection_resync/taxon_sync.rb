@@ -196,11 +196,10 @@ class Inat
         return record(vote, value) if vote && vote.value == value
 
         consensus = Observation::NamingConsensus.new(@obs)
-        # NamingConsensus's contract: without eager-loaded namings,
-        # reload before using it, or it may silently work off a stale
-        # `@obs.namings` cached from elsewhere in this resync -- `@obs`
-        # is reused across every naming `apply` processes and across
-        # repeated resyncs of the same observation (#5551).
+        # NamingConsensus may reuse a previously-loaded `@obs.namings` instead of
+        # querying fresh. Since `@obs` is reused across each `apply` iteration and
+        # across repeated resyncs, force a reload when the association is cached
+        # to avoid working from a stale snapshot (#5551).
         consensus.reload_namings_and_votes!
         @reweighted += 1 if consensus.change_vote(naming, value, importer)
         record(naming.votes.find_by(user: importer), value)
