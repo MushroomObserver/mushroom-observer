@@ -22,6 +22,7 @@ module Views::Controllers::Checklists
 
     def render_page_chrome
       container_class(:full)
+      content_padding(:no_panels)
       add_project_banner(@context.project) if @context.project
       add_page_title(checklist_show_title)
       list = @context.species_list
@@ -46,9 +47,11 @@ module Views::Controllers::Checklists
     end
 
     def render_target_names_widget
-      render(Views::Controllers::Projects::TargetNames::Form.new(
-               project: @context.project
-             ))
+      Container(class: "my-3", width: :text) do
+        render(Views::Controllers::Projects::TargetNames::Form.new(
+                 project: @context.project
+               ))
+      end
     end
   end
 end
