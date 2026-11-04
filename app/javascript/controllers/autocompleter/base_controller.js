@@ -938,7 +938,7 @@ export default class BaseAutocompleterController extends Controller {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
       if (this.hasHasIdIndicatorTarget) {
-        this.hasIdIndicatorTarget.classList.remove("d-none");
+        this.hasIdIndicatorTarget.classList.remove("invisible");
       }
       if (this.hasKeepOrEditBtnTarget) {
         this.keepOrEditBtnTarget.classList.remove("d-none");
@@ -954,7 +954,7 @@ export default class BaseAutocompleterController extends Controller {
         this.wrapTarget.classList.add('offer-create');
       }
       if (this.hasHasIdIndicatorTarget) {
-        this.hasIdIndicatorTarget.classList.add("d-none");
+        this.hasIdIndicatorTarget.classList.add("invisible");
       }
       if (this.hasKeepOrEditBtnTarget) {
         this.keepOrEditBtnTarget.classList.add("d-none");

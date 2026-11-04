@@ -8,8 +8,11 @@
 #     line -- see `Views::Layouts::Header::ObjectTitle`), a CTA slot
 #     right after the title (a form's primary submit button), and the
 #     actions slot flush right (edit/destroy icons).
-#   - right (show-only, non-project): interest-icons strip and the
-#     prev/index/next pager.
+#   - right (show-only, non-project, and only when the page has a
+#     column split -- see `columns?`): interest-icons strip and
+#     the prev/index/next pager. On a column-less show page, that
+#     same content renders inline in the left column instead, right
+#     before the edit/destroy icons (`render_inline_object_nav`).
 #
 # Below `sm`, those two columns collapse to `d-none` and a third
 # piece, `render_mobile_top_row`, takes over: the id badge, CTA,
@@ -25,11 +28,11 @@
 # navigation content. The `<nav>` landmark in this strip is supplied
 # by `Views::Layouts::Header::ShowPrevNextNav`, around the pager alone.
 #
-# `#title_bar` carries the same `content_for(:container_class)` width
-# cap (`container-text`, `container-wide`, ...) as `#content` below it
-# (`Views::Layouts::Application#content_classes_for_main`), so a
-# narrow-width page's title lines up with its body instead of
-# spanning the full column.
+# `#title_bar` is wrapped in a `Container` carrying the same
+# `content_for(:container_class)` width cap (`container-text`,
+# `container-wide`, ...) as `#content` below it (`Views::Layouts::
+# Application#content_classes_for_main`), so a narrow-width page's
+# title lines up with its body instead of spanning the full column.
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
@@ -37,11 +40,12 @@ module Views::Layouts
       "px-card"
 
     def view_template
-      Row(id: "title_bar",
-          class: class_names("mb-1", content_for(:container_class))) do
-        render_mobile_top_row unless suppress_title?
-        render_left_column unless suppress_title?
-        render_right_column if show_right_column?
+      Container(class: content_for(:container_class)) do
+        Row(id: "title_bar", class: "mb-1") do
+          render_mobile_top_row unless suppress_title?
+          render_left_column unless suppress_title?
+          render_right_column if show_desktop_right_column?
+        end
       end
     end
 
@@ -61,7 +65,7 @@ module Views::Layouts
           trusted_html(content_for(:id_badge))
           trusted_html(content_for(:title_bar_cta))
           trusted_html(content_for(:title_bar_actions))
-          render_mobile_object_nav if show_right_column?
+          render_mobile_object_nav if object_nav?
         end
       end
     end
@@ -116,11 +120,26 @@ module Views::Layouts
       end
     end
 
+    # On a page with no columns, interest-icons + the prev/next pager
+    # have no right column to render into (see render_right_column) --
+    # show them here instead, right before the edit/destroy icons,
+    # with a gap between the two groups.
     def render_title_bar_actions
-      return unless content_for?(:title_bar_actions)
+      inline = inline_object_nav?
+      return unless content_for?(:title_bar_actions) || inline
 
-      div(class: "title_bar_actions_wrap d-none d-sm-block ml-auto") do
-        trusted_html(content_for(:title_bar_actions))
+      div(class: "title_bar_actions_wrap d-none d-sm-flex ml-auto " \
+                 "flex-nowrap flex-shrink-0 align-items-start") do
+        render_inline_object_nav if inline
+        trusted_html(content_for(:title_bar_actions)) if
+          content_for?(:title_bar_actions)
+      end
+    end
+
+    def render_inline_object_nav
+      div(class: "d-flex flex-nowrap flex-shrink-0 align-items-start mr-3") do
+        trusted_html(content_for(:interest_icons))
+        trusted_html(content_for(:prev_next_object))
       end
     end
 
@@ -140,7 +159,24 @@ module Views::Layouts
       controller.action_name == "index" || on_project_page?
     end
 
-    def show_right_column?
+    # A right column to render interest-icons/pager into only exists
+    # when the page opted into a column split (see
+    # Views::FullPageBase::LayoutClasses#column_classes) -- a
+    # column-less show page (SpeciesLists) renders the same content
+    # inline instead, via render_inline_object_nav.
+    def show_desktop_right_column?
+      object_nav? && columns?
+    end
+
+    def inline_object_nav?
+      object_nav? && !columns?
+    end
+
+    def columns?
+      content_for?(:has_columns)
+    end
+
+    def object_nav?
       controller.action_name == "show" && !on_project_page? &&
         right_column_content?
     end

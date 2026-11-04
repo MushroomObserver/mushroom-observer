@@ -48,6 +48,10 @@
   flex-wrap: wrap;
 }
 
+.flex-nowrap {
+  flex-wrap: nowrap;
+}
+
 // A fixed-width gap between flex items, for a flex-wrap row where a
 // margin on either sibling would travel with it onto a wrapped
 // line and indent it -- the spacer itself stays small enough to
@@ -972,6 +976,10 @@
 
   .d-md-flex {
     display: flex !important;
+  }
+
+  .mb-md-0 {
+    margin-bottom: 0 !important;
   }
 }
 

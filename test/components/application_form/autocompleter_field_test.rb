@@ -48,6 +48,30 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(form, ".has-id-indicator svg")
   end
 
+  # `invisible`, not `d-none` -- its box stays in the label row's
+  # layout even while hidden, so later content there (label_append)
+  # doesn't shift position when the checkmark toggles.
+  def test_has_id_indicator_reserves_space_instead_of_d_none
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name")
+    end
+
+    assert_html(form, ".has-id-indicator.invisible")
+    assert_no_html(form, ".has-id-indicator.d-none")
+  end
+
+  # Caller-supplied label_append content renders in the label row,
+  # after the built-in has-id-indicator.
+  def test_label_append_slot_renders_after_has_id_indicator
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name") do |f|
+        f.with_label_append { span(id: "custom_append") { "extra" } }
+      end
+    end
+
+    assert_html(form, ".has-id-indicator ~ #custom_append")
+  end
+
   # Regression: an outer .autocompleter must not carry an auto-derived
   # id when the caller didn't pass controller_id: -- but does carry it
   # when the caller does.

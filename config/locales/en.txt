@@ -273,6 +273,8 @@
   licenses: licenses
   lichen: lichen
   links: links
+  list: list
+  lists: lists
   locality: locality
   localities: localities
   location: location
@@ -919,9 +921,12 @@
   lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
 
   # For search-status widget
-  search_status_all_names: Enter text to search [type]
-  search_status_has_name: "Match found in [type]:"
-  search_status_has_no_name: No match found in [type]
+  search_status_all_names: Search if already present
+  search_status_has_name: "Match found:"
+  search_status_has_no_name: No match found
+  search_status_label: Name
+  list_add_heading: Add observation to [type]
+  field_slip_help: If the field slip has already been scanned, it will be added to the [type]
 
   # These are the keywords the PatternSearch class resolves as Query params,
   # e.g. "date" in "date:today". They should not depend on other translations.

@@ -38,6 +38,11 @@ module Views::FullPageBase::LayoutClasses
     content_for(:right_columns, flush: true) do
       right_column_class_for(columns)
     end
+    # Lets Header::PageTitle tell a two-column split from the :twelve
+    # (untouched, full-width) default -- right-column content (interest
+    # icons, the prev/next pager) only has a column to render into
+    # when this is set.
+    content_for(:has_columns, flush: true) { columns == :twelve ? "" : "1" }
   end
 
   def default_column_classes

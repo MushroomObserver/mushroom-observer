@@ -372,7 +372,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # @option options [Boolean] :textarea use textarea instead of text input
     # All wrapper options same as text_field
     # @yield [field_component] Optional block to set slots:
-    #   `with_between`, `with_append`, `with_help`
+    #   `with_between`, `with_append`, `with_help`, `with_label_append`
     def autocompleter_field(field_name, type:, textarea: false, **options)
       wrapper_opts = options.slice(*WRAPPER_OPTIONS)
       field_opts = options.except(*WRAPPER_OPTIONS)

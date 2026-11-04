@@ -656,7 +656,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(new_observation_url(field_code: slip.code))
   end
 
-  # AddDispatchController is what puts these on a /qr/ URL (the "Add"
+  # ListAddDispatchController is what puts these on a /qr/ URL (the "Add"
   # button on project and species-list pages); they have to survive the
   # hop into the observation form.
   def test_add_dispatch_context_survives_redirect_to_new_observation

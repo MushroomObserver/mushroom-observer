@@ -259,7 +259,11 @@ button.badge-id:hover {
 // Wrapper for a group of inline mod/add links (Components::
 // InlineLinkBlock). Flex + gap spaces items evenly with no trailing
 // margin after the last one, so a lone or final item's width matches
-// its content.
+// its content. `margin-top` baseline-corrects the block against
+// adjacent inline text (a name link, "Field Slip:" label, etc.) --
+// the title bar's `.object_edit .inline-link-block` (_content.scss)
+// sets a different margin-top, since that block sits next to other
+// icons, not text, and doesn't want this correction.
 .inline-link-block {
   display: inline-flex;
   align-items: center;
@@ -268,6 +272,7 @@ button.badge-id:hover {
   // (a title-bar heading vs. small body text), same reasoning as
   // .icon-text-gap in _icons.scss.
   gap: 0.75em;
+  margin-top: 2px;
 }
 
 // Trailing observation-count column on the locations list-group --
@@ -278,8 +283,9 @@ button.badge-id:hover {
 }
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
-// mo-icon's usual top offset and 1.12em size are tuned for looser
-// contexts -- undone/shrunk here. `top: 1px`, not 0, for BS3.
+// mo-icon's usual size is tuned for looser contexts -- shrunk here.
+// The baseline correction against adjacent text lives on the
+// wrapping `.inline-link-block`'s margin-top, just above, not here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -292,7 +298,6 @@ button.badge-id:hover {
   }
 
   .mo-icon {
-    top: 1px;
     width: 1em;
     height: 1em;
   }
@@ -300,12 +305,12 @@ button.badge-id:hover {
 
 // button_to's <form> wrapper around a destroy .inline-icon-link keeps
 // the browser's default line-height, taller than `line-height: 1` on
-// the button -- baseline-aligns the icon a pixel or two off from a
-// plain <a>'s. Flex centering (matches .btn:has(.mo-icon)) collapses
-// the form to its content height instead.
+// the button -- flex-centering collapses the form to its content
+// height so the icon doesn't float inside extra line-height.
 form:has(> .inline-icon-link) {
   display: inline-flex;
   align-items: center;
+  position: relative;
 }
 
 //

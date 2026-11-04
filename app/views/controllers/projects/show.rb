@@ -15,9 +15,9 @@ module Views::Controllers::Projects
     def view_template
       add_show_title(@project)
       add_project_banner(@project)
-      container_class(:wide)
+      container_class(:text_image)
 
-      render_list_search
+      render_list_add
       render_summary_panel
       render_actions
       render_comments
@@ -28,18 +28,16 @@ module Views::Controllers::Projects
 
     private
 
-    def render_list_search
-      render(Components::ListGroup::Search.new(
-               object: @project,
-               object_names: @object_names,
-               project: @project
-             ))
+    def render_list_add
+      ListAdd(
+        object: @project,
+        object_names: @object_names,
+        project: @project
+      )
     end
 
     def render_summary_panel
-      Panel(
-        panel_id: "project_summary"
-      ) do |panel|
+      Panel(panel_id: "project_summary") do |panel|
         panel.with_body do
           render_summary_body
         end

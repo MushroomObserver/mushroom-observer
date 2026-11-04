@@ -79,7 +79,9 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_manage_observation
-      div(class: "manage_observation") { render_remove_obs_button }
+      div(class: "manage_observation flex-shrink-0") do
+        render_remove_obs_button
+      end
     end
 
     # `confirm:` is the Turbo-confirm kwarg; `data: { confirm: … }` is
@@ -88,7 +90,8 @@ module Views::Controllers::SpeciesLists
       Button(
         type: :put,
         variant: :strip,
-        name: :remove.ti,
+        name: :remove.ti, icon: :remove, class: "text-danger",
+        show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id,

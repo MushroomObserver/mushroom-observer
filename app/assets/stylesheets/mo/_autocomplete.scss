@@ -32,9 +32,12 @@
 }
 
 // autocompleter state (do we have a match?) is no longer handled
-// here -- `.has-id-indicator` carries `d-none` by default, same as
-// find-btn/keep-edit-toggle/create-button, and the autocompleter
-// controller's cssHasIdOrNo toggles it the same way. Its span also
+// here -- the autocompleter controller's cssHasIdOrNo toggles
+// `.has-id-indicator`'s visibility directly. Unlike find-btn/
+// keep-edit-toggle/create-button (which toggle `d-none`),
+// has-id-indicator toggles `invisible` so its box stays in the
+// label row's layout, reserving space for whatever renders after it
+// (see autocompleter_field.rb#render_has_id_indicator). Its span also
 // carries `.inline-flex-center` (see _icons.scss) directly for the
 // icon centering, rather than relying on an implicit selector.
 

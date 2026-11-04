@@ -249,7 +249,7 @@ module ObservationsController::New
   # supersedes them).
   #
   # An explicit `?project=` wins over the project derived from the code
-  # prefix: `AddDispatchController` sends it precisely so the page the
+  # prefix: `ListAddDispatchController` sends it precisely so the page the
   # user pressed "Add" on can override the slip's own project.
   def add_field_slip_project(code)
     project = Project.safe_find(params[:project]) ||
