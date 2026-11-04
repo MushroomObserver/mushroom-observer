@@ -122,13 +122,7 @@ module Views::Layouts
 
     def render_right_side(content_classes, banner:, &block)
       Column(id: "right_side", xs: 12, md: 10) do
-        render(Views::Layouts::TopNav.new(user: current_user,
-                                          query: current_query,
-                                          banner: banner))
-        render(Views::Layouts::App::PageFlash.new)
-        render(Views::Layouts::Header.new(
-                 any_content_filters_applied: @any_content_filters_applied
-               ))
+        render_nav_chrome(banner: banner)
         Container(element: :main, id: "content", class: content_classes,
                   data: { controller: "lightgallery" }) do
           comment { "MAIN_PAGE_CONTENT" }
@@ -136,6 +130,47 @@ module Views::Layouts
           comment { "/MAIN_PAGE_CONTENT" }
           render(Views::Layouts::TranslatorsCredit.new)
         end
+      end
+    end
+
+    # The page chrome above `#content`: the top nav, the collapsible
+    # search-bar row (a sibling, not a child -- see
+    # `Views::Layouts::SearchNav`), the index bar, and the flash/
+    # header row.
+    def render_nav_chrome(banner:)
+      render(Views::Layouts::TopNav.new(user: current_user,
+                                        query: current_query,
+                                        banner: banner))
+      render(Views::Layouts::SearchNav.new)
+      render_index_bar
+      render(Views::Layouts::App::PageFlash.new)
+      render(Views::Layouts::Header.new)
+    end
+
+    # `Header::IndexBar` lives here, not inside `Header`, so it sits
+    # above `:page_flash` instead of below it.
+    def render_index_bar
+      return unless index_bar?
+
+      maybe_set_filter_help
+      render(Views::Layouts::Header::IndexBar.new)
+    end
+
+    def index_bar?
+      action = controller.action_name
+      controller_name = controller.controller_name
+      (action == "index" && controller_name != "articles") ||
+        controller_name == "maps"
+    end
+
+    def maybe_set_filter_help
+      return unless @any_content_filters_applied
+
+      content_for(:filter_help) do
+        Help(type: :tooltip,
+             label: "(#{:filtered.t})",
+             title: :rss_filtered_mouseover.t,
+             extra_class: "filter-help")
       end
     end
 

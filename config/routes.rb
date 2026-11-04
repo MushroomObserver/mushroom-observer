@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # Nested hash of permissible controllers and actions. Each entry as follows,
 # with missing element meaning use default:
 #
@@ -16,6 +17,7 @@
 #
 # Note that the hash of attributes is not yet actually used.
 #
+# rubocop:enable MO/NoLongCommentBlock
 ACTIONS = {
   # The v1 API (`api`) was retired: its APIController was removed long
   # ago, but these routes lingered, so every /api* request matched a
@@ -288,6 +290,9 @@ MushroomObserver::Application.routes.draw do
                                  as: "profile_update_image")
     put("profile/images(/:id)", to: "profile/images#detach",
                                 as: "profile_remove_image")
+    resource :inat_link, only: [:new]
+    resource :inat_opt_out, only: [:update]
+    resource :content_purge, only: [:new, :create]
 
     resource :verify, only: [:new, :create], controller: "verifications"
     # Alternate path name for email verification
@@ -316,6 +321,10 @@ MushroomObserver::Application.routes.draw do
     get("review_donations", to: "donations#edit") # alternate path
     resources :banners, only: [:index, :create]
     resource :blocked_ips, only: [:edit, :update]
+    resources :excluded_inat_users, only: [:index, :create, :destroy] do
+      resource :content_purge, only: [:new, :create],
+                               controller: "excluded_inat_users/content_purges"
+    end
     namespace :emails do
       resource :webmaster_questions, only: [:new, :create],
                                      controller: "webmaster_questions"
@@ -513,6 +522,9 @@ MushroomObserver::Application.routes.draw do
   get("locations/help", to: "locations/help#show")
   # Map Locations: show
   get("locations/map", to: "locations/maps#show", as: "map_locations")
+  # Undefined Locations: index
+  get("locations/undefined", to: "locations/undefined#index",
+                             as: "undefined_locations")
 
   # ----- Names: a lot of actions  ----------------------------
   namespace :names do
@@ -809,45 +821,6 @@ MushroomObserver::Application.routes.draw do
       post("write_in", to: "species_lists/write_in#create", as: "write_in")
     end
   end
-
-  # put("/species_lists/:id/clear", to: "species_lists#clear",
-  #                                 as: "clear_species_list")
-
-  # get("/species_lists/name_lister/new", to: "species_lists/name_lists#new",
-  #                                       as: "new_species_list_name_lister")
-  # post("/species_lists/name_lister", to: "species_lists/name_lists#create",
-  #                                    as: "species_list_name_lister")
-  # get("/species_lists/:id/uploads/new", to: "species_lists/uploads#new",
-  #                                       as: "new_species_list_upload")
-  # post("/species_lists/:id/uploads", to: "species_lists/uploads#create",
-  #                                    as: "species_list_uploads")
-  # get("/species_lists/:id/downloads/new", to: "species_lists/downloads#new",
-  #                                         as: "new_species_list_download")
-  # post("/species_lists/:id/downloads", to: "species_lists/downloads#create",
-  #                                      as: "species_list_downloads")
-  # post("/species_lists/:id/downloads/print_labels",
-  #      to: "species_lists/downloads#print_labels",
-  #      as: "species_list_download_print_labels")
-  # get("/species_lists/observations/edit",
-  #     to: "species_lists/observations#edit",
-  #     as: "edit_species_list_observations")
-  # match("/species_lists/observations(/:commit)",
-  #       to: "species_lists/observations#update",
-  #       via: [:put, :patch],
-  #       as: "species_list_observations")
-  # get("/species_lists/:id/projects",
-  #     to: "species_lists/projects#edit",
-  #     as: "edit_species_list_projects")
-  # match("/species_lists/:id/projects",
-  #       to: "species_lists/projects#update",
-  #       via: [:put, :patch],
-  #       as: "species_list_projects")
-  # get("/species_lists/:id/write_in/new",
-  #     to: "species_lists/write_in#new",
-  #     as: "new_species_list_write_in")
-  # post("/species_lists/:id/write_in",
-  #      to: "species_lists/write_in#create",
-  #      as: "species_list_write_in")
 
   # ----- Test if server is up  -------------------------------------
   resources :test, only: [:index], controller: "test"

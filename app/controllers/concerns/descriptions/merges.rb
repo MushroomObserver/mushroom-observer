@@ -56,7 +56,7 @@ module Descriptions::Merges
     end
 
     def check_dest_exists!
-      target = params.dig(:description_move_or_merge, :target).to_s
+      target = params.dig(:description_move_or_merge, :target_id).to_s
       return true if (@dest = find_description!(target))
 
       flash_error(:runtime_invalid.t(type: '"target"', value: target))

@@ -26,6 +26,20 @@ module Views::Controllers::Projects
       assert_html(html, "input[name='project[field_slip_prefix]']")
       assert_html(html, "input[name='project[place_name]']")
 
+      # Summary help is collapsed behind a help-trigger icon, not
+      # always visible.
+      assert_includes(html, :shared_textile_help.l)
+      assert_html(html,
+                  "a.info-collapse-trigger[href='#project_summary_help']")
+
+      # Date Range section's explanatory text is always visible, not
+      # collapsed -- this page is used rarely enough that hiding it
+      # behind a trigger wasn't worth it.
+      assert_includes(html, :form_projects_date_range.t)
+      assert_includes(html, :form_projects_dates_explain.t)
+      assert_no_html(html,
+                     "a.info-collapse-trigger[href='#project_dates_help']")
+
       # Date fields — assert both IDs and name attributes
       # Year is a text input (1i), month (2i) and day (3i) are selects
       assert_html(html,
@@ -49,11 +63,25 @@ module Views::Controllers::Projects
                   "input[type='radio']" \
                   "[name='project[dates_any]'][value='true']")
 
-      # "Any" selected by default
+      # Radio labels
+      assert_html(html, "label[for='project_dates_any_false']",
+                  text: :form_projects_enforce_date_range.t)
+      assert_html(html, "label[for='project_dates_any_true']",
+                  text: :form_projects_accept_any_dates.t)
+
+      # "Accept any dates" is the default, and listed first.
       assert_html(html,
                   "input[type='radio']" \
                   "[name='project[dates_any]']" \
                   "[value='true'][checked]")
+      doc = Nokogiri::HTML5.fragment(html)
+      radio_values =
+        doc.css("input[name='project[dates_any]']").pluck("value")
+      assert_equal(%w[true false], radio_values)
+
+      # Date fields are collapsed by default (Accept any dates selected).
+      assert_html(html, "[data-collapse-switch-type='false'].collapse")
+      assert_no_html(html, "[data-collapse-switch-type='false'].collapse.in")
 
       # No upload fields without upload_params
       assert_no_html(html, "input[type='file']")
@@ -82,6 +110,8 @@ module Views::Controllers::Projects
         "input[type='radio'][name='project[dates_any]']" \
         "[value='true'][checked]"
       )
+      # "Enforce date range" selected -- date fields are expanded.
+      assert_html(html, "[data-collapse-switch-type='false'].collapse.in")
     end
 
     def test_with_upload_params

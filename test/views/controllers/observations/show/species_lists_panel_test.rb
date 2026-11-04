@@ -95,7 +95,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
       id: @obs.id, species_list_id: spl.id, commit: "remove"
     )}']"
     assert_html(html, "#{form_selector} button svg.mo-icon-remove")
-    assert_html(html, "#{form_selector} button span.sr-only",
+    assert_html(html, "#{form_selector} button .sr-only",
                 text: :remove.ti)
   end
 

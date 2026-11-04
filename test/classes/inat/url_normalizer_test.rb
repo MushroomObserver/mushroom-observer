@@ -154,7 +154,7 @@ class Inat
       result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "Should strip user_login for non-superimporters")
+                   "Should strip user_login when not importing others")
     end
 
     def test_strips_user_id_by_default
@@ -162,63 +162,52 @@ class Inat
       result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "Should strip user_id for non-superimporter")
+                   "Should strip user_id when not importing others")
     end
 
-    def test_superimporter_own_import_strips_user_login_and_user_id
-      # In own-import mode, inat_username controls whose observations to import;
+    def test_single_user_import_strips_user_login_and_user_id
+      # Importing one user's observations, inat_username says whose;
       # user_login from the URL is redundant/misleading and must be stripped.
       url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
-      result = URLNormalizer.new(url, superimporter: true).normalize
+      result = URLNormalizer.new(url).normalize
 
       assert_equal("project_id=291058", result,
-                   "Both user_login and user_id must be stripped for " \
-                   "superimporter in own-import mode")
+                   "Both user_login and user_id must be stripped when not " \
+                   "importing others")
     end
 
-    def test_superimporter_own_import_user_login_appears_in_ignored_params
+    def test_single_user_import_user_login_appears_in_ignored_params
       url = "#{API_URL}?project_id=291058&user_login=someone_else"
-      ignored = URLNormalizer.new(url, superimporter: true).ignored_params
+      ignored = URLNormalizer.new(url).ignored_params
 
       assert_includes(ignored, "user_login",
-                      "user_login stripped in own-import mode must appear " \
-                      "in ignored_params so the controller can warn the user")
+                      "user_login stripped when not importing others must " \
+                      "appear in ignored_params so the controller can warn")
     end
 
-    def test_superimporter_import_others_preserves_user_id
+    def test_import_others_preserves_user_id
       url = "#{API_URL}?project_id=291058&user_id=12345"
-      result = URLNormalizer.new(url, superimporter: true,
-                                      import_others: true).normalize
+      result = URLNormalizer.new(url, import_others: true).normalize
 
       assert_equal(
         "project_id=291058&user_id=12345", result,
-        "user_id should be kept for superimporter in import-others " \
-        "mode so the import can be scoped to a specific user"
+        "user_id should be kept in import-others mode so the import " \
+        "can be scoped to a specific user"
       )
     end
 
-    def test_superimporter_import_others_strips_user_id_when_user_login_present
+    def test_import_others_strips_user_id_when_user_login_present
       url = "#{API_URL}?project_id=291058&user_id=12345&user_login=testuser"
-      result = URLNormalizer.new(url, superimporter: true,
-                                      import_others: true).normalize
+      result = URLNormalizer.new(url, import_others: true).normalize
 
       assert_equal("project_id=291058&user_login=testuser", result,
                    "user_id stripped when user_login also present to prevent " \
                    "iNat from ORing them and returning cross-user results")
     end
 
-    def test_non_superimporter_strips_user_login_and_user_id
-      url = "#{API_URL}?project_id=291058&user_login=testuser&user_id=12345"
-      result = URLNormalizer.new(url).normalize
-
-      assert_equal("project_id=291058", result,
-                   "Should strip Both user_login and user_id stripped for " \
-                   "non-superimporters")
-    end
-
-    def test_superimporter_preserves_licensed
+    def test_single_user_import_preserves_licensed
       url = "#{API_URL}?project_id=291058&licensed=false"
-      result = URLNormalizer.new(url, superimporter: true).normalize
+      result = URLNormalizer.new(url).normalize
 
       # PageParser's add_ownership_filter defaults `licensed` to true for
       # import-others only when the stored URL doesn't specify a value.
@@ -226,7 +215,7 @@ class Inat
       # estimate counts match the literal request instead of a broader query
       # (#4636-adjacent).
       assert_equal("licensed=false&project_id=291058", result,
-                   "licensed should be preserved for superimporters")
+                   "licensed should be preserved as submitted")
     end
 
     def test_import_others_preserves_licensed
@@ -238,16 +227,6 @@ class Inat
         "`licensed` param should be preserved when importing others' " \
         "observations — downstream import behavior may still modify it"
       )
-    end
-
-    def test_own_non_superimporter_preserves_licensed
-      url = "#{API_URL}?project_id=291058&licensed=false"
-      result = URLNormalizer.new(url,
-                                 superimporter: false,
-                                 import_others: false).normalize
-
-      assert_equal("licensed=false&project_id=291058", result,
-                   "Should preserve regular user's iNat `licensed` param ")
     end
 
     # ---- #ignored_params ----------------------------------------------------
@@ -301,7 +280,7 @@ class Inat
       ignored = URLNormalizer.new(url).ignored_params
 
       assert_includes(ignored, "user_login",
-                      "user_login stripped for non-superimporter should " \
+                      "user_login stripped when not importing others should " \
                       "appear in ignored_params")
     end
 

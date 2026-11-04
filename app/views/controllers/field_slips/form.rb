@@ -180,7 +180,7 @@ module Views::Controllers::FieldSlips
       end
     end
 
-    # --- Submit buttons (matching ERB layout) ---
+    # --- Submit buttons ---
 
     def render_submit_quick_create
       submit(:field_slip_quick_create_obs.t, class: "mb-5")
@@ -300,7 +300,7 @@ module Views::Controllers::FieldSlips
 
     def render_primary_radio(obs)
       radio_field("field_slip[primary_observation_id]",
-                  [obs.id, :create_occurrence_primary.t],
+                  [obs.id, :primary.ti],
                   value: @primary_id,
                   wrap_class: "my-0",
                   data: { action: "field-slip-form#primarySelected" })

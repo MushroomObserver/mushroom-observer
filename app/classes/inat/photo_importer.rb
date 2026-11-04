@@ -39,11 +39,14 @@ class Inat
     end
 
     # owner: whether the importer made the iNat observation.
-    def initialize(observation:, user:, owner:,
+    # opted_out: the iNat observer opted out of MO (Inat::OptOut); no
+    # photo is uploaded or attached, while images already here stay.
+    def initialize(observation:, user:, owner:, opted_out: false,
                    external_site: ExternalSite.inaturalist)
       @observation = observation
       @user = user
       @owner = owner
+      @opted_out = opted_out
       @external_site = external_site
       @created_image_ids = []
       @reused_image_ids = []
@@ -61,10 +64,10 @@ class Inat
     # The created (or reused) Image, or nil when the photo was skipped.
     # Raises when the upload fails after retries.
     def import(photo)
-      existing = image_already_imported(photo)
+      existing = image_already_imported(photo) unless @opted_out
       return attach(existing) if existing
 
-      license_id = license_id_for(photo)
+      license_id = license_id_for(photo) unless @opted_out
       unless license_id
         @skipped_images += 1
         return nil

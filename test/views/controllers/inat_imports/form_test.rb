@@ -28,8 +28,8 @@ module Views::Controllers::InatImports
       html = render_form
 
       # Neither collapse panel is open (no .in class)
-      assert_no_html(html, "[data-type-switch-type='ids'].in")
-      assert_no_html(html, "[data-type-switch-type='url'].in")
+      assert_no_html(html, "[data-collapse-switch-type='ids'].in")
+      assert_no_html(html, "[data-collapse-switch-type='url'].in")
     end
 
     def test_ids_method_opens_ids_panel
@@ -37,8 +37,8 @@ module Views::Controllers::InatImports
 
       assert_html(html,
                   "input[type='radio'][value='ids'][checked]")
-      assert_html(html, "[data-type-switch-type='ids'].in")
-      assert_no_html(html, "[data-type-switch-type='url'].in")
+      assert_html(html, "[data-collapse-switch-type='ids'].in")
+      assert_no_html(html, "[data-collapse-switch-type='url'].in")
     end
 
     def test_url_method_opens_url_panel
@@ -46,17 +46,17 @@ module Views::Controllers::InatImports
 
       assert_html(html,
                   "input[type='radio'][value='url'][checked]")
-      assert_html(html, "[data-type-switch-type='url'].in")
-      assert_no_html(html, "[data-type-switch-type='ids'].in")
+      assert_html(html, "[data-collapse-switch-type='url'].in")
+      assert_no_html(html, "[data-collapse-switch-type='ids'].in")
     end
 
-    def test_type_switch_controller_wired
+    def test_collapse_switch_controller_wired
       html = render_form
 
-      assert_html(html, "[data-controller='type-switch']")
+      assert_html(html, "[data-controller='collapse-switch']")
       assert_html(html,
                   "input[type='radio']" \
-                  "[data-action='change->type-switch#switch']",
+                  "[data-action='change->collapse-switch#switch']",
                   count: 3)
     end
 
@@ -64,14 +64,14 @@ module Views::Controllers::InatImports
       html = render_form(choose_method: "ids")
 
       assert_html(html, "textarea[name='inat_import[inat_ids]']")
-      assert_html(html, "[data-type-switch-type='ids'] .help-block")
+      assert_html(html, "[data-collapse-switch-type='ids'] .help-block")
     end
 
     def test_url_field_name_and_help
       html = render_form(choose_method: "url")
 
       assert_html(html, "[name='inat_import[inat_url]']")
-      assert_html(html, "[data-type-switch-type='url'] .help-block")
+      assert_html(html, "[data-collapse-switch-type='url'] .help-block")
       assert_html(html,
                   "[name='inat_import[inat_url]']" \
                   "[placeholder*='inaturalist.org']")

@@ -13,6 +13,7 @@
 #  rank(ranks)
 #  with_rank(rank)
 #  with_rank_below(rank)
+#  with_rank_above(rank)
 #  with_rank_and_name_in_classification(rank, text_name)
 #  with_rank_at_or_below_genus
 #  with_rank_above_genus
@@ -164,6 +165,13 @@ module Name::Scopes
     scope :with_rank_below, lambda { |rank|
       where(Name[:rank] < ranks[rank]) if rank
     }
+    # Group is used for both species-groups and clades (#below_genus?),
+    # so it's excluded regardless of the rank threshold.
+    scope :with_rank_above, lambda { |rank|
+      next unless rank
+
+      where(Name[:rank] > ranks[rank]).where(Name[:rank].not_eq(ranks[:Group]))
+    }
     scope :with_rank_and_name_in_classification, lambda { |rank, text_name|
       where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
     }
@@ -171,8 +179,7 @@ module Name::Scopes
       where((Name[:rank] <= ranks[:Genus]).or(Name[:rank].eq(ranks[:Group])))
     }
     scope :with_rank_above_genus, lambda {
-      where(Name[:rank] > ranks[:Genus]).
-        where(Name[:rank].not_eq(ranks[:Group]))
+      with_rank_above(:Genus)
     }
     scope :subtaxa_of_genus_or_below, lambda { |text_name|
       # Note the space " " difference from :text_name_has scope
@@ -223,6 +230,7 @@ module Name::Scopes
     scope :one_clade, lambda { |names|
       names(lookup: names, include_subtaxa: true).misspellings(:no)
     }
+    # rubocop:disable MO/NoLongCommentBlock
     # scope :clade_above_genus,
     #       ->(name) { clade(name).with_rank_above_genus }
 
@@ -246,6 +254,7 @@ module Name::Scopes
     #   comments = Name.comments_has(phrase).map(&:id)
     #   where(id: fields + comments).distinct
     # }
+    # rubocop:enable MO/NoLongCommentBlock
     # This is what's called by pattern_search
     scope :pattern, lambda { |phrase|
       exact_match_or(phrase) { search_columns(Name.searchable_columns, phrase) }
@@ -304,6 +313,7 @@ module Name::Scopes
     }
 
     ### Specialized Scopes for Name::Create
+    # rubocop:disable MO/NoLongCommentBlock
     # Get list of Names that are potential matches when creating a new name.
     # Takes results of Name.parse_name.  Used by NameController#create_name.
     # Three cases:
@@ -317,6 +327,7 @@ module Name::Scopes
     # an author, but there are matches with an author, then it already exists
     # and we should just ignore the request.
     #
+    # rubocop:enable MO/NoLongCommentBlock
     scope :matching_desired_new_parsed_name, lambda { |parsed_name|
       if parsed_name.rank == "Group"
         where(search_name: parsed_name.search_name)
@@ -352,16 +363,13 @@ module Name::Scopes
     }
 
     # Used only by `NamesController#perform_merge_names`, right
-    # before `Name::Merge#merge` — `#move_observations`/`#move_namings`
-    # rewrite every associated row's `name_id` during an actual merge,
-    # so both need to be loaded. NOT used by #show, the common (non-
-    # merge) #edit/#update path, or `Names::Synonyms::ApproveController`
-    # (confirmed empirically — none of them read
-    # `@name.observations`/`@name.namings` directly), so for a name
-    # with many thousands of observations (a genus, say) this scope
-    # would eager-load all of them for no benefit anywhere but the
-    # merge path. See `show_includes` below for the lighter scope
-    # everything else uses.
+    # before `Name::Merge#merge` -- `#move_observations`/`#move_namings`
+    # rewrite every associated row's `name_id` during a merge, so
+    # both need to be loaded. Not used by #show or the common
+    # #edit/#update path, so for a name with many thousands of
+    # observations (a genus, say) this scope would eager-load all of
+    # them for no benefit outside the merge path. See `show_includes`
+    # below for the lighter scope everything else uses.
     scope :merge_includes, lambda {
       strict_loading.includes(
         *Name::Scopes.show_includes_base,

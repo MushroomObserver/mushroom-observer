@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #
 #  USAGE::
 #
@@ -29,6 +30,7 @@
 #  all those pages via pages they're allowed to crawl by robots.txt).
 #
 ################################################################################
+# rubocop:enable MO/NoLongCommentBlock
 
 require_relative("../config/boot")
 require_relative("../config/environment")

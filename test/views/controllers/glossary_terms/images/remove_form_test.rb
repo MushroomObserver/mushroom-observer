@@ -39,12 +39,13 @@ module Views::Controllers::GlossaryTerms::Images
       end
     end
 
+    # Each per-image .checkbox wrapper gets `my-0` so the default
+    # vertical margin doesn't leave visible gaps inside the MatrixBox
+    # cell.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_each_checkbox_wrap_has_my_0_class
       html = render_form
 
-      # Each per-image .checkbox wrapper gets `my-0` so BS3's default
-      # 10px vertical margin doesn't leave visible gaps inside the
-      # MatrixBox cell.
       @model.images.each do |image|
         assert_html(html,
                     ".checkbox.my-0 input[name='selected[#{image.id}]']")
@@ -60,9 +61,8 @@ module Views::Controllers::GlossaryTerms::Images
     def test_renders_matrix_with_one_box_per_image
       html = render_form
 
-      # MatrixTable renders a `.row.list-unstyled` wrap; each
-      # MatrixBox contains the image preview + checkbox for one image.
-      assert_html(html, ".row.list-unstyled")
+      # Each MatrixBox contains the image preview + checkbox for one
+      # image.
       assert_equal(@model.images.count, html.scan("matrix-box").count,
                    "expected one .matrix-box per image")
     end

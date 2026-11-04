@@ -7,6 +7,7 @@ class Tab::Sidebar::AdminActions < Tab::Collection
   def tabs
     [Tab::Sidebar::Admin::Jobs.new,
      Tab::Sidebar::Admin::BlockedIps.new,
+     Tab::Sidebar::Admin::ExcludedInatUsers.new,
      Tab::Sidebar::Admin::SwitchUsers.new,
      Tab::Sidebar::Admin::Users.new,
      Tab::Sidebar::Admin::Banners.new,

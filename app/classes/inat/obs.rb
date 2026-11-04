@@ -127,21 +127,22 @@ class Inat
     # panel. String keys, since Observation#skeleton_omissions is a JSON
     # column. imported_photo_ids: iNat photo ids the skeleton already has
     # an MO image of (see Inat::PhotoImporter.imported_photo_ids).
-    def skeleton_omissions(imported_photo_ids: [])
+    # opted_out: the observer opted out of MO, so every photo is left out.
+    def skeleton_omissions(imported_photo_ids: [], opted_out: false)
       { "login" => self[:user][:login],
-        "images" => unlicensed_photo_count(imported_photo_ids),
+        "images" => omitted_photo_count(imported_photo_ids, opted_out),
         "obs_fields" => without_mo_url_field(inat_obs_fields).size,
         "description" => cleaned_description.present?,
         "sequences" => sequences.present? }
     end
 
-    def unlicensed_photo_count(imported_photo_ids)
+    def omitted_photo_count(imported_photo_ids, opted_out)
       Array(self[:observation_photos]).count do |obs_photo|
-        obs_photo.dig(:photo, :license_code).blank? &&
-          imported_photo_ids.exclude?(obs_photo[:photo_id].to_s)
+        opted_out || (obs_photo.dig(:photo, :license_code).blank? &&
+          imported_photo_ids.exclude?(obs_photo[:photo_id].to_s))
       end
     end
-    private :unlicensed_photo_count
+    private :omitted_photo_count
 
     # Observation form requires a "normalized" key (no spaces) for Notes parts
     def snapshot_key
@@ -308,12 +309,15 @@ class Inat
       end
     end
 
-    # The MO text_name for an iNat provisional species name
+    # The MO text_name for an iNat provisional species name. None when the
+    # Observation Taxon is provisional: it outranks the field (#2892).
     def provisional_name
-      return nil if inat_prov_name.blank?
+      return nil if inat_prov_name.blank? || provisional_taxon?
 
       inat_prov_name
     end
+
+    def provisional_taxon? = @obs_taxon[:provisional] == true
 
     # The value of the iNat "Species Name Override" observation field, or nil.
     # When present it outranks the provisional name and the Observation Taxon
@@ -326,8 +330,7 @@ class Inat
     end
 
     # derive a provisional name from some specific Observation Fields
-    # NOTE: iNat does not allow provisional names as identifications.
-    # Also, iNat allows only 1 obs field with a given :name per obs,
+    # NOTE: iNat allows only 1 obs field with a given :name per obs,
     # so there can be only 1 Provisional Species Name per obs.
     # NOTE: Edge case -- obs also has Provisional Genus Name, etc.
     # NOTE: I assume iNat users will add only 1 provisional name per obs.

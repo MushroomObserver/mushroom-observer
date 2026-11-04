@@ -160,15 +160,18 @@ module InatImportsController::Estimators
   end
 
   # Import-others with skeletons imports unlicensed obss too, so it keeps
-  # whatever license filter the URL has, as does a URL's own `license`
-  # filter (see PageParser#add_license_filter).
+  # whatever license filter the URL has, as does a URL with a `license`
+  # filter (see PageParser#add_license_filter). Without skeletons it
+  # skips opted-out observers (Inat::ObservationImporter#opted_out_other?).
   def ownership_filter_args
     if !import_others?
       { user_login: normalized_inat_username }
-    elsif create_skeletons? || listing_query_args.key?(:license)
+    elsif create_skeletons?
       {}
+    elsif listing_query_args.key?(:license)
+      Inat::OptOut.filter_args
     else
-      LICENSED_FILTER
+      LICENSED_FILTER.merge(Inat::OptOut.filter_args)
     end
   end
 

@@ -20,10 +20,10 @@
 # just stating it. "own" is the odd one out: it's a redundant
 # possessive almost every time ("the model's own X" just means "the
 # model's X" -- see .claude/rules/code_comments.md rule 4), not an
-# intensifier, but it gets the same blunt treatment because the
-# illegitimate-use rate is just as high. The rare legitimate case
-# (idiomatic "own", not a redundant possessive) gets rephrased like any
-# other false positive here -- that's cheaper than a smarter check.
+# intensifier -- so "own" is only flagged in that possessive shape
+# (preceded by 's or a possessive pronoun: its/their/his/her/your/
+# my/our own), not as a verb ("doesn't own", "to own"), which is
+# always legitimate.
 # Whole-word matches only (so e.g. "actualization", "eventual",
 # "owner", "shown" don't false-positive); case-insensitive.
 #
@@ -37,7 +37,11 @@ TOOL="$(printf '%s' "$INPUT" | jq -r '.tool_name // ""')"
 # POSIX ERE doesn't treat `\b` as a word boundary (BSD/macOS grep in
 # particular) -- use the same `(^|[^[:alnum:]_])...([^[:alnum:]_]|$)`
 # portable boundary as check_any_phlex_props_on_save.sh.
-WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|canonical|consume|at all|own)([^[:alnum:]_]|$)'
+WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|canonical|consume|at all)([^[:alnum:]_]|$)'
+# "own" only counts in the redundant-possessive shape (X's own Y /
+# its own Y / their own Y, etc.) -- a verb use ("doesn't own") is
+# always legitimate and isn't matched here.
+OWN_RE="('s|its|their|his|her|your|my|our)[[:space:]]+own([^[:alnum:]_]|$)"
 
 TEXT=""
 case "$TOOL" in
@@ -74,9 +78,21 @@ $(cat "$f")"
   *) exit 0 ;;
 esac
 
+# Strip lines between a `rubocop:disable MO/NoLongCommentBlock` and
+# its matching `rubocop:enable` -- the NoLongCommentBlock cleanup
+# sweep uses that pair specifically to preserve a pre-existing,
+# human-written comment verbatim (not to author new prose), so this
+# style rule doesn't apply inside it.
+SCAN_TEXT="$(printf '%s' "$TEXT" | awk '
+  /rubocop:disable MO\/NoLongCommentBlock/ { skip = 1; next }
+  /rubocop:enable MO\/NoLongCommentBlock/ { skip = 0; next }
+  !skip { print }
+')"
+
 # Strip comment lines discussing the rule itself (e.g. this file, or
 # a rules doc quoting the banned words) -- only match live prose/code.
-HITS="$(printf '%s' "$TEXT" | grep -inE "$WORD_RE" || true)"
+HITS="$( { printf '%s' "$SCAN_TEXT" | grep -inE "$WORD_RE" || true
+           printf '%s' "$SCAN_TEXT" | grep -inE "$OWN_RE" || true; } )"
 
 if [ -n "$HITS" ]; then
   cat >&2 <<EOF

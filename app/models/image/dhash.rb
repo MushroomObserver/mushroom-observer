@@ -64,12 +64,11 @@ class Image
       # (already-rotated) renditions hash alike.
       #
       # Open3.capture3 is called in argv (list) form, so no shell is
-      # spawned and each argument reaches convert verbatim — the
-      # interpolations cannot be interpreted as shell syntax. `path` is
-      # never user input either: it is an internally built absolute path
-      # (Image#full_filepath, or a Tempfile) so it can't begin with "-"
-      # and be mistaken for an option. (Brakeman command-injection warning
-      # ignored on this basis in config/brakeman.ignore.)
+      # spawned and each argument reaches convert verbatim. `path` is
+      # an internally built absolute path (Image#full_filepath, or a
+      # Tempfile), not user input, so it can't be mistaken for an
+      # option (Brakeman's command-injection warning is ignored on
+      # this basis in config/brakeman.ignore).
       def grayscale_pixels(path)
         out, err, status = Open3.capture3(
           magick_binary, "#{path}[0]", "-auto-orient",

@@ -122,18 +122,16 @@ class Components::Form::UploadGallery < Components::Base
 
   def sibling_slide_data(image)
     img_id_for_dom = image&.id || "img_id_missing"
-    # `image_status: "good"` — sibling slides are pre-existing images
-    # too (just from another observation, hence not editable here).
+    # `image_status: "good"` -- sibling slides are pre-existing images
+    # from another observation, not editable here.
     # `form-images_controller.js#itemTargetConnected` returns early on
-    # "good" / "upload"; anything else logs an error and skips. The
-    # sibling-specific UI differences are gated by the `sibling: true`
-    # prop on `Components::Form::UploadGallery::Item`, not by the
-    # status string.
+    # "good"/"upload"; anything else logs an error and skips.
+    # Sibling-specific UI is gated by the `sibling: true` prop, not
+    # the status string.
     #
     # geocode carries the image's EXIF location (empty when it has
-    # none, so "Use this info" leaves the observation's coords alone);
-    # exif_date carries the reflection's date so the same button can
-    # adopt it (#5317).
+    # none, so "Use this info" leaves the coords alone); exif_date
+    # carries the reflection's date for the same button to adopt.
     {
       form_images_target: "item",
       form_exif_target: "item",

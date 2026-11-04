@@ -85,6 +85,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
                  @response.request.fullpath)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Herbarium to Herbaria ------------------------------------------------------
   #
   # legacy Herbarium action (method)  upddated Herbaria action (method)
@@ -108,6 +109,7 @@ class RedirectsIntegrationTest < IntegrationTestCase
   # show_herbarium (post)             Herbaria::Curators#create (post)
   # * == legacy action is not redirected
   # See https://tinyurl.com/ynapvpt7
+  # rubocop:enable MO/NoLongCommentBlock
 
   def test_herbarium_search
     login

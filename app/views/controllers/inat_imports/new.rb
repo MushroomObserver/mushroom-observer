@@ -8,6 +8,7 @@ module Views::Controllers::InatImports
     prop :form, ::FormObject::InatImport
     prop :super_importer, _Boolean, default: false
     prop :admin, _Boolean, default: false
+    prop :project_site, _Nilable(::ProjectExternalSite), default: nil
     prop :has_prior_imports, _Boolean, default: false
 
     def view_template
@@ -17,7 +18,7 @@ module Views::Controllers::InatImports
       )
       render(Views::Controllers::InatImports::Form.new(
                @form, super_importer: @super_importer, admin: @admin,
-                      turbo: true
+                      project_site: @project_site, turbo: true
              ))
     end
   end

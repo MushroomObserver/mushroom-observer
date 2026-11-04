@@ -289,18 +289,38 @@ class InatImport < ApplicationRecord
   def estimated_remaining_time
     return 0 if Done?
     return nil unless capped_total_importables.positive? && started_at
-    return total_expected_time if imported_count.to_i.zero?
+    return total_expected_time if processed_count.zero?
 
     [extrapolated_remaining_time, 0].max
   end
 
-  # Observed rate (elapsed per imported obs) times obs still to import, so
-  # the estimate tracks real progress instead of a fixed up-front guess.
-  # Uses the capped total, not the raw estimate -- this run will never
-  # import more than MAX_IMPORTABLE regardless of how many are available.
+  # Observations this run has finished with, imported or not. The total
+  # it is measured against counts every observation iNat will return, so
+  # the queue has to shrink by skips too: a run that skips most of what
+  # it fetches (a re-run, where already_imported carries the page)
+  # otherwise shows no progress and holds its opening estimate until it
+  # ends.
+  def processed_count
+    imported_count.to_i + ignored_total_count.to_i
+  end
+
+  # Skips shrink the queue but do not set the pace. A skip is an
+  # ExternalLink lookup and an import is a round trip with photos, so
+  # dividing the whole elapsed time by everything processed would price
+  # the imports still to come at the speed of skipping. avg_import_time
+  # is a moving average updated only when an obs imports, which is the
+  # rate the observations left are going to cost.
+  def observed_import_seconds
+    return initial_avg_import_seconds unless avg_import_time.to_f.positive?
+
+    avg_import_time
+  end
+
+  # Uses the capped total, not the raw estimate -- this run imports at
+  # most MAX_IMPORTABLE however many are available.
   def extrapolated_remaining_time
-    remaining = capped_total_importables - imported_count.to_i
-    (remaining * elapsed_time.to_f / imported_count).round
+    remaining = [capped_total_importables - processed_count, 0].max
+    (remaining * observed_import_seconds).round
   end
 
   #########

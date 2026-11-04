@@ -7,10 +7,9 @@ module RuboCop
       # a `render_`-prefixed qualifier -- `render_phlex_*`
       # (`render_phlex_show`, `render_phlex_edit`, ...) and `*_phlex`
       # (`render_new_phlex`, `render_edit_phlex`, `render_show_phlex`,
-      # ...) alike. The whole app is Phlex now -- there is no ERB left
-      # to disambiguate from -- so the qualifier carries no information
-      # and just adds noise to a name that should read as what action
-      # the method renders.
+      # ...) alike. The whole app is Phlex now, so the qualifier
+      # carries no information and just adds noise to a name that
+      # should read as what action the method renders.
       #
       # The established convention is `render_<action>_view`:
       # `render_new_view`, `render_edit_view`, `render_show_view`,

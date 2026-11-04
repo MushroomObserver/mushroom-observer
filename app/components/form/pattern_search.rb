@@ -35,7 +35,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
 
   # The selectable `type` values — the set a stored
   # `session[:search_type]` must belong to for the select to be able
-  # to show it (see `Views::Layouts::TopNav::SearchBar`).
+  # to show it (see `Views::Layouts::SearchBar`).
   TYPE_VALUES = SEARCH_TYPE_OPTIONS.map(&:last).freeze
 
   FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \

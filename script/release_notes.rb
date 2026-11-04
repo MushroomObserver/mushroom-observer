@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
 # Shared by the release scripts (prerelease.rb, update_article_changelog.rb,
-# update_release_banner.rb): when a deploy is scheduled, where the MO
-# Article changelog lives, and the first line of the site banner before
-# and after a release. Only that first line announces the release; the
-# rest of the banner is left alone.
+# update_release_banner.rb): where the MO Article changelog lives, and
+# the first line of the site banner before and after a release. Only that
+# first line announces the release; the rest of the banner is left alone.
 
-require("date")
 require("tzinfo")
 
 module ReleaseNotes
@@ -17,30 +15,11 @@ module ReleaseNotes
   PENDING_FILE = "article_pending.textile"
   CHANGELOG_URL = "https://github.com/MushroomObserver/mushroom-observer/" \
                   "blob/%<branch>s/CHANGELOG.md"
-  # Scheduled deploys stay at 8am Eastern through daylight saving changes,
-  # so their UTC time moves between 12:00 and 13:00.
-  DEPLOY_ZONE = "America/New_York"
-  DEPLOY_HOUR = 8
   LOCAL_ZONES = { "eastern" => "America/New_York",
                   "pacific" => "America/Los_Angeles" }.freeze
   LINE_BREAK = %r{<br\s*/?>\s*\z}
 
   module_function
-
-  # Today's deploy time if it hasn't passed (the time itself counts as not
-  # passed), otherwise tomorrow's. UTC.
-  def next_deploy_time(now = Time.now.utc)
-    today = TZInfo::Timezone.get(DEPLOY_ZONE).to_local(now).to_date
-    scheduled = deploy_time_on(today)
-    now <= scheduled ? scheduled : deploy_time_on(today + 1)
-  end
-
-  # The scheduled deploy time on a calendar date, in UTC.
-  def deploy_time_on(date)
-    TZInfo::Timezone.get(DEPLOY_ZONE).local_to_utc(
-      Time.utc(date.year, date.month, date.day, DEPLOY_HOUR)
-    )
-  end
 
   # Posted by hand after `prerelease.rb --apply`, when production has no
   # part in the change yet. Only this line gives Eastern and Pacific

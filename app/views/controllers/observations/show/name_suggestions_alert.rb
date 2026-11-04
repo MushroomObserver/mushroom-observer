@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Warning-level alert that surfaces likely-meant names when the user
-# typed a name string with no exact match. Pre-Phlex this was
-# `_name_suggestions.erb`. Heading is the `:list_observations_suggestions`
-# label, then one indented row per suggested name: either a link to
+# typed a name string with no exact match. Heading is the
+# `:list_observations_suggestions` label, then one indented row per
+# suggested name: either a link to
 # the name's show page (when there are no observations of that name)
 # or a link to the observations search filtered by the name (when
 # there are observations).

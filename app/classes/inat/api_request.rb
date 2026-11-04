@@ -8,18 +8,18 @@ class Inat::APIRequest
     @token = token
   end
 
-  def request(path:, method: :get, payload: {}, headers: {})
+  # timeout: seconds, for a caller that a slow iNat must not hold up.
+  # Left out otherwise: RestClient reads `timeout: nil` as no timeout.
+  def request(path:, method: :get, payload: {}, headers: {}, timeout: nil)
     default_headers = { content_type: :json, accept: :json }
     default_headers[:authorization] = "Bearer #{@token}" if @token.present?
-    headers = default_headers.merge(headers)
+    options = { method: method, url: "#{API_BASE}/#{path}",
+                payload: payload.to_json,
+                headers: default_headers.merge(headers) }
+    options[:timeout] = timeout if timeout
 
     count_request
-    RestClient::Request.execute(
-      method: method,
-      url: "#{API_BASE}/#{path}",
-      payload: payload.to_json,
-      headers: headers
-    )
+    RestClient::Request.execute(**options)
   end
 
   private

@@ -57,7 +57,7 @@ module Views::Controllers::Images
           name: label_key.t,
           target: transform_image_path(id: @image.id,
                                        op: operation, size: @size),
-          variant: :outline, icon: icon, label: true
+          variant: :outline, icon: icon, show_label: :responsive
         )
       end
 

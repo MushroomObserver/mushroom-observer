@@ -39,13 +39,18 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Left column --------------------------------------------------
 
   def render_left_column
-    Column(xs: 12, sm: 6) do
+    Column(xs: 12, sm: left_column_width) do
       ul(class: "list-unstyled") do
         render_rank_line
         render_status_line
         render_name_line
       end
     end
+  end
+
+  # Code names omit the right column, so fill the row.
+  def left_column_width
+    @name.code_name? ? 12 : 6
   end
 
   def render_rank_line
@@ -56,7 +61,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   end
 
   def render_status_line
-    li(class: "hanging-indent") do
+    li(id: "name_status", class: "hanging-indent") do
       trusted_html(append_colon(:status.ti))
       plain(name_deprecation_status)
       if @name.is_misspelling?
@@ -152,6 +157,8 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   # --- Right column -------------------------------------------------
 
   def render_right_column
+    return if @name.code_name?
+
     Column(xs: 12, sm: 6) do
       ul(class: "list-unstyled") do
         if @name.icn_id?
@@ -226,8 +233,9 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     approved, deprecated = @name.sort_synonyms
     misspellings = deprecated.select(&:correct_spelling_id)
     deprecated.reject!(&:correct_spelling_id)
+    return if approved.blank? && deprecated.blank? && misspellings.blank?
 
-    ul(class: "list-unstyled") do
+    ul(id: "name_synonyms", class: "list-unstyled") do
       render_synonym_group(label_for_approved, approved)
       render_synonym_group(:show_name_deprecated_synonyms.l, deprecated)
       render_synonym_group(:show_name_misspelled_synonyms.l, misspellings)

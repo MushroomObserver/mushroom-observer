@@ -68,6 +68,26 @@ module Names
       assert_redirected_to(new_tracker_of_name_path(name))
     end
 
+    # A tracker with no template (e.g. enabled with the checkbox left
+    # unchecked) should suggest the same default template #new offers,
+    # not reopen to a blank textarea.
+    def test_email_tracking_edit_without_template_shows_default_suggestion
+      name = names(:conocybe_filaris)
+      NameTracker.create!(name: name, user: rolf, approved: true,
+                          note_template: "")
+
+      login("rolf")
+      get(:edit, params: { id: name.id })
+
+      assert_response(:success)
+      expected = :email_tracking_note_template.l(
+        species_name: name.real_text_name,
+        mailing_address: rolf.mailing_address_for_tracking_template,
+        users_name: rolf.legal_name
+      )
+      assert_select("textarea#name_tracker_note_template", text: expected)
+    end
+
     def test_email_tracking_enable_no_note
       name = names(:conocybe_filaris)
       count_before = NameTracker.count
@@ -137,6 +157,32 @@ module Names
       assert_equal(false, name_tracker.approved)
       interest = Interest.find_by(target: name_tracker)
       assert(interest)
+    end
+
+    # A second submit of the new form (back button, two tabs) must update
+    # the existing tracker instead of creating a duplicate.
+    def test_email_tracking_create_with_existing_tracker
+      name = names(:coprinus_comatus)
+      name_tracker = NameTracker.find_by(name: name, user: rolf)
+      assert(name_tracker, "Test needs a fixture with existing tracker")
+      note = "A note about :observation from :observer"
+      params = {
+        id: name.id,
+        commit: :enable.ti,
+        name_tracker: { note_template_enabled: "1", note_template: note }
+      }
+
+      login("rolf")
+      assert_no_difference(
+        ["NameTracker.count", "Interest.count"],
+        "Create should not add a tracker or interest when one exists"
+      ) do
+        post(:create, params: params)
+      end
+
+      assert_redirected_to(name_path(name.id))
+      assert_equal(note, name_tracker.reload.note_template,
+                   "Create should update the existing tracker")
     end
 
     def test_email_tracking_update_add_note

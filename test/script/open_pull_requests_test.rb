@@ -102,6 +102,15 @@ class OpenPullRequestsTest < UnitTestCase
                  report.report)
   end
 
+  def test_failing_ci_holds_the_pr
+    %w[FAILURE ERROR].each do |state|
+      assert_not(mergeable?(node(labels: ["review: blocker"], ci: state)),
+                 "CI #{state}")
+    end
+    assert(mergeable?(node(labels: ["review: blocker"], ci: "PENDING")),
+           "running CI does not hold")
+  end
+
   def test_fetch_requeries_once_when_merge_state_is_unknown
     responses = [graphql_response(node(mergeable: "UNKNOWN")),
                  graphql_response(node(mergeable: "MERGEABLE"))]
@@ -150,9 +159,9 @@ class OpenPullRequestsTest < UnitTestCase
       now: NOW
     ).report
 
-    assert_match(/Can merge now:\n  PR#10 .*\[CI failing, conflicts\]/,
-                 report)
-    assert_match(/Waiting:\n  PR#20 .*Standard change  /, report)
+    assert_match(/Waiting:\n  PR#10 .*\[CI failing, conflicts\]/, report,
+                 "failing CI holds even an urgent PR")
+    assert_match(/Waiting:\n.*\n  PR#20 .*Standard change  /, report)
     assert_match(/PR#10 .* @alice        A change/, report,
                  "authors pad to the longest login")
     assert_match(/PR#20 .* @bartholomew  Standard change/, report)
@@ -196,7 +205,7 @@ class OpenPullRequestsTest < UnitTestCase
       end
     end
 
-    assert_match(/Open PR query failed:\ngh: not logged in/, err)
+    assert_match(/failed:\ngh: not logged in/, err)
   end
 
   def test_report_with_nothing_open

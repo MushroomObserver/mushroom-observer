@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-# Action view for `descriptions/authors#show`. Admins of a description
-# manage its author roster here: existing authors get a destroy
+# Action view for `descriptions/authors#show`. Authors and reviewers
+# manage a description's author roster here: existing authors get a destroy
 # button beside their name, plus a user-autocompleter + "Add Author"
 # submit at the bottom (`AddAuthorForm`).
 module Views::Controllers::Descriptions::Authors
@@ -10,6 +10,9 @@ module Views::Controllers::Descriptions::Authors
     # Callers pass `@description.authors.to_a` — the controller
     # converts the has_many-through CollectionProxy at the boundary.
     prop :authors, _Array(::User)
+    # Whoever asked for authorship, from the request email's link;
+    # prefills the add box so the reviewer only has to confirm.
+    prop :requester, _Nilable(::User), default: nil
 
     def view_template
       type = @object.type_tag
@@ -50,8 +53,12 @@ module Views::Controllers::Descriptions::Authors
     def render_other_users_block
       p do
         plain(:review_authors_other_users.t)
-        render(AddAuthorForm.new(::FormObject::DescriptionAuthor.new,
-                                 object: @object, turbo: true))
+        render(AddAuthorForm.new(
+                 ::FormObject::DescriptionAuthor.new(
+                   user: @requester&.unique_text_name
+                 ),
+                 object: @object, turbo: true
+               ))
       end
     end
   end

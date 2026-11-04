@@ -11,7 +11,8 @@ module Descriptions
       return unless authorized?
 
       render(Views::Controllers::Descriptions::Authors::Show.new(
-               object: @object, authors: @authors.to_a
+               object: @object, authors: @authors.to_a,
+               requester: User.safe_find(params[:add])
              ))
     end
 
@@ -44,11 +45,9 @@ module Descriptions
       @authors = @object.authors
     end
 
-    # Reviewing (and adding/removing) authors is limited to existing
-    # authors and reviewers -- same check `create`/`destroy` need,
-    # not just `show`.
+    # Same check for `create`/`destroy` as for `show`.
     def authorized?
-      return true if @authors.member?(@user) || @user.in_group?("reviewers")
+      return true if @object.can_review_authors?(@user)
 
       flash_error(:review_authors_denied.t)
       redirect_to(@object.parent.show_link_args)

@@ -39,8 +39,8 @@ class SubmitTest < ComponentTestCase
                 "button[type='submit'][data-turbo-submits-with='Saving...']")
   end
 
-  # Mirrors ERB `forms_helper.rb#submits_default_text`: an Update
-  # button shows "Updating" in-flight, anything else shows "Submitting".
+  # An Update button shows "Updating" in-flight, anything else shows
+  # "Submitting".
   def test_submit_default_submits_with_for_update_button
     form = render_form { submit(:update.ti) }
 

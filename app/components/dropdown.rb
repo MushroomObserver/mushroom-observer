@@ -1,9 +1,13 @@
 # frozen_string_literal: true
 
-# Bootstrap 3 nav-style dropdown menu. Renders the
+# Bootstrap nav-style dropdown menu. Renders the
 # `<li class="dropdown d-inline-block">` + `<a class="dropdown-toggle">` +
-# `<ul class="dropdown-menu">` triple that the top-nav's Actions
-# dropdown, user dropdown, and similar menus all share.
+# `<div class="dropdown-menu">` triple that the top-nav's Actions
+# dropdown, user dropdown, and similar menus all share. The menu's
+# items (`a`/`form.dropdown-item`) sit directly inside the menu div,
+# matching Bootstrap 4's flat dropdown markup -- no `<ul>`/`<li>`
+# nesting inside the menu itself (the outer `<li>` wrapper is a
+# separate concern, the surrounding navbar-nav's list-item).
 #
 # Builder-pattern API: yields a `menu` object the caller registers
 # sections on. Each section is `Tab::Collection`, a single
@@ -11,8 +15,8 @@
 # is what `Header::ContextNavHelper#add_context_nav` hands its
 # downstream renderers after normalizing — no live caller passes
 # raw tuple arrays directly anymore). Multiple sections are
-# separated by a `<li class="divider">`. Empty sections are
-# skipped (no spurious divider).
+# separated by a `<div class="dropdown-divider">`. Empty sections
+# are skipped (no spurious divider).
 #
 # @example Single-section (Actions dropdown)
 #   Dropdown(
@@ -41,10 +45,14 @@ class Components::Dropdown < Components::Base
   prop :id, ::String
   prop :menu_id, ::String
   prop :label, ::String
-  # Extra classes on the outer `<li class="dropdown d-inline-block">`,
-  # the toggle `<a>`, and the menu `<ul>`. Defaults are nil — only
-  # the index sort-bar (`Views::Layouts::Header::Sorter`) currently
-  # passes any of these.
+  # Outer wrapper tag. `:li` (the default) is correct inside a
+  # `<ul>`-based nav (top-nav's Actions/user dropdowns); a caller
+  # placing the dropdown outside a list (the index sort-bar) passes
+  # `element: :div` instead.
+  prop :element, ::Symbol, default: :li
+  # Extra classes on the outer wrapper, the toggle `<a>`, and the
+  # menu `<div>`. Defaults are nil — only the index sort-bar
+  # (`Views::Layouts::Header::Sorter`) currently passes any of these.
   prop :wrapper_class, _Nilable(::String), default: nil
   # `toggle_variant:` / `toggle_size:` add Bootstrap btn styling to the
   # toggle `<a>`. Extra non-btn classes (e.g. "font-weight-normal") still
@@ -54,11 +62,23 @@ class Components::Dropdown < Components::Base
   prop :toggle_size, _Nilable(::Symbol), default: nil
   prop :toggle_class, _Nilable(::String), default: nil
   prop :menu_class, _Nilable(::String), default: nil
-  # Optional pre-section content rendered inside the menu `<ul>`
+  # Optional raw HTML for the toggle's visible content (SafeBuffer),
+  # overriding the default `label:`-text span. `label:` is still
+  # required -- it becomes the toggle's `aria-label` instead, since
+  # the visible text no longer speaks for itself.
+  prop :toggle_content, _Nilable(::String), default: nil
+  # Optional pre-section content rendered inside the menu `<div>`
   # above the first section. SafeBuffer (from `capture { … }`) so
   # `trusted_html` emits it intact. Used by the sort-bar to inject
-  # the mobile-only `Sort by:` `<li>` header.
+  # the mobile-only `Sort by:` header.
   prop :menu_header, _Nilable(::String), default: nil
+  # Optional raw content rendered inside the menu `<div>`, after any
+  # sections. SafeBuffer (from `capture { … }`), for menu content
+  # that doesn't fit `section`'s link-tuple shape -- form fields,
+  # checkboxes. A caller using only `menu_content:` can pass an empty
+  # block (`Dropdown(..., menu_content: ...) { }`); the empty-menu
+  # guard below also checks this, not just registered sections.
+  prop :menu_content, _Nilable(::String), default: nil
 
   def initialize(...)
     super
@@ -71,9 +91,10 @@ class Components::Dropdown < Components::Base
     # we render the wrapper + items afterwards.
     vanish(self, &block)
     rendered = @sections.map { |s| normalize_section(s) }.reject(&:empty?)
-    return if rendered.empty?
+    return if rendered.empty? && @menu_content.blank?
 
-    li(class: class_names("dropdown d-inline-block", @wrapper_class)) do
+    send(@element,
+         class: class_names("dropdown d-inline-block", @wrapper_class)) do
       render_toggle
       render_menu(rendered)
     end
@@ -81,7 +102,7 @@ class Components::Dropdown < Components::Base
 
   # Register one section of items. Block-evaluation collects via
   # the vanish pattern above; consecutive sections get a Bootstrap
-  # `<li class="divider">` between them.
+  # `<div class="dropdown-divider">` between them.
   #
   # @return [nil] so the call doesn't accidentally emit anything
   def section(items)
@@ -91,13 +112,20 @@ class Components::Dropdown < Components::Base
 
   private
 
+  # No manual caret span -- Bootstrap draws one automatically via a
+  # `::after` pseudo-element on `.dropdown-toggle` itself
+  # (`@include caret()`, bootstrap/_dropdown.scss).
   def render_toggle
     a(class: toggle_link_class,
       id: @id, role: "button", href: "#",
       data: { toggle: "dropdown" },
-      aria: { haspopup: "true", expanded: "false" }) do
-      span { plain(@label) }
-      span(class: "caret ml-2")
+      aria: { haspopup: "true", expanded: "false",
+              **(@toggle_content ? { label: @label } : {}) }) do
+      if @toggle_content
+        trusted_html(@toggle_content)
+      else
+        span { plain(@label) }
+      end
     end
   end
 
@@ -112,14 +140,15 @@ class Components::Dropdown < Components::Base
   end
 
   def render_menu(sections)
-    ul(id: @menu_id,
-       class: class_names("dropdown-menu", @menu_class),
-       aria: { labelledby: @id }) do
+    div(id: @menu_id,
+        class: class_names("dropdown-menu", @menu_class),
+        aria: { labelledby: @id }) do
       trusted_html(@menu_header) if @menu_header
       sections.each_with_index do |tuples, idx|
-        li(class: "divider") if idx.positive?
-        tuples.each { |tuple| li { render_link(tuple) } }
+        div(class: "dropdown-divider") if idx.positive?
+        tuples.each { |tuple| render_link(tuple) }
       end
+      trusted_html(@menu_content) if @menu_content
     end
   end
 
@@ -128,9 +157,9 @@ class Components::Dropdown < Components::Base
   # used to provide (merge args, strip `d-block` for buttons,
   # dispatch via `LinkRendering`).
   #
-  # `args[:active]` (sort-bar uses this) adds the BS3 `.active`
-  # class to the link and disables it so the current sort doesn't
-  # navigate away to itself.
+  # `args[:active]` (sort-bar uses this) adds the `.active` class to
+  # the link and disables it so the current sort doesn't navigate
+  # away to itself.
   def render_link(tuple)
     str, url, args = tuple
     args ||= {}
@@ -164,28 +193,15 @@ class Components::Dropdown < Components::Base
     strip_tooltip_data(kwargs)
   end
 
-  # Tooltip data attrs are meaningful on icon links in the top-nav
-  # but are redundant and noisy inside a dropdown menu — the item
-  # label is already visible, and Bootstrap's tooltip JS can
-  # interfere with dropdown click handling. Also strips a top-level
-  # `title:` (Tab::Base::ALLOWED_HTML_OPTION_KEYS allows one) --
-  # `merge_context_nav_link_args` doesn't exclude it since it's
-  # shared with ContextNav/Profile, which don't have this problem,
-  # but a bare `title=` attribute alone still triggers the browser's
-  # native tooltip even with no Bootstrap JS wiring.
+  # Tooltip data attrs are noisy inside a dropdown menu (the label's
+  # already visible, and Bootstrap's tooltip JS can interfere with
+  # dropdown clicks) -- also strips `title:`, since a bare `title=`
+  # triggers the browser's native tooltip unaided.
   #
-  # Explicit `nil`s rather than just omitting the keys:
-  # Button::Post/Put/Patch/Delete (Button::CRUDBase) compute their
-  # own `data: { tooltip_target: "tip", placement: "top",
-  # title: @name }` internally in `button_html_options`, independent
-  # of anything passed in here -- merely removing the keys from these
-  # kwargs does nothing, since CRUDBase's own defaults were never in
-  # them to begin with. Explicit `nil`s deep_merge over those
-  # defaults and actually suppress them. Must be `nil`, not `false`
-  # -- Phlex omits a `nil` data value's attribute entirely, but
-  # renders `false` as the literal string "false", which is still a
-  # present attribute a presence-only JS check would treat as "has a
-  # tooltip target".
+  # Explicit `nil`s, not omitted keys: Button::CRUDBase always
+  # computes its tooltip data internally, and `nil` is what
+  # deep_merges over and suppresses those defaults -- `false` would
+  # render as the present attribute string "false".
   def strip_tooltip_data(kwargs)
     kwargs = kwargs.except(:title)
     data = (kwargs[:data] || {}).except(:tooltip_target, :title, :placement)

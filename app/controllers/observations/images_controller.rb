@@ -141,6 +141,7 @@ module Observations
     def update_related_projects(img, submitted_ids)
       return false unless submitted_ids
 
+      # rubocop:disable MO/NoLongCommentBlock
       # Here's the problem: User can add image to obs he doesn't own
       # if it is attached to one of his projects.
       # Observation can be attached to other projects, too,
@@ -156,6 +157,7 @@ module Observations
       # projects she doesn't belong to...
       # except in the very strict case of uploading images for
       # an observation which belongs to a project he doesn't belong to.
+      # rubocop:enable MO/NoLongCommentBlock
       projects = @user.projects_member
       img.observations.each do |obs|
         obs.projects.each do |project|

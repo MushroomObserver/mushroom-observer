@@ -24,7 +24,7 @@ class PasswordFieldTest < ComponentTestCase
 
   # Regression: Phlex password_field defaults `value: ""` to prevent
   # Rails from re-populating the field with the stored password hash
-  # on form re-render. Matches ERB password_field_with_label.
+  # on form re-render.
   def test_password_field_defaults_value_to_empty_string
     form = render_form do
       password_field(:password, label: "Password")

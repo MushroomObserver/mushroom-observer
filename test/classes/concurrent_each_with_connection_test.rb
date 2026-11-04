@@ -21,15 +21,13 @@ class ConcurrentEachWithConnectionTest < UnitTestCase
 
   # NOTE: this can't assert that concurrent items get *distinct*
   # connection objects. MO's transactional-fixtures test setup pins a
-  # single leased connection across all threads within one test (so
-  # the per-test rollback wrapper stays consistent) -- confirmed via a
-  # throwaway probe: two threads calling
+  # single leased connection across all threads within one test, so
+  # two threads calling
   # `ActiveRecord::Base.connection_pool.with_connection` inside the
-  # same test always report the same connection object_id, regardless
-  # of synchronization. Outside a transactional test (the real
-  # lib/tasks/lang.rake usage this class exists for), `with_connection`
-  # does give each thread its own connection -- that's the whole
-  # point of the pool -- but this test harness can't observe it.
+  # same test always report the same connection object_id. Outside a
+  # transactional test (the lib/tasks/lang.rake usage this class
+  # exists for), `with_connection` gives each thread a distinct
+  # connection, but this test harness can't observe it.
   def test_each_item_runs_with_an_active_db_connection
     connection_ids = Concurrent::Array.new
 

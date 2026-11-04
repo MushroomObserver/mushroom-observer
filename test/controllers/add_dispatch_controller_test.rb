@@ -269,6 +269,116 @@ class AddDispatchControllerTest < FunctionalTestCase
     assert_redirected_to(expected_full_url)
   end
 
+  # A code whose slip already has an observation adds that observation to
+  # the page's project and list, then shows it -- issue #3084.
+  def test_used_code_adds_observation_to_project
+    login("mary") # member of bolete_project
+    slip = field_slips(:field_slip_one)
+    obs = slip.observation
+
+    post(:new, params: { project: @project.id, field_slip: slip.code })
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_includes(@project.reload.observations, obs)
+    assert_flash_success(:runtime_project_add_observation_success,
+                         name: @project.title, id: obs.id)
+  end
+
+  def test_used_code_adds_observation_to_species_list
+    slip = field_slips(:field_slip_one)
+    obs = slip.observation
+
+    post(:new, params: { object_type: "SpeciesList",
+                         object_id: @species_list.id,
+                         field_slip: slip.code.downcase })
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_includes(@species_list.reload.observations, obs)
+  end
+
+  def test_used_code_adds_every_observation_of_the_occurrence
+    login("mary")
+    slip = field_slips(:field_slip_one)
+    sibling = observations(:coprinus_comatus_obs)
+    sibling.update_column(:occurrence_id, slip.occurrence.id)
+
+    post(:new, params: { project: @project.id, field_slip: slip.code })
+
+    assert_includes(@project.reload.observations, sibling)
+  end
+
+  def test_used_code_skips_a_project_the_user_is_not_in
+    slip = field_slips(:field_slip_one) # rolf is not in bolete_project
+    obs = slip.observation
+
+    post(:new, params: { project: @project.id, field_slip: slip.code })
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_not_includes(@project.reload.observations, obs)
+    assert_flash_warning(:occurrence_resolve_projects_refused,
+                         projects: @project.title)
+  end
+
+  def test_used_code_skips_a_list_the_user_cannot_edit
+    login("mary") # first_species_list is rolf's
+    slip = field_slips(:field_slip_one)
+    obs = slip.observation
+
+    post(:new, params: { object_type: "SpeciesList",
+                         object_id: @species_list.id,
+                         field_slip: slip.code })
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_not_includes(@species_list.reload.observations, obs)
+    assert_flash_error(:permission_denied)
+  end
+
+  # Already there: "already in", even for a user who couldn't add it.
+  def test_used_code_already_in_project_and_list
+    slip = field_slips(:field_slip_one)
+    obs = slip.observation
+    @project.add_observation(obs) # rolf is not a member
+    @species_list.add_observation(obs)
+
+    post(:new, params: { project: @project.id, field_slip: slip.code,
+                         object_type: "SpeciesList",
+                         object_id: @species_list.id })
+
+    assert_redirected_to(permanent_observation_path(obs.id))
+    assert_flash_success(
+      [[:add_dispatch_already_in, { name: @project.title, id: obs.id }],
+       [:add_dispatch_already_in,
+        { name: @species_list.unique_format_name, id: obs.id }]]
+    )
+  end
+
+  # A sibling not yet in the project means the collection isn't already
+  # there: the missing one is added.
+  def test_used_code_partly_in_project_adds_the_rest
+    login("mary")
+    slip = field_slips(:field_slip_one)
+    @project.add_observation(slip.observation)
+    sibling = observations(:coprinus_comatus_obs)
+    sibling.update_column(:occurrence_id, slip.occurrence.id)
+
+    post(:new, params: { project: @project.id, field_slip: slip.code })
+
+    assert_includes(@project.reload.observations, sibling)
+    assert_flash_success(:runtime_project_add_observation_success,
+                         name: @project.title, id: slip.observation.id)
+  end
+
+  # A slip with no observation yet still goes to the observation form.
+  def test_unused_slip_code_still_goes_to_qr_page
+    code = field_slips(:field_slip_no_obs).code
+
+    post(:new, params: { project: @project.id, field_slip: code })
+
+    assert_redirected_to(
+      "#{MO.http_domain}/qr/#{code}?project=#{@project.id}"
+    )
+  end
+
   # Test species_list without project
   def test_species_list_without_project
     spl = species_lists(:first_species_list)

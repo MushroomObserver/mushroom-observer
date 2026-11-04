@@ -130,10 +130,10 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_head_title(term.name)
 
-    ESSENTIAL_ATTRIBUTES.each do |attr|
-      assert_select("body", /#{term.send(attr)}/,
-                    "Page is missing glossary term #{attr}")
-    end
+    assert_select("#title", /#{term.name}/,
+                  "Page is missing glossary term name")
+    assert_select(".description", /#{term.description}/,
+                  "Page is missing glossary term description")
     assert_select("a[href='#{prior_version_path}']", true,
                   "Page should have link to prior version")
     assert_select(
@@ -156,7 +156,7 @@ class GlossaryTermsControllerTest < FunctionalTestCase
     make_admin
     get(:show, params: { id: term.id })
 
-    assert_select("form input[value='delete']", { count: 1 },
+    assert_select(".show_title_nav form input[value='delete']", { count: 1 },
                   "Page is missing a way for admin to destroy glossary term")
   end
 

@@ -924,6 +924,56 @@ class Query::ObservationsTest < UnitTestCase
     assert_equal(2, query.num_results)
   end
 
+  # A member is dropped to keep an occurrence from appearing twice. Where
+  # the primary cannot appear, there is nothing to appear twice, and
+  # dropping the member hid it from its owner's list entirely (#5486).
+  def test_observation_query_keeps_member_when_primary_is_filtered_out
+    member = observations(:minimal_unknown_obs)      # mary's
+    primary = observations(:coprinus_comatus_obs)    # rolf's
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    member.update!(occurrence: occ)
+    assert_not_equal(member.user_id, primary.user_id)
+
+    ids = Query.lookup(:Observation, by_users: member.user_id).result_ids
+
+    assert_includes(ids, member.id,
+                    "a user should see their observation even when the " \
+                    "occurrence's primary belongs to someone else")
+    assert_not_includes(ids, primary.id)
+  end
+
+  def test_observation_query_drops_member_when_owner_holds_both
+    member = observations(:minimal_unknown_obs)
+    primary = observations(:detailed_unknown_obs)
+    assert_equal(member.user_id, primary.user_id)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    member.update!(occurrence: occ)
+
+    ids = Query.lookup(:Observation, by_users: member.user_id).result_ids
+
+    assert_not_includes(ids, member.id,
+                        "one occurrence should take one place in a list")
+    assert_includes(ids, primary.id)
+  end
+
+  # An import's primaries are native MO records carrying no import id,
+  # so the results page could show nothing of what it imported.
+  def test_observation_query_keeps_imported_member_in_import_results
+    member = observations(:minimal_unknown_obs)
+    primary = observations(:coprinus_comatus_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    import = inat_imports(:rolf_inat_import)
+    member.update!(occurrence: occ, inat_import: import)
+
+    ids = Query.lookup(:Observation, inat_import: import.id).result_ids
+
+    assert_includes(ids, member.id,
+                    "an import's results should list what it imported")
+  end
+
   def test_observation_needs_naming_true_filters_by_viewer
     mary = users(:mary)
     expected = Observation.needs_naming(mary)

@@ -3,7 +3,8 @@
 # Action template for `Account::ProfileController#edit` — the user's
 # profile edit page. Two columns: the `Form` on the left (name,
 # location, notes, image upload, mailing address), the user's
-# current profile image plus a remove button on the right.
+# current profile image plus a remove button on the right; the Danger
+# Zone below them.
 #
 module Views::Controllers::Account::Profile
   class Edit < Views::FullPageBase
@@ -12,6 +13,7 @@ module Views::Controllers::Account::Profile
     prop :copyright_year, Integer
     prop :licenses, _Array(Array)
     prop :upload_license_id, _Nilable(Integer)
+    prop :purge, _Nilable(::ContentPurge), default: nil
 
     def view_template
       container_class(:full)
@@ -22,6 +24,7 @@ module Views::Controllers::Account::Profile
         Column(xs: 12, sm: 7) { render_form }
         Column(xs: 12, sm: 5, class: "text-center") { render_image_column }
       end
+      render(Edit::DangerZone.new(user: @user, purge: @purge))
     end
 
     private

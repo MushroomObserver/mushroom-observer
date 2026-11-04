@@ -1,9 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::Admin::Emails::NameChangeRequests
-  # Form for submitting a name change request email to admins.
-  # Rendered by the admin/emails/name_change_requests controller's
-  # `new.erb`. Allows users to request changing a taxonomic name.
+  # Form for submitting a name change request email to admins. Allows
+  # users to request changing a taxonomic name.
   class Form < ::Components::ApplicationForm
     prop :name, ::Name
     prop :new_name_with_icn_id, String

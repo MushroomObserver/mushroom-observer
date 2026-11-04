@@ -149,9 +149,7 @@ module Projects
     end
 
     # Replaces the target widget and the aliases table, then closes
-    # and removes the modal. Inlined from the deleted
-    # `projects/aliases/_target_update.erb` partial. Emits four
-    # turbo_stream actions.
+    # and removes the modal. Emits four turbo_stream actions.
     def render_project_alias_target_change(project)
       project_aliases = project.aliases.includes(:target).order(name: :asc).
                         to_a

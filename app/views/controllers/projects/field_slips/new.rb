@@ -58,17 +58,14 @@ module Views::Controllers::Projects::FieldSlips
              ))
     end
 
-    # Each `<tr>` is a Stimulus root rendered by `TrackerRow` —
+    # Each `<tr>` is a Stimulus root rendered by `TrackerRow` --
     # `data-controller="field-slip-job"` + per-tracker data attrs the
-    # JS uses to mutate cells in place as job state changes. The
+    # JS uses to mutate cells as job state changes.
     # `tbody#field_slip_job_trackers` is also a Turbo Stream target
-    # (`field_slips_controller#create` does
-    # `turbo_stream.prepend(:field_slip_job_trackers) { ... }` to
-    # append a newly-created tracker without a full page refresh).
-    #
-    # Uses `Components::Table`'s row mode: `column(header, …)`
-    # defines just the `<th>` chrome; `row { |tracker| … }` renders
-    # the entire `<tr>` per tracker via `TrackerRow`.
+    # (`field_slips_controller#create` prepends a newly-created
+    # tracker there). Uses `Components::Table`'s row mode:
+    # `column(header, …)` defines the `<th>` chrome; `row { |tracker|
+    # … }` renders each `<tr>` via `TrackerRow`.
     def render_tracker_table
       Table(@trackers,
             identifier: "field-slip-trackers",

@@ -16,9 +16,9 @@ class ModalConfirmTest < ComponentTestCase
     # also having to track a header element.
     assert_no_html(html, "#mo_confirm .modal-header")
 
-    # Title lives INSIDE .modal-body, with .py-4 extra padding.
+    # Title lives INSIDE .modal-body.
     assert_html(html,
-                ".modal-body.py-4 > #mo_confirm_title.modal-title" \
+                ".modal-body > #mo_confirm_title.modal-title" \
                 "[data-confirm-modal-target='title']",
                 text: :are_you_sure.l)
 

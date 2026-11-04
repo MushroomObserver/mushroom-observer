@@ -21,8 +21,9 @@ module ApplicationController::Authentication
   # Request-scoped accessor for the logged-in User. Lives on the
   # controller so the request/session boundary is the only thing
   # that can answer "who's looking at this page" - no model-level
-  # ambient global anywhere. `helper_method` exposes it to ERB;
-  # `Components::Base` registers it as a value helper for Phlex views.
+  # ambient global anywhere. `helper_method` exposes it to the view
+  # context; `Components::Base` registers it as a value helper for
+  # Phlex views.
   def current_user
     @user
   end
@@ -33,6 +34,7 @@ module ApplicationController::Authentication
   #
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Filter that should run before everything else.  Establishes whether a User
   # is logged in or not.
   #
@@ -47,6 +49,7 @@ module ApplicationController::Authentication
   # not, the "user" is immediately logged out and the autologin cookie is
   # destroyed.
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def autologin
     # render(plain: "Sorry, we've taken MO down to test something urgent."\
     #               "We'll be back in a few minutes. -Jason", layout: false)

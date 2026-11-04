@@ -13,15 +13,13 @@ module Views::Controllers::Observations::FieldSlips
       add_page_title(
         :field_slip_attach_title.t(
           name: viewer_aware_unique_format_name(@observation)
-        )
+        ).small_author
       )
       add_context_nav(
         Tab::Observation::ListActions.new(observation: @observation)
       )
 
-      div(class: "p-3") do
-        render(Form.new(observation: @observation, field_code: @field_code))
-      end
+      render(Form.new(observation: @observation, field_code: @field_code))
     end
   end
 end

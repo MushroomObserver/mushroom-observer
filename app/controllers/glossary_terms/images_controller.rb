@@ -80,6 +80,7 @@ module GlossaryTerms
 
     ############################################################################
 
+    # rubocop:disable MO/NoLongCommentBlock
     # REMOVE IMAGES. These actions are more or less identical to the ones in
     # Observations::ImagesController. Each image tile has a button that's a
     # form used to remove one or more images from a glossary_term (not destroy!)
@@ -92,6 +93,7 @@ module GlossaryTerms
     # remove_images. No permission check — `GlossaryTerm#can_edit?`
     # returns true for any logged-in user, and `login_required`
     # runs before this action.
+    # rubocop:enable MO/NoLongCommentBlock
     def remove
       return unless (@object = find_or_goto_index(GlossaryTerm,
                                                   params[:id].to_s))

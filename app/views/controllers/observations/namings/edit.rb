@@ -18,13 +18,12 @@ module Views::Controllers::Observations::Namings
       add_chrome
       Row do
         Column(xs: 12, sm: 8) do
-          div(class: "mt-3") do
-            render_observation_details
-            render_specimen_panel
-          end
-          div(class: "mt-3") { render_naming_form }
+          ContentPadded { render_naming_form }
         end
-        Column(xs: 12, sm: 4) { render_images }
+        Column(xs: 12, sm: 4) do
+          render_images
+          div(class: "mt-3") { render_observation_details }
+        end
       end
     end
 
@@ -32,6 +31,7 @@ module Views::Controllers::Observations::Namings
 
     def add_chrome
       container_class(:double)
+      content_padding(:panels)
       add_page_title(:edit_naming_title.t(id: @observation.id))
       add_context_nav(Tab::Observation::NamingForm.new(
                         observation: @observation
@@ -40,12 +40,6 @@ module Views::Controllers::Observations::Namings
 
     def render_observation_details
       render(Views::Controllers::Observations::Show::Details.new(
-               obs: @observation, user: @user
-             ))
-    end
-
-    def render_specimen_panel
-      render(Views::Controllers::Observations::Show::SpecimenPanel.new(
                obs: @observation, user: @user
              ))
     end

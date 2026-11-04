@@ -64,6 +64,7 @@ module SpeciesLists
       @member_specimen = false
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Validate list of names, and if successful, create observations.
     # Parameters involved in name list validation:
     #   params[:list][:members]               String user typed in big text area
@@ -77,6 +78,7 @@ module SpeciesLists
     #       val: id of name user has chosen (via radio boxes in feedback)
     # Bullet:
     # https://blog.appsignal.com/2018/06/19/activerecords-counter-cache.html
+    # rubocop:enable MO/NoLongCommentBlock
     def process_write_in_list
       redirected = false
 
@@ -112,11 +114,9 @@ module SpeciesLists
       @place_name = submitted_place_name
       init_member_vars_for_reload
       init_project_vars_for_reload(@species_list)
-      # Member notes parts are derived from the list, not from params;
-      # the reload path didn't populate them explicitly under ERB
-      # (the template called `@species_list.form_notes_parts(@user)`
-      # inline). Set them here so the Phlex view's constructor can
-      # carry them.
+      # Member notes parts are derived from the list, not from
+      # params; the reload path doesn't populate them. Set them here
+      # so the Phlex view's constructor can carry them.
       @member_notes_parts = @species_list.form_notes_parts(@user)
       render_new_view_invalid
     end

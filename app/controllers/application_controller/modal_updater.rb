@@ -4,10 +4,6 @@
 #
 #  Two helpers used by controllers whose CRUD actions write to a
 #  Bootstrap modal opened by the user without unloading the page.
-#  Both used to live as `shared/_modal_flash_update.erb` and
-#  `shared/_modal_form_reload.erb` partials that every modal
-#  controller rendered via
-#  `render(partial: "shared/modal_...", locals: { identifier: ..., ... })`.
 #
 #  - `render_modal_flash_update(identifier)` — for actions that
 #    fail validation but don't need to reload the form: just push

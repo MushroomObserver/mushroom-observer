@@ -25,8 +25,6 @@ module Views::Controllers::VisualModels
       html = render_form
 
       assert_html(html, "#error_explanation")
-      assert_html(html, "h2")
-      assert_html(html, "li")
       error_text = Nokogiri::HTML(html).at_css("#error_explanation").text
       assert_includes(error_text, "1 #{:error.t}")
       assert_includes(

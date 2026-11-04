@@ -34,7 +34,7 @@ class Views::Controllers::Descriptions::Authors::ShowTest <
     # Stimulus controller for the user autocompleter.
     assert_html(
       html,
-      "div.autocompleter[data-controller~='autocompleter--user']"
+      ".autocompleter[data-controller~='autocompleter--user']"
     )
   end
 

@@ -11,6 +11,7 @@ class Inat
       def add_inat_images(inat_obs_photos)
         importer = Inat::PhotoImporter.new(
           observation: @observation, user: user, owner: !@import_others,
+          opted_out: @opted_out,
           external_site: @external_site
         )
         inat_obs_photos.each do |obs_photo|

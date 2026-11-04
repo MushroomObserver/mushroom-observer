@@ -22,7 +22,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # the row to update.
     html = render_row
 
-    assert_html(html, "div.row.naming-row" \
+    assert_html(html, ".row.naming-row" \
                       "#observation_naming_#{@naming.id}")
   end
 
@@ -103,7 +103,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     assert_html(html, "a[data-modal='modal_naming_votes_#{@naming.id}']")
     # vote-number span carries the count for JS / tests targeting
     # it (it gets updated in place after a vote turbo_stream).
-    assert_html(html, "span.vote-number")
+    assert_html(html, ".vote-number")
   end
 
   # ---- your-vote cell ------------------------------------------------

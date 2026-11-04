@@ -40,25 +40,26 @@ module Views::Layouts
 
     # Renders authors and editors for description objects
     def description_authors_and_editors
-      authors_list = @obj.authors
-      editors_list = @obj.editors
-      is_admin = @user && @obj.is_admin?(@user)
-      is_author = @user && authors_list.include?(@user)
-
       p do
-        render_user_list(:show_name_description_author, authors_list) do
-          render_authors_link if is_admin || !is_author
+        render_user_list(:show_name_description_author, @obj.authors) do
+          render_authors_link if @user
         end
         br
-        render_user_list(:show_name_description_editor, editors_list)
+        render_user_list(:show_name_description_editor, @obj.editors)
       end
     end
 
     def render_authors_link
+      args = { id: @obj.id, type: @obj.type_tag }
+      href, label =
+        if @obj.can_review_authors?(@user)
+          [description_authors_path(**args), :review_authors_review_authors]
+        else
+          [new_description_author_requests_path(**args),
+           :show_description_author_request]
+        end
       whitespace
-      a(href: description_authors_path(id: @obj.id, type: @obj.type_tag)) do
-        plain("(#{:review_authors_review_authors.t})")
-      end
+      a(href: href) { plain("(#{label.t})") }
     end
 
     # Renders authors and editors for non-description objects.
@@ -76,6 +77,7 @@ module Views::Layouts
       end
     end
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Render a list of users on one line. Renders nothing if user list
     # empty. Accepts optional block to append content after the list.
     #
@@ -87,6 +89,7 @@ module Views::Layouts
     #   render_user_list(:show_name_description_author, authors) do
     #     a(href: some_path) { plain "(review)" }
     #   end
+    # rubocop:enable MO/NoLongCommentBlock
     def render_user_list(title, users = [])
       return unless users&.any?
 

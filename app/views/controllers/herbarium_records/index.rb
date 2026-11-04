@@ -31,8 +31,7 @@ module Views::Controllers::HerbariumRecords
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`) — matches
-    # the bare-table markup of the original ERB.
+    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
       Table(@objects, class: "table-striped",
                       show_headers: false) do |t|

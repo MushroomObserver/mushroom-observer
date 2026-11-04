@@ -25,7 +25,8 @@ module Views::Controllers::Observations::Show::OccurrenceStatusIcons
     types.each_with_index do |type, index|
       wrap_class = "icon-text-gap" if index.positive?
       Icon(type: type, title: status_icon_title(type),
-           wrap_class: wrap_class, data: { tooltip_container: "li" })
+           wrap_class: wrap_class, center_tooltip: true,
+           data: { tooltip_container: "li" })
     end
   end
 

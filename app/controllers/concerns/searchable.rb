@@ -55,6 +55,7 @@ module Searchable
     def save_search_query_and_redirect_to_index
       flash_unmatched_lookups
       save_search_query
+      session[:search_view] = "advanced"
       # always_index: 1 preserves MO's existing guarantee that a search
       # submission lands on the results list, not a same-request
       # auto-redirect to a single match -- see

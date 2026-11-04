@@ -3,9 +3,7 @@
 require("test_helper")
 
 # Tests for Views::Controllers::FieldSlips::Form — the Phlex
-# conversion of the field-slip form (replaces
-# app/views/controllers/field_slips/_form.erb plus its matrix
-# sub-partials).
+# field-slip form, plus its matrix sub-views.
 #
 # Focus areas:
 # 1. Render-mode branching (code-only vs main form)

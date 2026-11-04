@@ -70,7 +70,7 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     click_link(class: "herbarium_record_link_#{rec.id}")
 
     assert_selector("body.herbarium_records__show")
-    click_on(text: "Edit Fungarium Record")
+    within(".show_title_nav") { click_on(text: "Edit Fungarium Record") }
 
     assert_selector("body.herbarium_records__edit")
     within("#herbarium_record_form") do
@@ -94,7 +94,9 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     end
 
     assert_selector("body.herbarium_records__show")
-    click_on(class: "destroy_herbarium_record_link_#{rec.id}")
+    within(".show_title_nav") do
+      click_on(class: "destroy_herbarium_record_link_#{rec.id}")
+    end
 
     # After destroying from show page, redirects to the observation
     assert_selector("body.observations__show")

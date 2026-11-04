@@ -2,8 +2,7 @@
 
 module Views::Controllers::Locations
   module Search
-    # Shown after a pattern-search submission. The original `show.erb`
-    # rendered a single partial; here it simply renders the `Help`
+    # Shown after a pattern-search submission. Renders the `Help`
     # sibling class.
     class Show < Views::FullPageBase
       def view_template

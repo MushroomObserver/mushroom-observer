@@ -6,6 +6,8 @@ module Views::Controllers::Locations::Descriptions
     prop :description, ::LocationDescription
     prop :user, _Nilable(::User), default: nil
     prop :licenses, _Array(_Tuple(String, Integer)), default: -> { [] }
+    prop :project, _Nilable(::Project), default: nil
+    prop :project_chosen, _Boolean, default: false
 
     def view_template
       add_page_title(:create_location_description_title.t(
@@ -15,8 +17,10 @@ module Views::Controllers::Locations::Descriptions
                         description: @description
                       ))
 
-      render(Views::Controllers::Descriptions::Form.new(
-               @description, licenses: @licenses, user: @user, turbo: true
+      render(Views::Controllers::Descriptions::NewToggle.new(
+               target: @location, description: @description, user: @user,
+               licenses: @licenses, project: @project,
+               project_chosen: @project_chosen
              ))
     end
   end

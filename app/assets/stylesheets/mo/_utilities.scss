@@ -226,6 +226,10 @@
   border-bottom: 1px solid $border-color !important;
 }
 
+.border-top-0 {
+  border-top: 0 !important;
+}
+
 .rounded-0 {
   border-radius: 0 !important;
 }
@@ -384,6 +388,10 @@
   margin-right: 3rem !important;
 }
 
+.mr-auto {
+  margin-right: auto !important;
+}
+
 .ml-0 {
   margin-left: 0 !important;
 }
@@ -406,6 +414,10 @@
 
 .ml-5 {
   margin-left: 3rem !important;
+}
+
+.ml-auto {
+  margin-left: auto !important;
 }
 
 .p-0 {
@@ -530,6 +542,10 @@
 
 .pr-0 {
   padding-right: 0 !important;
+}
+
+.pr-2 {
+  padding-right: 0.5rem !important;
 }
 
 .pr-3 {
@@ -835,6 +851,14 @@
 
   .float-sm-none {
     float: none !important;
+  }
+
+  .mt-sm-1 {
+    margin-top: 0.25em !important;
+  }
+
+  .mt-sm-2 {
+    margin-top: 0.5em !important;
   }
 
   .mt-sm-3 {

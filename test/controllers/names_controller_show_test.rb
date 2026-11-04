@@ -345,7 +345,7 @@ class NamesControllerShowTest < FunctionalTestCase
     get(:show, params: { id: name.id })
 
     assert_no_match(
-      footer_created_by, @response.body,
+      footer_created_by, css_select(".footer-view-stats").to_s,
       "Footer should omit `#{:created.ti} line if created_at is absent"
     )
   end
@@ -363,7 +363,7 @@ class NamesControllerShowTest < FunctionalTestCase
     get(:show, params: { id: name.id })
 
     assert_no_match(
-      footer_updated_at, @response.body,
+      footer_updated_at, css_select(".footer-view-stats").to_s,
       "Footer should omit #{:modified.l} date if updated_at absent"
     )
   end
@@ -394,7 +394,7 @@ class NamesControllerShowTest < FunctionalTestCase
     get(:show, params: { id: name.id })
 
     assert_no_match(
-      footer_last_updated_by, @response.body,
+      footer_last_updated_by, css_select(".footer-view-stats").to_s,
       "Footer should omit #{:modified.l} by if updated_at absent"
     )
   end

@@ -2,15 +2,12 @@
 
 # Renders errors.add(:field, :tag, **args) translation :tag at display
 # time, instead of resolving eagerly via .t/.l at validation time.
-#
-# MO's tags live in a flat `mo.*` i18n scope. Rails' own
-# generate_message never looks there - it only checks
-# <i18n_scope>.errors.* and top-level errors.*.
-#
-# This overrides #message, not a separate resolver method. Every
-# other entry point built on #message - full_message, full_messages,
-# to_hash/as_json, errors[:attr], ActiveRecord::RecordInvalid#message
-# - resolves MO tags correctly too, automatically.
+# MO's tags live in a flat `mo.*` i18n scope, which Rails' own
+# generate_message doesn't check -- only <i18n_scope>.errors.* and
+# top-level errors.*. Overrides #message, not a separate resolver,
+# so every other entry point built on it (full_message,
+# full_messages, to_hash/as_json, errors[:attr],
+# ActiveRecord::RecordInvalid#message) resolves MO tags too.
 ActiveModel::Error.prepend(
   Module.new do
     def message

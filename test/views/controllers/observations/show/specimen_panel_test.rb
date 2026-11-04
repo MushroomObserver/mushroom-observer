@@ -137,7 +137,7 @@ class Views::Controllers::Observations::Show::SpecimenPanelTest <
     )
     # MO attribution link
     assert_html(
-      html, "small.text-muted " \
+      html, "small " \
             "a[href='#{routes.permanent_observation_path(sibling.id)}']"
     )
   end

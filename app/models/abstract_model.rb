@@ -254,6 +254,7 @@ class AbstractModel < ApplicationRecord
   # Return id from before destroy.
   attr_reader :id_was
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Call this whenever a User requests the show_object page for an
   # object.  It updates the +num_views+ and +last_view+ fields.
   #
@@ -269,6 +270,7 @@ class AbstractModel < ApplicationRecord
   # *NOTE*: this saves the old stats for the page footer of show_observation,
   # show_name, etc. otherwise the footer will always show the last view as now!
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def update_view_stats(_current_user = nil)
     return unless respond_to?(:num_views=) || respond_to?(:last_view=)
 
@@ -332,6 +334,7 @@ class AbstractModel < ApplicationRecord
   #
   ##############################################################################
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Return the name of the controller (as a string! see below)
   # that handles the "show_<object>" for this object.
   #
@@ -351,12 +354,14 @@ class AbstractModel < ApplicationRecord
   # cases `show_controller` is practical - some actions handle a polyvalent
   # object whose path cannot be easily interpolated. - AN 10/2022
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def self.show_controller
     "/#{name.pluralize.underscore}" # Rails standard for most controllers
   end
 
   delegate :show_controller, to: :class
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Return the name of the "index_<object>" action (as a symbol)
   # that displays search index for this object.
   #
@@ -375,6 +380,7 @@ class AbstractModel < ApplicationRecord
   #   Best: each such controller has just one index action.
   #   Otherwise, perhaps define "index_action" in the individual object class.
   # JDC 2021-01-14
+  # rubocop:enable MO/NoLongCommentBlock
   def self.index_action
     :index
   end
@@ -411,6 +417,7 @@ class AbstractModel < ApplicationRecord
 
   delegate :show_action, to: :class
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Return the URL of the "show_<object>" action (as a string)
   #
   #   # normalized controller
@@ -423,6 +430,7 @@ class AbstractModel < ApplicationRecord
   # NOTE: show_controller now has leading forward slash,
   # to account for namespacing
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def self.show_url(id)
     "#{MO.http_domain}#{show_controller}/#{id}"
   end

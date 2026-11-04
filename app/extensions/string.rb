@@ -31,6 +31,7 @@
 #  ---
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
+#  strip_textile_for_names:: Remove the Textile markup Names use.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.
 #  is_ascii_character?:: Does string start with ASCII character?
@@ -466,9 +467,12 @@ class String
     gsub(HTML_TAG_PATTERN, "")
   end
 
-  # Remove hyperlinks from an HTML string.
+  # Remove hyperlinks from an HTML string. Removing tags from safe HTML
+  # leaves safe HTML, so the result keeps the receiver's html_safe flag,
+  # which gsub alone drops.
   def strip_links
-    gsub(%r{</?a.*?>}, "")
+    result = to_str.gsub(%r{</?a.*?>}, "")
+    html_safe? ? ActiveSupport::SafeBuffer.new(result) : result
   end
 
   # Truncate an HTML string, being careful to close off any open formatting
@@ -593,6 +597,7 @@ class String
     insert(ind + offset, '<small class="text-nowrap">'.html_safe)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
   #
@@ -609,6 +614,7 @@ class String
   #
   #   string.strip_squeeze == "This type of string."
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def strip_squeeze
     strip.squeeze(" ")
   end
@@ -620,6 +626,12 @@ class String
   # This gets rid of them both. Turns all newlines into single spaces.
   def wring_out_textile
     gsub("\r\n", " ").squeeze(" ")
+  end
+
+  # Remove whatever Textile markup Name display strings carry, so a name
+  # copied from a rendered page parses: "**__Amanita__** Pers."
+  def strip_textile_for_names
+    gsub(/\*\*|__/, "")
   end
 
   # Generate a string of random characters of length +len+.  By default it

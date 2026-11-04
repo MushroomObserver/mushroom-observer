@@ -3,28 +3,8 @@
 require("test_helper")
 require(Rails.root.join("script/release_notes").to_s)
 
-# Deploy schedule and banner text for the release scripts.
+# Banner text for the release scripts.
 class ReleaseNotesTest < UnitTestCase
-  # 8am Eastern: 12:00 UTC in daylight time, 13:00 UTC in standard time.
-  # 2026 falls back on Nov 1 and springs forward on Mar 8.
-  def test_next_deploy_time_stays_at_8am_eastern
-    {
-      Time.utc(2026, 9, 17, 11) => Time.utc(2026, 9, 17, 12),
-      Time.utc(2026, 9, 17, 12) => Time.utc(2026, 9, 17, 12),
-      Time.utc(2026, 9, 17, 12, 1) => Time.utc(2026, 9, 18, 12),
-      Time.utc(2026, 11, 1, 12, 30) => Time.utc(2026, 11, 1, 13),
-      Time.utc(2026, 11, 1, 13, 30) => Time.utc(2026, 11, 2, 13),
-      Time.utc(2026, 3, 7, 14) => Time.utc(2026, 3, 8, 12)
-    }.each do |now, expected|
-      assert_equal(expected, ReleaseNotes.next_deploy_time(now), "from #{now}")
-    end
-  end
-
-  def test_deploy_time_on_a_date
-    assert_equal(Time.utc(2026, 12, 1, 13),
-                 ReleaseNotes.deploy_time_on(Date.new(2026, 12, 1)))
-  end
-
   def test_pending_banner_line_at_the_usual_noon_deploy
     assert_equal(
       "Next release Sep 15 noon UTC (8am eastern, 5am pacific). " \

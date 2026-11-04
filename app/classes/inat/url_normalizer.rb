@@ -48,12 +48,10 @@ class Inat
       "without_field"
     ].freeze
 
-    def initialize(url, superimporter: false, import_others: false,
-                   keep_taxon_id: false)
-      @url            = url.to_s.strip
-      @superimporter  = superimporter
-      @import_others  = import_others
-      @keep_taxon_id  = keep_taxon_id
+    def initialize(url, import_others: false, keep_taxon_id: false)
+      @url           = url.to_s.strip
+      @import_others = import_others
+      @keep_taxon_id = keep_taxon_id
     end
 
     # Returns the cleaned query string, or nil if the URL is invalid.
@@ -103,8 +101,8 @@ class Inat
 
     def context_strip_params
       # user_login is meaningful only in import-others mode
-      # inat_username controls whose obss to import in own-import mode.
-      return [] if @superimporter && @import_others
+      # inat_username controls whose obss to import otherwise.
+      return [] if @import_others
 
       ["user_login"]
     end
@@ -117,13 +115,11 @@ class Inat
     end
 
     # taxon_id: strip unless all values are importable (Fungi/Slime Molds).
-    # user_id: safe for superimporters importing others' obs
+    # user_id: safe when importing others' obs,
     # strip if user_login is also present to prevent iNat from ORing the two.
     def content_strip_params(params)
       strips = @keep_taxon_id ? [] : ["taxon_id"]
-      if @superimporter && @import_others && !params.key?("user_login")
-        return strips
-      end
+      return strips if @import_others && !params.key?("user_login")
 
       strips + ["user_id"]
     end

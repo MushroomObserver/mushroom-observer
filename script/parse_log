@@ -18,6 +18,14 @@ rails_log=$app_root/log/$RAILS_ENV.log
 old_errors=$app_root/log/errors.old
 new_errors=$app_root/log/errors.new
 
+# A run that outlasts the cron interval would let the next run report the
+# same errors again; skip a run while another holds the lock. macOS has no
+# flock, so development runs go unlocked.
+if command -v flock >/dev/null; then
+  exec 9>"$app_root/log/parse_log.lock"
+  flock -n 9 || exit 0
+fi
+
 grep -a -A1 '^E, .* ERROR \|ENOMEM' $rails_log |
 grep -av '^--' |
 grep -av '^[EWI], ' |

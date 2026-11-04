@@ -31,9 +31,9 @@
 #
 # Pure kwargs — no positional-arg shorthand. The old
 # `Components::Help::Block` / `Help::Note` accepted a legacy
-# `(element, string)` positional pair (an ERB-helper holdover); this
-# was the last component in the codebase still doing that, everything
-# else (`Link`, `Button`, etc.) is kwargs-only, so the merge dropped it.
+# `(element, string)` positional pair; this was the last component in
+# the codebase still doing that, everything else (`Link`, `Button`,
+# etc.) is kwargs-only, so the merge dropped it.
 #
 # Renders nothing when there's neither a block nor `content:` to show
 # — empty wrappers are noise no caller needs; opt out by not calling

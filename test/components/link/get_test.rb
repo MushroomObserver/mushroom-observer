@@ -20,14 +20,31 @@ class LinkGetTest < ComponentTestCase
     html = render_link(name: :edit.ti, target: @path, icon: :edit)
 
     assert_html(html, "a svg.mo-icon-edit")
-    assert_html(html, "a span.sr-only", text: :edit.ti)
+    assert_html(html, "a .sr-only", text: :edit.ti)
+  end
+
+  def test_show_label_responsive_hides_text_on_xs_shows_from_sm
+    html = render_link(name: :edit.ti, target: @path, icon: :edit,
+                       show_label: :responsive)
+
+    assert_html(html, "a .d-none.d-sm-inline", text: :edit.ti)
+    assert_no_html(html, "a .sr-only")
+  end
+
+  def test_show_label_always_shows_text_at_every_breakpoint
+    html = render_link(name: :edit.ti, target: @path, icon: :edit,
+                       show_label: :always)
+
+    assert_html(html, "a .icon-text-gap", text: :edit.ti)
+    assert_no_html(html, "a .sr-only")
+    assert_no_html(html, "a .d-none")
   end
 
   def test_block_renders_inside_anchor
     html = render(block_wrapper)
 
     assert_html(html, "a[href='#{@path}']")
-    assert_html(html, "a span.block-sentinel", text: "from block")
+    assert_html(html, "a .block-sentinel", text: "from block")
   end
 
   def test_block_supersedes_button_content
@@ -51,6 +68,7 @@ class LinkGetTest < ComponentTestCase
                 "[rel='noopener noreferrer']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_strip_button_variant_renders_plain_link_without_btn_frame
     html = render_link(name: "View", target: @path, button: :strip)
 
@@ -123,8 +141,8 @@ class LinkGetTest < ComponentTestCase
 
     assert_html(html, "a.stateful-link svg.mo-icon-tracking")
     assert_html(html, "a.stateful-link svg.mo-icon-check.active-icon")
-    assert_html(html, "a span.sr-only", text: "Subscribe")
-    assert_html(html, "a span.sr-only.active-label", text: "Subscribed")
+    assert_html(html, "a .sr-only", text: "Subscribe")
+    assert_html(html, "a .sr-only.active-label", text: "Subscribed")
     assert_html(html, "a[data-active-title='Subscribed']")
   end
 

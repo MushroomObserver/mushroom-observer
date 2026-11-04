@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 # One-time backfill of ExternalLink (relationship: :export) rows for
 # Observations and Images already present in MyCoPortal (MCP)
 # (Based on a Darwin Core Archive (DwC-A) backup of the MUOB collection)
@@ -26,6 +27,7 @@
 # left by Report::Mycoportal / Report::MycoportalImageList's
 # #mark_exported!) gets that marker resolved to the discovered occid
 # in place, instead of a second row being created alongside it.
+# rubocop:enable MO/NoLongCommentBlock
 
 # USAGE:
 #

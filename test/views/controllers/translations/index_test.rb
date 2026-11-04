@@ -35,10 +35,10 @@ module Views::Controllers::Translations
         official_records: records,
         translated_records: records
       )
-      assert_html(html, "p.major_header")
-      assert_html(html, "p.minor_header")
-      assert_html(html, "p.comment")
-      assert_html(html, "p.tag_field")
+      assert_html(html, ".major_header")
+      assert_html(html, ".minor_header")
+      assert_html(html, ".comment")
+      assert_html(html, ".tag_field")
     end
 
     # Defensive branch guarding against a future item type being added
