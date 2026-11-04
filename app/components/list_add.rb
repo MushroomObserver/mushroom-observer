@@ -36,7 +36,7 @@ class Components::ListAdd < Components::ApplicationForm
     Panel(
       panel_id: "list_add", panel_class: "mt-3"
     ) do |panel|
-      panel.with_heading { plain(:list_add_heading.l) }
+      panel.with_heading { plain(:list_add_heading.l(type: heading_type)) }
       panel.with_body { super(&block) }
     end
   end
@@ -52,6 +52,10 @@ class Components::ListAdd < Components::ApplicationForm
   end
 
   private
+
+  def heading_type
+    @object.is_a?(::Project) ? :project : :list
+  end
 
   # The search-status UI is a Stimulus-driven block with three pieces:
   # a name autocompleter whose label row carries the colored
@@ -106,9 +110,13 @@ class Components::ListAdd < Components::ApplicationForm
         # `<label>` above plays that role here.
         text_field("field_slip", label: false,
                                  class: "form-control mr-3", size: 9)
-        submit("Add")
+        render_add_submit
       end
     end
+  end
+
+  def render_add_submit
+    submit("Add")
   end
 
   def render_status_light

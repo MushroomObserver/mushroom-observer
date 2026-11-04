@@ -273,6 +273,8 @@
   licenses: licenses
   lichen: lichen
   links: links
+  list: list
+  lists: lists
   locality: locality
   localities: localities
   location: location
@@ -922,7 +924,7 @@
   search_status_has_name: "Match found:"
   search_status_has_no_name: No match found
   search_status_label: Name
-  list_add_heading: Add an observation
+  list_add_heading: Add observation to [type]
 
   # These are the keywords the PatternSearch class resolves as Query params,
   # e.g. "date" in "date:today". They should not depend on other translations.

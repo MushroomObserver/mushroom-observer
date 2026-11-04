@@ -7,7 +7,8 @@ class Components::ListAddTest < ComponentTestCase
     project = projects(:bolete_project)
     html = render_list_add(object: project, project: project)
 
-    assert_html(html, "#list_add .panel-heading", text: :list_add_heading.l)
+    assert_html(html, "#list_add .panel-heading",
+                text: :list_add_heading.l(type: :project))
     assert_html(html, "#list_add .panel-body")
     assert_html(
       html, "form#list_add_form[action='#{routes.list_add_dispatch_path}']"
@@ -34,6 +35,14 @@ class Components::ListAddTest < ComponentTestCase
     )
     assert_html(html, "[data-search-status-target='message']",
                 text: :search_status_all_names.l)
+  end
+
+  def test_renders_list_heading_for_a_species_list
+    species_list = species_lists(:first_species_list)
+    html = render_list_add(object: species_list)
+
+    assert_html(html, "#list_add .panel-heading",
+                text: :list_add_heading.l(type: :list))
   end
 
   def test_field_slip_quick_add_input
