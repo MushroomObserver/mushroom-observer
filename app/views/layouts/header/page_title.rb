@@ -75,7 +75,7 @@ module Views::Layouts
     # already guards against, one level up.
     def mobile_top_row_content?
       content_for?(:id_badge) || content_for?(:title_bar_cta) ||
-        content_for?(:title_bar_actions) || show_right_column?
+        content_for?(:title_bar_actions) || object_nav?
     end
 
     def render_mobile_object_nav
