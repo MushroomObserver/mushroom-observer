@@ -338,7 +338,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # optional per-member metadata, not a second membership record.
   scope :member_of_project, lambda { |project|
     project = Project.find(project) unless project.is_a?(Project)
-    joins(:user_groups).where(user_groups: { id: project.user_group_id })
+    joins(:user_groups).
+      where(user_groups: { id: project.user_group_id }).distinct
   }
 
   scope :top_users_for_herbarium, lambda { |herbarium|
