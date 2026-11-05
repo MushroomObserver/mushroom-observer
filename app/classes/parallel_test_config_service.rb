@@ -66,10 +66,14 @@ class ParallelTestConfigService
       return nil
     end
 
-    # aliases: true -- config/database.yml merges shared credentials
-    # via YAML anchors (`<<: *credentials`); Psych's safe-load default
-    # rejects alias nodes.
-    database_config = YAML.load_file(config_path, aliases: true)
+    # database.yml is ERB, not plain YAML (#4807 added a multi-line <% %>
+    # block computing test_db/cache_test_db before the `test:` section) --
+    # YAML.load_file can't parse that raw, unlike Rails' config loading,
+    # which always renders ERB first. aliases: true -- config/database.yml
+    # merges shared credentials via YAML anchors (`<<: *credentials`);
+    # Psych's safe-load default rejects alias nodes.
+    rendered = ERB.new(File.read(config_path)).result
+    database_config = YAML.safe_load(rendered, aliases: true)
     test_config = database_config["test"]
 
     unless test_config
@@ -79,9 +83,13 @@ class ParallelTestConfigService
       return nil
     end
 
+    # test: is multi-db (primary/cache, #4807) like development/production
+    # now -- fall back to test_config itself for an old flat-shaped file.
+    primary_config = test_config["primary"] || test_config
+
     {
-      username: test_config["username"] || "mo",
-      password: test_config["password"] || "mo"
+      username: primary_config["username"] || "mo",
+      password: primary_config["password"] || "mo"
     }
   end
 
