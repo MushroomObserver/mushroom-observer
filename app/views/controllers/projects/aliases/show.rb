@@ -10,6 +10,7 @@ module Views::Controllers::Projects::Aliases
       add_project_banner(@project)
       add_show_title(@project_alias)
       container_class(:text)
+      content_padding(:no_panels)
 
       render_fields
       render_links
