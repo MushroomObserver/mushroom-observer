@@ -18,7 +18,7 @@ module Views::Controllers::InatImports
       )
       render(Views::Controllers::InatImports::Form.new(
                @form, super_importer: @super_importer, admin: @admin,
-                      project_site: @project_site, turbo: true
+                      project_site: @project_site
              ))
     end
   end

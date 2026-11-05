@@ -158,7 +158,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   # below and in the gem).
   prop :model, _Interface(:model_name, :persisted?), :positional
   prop :id, _Nilable(String), default: nil
-  prop :turbo, _Boolean, default: false
+  prop :turbo, _Boolean, default: true
   # Set only via Components::Modal::TurboForm -- see
   # `modal_hidden_field` and ModalUpdater#modal_submission?.
   prop :modal, _Boolean, default: false

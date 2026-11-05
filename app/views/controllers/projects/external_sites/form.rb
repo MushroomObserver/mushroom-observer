@@ -13,7 +13,7 @@ module Views::Controllers::Projects::ExternalSites
     prop :candidates, ::Inat::CandidateCount::Candidates
 
     def initialize(model, **attrs)
-      super(model, turbo: true, **attrs)
+      super
     end
 
     def view_template

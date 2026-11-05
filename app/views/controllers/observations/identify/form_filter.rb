@@ -11,8 +11,7 @@ module Views::Controllers::Observations::Identify
                FormObject::IdentifyFilter.new(
                  type: filter&.dig(:type),
                  term: filter&.dig(:term)
-               ),
-               turbo: true
+               )
              ))
     end
   end
