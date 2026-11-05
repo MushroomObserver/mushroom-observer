@@ -85,8 +85,7 @@ module Projects
       obs_page = paginated_observations(scope, pagination)
       { observations: obs_page,
         pagination: pagination,
-        current_count: pagination.num_total,
-        request_url: request.fullpath }
+        current_count: pagination.num_total }
     end
 
     def build_pagination(scope)

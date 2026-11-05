@@ -6,17 +6,16 @@ module Views::Controllers::Projects::Updates
     prop :user, ::User
     prop :observations, _Array(::Observation)
     prop :pagination, ::PaginationData
-    prop :request_url, String
     prop :current_count, Integer
     prop :show_excluded, _Boolean
 
-    # `results:` bundles four values the controller computes together
-    # (see Projects::UpdatesController#build_index_results) -- split
-    # them into individual props here so callers still pass one hash.
+    # `results:` bundles three values the controller computes
+    # together (see Projects::UpdatesController#build_index_results)
+    # -- split them into individual props here so callers still pass
+    # one hash.
     def initialize(results:, **)
       super(observations: results[:observations],
             pagination: results[:pagination],
-            request_url: results[:request_url],
             current_count: results[:current_count],
             **)
     end
@@ -25,11 +24,12 @@ module Views::Controllers::Projects::Updates
       add_project_banner(@project)
       container_class(:full)
       add_page_title(:project_updates_title.t)
+      add_pagination(@pagination)
 
       render_toolbar
-      render_pagination
-      render_matrix
-      render_pagination
+      PaginatedResults do
+        render_matrix
+      end
     end
 
     private
@@ -100,15 +100,6 @@ module Views::Controllers::Projects::Updates
           confirm: :project_updates_confirm_add_all.t
         )
       end
-    end
-
-    def render_pagination
-      return unless @pagination.num_pages > 1
-
-      render(Views::Layouts::Header::IndexPaginationNav.new(
-               pagination_data: @pagination,
-               request_url: @request_url
-             ))
     end
 
     def render_matrix
