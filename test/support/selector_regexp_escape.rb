@@ -15,5 +15,6 @@ module SelectorRegexpEscape
   end
 end
 
-Rails::Dom::Testing::Assertions::SelectorAssertions::SubstitutionContext.
-  prepend(SelectorRegexpEscape)
+module Rails::Dom::Testing::Assertions::SelectorAssertions
+  SubstitutionContext.prepend(SelectorRegexpEscape)
+end
