@@ -333,6 +333,14 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   scope :verified, -> { where.not(verified: nil) }
   scope :unverified, -> { where(verified: nil) }
 
+  # Project membership is user_group membership -- see
+  # Project#member?. A ProjectMember row (trust_level) is separate,
+  # optional per-member metadata, not a second membership record.
+  scope :member_of_project, lambda { |project|
+    project = Project.find(project) unless project.is_a?(Project)
+    joins(:user_groups).where(user_groups: { id: project.user_group_id })
+  }
+
   scope :top_users_for_herbarium, lambda { |herbarium|
     joins(:herbarium_records).
       where(herbarium_records: { herbarium_id: herbarium.id }).

@@ -9,6 +9,8 @@
 module Projects
   # CRUD for project members
   class MembersController < ApplicationController
+    include Projects::AddableObservations
+
     before_action :login_required
 
     # Members lives under the project Admin tab now (issue #4148).
@@ -20,10 +22,11 @@ module Projects
     def index
       return unless find_project!
 
-      users = @project.user_group.users.includes(:image).to_a
+      results = members_index_results
       project_member = ProjectMember.new(project: @project)
       render(Views::Controllers::Projects::Members::Index.new(
-               project: @project, users: users,
+               project: @project, users: results[:users],
+               pagination: results[:pagination],
                project_member: project_member, user: @user
              ))
     end
@@ -94,10 +97,6 @@ module Projects
       update_membership(@project, @project_member.user)
     end
 
-    # Per-click cap on "Add My Observations". Method (not constant) so
-    # tests can stub it via Minitest stub. See issue #4129.
-    def self.add_obs_batch_limit = 100
-
     # Turbo-stream modal showing how many of the candidate's observations
     # match current project constraints and aren't already in the project.
     # See issue #4129.
@@ -165,6 +164,16 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end
 
+    def members_index_results
+      scope = Query.lookup(:User, member_of_project: @project.id,
+                                  order_by: :login).scope.includes(:image)
+      pagination = number_pagination_data
+      pagination.num_total = scope.count
+      users = scope.offset(pagination.from).limit(pagination.num_per_page).
+              to_a
+      { users: users, pagination: pagination }
+    end
+
     def find_project_member!
       user = find_or_goto_index(User, params[:candidate])
       return unless user
@@ -229,37 +238,6 @@ module Projects
       else
         false
       end
-    end
-
-    def add_observations(project, candidate)
-      # Returns the count of observations added. Caps each click at
-      # add_obs_batch_limit most-recent matching observations so the
-      # request stays synchronous.
-      obs = addable_observations(project, candidate).
-            order(id: :desc).limit(self.class.add_obs_batch_limit)
-      before = project.observations.count
-      project.add_observations(obs)
-      project.observations.count - before
-    end
-
-    # Observations owned by candidate that match project constraints and
-    # are not already in project.observations. Date bounds are applied
-    # independently so projects with only a start_date or only an
-    # end_date still constrain correctly.
-    def addable_observations(project, candidate)
-      obs = candidate.observations
-      loc = project.location
-      if loc
-        obs = obs.in_box(north: loc.north, south: loc.south,
-                         east: loc.east, west: loc.west)
-      end
-      if project.start_date
-        obs = obs.found_after(project.start_date.strftime("%Y-%m-%d"))
-      end
-      if project.end_date
-        obs = obs.found_before(project.end_date.strftime("%Y-%m-%d"))
-      end
-      obs.where.not(id: project.observations.select(:id))
     end
 
     def set_trust(project, user, trust_level)
