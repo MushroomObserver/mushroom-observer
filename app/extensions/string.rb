@@ -473,7 +473,26 @@ class String
   # Remove HTML tags and comments (not entities) from string.  Used to
   # make sure title is safe for HTML header field.
   def strip_html
-    gsub(HTML_COMMENT_PATTERN, "").gsub(HTML_TAG_PATTERN, "")
+    gsub_until_stable(HTML_COMMENT_PATTERN, HTML_TAG_PATTERN)
+  end
+
+  # Repeatedly removes matches of each pattern until no pattern
+  # matches anything, instead of trusting one pass of each. A single
+  # pass can leave a dangerous substring behind when removing one
+  # match exposes a new one that wasn't contiguous in the original
+  # string -- e.g. "<scr<script>ipt>" loses only the inner match in
+  # one pass, reassembling "<script>" from what's left on either
+  # side (CodeQL: incomplete multi-character sanitization).
+  def gsub_until_stable(*patterns)
+    result = to_str
+    loop do
+      stripped = patterns.reduce(result) do |str, pattern|
+        str.gsub(pattern, "")
+      end
+      return stripped if stripped == result
+
+      result = stripped
+    end
   end
 
   # Remove hyperlinks from an HTML string. Removing tags from safe HTML
@@ -530,7 +549,7 @@ class String
   # problem, but this seems to work pretty well on the output of RedCloth at
   # least.
   def html_to_ascii
-    gsub(HTML_COMMENT_PATTERN, ""). # remove comments before any tags
+    gsub_until_stable(HTML_COMMENT_PATTERN). # remove comments before tags
       gsub(/\s*\n\s*/, " "). # remove all newlines first
       gsub(%r{</?div[^>]*>}, ""). # divs are messing things up, too
       gsub(%r{<br */> *}, "\n"). # put \n after every line break
@@ -540,7 +559,11 @@ class String
       gsub(%r{</td> *}, "\t"). # put tabs between table columns
       gsub(/[ \t]+(\n|$)/, '\\1'). # remove superfluous trailing whitespace
       gsub(/\n+\Z/, ""). # remove superfluous newlines at end
-      gsub(HTML_TAG_PATTERN, ""). # remove all <tags>
+      # Combined, not just HTML_TAG_PATTERN alone -- removing a tag
+      # here can expose a comment marker that survived the earlier
+      # comment pass untouched (it wasn't a complete comment until
+      # this step's tag removal revealed it).
+      gsub_until_stable(HTML_COMMENT_PATTERN, HTML_TAG_PATTERN).
       gsub(/^ +|[ \t]+$/, ""). # remove leading/trailing sp on each line
       gsub_html_special_chars # convert &xxx; and &#nnn; to ascii
   end
