@@ -110,8 +110,9 @@ module Views::Controllers::Projects
       controller.define_singleton_method(:controller_name) { "locations" }
       controller.define_singleton_method(:action_name) { "index" }
 
-      %w[projects/admin projects/members
-         projects/aliases projects/external_sites].each do |path|
+      %w[projects/admin projects/members projects/aliases
+         field_slips projects/field_slips
+         projects/external_sites].each do |path|
         controller.define_singleton_method(:controller_path) { path }
         html = render_navs(project: project)
 
@@ -146,6 +147,8 @@ module Views::Controllers::Projects
         "projects/admin" => "/projects/#{project.id}/admin",
         "projects/members" => "/projects/#{project.id}/members",
         "projects/aliases" => "/projects/#{project.id}/aliases",
+        "field_slips" => "/field_slips?project=#{project.id}",
+        "projects/field_slips" => "/field_slips?project=#{project.id}",
         "projects/external_sites" =>
           "/projects/#{project.id}/external_sites"
       }.each do |path, active_href|

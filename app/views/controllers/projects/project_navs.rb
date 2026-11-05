@@ -18,6 +18,8 @@ module Views::Controllers::Projects
       "projects/admin" => "details",
       "projects/members" => "members",
       "projects/aliases" => "aliases",
+      "field_slips" => "field_slips",
+      "projects/field_slips" => "field_slips",
       "projects/external_sites" => "external_sites"
     }.freeze
 
