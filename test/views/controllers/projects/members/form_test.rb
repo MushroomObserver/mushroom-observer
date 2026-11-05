@@ -32,6 +32,8 @@ module Views::Controllers::Projects::Members
 
       # Help text
       assert_includes(html, :change_member_status_make_member_help.t)
+      assert_includes(html, :change_member_status_remove_member_help.t)
+      assert_includes(html, :change_member_status_make_admin_help.t)
     end
 
     private

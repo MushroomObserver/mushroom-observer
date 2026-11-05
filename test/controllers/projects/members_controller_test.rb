@@ -501,6 +501,7 @@ module Projects
         "hidden_gps",
         project.project_members.find_by(user: target_user).trust_level
       )
+      assert_flash(:change_member_hidden_gps_trust_flash)
     end
 
     # trusting member revoking trust
@@ -517,6 +518,7 @@ module Projects
         "no_trust",
         project.project_members.find_by(user: target_user).trust_level
       )
+      assert_flash(:change_member_status_revoke_trust_flash)
     end
 
     # member allows editing
@@ -533,6 +535,7 @@ module Projects
         "editing",
         project.project_members.find_by(user: target_user).trust_level
       )
+      assert_flash(:change_member_editing_trust_flash)
     end
 
     # There are many other combinations that shouldn't work

@@ -265,7 +265,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".upload-status-overlay:not(.d-none)", wait: 5)
     assert_selector(".upload-status-check:not(.d-none)", wait: 8)
     assert_selector(".carousel-item[data-image-status='upload']",
-                    visible: true)
+                    visible: :visible)
     assert_selector(".remove_image_button[disabled]", visible: :all)
 
     assert_selector("body.observations__show", wait: 10)
@@ -791,7 +791,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     within(first_image_wrapper) do
       thumb_button = find(".thumb_img_btn")
       scroll_to(thumb_button, align: :center)
-      radio = thumb_button.find("input[type='radio']", visible: :all)
+      radio = thumb_button.find_field(type: "radio", visible: :all)
       check_radio(radio[:id])
       assert_text(:image_add_default.l)
       assert_no_text(:image_set_default.l)
@@ -2042,7 +2042,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     if img_uuid
       thumbnail = find(
         ".carousel-indicator[data-image-uuid='#{img_uuid}']",
-        visible: false
+        visible: :all
       )
       thumbnail.trigger("click")
       sleep(1) # Wait for carousel to transition

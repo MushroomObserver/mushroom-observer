@@ -117,8 +117,9 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       assert_html(html, ".project_location.banner-image-text")
-      assert_html(html, "a[href='/locations/#{project.location.id}']")
-      assert_includes(html, project.place_name)
+      path = routes.location_path(project.location.id)
+      assert_html(html, ".project_location a[href='#{path}']",
+                  text: project.place_name)
     end
 
     def test_does_not_render_project_date_range_when_project_has_no_dates
@@ -133,9 +134,9 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       # past_project has no image, so no banner-image-text class
-      assert_html(html, ".project_date_range")
+      assert_html(html, ".project_date_range",
+                  text: expected_date_range(project))
       assert_no_html(html, ".banner-image-text")
-      assert_includes(html, expected_date_range(project))
     end
 
     def test_renders_both_location_and_date_range_when_both_present
@@ -143,16 +144,35 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       # past_project has no image, so no banner-image-text class
-      assert_html(html, ".project_location")
-      assert_html(html, ".project_date_range")
+      assert_html(html, ".project_location", text: project.place_name)
+      assert_html(html, ".project_date_range",
+                  text: expected_date_range(project))
       assert_no_html(html, ".banner-image-text")
-      assert_includes(html, project.place_name)
-      assert_includes(html, expected_date_range(project))
+    end
+
+    def test_logged_out_banner_has_no_links_but_a_login_prompt
+      project = projects(:albion_project)
+      project.title = "\"Albion\":https://example.com survey"
+      html = render_banner(project: project, user: nil)
+
+      assert_html(html, "#title", text: "Albion survey")
+      assert_no_html(html, "#title a")
+      assert_html(html, ".project_location", text: project.place_name)
+      assert_no_html(html, ".project_location a")
+      assert_html(html, "img.banner-image")
+      assert_html(html, "#project_login_prompt",
+                  text: :project_banner_login_prompt.l.as_displayed)
+      assert_no_html(html, "a")
+      ids = Nokogiri::HTML5.fragment(html).css("[id]").pluck("id")
+      assert_operator(ids.index("project_login_prompt"), :<,
+                      ids.index("project_banner"),
+                      "Login prompt should come before the banner")
     end
 
     private
 
-    def render_banner(project: projects(:eol_project))
+    def render_banner(project: projects(:eol_project), user: users(:mary))
+      controller.instance_variable_set(:@user, user)
       render(Banner.new(project: project))
     end
 

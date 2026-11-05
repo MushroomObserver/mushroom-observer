@@ -14,7 +14,8 @@ module Views::Controllers::Projects::Members
       project = projects(:eol_project)
       users = project.user_group.users.to_a
 
-      html = render(Index.new(project: project, users: users, user: @user))
+      html = render(Index.new(project: project, users: users,
+                              pagination: PaginationData.new, user: @user))
 
       assert_html(html, "#project_members_widget")
       assert_html(html, "#project_members_table")

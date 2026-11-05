@@ -11,15 +11,17 @@ module Projects
   class MembersController < ApplicationController
     include Projects::TabCountsRefreshable
     include Projects::AddableObservations
+    include Projects::MembershipStatusUpdates
 
     before_action :login_required
 
     def index
       return unless find_project!
 
-      users = @project.user_group.users.includes(:image).to_a
+      results = members_index_results
       render(Views::Controllers::Projects::Members::Index.new(
-               project: @project, users: users, user: @user
+               project: @project, users: results[:users],
+               pagination: results[:pagination], user: @user
              ))
     end
 
@@ -160,6 +162,16 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end
 
+    def members_index_results
+      scope = Query.lookup(:User, member_of_project: @project.id,
+                                  order_by: :login).scope.includes(:image)
+      pagination = number_pagination_data
+      pagination.num_total = scope.count
+      users = scope.offset(pagination.from).limit(pagination.num_per_page).
+              to_a
+      { users: users, pagination: pagination }
+    end
+
     def find_project_member!
       user = find_or_goto_index(User, params[:candidate])
       return unless user
@@ -200,7 +212,7 @@ module Projects
     end
 
     def render_members_update
-      users = @project.user_group.users.includes(:image).to_a
+      users = members_index_results[:users]
       render(turbo_stream: [
                turbo_stream.replace(
                  "project_members_widget",
@@ -233,110 +245,9 @@ module Projects
       User.lookup_unique_text_name(str)
     end
 
-    def update_membership(project, candidate)
-      unless update_trust_status(project, candidate)
-        unless update_admin_status(project, candidate)
-          return must_be_project_admin!(project.id)
-        end
-
-        update_member_status(project, candidate)
-      end
-      return_to_caller(project, params[:target])
-    end
-
-    def update_trust_status(project, candidate)
-      if params[:commit] == :change_member_status_revoke_trust.l
-        flash_notice(:change_member_status_revoke_trust_flash.l)
-        set_trust(project, candidate, "no_trust")
-        true
-      elsif params[:commit] == :change_member_hidden_gps_trust.l
-        flash_notice(:change_member_hidden_gps_trust_flash.l)
-        set_trust(project, candidate, "hidden_gps")
-        true
-      elsif params[:commit] == :change_member_editing_trust.l
-        flash_notice(:change_member_editing_trust_flash.l)
-        set_trust(project, candidate, "editing")
-        true
-      elsif params[:commit] == :change_member_add_obs.l
-        count = add_observations(project, candidate)
-        flash_notice(:change_member_add_obs_flash.t(count: count))
-        true
-      else
-        false
-      end
-    end
-
-    def set_trust(project, user, trust_level)
-      member = project.project_members.find_by(user:)
-      member.update(trust_level:)
-    end
-
-    def update_admin_status(project, candidate)
-      make_admin = (params[:commit] == :change_member_status_make_admin.l)
-      if project.is_admin?(@user)
-        set_status(project, :admin, candidate, make_admin)
-      elsif make_admin
-        return false
-      end
-      true
-    end
-
-    def update_member_status(project, candidate)
-      make_member = [
-        :change_member_status_make_admin.l,
-        :change_member_status_make_member.l
-      ].member?(params[:commit])
-      set_status(project, :member, candidate, make_member)
-    end
-
     def must_be_project_admin!(id)
       flash_error(:change_member_status_denied.t)
       redirect_to(project_members_path(id, q: q_param))
-    end
-
-    # Add/remove a given User to/from a given UserGroup.
-    # Changes should get logged
-    def set_status(project, type, user, add)
-      update_project_membership(project, type, user, add)
-      group = project.send(type == :member ? :user_group : :admin_group)
-      if add
-        set_status_add(project, type, user, group)
-      else
-        set_status_remove(project, type, user, group)
-      end
-    end
-
-    def update_project_membership(project, type, user, add)
-      project_member = ProjectMember.find_by(project:, user:)
-      unless project_member
-        project_member = ProjectMember.create(project:, user:,
-                                              trust_level: "editing")
-        flash_notice(:add_members_with_editing.l)
-      end
-      return unless project_member
-      return if type == :admin || add
-
-      project_member.destroy
-    end
-
-    def set_status_add(project, type, user, group)
-      if group.users.include?(user)
-        flash_notice(:"add_members_already_added_#{type}".t(user: user.login))
-      else
-        group.users << user unless group.users.member?(user)
-        project.send(:"log_add_#{type}", user)
-        flash_notice(:"add_members_added_#{type}".t(user: user.login))
-      end
-    end
-
-    def set_status_remove(project, type, user, group)
-      if group.users.include?(user)
-        group.users.delete(user)
-        project.send(:"log_remove_#{type}", user)
-        flash_notice(:"add_members_removed_#{type}".t(user: user.login))
-      else
-        flash_notice(:"add_members_already_removed_#{type}".t(user: user.login))
-      end
     end
   end
 end

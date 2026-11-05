@@ -38,6 +38,15 @@ class Query::UsersTest < UnitTestCase
     assert_query(expects, :User, has_contribution: true)
   end
 
+  def test_user_member_of_project
+    project = projects(:eol_project)
+    expects = User.member_of_project(project).order_by(:login)
+    assert(expects.any?, "Test needs a project fixture with members")
+
+    assert_query(expects, :User, member_of_project: project,
+                                 order_by: :login)
+  end
+
   def test_user_pattern_search_nonexistent
     assert_query([], :User, pattern: "nonexistent pattern")
   end

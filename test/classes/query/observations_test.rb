@@ -308,6 +308,45 @@ class Query::ObservationsTest < UnitTestCase
                  :Observation, project_violations: project, order_by: :name)
   end
 
+  # Delegates to Project#candidate_observations -- see project_test.rb
+  # for coverage of the underlying matching logic itself. Compares id
+  # sets, not assert_query's ordered array, since the Query path adds
+  # a :date (observation "when") tiebreaker the scope's direct call
+  # doesn't have.
+  def test_observation_project_candidates
+    project = projects(:rare_fungi_project)
+    assert(project.candidate_observations.any?,
+           "Test needs a project fixture with candidates")
+
+    query = Query.lookup(:Observation, project_candidates: project)
+    assert_equal(project.candidate_observations.pluck(:id).sort,
+                 query.result_ids.sort)
+  end
+
+  # Delegates to Project#new_candidate_observations -- see
+  # project_test.rb for coverage of the underlying logic itself.
+  def test_observation_project_new_candidates
+    project = projects(:rare_fungi_project)
+    assert(project.new_candidate_observations.any?,
+           "Test needs a project fixture with new candidates")
+
+    query = Query.lookup(:Observation, project_new_candidates: project)
+    assert_equal(project.new_candidate_observations.pluck(:id).sort,
+                 query.result_ids.sort)
+  end
+
+  # Delegates to Project#excluded_observations -- see project_test.rb
+  # for coverage of #exclude_observation itself.
+  def test_observation_project_excluded
+    project = projects(:rare_fungi_project)
+    obs = observations(:agaricus_campestris_obs)
+    project.exclude_observation(obs)
+
+    query = Query.lookup(:Observation, project_excluded: project)
+    assert_equal(project.excluded_observations.reload.pluck(:id).sort,
+                 query.result_ids.sort)
+  end
+
   def test_observation_projects_equivalence
     qu1 = Query.lookup_and_save(:Observation,
                                 projects: projects(:bolete_project))

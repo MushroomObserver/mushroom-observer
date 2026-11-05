@@ -2,8 +2,17 @@
 
 class ChecklistsController < ApplicationController
   # filters
-  before_action :login_required
+  before_action :login_required, unless: :public_checklist_request?
   before_action :store_location
+
+  # Exact query-param sets a logged-out visitor may request. Anything
+  # else (site-wide, user, location, `q`, extra params) needs a login,
+  # so crawlers cannot multiply URL variants of the public pages.
+  PUBLIC_PARAM_SETS = [
+    %w[project_id],
+    %w[species_list_id],
+    %w[project species_list_id]
+  ].freeze
 
   # Old MO Action (method)        New "Normalized" Action (method)
   # ----------------------------  --------------------------------
@@ -31,6 +40,7 @@ class ChecklistsController < ApplicationController
             end
     return unless @data
 
+    response.set_header("X-Robots-Tag", "noindex")
     render(Views::Controllers::Checklists::Show.new(
              data: @data, context: checklist_context,
              project_data: @project_checklist
@@ -41,10 +51,17 @@ class ChecklistsController < ApplicationController
 
   private
 
+  def public_checklist_request?
+    query = request.query_parameters
+    PUBLIC_PARAM_SETS.include?(query.keys.sort) &&
+      query.values.all? { |value| value.to_s.match?(/\A\d+\z/) }
+  end
+
   def checklist_context
     Views::Controllers::Checklists::Context.new(
       user: @user, project: @project, show_user: @show_user,
-      location: @location, species_list: @species_list
+      location: @location, species_list: @species_list,
+      logged_out: @user.nil?
     )
   end
 

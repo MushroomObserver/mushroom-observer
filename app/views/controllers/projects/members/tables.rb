@@ -27,9 +27,10 @@ module Views::Controllers::Projects::Members
     # thead rows is invisible in standard Bootstrap).
     def define_columns(table)
       table.column(:login_name.ti,
-                   class: "text-center") { |u| render_avatar(u) }
+                   align: :center) { |u| render_avatar(u) }
       table.column(:full_name.ti, class: "align-middle") { |u| plain(u.name) }
-      table.column(:project_aliases.ti, class: "align-middle") do |u|
+      table.column(:project_aliases.ti,
+                   align: :center, class: "align-middle") do |u|
         render_aliases(u)
       end
       table.column(:status.ti, class: "align-middle") do |u|

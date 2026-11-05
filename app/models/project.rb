@@ -694,53 +694,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # project's date range and (when set) bounding box. When only one
   # kind of target is set, matches on that alone. The date and bbox
   # filters mirror the violations-page rule so an obs is a candidate
-  # iff it would NOT be a violation if added.
+  # iff it would NOT be a violation if added. See
+  # Observation.project_candidates for the per-kind logic.
   def candidate_observations
-    name_ids = candidate_name_ids
-    loc_ids = candidate_location_ids
-    return Observation.none if name_ids.nil? && loc_ids.nil?
-
-    scope = if name_ids && loc_ids
-              Observation.where(id: name_ids).
-                where(id: loc_ids)
-            elsif name_ids
-              Observation.where(id: name_ids)
-            else
-              Observation.where(id: loc_ids)
-            end
-    scope = constrain_to_project_date_range(scope)
-    scope = constrain_to_project_bbox(scope)
-    scope.order(created_at: :desc)
-  end
-
-  # GPS-inside-bbox OR (no GPS AND obs.location bbox is fully
-  # contained in project bbox). Agrees with the bbox violation kind
-  # in Observation.project_violations on what "in" means.
-  def constrain_to_project_bbox(scope)
-    return scope if location.nil?
-
-    box_kwargs = location.bounding_box
-    m_box = Mappable::Box.new(**box_kwargs)
-    return scope unless m_box.valid?
-
-    gps_in_ids = Observation.gps_in_box(m_box).select(:id)
-    no_gps_in_ids = Observation.where(lat: nil).joins(:location).
-                    merge(Location.in_box(**box_kwargs)).select(:id)
-    scope.where(id: gps_in_ids).or(scope.where(id: no_gps_in_ids))
-  end
-
-  def constrain_to_project_date_range(scope)
-    return scope if start_date.nil? && end_date.nil?
-    return scope.where(Observation[:when].lteq(end_date)) if start_date.nil?
-    return scope.where(Observation[:when].gteq(start_date)) if end_date.nil?
-
-    scope.where(Observation[:when].between(start_date..end_date))
+    Observation.project_candidates(self)
   end
 
   private
 
-  # Same expansion rule as candidate_name_ids: each given name plus
-  # its synonyms plus sub-taxa of both.
+  # Same expansion rule as Observation.project_candidate_name_ids:
+  # each given name plus its synonyms plus sub-taxa of both.
   def expanded_target_name_ids(name_ids)
     return [] if name_ids.empty?
 
@@ -749,28 +712,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                       include_subtaxa: true).ids
   end
 
-  def candidate_name_ids
-    return unless target_names.any?
-
-    Observation.names(lookup: target_name_ids,
-                      include_synonyms: true,
-                      include_subtaxa: true).select(:id)
-  end
-
-  def candidate_location_ids
-    return unless target_locations.any?
-
-    scope = Observation.joins(:location).
-            where(location_suffix_conditions)
-    scope = scope.merge(Observation.in_box(**location.bounding_box)) if location
-    scope.select("observations.id")
-  end
-
   public
 
   # OR clause: location.name LIKE '%, <target>' OR = '<target>'
   # Public: also called from Observation.project_violations (the
-  # target_location violation check).
+  # target_location violation check) and
+  # Observation.project_candidate_location_ids.
   def location_suffix_conditions
     tbl = Location.arel_table
     target_location_names.map do |name|
@@ -796,9 +743,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Candidate observations not already in the project and not excluded.
   # Used for the default Updates tab list and its badge count.
   def new_candidate_observations
-    candidate_observations.
-      where.not(id: observations.select(:id)).
-      where.not(id: excluded_observations.select(:id))
+    Observation.project_new_candidates(self)
   end
 
   delegate :count, to: :new_candidate_observations,
