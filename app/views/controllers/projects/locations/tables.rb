@@ -201,7 +201,7 @@ module Views::Controllers::Projects::Locations
         confirm: :project_target_location_confirm_remove.t(
           name: loc.display_name
         ),
-        icon: :x,
+        icon: :remove,
         variant: :link,
         class: "p-0"
       )
