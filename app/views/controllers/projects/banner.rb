@@ -18,6 +18,7 @@ module Views::Controllers::Projects
     def view_template
       return unless @project
 
+      render_login_prompt unless current_user
       if @project.image
         render_banner_with_image
       else
@@ -26,6 +27,18 @@ module Views::Controllers::Projects
     end
 
     private
+
+    # Only the public checklist renders a banner without a user. No
+    # link: the top nav's login button sits just above it.
+    def render_login_prompt
+      Row do
+        Column(xs: 12) do
+          p(class: "my-3", id: "project_login_prompt") do
+            plain(:project_banner_login_prompt.l)
+          end
+        end
+      end
+    end
 
     def render_banner_with_image
       Row do
@@ -67,7 +80,12 @@ module Views::Controllers::Projects
         div(class: "d-flex align-items-center") do
           IDBadge(object: @project, size: :sm)
           whitespace
-          Link(type: :object, object: @project)
+          if current_user
+            Link(type: :object, object: @project)
+          else
+            # Plain text: Textile turns links and bare URLs into anchors.
+            plain(@project.title.t.as_displayed)
+          end
         end
       end
     end
@@ -87,8 +105,12 @@ module Views::Controllers::Projects
 
       div(class: location_classes) do
         b do
-          a(href: location_path(@project.location.id)) do
-            @project.place_name(current_user)
+          if current_user
+            a(href: location_path(@project.location.id)) do
+              @project.place_name(current_user)
+            end
+          else
+            plain(@project.place_name(nil))
           end
         end
       end

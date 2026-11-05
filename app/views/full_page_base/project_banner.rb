@@ -18,6 +18,8 @@ module Views::FullPageBase::ProjectBanner
     content_for(:project_banner) do
       capture do
         render(::Views::Controllers::Projects::Banner.new(project: project))
+        next unless current_user
+
         render(::Views::Controllers::Projects::ProjectNavs.new(
                  project: project,
                  user: current_user,

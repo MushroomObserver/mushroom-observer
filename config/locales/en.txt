@@ -2912,6 +2912,7 @@
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_species_list_title: Checklist for [list]
+  checklist_for_project_title: Checklist for [project]
   checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_observed_species_only: "[species] species observed (synonyms counted once)."
@@ -2922,6 +2923,7 @@
   checklist_missing_taxa: Missing taxa
   checklist_taxon: taxon
   checklist_taxa: taxa
+  project_banner_login_prompt: More information about this project and the names listed below is available if you log in.
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms. By default the simple clean \"Black on White\" theme is used. However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics. Each color in a mushroom theme was pulled from a photograph included in the site from the given group. The colors attempt to express the characteristic colors of the group. In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
