@@ -30,10 +30,10 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
         type: autocompleter_type,
         textarea: true,
         label: label_key,
-        wrap_class: "d-inline-block",
+        wrap_class: "d-inline-block align-middle",
         cols: 60
       )
-      submit(submit_key.l, class: "d-inline-block ml-3 mt-3")
+      submit(submit_key.l, class: "d-inline-block align-middle ml-3")
     end
   end
 
