@@ -22,7 +22,6 @@ module Views::Controllers::SpeciesLists::Downloads
 
     def view_template
       super do
-        h3(class: "mt-5") { append_colon(:species_list_labels_header.l) }
         submit(:species_list_labels_button.l, center: true)
       end
     end
