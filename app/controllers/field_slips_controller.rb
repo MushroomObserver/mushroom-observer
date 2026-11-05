@@ -99,10 +99,9 @@ class FieldSlipsController < ApplicationController
 
   # The code-only entry form submits a namespaced field_slip[code];
   # a QR-code scan link uses a flat ?code= query param.
-def submitted_code
-  permitted = params.permit(:code, field_slip: [:code])
-  permitted[:code] || permitted.dig(:field_slip, :code)
-end
+  def submitted_code
+    permitted = params.permit(:code, field_slip: [:code])
+    permitted[:code] || permitted.dig(:field_slip, :code)
   end
 
   def adding_images?
