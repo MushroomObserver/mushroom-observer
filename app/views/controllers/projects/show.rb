@@ -45,7 +45,7 @@ module Views::Controllers::Projects
     end
 
     def render_summary_body
-      p { trusted_html(@project.summary.to_s.tpl) }
+      trusted_html(@project.summary.to_s.tpl)
       render_drafts if @drafts.any?
       render_created_at
     end
