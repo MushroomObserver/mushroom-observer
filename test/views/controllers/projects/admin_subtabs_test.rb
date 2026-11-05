@@ -67,6 +67,16 @@ module Views::Controllers::Projects
       )
     end
 
+    def test_field_slips_active_when_current
+      project = projects(:eol_project)
+      html = render_subtabs(project: project, current_subtab: "field_slips")
+
+      assert_html(
+        html,
+        "a.nav-link.active[href='/field_slips?project=#{project.id}']"
+      )
+    end
+
     def test_member_count_in_label
       project = projects(:eol_project)
       expected_count = project.user_group.users.count

@@ -2,10 +2,10 @@
 
 # Action template for the Observations index.
 #
-# Composes the page chrome (project banner / observation buttons row
-# when scoped to a project, container width, index title, action-nav,
-# sorter, pagination), flashes the no-matches error when the query
-# returned nothing, optionally renders the alternate-spellings alert
+# Composes the page chrome (project banner when scoped to a project,
+# container width, index title, action-nav, sorter, pagination),
+# flashes the no-matches error when the query returned nothing,
+# optionally renders the alternate-spellings alert
 # (pattern-search-with-zero-results path), and renders the paginated
 # `Components::Matrix::Table` grid of Observation thumbnails.
 #
@@ -27,7 +27,6 @@ module Views::Controllers::Observations
 
     def view_template
       add_project_banner(@project) if @project
-      add_project_observation_buttons if @project
       container_class(:full)
       add_index_title(@query)
       add_context_nav_when_results
@@ -40,17 +39,6 @@ module Views::Controllers::Observations
     end
 
     private
-
-    # Stash the Map / Images / Download / FieldSlips button row
-    # into `content_for(:observation_buttons)` so the layout's project
-    # chrome can place it under the banner.
-    def add_project_observation_buttons
-      content_for(:observation_buttons) do
-        render(Views::Controllers::Projects::ObservationButtons.new(
-                 project: @project, query: @query
-               ))
-      end
-    end
 
     def add_context_nav_when_results
       return if @objects.empty?

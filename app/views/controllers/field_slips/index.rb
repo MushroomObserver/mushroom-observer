@@ -24,7 +24,7 @@ module Views::Controllers::FieldSlips
       container_class(:wide)
 
       render_notice
-      ContentPadded { render_project_or_filter_section }
+      render_project_or_filter_section
       render_list
     end
 
@@ -40,33 +40,32 @@ module Views::Controllers::FieldSlips
       if @project
         render_project_info_section
       else
-        render_filter_form
+        ContentPadded { render_filter_form }
       end
     end
 
     def render_project_info_section
       if @project.field_slip_prefix
-        render_existing_prefix_block
+        ContentPadded { render_existing_prefix_block }
       elsif @project.is_admin?(current_user)
         render_no_prefix_nudge
       end
     end
 
     def render_existing_prefix_block
-      div(class: "mt-3") do
-        b { trusted_html(append_colon(:show_project_field_slip_prefix.t)) }
-        plain(@project.field_slip_prefix.to_s)
-        whitespace
-        if @project.member?(current_user)
-          Button(
-            type: :get,
-            name: :show_project_field_slip_create.t,
-            target: new_project_field_slip_path(
-              project_id: @project.id
-            )
-          )
-        end
-      end
+      b { trusted_html(append_colon(:show_project_field_slip_prefix.t)) }
+      plain(@project.field_slip_prefix.to_s)
+      whitespace
+      return unless @project.member?(current_user)
+
+      Button(
+        type: :get,
+        name: :show_project_field_slip_create.t,
+        target: new_project_field_slip_path(
+          project_id: @project.id
+        ),
+        class: "ml-3"
+      )
     end
 
     def render_no_prefix_nudge

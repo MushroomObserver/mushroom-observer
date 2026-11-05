@@ -175,7 +175,8 @@ module Views::Layouts
       action = controller.action_name
       controller_name = controller.controller_name
       (action == "index" && controller_name != "articles") ||
-        controller_name == "maps"
+        controller_name == "maps" ||
+        controller.controller_path == "observations/downloads"
     end
 
     def maybe_set_filter_help

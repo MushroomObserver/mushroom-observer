@@ -159,6 +159,55 @@ module Tab::Project
       assert_equal("field_slips", tab.nav_key)
     end
 
+    # ObservationSubtabs: Observations, Map, Images, Download, plus
+    # Field Slips when the project has a field_slip_prefix.
+    def test_observation_subtabs_order
+      bolete = projects(:bolete_project) # field_slip_prefix: "BLT"
+      tabs = Tab::Project::ObservationSubtabs.new(
+        project: bolete, query: nil, controller: stub_controller
+      ).to_a
+
+      assert_equal(
+        [Tab::Project::ObservationIndex,
+         Tab::Project::ObservationMap,
+         Tab::Project::ObservationImages,
+         Tab::Project::ObservationDownload,
+         Tab::Project::ObservationFieldSlips],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_observation_subtabs_without_field_slip_prefix
+      empty = projects(:empty_project) # no field_slip_prefix
+      tabs = Tab::Project::ObservationSubtabs.new(
+        project: empty, query: nil, controller: stub_controller
+      ).to_a
+
+      assert_equal(
+        [Tab::Project::ObservationIndex,
+         Tab::Project::ObservationMap,
+         Tab::Project::ObservationImages,
+         Tab::Project::ObservationDownload],
+        tabs.map(&:class)
+      )
+    end
+
+    def test_observation_subtabs_with_constraints
+      rare_fungi = projects(:rare_fungi_project) # has targets, no fs prefix
+      tabs = Tab::Project::ObservationSubtabs.new(
+        project: rare_fungi, query: nil, controller: stub_controller
+      ).to_a
+
+      assert_equal(
+        [Tab::Project::ObservationIndex,
+         Tab::Project::ObservationMap,
+         Tab::Project::ObservationImages,
+         Tab::Project::ObservationDownload,
+         Tab::Project::ObservationViolations],
+        tabs.map(&:class)
+      )
+    end
+
     # IndexNav: the "Add Project" action-nav collection for the
     # projects index page.
     def test_index_nav_collection
@@ -214,6 +263,13 @@ module Tab::Project
 
     def routes
       Rails.application.routes.url_helpers
+    end
+
+    # ObservationSubtabs calls `controller.q_param(query)` to build
+    # its Map/Download tabs' q param -- a minimal stand-in, since
+    # these tests only assert tab order/class, not a built path.
+    def stub_controller
+      Object.new.tap { |o| o.define_singleton_method(:q_param) { |*| nil } }
     end
   end
 end

@@ -7,24 +7,18 @@ module Views::Controllers::Projects::Members
     def setup
       super
       @user = users(:rolf)
+      controller.define_singleton_method(:active_project_tab) { "members" }
     end
 
-    # Was Project#member_status, tested in project_test.rb -- moved
-    # here (#4901) since the model method's only caller was this
-    # view's table column.
-    def test_member_status
+    def test_renders_add_widget_and_table
       project = projects(:eol_project)
-      view = Index.new(project: project, users: [],
-                       pagination: PaginationData.new,
-                       project_member: ProjectMember.new(project: project),
-                       user: @user)
+      users = project.user_group.users.to_a
 
-      assert_equal(:owner.ti, view.send(:member_status, project.user))
-      admin = (project.admin_group.users - [project.user]).first
-      assert_equal(:admin.ti, view.send(:member_status, admin))
-      member = (project.user_group.users - project.admin_group.users).first
-      assert_equal(:member.ti, view.send(:member_status, member))
-      assert_nil(view.send(:member_status, users(:zero_user)))
+      html = render(Index.new(project: project, users: users,
+                              pagination: PaginationData.new, user: @user))
+
+      assert_html(html, "#project_members_widget")
+      assert_html(html, "#project_members_table")
     end
   end
 end

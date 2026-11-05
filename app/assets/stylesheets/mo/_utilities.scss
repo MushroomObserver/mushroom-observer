@@ -544,6 +544,10 @@
   padding-left: 1.5rem !important;
 }
 
+.pl-5 {
+  padding-left: 3rem !important;
+}
+
 .pr-0 {
   padding-right: 0 !important;
 }
@@ -938,6 +942,10 @@
 @media screen and (min-width: $screen-lg-min) {
   .mr-lg-5 {
     margin-right: 3rem !important;
+  }
+
+  .pl-lg-5 {
+    padding-left: 3rem !important;
   }
 
   .d-lg-none {
