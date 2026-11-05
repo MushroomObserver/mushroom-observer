@@ -38,7 +38,7 @@ module Views::Layouts
       assert_html(html, ".d-none.d-sm-block .badge-id")
       assert_html(html, ".show_title_nav .d-none.d-sm-block .cta-marker")
       assert_html(html,
-                  ".show_title_nav .d-none.d-sm-block .edit-icons-marker")
+                  ".show_title_nav .d-none.d-sm-flex .edit-icons-marker")
       assert_html(html, ".show_object_nav .interest-icons-marker")
       assert_html(html, ".show_object_nav .pager-marker")
 
@@ -56,9 +56,8 @@ module Views::Layouts
 
       assert_html(html, "#title + .ml-3.d-none.d-sm-block .cta-marker")
       assert_no_html(html, ".ml-3 .edit-icons-marker")
-      assert_html(html,
-                  ".ml-auto.d-none.d-sm-block .edit-icons-marker")
-      assert_no_html(html, ".ml-auto .cta-marker")
+      assert_html(html, ".d-none.d-sm-flex .edit-icons-marker")
+      assert_no_html(html, ".d-none.d-sm-flex .cta-marker")
     end
 
     def test_no_duplicate_ids_between_mobile_and_desktop_copies
@@ -109,6 +108,24 @@ module Views::Layouts
       assert_no_html(html, ".col-xs-12.d-sm-none .pager-marker")
     end
 
+    # A column-less show page (e.g. SpeciesLists::Show) has no right
+    # column for interest-icons/pager to render into -- they render
+    # inline instead, after the edit icons, both inside the actions
+    # div (see render_inline_object_nav / render_title_bar_actions).
+    def test_inline_object_nav_when_page_has_no_columns
+      html = render_page_title("show", with_columns: false)
+
+      assert_no_html(html, ".title_bar_right_col")
+      assert_no_html(html, ".show_object_nav")
+      assert_html(html, ".d-none.d-sm-flex .interest-icons-marker")
+      assert_html(html, ".d-none.d-sm-flex .pager-marker")
+      assert_html(html, ".d-none.d-sm-flex .edit-icons-marker")
+      # Mobile row is unaffected by has_columns -- same inline
+      # treatment it always uses.
+      assert_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
+      assert_html(html, ".col-xs-12.d-sm-none .pager-marker")
+    end
+
     def test_suppressed_on_index_action
       html = render_page_title("index")
 
@@ -126,9 +143,15 @@ module Views::Layouts
     # `render_page_title`) rather than `self` -- `controller`/
     # `content_for`/`column_classes` are page-instance methods, not
     # test-instance methods.
-    def populate_slots(page, action, with_right_column_content: true)
+    def populate_slots(page, action, with_right_column_content: true,
+                       with_columns: true)
       page.controller.define_singleton_method(:action_name) { action }
-      page.column_classes
+      # A non-:twelve split -- the interest-icons/pager right column
+      # only renders for a page that has one (see
+      # test_inline_object_nav_when_page_has_no_columns below for the
+      # column-less case, where `column_classes` is left at its
+      # :twelve default).
+      page.column_classes(:eight_four) if with_columns
       page.content_for(:title) { TITLE }
       page.content_for(:id_badge) { ID_BADGE }
       page.content_for(:title_bar_cta) { CTA }
@@ -139,13 +162,15 @@ module Views::Layouts
       page.content_for(:prev_next_object) { PREV_NEXT }
     end
 
-    def render_page_title(action, with_right_column_content: true)
+    def render_page_title(action, with_right_column_content: true,
+                          with_columns: true)
       captured = nil
       test = self
       StubPage.class_eval do
         define_method(:view_template) do
           test.send(:populate_slots, self, action,
-                    with_right_column_content: with_right_column_content)
+                    with_right_column_content: with_right_column_content,
+                    with_columns: with_columns)
           captured = capture { render(Header::PageTitle.new) }
         end
       end

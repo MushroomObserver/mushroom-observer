@@ -18,11 +18,9 @@ module Views::Controllers::Projects::Admin
     def view_template
       add_project_banner(@project)
       add_page_title(:show_project_admin_title.l)
-      container_class(:wide)
+      container_class(:text)
+      content_padding(:no_panels)
 
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "details"
-             ))
       render_form
       render_danger_zone
     end

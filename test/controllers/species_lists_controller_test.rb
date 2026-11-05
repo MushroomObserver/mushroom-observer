@@ -261,12 +261,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_select("body.species_lists__show")
     assert_select("#comments_for_object")
-    assert_select(
-      "form:match('action', ?)",
-      %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: 0 },
-      "Non owner should not get buttons to remove Observations from List"
-    )
+    observations.each do |obs|
+      assert_select(
+        "form[action='#{observation_species_list_path(
+          id: obs.id, species_list_id: list.id
+        )}']",
+        { count: 0 },
+        "Non owner should not get buttons to remove Observations from List"
+      )
+    end
   end
 
   def test_show_species_list_owner_logged_in
@@ -280,12 +283,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_select("body.species_lists__show")
     assert_select("#comments_for_object")
-    assert_select(
-      "form:match('action', ?)",
-      %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: observations.size },
-      "Observation List owner should get 1 Remove button per Observation"
-    )
+    observations.each do |obs|
+      assert_select(
+        "form[action='#{observation_species_list_path(
+          id: obs.id, species_list_id: list.id
+        )}']",
+        { count: 1 },
+        "Observation List owner should get 1 Remove button per Observation"
+      )
+    end
   end
 
   def test_show_species_list_for_project
@@ -303,6 +309,23 @@ class SpeciesListsControllerTest < FunctionalTestCase
       { count: 1 },
       "Names button should carry the project context to the checklist"
     )
+  end
+
+  def test_show_species_list_action_tabs
+    spl = species_lists(:unknown_species_list)
+    login(spl.user.login)
+
+    get(:show, params: { id: spl.id })
+
+    assert_select("ul#project_species_list_buttons.nav.nav-tabs")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id), { count: 1 }
+    )
+    # Map, Observations, Names, Locations, Images -- the last two
+    # gate on the Location-via-Observation bridge (Query.related?),
+    # which every observation query satisfies, so all five render.
+    assert_select("#project_species_list_buttons li.nav-item", count: 5)
   end
 
   # Regression test for bug where params[:q] as a String (saved query ID)
@@ -360,7 +383,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: spl.id })
     assert_no_edit_button(spl)
-    assert_select("form[action=?]", add_dispatch_path, count: 1)
+    assert_select("form[action=?]", list_add_dispatch_path, count: 1)
     get(:edit, params: { id: spl.id })
     assert_response(:redirect)
     delete(:destroy, params: { id: spl.id })

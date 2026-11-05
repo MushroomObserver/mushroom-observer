@@ -17,7 +17,10 @@ module Views::FullPageBase::ProjectBanner
   def add_project_banner(project)
     content_for(:project_banner) do
       capture do
-        render(::Views::Controllers::Projects::Banner.new(
+        render(::Views::Controllers::Projects::Banner.new(project: project))
+        next unless current_user
+
+        render(::Views::Controllers::Projects::ProjectNavs.new(
                  project: project,
                  user: current_user,
                  current_tab: controller.active_project_tab

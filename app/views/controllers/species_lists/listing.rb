@@ -97,16 +97,14 @@ module Views::Controllers::SpeciesLists
 
     def render_remove_obs_button
       Button(
-        type: :put,
+        type: :delete,
         variant: :outline,
         icon: :remove,
-        icon_class: "text-danger",
         name: :remove.ti,
         show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
-          species_list_id: @species_list.id,
-          commit: "remove"
+          species_list_id: @species_list.id
         ),
         confirm: :are_you_sure.l
       )
@@ -120,8 +118,7 @@ module Views::Controllers::SpeciesLists
         show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
-          species_list_id: @species_list.id,
-          commit: "add"
+          species_list_id: @species_list.id
         )
       )
     end

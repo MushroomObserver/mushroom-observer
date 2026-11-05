@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class AddDispatchControllerTest < FunctionalTestCase
+class ListAddDispatchControllerTest < FunctionalTestCase
   def setup
     super
     @user = users(:rolf)
