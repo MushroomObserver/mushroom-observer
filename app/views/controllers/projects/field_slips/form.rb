@@ -7,12 +7,12 @@ module Views::Controllers::Projects::FieldSlips
     prop :project, ::Project
 
     def initialize(model, **attrs)
-      super(model, turbo: true, **attrs)
+      super
     end
 
     def view_template
       super do
-        number_field(:field_slips, label: :field_slips,
+        number_field(:field_slips, label: :field_slips_count,
                                    inline: true, min: 0)
         checkbox_field(:one_per_page,
                        label: :field_slips_one_per_page)

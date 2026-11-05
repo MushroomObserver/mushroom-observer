@@ -135,6 +135,22 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert(response.body.include?(project.title))
   end
 
+  # Regression: the code-only entry form submits a namespaced
+  # field_slip[code], not the flat code= a QR-scan redirect uses --
+  # #new has to read both shapes.
+  def test_should_get_new_with_namespaced_code_param
+    project = projects(:bolete_project)
+    login(project.user.login)
+    code = "#{project.field_slip_prefix}-1234"
+    get(:new, params: { field_slip: { code: code } })
+
+    assert_response(:success)
+    # Main form (POST), not the code-only entry form (GET) --
+    # confirms the submitted code reached @field_slip.code.
+    assert_select("form[action='/field_slips'][method='post']")
+    assert_select("input[name='field_slip[code]'][value='#{code}']")
+  end
+
   def test_should_get_new_with_no_project_if_not_member
     project = projects(:bolete_project)
     login("lone_wolf") # Not a member of bolete_project
@@ -656,7 +672,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_redirected_to(new_observation_url(field_code: slip.code))
   end
 
-  # AddDispatchController is what puts these on a /qr/ URL (the "Add"
+  # ListAddDispatchController is what puts these on a /qr/ URL (the "Add"
   # button on project and species-list pages); they have to survive the
   # hop into the observation form.
   def test_add_dispatch_context_survives_redirect_to_new_observation

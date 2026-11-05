@@ -9,17 +9,21 @@ module Views::Controllers::Projects::FieldSlips
     prop :trackers, _Array(::FieldSlipJobTracker)
 
     def view_template
-      add_page_title(page_title)
-      container_class(:text_image)
+      render_page_chrome
 
-      div(class: "mt-3 pb-2") do
-        render_max_info
-        render_form
-        render_tracker_table if member?
-      end
+      render_max_info
+      render_form
+      render_tracker_table if member?
     end
 
     private
+
+    def render_page_chrome
+      add_page_title(page_title)
+      add_project_banner(@project)
+      container_class(:text_image)
+      content_padding(:panels)
+    end
 
     def page_title
       [
@@ -40,7 +44,7 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_max_info
-      div do
+      p do
         plain(
           :field_slips_max_for_project.t(
             max: @field_slip_max
@@ -50,12 +54,14 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_form
-      render(Views::Controllers::Projects::FieldSlips::Form.new(
-               FormObject::ProjectFieldSlip.new(
-                 field_slips: default_count
-               ),
-               project: @project
-             ))
+      ContentPadded do
+        render(Views::Controllers::Projects::FieldSlips::Form.new(
+                 FormObject::ProjectFieldSlip.new(
+                   field_slips: default_count
+                 ),
+                 project: @project
+               ))
+      end
     end
 
     # Each `<tr>` is a Stimulus root rendered by `TrackerRow` --

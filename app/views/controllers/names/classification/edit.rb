@@ -13,7 +13,7 @@ class Views::Controllers::Names::Classification::Edit < Views::FullPageBase
     container_class(:text)
 
     render(Views::Controllers::Names::Classification::Form.new(
-             @name, turbo: true
+             @name
            ))
   end
 end

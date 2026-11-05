@@ -62,7 +62,7 @@ module FieldSlipsController::Show
   end
 
   # Context carried from a scanned slip into the observation form.
-  # `AddDispatchController` is what puts name/species_list/project on a
+  # `ListAddDispatchController` is what puts name/species_list/project on a
   # `/qr/` URL (the "Add" button on project and species-list pages); a
   # bare scan carries none of them.
   def observation_form_params

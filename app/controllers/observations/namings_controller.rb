@@ -156,7 +156,6 @@ module Observations
       {
         model: @naming,
         observation: @observation,
-        turbo: true,
         show_reasons: true,
         context: params.permit(:context)[:context],
         vote: @vote,

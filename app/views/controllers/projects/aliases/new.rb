@@ -13,8 +13,7 @@ module Views::Controllers::Projects::Aliases
       container_class(:text)
 
       render(Views::Controllers::Projects::Aliases::Form.new(
-               @project_alias, user: @user,
-                               turbo: true
+               @project_alias, user: @user
              ))
       a(href: project_aliases_path(
         project_id: @project_alias.project_id

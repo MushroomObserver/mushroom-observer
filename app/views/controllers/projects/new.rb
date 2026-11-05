@@ -19,7 +19,6 @@ module Views::Controllers::Projects
                enctype: "multipart/form-data",
                dates_any: @dates_any,
                upload_params: @upload_params,
-               turbo: true,
                dubious_where_reasons: @dubious_where_reasons,
                raw_place_name: @raw_place_name
              ))

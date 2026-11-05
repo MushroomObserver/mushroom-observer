@@ -91,7 +91,7 @@ class ProjectsControllerTest < FunctionalTestCase
     assert_select(
       "a[href*=?]", new_project_member_path(project_id: p_id), count: 0
     )
-    assert_select("form[action=?]", add_dispatch_path, count: 1)
+    assert_select("form[action=?]", list_add_dispatch_path, count: 1)
     assert_select("h1#title", /\S/,
                   "H1 title element should exist and contain content")
     assert_select("div#project_banner", true,
@@ -237,8 +237,8 @@ class ProjectsControllerTest < FunctionalTestCase
     expected_range = "#{project.start_date.strftime("%Y-%m-%d")} to " \
                       "#{project.end_date.strftime("%Y-%m-%d")}"
     # NOTE: this project has no banner_image
-    assert_select("#header", { text: /#{expected_range}/ },
-                  "Date range missing from Project header")
+    assert_select("#project_banner", { text: /#{expected_range}/ },
+                  "Date range missing from Project banner")
   end
 
   def test_show_project_with_constraint_violations

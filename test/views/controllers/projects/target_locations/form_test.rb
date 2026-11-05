@@ -15,7 +15,6 @@ module Views::Controllers::Projects::TargetLocations
         "form#target_locations_widget[action='#{expected_path}']" \
         "[method='post'][data-turbo='true']"
       )
-      assert_html(html, "form.form-inline")
     end
 
     def test_renders_autocompleter_textarea_under_form_object_namespace
@@ -53,7 +52,7 @@ module Views::Controllers::Projects::TargetLocations
 
       assert_html(
         html,
-        "form#target_locations_widget.form-inline.project-target-widget"
+        "form#target_locations_widget.project-target-widget"
       )
     end
 

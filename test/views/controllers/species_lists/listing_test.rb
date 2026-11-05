@@ -51,32 +51,30 @@ module Views::Controllers::SpeciesLists
       assert_html(html, ".count-badge", text: "5")
     end
 
-    # `remove: true` → put-button with `commit=remove`, modern Turbo
-    # confirm (data-turbo-confirm, not the legacy data-confirm).
+    # `remove: true` → delete-button, modern Turbo confirm
+    # (data-turbo-confirm, not the legacy data-confirm).
     def test_renders_remove_button_when_remove_true
       html = render_listing(observation: @observation, remove: true)
 
       assert_html(html, ".list_manage form")
       remove_path = routes.observation_species_list_path(
         id: @observation.id,
-        species_list_id: @species_list.id,
-        commit: "remove"
+        species_list_id: @species_list.id
       )
       assert_html(html, "form[action='#{remove_path}']")
-      assert_html(html, "input[name='_method'][value='put']")
+      assert_html(html, "input[name='_method'][value='delete']")
       assert_html(html, "[data-turbo-confirm]")
       assert_html(html, "form button", text: :remove.ti)
     end
 
-    # `add: true` → put-button with `commit=add`; no confirm.
+    # `add: true` → put-button; no confirm.
     def test_renders_add_button_when_add_true
       html = render_listing(observation: @observation, add: true)
 
       assert_html(html, ".list_manage form")
       add_path = routes.observation_species_list_path(
         id: @observation.id,
-        species_list_id: @species_list.id,
-        commit: "add"
+        species_list_id: @species_list.id
       )
       assert_html(html, "form[action='#{add_path}']")
       assert_html(html, "input[name='_method'][value='put']")

@@ -92,7 +92,7 @@ module Observations
       spl = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
       assert_not(spl.observations.member?(obs))
-      params = { id: obs.id, species_list_id: spl.id, commit: "add" }
+      params = { id: obs.id, species_list_id: spl.id }
       requires_login(:update, params)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert(spl.reload.observations.member?(obs))
@@ -102,22 +102,10 @@ module Observations
       spl = species_lists(:first_species_list)
       obs = observations(:coprinus_comatus_obs)
       assert_not(spl.observations.member?(obs))
-      params = { id: obs.id, species_list_id: spl.id, commit: "add" }
+      params = { id: obs.id, species_list_id: spl.id }
       login("dick")
       put(:update, params: params)
       assert_redirected_to(permanent_observation_path(obs.id))
-      assert_not(spl.reload.observations.member?(obs))
-    end
-
-    def test_add_observation_to_species_list_invalid_mode
-      spl = species_lists(:first_species_list)
-      obs = observations(:coprinus_comatus_obs)
-      assert_not(spl.observations.member?(obs))
-      params = { id: obs.id, species_list_id: spl.id, commit: "invalid_param" }
-
-      requires_login(:update, params)
-
-      assert_flash_error
       assert_not(spl.reload.observations.member?(obs))
     end
 
@@ -125,42 +113,20 @@ module Observations
       spl = species_lists(:unknown_species_list)
       obs = observations(:minimal_unknown_obs)
       assert(spl.observations.member?(obs))
-      params = { id: obs.id, species_list_id: spl.id, commit: "remove" }
+      params = { id: obs.id, species_list_id: spl.id }
       owner = spl.user.login
       assert_not_equal("rolf", owner)
 
       # Try with non-owner (can't use requires_user since failure is a redirect)
       # effectively fails and gets redirected to the observation
-      requires_login(:update, params)
+      requires_login(:destroy, params)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert(spl.reload.observations.member?(obs))
 
       login(owner)
-      put(:update, params: params)
+      delete(:destroy, params: params)
       assert_redirected_to(permanent_observation_path(obs.id))
       assert_not(spl.reload.observations.member?(obs))
-    end
-
-    def test_remove_observation_from_species_list_invalid_mode
-      spl = species_lists(:unknown_species_list)
-      obs = observations(:minimal_unknown_obs)
-      assert(spl.observations.member?(obs))
-      params = { id: obs.id, species_list_id: spl.id, commit: "invalid_mode" }
-      owner = spl.user.login
-
-      login(owner)
-      put(:update, params: params)
-
-      assert_flash_error(
-        on_fail: "Flash error should display if trying to remove an " \
-                 "Observation from a SpeciesList with an invalid " \
-                 "`commit` mode"
-      )
-      # Same-URL re-render needs non-2xx or Turbo hangs (see
-      # .claude/rules/turbo_submit_forms.md).
-      assert_unprocessable
-      assert(spl.reload.observations.member?(obs),
-             "Observation should remain in Observation List")
     end
 
     def test_manage_species_list_with_projects
@@ -189,57 +155,49 @@ module Observations
       get(:edit, params: { id: obs1.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs1.id,
-                                                  species_list_id: spl1.id,
-                                                  commit: "remove"),
+                                                  species_list_id: spl1.id),
                     count: 1)
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs1.id,
-                                                  species_list_id: spl2.id,
-                                                  commit: "add"),
+                                                  species_list_id: spl2.id),
                     count: 1)
       assert_select("form[action*=?]",
                     observation_species_list_path(id: obs1.id,
-                                                  species_list_id: spl3.id,
-                                                  commit: "add"),
+                                                  species_list_id: spl3.id),
                     count: 0)
 
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
-                                                  species_list_id: spl1.id,
-                                                  commit: "add"),
+                                                  species_list_id: spl1.id),
                     count: 1)
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
-                                                  species_list_id: spl2.id,
-                                                  commit: "add"),
+                                                  species_list_id: spl2.id),
                     count: 1)
       assert_select("form[action*=?]",
                     observation_species_list_path(id: obs2.id,
-                                                  species_list_id: spl3.id,
-                                                  commit: "add"),
+                                                  species_list_id: spl3.id),
                     count: 0)
 
       put(:update,
-          params: { id: obs2.id, species_list_id: spl1.id, commit: "add" })
+          params: { id: obs2.id, species_list_id: spl1.id })
       assert_redirected_to(permanent_observation_path(obs2.id))
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
-                                                  species_list_id: spl1.id,
-                                                  commit: "remove"),
+                                                  species_list_id: spl1.id),
                     count: 1)
 
       assert_true(spl1.reload.observations.include?(obs2))
 
-      put(:update,
-          params: { id: obs2.id, species_list_id: spl1.id, commit: "remove" })
+      delete(:destroy,
+             params: { id: obs2.id, species_list_id: spl1.id })
       assert_redirected_to(permanent_observation_path(obs2.id))
       get(:edit, params: { id: obs2.id })
       assert_select("form[action=?]",
                     observation_species_list_path(id: obs2.id,
-                                                  species_list_id: spl1.id,
-                                                  commit: "add"),
+                                                  species_list_id: spl1.id),
                     count: 1)
       assert_false(spl1.reload.observations.include?(obs2))
     end
