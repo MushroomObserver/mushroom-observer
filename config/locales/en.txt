@@ -2800,6 +2800,7 @@
   add_dispatch_already_in: "Observation #[id] is already in [name]."
 
   # Project Aliases
+  project_aliases_help: Short names members can use in place of a **user** or a **location** when filling in field slips.
   project_alias_created: Project Alias was successfully created.
   project_alias_destroyed: Project Alias was successfully deleted.
   project_alias_edit: Edit Project Alias [name]
