@@ -99,7 +99,7 @@ module Views::Controllers::Checklists
         confirm: :project_target_name_confirm_remove.t(
           name: Name.safe_find(name_id)&.text_name
         ),
-        icon: :x,
+        icon: :remove,
         variant: :link,
         class: "p-0 ml-1"
       )
