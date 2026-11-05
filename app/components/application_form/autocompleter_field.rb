@@ -79,7 +79,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def view_template
       div(
         id: controller_id,
-        class: "autocompleter",
+        class: class_names("autocompleter", wrapper_options[:wrap_class]),
         data: controller_data
       ) do
         render_input_field do

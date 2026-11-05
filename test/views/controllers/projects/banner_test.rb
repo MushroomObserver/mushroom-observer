@@ -3,9 +3,9 @@
 require("test_helper")
 
 module Views::Controllers::Projects
-  # Tests for ProjectBanner component structure and conditional rendering.
-  # This component now handles all project banner logic internally including
-  # banner image, title, location, date range, and tabs.
+  # Tests for Banner's image/title/location/date-range rendering.
+  # Tab rendering (#project_tabs, AdminSubtabs) lives on ProjectNavs --
+  # see project_navs_test.rb.
   class BannerTest < ComponentTestCase
     def test_renders_basic_html_structure_with_banner_image
       project = projects(:albion_project)
@@ -114,87 +114,10 @@ module Views::Controllers::Projects
       assert_includes(html, expected_date_range(project))
     end
 
-    def test_renders_project_tabs_when_project_has_observations
-      project = projects(:eol_project)
-      html = render_banner(project: project)
-
-      assert_html(html, "#project_tabs")
-      assert_html(html, "ul.nav.nav-tabs")
-      assert_html(html, "a.nav-link[href='/projects/#{project.id}']")
-    end
-
-    def test_renders_names_and_locations_tabs_for_empty_project
-      project = projects(:empty_project)
-      html = render_banner(project: project)
-
-      assert_html(html, "#project_tabs")
-      assert_includes(html, :names.ti)
-      assert_includes(html, :locations.ti)
-      # No targets, so no Update tab
-      assert_not_includes(html, :project_updates_title.l)
-    end
-
-    def test_renders_update_tab_for_admin_with_targets
-      project = projects(:rare_fungi_project)
-      user = users(:rolf) # admin of rare_fungi_project
-      html = render_banner(project: project, user: user)
-
-      assert_html(html, "#project_tabs")
-      assert_includes(html, :project_updates_title.l)
-      assert_html(
-        html,
-        "a[href='/projects/#{project.id}/updates']"
-      )
-    end
-
-    def test_does_not_render_update_tab_for_non_admin
-      project = projects(:rare_fungi_project)
-      user = users(:mary) # not admin
-      html = render_banner(project: project, user: user)
-
-      assert_not_includes(html, :project_updates_title.l)
-    end
-
-    def test_renders_admin_tab_for_admin
-      project = projects(:rare_fungi_project)
-      user = users(:rolf) # admin of rare_fungi_project
-      html = render_banner(project: project, user: user)
-
-      assert_html(html, "a[href='/projects/#{project.id}/admin']")
-      assert_includes(html, :show_project_admin_tab.l)
-    end
-
-    def test_does_not_render_admin_tab_for_non_admin
-      project = projects(:rare_fungi_project)
-      user = users(:mary) # not admin of rare_fungi_project
-      html = render_banner(project: project, user: user)
-
-      assert_no_html(html, "a[href='/projects/#{project.id}/admin']")
-    end
-
-    def test_active_tab_highlights_current_tab
-      project = projects(:eol_project)
-      html = render_banner(project: project, current_tab: "observations")
-
-      # Observations tab should have active class
-      assert_html(html, "a.nav-link.active[href*='observations']")
-    end
-
-    def test_summary_tab_active_for_projects_controller
-      project = projects(:eol_project)
-      html = render_banner(project: project, current_tab: "projects")
-
-      # Projects tab (summary) should have active class
-      assert_html(html, "a.nav-link.active[href='/projects/#{project.id}']")
-    end
-
     private
 
-    def render_banner(project: projects(:eol_project),
-                      user: nil, current_tab: nil)
-      render(Banner.new(project: project,
-                        user: user,
-                        current_tab: current_tab))
+    def render_banner(project: projects(:eol_project))
+      render(Banner.new(project: project))
     end
 
     def expected_date_range(project)

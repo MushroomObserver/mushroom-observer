@@ -21,9 +21,6 @@ module Views::Controllers::Projects::Admin
       container_class(:text)
       content_padding(:no_panels)
 
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "details"
-             ))
       render_form
       render_danger_zone
     end

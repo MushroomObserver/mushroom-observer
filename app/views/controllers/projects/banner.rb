@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-# Renders a project banner with title, location, date range, tabs,
-# and optional banner image. Rendered on every project page (and
-# the per-project checklist show page) via the `add_project_banner`
-# helper so the banner looks the same regardless of which tab is
-# selected.
+# Renders a project banner with title, location, date range, and
+# optional banner image. Rendered on every project page (and the
+# per-project checklist show page) via the `add_project_banner`
+# helper, alongside `Views::Controllers::Projects::ProjectNavs`
+# (the tabs), so the banner looks the same regardless of which page
+# is active.
 #
 # @example Basic usage in helper
 #   content_for(:project_banner) do
@@ -12,11 +13,7 @@
 #   end
 module Views::Controllers::Projects
   class Banner < Views::Base
-    include Phlex::Rails::Helpers::ContentFor
-
     prop :project, _Nilable(Project)
-    prop :user, _Nilable(User), default: nil
-    prop :current_tab, _Nilable(String), default: nil
 
     def view_template
       return unless @project
@@ -26,13 +23,6 @@ module Views::Controllers::Projects
       else
         render_banner_without_image
       end
-
-      NavTabs(
-        id: "project_tabs", class: "mt-3", current: @current_tab,
-        tabs: ::Tab::Project::Banner.new(
-          project: @project, user: @user
-        )
-      )
     end
 
     private

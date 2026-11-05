@@ -237,8 +237,8 @@ class ProjectsControllerTest < FunctionalTestCase
     expected_range = "#{project.start_date.strftime("%Y-%m-%d")} to " \
                       "#{project.end_date.strftime("%Y-%m-%d")}"
     # NOTE: this project has no banner_image
-    assert_select("#header", { text: /#{expected_range}/ },
-                  "Date range missing from Project header")
+    assert_select("#project_banner", { text: /#{expected_range}/ },
+                  "Date range missing from Project banner")
   end
 
   def test_show_project_with_constraint_violations

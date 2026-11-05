@@ -78,21 +78,11 @@ module Views::Layouts
 
     def render_body(&block)
       render_gtm_iframe_when_production
-      render_main_container(content_classes_for_main, &block)
+      render_main_container(&block)
       render_bottom_singletons
     end
 
-    # `content_for(:container_class)` + `(:content_padding)` are
-    # guaranteed populated by the time the layout renders —
-    # `Views::FullPageBase#around_template` fills any unset slot
-    # with the matching default after the action's `view_template`
-    # has finished.
-    def content_classes_for_main
-      class_names(content_for(:container_class),
-                  content_for(:content_padding))
-    end
-
-    def render_main_container(content_classes, &block)
+    def render_main_container(&block)
       banner = ::Banner.current
       div(id: "main_container", class: "px-sm-3",
           data: main_container_data(banner)) do
@@ -105,7 +95,7 @@ module Views::Layouts
                    request: request,
                    languages: current_languages
                  ))
-          render_right_side(content_classes, banner: banner, &block)
+          render_right_side(banner: banner, &block)
         end
       end
     end
@@ -120,10 +110,49 @@ module Views::Layouts
       { controller: controllers, nav_target: "container" }
     end
 
-    def render_right_side(content_classes, banner:, &block)
+    def render_right_side(banner:, &block)
       Column(id: "right_side", xs: 12, md: 10) do
         render_nav_chrome(banner: banner)
-        Container(element: :main, id: "content", class: content_classes,
+        render_header_and_main(&block)
+      end
+    end
+
+    # Ahead of `render_header_and_main`'s `content_for(:container_class)`
+    # width cap -- a project's banner image/tabs always span the full
+    # page width, regardless of the page's container_class. Ahead of
+    # the flash too, so a flash message from a project-page action
+    # (e.g. after adding a target location) reads below the banner,
+    # not sandwiched between it and the title.
+    def render_project_banner
+      banner = content_for(:project_banner)
+      trusted_html(banner) if banner.present?
+    end
+
+    # The page chrome above `#content`: the top nav, the collapsible
+    # search-bar row (a sibling, not a child -- see
+    # `Views::Layouts::SearchNav`), the index bar, the project
+    # banner, and the flash row.
+    def render_nav_chrome(banner:)
+      render(Views::Layouts::TopNav.new(user: current_user,
+                                        query: current_query,
+                                        banner: banner))
+      render(Views::Layouts::SearchNav.new)
+      render_index_bar
+      render_project_banner
+      render(Views::Layouts::App::PageFlash.new)
+    end
+
+    # `content_for(:container_class)` wraps the title bar + `#content`
+    # (not the nav chrome above it) so a `:wide` page's width ceiling
+    # only constrains the body, not the top nav/search bar/index bar.
+    # `content_for(:content_padding)` lands on `#content` alone, not
+    # this wrapper -- `Views::FullPageBase#around_template` guarantees
+    # both slots are populated by the time the layout renders.
+    def render_header_and_main(&block)
+      div(class: content_for(:container_class)) do
+        render(Views::Layouts::Header.new)
+        Container(element: :main, id: "content",
+                  class: content_for(:content_padding),
                   data: { controller: "lightgallery" }) do
           comment { "MAIN_PAGE_CONTENT" }
           yield
@@ -131,20 +160,6 @@ module Views::Layouts
           render(Views::Layouts::TranslatorsCredit.new)
         end
       end
-    end
-
-    # The page chrome above `#content`: the top nav, the collapsible
-    # search-bar row (a sibling, not a child -- see
-    # `Views::Layouts::SearchNav`), the index bar, and the flash/
-    # header row.
-    def render_nav_chrome(banner:)
-      render(Views::Layouts::TopNav.new(user: current_user,
-                                        query: current_query,
-                                        banner: banner))
-      render(Views::Layouts::SearchNav.new)
-      render_index_bar
-      render(Views::Layouts::App::PageFlash.new)
-      render(Views::Layouts::Header.new)
     end
 
     # `Header::IndexBar` lives here, not inside `Header`, so it sits
