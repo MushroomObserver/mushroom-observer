@@ -47,7 +47,7 @@ module Views::Controllers::Admin::Donations
 
     def define_donor_columns(tbl)
       tbl.column(:review_id.t) { |d| d.id.to_s }
-      tbl.column(:review_who.t, class: "text-left") do |d|
+      tbl.column(:review_who.t) do |d|
         d.who.to_s.truncate(30)
       end
       tbl.column(:review_anon.t) { |d| d.anonymous.to_s }
@@ -55,7 +55,7 @@ module Views::Controllers::Admin::Donations
 
     def define_detail_columns(tbl)
       tbl.column(:review_amount.t) { |d| d.amount.to_s }
-      tbl.column(:review_email.t, class: "text-left") do |d|
+      tbl.column(:review_email.t) do |d|
         d.email.to_s.truncate(50)
       end
       tbl.column(:review_date.t) do |d|
