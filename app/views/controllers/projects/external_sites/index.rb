@@ -16,9 +16,6 @@ module Views::Controllers::Projects::ExternalSites
       add_page_title(:project_sites_title.l)
       container_class(:wide)
 
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "external_sites"
-             ))
       @sites.each { |site| render_site_panel(site) }
     end
 

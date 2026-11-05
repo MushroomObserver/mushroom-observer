@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-# Renders a project banner with title, location, date range, tabs,
-# and optional banner image. Rendered on every project page (and
-# the per-project checklist show page) via the `add_project_banner`
-# helper so the banner looks the same regardless of which tab is
-# selected.
+# Renders a project banner with title, location, date range, and
+# optional banner image. Rendered on every project page (and the
+# per-project checklist show page) via the `add_project_banner`
+# helper, alongside `Views::Controllers::Projects::ProjectNavs`
+# (the tabs), so the banner looks the same regardless of which page
+# is active.
 #
 # @example Basic usage in helper
 #   content_for(:project_banner) do
@@ -12,20 +13,7 @@
 #   end
 module Views::Controllers::Projects
   class Banner < Views::Base
-    include Phlex::Rails::Helpers::ContentFor
-
     prop :project, _Nilable(Project)
-    prop :user, _Nilable(User), default: nil
-    prop :current_tab, _Nilable(String), default: nil
-
-    # Every controller that renders AdminSubtabs below the banner's
-    # tabs (see Tab::Project::AdminSubtabs) -- its mt-2 already
-    # separates it from the banner, so the banner's tabs don't need a
-    # bottom margin too.
-    ADMIN_SUBTAB_CONTROLLERS = [
-      "projects/admin", "projects/members",
-      "projects/aliases", "projects/external_sites"
-    ].freeze
 
     def view_template
       return unless @project
@@ -35,36 +23,9 @@ module Views::Controllers::Projects
       else
         render_banner_without_image
       end
-
-      render_project_tabs
     end
 
     private
-
-    def render_project_tabs
-      tab_margin_class = no_tab_bottom_margin? ? "mt-3" : "my-3"
-
-      NavTabs(
-        id: "project_tabs", class: tab_margin_class,
-        current: @current_tab,
-        tabs: ::Tab::Project::Banner.new(
-          project: @project, user: @user
-        )
-      )
-    end
-
-    def no_tab_bottom_margin?
-      project_page? || project_admin_page?
-    end
-
-    def project_page?
-      controller.controller_name == "projects" &&
-        controller.action_name == "show"
-    end
-
-    def project_admin_page?
-      ADMIN_SUBTAB_CONTROLLERS.include?(controller.controller_path)
-    end
 
     def render_banner_with_image
       Row do

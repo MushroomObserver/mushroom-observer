@@ -11,10 +11,6 @@ module Views::Controllers::Projects::Aliases
       add_page_title(:project_aliases.ti)
       container_class(:wide)
 
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "aliases"
-             ))
-
       render(Table.new(project_aliases: @project_aliases))
 
       a(href: new_project_alias_path(
