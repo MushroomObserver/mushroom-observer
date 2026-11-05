@@ -59,7 +59,7 @@ module Projects
       end
 
       respond_to do |format|
-        format.turbo_stream { render_members_update }
+        format.turbo_stream { render_create_response }
         format.html { return_to_caller(@project, params[:target]) }
       end
     end
@@ -183,6 +183,20 @@ module Projects
 
     def self_only_open_join?(candidates)
       @project.open_membership && candidates == [@user]
+    end
+
+    # The batch-add widget is the only turbo_stream caller whose page
+    # carries the #project_members_widget/#project_members_table
+    # targets this replaces -- the per-row Add button on the "new"
+    # page and the Join button on the project summary page also post
+    # here, turbo-enabled, from pages that don't have those ids, so
+    # they fall back to the redirect instead.
+    def render_create_response
+      if params[:project_members_add]
+        render_members_update
+      else
+        return_to_caller(@project, params[:target])
+      end
     end
 
     def render_members_update

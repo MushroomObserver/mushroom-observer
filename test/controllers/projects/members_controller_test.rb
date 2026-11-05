@@ -724,6 +724,25 @@ module Projects
       )
     end
 
+    # The per-row Add button on the "new" page, and the Join button
+    # on the project summary page, both post a flat `candidate` param
+    # (no `project_members_add`) and are turbo-enabled -- neither
+    # page has #project_members_widget/#project_members_table to
+    # replace, so this falls back to a redirect even though the
+    # request negotiated turbo_stream.
+    def test_add_members_flat_candidate_turbo_stream_falls_back_to_redirect
+      eol_project = projects(:eol_project)
+      params = {
+        project_id: eol_project.id,
+        candidate: dick.id.to_s
+      }
+      login(mary.login)
+
+      post(:create, params: params, format: :turbo_stream)
+
+      assert_redirected_to(project_members_path(eol_project.id))
+    end
+
     def test_index
       eol_project = projects(:eol_project)
       login
