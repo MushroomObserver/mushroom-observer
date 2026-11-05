@@ -26,7 +26,7 @@ module Views::Controllers::FieldSlips
     def view_template
       add_page_title("#{:field_slip_new.t}: #{@field_slip.code}")
       add_context_nav(Tab::FieldSlip::Index.new)
-      container_class(:full)
+      container_class(@field_slip.code ? :full : :text)
 
       render(Form.new(
                @field_slip,
