@@ -129,10 +129,29 @@ jobs:
         run: bundle exec rake parallel:test:setup
 
       # And finally we can run the test suite
+      # `pipefail` makes this step's own exit code reflect `rails test`,
+      # not `tee` (which always exits 0) -- so the tee'd log capture
+      # below can't mask a real test failure as a passing step.
       - name: Run tests
         env:
           RAILS_MASTER_KEY: ${{ secrets.RAILS_MASTER_KEY }}
-        run: bundle exec rails test
+        run: |
+          set -o pipefail
+          bundle exec rails test 2>&1 | tee test_output.log
+
+      # Make Deprecation warnings (and similar) visible.
+      # `::warning::` annotations surface as yellow flags
+      # on the workflow run/PR checks without affecting job status.
+      # `if: always()` so warnings still surface even if tests failed.
+      - name: Check for deprecation warnings
+        if: always()
+        run: |
+          if [ -f test_output.log ] && grep -q "DEPRECATION WARNING" test_output.log; then
+            grep "DEPRECATION WARNING" test_output.log | while IFS= read -r line; do
+              escaped=$(printf '%s' "$line" | sed -e 's/%/%25/g' -e 's/\r/%0D/g')
+              echo "::warning::$escaped"
+            done
+          fi
 
       # https://github.com/marketplace/actions/coveralls-github-action
       - name: Coveralls GitHub Action
