@@ -89,17 +89,15 @@ module Views::Controllers::Projects::Updates
     def render_add_all_button
       return if @current_count.zero?
 
-      div(class: "mb-3") do
-        Button(
-          type: :post,
-          name: :project_updates_add_all.t,
-          target: add_all_project_updates_path(
-            project_id: @project.id,
-            show_excluded: @show_excluded
-          ),
-          confirm: :project_updates_confirm_add_all.t
-        )
-      end
+      Button(
+        type: :post,
+        name: :project_updates_add_all.t,
+        target: add_all_project_updates_path(
+          project_id: @project.id,
+          show_excluded: @show_excluded
+        ),
+        confirm: :project_updates_confirm_add_all.t
+      )
     end
 
     def render_pagination
