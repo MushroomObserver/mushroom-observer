@@ -188,6 +188,55 @@ module Views::Controllers::Projects
       assert_html(html, "a.nav-link.active[href='/projects/#{project.id}']")
     end
 
+    # On the Project show page, the banner sits directly above
+    # ProjectBanner's inline title (mt-3 only). Every other
+    # project-scoped page (locations, checklists, admin, ...) has a
+    # title/content below the tabs, which needs a bottom margin too
+    # (my-3). project_page? drives this choice, so the margin class
+    # itself is the contract under test here, not incidental styling.
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_project_tabs_margin_on_projects_show
+      project = projects(:eol_project)
+      controller.define_singleton_method(:controller_name) { "projects" }
+      controller.define_singleton_method(:action_name) { "show" }
+
+      html = render_banner(project: project)
+
+      assert_html(html, "#project_tabs.mt-3")
+      assert_no_html(html, "#project_tabs.my-3")
+    end
+
+    # Every controller that renders AdminSubtabs below the banner's
+    # tabs -- its mt-2 already separates it from the banner, so the
+    # banner's tabs don't need a bottom margin either (same contract
+    # as test_project_tabs_margin_on_projects_show above).
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_project_tabs_margin_on_admin_subtab_pages
+      project = projects(:eol_project)
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+
+      %w[projects/admin projects/members
+         projects/aliases projects/external_sites].each do |path|
+        controller.define_singleton_method(:controller_path) { path }
+        html = render_banner(project: project)
+
+        assert_html(html, "#project_tabs.mt-3")
+      end
+    end
+
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    def test_project_tabs_margin_off_projects_show
+      project = projects(:eol_project)
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+
+      html = render_banner(project: project)
+
+      assert_html(html, "#project_tabs.my-3")
+      assert_no_html(html, "#project_tabs.mt-3")
+    end
+
     private
 
     def render_banner(project: projects(:eol_project),
