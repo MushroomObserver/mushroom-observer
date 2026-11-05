@@ -52,8 +52,7 @@ module Views::Controllers::Observations::Namings
                given_name: @given_name,
                reasons: @reasons,
                feedback: @feedback,
-               show_reasons: true,
-               turbo: true
+               show_reasons: true
              ))
     end
 

@@ -15,7 +15,7 @@ module Views::Controllers::Names::Descriptions::Moves
                         description: @description
                       ))
 
-      render(Form.new(@description, user: @user, turbo: true))
+      render(Form.new(@description, user: @user))
     end
   end
 end

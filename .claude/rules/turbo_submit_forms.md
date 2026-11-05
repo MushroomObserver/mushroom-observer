@@ -1,9 +1,14 @@
 # Converting a Phlex form to Turbo submission
 
-Tracked by issue #5052. `Turbo.config.forms.mode = "optin"` — a form only
-submits via Turbo if it (or an ancestor) carries `data-turbo="true"`.
-`Components::ApplicationForm` defaults to `turbo: false` (no Turbo); pass
-`turbo: true` to opt a form in.
+Tracked by issue #5052. `Turbo.config.forms.mode = "on"` (set in
+`app/javascript/application.js`) — every form submits via Turbo
+unless it (or an ancestor) carries `data-turbo="false"`.
+`Components::ApplicationForm` defaults to `turbo: true` (Turbo-on);
+pass `turbo: false` only for the download-triggering exemptions
+described below. This flipped from the sweep's original `optin`/
+`turbo: false` default once every caller had been converted — see
+"Always write `turbo: false` explicitly" below for what that default
+flip means for the forms that still need it off.
 
 ## Turbo Drive vs. Turbo Frames vs. Turbo Streams — three different mechanisms
 
@@ -13,7 +18,8 @@ with different response contracts, and mixing up which one a given
 controller uses is how you end up applying the wrong fix (see the
 `Admin::BlockedIpsController` revert below).
 
-- **Turbo Drive** — what `turbo: true` opts a form into. The response
+- **Turbo Drive** — what every `ApplicationForm` submits through by
+  default now (`turbo: false` opts a form out). The response
   is ordinary HTML (`text/html`), and **the HTTP status code is the
   success/failure signal**: a 2xx/3xx response is a "visit" (Drive
   pushes a new history entry, treats it as a fresh page); a 4xx/5xx
@@ -53,9 +59,9 @@ branch) needs the `422` treatment described below.
 
 ## Exception: forms that trigger a file download are not convertible
 
-`turbo: true` routes a form's submission through Turbo Drive's
-`fetch()`-based interception. A `fetch()` response body can never
-trigger the browser's native Save-As/download UI, no matter its
+Turbo-on routes a form's submission through Turbo Drive's `fetch()`-
+based interception. A `fetch()` response body can never trigger the
+browser's native Save-As/download UI, no matter its
 `Content-Disposition` header — only a real, non-intercepted form
 submission does that. So any form whose success path calls `send_data`/
 `send_file`/`render_report` (a CSV, DwC-A, PDF-labels, or similar
@@ -89,19 +95,21 @@ the same `species_lists/downloads/new` page, are the third and fourth
 instances — both call `send_data` unconditionally on submit.
 
 **`Components::ApplicationForm#around_template` always sets an explicit
-`data-turbo` attribute** — `"true"` when `turbo: true`, `"false"` when
-`turbo: false` (the default) — rather than leaving it unset for
-`turbo: false`. Earlier revisions of this doc had each of the four
-download-exempt forms above pass `data: { turbo: "false" }` by hand;
-that's no longer necessary and has been removed from all four — the
-base class now guarantees it for every `ApplicationForm` subclass,
-without each form needing to opt in individually. This matters because
-an unset `data-turbo` attribute's Turbo-off behavior was previously
-inert only because `Turbo.config.forms.mode = "optin"` made unmarked
-forms Turbo-off by default; flipping that global config would have
-silently turned every unmarked `turbo: false` form Turbo-on, including
-these four permanently-exempt ones. The explicit attribute makes every
-form's Turbo state independent of the global config.
+`data-turbo` attribute** — `"true"` when `turbo: true` (the default),
+`"false"` when `turbo: false` — rather than leaving it unset. Earlier
+revisions of this doc had each of the four download-exempt forms above
+pass `data: { turbo: "false" }` by hand; that's no longer necessary and
+has been removed from all four — the base class guarantees it for
+every `ApplicationForm` subclass, without each form needing to opt in
+individually. This mattered concretely, not just in theory: an unset
+`data-turbo` attribute's Turbo-off behavior was only inert while
+`Turbo.config.forms.mode = "optin"` made unmarked forms Turbo-off by
+default. When that global config later flipped to `"on"` (and
+`ApplicationForm`'s own `turbo:` default flipped from `false` to
+`true` alongside it), every unmarked form switched to Turbo-on — the
+four download forms' explicit `turbo: false` is exactly what kept them
+working through that flip. The explicit attribute makes every form's
+Turbo state independent of the global config.
 
 **This protection does not reach forms that bypass `Components::
 ApplicationForm` entirely** — a subclass that overrides `form_tag`
@@ -111,14 +119,16 @@ hand-rolled `<form>` tag outside the framework never runs
 `around_template` at all. Those need the same `data: { turbo: "false" }`
 treatment applied by hand, at the point the tag is actually built.
 
-**Always write `turbo: false` explicitly on a permanently-exempt form,
-even though it's the base class's own default.** Omitting it is
-functionally identical today, but it's indistinguishable from a form
-nobody has reviewed yet — a future pass converting `turbo: false` forms
-to `turbo: true` has no way to tell "deliberately kept off" from
-"just hasn't been looked at" without reading every comment. The
-explicit `turbo: false` is the grep-able signal that this form's Turbo
-state was a reviewed decision, not an oversight. If the form's
+**Always write `turbo: false` explicitly on a permanently-exempt form.**
+This used to be a readability nicety (the base class's own default was
+also `false`, so omitting it was functionally identical, just
+indistinguishable from a form nobody had reviewed yet). It is no
+longer optional: `ApplicationForm`'s `turbo:` prop now defaults to
+`true`, so a download form that omitted `turbo: false` would silently
+become Turbo-submitted — exactly the breakage this exemption exists to
+prevent. The explicit `turbo: false` is both the grep-able signal that
+this form's Turbo state was a reviewed decision and the only thing
+keeping it off now that the default has flipped. If the form's
 `initialize` accepts `**attrs`, put `turbo: false` *after* the splat
 (`**attrs, turbo: false`), not before — a literal keyword placed before
 a splatted hash is silently overridable by that hash (Ruby's later-key-
@@ -285,17 +295,20 @@ not assumed safe because "it's just a destroy button."
 
 ## The conversion, per controller
 
-1. **`turbo: true`** on every `Form.new(...)` call in the controller's
-   `New`/`Edit` action views (`app/views/controllers/<c>/new.rb`,
-   `edit.rb`).
-2. **`render_new_view`/`render_edit_view`** — the controller's GET
+This sweep is complete — `ApplicationForm` defaults to `turbo: true`
+now, so a new `Form.new(...)` call needs no `turbo:` kwarg at all
+unless it's one of the download exemptions above (`turbo: false`).
+What's still relevant per controller when converting a form that
+predates this (or auditing one):
+
+1. **`render_new_view`/`render_edit_view`** — the controller's GET
    `new`/`edit` actions (and any success-path re-render) call these.
    Give them `status: :ok, **render_opts` and forward into
    `render(View.new(...), status: status, **render_opts)`. Rename any
    differently-named existing method (`render_new_phlex`,
    `render_edit`, `render_phlex_new`, …) to this pair for consistency
    across the sweep.
-3. **Route every failure-path re-render through
+2. **Route every failure-path re-render through
    `render_new_view_invalid`/`render_edit_view_invalid`**
    (`ApplicationController#render_new_view_invalid`/
    `#render_edit_view_invalid`, added in #5054) instead of calling
@@ -305,7 +318,7 @@ not assumed safe because "it's just a destroy button."
    kwargs, then set `self.status = :unprocessable_content` afterward —
    works regardless of the subclass method's own signature, so no
    per-controller override is needed for this pair.
-4. **A controller with two distinct forms** (e.g. login +
+3. **A controller with two distinct forms** (e.g. login +
    password-reset) can't route both through the canonical
    `render_new_view_invalid` name. Give the second form its own local
    `_invalid` wrapper mirroring the same two-line pattern:
@@ -323,8 +336,9 @@ wrong before writing any test and you'll chase a false failure:
 
 1. **Redirect-on-failure** — the failure path calls `redirect_to`, not a
    re-render. Turbo already handles redirects natively. **No status
-   change needed at all** — `turbo: true` on the Form is the only
-   change (`CollectionNumbersController`, `HerbariumRecordsController`).
+   change needed at all**, and no `turbo:` kwarg needed either now that
+   it's the default (`CollectionNumbersController`,
+   `HerbariumRecordsController`).
 2. **Turbo Frame / Turbo Stream scoped** — a form wrapped in
    `turbo_frame_tag(...)`, or a `format.turbo_stream` branch. Turbo
    Frames match by `<turbo-frame id="...">` in the body regardless of
