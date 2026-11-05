@@ -127,8 +127,7 @@ renders, just without the attribute.
 ApplicationForm` entirely** — a raw hand-rolled `<form>` (or
 Phlex `form(...)`) tag outside the framework never runs
 `around_template` at all, so there's no `turbo:` prop or default to
-inherit in the first place. `Components::IndexFilter` (`<
-Components::Base`, not `ApplicationForm`) is the real example: it
+inherit in the first place. `Components::IndexFilter` (`< Components::Base`, not `ApplicationForm`) is the real example: it
 sets `data: { turbo: "false" }` by hand, at the point the tag is
 built, because nothing else would.
 
