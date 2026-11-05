@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 # The header block immediately below the application top nav. Rendered
-# once per page by the application layout. Composes (in order):
+# once per page by `Views::Layouts::Application#render_header_and_main`,
+# inside the `content_for(:container_class)` width cap it shares with
+# `#content`. Composes (in order):
 #
 #   - on non-index actions, the page title strip (`Header::PageTitle`);
 #   - the project observation-buttons row, fed from a content_for
