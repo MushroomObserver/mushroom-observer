@@ -21,7 +21,16 @@ module Observations
       return unless permission_to_change_membership?
 
       set_project_ivars
-      dispatch_commit
+      add_observation_to_project(@project, @observation)
+    end
+
+    def destroy
+      return unless (@project = find_project!) &&
+                    (@observation = find_observation!)
+      return unless permission_to_change_membership?
+
+      set_project_ivars
+      remove_observation_from_project(@project, @observation)
     end
 
     private
@@ -32,20 +41,6 @@ module Observations
       flash_error(:permission_denied.l)
       redirect_to(project_path(@project.id))
       false
-    end
-
-    def dispatch_commit
-      case params[:commit]
-      when "add"
-        add_observation_to_project(@project, @observation)
-      when "remove"
-        remove_observation_from_project(@project, @observation)
-      else
-        flash_error(:runtime_invalid.t(type: '"mode"', value: params[:commit]))
-        render_edit_view_invalid(
-          location: edit_observation_projects_path(id: @observation.id)
-        )
-      end
     end
 
     def render_edit_view(**render_opts)
