@@ -3,11 +3,8 @@
 # The header block immediately below the application top nav. Rendered
 # once per page by `Views::Layouts::Application#render_header_and_main`,
 # inside the `content_for(:container_class)` width cap it shares with
-# `#content`. Composes (in order):
-#
-#   - on non-index actions, the page title strip (`Header::PageTitle`);
-#   - the project observation-buttons row, fed from a content_for
-#     slot.
+# `#content`. On non-index actions, renders the page title strip
+# (`Header::PageTitle`).
 #
 # The project banner (`:project_banner` content_for slot) renders
 # separately, in `Views::Layouts::Application#render_nav_chrome`,
@@ -25,37 +22,7 @@ module Views::Layouts
     def view_template
       header(id: "header") do
         render(PageTitle.new) if controller.action_name != "index"
-        render_filter_row
       end
-    end
-
-    private
-
-    # The outer `.row` always renders, even when the inner content_for
-    # isn't set -- keeps the empty row in case any CSS / JS keys off
-    # `header > .row:last-child`.
-    def render_filter_row
-      Row do
-        render_observation_buttons if content_for?(:observation_buttons)
-      end
-    end
-
-    def render_observation_buttons
-      div(class: title_cols, id: "observation_buttons") do
-        trusted_html(content_for(:observation_buttons))
-      end
-    end
-
-    # `content_for?(:left_columns) || "col-sm-8 col-lg-7"` — the `||`
-    # there is operating on a boolean, so when `:left_columns` IS set
-    # the LHS is `true` and `cols` becomes the literal `true`. Then
-    # `class_names(Components::Column.classes_for(xs: 12), true)`
-    # evaluates to `"col-xs-12"`. Keep the bug for visual parity; fix
-    # in a separate PR if needed.
-    def title_cols
-      cols = content_for?(:left_columns) || "col-sm-8 col-lg-7"
-      cols = "" unless content_for?(:interest_icons)
-      class_names(Components::Column.classes_for(xs: 12), cols)
     end
   end
 end

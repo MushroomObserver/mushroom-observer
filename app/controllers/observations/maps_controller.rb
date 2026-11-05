@@ -11,6 +11,7 @@ module Observations
       show and return if params[:id].present?
 
       @query = find_or_create_query(:Observation)
+      derive_ivar_from_query(:@project, @query, :projects, Project)
       @any_content_filters_applied = check_if_preference_filters_applied
       find_locations_matching_observations
 
@@ -96,7 +97,8 @@ module Observations
         observations_capped: @observations_capped || false,
         observations_loaded_count: @observations_loaded_count,
         observations_total_count: @observations_total_count,
-        cluster_query_string: @cluster_query_string
+        cluster_query_string: @cluster_query_string,
+        project: @project
       )
     end
   end

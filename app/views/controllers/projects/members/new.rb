@@ -5,19 +5,16 @@ module Views::Controllers::Projects::Members
   class New < Views::FullPageBase
     prop :project, ::Project
     prop :users, _Array(::User)
-    prop :project_member, ::ProjectMember
     prop :user, ::User
 
     def view_template
+      add_project_banner(@project)
       add_page_title(
         :add_members_title.t(title: @project.title)
       )
       add_context_nav(Tab::Project::Members::FormNew.new(project: @project))
       container_class(:wide)
 
-      render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project
-             ))
       render_users_table
     end
 
@@ -40,6 +37,8 @@ module Views::Controllers::Projects::Members
         type: :post,
         variant: :strip,
         name: :add.ti,
+        icon: :merge,
+        show_label: :responsive,
         target: project_members_path(
           project_id: @project.id,
           candidate: user.id

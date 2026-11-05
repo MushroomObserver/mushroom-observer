@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 # Action template for `Observations::MapsController#index` — the
-# "map of observations matching a query" page. The cap-banner is
-# baked into `Components::Map`, so this view just sets chrome and
-# instantiates the component.
+# "map of observations matching a query" page. Shows the project
+# banner when the query is scoped to a single project. The cap-banner
+# is baked into `Components::Map`, so this view otherwise just sets
+# chrome and instantiates the component.
 module Views::Controllers::Observations::Maps
   class Index < Views::FullPageBase
     prop :query, ::Query::Observations
@@ -12,8 +13,10 @@ module Views::Controllers::Observations::Maps
     prop :observations_loaded_count, _Nilable(Integer), default: nil
     prop :observations_total_count, _Nilable(Integer), default: nil
     prop :cluster_query_string, _Nilable(String), default: nil
+    prop :project, _Nilable(::Project), default: nil
 
     def view_template
+      add_project_banner(@project) if @project
       container_class(:full)
       add_index_title(@query, map: true)
       add_context_nav(

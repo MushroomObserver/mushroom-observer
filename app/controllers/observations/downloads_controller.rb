@@ -10,9 +10,10 @@ module Observations
       @query = find_or_create_query(:Observation, order_by: params[:by])
       return too_many_results if too_many_results?
 
+      derive_ivar_from_query(:@project, @query, :projects, Project)
       update_stored_query(@query) # also stores query in session
       render(Views::Controllers::Observations::Downloads::New.new(
-               query: @query
+               query: @query, project: @project
              ))
     end
 

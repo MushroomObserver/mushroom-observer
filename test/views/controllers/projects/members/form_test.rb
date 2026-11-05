@@ -10,19 +10,6 @@ module Views::Controllers::Projects::Members
       @user = users(:rolf)
     end
 
-    def test_new_form
-      project_member = ProjectMember.new(project: @project)
-      html = render_form(project_member)
-
-      # Form structure
-      assert_html(html, "form#project_member_form")
-      assert_html(html, "form[action='/projects/#{@project.id}/members']")
-      assert_html(html, "button[type='submit']", text: :add.ti)
-
-      # Autocompleter field
-      assert_html(html, "[data-controller*='autocompleter']")
-    end
-
     def test_edit_form_for_existing_member
       # Mary is a member of eol_project
       mary = users(:mary)
@@ -45,19 +32,8 @@ module Views::Controllers::Projects::Members
 
       # Help text
       assert_includes(html, :change_member_status_make_member_help.t)
-    end
-
-    def test_edit_form_for_non_member
-      # Create a new ProjectMember for a user who isn't yet a member
-      katrina = users(:katrina)
-      project_member = ProjectMember.new(project: @project, user: katrina)
-
-      html = render_form(project_member)
-
-      # Should render create form since not persisted
-      assert_html(html, "form#project_member_form")
-      assert_html(html, "form[action='/projects/#{@project.id}/members']")
-      assert_html(html, "[data-controller*='autocompleter']")
+      assert_includes(html, :change_member_status_remove_member_help.t)
+      assert_includes(html, :change_member_status_make_admin_help.t)
     end
 
     private

@@ -176,13 +176,15 @@ module Views::Layouts
       content_for?(:interest_icons) || content_for?(:prev_next_object)
     end
 
-    # Projects render a title inside ProjectBanner — skip ours to
-    # avoid stacking two titles.
+    # `projects#show` renders a title inside ProjectBanner — skip ours
+    # there to avoid stacking two titles. Every other project
+    # sub-page (aliases, members, admin, ...) has a distinct heading
+    # alongside the banner's project title, so it isn't suppressed.
     def on_project_page?
       return false unless content_for?(:project_banner)
 
-      path = controller.controller_path
-      path == "projects" || path.start_with?("projects/")
+      controller.controller_path == "projects" &&
+        controller.action_name == "show"
     end
   end
 end

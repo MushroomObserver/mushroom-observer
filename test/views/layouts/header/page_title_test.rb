@@ -137,6 +137,24 @@ module Views::Layouts
       assert_no_html(html, ".pager-marker")
     end
 
+    # projects#show renders a title inside ProjectBanner.
+    def test_suppressed_on_projects_show_with_banner
+      html = render_page_title("show", controller_path: "projects",
+                                       with_project_banner: true)
+
+      assert_no_html(html, ".title-marker")
+    end
+
+    # A project sub-page (e.g. aliases#new) gets a heading alongside
+    # the banner's project title.
+    def test_not_suppressed_on_project_subpage_with_banner
+      html = render_page_title("new", controller_path: "projects/aliases",
+                                      with_project_banner: true,
+                                      with_columns: false)
+
+      assert_html(html, ".title-marker")
+    end
+
     private
 
     # Runs against `page` (the one-off page instance rendered by
@@ -144,8 +162,9 @@ module Views::Layouts
     # `content_for`/`column_classes` are page-instance methods, not
     # test-instance methods.
     def populate_slots(page, action, with_right_column_content: true,
-                       with_columns: true)
+                       with_columns: true, **project_opts)
       page.controller.define_singleton_method(:action_name) { action }
+      populate_project_slots(page, **project_opts)
       # A non-:twelve split -- the interest-icons/pager right column
       # only renders for a page that has one (see
       # test_inline_object_nav_when_page_has_no_columns below for the
@@ -162,15 +181,26 @@ module Views::Layouts
       page.content_for(:prev_next_object) { PREV_NEXT }
     end
 
-    def render_page_title(action, with_right_column_content: true,
-                          with_columns: true)
+    # Stubs the project-page suppression inputs for `on_project_page?`
+    # (`controller_path`, `content_for(:project_banner)`).
+    def populate_project_slots(page, controller_path: nil,
+                               with_project_banner: false)
+      if controller_path
+        page.controller.define_singleton_method(:controller_path) do
+          controller_path
+        end
+      end
+      return unless with_project_banner
+
+      page.content_for(:project_banner) { "<div>banner</div>".html_safe }
+    end
+
+    def render_page_title(action, **)
       captured = nil
       test = self
       StubPage.class_eval do
         define_method(:view_template) do
-          test.send(:populate_slots, self, action,
-                    with_right_column_content: with_right_column_content,
-                    with_columns: with_columns)
+          test.send(:populate_slots, self, action, **)
           captured = capture { render(Header::PageTitle.new) }
         end
       end

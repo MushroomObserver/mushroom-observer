@@ -7,12 +7,14 @@
 # the top of the page body, with tabs that navigate within the
 # project's resources (observations, names, locations, etc.).
 #
-# `active_project_tab` is a controller helper — `ApplicationController`
-# defines the default and `Projects::MembersController` /
-# `Projects::AliasesController` override per-page. Keeping the
-# resolution on the controller side means project sub-controllers can
-# keep overriding it without us having to thread the override through
-# every action view.
+# `active_project_tab` is a controller helper -- `ApplicationController`
+# defines the default (the demodulized controller_name), and a
+# sub-controller may still override it for a page `ProjectNavs` can't
+# place from controller_path alone. Pages covered by
+# `ProjectNavs::ADMIN_SUBTAB_CONTROLLERS` /
+# `::OBSERVATION_SUBTAB_CONTROLLERS` don't need an override --
+# `ProjectNavs` derives "admin"/"observations" for those itself and
+# ignores whatever this returns.
 module Views::FullPageBase::ProjectBanner
   def add_project_banner(project)
     content_for(:project_banner) do

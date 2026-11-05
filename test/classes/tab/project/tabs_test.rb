@@ -124,6 +124,97 @@ module Tab::Project
       assert_equal("aliases_link", link_class(tab))
     end
 
+    # --- Member-facing observation sub-tabs (Tab::Project::ObservationSubtabs)
+
+    def test_observation_index
+      tab = Tab::Project::ObservationIndex.new(project: @project)
+
+      assert_equal(:observations.ti, tab.title)
+      assert_equal(
+        routes.observations_path(project: @project, by: "thumbnail_quality"),
+        tab.path
+      )
+      assert_equal("observations", tab.alt_title)
+      assert_equal("observations_link", link_class(tab))
+    end
+
+    def test_observation_map
+      tab = Tab::Project::ObservationMap.new(q_param: "abc")
+
+      assert_equal(:map.ti, tab.title)
+      assert_equal(routes.map_observations_path(q: "abc"), tab.path)
+      assert_equal("map", tab.alt_title)
+      assert_equal("map_link", link_class(tab))
+    end
+
+    def test_observation_map_without_q_param
+      tab = Tab::Project::ObservationMap.new
+
+      assert_equal(routes.map_observations_path, tab.path)
+    end
+
+    def test_observation_download
+      tab = Tab::Project::ObservationDownload.new(q_param: "abc")
+
+      assert_equal(:download.ti, tab.title)
+      assert_equal(routes.new_observations_download_path(q: "abc"), tab.path)
+      assert_equal("download", tab.alt_title)
+      assert_equal("download_link", link_class(tab))
+    end
+
+    def test_observation_field_slips
+      tab = Tab::Project::ObservationFieldSlips.new(project: @project)
+
+      assert_equal(:field_slips.ti, tab.title)
+      assert_equal(routes.field_slips_path(project: @project.id), tab.path)
+      assert_equal("field_slips", tab.alt_title)
+      assert_equal("field_slips_link", link_class(tab))
+    end
+
+    # Unlike Tab::Project::AdminFieldSlips, this title carries no count.
+    def test_observation_field_slips_title_has_no_count
+      tab = Tab::Project::ObservationFieldSlips.new(project: @project)
+
+      assert_equal(:field_slips.ti, tab.title)
+    end
+
+    def test_observation_violations
+      project = projects(:rare_fungi_project) # has target names + locations
+      tab = Tab::Project::ObservationViolations.new(project: project)
+
+      assert_equal(
+        "#{project.count_violations} #{:constraint_violations.ti}",
+        tab.title
+      )
+      assert_equal(routes.project_violations_path(project.id), tab.path)
+      assert_equal("violations", tab.alt_title)
+      assert_equal("violations_link", link_class(tab))
+    end
+
+    def test_observation_images_for_returns_nil_without_bridge
+      stub_no_bridge = ->(*) { false }
+
+      ::Query.stub(:related?, stub_no_bridge) do
+        assert_nil(Tab::Project::ObservationImages.for(
+                     query: ::Query.lookup(:Observation), controller: nil
+                   ))
+      end
+    end
+
+    def test_observation_images_for_returns_tab_when_bridge_exists
+      stub_bridge_ok = ->(*) { true }
+
+      ::Query.stub(:related?, stub_bridge_ok) do
+        tab = Tab::Project::ObservationImages.for(
+          query: ::Query.lookup(:Observation), controller: nil
+        )
+
+        assert_kind_of(Tab::Project::ObservationImages, tab)
+        assert_equal(:images.ti, tab.title)
+        assert_equal("images", tab.alt_title)
+      end
+    end
+
     def test_to_a_legacy_shape
       tab = Tab::Project::Summary.new(project: @project)
       title, url, opts = tab.to_a
