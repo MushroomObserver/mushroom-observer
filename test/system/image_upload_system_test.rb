@@ -19,7 +19,7 @@ class ImageUploadSystemTest < ApplicationSystemTestCase
 
     # Attach image file (file input is inside styled button, not visible)
     image_path = Rails.root.join("test/images/Coprinus_comatus.jpg")
-    attach_file("glossary_term_upload_image", image_path, visible: false)
+    attach_file("glossary_term_upload_image", image_path, visible: :all)
 
     # Fill in copyright fields
     fill_in("glossary_term_upload_copyright_holder", with: user.name)
@@ -68,7 +68,7 @@ class ImageUploadSystemTest < ApplicationSystemTestCase
       # Attach the non-image file and expect an alert
       alert_text = accept_alert do
         attach_file("project_upload_image", text_file.path,
-                    visible: false)
+                    visible: :all)
       end
 
       assert_equal("Please select an image file.", alert_text)
