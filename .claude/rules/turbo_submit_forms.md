@@ -111,13 +111,26 @@ four download forms' explicit `turbo: false` is exactly what kept them
 working through that flip. The explicit attribute makes every form's
 Turbo state independent of the global config.
 
-**This protection does not reach forms that bypass `Components::
-ApplicationForm` entirely** — a subclass that overrides `form_tag`
-directly (e.g. `Components::Form::LiveDataFilter`) builds its own
-`<form>` attributes and never touches `@attributes[:data]`, and a raw
-hand-rolled `<form>` tag outside the framework never runs
-`around_template` at all. Those need the same `data: { turbo: "false" }`
-treatment applied by hand, at the point the tag is actually built.
+**A `Components::ApplicationForm` subclass that overrides `form_tag`
+still gets the protection, as long as the override forwards
+`@attributes[:data]`** — `around_template` sets `@attributes[:data][:turbo]`
+before `form_tag` runs, regardless of which subclass method ends up
+building the tag. `field_slips/form.rb`'s override is the worked
+example: its `form_attributes` method explicitly forwards
+`@attributes[:data]` with a comment explaining why, specifically so
+the inherited `turbo:` value reaches the hand-built `form(...)` call.
+Skipping that forward (building a `data:` hash from scratch instead)
+silently drops the protection — easy to miss since the form still
+renders, just without the attribute.
+
+**The protection does not reach forms that bypass `Components::
+ApplicationForm` entirely** — a raw hand-rolled `<form>` (or
+Phlex `form(...)`) tag outside the framework never runs
+`around_template` at all, so there's no `turbo:` prop or default to
+inherit in the first place. `Components::IndexFilter` (`<
+Components::Base`, not `ApplicationForm`) is the real example: it
+sets `data: { turbo: "false" }` by hand, at the point the tag is
+built, because nothing else would.
 
 **Always write `turbo: false` explicitly on a permanently-exempt form.**
 This used to be a readability nicety (the base class's own default was
@@ -186,11 +199,11 @@ the clear button carry a turbo_stream swap-target marker — tracked by
 its own `prop :context, _Union(:page, :dropdown), default: :page`.
 This form is *always* Turbo-submitted regardless of context (`Searchable#
 create` always redirects, so there's no same-URL-200 risk either way);
-it builds its own `<form>` `data:` hash from scratch in `form_attributes`
-rather than calling `super`, so the base class's `turbo:` prop is
-inherited but unused. Don't conflate `context:` with `turbo:` on this
-form, and don't add a `turbo:`/`local:` kwarg to any of its callers —
-none of the 6 `Searchable`-including search controllers or their
+it calls `super` from its own `initialize` with no `turbo:` kwarg, so
+it inherits the base class's `turbo: true` default like any other
+form. Don't conflate `context:` with `turbo:` on this form, and don't
+add a `turbo:`/`local:` kwarg to any of its callers — none of the 6
+`Searchable`-including search controllers or their
 `*/search/new.rb` views need one.
 
 ## HARD RULE: a same-URL `200` re-render on a Turbo-enabled form hangs the browser
