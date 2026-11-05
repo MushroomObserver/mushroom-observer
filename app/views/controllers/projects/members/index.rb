@@ -11,14 +11,21 @@ module Views::Controllers::Projects::Members
     def view_template
       add_project_banner(@project)
       container_class(:wide)
+      content_padding(:panels)
 
-      render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project, turbo: true
-             ))
+      render_add_form
       render_table
     end
 
     private
+
+    def render_add_form
+      ContentPadded do
+        render(Views::Controllers::Projects::Members::Form.new(
+                 @project_member, project: @project, turbo: true
+               ))
+      end
+    end
 
     def render_table
       Table(@users.sort_by(&:login),
