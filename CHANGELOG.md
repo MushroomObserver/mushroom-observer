@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-11-05 (deploy-2026-11-05-18-00)
+
+- Translate genus-rank classification flash messages; block rubocop on locale `.txt` files ([PR5600](https://github.com/MushroomObserver/mushroom-observer/pull/5600), @nimmolo)
+- Clade autocompleter for `Names::Classification::Inherit::Form`'s parent field ([PR5599](https://github.com/MushroomObserver/mushroom-observer/pull/5599), @nimmolo)
+- Suggest the default template on the email-tracking edit form ([PR5601](https://github.com/MushroomObserver/mushroom-observer/pull/5601), @nimmolo)
+- Fix empty right-column flex row on most show pages ([PR5609](https://github.com/MushroomObserver/mushroom-observer/pull/5609), @nimmolo)
+- Fix the vote-breakdown page's missing title and padding ([PR5607](https://github.com/MushroomObserver/mushroom-observer/pull/5607), @nimmolo)
+- Tidy up the propose/edit-naming page layout ([PR5606](https://github.com/MushroomObserver/mushroom-observer/pull/5606), @nimmolo)
+- Fix the add-external-link form and a crash on Image-targeted links ([PR5605](https://github.com/MushroomObserver/mushroom-observer/pull/5605), @nimmolo)
+- Fix the location-merge page's crash and row markup ([PR5604](https://github.com/MushroomObserver/mushroom-observer/pull/5604), @nimmolo)
+- Small-author six observation page titles ([PR5603](https://github.com/MushroomObserver/mushroom-observer/pull/5603), @nimmolo)
+- Fix a crash on the naming-suggestions endpoint's names param ([PR5608](https://github.com/MushroomObserver/mushroom-observer/pull/5608), @nimmolo)
+- Fix the occurrence show page and clean up its duplicate strings ([PR5610](https://github.com/MushroomObserver/mushroom-observer/pull/5610), @nimmolo)
+- Block `rubocop` against `*.js` files too, and rename the hook ([PR5613](https://github.com/MushroomObserver/mushroom-observer/pull/5613), @nimmolo)
+- Pin Redoc to v2.5.1 so `/api-docs` renders ([PR5615](https://github.com/MushroomObserver/mushroom-observer/pull/5615), @mo-nathan)
+- Prevent duplicate `NameTracker` records ([PR5462](https://github.com/MushroomObserver/mushroom-observer/pull/5462), @JoeCohen)
+- Rework Project and Species List show-page layouts ([PR5614](https://github.com/MushroomObserver/mushroom-observer/pull/5614), @nimmolo)
+- Fix stale `NamingConsensus` in `TaxonSync#set_vote` (flaky `#5551`) ([PR5622](https://github.com/MushroomObserver/mushroom-observer/pull/5622), @nimmolo)
+
 ## 2026-11-03 (deploy-2026-11-03-06-00)
 
 - Fix `script/lang_update_if_needed.sh` crashing under `RAILS_ENV=test` ([PR5573](https://github.com/MushroomObserver/mushroom-observer/pull/5573), @nimmolo)
