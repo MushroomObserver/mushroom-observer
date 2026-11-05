@@ -5,25 +5,28 @@ module Views::Controllers::Projects::Members
   class Index < Views::FullPageBase
     prop :project, ::Project
     prop :users, _Array(::User)
+    prop :pagination, ::PaginationData
     prop :project_member, ::ProjectMember
     prop :user, ::User
 
     def view_template
       add_project_banner(@project)
       container_class(:wide)
+      add_pagination(@pagination)
 
       render(Views::Controllers::Projects::Members::Form.new(
                @project_member, project: @project
              ))
-      render_table
+      PaginatedResults do
+        render_table
+      end
     end
 
     private
 
     def render_table
-      Table(@users.sort_by(&:login),
-            variant: :striped, identifier: "project-members",
-            class: "mt-3") do |table|
+      Table(@users,
+            variant: :striped, identifier: "project-members") do |table|
         define_columns(table)
       end
     end
@@ -37,7 +40,8 @@ module Views::Controllers::Projects::Members
       table.column(:login_name.ti,
                    class: "text-center") { |u| render_avatar(u) }
       table.column(:full_name.ti, class: "align-middle") { |u| plain(u.name) }
-      table.column(:project_aliases.ti, class: "align-middle") do |u|
+      table.column(:project_aliases.ti,
+                   class: "align-middle text-right") do |u|
         render_aliases(u)
       end
       table.column(:status.ti, class: "align-middle") do |u|

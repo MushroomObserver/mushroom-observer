@@ -10,6 +10,11 @@ module Projects
 
     def index
       results = build_index_results
+      # Stores the query so clicking into an observation from here
+      # carries q: and its prev/next pager stays in this project's
+      # list, instead of falling back to whatever query was in the
+      # session before.
+      update_stored_query(updates_query)
       render(Views::Controllers::Projects::Updates::Index.new(
                project: @project, user: @user, results: results,
                show_excluded: show_excluded?
@@ -63,11 +68,15 @@ module Projects
 
     # The observation list the Updates tab is currently showing.
     def current_scope
-      if show_excluded?
-        @project.excluded_observations.order(created_at: :desc)
-      else
-        @project.new_candidate_observations
-      end
+      updates_query.scope
+    end
+
+    def updates_query
+      @updates_query ||= create_query(:Observation, query_attr => @project.id)
+    end
+
+    def query_attr
+      show_excluded? ? :project_excluded : :project_new_candidates
     end
 
     def build_index_results
@@ -76,8 +85,7 @@ module Projects
       obs_page = paginated_observations(scope, pagination)
       { observations: obs_page,
         pagination: pagination,
-        current_count: pagination.num_total,
-        request_url: request.fullpath }
+        current_count: pagination.num_total }
     end
 
     def build_pagination(scope)
