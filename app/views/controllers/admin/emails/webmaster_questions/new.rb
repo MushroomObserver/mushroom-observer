@@ -14,8 +14,7 @@ module Views::Controllers::Admin::Emails::WebmasterQuestions
       render(Form.new(
                reply_to: @email,
                message: @message,
-               email_error: @email_error,
-               turbo: true
+               email_error: @email_error
              ))
     end
   end

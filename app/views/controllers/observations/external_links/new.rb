@@ -30,8 +30,7 @@ module Views::Controllers::Observations::ExternalLinks
                observation: @observation,
                sites: @sites,
                site: @site || @sites.first,
-               user: @user,
-               turbo: true
+               user: @user
              ))
     end
 

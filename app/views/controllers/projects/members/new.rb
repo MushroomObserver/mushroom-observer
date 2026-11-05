@@ -16,7 +16,7 @@ module Views::Controllers::Projects::Members
       container_class(:wide)
 
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project, turbo: true
+               @project_member, project: @project
              ))
       render_users_table
     end

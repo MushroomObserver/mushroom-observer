@@ -15,7 +15,7 @@ module Views::Controllers::Projects::Members
       add_pagination(@pagination)
 
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project, turbo: true
+               @project_member, project: @project
              ))
       PaginatedResults do
         render_table

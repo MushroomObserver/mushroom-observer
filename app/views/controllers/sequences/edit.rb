@@ -25,7 +25,7 @@ module Views::Controllers::Sequences
 
     def render_form_column(obs)
       render(ObservationTitle.new(observation: obs))
-      render(Form.new(@sequence, back: @back, turbo: true))
+      render(Form.new(@sequence, back: @back))
       div(class: "small") do
         span(class: "font-weight-bold") { append_colon(:created_by.ti) }
         Link(type: :user, user: @sequence.user)

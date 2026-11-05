@@ -57,7 +57,7 @@ module Views::Controllers::Descriptions::Authors
                  ::FormObject::DescriptionAuthor.new(
                    user: @requester&.unique_text_name
                  ),
-                 object: @object, turbo: true
+                 object: @object
                ))
       end
     end
