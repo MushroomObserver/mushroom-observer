@@ -14,7 +14,7 @@ module Views::Controllers::Observations::Emails
         ).small_author
       )
 
-      render(Form.new(observation: @observation, turbo: true))
+      render(Form.new(observation: @observation))
     end
   end
 end

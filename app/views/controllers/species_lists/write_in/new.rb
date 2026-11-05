@@ -51,8 +51,7 @@ module Views::Controllers::SpeciesLists::WriteIn
                       member_alt: @member_alt,
                       member_is_collection_location:
                         @member_is_collection_location,
-                      member_specimen: @member_specimen,
-                      turbo: true))
+                      member_specimen: @member_specimen))
     end
   end
 end

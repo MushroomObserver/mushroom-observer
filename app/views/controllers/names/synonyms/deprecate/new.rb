@@ -29,8 +29,7 @@ class Views::Controllers::Names::Synonyms::Deprecate::New < Views::FullPageBase
              valid_names: @valid_names,
              suggest_corrections: @suggest_corrections,
              parent_deprecated: @parent_deprecated,
-             user: current_user,
-             turbo: true
+             user: current_user
            ))
   end
 end

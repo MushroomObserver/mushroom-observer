@@ -21,7 +21,7 @@ module Views::Controllers::Names
       render(Form.new(
                @name, user: @user, name_string: @name_string,
                       misspelling: @misspelling,
-                      correct_spelling: @correct_spelling, turbo: true
+                      correct_spelling: @correct_spelling
              ))
     end
   end

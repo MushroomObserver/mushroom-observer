@@ -9,7 +9,7 @@ module Views::Controllers::Articles
     def view_template
       add_edit_title(@article)
       add_context_nav(::Tab::Article::FormEdit.new(article: @article))
-      render(Form.new(@article, turbo: true))
+      render(Form.new(@article))
     end
   end
 end
