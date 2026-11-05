@@ -21,16 +21,15 @@ module Views::Controllers::Projects::Members
 
     def render_create_form
       Container(width: :text, class: "mt-5 ml-3") do
-        div(class: "d-flex align-items-start") do
-          autocompleter_field(
-            :candidate,
-            type: :user,
-            label: :add_object.l(type: :user),
-            inline: true,
-            size: 40
-          )
-          submit(:add.ti, class: "ml-3")
-        end
+        autocompleter_field(
+          :candidate,
+          type: :user,
+          label: :add_object.l(type: :user),
+          inline: true,
+          size: 40,
+          wrap_class: "d-inline-block align-middle"
+        )
+        submit(:add.ti, class: "d-inline-block align-middle ml-3")
       end
     end
 

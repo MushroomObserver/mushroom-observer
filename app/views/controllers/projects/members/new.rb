@@ -9,6 +9,7 @@ module Views::Controllers::Projects::Members
     prop :user, ::User
 
     def view_template
+      add_project_banner(@project)
       add_page_title(
         :add_members_title.t(title: @project.title)
       )
@@ -40,6 +41,8 @@ module Views::Controllers::Projects::Members
         type: :post,
         variant: :strip,
         name: :add.ti,
+        icon: :merge,
+        show_label: :responsive,
         target: project_members_path(
           project_id: @project.id,
           candidate: user.id
