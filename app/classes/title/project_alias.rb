@@ -1,12 +1,10 @@
 # frozen_string_literal: true
 
-# Page heading + browser tab title — both just `name` (plain text).
+# Page heading + browser tab title — `name` alone ("0", "NJW") isn't
+# self-explanatory out of context, so both lead with the type label.
 class Title::ProjectAlias < Title
   def page_title(_user = nil)
-    @object.name
+    "#{:project_alias.ti}: \"#{@object.name}\""
   end
-
-  def document_title
-    @object.name
-  end
+  alias document_title page_title
 end

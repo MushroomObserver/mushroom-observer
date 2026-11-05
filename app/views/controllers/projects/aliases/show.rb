@@ -8,6 +8,7 @@ module Views::Controllers::Projects::Aliases
 
     def view_template
       add_project_banner(@project)
+      add_show_title(@project_alias)
       container_class(:text)
 
       render_fields
