@@ -15,6 +15,7 @@ module Views::Controllers::Projects::Members
     def test_member_status
       project = projects(:eol_project)
       view = Index.new(project: project, users: [],
+                       pagination: PaginationData.new,
                        project_member: ProjectMember.new(project: project),
                        user: @user)
 
