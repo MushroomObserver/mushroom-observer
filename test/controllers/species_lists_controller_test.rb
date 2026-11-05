@@ -261,12 +261,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_select("body.species_lists__show")
     assert_select("#comments_for_object")
-    assert_select(
-      "form:match('action', ?)",
-      %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: 0 },
-      "Non owner should not get buttons to remove Observations from List"
-    )
+    observations.each do |obs|
+      assert_select(
+        "form[action='#{observation_species_list_path(
+          id: obs.id, species_list_id: list.id
+        )}']",
+        { count: 0 },
+        "Non owner should not get buttons to remove Observations from List"
+      )
+    end
   end
 
   def test_show_species_list_owner_logged_in
@@ -280,12 +283,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_select("body.species_lists__show")
     assert_select("#comments_for_object")
-    assert_select(
-      "form:match('action', ?)",
-      %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: observations.size },
-      "Observation List owner should get 1 Remove button per Observation"
-    )
+    observations.each do |obs|
+      assert_select(
+        "form[action='#{observation_species_list_path(
+          id: obs.id, species_list_id: list.id
+        )}']",
+        { count: 1 },
+        "Observation List owner should get 1 Remove button per Observation"
+      )
+    end
   end
 
   def test_show_species_list_for_project

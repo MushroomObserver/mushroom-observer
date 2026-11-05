@@ -96,14 +96,13 @@ module Views::Controllers::Projects
 
     def render_remove_obs_button
       Button(
-        type: :put,
+        type: :delete,
         variant: :outline,
         icon: :remove,
-        icon_class: "text-danger",
         name: :remove.ti,
         show_label: :responsive,
         target: observation_project_path(
-          id: @observation.id, project_id: @project.id, commit: "remove"
+          id: @observation.id, project_id: @project.id
         ),
         confirm: :are_you_sure.l
       )
@@ -116,7 +115,7 @@ module Views::Controllers::Projects
         icon: :attach,
         show_label: :responsive,
         target: observation_project_path(
-          id: @observation.id, project_id: @project.id, commit: "add"
+          id: @observation.id, project_id: @project.id
         )
       )
     end

@@ -78,13 +78,12 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
 
   def remove_button(spl)
     remove_path = observation_species_list_path(
-      id: @obs.id, species_list_id: spl.id, commit: "remove"
+      id: @obs.id, species_list_id: spl.id
     )
     Components::Button.new(
-      type: :put,
+      type: :delete,
       variant: :strip,
       icon: :remove,
-      icon_class: "text-danger",
       name: :remove.ti,
       target: remove_path,
       confirm: :are_you_sure.l,

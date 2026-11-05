@@ -83,13 +83,12 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
 
   def remove_button(project)
     remove_path = observation_project_path(
-      id: @obs.id, project_id: project.id, commit: "remove"
+      id: @obs.id, project_id: project.id
     )
     Components::Button.new(
-      type: :put,
+      type: :delete,
       variant: :strip,
       icon: :remove,
-      icon_class: "text-danger",
       name: :remove.ti,
       target: remove_path,
       confirm: :are_you_sure.l,
