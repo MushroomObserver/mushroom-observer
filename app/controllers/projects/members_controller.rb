@@ -29,7 +29,7 @@ module Projects
     #   params[:project_id] (was :id)
     #   params[:candidate]  (when click on user)
     # Outputs:
-    #   @project, @users, @project_member
+    #   @project, @users
     # "Posts" to the same action.  Stays on this view until done.
     def new
       return unless find_project!
@@ -39,10 +39,8 @@ module Projects
 
       users =
         User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
-      project_member = ProjectMember.new(project: @project)
       render(Views::Controllers::Projects::Members::New.new(
-               project: @project, users: users,
-               project_member: project_member, user: @user
+               project: @project, users: users, user: @user
              ))
     end
 

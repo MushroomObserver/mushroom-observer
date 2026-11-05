@@ -7,6 +7,14 @@ module Views::Controllers::Projects
   # Tab rendering (#project_tabs, AdminSubtabs) lives on ProjectNavs --
   # see project_navs_test.rb.
   class BannerTest < ComponentTestCase
+    # `#title` only belongs to this banner's title on `projects#show`
+    # -- see `Banner#title_id`.
+    def setup
+      super
+      controller.define_singleton_method(:controller_path) { "projects" }
+      controller.define_singleton_method(:action_name) { "show" }
+    end
+
     def test_renders_basic_html_structure_with_banner_image
       project = projects(:albion_project)
       html = render_banner(project: project)
@@ -49,6 +57,34 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       assert_html(html, "#title .badge-id")
+    end
+
+    # Off projects#show, Header::PageTitle renders a distinct
+    # heading, so this title must not also claim the #title id.
+    def test_title_id_off_projects_show
+      controller.define_singleton_method(:controller_path) do
+        "projects/aliases"
+      end
+      controller.define_singleton_method(:action_name) { "new" }
+
+      html = render_banner
+
+      assert_no_html(html, "#title")
+      assert_html(html, "#project_banner_title")
+    end
+
+    # Header::PageTitle is suppressed on every index action, so this
+    # banner title is the page's only heading there, same as show.
+    def test_title_id_on_project_index_page
+      controller.define_singleton_method(:controller_path) do
+        "projects/violations"
+      end
+      controller.define_singleton_method(:action_name) { "index" }
+
+      html = render_banner
+
+      assert_html(html, "#title")
+      assert_no_html(html, "#project_banner_title")
     end
 
     def test_renders_banner_image_when_project_has_image

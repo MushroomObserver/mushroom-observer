@@ -9,9 +9,7 @@ module Views::Controllers::Projects::Aliases
 
     def view_template
       add_project_banner(@project)
-      add_page_title(
-        :project_alias_edit.l(name: @project_alias.name)
-      )
+      add_edit_title(@project_alias, user: @user)
       container_class(:text)
 
       render(Views::Controllers::Projects::Aliases::Form.new(

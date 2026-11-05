@@ -7,6 +7,7 @@ module Views::Controllers::Projects::Members
     def setup
       super
       @user = users(:rolf)
+      controller.define_singleton_method(:active_project_tab) { "members" }
     end
 
     def test_renders_add_widget_and_table

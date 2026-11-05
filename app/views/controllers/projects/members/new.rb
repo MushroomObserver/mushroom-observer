@@ -5,7 +5,6 @@ module Views::Controllers::Projects::Members
   class New < Views::FullPageBase
     prop :project, ::Project
     prop :users, _Array(::User)
-    prop :project_member, ::ProjectMember
     prop :user, ::User
 
     def view_template
@@ -16,9 +15,6 @@ module Views::Controllers::Projects::Members
       add_context_nav(Tab::Project::Members::FormNew.new(project: @project))
       container_class(:wide)
 
-      render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project, turbo: true
-             ))
       render_users_table
     end
 
