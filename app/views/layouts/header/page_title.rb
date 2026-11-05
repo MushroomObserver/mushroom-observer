@@ -28,10 +28,10 @@
 # navigation content. The `<nav>` landmark in this strip is supplied
 # by `Views::Layouts::Header::ShowPrevNextNav`, around the pager alone.
 #
-# `#title_bar` is wrapped in a `Container` carrying the same
-# `content_for(:container_class)` width cap (`container-text`,
-# `container-wide`, ...) as `#content` below it (`Views::Layouts::
-# Application#content_classes_for_main`), so a narrow-width page's
+# `#title_bar` and `#content` share the same `content_for(:container_class)`
+# width cap (`container-text`, `container-wide`, ...), applied once by
+# `Views::Layouts::Application#render_header_and_main` around both --
+# this component doesn't apply it itself, so a narrow-width page's
 # title lines up with its body instead of spanning the full column.
 module Views::Layouts
   class Header::PageTitle < Views::Base
@@ -40,12 +40,10 @@ module Views::Layouts
       "px-card"
 
     def view_template
-      Container(class: content_for(:container_class)) do
-        Row(id: "title_bar", class: "mb-1") do
-          render_mobile_top_row unless suppress_title?
-          render_left_column unless suppress_title?
-          render_right_column if show_desktop_right_column?
-        end
+      Row(id: "title_bar", class: "mb-1") do
+        render_mobile_top_row unless suppress_title?
+        render_left_column unless suppress_title?
+        render_right_column if show_desktop_right_column?
       end
     end
 

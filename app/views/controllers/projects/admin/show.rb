@@ -18,7 +18,6 @@ module Views::Controllers::Projects::Admin
     def view_template
       render_page_chrome
 
-      render_subtabs
       render_form
       render_danger_zone
     end
@@ -30,12 +29,6 @@ module Views::Controllers::Projects::Admin
       add_page_title(:show_project_admin_title.l)
       container_class(:text)
       content_padding(:no_panels)
-    end
-
-    def render_subtabs
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "details"
-             ))
     end
 
     def render_form

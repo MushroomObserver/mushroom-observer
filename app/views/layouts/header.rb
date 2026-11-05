@@ -1,17 +1,18 @@
 # frozen_string_literal: true
 
 # The header block immediately below the application top nav. Rendered
-# once per page by the application layout, inside the
-# `content_for(:container_class)` width cap. Composes (in order):
+# once per page by `Views::Layouts::Application#render_header_and_main`,
+# inside the `content_for(:container_class)` width cap it shares with
+# `#content`. Composes (in order):
 #
 #   - on non-index actions, the page title strip (`Header::PageTitle`);
 #   - the project observation-buttons row, fed from a content_for
 #     slot.
 #
 # The project banner (`:project_banner` content_for slot) renders
-# separately, in `Views::Layouts::Application#render_right_side`,
-# ahead of this width cap -- a project's banner image/tabs always
-# span the full page width, regardless of the page's container_class.
+# separately, in `Views::Layouts::Application#render_nav_chrome`,
+# ahead of the flash row -- a project's banner image/tabs always
+# span the full page width.
 #
 # The index filter/pager bar (`Header::IndexBar`) and the rss-log
 # type-filter row no longer render here -- `Header::IndexBar` moved

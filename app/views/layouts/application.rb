@@ -130,8 +130,8 @@ module Views::Layouts
 
     # The page chrome above `#content`: the top nav, the collapsible
     # search-bar row (a sibling, not a child -- see
-    # `Views::Layouts::SearchNav`), the index bar, the project banner,
-    # and the flash row.
+    # `Views::Layouts::SearchNav`), the index bar, the project
+    # banner, and the flash row.
     def render_nav_chrome(banner:)
       render(Views::Layouts::TopNav.new(user: current_user,
                                         query: current_query,

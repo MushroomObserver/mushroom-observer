@@ -45,9 +45,13 @@ module Views::Controllers::Projects
     end
 
     def render_summary_body
-      p { trusted_html(@project.summary.to_s.tpl) }
+      render_summary if @project.summary.present?
       render_drafts if @drafts.any?
       render_created_at
+    end
+
+    def render_summary
+      div(class: "mb-3") { trusted_html(@project.summary.to_s.tpl) }
     end
 
     def render_drafts
