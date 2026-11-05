@@ -653,6 +653,77 @@ module Projects
       assert_equal(num_before, eol_project.reload.user_group.users.count)
     end
 
+    # The inline AddForm widget submits a namespaced, newline-separated
+    # list -- same shape as the project's other add-target widgets.
+    def test_add_members_batch
+      eol_project = projects(:eol_project)
+      dick_user = dick
+      roy_user = roy
+      assert_not(dick_user.in_group?(eol_project.user_group.name))
+      assert_not(roy_user.in_group?(eol_project.user_group.name))
+      params = {
+        project_id: eol_project.id,
+        project_members_add: {
+          candidates: "#{dick_user.id}\n#{roy_user.unique_text_name}"
+        }
+      }
+
+      post_requires_login(:create, params, mary.login)
+
+      assert_redirected_to(project_members_path(eol_project.id))
+      assert(dick_user.reload.in_group?(eol_project.user_group.name))
+      assert(roy_user.reload.in_group?(eol_project.user_group.name))
+    end
+
+    def test_add_members_batch_denied_for_non_admin
+      eol_project = projects(:eol_project)
+      num_before = eol_project.user_group.users.count
+      params = {
+        project_id: eol_project.id,
+        project_members_add: { candidates: "#{dick.id}\n#{roy.id}" }
+      }
+
+      post_requires_login(:create, params, katrina.login)
+
+      assert_redirected_to(project_members_path(eol_project.id))
+      assert_equal(num_before, eol_project.reload.user_group.users.count)
+    end
+
+    def test_add_members_batch_no_matches
+      eol_project = projects(:eol_project)
+      params = {
+        project_id: eol_project.id,
+        project_members_add: { candidates: "freddymercury\nnotarealuser" }
+      }
+
+      post_requires_login(:create, params, mary.login)
+
+      assert_redirected_to(project_members_path(eol_project.id))
+      assert_flash_error
+    end
+
+    def test_add_members_turbo_stream_response
+      eol_project = projects(:eol_project)
+      params = {
+        project_id: eol_project.id,
+        project_members_add: { candidates: dick.id.to_s }
+      }
+      login(mary.login)
+
+      post(:create, params: params, format: :turbo_stream)
+
+      assert_response(:success)
+      assert_select(
+        "turbo-stream[action='replace'][target='project_members_widget']"
+      )
+      assert_select(
+        "turbo-stream[action='replace'][target='project_members_table']"
+      )
+      assert_select(
+        "turbo-stream[action='replace'][target='project_admin_subtabs']"
+      )
+    end
+
     def test_index
       eol_project = projects(:eol_project)
       login

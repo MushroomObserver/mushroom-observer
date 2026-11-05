@@ -1,43 +1,19 @@
 # frozen_string_literal: true
 
-# Form for adding or editing project members. Rendered by
-# `Projects::MembersController#{index,new,edit}`.
-#
-# For new members: renders an autocompleter to select a user.
-# For existing members: renders status-change buttons.
+# Status-change form for an existing project member. Rendered by
+# `Projects::MembersController#edit`. Adding a new member is a
+# separate widget now -- see `AddForm`.
 module Views::Controllers::Projects::Members
   class Form < ::Components::ApplicationForm
     prop :project, ::Project
 
     def view_template
-      if model.persisted?
-        render_update_form
-      else
-        render_create_form
-      end
-    end
-
-    private
-
-    def render_create_form
-      Container(width: :text, class: "mt-5 ml-3") do
-        autocompleter_field(
-          :candidate,
-          type: :user,
-          label: :add_object.l(type: :user),
-          inline: true,
-          size: 40,
-          wrap_class: "d-inline-block align-middle"
-        )
-        submit(:add.ti, class: "d-inline-block align-middle ml-3")
-      end
-    end
-
-    def render_update_form
       render_status_button(:change_member_status_make_member)
       render_status_button(:change_member_status_remove_member)
       render_status_button(:change_member_status_make_admin)
     end
+
+    private
 
     def render_status_button(key)
       div(class: "form-group mt-3") do
@@ -48,14 +24,9 @@ module Views::Controllers::Projects::Members
     end
 
     def form_action
-      if model.persisted?
-        url_for(controller: "projects/members", action: :update,
-                project_id: @project.id, candidate: model.user_id,
-                only_path: true)
-      else
-        url_for(controller: "projects/members", action: :create,
-                project_id: @project.id, only_path: true)
-      end
+      url_for(controller: "projects/members", action: :update,
+              project_id: @project.id, candidate: model.user_id,
+              only_path: true)
     end
   end
 end

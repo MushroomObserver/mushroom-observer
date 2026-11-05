@@ -3295,11 +3295,15 @@
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
-  add_members_not_found: User "[user]" not found.
   add_members_added_admin: Successfully added [user] to admins.
   add_members_added_member: Successfully added [user] to members.
   add_members_removed_admin: Successfully removed [user] from admins.
   add_members_removed_member: Successfully removed [user] from members.
+
+  # Project Members (inline add widget -- Projects::Members::AddForm)
+  project_members_to_add_label: "Members to Add"
+  project_member_add: Add
+  project_members_not_found: No matching users found.
   add_members_already_added_admin: Already added [user] to admins.
   add_members_already_added_member: Already added [user] to members.
   add_members_already_removed_admin: Already removed [user] from admins.

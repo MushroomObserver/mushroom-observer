@@ -9,16 +9,17 @@
 module Projects
   # CRUD for project members
   class MembersController < ApplicationController
+    include Projects::TabCountsRefreshable
+    include Projects::AddableObservations
+
     before_action :login_required
 
     def index
       return unless find_project!
 
       users = @project.user_group.users.includes(:image).to_a
-      project_member = ProjectMember.new(project: @project)
       render(Views::Controllers::Projects::Members::Index.new(
-               project: @project, users: users,
-               project_member: project_member, user: @user
+               project: @project, users: users, user: @user
              ))
     end
 
@@ -48,15 +49,21 @@ module Projects
     def create
       return unless find_project!
 
-      candidate = params[:candidate] ||
-                  params.dig(:project_member, :candidate)
-      unless @project.is_admin?(@user) ||
-             (@project.open_membership && @user.id.to_s == candidate)
+      candidates = resolved_candidates
+      unless @project.is_admin?(@user) || self_only_open_join?(candidates)
         return must_be_project_admin!(@project.id)
       end
-      return unless candidate
 
-      add_member(candidate, @project)
+      if candidates.any?
+        candidates.each { |user| set_status(@project, :member, user, :add) }
+      else
+        flash_error(:project_members_not_found.t)
+      end
+
+      respond_to do |format|
+        format.turbo_stream { render_members_update }
+        format.html { return_to_caller(@project, params[:target]) }
+      end
     end
 
     # Form to make a given User either a member or an admin.
@@ -87,10 +94,6 @@ module Projects
 
       update_membership(@project, @project_member.user)
     end
-
-    # Per-click cap on "Add My Observations". Method (not constant) so
-    # tests can stub it via Minitest stub. See issue #4129.
-    def self.add_obs_batch_limit = 100
 
     # Turbo-stream modal showing how many of the candidate's observations
     # match current project constraints and aren't already in the project.
@@ -167,15 +170,41 @@ module Projects
                         ProjectMember.new(project: @project, user: user)
     end
 
-    # Redirects back to show_project.
-    def add_member(str, project)
-      if (user = find_member(str))
-        set_status(project, :member, user, :add)
-        @candidate = nil
-      else
-        flash_error(:add_members_not_found.t(user: str))
-      end
-      return_to_caller(project, params[:target])
+    # A single flat `candidate` param (Members::New's per-row Add
+    # button, or a bookmarked link) resolves to at most one user; the
+    # inline AddForm widget on the members index submits a
+    # namespaced, newline/comma-separated list that can resolve to
+    # several -- same shape as the project's other add-target widgets
+    # (TargetNames/TargetLocations).
+    def resolved_candidates
+      return [find_member(params[:candidate])].compact if params[:candidate]
+
+      raw = params.dig(:project_members_add, :candidates).to_s
+      raw.split(/[,\n]/).filter_map { |entry| find_member(entry.strip) }
+    end
+
+    def self_only_open_join?(candidates)
+      @project.open_membership && candidates == [@user]
+    end
+
+    def render_members_update
+      users = @project.user_group.users.includes(:image).to_a
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "project_members_widget",
+                 Views::Controllers::Projects::Members::AddForm.new(
+                   project: @project
+                 )
+               ),
+               turbo_stream.replace(
+                 "project_members_table",
+                 Views::Controllers::Projects::Members::Tables.new(
+                   project: @project, users: users, user: @user
+                 )
+               ),
+               turbo_stream_admin_subtabs("members"),
+               turbo_stream_flash_update
+             ])
     end
 
     def return_to_caller(project, target)
@@ -223,37 +252,6 @@ module Projects
       else
         false
       end
-    end
-
-    def add_observations(project, candidate)
-      # Returns the count of observations added. Caps each click at
-      # add_obs_batch_limit most-recent matching observations so the
-      # request stays synchronous.
-      obs = addable_observations(project, candidate).
-            order(id: :desc).limit(self.class.add_obs_batch_limit)
-      before = project.observations.count
-      project.add_observations(obs)
-      project.observations.count - before
-    end
-
-    # Observations owned by candidate that match project constraints and
-    # are not already in project.observations. Date bounds are applied
-    # independently so projects with only a start_date or only an
-    # end_date still constrain correctly.
-    def addable_observations(project, candidate)
-      obs = candidate.observations
-      loc = project.location
-      if loc
-        obs = obs.in_box(north: loc.north, south: loc.south,
-                         east: loc.east, west: loc.west)
-      end
-      if project.start_date
-        obs = obs.found_after(project.start_date.strftime("%Y-%m-%d"))
-      end
-      if project.end_date
-        obs = obs.found_before(project.end_date.strftime("%Y-%m-%d"))
-      end
-      obs.where.not(id: project.observations.select(:id))
     end
 
     def set_trust(project, user, trust_level)

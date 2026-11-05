@@ -9,21 +9,14 @@ module Views::Controllers::Projects::Members
       @user = users(:rolf)
     end
 
-    # Was Project#member_status, tested in project_test.rb -- moved
-    # here (#4901) since the model method's only caller was this
-    # view's table column.
-    def test_member_status
+    def test_renders_add_widget_and_table
       project = projects(:eol_project)
-      view = Index.new(project: project, users: [],
-                       project_member: ProjectMember.new(project: project),
-                       user: @user)
+      users = project.user_group.users.to_a
 
-      assert_equal(:owner.ti, view.send(:member_status, project.user))
-      admin = (project.admin_group.users - [project.user]).first
-      assert_equal(:admin.ti, view.send(:member_status, admin))
-      member = (project.user_group.users - project.admin_group.users).first
-      assert_equal(:member.ti, view.send(:member_status, member))
-      assert_nil(view.send(:member_status, users(:zero_user)))
+      html = render(Index.new(project: project, users: users, user: @user))
+
+      assert_html(html, "#project_members_widget")
+      assert_html(html, "#project_members_table")
     end
   end
 end
