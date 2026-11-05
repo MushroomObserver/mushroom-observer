@@ -26,11 +26,6 @@ module Views::Controllers::Projects::Violations
     prop :user, User
 
     def view_template
-      h4 do
-        trusted_html(append_colon(:project.ti))
-        Link(type: :object, object: @project)
-      end
-
       if @violations.empty?
         p { :form_violations_no_violations.l }
         return

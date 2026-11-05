@@ -100,10 +100,10 @@ module Views::Controllers::Projects
       assert_no_html(html, "#project_tabs.my-3")
     end
 
-    # Every controller that renders AdminSubtabs below the tabs --
-    # its mt-2 already separates it from the tabs, so the tabs don't
-    # need a bottom margin either (same contract as
-    # test_project_tabs_margin_on_projects_show above).
+    # Every controller that renders AdminSubtabs or ObservationSubtabs
+    # below the tabs -- their mt-2 already separates them from the
+    # tabs, so the tabs don't need a bottom margin either (same
+    # contract as test_project_tabs_margin_on_projects_show above).
     # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_project_tabs_margin_on_admin_subtab_pages
       project = projects(:eol_project)
@@ -111,8 +111,9 @@ module Views::Controllers::Projects
       controller.define_singleton_method(:action_name) { "index" }
 
       %w[projects/admin projects/members projects/aliases
-         field_slips projects/field_slips
-         projects/external_sites].each do |path|
+         projects/external_sites observations observations/maps
+         images observations/downloads projects/violations field_slips
+         projects/field_slips].each do |path|
         controller.define_singleton_method(:controller_path) { path }
         html = render_navs(project: project)
 
@@ -134,7 +135,10 @@ module Views::Controllers::Projects
 
     # ADMIN_SUBTAB_CONTROLLERS maps each admin-subtab controller path
     # to the sub-tab it should land on -- the point of moving this
-    # into ProjectNavs is that no caller passes current_subtab.
+    # into ProjectNavs is that no caller passes current_subtab. The
+    # two Field Slips paths are NOT in this hash -- see
+    # test_field_slips_page_shows_admin_subtabs_for_admin /
+    # test_field_slips_page_shows_observation_subtabs_for_member below.
     def test_renders_admin_subtabs_with_correct_current_subtab
       project = projects(:eol_project)
       controller.define_singleton_method(:controller_name) { "locations" }
@@ -147,8 +151,6 @@ module Views::Controllers::Projects
         "projects/admin" => "/projects/#{project.id}/admin",
         "projects/members" => "/projects/#{project.id}/members",
         "projects/aliases" => "/projects/#{project.id}/aliases",
-        "field_slips" => "/field_slips?project=#{project.id}",
-        "projects/field_slips" => "/field_slips?project=#{project.id}",
         "projects/external_sites" =>
           "/projects/#{project.id}/external_sites"
       }.each do |path, active_href|
@@ -157,6 +159,86 @@ module Views::Controllers::Projects
 
         assert_html(html, "#project_admin_subtabs")
         assert_html(html, "a.nav-link.active[href='#{active_href}']")
+      end
+    end
+
+    # OBSERVATION_SUBTAB_CONTROLLERS maps each member-facing
+    # observation-subtab controller path to the sub-tab it lands on.
+    def test_renders_observation_subtabs_with_correct_current_subtab
+      project = projects(:eol_project) # field_slip_prefix: "EOL"
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+
+      {
+        "observations" => "by=thumbnail_quality",
+        "observations/maps" => "/observations/map",
+        "images" => "/images",
+        "observations/downloads" => "/observations/downloads/new"
+      }.each do |path, href_fragment|
+        controller.define_singleton_method(:controller_path) { path }
+        html = render_navs(project: project)
+
+        assert_html(html, "#project_observation_subtabs")
+        assert_html(html, "a.nav-link.active[href*='#{href_fragment}']")
+      end
+    end
+
+    def test_renders_observation_subtabs_for_violations_page
+      project = projects(:rare_fungi_project) # has targets -> constraints?
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+      controller.define_singleton_method(:controller_path) do
+        "projects/violations"
+      end
+
+      html = render_navs(project: project)
+
+      assert_html(html, "#project_observation_subtabs")
+      assert_html(
+        html,
+        "a.nav-link.active[href='#{routes.project_violations_path(
+          project.id
+        )}']"
+      )
+    end
+
+    # Field Slips dispatches by whether the viewer is a project
+    # admin, not by controller_path alone -- admins keep reaching
+    # AdminSubtabs (so they can set the field_slip_prefix in the
+    # first place); members get ObservationSubtabs instead.
+    def test_field_slips_page_shows_admin_subtabs_for_admin
+      project = projects(:eol_project)
+      rolf = users(:rolf) # admin of eol_project
+      controller.define_singleton_method(:controller_name) { "field_slips" }
+      controller.define_singleton_method(:action_name) { "index" }
+
+      %w[field_slips projects/field_slips].each do |path|
+        controller.define_singleton_method(:controller_path) { path }
+        html = render_navs(project: project, user: rolf)
+
+        assert_html(html, "#project_admin_subtabs")
+        assert_html(
+          html,
+          "a.nav-link.active[href='/field_slips?project=#{project.id}']"
+        )
+      end
+    end
+
+    def test_field_slips_page_shows_observation_subtabs_for_member
+      project = projects(:eol_project)
+      katrina = users(:katrina) # member of eol_project, not an admin
+      controller.define_singleton_method(:controller_name) { "field_slips" }
+      controller.define_singleton_method(:action_name) { "index" }
+
+      %w[field_slips projects/field_slips].each do |path|
+        controller.define_singleton_method(:controller_path) { path }
+        html = render_navs(project: project, user: katrina)
+
+        assert_html(html, "#project_observation_subtabs")
+        assert_html(
+          html,
+          "a.nav-link.active[href='/field_slips?project=#{project.id}']"
+        )
       end
     end
 
@@ -171,6 +253,42 @@ module Views::Controllers::Projects
       html = render_navs(project: project)
 
       assert_no_html(html, "#project_admin_subtabs")
+      assert_no_html(html, "#project_observation_subtabs")
+    end
+
+    # The main tab bar's active tab is derived from controller_path on
+    # a sub-tab page -- no caller needs to pass current_tab for these.
+    def test_main_tab_highlights_admin_on_admin_subtab_page
+      project = projects(:eol_project)
+      rolf = users(:rolf) # admin of eol_project -- Banner only
+      # renders the main Admin tab for an admin viewer
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+      controller.define_singleton_method(:controller_path) do
+        "projects/members"
+      end
+
+      html = render_navs(project: project, user: rolf) # current_tab: nil
+
+      assert_html(
+        html,
+        "#project_tabs a.nav-link.active" \
+        "[href='/projects/#{project.id}/admin']"
+      )
+    end
+
+    def test_main_tab_highlights_observations_on_observation_subtab_page
+      project = projects(:eol_project)
+      controller.define_singleton_method(:controller_name) { "locations" }
+      controller.define_singleton_method(:action_name) { "index" }
+      controller.define_singleton_method(:controller_path) { "images" }
+
+      html = render_navs(project: project) # current_tab: nil
+
+      assert_html(
+        html,
+        "#project_tabs a.nav-link.active[href*='by=thumbnail_quality']"
+      )
     end
 
     private

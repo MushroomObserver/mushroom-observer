@@ -19,12 +19,6 @@ module Projects
   class ExternalSitesController < ApplicationController
     before_action :login_required
 
-    # External sites live under the project Admin tab.
-    def active_project_tab
-      "admin"
-    end
-    helper_method :active_project_tab
-
     def index
       return unless find_project!
 
