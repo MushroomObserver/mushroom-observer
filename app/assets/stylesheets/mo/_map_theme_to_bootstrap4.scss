@@ -138,6 +138,9 @@ $grid-gutter-width: 24px;
 // Bootstrap 4's name for this; bootstrap-sass does not read it.
 $border-color: $PANEL_BORDER_COLOR;
 
+// `.mt-n2`/`.mb-n3`/etc -- off by default in Bootstrap 4.
+$enable-negative-margins: true;
+
 // ==================================================
 // SECTION 5: BUTTONS
 // ==================================================
