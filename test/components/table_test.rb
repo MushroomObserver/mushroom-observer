@@ -147,6 +147,44 @@ class TableTest < ComponentTestCase
     assert_raises(ArgumentError) { Components::Table.align_class(:bogus) }
   end
 
+  # valign: is align:'s vertical-align counterpart -- same
+  # styling-abstraction contract.
+  def test_column_valign_sets_th_and_td_class
+    rows = [TestRow.new(name: "Alice", age: 30)]
+
+    html = render_table(rows) do |t|
+      t.column("Name", &:name)
+      t.column("Age", valign: :middle, &:age)
+    end
+
+    assert_html(html, "th.align-middle", text: "Age")
+    assert_html(html, "td.align-middle", text: "30")
+    assert_no_html(html, "th.align-middle", text: "Name")
+  end
+
+  def test_column_valign_combines_with_align_and_caller_class
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render_table(rows) do |t|
+      t.column("Name", align: :center, valign: :middle,
+                       class: "nowrap", &:name)
+    end
+
+    assert_html(html, "th.text-center.align-middle.nowrap")
+    assert_html(html, "td.text-center.align-middle.nowrap")
+  end
+
+  def test_valign_class_maps_symbol_to_bootstrap_utility
+    assert_equal("align-middle", Components::Table.valign_class(:middle))
+    assert_equal("align-top", Components::Table.valign_class(:top))
+    assert_equal("align-bottom", Components::Table.valign_class(:bottom))
+    assert_nil(Components::Table.valign_class(nil))
+  end
+
+  def test_valign_class_rejects_unknown_value
+    assert_raises(ArgumentError) { Components::Table.valign_class(:bogus) }
+  end
+
   def test_works_with_activerecord_objects
     user_list = [users(:rolf), users(:mary)]
 

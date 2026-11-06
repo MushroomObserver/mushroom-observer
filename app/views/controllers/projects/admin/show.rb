@@ -38,7 +38,6 @@ module Views::Controllers::Projects::Admin
                dates_any: @dates_any,
                upload_params: @upload_params,
                dirty_form: true,
-               turbo: true,
                dubious_where_reasons: @dubious_where_reasons,
                raw_place_name: @raw_place_name,
                user: @user

@@ -84,6 +84,18 @@ class ApplicationFormTest < ComponentTestCase
     assert_html(form, "form[data-turbo='false']")
   end
 
+  # Regression: a subclass that omits turbo: should render Turbo-on,
+  # matching the prop default -- caught a bug in Components::Form::
+  # LiveDataFilter, which omitted turbo: and picked up whatever the
+  # prop defaulted to.
+  def test_form_defaults_to_turbo_true_when_omitted
+    form = render(ApplicationFormFieldTestHelpers::TestFormClass.new(
+                    @collection_number, action: "/test_form_path"
+                  ))
+
+    assert_html(form, "form[data-turbo='true']")
+  end
+
   # No `_method` hidden on a plain POST form. Superform emits one
   # unconditionally, and a stray `_method=post` turns a Turbo PATCH
   # submission into a bare POST when a second `_method` joins it --

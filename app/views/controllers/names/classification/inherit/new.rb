@@ -27,8 +27,7 @@ class Views::Controllers::Names::Classification::Inherit::New <
 
     render(Views::Controllers::Names::Classification::Inherit::Form.new(
              name: @name, parent: @parent_text_name,
-             candidates: @candidates, message: @message, user: current_user,
-             turbo: true
+             candidates: @candidates, message: @message, user: current_user
            ))
   end
 end

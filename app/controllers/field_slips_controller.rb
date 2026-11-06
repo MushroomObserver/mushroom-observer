@@ -22,7 +22,7 @@ class FieldSlipsController < ApplicationController
   def new
     @field_slip = FieldSlip.new
     @field_slip.current_user = @user
-    @field_slip.code = params[:code].upcase if params.include?(:code)
+    @field_slip.code = submitted_code.upcase if submitted_code
     @field_slip.field_slip_name = params[:name]
     @species_list = params[:species_list]
     @field_slip.project = Project.safe_find(params[:project]) ||
@@ -96,6 +96,13 @@ class FieldSlipsController < ApplicationController
   end
 
   private
+
+  # The code-only entry form submits a namespaced field_slip[code];
+  # a QR-code scan link uses a flat ?code= query param.
+  def submitted_code
+    permitted = params.permit(:code, field_slip: [:code])
+    permitted[:code] || permitted.dig(:field_slip, :code)
+  end
 
   def adding_images?
     params[:commit] == :field_slip_add_images.t

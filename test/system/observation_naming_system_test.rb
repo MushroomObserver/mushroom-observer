@@ -156,7 +156,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       # its checkbox, and verify the textarea expands. Use reason 4
       # (no-default) — reason 1 is pre-checked server-side for new
       # namings (NAMING_RECOGNIZED_BY_SIGHT default).
-      assert_selector("#naming_reasons_4_notes", visible: false)
+      assert_selector("#naming_reasons_4_notes", visible: :all)
       find_by_id("naming_reasons_4_check").click
       assert_selector(
         "#naming_reasons_4_notes.#{Components::Collapsible::EXPANDED_CLASS}",

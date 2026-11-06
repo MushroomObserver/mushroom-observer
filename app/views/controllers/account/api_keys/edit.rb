@@ -17,8 +17,7 @@ module Views::Controllers::Account::APIKeys
       render(Form.new(
                @key,
                action: account_api_key_path(id: @key.id),
-               id: "account_edit_api_key_form",
-               turbo: true
+               id: "account_edit_api_key_form"
              ))
     end
   end

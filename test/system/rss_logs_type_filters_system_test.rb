@@ -16,7 +16,7 @@ class RssLogsTypeFiltersSystemTest < ApplicationSystemTestCase
     # BS3's dropdown JS toggles `.open` on the toggle's parent, not
     # `.show` on the menu itself -- `.open > .dropdown-menu` CSS is
     # what makes the menu visible.
-    assert_selector("#log_filter_menu_top", visible: true)
+    assert_selector("#log_filter_menu_top", visible: :visible)
 
     within("#log_filter_menu_top") do
       assert_apply_disabled

@@ -19,8 +19,7 @@ class Views::Controllers::Names::Trackers::New < Views::FullPageBase
     div(class: "mb-3") { trusted_html(help_blurb) }
 
     render(Views::Controllers::Names::Trackers::Form.new(
-             NameTracker.new(name: @name), note_template: @note_template,
-                                           turbo: true
+             NameTracker.new(name: @name), note_template: @note_template
            ))
   end
 

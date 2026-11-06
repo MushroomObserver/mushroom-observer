@@ -19,7 +19,7 @@ class Views::Controllers::Names::Trackers::Edit < Views::FullPageBase
     div(class: "mb-3") { trusted_html(help_blurb) }
 
     render(Views::Controllers::Names::Trackers::Form.new(
-             @name_tracker, note_template: @note_template, turbo: true
+             @name_tracker, note_template: @note_template
            ))
   end
 

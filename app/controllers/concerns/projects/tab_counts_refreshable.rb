@@ -21,5 +21,17 @@ module Projects
         )
       )
     end
+
+    # Turbo-stream op that replaces the project admin sub-tabs strip
+    # with a freshly-rendered AdminSubtabs -- for a count that lives
+    # there (e.g. Members) rather than on the main tab strip.
+    def turbo_stream_admin_subtabs(current_subtab)
+      turbo_stream.replace(
+        "project_admin_subtabs",
+        Views::Controllers::Projects::AdminSubtabs.new(
+          project: @project, current_subtab: current_subtab
+        )
+      )
+    end
   end
 end

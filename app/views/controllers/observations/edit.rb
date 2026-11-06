@@ -35,7 +35,6 @@ module Views::Controllers::Observations
       render(Form.new(
                @observation,
                mode: :update,
-               turbo: true,
                user: @user,
                location: @location,
                good_images: @good_images,

@@ -8,7 +8,7 @@ module Views::Controllers::Account
 
     def view_template
       add_page_title(:signup_title.t)
-      render(Form.new(@new_user, turbo: true))
+      render(Form.new(@new_user))
     end
   end
 end

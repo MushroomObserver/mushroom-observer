@@ -31,8 +31,7 @@ module Views::Controllers::Projects::Violations
           m.with_form_content do
             render(TargetLocationForm.new(
                      obs: @obs, project: @project,
-                     existing_locations: @existing_locations,
-                     turbo: true
+                     existing_locations: @existing_locations
                    ))
           end
         else

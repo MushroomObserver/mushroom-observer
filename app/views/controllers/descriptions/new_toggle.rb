@@ -47,7 +47,7 @@ module Views::Controllers::Descriptions
 
     def build_main_form
       Views::Controllers::Descriptions::Form.new(
-        @description, licenses: @licenses, user: @user, turbo: true
+        @description, licenses: @licenses, user: @user
       )
     end
 

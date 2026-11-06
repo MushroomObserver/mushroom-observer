@@ -13,8 +13,7 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
       render(Form.new(
                ::FormObject::EmailRequest.new,
                name: @name,
-               new_name_with_icn_id: @new_name_with_icn_id,
-               turbo: true
+               new_name_with_icn_id: @new_name_with_icn_id
              ))
     end
   end

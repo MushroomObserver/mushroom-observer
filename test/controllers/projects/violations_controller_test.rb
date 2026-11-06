@@ -20,7 +20,7 @@ module Projects
       get(:index, params: { id: project.id })
 
       assert_response(:success)
-      assert_select("#content", { text: /#{project.title}/ })
+      assert_select("#title", { text: /#{project.title}/ })
       assert_select("a[href = '#{project_path(project)}']", true,
                     "Missing project link")
       violations.each do |v|

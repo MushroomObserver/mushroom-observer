@@ -7,8 +7,10 @@ module Views::Controllers::Images
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Image)
+    prop :project, _Nilable(::Project), default: nil
 
     def view_template
+      add_project_banner(@project) if @project
       container_class(:full)
       add_index_title(@query)
       add_context_nav(::Tab::Image::IndexActions.new(

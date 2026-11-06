@@ -62,7 +62,7 @@ class OccurrenceEditFormSystemTest < ApplicationSystemTestCase
       "input[type='checkbox']" \
       "[name='occurrence[observation_ids][]']" \
       "[value='#{candidate_obs.id}']",
-      visible: false
+      visible: :all
     )
   end
 
@@ -137,13 +137,13 @@ class OccurrenceEditFormSystemTest < ApplicationSystemTestCase
     find("input[type='checkbox']" \
          "[name='occurrence[observation_ids][]']" \
          "[value='#{obs.id}']",
-         visible: false)
+         visible: :all)
   end
 
   def radio_for(obs)
     find("input[type='radio']" \
          "[name='occurrence[primary_observation_id]']" \
          "[value='#{obs.id}']",
-         visible: false)
+         visible: :all)
   end
 end
