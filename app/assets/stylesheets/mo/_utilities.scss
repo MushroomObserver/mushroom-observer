@@ -82,21 +82,6 @@
   padding-right: $card-spacer-x !important;
 }
 
-// A Bootstrap 4 `.row` grid utility -- bootstrap-sass (BS3) has no
-// equivalent, so this hand-writes the mechanism: zero the row's
-// negative gutter margin, and zero the padding on its direct column
-// children. See #5527.
-.no-gutters {
-  margin-right: 0 !important;
-  margin-left: 0 !important;
-
-  > .col,
-  > [class*="col-"] {
-    padding-right: 0 !important;
-    padding-left: 0 !important;
-  }
-}
-
 // See .px-card above.
 .pl-card {
   padding-left: $card-spacer-x !important;

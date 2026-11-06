@@ -61,7 +61,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # `inline?` wraps the form-group in a `.form-inline` ancestor div,
-    # so Bootstrap 3's `.form-inline .form-group` descendant selector
+    # so Bootstrap's `.form-inline .form-group` descendant selector
     # matches as designed -- putting both classes on the form-group
     # div itself matches nothing, since that selector needs two
     # distinct elements. `wrap_data` follows `wrap_class` to this

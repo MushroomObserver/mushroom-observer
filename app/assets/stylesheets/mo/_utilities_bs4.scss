@@ -586,6 +586,17 @@
   opacity: .75 !important;
 }
 
+.no-gutters {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+}
+
 @media screen and (min-width: $screen-sm-min) {
   .d-sm-none {
     display: none !important;
