@@ -124,12 +124,28 @@ module Views::Controllers::Checklists
     end
 
     def render_footnotes
-      div do
-        p { plain(:checklist_any_deprecated.l) } if @data.any_deprecated?
-        if @data.duplicate_synonyms.present?
-          p { plain(:checklist_duplicate_synonyms.l) }
-        end
+      div(class: "checklist-legend") do
+        render_deprecated_footnote if @data.any_deprecated?
+        render_duplicate_synonyms_footnote if @data.duplicate_synonyms.present?
         render_target_remove_footnote if show_target_remove_footnote?
+      end
+    end
+
+    def render_deprecated_footnote
+      p do
+        # See Panel#render_taxon_content for why :approve, not
+        # :deprecate.
+        Icon(type: :approve)
+        whitespace
+        plain(:checklist_any_deprecated.l)
+      end
+    end
+
+    def render_duplicate_synonyms_footnote
+      p do
+        Icon(type: :observations)
+        whitespace
+        plain(:checklist_duplicate_synonyms.l)
       end
     end
 
@@ -139,7 +155,7 @@ module Views::Controllers::Checklists
 
     def render_target_remove_footnote
       p do
-        Icon(type: :x, class: "text-danger")
+        Icon(type: :remove, class: "text-danger")
         whitespace
         plain(:checklist_target_remove_footnote.l)
       end

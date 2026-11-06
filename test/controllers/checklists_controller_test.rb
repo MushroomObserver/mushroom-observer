@@ -29,7 +29,7 @@ class ChecklistsControllerTest < FunctionalTestCase
                   order(:id).first
     user = observation.user
     get(:show, params: { user_id: user.id })
-    assert_select(".checklist a", text: /\) \*\z/)
+    assert_select(".checklist li svg.mo-icon-approve")
   end
 
   # Prove that Species List checklist goes to correct page with correct content
