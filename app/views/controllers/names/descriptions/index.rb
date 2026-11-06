@@ -38,7 +38,7 @@ module Views::Controllers::Names::Descriptions
     def build_table_columns(table)
       table.column(:name.ti) { |desc| render_name_cell(desc) }
       table.column(:type.ti) { |desc| render_type_cell(desc) }
-      table.column(:mo_id.t, class: "text-right") do |desc|
+      table.column(:mo_id.t, align: :right) do |desc|
         IDBadge(object: desc, size: :md, extra_class: "mr-0")
       end
     end

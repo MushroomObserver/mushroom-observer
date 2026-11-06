@@ -85,10 +85,10 @@ module Views::Controllers::Projects::FieldSlips
 
     def define_tracker_columns(table)
       table.column(:filename.ti, scope: "col")
-      table.column(:user.ti, scope: "col", class: "text-center")
-      table.column(:seconds.ti, scope: "col", class: "text-center")
-      table.column(:pages.ti, scope: "col", class: "text-center")
-      table.column(:status.ti, scope: "col", class: "text-right")
+      table.column(:user.ti, scope: "col", align: :center)
+      table.column(:seconds.ti, scope: "col", align: :center)
+      table.column(:pages.ti, scope: "col", align: :center)
+      table.column(:status.ti, scope: "col", align: :right)
     end
   end
 end
