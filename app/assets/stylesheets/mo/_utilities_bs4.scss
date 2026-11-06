@@ -46,11 +46,11 @@
 }
 
 .flex-column {
-  flex-direction: column;
+  flex-direction: column !important;
 }
 
 .flex-row {
-  flex-direction: row;
+  flex-direction: row !important;
 }
 
 .flex-grow-1 {
@@ -62,11 +62,11 @@
 }
 
 .flex-wrap {
-  flex-wrap: wrap;
+  flex-wrap: wrap !important;
 }
 
 .flex-nowrap {
-  flex-wrap: nowrap;
+  flex-wrap: nowrap !important;
 }
 
 .align-items-start {
@@ -82,7 +82,7 @@
 }
 
 .justify-content-start {
-  justify-content: start !important;
+  justify-content: flex-start !important;
 }
 
 .justify-content-between {
@@ -94,7 +94,7 @@
 }
 
 .justify-content-end {
-  justify-content: end !important;
+  justify-content: flex-end !important;
 }
 
 .w-auto {
@@ -215,7 +215,7 @@
 }
 
 .rounded-circle {
-  border-radius: 50%;
+  border-radius: 50% !important;
 }
 
 .m-0 {
@@ -583,7 +583,7 @@
 }
 
 .opacity-75 {
-  opacity: 75% !important;
+  opacity: .75 !important;
 }
 
 @media screen and (min-width: $screen-sm-min) {
