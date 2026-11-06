@@ -95,21 +95,38 @@ module Names
         params.dig(:name_tracker, :note_template_enabled) == "1"
       @note_template = nil if @note_template.blank? || !note_template_enabled
       if @name_tracker.nil?
-        create_name_tracker_interest_and_flash(name_id)
+        create_name_tracker_and_interest(name_id)
       else
         update_name_tracker_interest_and_flash
       end
       notify_admins_of_name_tracker(@name_tracker)
-      @name_tracker.save
-      @interest.save
+      save_name_tracker_and_interest
     end
 
-    def create_name_tracker_interest_and_flash(name_id)
+    def create_name_tracker_and_interest(name_id)
       @name_tracker = NameTracker.new(user: @user,
                                       name_id: name_id,
                                       note_template: @note_template,
                                       approved: false)
       @interest = Interest.new(user: @user, target: @name_tracker, state: true)
+    end
+
+    # The uniqueness validation on NameTracker#name_id can reject a
+    # create (e.g. a duplicate submission) -- flash the failure
+    # instead of unconditionally reporting success.
+    def save_name_tracker_and_interest
+      was_new = @name_tracker.new_record?
+      unless @name_tracker.save
+        return flash_error(
+          :email_tracking_already_tracking.t(
+            name: @name.display_name(@user)
+          )
+        )
+      end
+
+      @interest.save
+      return unless was_new
+
       flash_notice(
         :email_tracking_now_tracking.t(name: @name.display_name(@user))
       )
