@@ -4,13 +4,16 @@
 # once per page by `Views::Layouts::Application#render_header_and_main`,
 # inside the `content_for(:container_class)` width cap it shares with
 # `#content`. On non-index actions, renders the page title strip
-# (`Header::PageTitle`), then the project observation-buttons row, fed
-# from a content_for slot.
+# (`Header::PageTitle`).
 #
 # The project banner (`:project_banner` content_for slot) renders
 # separately, in `Views::Layouts::Application#render_nav_chrome`,
 # ahead of the flash row -- a project's banner image/tabs always
-# span the full page width.
+# span the full page width. The project observation-buttons row that
+# used to render here, fed from a `content_for(:observation_buttons)`
+# slot, is part of that banner now too -- see
+# `Tab::Project::ObservationSubtabs`/`Projects::ObservationSubtabs`,
+# rendered via `ProjectNavs`.
 #
 # The index filter/pager bar (`Header::IndexBar`) and the rss-log
 # type-filter row no longer render here -- `Header::IndexBar` moved
@@ -23,34 +26,7 @@ module Views::Layouts
     def view_template
       header(id: "header") do
         render(PageTitle.new) if controller.action_name != "index"
-        render_filter_row
       end
-    end
-
-    private
-
-    def render_filter_row
-      return unless content_for?(:observation_buttons)
-
-      Row do
-        render_observation_buttons
-      end
-    end
-
-    def render_observation_buttons
-      div(class: title_cols, id: "observation_buttons") do
-        trusted_html(content_for(:observation_buttons))
-      end
-    end
-
-    # Matches the title row's left-column width to the content row's
-    # `:left_columns` value (set via `content_for(:left_columns, ...)`
-    # in `FullPageBase::LayoutClasses`), falling back to the default
-    # width when no page sets it.
-    def title_cols
-      cols = content_for(:left_columns) || "col-sm-8 col-lg-7"
-      cols = "" unless content_for?(:interest_icons)
-      class_names(Components::Column.classes_for(xs: 12), cols)
     end
   end
 end
