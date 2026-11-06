@@ -2906,8 +2906,8 @@
   bulk_license_link: Bulk License Updater
 
   # checklists
-  checklist_any_deprecated: "* This name is not considered current on MO"
-  checklist_duplicate_synonyms: "+ This name has a synonym in this checklist"
+  checklist_any_deprecated: This name is not considered current on MO
+  checklist_duplicate_synonyms: This name has a synonym in this checklist
   checklist_target_remove_footnote: Remove this target name from the project
   checklist_for: Checklist for
   checklist_for_site_title: Checklist for Mushroom Observer
@@ -2915,9 +2915,9 @@
   checklist_for_species_list_title: Checklist for [list]
   checklist_for_project_title: Checklist for [project]
   checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
-  checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
-  checklist_observed_species_only: "[species] species observed (synonyms counted once)."
-  checklist_observed_higher_only: "[higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_summary: "Totals: [species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
+  checklist_observed_species_only: "Totals: [species] species observed (synonyms counted once)."
+  checklist_observed_higher_only: "Totals: [higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_unobserved_targets: Unobserved target names
   checklist_species_level: Species and below
   checklist_higher_level: Higher-level taxa

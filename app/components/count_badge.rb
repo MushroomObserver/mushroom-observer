@@ -11,10 +11,13 @@
 class Components::CountBadge < Components::Base
   prop :count, ::Integer
   prop :type, Symbol, default: :observation
+  # Catch-all for class:, data:, and any other HTML attrs -- matches
+  # Components::ContentPadded/Table's pattern.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    span(class: "badge count-badge", title: tooltip_title,
-         data: { tooltip_target: "tip" }) do
+    span(**mix({ class: "badge count-badge", title: tooltip_title,
+                 data: { tooltip_target: "tip" } }, @attributes)) do
       @count.to_s
     end
   end
