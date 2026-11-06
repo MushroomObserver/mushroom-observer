@@ -51,32 +51,35 @@ module Views::Controllers::Checklists
             render_taxon_name(name)
           end
         end
-        render_taxon_markers(deprecated, synonym_id)
-        InlineLinkBlock(items: taxon_remove_button_items(name_id))
+        # One InlineLinkBlock for the count badge, markers, and the
+        # remove button -- same gap-based spacing and
+        # vertical-align: middle baseline alignment for all of them,
+        # instead of separately-spaced groups.
+        InlineLinkBlock(items: taxon_marker_items(name, deprecated,
+                                                  synonym_id) +
+                               taxon_remove_button_items(name_id))
       end
     end
 
     def render_taxon_name(name)
       i { plain(name) }
-      whitespace
-      plain("(#{@data.counts[name]})")
     end
 
-    # Siblings of the Link, not nested inside it -- these are status
-    # markers, not part of the taxon's clickable name.
-    def render_taxon_markers(deprecated, synonym_id)
+    def taxon_marker_items(name, deprecated, synonym_id)
+      items = [Components::CountBadge.new(count: @data.counts[name],
+                                          class: "badge-outline ml-2")]
       if deprecated
-        whitespace
         # :approve, not :deprecate -- Tab::Name::Approve's icon is the
         # "currently deprecated" state indicator (see its comment);
         # Tab::Name::Deprecate's icon means the opposite (currently
         # approved).
-        Icon(type: :approve, title: :checklist_any_deprecated.t)
+        items << Components::Icon.new(type: :approve,
+                                      title: :checklist_any_deprecated.t)
       end
-      return unless @data.duplicate_synonyms&.include?(synonym_id)
+      return items unless @data.duplicate_synonyms&.include?(synonym_id)
 
-      whitespace
-      Icon(type: :observations, title: :checklist_duplicate_synonyms.t)
+      items << Components::Icon.new(type: :observations,
+                                    title: :checklist_duplicate_synonyms.t)
     end
 
     def taxon_link_path(name_id)

@@ -80,10 +80,11 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_select(
       "#checklist_missing_panel a[href*='project%3A#{project.id}']" \
       "[href*='name%3A#{fungi.id}']",
-      { text: /Fungi \(1\)/ },
-      "Missing taxon should show the project count and " \
-      "project-scoped observation link"
+      { text: "Fungi" },
+      "Missing taxon should link to the project-scoped observation list"
     )
+    assert_select("#checklist_missing_panel li .count-badge",
+                  { text: "1" }, "Missing taxon should show the project count")
     assert_select("#checklist_missing_panel a[href*='list%3A']", count: 0)
     assert_select(
       "form[action='#{project_target_names_path(project_id: project.id)}']",
@@ -102,7 +103,7 @@ class ChecklistsControllerTest < FunctionalTestCase
                       { project_id: project.id } } }).distinct
 
     get(:show, params: { project_id: project.id })
-    assert_select(".checklist a", text: /\(1\)/)
+    assert_select(".checklist .count-badge", text: "1")
     tab_title = :checklist_for_project_title.l(project: project.title)
     assert_includes(css_select("title").text, tab_title)
     assert_select("h1#title", text: /#{:checklist_for.l}/, count: 0)
@@ -120,7 +121,7 @@ class ChecklistsControllerTest < FunctionalTestCase
                            location: location } }).distinct
 
     get(:show, params: { project_id: project.id, location_id: location.id })
-    assert_select(".checklist a", text: /\(1\)/)
+    assert_select(".checklist .count-badge", text: "1")
     assert_select(".checklist a[href*='location%3A#{location.id}']")
     assert_select("h4", text: /#{:checklist_for.t}/)
     assert_select("li.nav-item") do
@@ -226,7 +227,7 @@ class ChecklistsControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_equal("noindex", response.headers["X-Robots-Tag"])
     assert_select(".checklist li", count: expect.size)
-    assert_select(".checklist li", text: /\(1\)/)
+    assert_select(".checklist .count-badge", text: "1")
     assert_select(".checklist a", count: 0)
     assert_select("#title a", count: 0)
     assert_select("#project_tabs", count: 0)
@@ -243,8 +244,9 @@ class ChecklistsControllerTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("#project_login_prompt")
-    assert_select(".checklist li", text: /\(\d+\)/)
-    assert_select("#checklist_missing_panel li", text: /Fungi \(1\)/)
+    assert_select(".checklist .count-badge")
+    assert_select("#checklist_missing_panel li i", text: "Fungi")
+    assert_select("#checklist_missing_panel .count-badge", text: "1")
     assert_select(".checklist a", count: 0)
   end
 

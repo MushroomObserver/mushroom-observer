@@ -197,6 +197,16 @@ form.button_to {
 
 // badges
 
+// A lighter-weight badge variant: outlined in text-color, no fill,
+// normal (not bold) weight -- for a count/label that shouldn't read
+// as loudly as Bootstrap's solid-background default.
+.badge-outline {
+  font-weight: normal;
+  background-color: transparent;
+  color: $text-color;
+  border: 1px solid $text-color;
+}
+
 // Record id badge. No inherent font-size -- every caller states one
 // of the .badge-* sizes below.
 .badge-id {
