@@ -560,6 +560,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.datetime "updated_at", precision: nil
     t.boolean "require_specimen", default: false, null: false
     t.boolean "approved", default: true, null: false
+    t.index ["user_id", "name_id"], name: "index_name_trackers_on_user_id_and_name_id", unique: true
   end
 
   create_table "name_versions", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|

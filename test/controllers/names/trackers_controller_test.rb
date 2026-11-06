@@ -185,6 +185,34 @@ module Names
                    "Create should update the existing tracker")
     end
 
+    # Simulates the race between find_name_tracker's lookup and the
+    # save (e.g. a double submit): a tracker for this name/user
+    # exists, but the lookup still returns nil, so the controller
+    # takes the create path and the uniqueness validation rejects it.
+    def test_email_tracking_create_rejects_duplicate_past_lookup
+      name = names(:conocybe_filaris)
+      NameTracker.create!(name: name, user: rolf, approved: true,
+                          note_template: "")
+      params = {
+        id: name.id,
+        commit: :enable.ti,
+        name_tracker: { note_template_enabled: "", note_template: "" }
+      }
+      login("rolf")
+
+      assert_no_difference(
+        ["NameTracker.count", "Interest.count"],
+        "A duplicate past the lookup should not create a second tracker"
+      ) do
+        @controller.stub(:find_name_tracker, nil) do
+          post(:create, params: params)
+        end
+      end
+
+      assert_redirected_to(name_path(name.id))
+      assert_flash_error
+    end
+
     def test_email_tracking_update_add_note
       name = names(:coprinus_comatus)
       count_before = NameTracker.count

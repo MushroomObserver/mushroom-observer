@@ -2934,6 +2934,7 @@
   color_themes_title: Color Themes
 
   # name/email_tracking
+  email_tracking_already_tracking: You are already tracking [name].
   email_tracking_help_above_species: If enabled, this feature will notify you by email whenever someone posts an observation in this [rank].
   email_tracking_help_below_species: If enabled, this feature will notify you by email whenever someone posts an observation of [name].
   email_tracking_no_longer_tracking: No longer tracking [name].
