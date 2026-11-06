@@ -144,7 +144,7 @@ module Views::Controllers::Projects::Locations
         t.column(:project_aliases.ti)
         if admin?
           t.column(:project_target_locations_title.l,
-                   class: "text-center")
+                   align: :center)
         end
         yield(t)
       end

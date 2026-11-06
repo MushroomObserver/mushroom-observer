@@ -28,15 +28,15 @@ module Views::Controllers::Projects::Members
     def define_columns(table)
       table.column(:login_name.ti,
                    align: :center) { |u| render_avatar(u) }
-      table.column(:full_name.ti, class: "align-middle") { |u| plain(u.name) }
+      table.column(:full_name.ti, valign: :middle) { |u| plain(u.name) }
       table.column(:project_aliases.ti,
-                   align: :center, class: "align-middle") do |u|
+                   align: :center, valign: :middle) do |u|
         render_aliases(u)
       end
-      table.column(:status.ti, class: "align-middle") do |u|
+      table.column(:status.ti, valign: :middle) do |u|
         plain(member_status(u))
       end
-      table.column(nil, class: "align-middle") { |u| render_edit_link(u) }
+      table.column(nil, valign: :middle) { |u| render_edit_link(u) }
     end
 
     # Was Project#member_status -- moved here (#4901) since its only
