@@ -20,8 +20,7 @@ module Views::Controllers::Admin::Emails::MergeRequests
                old_obj: @old_obj,
                new_obj: @new_obj,
                model_class: @model,
-               user: current_user,
-               turbo: true
+               user: current_user
              ))
     end
   end

@@ -6,6 +6,7 @@ class Query::Users < Query
   query_attr(:id_in_set, [User])
   query_attr(:has_contribution, :boolean)
   query_attr(:pattern, :string)
+  query_attr(:member_of_project, Project)
 
   def alphabetical_by
     @alphabetical_by ||= case params[:order_by].to_s

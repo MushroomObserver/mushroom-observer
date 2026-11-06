@@ -34,7 +34,7 @@ module Views::Controllers::Occurrences
 
       # Submit button
       assert_html(html, "button[type='submit']",
-                  text: :create_occurrence_submit.l)
+                  text: :create_object.t(type: :occurrence))
     end
 
     def test_new_source_observation_box
@@ -47,7 +47,7 @@ module Views::Controllers::Occurrences
                         "[value='#{@source.id}']")
 
       # Source obs label
-      assert_includes(html, :create_occurrence_source.l)
+      assert_html(html, "strong", text: :create_occurrence_source.l)
 
       # Source obs primary radio is checked
       assert_html(html, "input[type='radio']" \
@@ -75,7 +75,11 @@ module Views::Controllers::Occurrences
                  "Recent obs radio should not be checked")
 
       # Primary label
-      assert_includes(html, :create_occurrence_primary.l)
+      assert_html(
+        html,
+        "label[for='occurrence_primary_observation_id_#{@recent.id}']",
+        text: :primary.ti
+      )
     end
 
     def test_new_matrix_ul_stimulus_wiring
@@ -150,8 +154,9 @@ module Views::Controllers::Occurrences
 
       html = render_new_form
 
-      assert_includes(html, :in_existing_occurrence.l)
-      assert_html(html, "a[href='/occurrences/#{occ.id}']")
+      assert_html(html, "a.in_existing_occurrence_link" \
+                        "[href='/occurrences/#{occ.id}']",
+                  text: :in_existing_occurrence.l)
     end
 
     def test_new_field_slip_link_shown
@@ -160,8 +165,8 @@ module Views::Controllers::Occurrences
       html = render_new_form(source_obs: @source,
                              recent: [obs_with_slip])
 
-      assert_includes(html, "Field Slip: #{field_slip.code}")
-      assert_html(html, "a[href='/field_slips/#{field_slip.id}']")
+      assert_html(html, "a[href='/field_slips/#{field_slip.id}']",
+                  text: "Field Slip: #{field_slip.code}")
     end
 
     def test_new_recent_controls_include_checkbox_label
@@ -189,7 +194,7 @@ module Views::Controllers::Occurrences
       html = render_new_form(source_obs: @source,
                              recent: [plain_obs])
 
-      assert_not_includes(html, :in_existing_occurrence.l)
+      assert_no_html(html, "a.in_existing_occurrence_link")
     end
 
     # ============== EDIT MODE ==============
@@ -215,7 +220,7 @@ module Views::Controllers::Occurrences
 
       # Submit button
       assert_html(html, "button[type='submit']",
-                  text: :edit_occurrence_submit.l)
+                  text: :save_changes.ti)
 
       # Empty hidden observation_ids[] for unchecked state
       assert_html(html, "input[type='hidden']" \
@@ -257,8 +262,6 @@ module Views::Controllers::Occurrences
     def test_edit_details_section
       _, html = render_edit_form_for_two_obs
 
-      assert_includes(html, :edit_occurrence_details_heading.l)
-
       # Date is rendered as MO's 3-select picker
       assert_html(
         html,
@@ -285,7 +288,11 @@ module Views::Controllers::Occurrences
       assert_html(html,
                   "select[name='occurrence[primary_observation]" \
                   "[location_id]']")
-      assert_includes(html, :edit_occurrence_location.l)
+      assert_html(
+        html,
+        "label[for='occurrence_primary_observation_location_id']",
+        text: :location.ti
+      )
     end
 
     def test_edit_no_location_select_with_single_location
@@ -308,7 +315,9 @@ module Views::Controllers::Occurrences
                               observations: [@source],
                               candidates: [candidate])
 
-      assert_includes(html, :edit_occurrence_add_heading.l)
+      # Candidate section rendered a second grid (one is always
+      # present for @observations).
+      assert_html(html, "ul.grid-row", count: 2)
 
       # Candidate has unchecked Include checkbox
       doc = Nokogiri::HTML(html)
@@ -338,7 +347,9 @@ module Views::Controllers::Occurrences
                               observations: [@source],
                               candidates: [])
 
-      assert_not_includes(html, :edit_occurrence_add_heading.l)
+      # Only the always-present @observations grid -- no second one
+      # for an empty candidate list.
+      assert_html(html, "ul.grid-row", count: 1)
     end
 
     def test_edit_field_slip_link_on_observation
@@ -349,8 +360,8 @@ module Views::Controllers::Occurrences
                               observations: [obs],
                               candidates: [])
 
-      assert_includes(html, "Field Slip: #{field_slip.code}")
-      assert_html(html, "a[href='/field_slips/#{field_slip.id}']")
+      assert_html(html, "a[href='/field_slips/#{field_slip.id}']",
+                  text: "Field Slip: #{field_slip.code}")
     end
 
     def test_edit_multi_occurrence_link_on_candidate
@@ -368,8 +379,9 @@ module Views::Controllers::Occurrences
                               observations: [@source],
                               candidates: [other])
 
-      assert_includes(html, :in_existing_occurrence.l)
-      assert_html(html, "a[href='/occurrences/#{other_occ.id}']")
+      assert_html(html, "a.in_existing_occurrence_link" \
+                        "[href='/occurrences/#{other_occ.id}']",
+                  text: :in_existing_occurrence.l)
     end
 
     def test_edit_location_select_options_populated

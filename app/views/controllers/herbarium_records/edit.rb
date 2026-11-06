@@ -29,7 +29,7 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_form
-      render(Form.new(@herbarium_record, back: @back, turbo: true))
+      render(Form.new(@herbarium_record, back: @back))
     end
 
     def render_observation_boxes

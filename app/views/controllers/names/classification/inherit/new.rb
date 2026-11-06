@@ -20,15 +20,14 @@ class Views::Controllers::Names::Classification::Inherit::New <
     add_page_title(
       :inherit_classification_title.t(
         name: @name.display_name(current_user)
-      )
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
     container_class(:text)
 
     render(Views::Controllers::Names::Classification::Inherit::Form.new(
              name: @name, parent: @parent_text_name,
-             candidates: @candidates, message: @message, user: current_user,
-             turbo: true
+             candidates: @candidates, message: @message, user: current_user
            ))
   end
 end

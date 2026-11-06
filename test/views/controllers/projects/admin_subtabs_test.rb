@@ -9,10 +9,7 @@ module Views::Controllers::Projects
       project = projects(:eol_project)
       html = render_subtabs(project: project, current_subtab: "details")
 
-      # Wrapping row + col-12 ensures the sub-tabs claim a full row
-      # so the next element doesn't float alongside them.
-      assert_html(html, ".row #project_admin_subtabs")
-      assert_html(html, "ul.nav.nav-tabs")
+      assert_html(html, "ul.nav.nav-tabs#project_admin_subtabs")
       assert_html(html, "a[href='/projects/#{project.id}/admin']",
                   text: :show_project_admin_details_tab.l)
       assert_html(html, "a[href='/projects/#{project.id}/members']")
@@ -67,6 +64,16 @@ module Views::Controllers::Projects
       assert_html(
         html,
         "a.nav-link.active[href='/projects/#{project.id}/aliases']"
+      )
+    end
+
+    def test_field_slips_active_when_current
+      project = projects(:eol_project)
+      html = render_subtabs(project: project, current_subtab: "field_slips")
+
+      assert_html(
+        html,
+        "a.nav-link.active[href='/field_slips?project=#{project.id}']"
       )
     end
 

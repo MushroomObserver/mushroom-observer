@@ -14,8 +14,7 @@ module Views::Controllers::Images
                    ::FormObject::ImageVoteAnonymity.new(
                      num_anonymous: @num_anonymous,
                      num_public: @num_public
-                   ),
-                   turbo: true
+                   )
                  ))
         end
       end

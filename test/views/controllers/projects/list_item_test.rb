@@ -72,9 +72,10 @@ module Views::Controllers::Projects
       assert_html(
         html,
         "form[action='#{routes.observation_project_path(
-          id: obs.id, project_id: project.id, commit: "remove"
+          id: obs.id, project_id: project.id
         )}'] button"
       )
+      assert_html(html, "input[name='_method'][value='delete']")
     end
 
     def test_add_button
@@ -85,9 +86,10 @@ module Views::Controllers::Projects
       assert_html(
         html,
         "form[action='#{routes.observation_project_path(
-          id: obs.id, project_id: project.id, commit: "add"
+          id: obs.id, project_id: project.id
         )}'] button"
       )
+      assert_html(html, "input[name='_method'][value='put']")
     end
 
     def test_violation_warning

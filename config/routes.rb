@@ -674,10 +674,12 @@ MushroomObserver::Application.routes.draw do
   get("/observations/:id/species_lists/edit",
       to: "observations/species_lists#edit",
       as: "edit_observation_species_lists")
-  match("/observations/:id/species_lists/:species_list_id(/:commit)",
+  match("/observations/:id/species_lists/:species_list_id",
         to: "observations/species_lists#update",
         via: [:put, :patch],
         as: "observation_species_list")
+  delete "/observations/:id/species_lists/:species_list_id",
+         to: "observations/species_lists#destroy"
   get("/observations/:id/field_slip/edit",
       to: "observations/field_slips#edit",
       as: "edit_observation_field_slip")
@@ -688,10 +690,12 @@ MushroomObserver::Application.routes.draw do
   get("/observations/:id/projects/edit",
       to: "observations/projects#edit",
       as: "edit_observation_projects")
-  match("/observations/:id/projects/:project_id(/:commit)",
+  match("/observations/:id/projects/:project_id",
         to: "observations/projects#update",
         via: [:put, :patch],
         as: "observation_project")
+  delete "/observations/:id/projects/:project_id",
+         to: "observations/projects#destroy"
   # These are in observations because they share private methods with
   # :new and :create, which are currently observation-specific
   get("/images/:id/edit", to: "observations/images#edit", as: "edit_image")
@@ -784,7 +788,7 @@ MushroomObserver::Application.routes.draw do
         as: "search_pattern")
 
   # ----- Add dispatch: new -------------------------------------------------
-  post "add_dispatch", to: "add_dispatch#new"
+  post "list_add_dispatch", to: "list_add_dispatch#new"
 
   # ----- Sequences: standard actions ---------------------------------------
   resources :sequences, id: /\d+/

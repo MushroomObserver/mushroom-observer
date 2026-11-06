@@ -10,14 +10,16 @@ class Views::Controllers::Names::Trackers::Edit < Views::FullPageBase
 
   def view_template
     add_page_title(
-      :email_tracking_title.t(name: @name.display_name(current_user))
+      :email_tracking_title.t(
+        name: @name.display_name(current_user)
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 
     div(class: "mb-3") { trusted_html(help_blurb) }
 
     render(Views::Controllers::Names::Trackers::Form.new(
-             @name_tracker, note_template: @note_template, turbo: true
+             @name_tracker, note_template: @note_template
            ))
   end
 

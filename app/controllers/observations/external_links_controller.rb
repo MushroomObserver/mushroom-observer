@@ -43,6 +43,7 @@ module Observations
 
     def edit
       set_ivars_for_edit
+      return if performed?
       return unless check_external_link_permission!(link: @external_link)
 
       respond_to do |format|
@@ -53,6 +54,7 @@ module Observations
 
     def update
       set_ivars_for_edit
+      return if performed?
       return unless check_external_link_permission!(link: @external_link)
 
       update_external_link
@@ -60,6 +62,7 @@ module Observations
 
     def destroy
       set_ivars_for_edit
+      return if performed?
       return unless check_external_link_permission!(link: @external_link)
 
       remove_external_link
@@ -72,16 +75,14 @@ module Observations
       @sites = ExternalSite.sites_user_can_add_links_to_for_obs(
         @user, @observation, admin: in_admin_mode?
       )
-      @site = @sites&.first
+      @site = ExternalSite.default_new_link_site(@sites)
     end
 
     def set_ivars_for_edit
       @external_link = ExternalLink.show_includes.find(params[:id].to_s)
-      # The link is strict-loaded with a shallow polymorphic target, so load
-      # the observation with its own grid-box subtree for the edit card.
-      @observation = Observation.strict_loading.
-                     includes(Observation.matrix_box_includes).
-                     find(@external_link.observation.id)
+      return redirect_to_image_link unless @external_link.observation
+
+      load_observation_for_edit
       @site = @external_link.external_site
       @sites = sites_including_current(@site)
       # No standalone external_link "show" destination exists to offer
@@ -91,6 +92,15 @@ module Observations
       # blank/absent is the common case and every consumer already
       # guards on `@back.present?` before using it.
       @back = params.permit(:back)[:back]
+    end
+
+    # The link is strict-loaded with a shallow polymorphic target, so
+    # load the observation with its grid-box subtree for the edit
+    # card.
+    def load_observation_for_edit
+      @observation = Observation.strict_loading.
+                     includes(Observation.matrix_box_includes).
+                     find(@external_link.observation.id)
     end
 
     # The link's current site must stay selectable even if the user

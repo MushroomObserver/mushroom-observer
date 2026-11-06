@@ -92,6 +92,29 @@ class ImagesControllerTest < FunctionalTestCase
     assert_select(".grid-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
+    assert_select("#project_banner")
+  end
+
+  # Regression: reaching Images via the project's Images sub-tab --
+  # built as an Observations-query subquery (see
+  # Query::Modules::Subqueries#new_query_with_subquery), not a
+  # top-level `projects:` filter -- showed no project banner.
+  def test_index_project_observation_subquery_shows_project_banner
+    project = projects(:bolete_project) # 2 images -- no single-match redirect
+    obs_query = Query.lookup_and_save(:Observation, projects: project)
+    image_query = Query.current_or_related_query(:Image, :Observation,
+                                                 obs_query)
+    image_query.save
+
+    login
+    get(:index, params: { q: @controller.q_param(image_query) })
+
+    assert_response(:success)
+    assert_select("#project_banner")
+    assert_select(
+      "#project_observation_subtabs a.nav-link.active" \
+      "[href^='#{images_path}']"
+    )
   end
 
   def test_index_project_single_match_redirects

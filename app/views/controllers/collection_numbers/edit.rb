@@ -30,7 +30,7 @@ module Views::Controllers::CollectionNumbers
     private
 
     def render_form
-      render(Form.new(@collection_number, back: @back, turbo: true))
+      render(Form.new(@collection_number, back: @back))
     end
 
     def render_observation_boxes

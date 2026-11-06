@@ -19,6 +19,20 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
 
+  def test_renders_occurrence_link_for_multi_observation_occurrence
+    obs = multi_observation_occurrence_primary
+    html = render_box(object: obs)
+
+    assert_html(html, "a.occurrence-link")
+  end
+
+  def test_suppresses_occurrence_link_when_asked
+    obs = multi_observation_occurrence_primary
+    html = render_box(object: obs, suppress_occurrence_link: true)
+
+    assert_no_html(html, "a.occurrence-link")
+  end
+
   # Grid boxes deliberately do NOT subscribe to
   # [image, :processed] broadcasts -- rotate/mirror only happens on
   # the image-show page, and an index page with dozens of boxes would
@@ -359,5 +373,20 @@ class Components::Grid::BoxTest < ComponentTestCase
     html = render(component)
 
     assert_html(html, ".log-source-credit", text: "#{:via.l} MO API")
+  end
+
+  private
+
+  def render_box(**)
+    render(Components::Grid::Box.new(user: @user, **))
+  end
+
+  # minimal_unknown_obs is already occ_field_slip_one's sole member
+  # (fixture-linked, and its primary_observation) -- attach a second,
+  # unrelated observation to make this a multi-member occurrence.
+  def multi_observation_occurrence_primary
+    occ = occurrences(:occ_field_slip_one)
+    observations(:coprinus_comatus_obs).update!(occurrence: occ)
+    occ.primary_observation
   end
 end

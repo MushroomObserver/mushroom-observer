@@ -90,9 +90,6 @@ class Language::UnusedTagFinder
   ].freeze
   KNOWN_DYNAMIC_EXACT = %w[
     prev_object next_object
-    change_member_status_make_member_help
-    change_member_status_remove_member_help
-    change_member_status_make_admin_help
   ].freeze
 
   def self.call

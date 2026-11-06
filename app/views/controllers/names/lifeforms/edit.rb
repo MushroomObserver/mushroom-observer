@@ -8,14 +8,15 @@ class Views::Controllers::Names::Lifeforms::Edit < Views::FullPageBase
 
   def view_template
     add_page_title(
-      :edit_lifeform_title.t(name: @name.display_name(current_user))
+      :edit_lifeform_title.t(
+        name: @name.display_name(current_user)
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
     container_class(:text_image)
 
     render(Views::Controllers::Names::Lifeforms::Form.new(
-             FormObject::Lifeform.from_name(@name), name: @name,
-                                                    turbo: true
+             FormObject::Lifeform.from_name(@name), name: @name
            ))
   end
 end

@@ -9,7 +9,7 @@ module Views::Controllers::Occurrences
     prop :user, ::User
 
     def view_template
-      container_class(:wide)
+      container_class(:full)
       add_show_title(@occurrence, user: @user)
       add_edit_icons(@occurrence, @user)
       render_location_warning
@@ -37,7 +37,8 @@ module Views::Controllers::Occurrences
     def render_observation_grid
       Grid(
         objects: @observations,
-        user: @user
+        user: @user,
+        suppress_occurrence_link: true
       )
     end
   end

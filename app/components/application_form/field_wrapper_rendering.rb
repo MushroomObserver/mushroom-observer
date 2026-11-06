@@ -60,11 +60,17 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
-    # `.form-inline .form-group` is a descendant selector -- needs an
-    # ancestor div, not merged classes, to match.
+    # `inline?` wraps the form-group in a `.form-inline` ancestor div,
+    # so Bootstrap's `.form-inline .form-group` descendant selector
+    # matches as designed -- putting both classes on the form-group
+    # div itself matches nothing, since that selector needs two
+    # distinct elements. `wrap_data` follows `wrap_class` to this
+    # outer div too, so a Stimulus class toggle (e.g. .open) lands on
+    # the same element as "dropdown".
     def render_with_wrapper(&block)
       if inline?
-        div(class: class_names("form-inline", inline_wrapper_class)) do
+        div(class: class_names("form-inline", inline_wrapper_class),
+            data: wrapper_options[:wrap_data]) do
           render_form_group(&block)
         end
       else
@@ -73,7 +79,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_form_group(&block)
-      div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
+      div(class: wrapper_class,
+          data: inline? ? nil : wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
         render_between_block
         render_help_after_field if help_placement_above?

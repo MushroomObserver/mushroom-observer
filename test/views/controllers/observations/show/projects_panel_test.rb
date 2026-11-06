@@ -56,9 +56,11 @@ class Views::Controllers::Observations::Show::ProjectsPanelTest <
 
     member_html = render(panel_with(obs, users(:mary)))
     form_selector = "form[action='#{routes.observation_project_path(
-      id: obs.id, project_id: project.id, commit: "remove"
+      id: obs.id, project_id: project.id
     )}']"
     assert_html(member_html, "#{form_selector} button svg.mo-icon-remove")
+    assert_html(member_html,
+                "#{form_selector} input[name='_method'][value='delete']")
     # Must render inside InlineLinkBlock's wrapper -- that's what
     # supplies the group's spacing from the project link beside it.
     assert_html(member_html, ".inline-link-block #{form_selector}")

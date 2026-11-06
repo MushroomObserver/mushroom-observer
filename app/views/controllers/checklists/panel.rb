@@ -44,8 +44,12 @@ module Views::Controllers::Checklists
       name, name_id, deprecated, synonym_id = taxon
       li_class = target_name?(name_id) ? "checklist-target-name" : nil
       li(class: li_class) do
-        Link(type: :get, name: name, target: taxon_link_path(name_id)) do
+        if @context.logged_out
           render_taxon_content(name, deprecated, synonym_id)
+        else
+          Link(type: :get, name: name, target: taxon_link_path(name_id)) do
+            render_taxon_content(name, deprecated, synonym_id)
+          end
         end
         render_taxon_remove_button(name_id)
       end
@@ -99,7 +103,7 @@ module Views::Controllers::Checklists
         confirm: :project_target_name_confirm_remove.t(
           name: Name.safe_find(name_id)&.text_name
         ),
-        icon: :x,
+        icon: :remove,
         variant: :link,
         class: "p-0 ml-1"
       )

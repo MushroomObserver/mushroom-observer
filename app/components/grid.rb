@@ -83,6 +83,8 @@ class Components::Grid < Components::Base
   # Project context — passed through to each Grid::Box so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
+  # Passed through to each MatrixBox -- see the prop comment there.
+  prop :suppress_occurrence_link, _Boolean, default: false
 
   # BS4's `row-cols-{bp}-{n}` utilities size every direct child of
   # the row equally, so `Components::Grid::Box` doesn't need a
@@ -131,7 +133,8 @@ class Components::Grid < Components::Base
       else
         render(Components::Grid::Box.new(
                  user: @user, object: object,
-                 identify: @identify, project: @project
+                 identify: @identify, project: @project,
+                 suppress_occurrence_link: @suppress_occurrence_link
                ))
       end
     end
@@ -166,7 +169,7 @@ class Components::Grid < Components::Base
   # diverge from the cached non-admin / non-identify markup, so the
   # cache must be bypassed.
   def cacheable_render?(object)
-    !@identify && !project_admin_view? &&
+    !@identify && !project_admin_view? && !@suppress_occurrence_link &&
       self.class.should_cache_object?(object)
   end
 
@@ -178,7 +181,8 @@ class Components::Grid < Components::Base
     @objects.each do |object|
       render(Components::Grid::Box.new(
                user: @user, object: object,
-               identify: @identify, project: @project
+               identify: @identify, project: @project,
+               suppress_occurrence_link: @suppress_occurrence_link
              ))
     end
   end

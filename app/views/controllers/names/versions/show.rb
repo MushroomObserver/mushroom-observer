@@ -43,7 +43,7 @@ module Views::Controllers::Names::Versions
       )
       add_context_nav(Tab::Name::VersionActions.new(name: @name, user: @user))
       container_class(:full)
-      column_classes(:six)
+      column_classes(:six_even)
     end
 
     # --- Left column ---------------------------------------------

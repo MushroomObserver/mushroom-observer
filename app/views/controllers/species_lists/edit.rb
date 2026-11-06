@@ -22,8 +22,7 @@ module Views::Controllers::SpeciesLists
                dubious_where_reasons: @dubious_where_reasons,
                submitted_project_ids: @submitted_project_ids,
                user: @user,
-               button: :update,
-               turbo: true
+               button: :update
              ))
     end
   end

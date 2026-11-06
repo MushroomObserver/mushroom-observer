@@ -159,7 +159,7 @@ module Views::Controllers::Admin::BlockedIps
             class: "ips table-align-middle border-top",
             attributes: { style: "order: 3" }) do |t|
         t.column("ip", &:t)
-        t.column("actions", class: "text-right") do |ip|
+        t.column("actions", align: :right) do |ip|
           render_remove_button(ip)
         end
       end

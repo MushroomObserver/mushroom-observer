@@ -7,13 +7,15 @@ class Views::Controllers::Names::Classification::Edit < Views::FullPageBase
 
   def view_template
     add_page_title(
-      :edit_classification_title.t(name: @name.display_name(current_user))
+      :edit_classification_title.t(
+        name: @name.display_name(current_user)
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
     container_class(:text)
 
     render(Views::Controllers::Names::Classification::Form.new(
-             @name, turbo: true
+             @name
            ))
   end
 end

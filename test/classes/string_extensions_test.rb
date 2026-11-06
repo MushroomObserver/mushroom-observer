@@ -144,4 +144,24 @@ class StringExtensionsTest < UnitTestCase
     str = "<b><i>Abeliella xanthoconium</i></b>"
     assert_equal(str, str.dup.small_author)
   end
+
+  def test_strip_html
+    assert_equal("plain text", "<b>plain</b> <i>text</i>".strip_html)
+    assert_equal("text", "<!-- a comment -->text".strip_html)
+    assert_equal("no tags here", "no tags here".strip_html)
+  end
+
+  # A single gsub pass over each pattern can leave a dangerous
+  # substring behind when removing one match exposes a new one that
+  # wasn't contiguous in the original string (CodeQL: incomplete
+  # multi-character sanitization) -- strip_html must loop until
+  # nothing more matches.
+  def test_strip_html_reconstituted_comment
+    assert_equal("", "<!<script>-- -->".strip_html)
+  end
+
+  def test_html_to_ascii
+    assert_equal("text", "<!-- a comment -->text".html_to_ascii)
+    assert_equal("", "<!<script>-- -->".html_to_ascii)
+  end
 end

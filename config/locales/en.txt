@@ -273,6 +273,8 @@
   licenses: licenses
   lichen: lichen
   links: links
+  list: list
+  lists: lists
   locality: locality
   localities: localities
   location: location
@@ -304,6 +306,7 @@
   observation_fields: observation fields
   occurrence: occurrence
   occurrences: occurrences
+  primary: primary
   primary_observation: primary observation
   of: of
   past_locations: location changes
@@ -918,9 +921,12 @@
   lifeform_help_lichenicolous: Fungus which often or exclusively grows on or within a lichen.
 
   # For search-status widget
-  search_status_all_names: Enter text to search [type]
-  search_status_has_name: "Match found in [type]:"
-  search_status_has_no_name: No match found in [type]
+  search_status_all_names: Search if already present
+  search_status_has_name: "Match found:"
+  search_status_has_no_name: No match found
+  search_status_label: Name
+  list_add_heading: Add observation to [type]
+  field_slip_help: If the field slip has already been scanned, it will be added to the [type]
 
   # These are the keywords the PatternSearch class resolves as Query params,
   # e.g. "date" in "date:today". They should not depend on other translations.
@@ -2753,14 +2759,11 @@
   field_slips_for_project_title: Create Field Slips for the
 
   occurrence_already_exists: This observation already belongs to an occurrence.
-  occurrence_created: "Occurrence #[ID] created."
   occurrence_locations_differ: "Note: The observations in this occurrence have different locations."
   occurrence_need_two: You must include at least one additional observation to create an occurrence.
   occurrence_observation_not_found: Observation not found.
-  create_occurrence_title: Create Occurrence
+  show_occurrence_title: "[:occurrence.ti] of [name]"
   create_occurrence_source: Source Observation
-  create_occurrence_primary: Primary
-  create_occurrence_submit: Create Occurrence
   in_existing_occurrence: In existing occurrence
   occurrence_field_slip_conflict: "Field slip code conflict: [codes]"
   occurrence_max_observations_exceeded: "Cannot exceed [max] observations"
@@ -2775,9 +2778,7 @@
   show_observation_reflection_read_only: Read-only reflection of an imported source
   show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
-  edit_occurrence_submit: Save Changes
   edit_occurrence_add_heading: Add Recently Viewed Observations
-  edit_occurrence_location: "Location:"
   edit_occurrence_details_heading: Primary Observation Details
   edit_occurrence_no_edit_permission: You don't have permission to edit this observation's details.
   occurrence_updated: Occurrence updated.
@@ -2796,11 +2797,13 @@
   field_slips_tracker_fail: Unable to create Field Slip Tracker for [TITLE] Project
   field_slips_too_many_field_slips: You have requested more than [MAX] slips.
   field_slips_one_per_page: One field slip per page. Print shops prefer this. Otherwise 6/page which works best on US letter page.
+  field_slips_count: Number of field slips
 
   bad_dispatch_code: Unable to interpret Field Slip code, [code]
   add_dispatch_already_in: "Observation #[id] is already in [name]."
 
   # Project Aliases
+  project_aliases_help: Short names members can use in place of a **user** or a **location** when filling in field slips.
   project_alias_created: Project Alias was successfully created.
   project_alias_destroyed: Project Alias was successfully deleted.
   project_alias_edit: Edit Project Alias [name]
@@ -2913,6 +2916,7 @@
   checklist_for_site_title: Checklist for Mushroom Observer
   checklist_for_user_title: Checklist for [user]
   checklist_for_species_list_title: Checklist for [list]
+  checklist_for_project_title: Checklist for [project]
   checklist_target_summary: "Target names: [total] total, [observed] observed, [unobserved] not yet observed."
   checklist_observed_summary: "[species] species and [higher] higher-level [taxa_word] observed (synonyms counted once)."
   checklist_observed_species_only: "[species] species observed (synonyms counted once)."
@@ -2923,12 +2927,14 @@
   checklist_missing_taxa: Missing taxa
   checklist_taxon: taxon
   checklist_taxa: taxa
+  project_banner_login_prompt: More information about this project and the names listed below is available if you log in.
 
   # theme/color_themes
   color_themes_text: "**General Concept:** The [:app_title] website provides a number of color themes, some based on different groups of mushrooms. By default the simple clean \"Black on White\" theme is used. However, a [:user] can choose to use a particular theme throughout the site by selecting the theme on the [:user] preference page.\n\nThe idea of using mushrooms for color follows in the tradition of using mushrooms to dye fabrics. Each color in a mushroom theme was pulled from a photograph included in the site from the given group. The colors attempt to express the characteristic colors of the group. In a few cases, the [:images] were adjusted using an automatic color balance operation in order to get a more characteristic color.\n\nThe following links describe each of the available themes including links to the [:images] the colors were extracted from:"
   color_themes_title: Color Themes
 
   # name/email_tracking
+  email_tracking_already_tracking: You are already tracking [name].
   email_tracking_help_above_species: If enabled, this feature will notify you by email whenever someone posts an observation in this [rank].
   email_tracking_help_below_species: If enabled, this feature will notify you by email whenever someone posts an observation of [name].
   email_tracking_no_longer_tracking: No longer tracking [name].
@@ -3296,11 +3302,15 @@
   add_members_change_status: Change Status
   add_members_denied: "Permission denied: only admins for a project can add new members."
   add_members_title: Add [:users] to [title]
-  add_members_not_found: User "[user]" not found.
   add_members_added_admin: Successfully added [user] to admins.
   add_members_added_member: Successfully added [user] to members.
   add_members_removed_admin: Successfully removed [user] from admins.
   add_members_removed_member: Successfully removed [user] from members.
+
+  # Project Members (inline add widget -- Projects::Members::AddForm)
+  project_members_to_add_label: "Members to Add"
+  project_member_add: Add
+  project_members_not_found: No matching users found.
   add_members_already_added_admin: Already added [user] to admins.
   add_members_already_added_member: Already added [user] to members.
   add_members_already_removed_admin: Already removed [user] from admins.
@@ -4138,6 +4148,9 @@
   runtime_admin_switch_users_not_found: "Couldn't find \"[id]\".  Play again?"
   runtime_admin_switch_users_not_verified: This user is not verified yet!
   runtime_already_exists: "[Type] already exists: '[value]'"
+  runtime_classification_requires_at_or_above_genus: This only works on names at or above the rank of genus.
+  runtime_classification_requires_below_genus: This only works on names below the rank of genus.
+  runtime_classification_requires_genus: This only works on names at the rank of genus.
   runtime_created_at: Successfully created [type].
   runtime_created_id: "Successfully created [type] #[value]."
   runtime_created_name: Successfully created [type] '[value]'.

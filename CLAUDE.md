@@ -32,21 +32,20 @@ bin/rails routes
 
 ## Shell Commands
 
-**Never prepend a `cd` back to the directory each Bash call already
-starts in.** Bash calls begin in the session's working directory (shown
-as "Primary working directory" at session start) and that directory
-persists across every call, so `cd` to it is a pure no-op. Worse, a `cd`
-combined with `&&`/`;`/newlines and output redirection trips a built-in
-approval prompt ("path resolution bypass"), interrupting the user — a
-hook cannot suppress it, so the only fix is not to emit it.
+**Never use `cd` in a Bash command — not to the repo root, not into a
+subdirectory, not anywhere.** Use repo-relative or absolute paths
+instead (`cat app/views/controllers/checklists/show.rb`,
+`bin/rails test test/...`). Commands that need to run elsewhere take a
+directory flag (`git -C dir`, `bundle exec --gemfile`, `make -C dir`).
 
-The test is specific: **a leading `cd` is redundant only when its target
-resolves to the current working directory** — what the `pwd` command (or
-the `$PWD` variable) prints. Check the target against `$PWD` before
-writing it. A `cd` into a *different* directory is legitimate and not the
-anti-pattern. Prefer absolute paths
-(`bin/rails test test/...`, `sed -n '1,5p' "$PWD/path/file"`) over
-`cd`-then-relative when practical.
+Why there are no exceptions: a `cd` persists into every later Bash
+call, so a `cd` into a subdirectory moves the session out of the repo
+root, and the next command then needs a `cd` back. A `cd` combined with
+`&&`/`;`/newlines triggers a built-in approval prompt ("path resolution
+bypass") that interrupts the user, and no setting suppresses it. An
+earlier version of this rule allowed `cd` into a *different* directory;
+that exception is how sessions kept ending up prompting the user to
+`cd` back to the root.
 
 ## Test
 

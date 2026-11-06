@@ -1,7 +1,8 @@
 //
-// useful classes. many use the names of Bootstrap 4 utilities
-// All duplicates should be deleted here if updating to 4.
-// These are not meant as overrides, just to facilitate update.
+// This app's utility classes -- not Bootstrap duplicates. See
+// _utilities_bs4.scss for the classes that ARE Bootstrap 4 duplicates
+// (deletable in one shot at the upgrade); keep new additions here
+// unless a class is a confirmed, unmodified Bootstrap 4.6 utility.
 // --------------------------------------------------
 
 .center-block {
@@ -24,6 +25,15 @@
 
 .max-h-100 {
   max-height: 100% !important;
+}
+
+// A fixed-width gap between flex items, for a flex-wrap row where a
+// margin on either sibling would travel with it onto a wrapped
+// line and indent it -- the spacer itself stays small enough to
+// remain on the first line instead.
+.spacer {
+  display: inline-block;
+  width: 1rem;
 }
 
 .object-fit-cover {
@@ -52,22 +62,34 @@
   border: none !important;
 }
 
-.border-dashed {
-  border: 5px dashed;
-}
-
-// Bootstrap generates .m-*/.p-*/.mx-*/.my-*/.mt-*/.mb-*/.ml-*/.mr-*/
-// .px-*/.py-*/.pt-*/.pb-*/.pl-*/.pr-*/.mx-auto natively now -- the
-// hand-written duplicates of those are deleted, including the ones
-// that sat at a different value (.mt-5/.mb-5/.pb-5 at 2rem instead
-// of Bootstrap's 3rem, .my-0 missing !important). .indent is a
-// custom, non-Bootstrap class -- stays.
+// Custom, non-Bootstrap class.
 .indent {
   padding-left: 1rem !important;
 }
 
-.overflow-visible {
-  overflow: visible !important;
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- see .px-card below for the full explanation.
+.p-card {
+  padding: $card-spacer-x !important;
+}
+
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- the padding a card's body uses, applied here to
+// non-card chrome (nav bars, page-title strip) that wants to sit
+// flush with card content elsewhere on the page. See #5527.
+.px-card {
+  padding-left: $card-spacer-x !important;
+  padding-right: $card-spacer-x !important;
+}
+
+// See .px-card above.
+.pl-card {
+  padding-left: $card-spacer-x !important;
+}
+
+// See .px-card above.
+.pr-card {
+  padding-right: $card-spacer-x !important;
 }
 
 .overflow-ellipsis {
@@ -89,8 +111,15 @@
   letter-spacing: 0.5em;
 }
 
-// .stretched-link is Bootstrap's; not usable for form.button_to
-// inputs, though.
+.dashed-border {
+  border: 5px dashed;
+}
+
+.dotted-border {
+  border: 1px dotted;
+}
+
+// We can't use that for form.button_to inputs, though.
 .ab-fab {
   position: absolute;
   top: 0;
@@ -171,6 +200,25 @@
   left: auto;
 }
 
+.click-container {
+  a.ab-fab {
+
+    &:hover,
+    &:active,
+    &:focus {
+      background-color: transparent;
+    }
+  }
+}
+
+.list-group-item.none-yet {
+  display: none;
+
+  &:only-child {
+    display: block;
+  }
+}
+
 .bg-none {
   background: none !important;
 }
@@ -193,29 +241,53 @@
   background: rgba($black, 0.6);
 }
 
-.opacity-0 {
-  opacity: 0 !important;
+// Lighter/translucent, not Bootstrap's solid-background native
+// `.badge-warning` -- kept hand-written rather than assumed-duplicate.
+.badge-warning {
+  background-color: rgba($warning, 0.2);
+  color: $body-color;
+  font-weight: normal;
 }
 
-.opacity-75 {
-  opacity: 75% !important;
+// Fade instead of slide for a `.collapsing` element.
+.fade-not-slide.collapsing {
+  // transition-duration: 0.3s;
+  transition: height 0s, opacity 0.3s;
+  opacity: 0;
 }
 
+.violation-highlight {
+  background-color: orange;
+}
+
+// Project violations page (#4136) — `button_to` renders each per-row
+// action as its inline form, and the modal trigger is a plain
+// <button>. Adjacent elements touch by default; add a small gap on
+// both axes so the action buttons don't visually merge, including
+// when they wrap to a second line.
+.project-violations td .button_to,
+.project-violations td > button {
+  display: inline-block;
+  // `button_to` wraps its <button> in a <form>, while the modal
+  // trigger is a bare <button>. Without an explicit vertical-align
+  // their baselines differ and the last button sits half a line
+  // higher than its siblings.
+  vertical-align: top;
+  margin: 0 4px 4px 0;
+}
+.project-violations td .button_to:last-child,
+.project-violations td > button:last-child {
+  margin-right: 0;
+}
+
+// Bootstrap 5+ feature (not shipped by Bootstrap 4) -- stays
+// hand-written past the eventual Bootstrap 4 upgrade.
 .gap-2 {
   gap: 0.5rem !important;
 }
 
 .gap-3 {
   gap: 1rem !important;
-}
-
-// A fixed-width gap between flex items, for a flex-wrap row where a
-// margin on either sibling would travel with it onto a wrapped
-// line and indent it -- the spacer itself stays small enough to
-// remain on the first line instead.
-.spacer {
-  display: inline-block;
-  width: 1rem;
 }
 
 // Bootstrap 5's row/column gutter mechanism, backported: --bs-gutter-x
@@ -270,29 +342,10 @@
   }
 }
 
-// A soft-warning badge variant, using the same colors as
-// .alert-warning.
-.badge-warning {
-  background-color: rgba($warning, 0.2);
-  color: $body-color;
-  font-weight: normal;
-}
-
-// Fade instead of slide for a `.collapsing` element.
-.fade-not-slide.collapsing {
-  // transition-duration: 0.3s;
-  transition: height 0s, opacity 0.3s;
-  opacity: 0;
-}
-
-// Bootstrap's spacer-map utility generator only emits .p-card/.m-card
-// for a custom map key like "card" -- not the directional .pl-*/.pr-*
-// siblings a numeric key gets. .table's first/last-child rule
-// (mo/_tables.scss) needs those directly.
-.pl-card {
-  padding-left: $card-spacer-x !important;
-}
-
-.pr-card {
-  padding-right: $card-spacer-x !important;
+// Not a utility class -- a plain element override, so it isn't a
+// Bootstrap-duplicate candidate.
+@media screen and (min-width: breakpoint-min(sm)) {
+  .table {
+    overflow-x: scroll;
+  }
 }

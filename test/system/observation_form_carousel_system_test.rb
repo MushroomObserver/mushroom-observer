@@ -27,8 +27,8 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
       "Carousel item img src should be base64 data URL, got: #{src[0..50]}"
     )
 
-    # With only 1 image, thumbnails are hidden, so use visible: false
-    thumbnail_img = first(".carousel-indicator img.set-src", visible: false)
+    # With only 1 image, thumbnails are hidden, so use visible: :all
+    thumbnail_img = first(".carousel-indicator img.set-src", visible: :all)
     thumb_src = thumbnail_img["src"]
 
     assert(thumb_src.present?, "Thumbnail img should have src attribute")

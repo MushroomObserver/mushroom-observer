@@ -208,6 +208,8 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_observations, dependent: :destroy
   has_many :projects, through: :project_observations
 
+  has_many :project_excluded_observations, dependent: :destroy
+
   has_many :species_list_observations, dependent: :destroy
   has_many :species_lists, through: :species_list_observations,
                            after_add: :add_spl_callback,

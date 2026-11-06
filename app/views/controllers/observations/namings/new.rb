@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Phlex view for the "propose a name" page on an observation. Two
-# columns: a left column with the observation details + the naming
-# form, and a right column with the observation's images.
+# columns: a left column with the naming form, and a right column
+# with the observation's images and details.
 module Views::Controllers::Observations::Namings
   class New < Views::FullPageBase
     # Forwards every prop the Form component needs — `observation`
@@ -20,13 +20,12 @@ module Views::Controllers::Observations::Namings
       add_chrome
       Row do
         Column(xs: 12, sm: 8) do
-          div(class: "mt-3") do
-            render_observation_details
-            render_specimen_panel
-          end
-          div(class: "mt-3") { render_naming_form }
+          ContentPadded { render_naming_form }
         end
-        Column(xs: 12, sm: 4) { render_images }
+        Column(xs: 12, sm: 4) do
+          render_images
+          div(class: "mt-3") { render_observation_details }
+        end
       end
     end
 
@@ -34,6 +33,7 @@ module Views::Controllers::Observations::Namings
 
     def add_chrome
       container_class(:double)
+      content_padding(:panels)
       add_page_title(:create_naming_title.t(id: @observation.id))
       add_context_nav(Tab::Observation::NamingForm.new(
                         observation: @observation
@@ -46,12 +46,6 @@ module Views::Controllers::Observations::Namings
              ))
     end
 
-    def render_specimen_panel
-      render(Views::Controllers::Observations::Show::SpecimenPanel.new(
-               obs: @observation, user: @user
-             ))
-    end
-
     def render_naming_form
       render(Form.new(
                @naming,
@@ -60,8 +54,7 @@ module Views::Controllers::Observations::Namings
                given_name: @given_name,
                reasons: @reasons,
                feedback: @feedback,
-               show_reasons: true,
-               turbo: true
+               show_reasons: true
              ))
     end
 

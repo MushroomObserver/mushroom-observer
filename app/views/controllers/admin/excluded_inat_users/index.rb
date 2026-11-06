@@ -11,7 +11,7 @@ module Views::Controllers::Admin::ExcludedInatUsers
     def view_template
       add_page_title(:excluded_inat_users_title.l)
       p { plain(:excluded_inat_users_help.l) }
-      render(Form.new(@excluded, turbo: true))
+      render(Form.new(@excluded))
       render(Table.new(entries: @entries, purges: @purges))
     end
   end

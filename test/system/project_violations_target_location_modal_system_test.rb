@@ -33,6 +33,7 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
 
     # ---- Clicking Create opens a new tab at /locations/new?where=<suffix>
     #      AND closes the modal in the current tab.
+    original_tab = current_window
     new_tab = window_opened_by do
       within("##{modal_id}") do
         click_link(:form_violations_modal_target_location_create.l)
@@ -42,8 +43,8 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
       assert_match(%r{/locations/new\?where=Massachusetts}, current_url)
     end
     new_tab.close
-    switch_to_window(windows.first)
-    assert_no_selector("##{modal_id}", visible: true, wait: 3)
+    switch_to_window(original_tab)
+    assert_no_selector("##{modal_id}", visible: :visible, wait: 3)
 
     # ---- Simulate the admin completing the new Location form in the
     #      other tab. The location form's own system test covers that

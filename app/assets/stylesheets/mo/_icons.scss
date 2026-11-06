@@ -95,21 +95,19 @@ tbody.collapse.show {
 }
 
 // Baseline correction for icon+text pairs that aren't framed as a
-// .btn: plain Link::Get (.inline-icon-link sets top: 0 instead), a
-// form.button_to button (Components::Button::CRUDBase's strip
-// variant -- no .btn class), and the sidebar heading icons. The
-// `> span >` variants cover Components::Icon's title: wrap (moves
-// tooltip attrs off the <svg> onto a wrapping <span>). Excludes
-// `.info-collapse-trigger` (and any other `.inline-flex-center`
-// trigger) -- those are icon-only, flex-centered against their row's
-// siblings, not paired with adjacent text, so this baseline nudge
-// only pushes them out of alignment.
+// .btn and the sidebar heading icons. `.inline-icon-link` (plain or
+// form.button_to-wrapped) gets the matching +2px correction from its
+// wrapping `.inline-link-block`'s `margin-top` instead (see
+// _links_buttons_alerts.scss), so it's excluded here rather than
+// duplicated. `.inline-flex-center` triggers (e.g.
+// `.info-collapse-trigger`) are also excluded -- those are icon-only,
+// flex-centered against their row's siblings, not paired with
+// adjacent text, so this nudge only pushes them out of alignment.
+// The `> span >` variants cover Components::Icon's title: wrap
+// (moves tooltip attrs off the <svg> onto a wrapping <span>).
 a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
   > .mo-icon,
 a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
-  > span > .mo-icon,
-form.button_to button:not(.btn):not(.inline-flex-center) > .mo-icon,
-form.button_to button:not(.btn):not(.inline-flex-center)
   > span > .mo-icon,
 .list-group-item > .mo-icon,
 .list-group-item > span > .mo-icon {

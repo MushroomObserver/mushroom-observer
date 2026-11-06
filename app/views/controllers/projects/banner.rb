@@ -1,10 +1,11 @@
 # frozen_string_literal: true
 
-# Renders a project banner with title, location, date range, tabs,
-# and optional banner image. Rendered on every project page (and
-# the per-project checklist show page) via the `add_project_banner`
-# helper so the banner looks the same regardless of which tab is
-# selected.
+# Renders a project banner with title, location, date range, and
+# optional banner image. Rendered on every project page (and the
+# per-project checklist show page) via the `add_project_banner`
+# helper, alongside `Views::Controllers::Projects::ProjectNavs`
+# (the tabs), so the banner looks the same regardless of which page
+# is active.
 #
 # @example Basic usage in helper
 #   content_for(:project_banner) do
@@ -12,34 +13,32 @@
 #   end
 module Views::Controllers::Projects
   class Banner < Views::Base
-    include Phlex::Rails::Helpers::ContentFor
-
     prop :project, _Nilable(Project)
-    prop :user, _Nilable(User), default: nil
-    prop :current_tab, _Nilable(String), default: nil
 
     def view_template
       return unless @project
 
+      render_login_prompt unless current_user
       if @project.image
         render_banner_with_image
       else
         render_banner_without_image
       end
-
-      Row do
-        Column(xs: 12, id: "project_tabs") do
-          NavTabs(
-            current: @current_tab, link_class: "mt-3",
-            tabs: ::Tab::Project::Banner.new(
-              project: @project, user: @user
-            )
-          )
-        end
-      end
     end
 
     private
+
+    # Only the public checklist renders a banner without a user. No
+    # link: the top nav's login button sits just above it.
+    def render_login_prompt
+      Row do
+        Column(xs: 12) do
+          p(class: "my-3", id: "project_login_prompt") do
+            plain(:project_banner_login_prompt.l)
+          end
+        end
+      end
+    end
 
     def render_banner_with_image
       Row do
@@ -77,13 +76,38 @@ module Views::Controllers::Projects
                         "h3 page-title mb-4"
                       end
 
-      h1(class: title_classes, id: "title") do
+      h1(class: title_classes, id: title_id) do
         div(class: "d-flex align-items-center") do
           IDBadge(object: @project, size: :sm)
           whitespace
-          Link(type: :object, object: @project)
+          if current_user
+            Link(type: :object, object: @project)
+          else
+            # Plain text: Textile turns links and bare URLs into anchors.
+            plain(@project.title.t.as_displayed)
+          end
         end
       end
+    end
+
+    # `#title` is the page's heading id. `Header::PageTitle` suppresses
+    # its heading on every index action, and on `projects#show`
+    # specifically (see `Header::PageTitle#suppress_title?`/
+    # `#on_project_page?`) -- on those pages this banner title stands
+    # in as the page heading. Every other project page keeps a
+    # distinct heading from `Header::PageTitle`, so this title must
+    # not also claim that id -- `#project_banner_title` there instead.
+    def title_id
+      if controller.action_name == "index" || projects_show_page?
+        "title"
+      else
+        "project_banner_title"
+      end
+    end
+
+    def projects_show_page?
+      controller.controller_path == "projects" &&
+        controller.action_name == "show"
     end
 
     def project_subtitle?
@@ -101,8 +125,12 @@ module Views::Controllers::Projects
 
       div(class: location_classes) do
         b do
-          a(href: location_path(@project.location.id)) do
-            @project.place_name(current_user)
+          if current_user
+            a(href: location_path(@project.location.id)) do
+              @project.place_name(current_user)
+            end
+          else
+            plain(@project.place_name(nil))
           end
         end
       end

@@ -16,7 +16,9 @@ class Views::Controllers::Names::Synonyms::Deprecate::New < Views::FullPageBase
 
   def view_template
     add_page_title(
-      :name_deprecate_title.t(name: @name.display_name(current_user))
+      :name_deprecate_title.t(
+        name: @name.display_name(current_user)
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 
@@ -29,8 +31,7 @@ class Views::Controllers::Names::Synonyms::Deprecate::New < Views::FullPageBase
              valid_names: @valid_names,
              suggest_corrections: @suggest_corrections,
              parent_deprecated: @parent_deprecated,
-             user: current_user,
-             turbo: true
+             user: current_user
            ))
   end
 end

@@ -11,15 +11,16 @@ module Views::Controllers::Projects::Aliases
       add_page_title(:project_aliases.ti)
       container_class(:wide)
 
-      render(Views::Controllers::Projects::AdminSubtabs.new(
-               project: @project, current_subtab: "aliases"
-             ))
-
+      # On the rem-basis branch (16px rem scale), this should be my-3.
+      div(class: "my-4") do
+        Button(
+          type: :modal, name: :project_alias_new.t,
+          target: new_project_alias_path(project_id: @project.id),
+          modal_id: "project_alias"
+        )
+        Help(content: :project_aliases_help.t, well: false)
+      end
       render(Table.new(project_aliases: @project_aliases))
-
-      a(href: new_project_alias_path(
-        project_id: @project.id
-      )) { plain(:project_alias_new.t) }
     end
   end
 end

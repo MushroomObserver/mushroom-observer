@@ -112,20 +112,42 @@ module Views::Layouts
       # against the sidebar's fixed `$sidebar-max-width`), not a
       # Bootstrap grid column.
       div(id: "right_side") do
-        render(Views::Layouts::TopNav.new(user: current_user,
-                                          query: current_query,
-                                          banner: banner))
-        render(Views::Layouts::SearchNav.new)
-        render_index_bar
-        render(Views::Layouts::App::PageFlash.new)
+        render_nav_chrome(banner: banner)
         render_header_and_main(&block)
       end
     end
 
-    # `content_for(:container_class)` (set in `Views::FullPageBase#
-    # around_template`) wraps header + `<main>` so the title bar's
-    # right-aligned content aligns with the content box's edge, not
-    # `#right_side`'s full width.
+    # Ahead of `render_header_and_main`'s `content_for(:container_class)`
+    # width cap -- a project's banner image/tabs always span the full
+    # page width, regardless of the page's container_class. Ahead of
+    # the flash too, so a flash message from a project-page action
+    # (e.g. after adding a target location) reads below the banner,
+    # not sandwiched between it and the title.
+    def render_project_banner
+      banner = content_for(:project_banner)
+      trusted_html(banner) if banner.present?
+    end
+
+    # The page chrome above `#content`: the top nav, the collapsible
+    # search-bar row (a sibling, not a child -- see
+    # `Views::Layouts::SearchNav`), the index bar, the project
+    # banner, and the flash row.
+    def render_nav_chrome(banner:)
+      render(Views::Layouts::TopNav.new(user: current_user,
+                                        query: current_query,
+                                        banner: banner))
+      render(Views::Layouts::SearchNav.new)
+      render_index_bar
+      render_project_banner
+      render(Views::Layouts::App::PageFlash.new)
+    end
+
+    # `content_for(:container_class)` wraps the title bar + `#content`
+    # (not the nav chrome above it) so a `:wide` page's width ceiling
+    # only constrains the body, not the top nav/search bar/index bar.
+    # `content_for(:content_padding)` lands on `#content` alone, not
+    # this wrapper -- `Views::FullPageBase#around_template` guarantees
+    # both slots are populated by the time the layout renders.
     def render_header_and_main(&block)
       div(class: content_for(:container_class)) do
         render(Views::Layouts::Header.new)
@@ -153,7 +175,8 @@ module Views::Layouts
       action = controller.action_name
       controller_name = controller.controller_name
       (action == "index" && controller_name != "articles") ||
-        controller_name == "maps"
+        controller_name == "maps" ||
+        controller.controller_path == "observations/downloads"
     end
 
     def maybe_set_filter_help

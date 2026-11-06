@@ -75,7 +75,28 @@ class ImagesController < ApplicationController
   # Hook runs before template displayed. Must return query.
   def filtered_index_final_hook(query, _display_opts)
     store_query_in_session(query)
+    derive_ivar_from_query(:@project, query, :projects, Project)
+    derive_project_from_observation_subquery(query)
     query
+  end
+
+  # Images reached via a project-scoped Observations subquery (the
+  # project banner's Images sub-tab, built through
+  # `Tab::RelatedQuery`/`Query.current_or_related_query`) carry the
+  # project filter nested under `observation_query:`, not as a
+  # top-level `projects:` param -- see
+  # `Query::Modules::Subqueries#new_query_with_subquery`. Mirrors
+  # `LocationsController#species_list_filter_for`'s digging shape.
+  def derive_project_from_observation_subquery(query)
+    return if @project
+
+    obs_query = query.params[:observation_query]
+    return unless obs_query.is_a?(Hash)
+
+    projects = obs_query[:projects]
+    return unless projects.is_a?(Array) && projects.length == 1
+
+    @project = Project.safe_find(projects[0])
   end
 
   # I can't figure out why ActiveRecord is not eager-loading all the names.
@@ -153,7 +174,7 @@ class ImagesController < ApplicationController
   def render_index_view
     render(Views::Controllers::Images::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects
+             objects: @objects, project: @project
            ))
   end
 

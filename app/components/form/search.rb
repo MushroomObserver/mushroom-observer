@@ -39,7 +39,7 @@ class Components::Form::Search < Components::ApplicationForm
       search_length_validator_search_type_value: type
     }
     data[:turbo_stream] = "true" if context == :dropdown
-    super(model, search_controller:, context:, turbo: true,
+    super(model, search_controller:, context:,
                  action: "/#{type}/search", method: :post,
                  id: "#{type}_search_form",
                  class: "faceted-search-form pb-4 w-100",

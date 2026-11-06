@@ -27,8 +27,7 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_form_column
-      render(Form.new(@herbarium_record, observation: @observation,
-                                         turbo: true))
+      render(Form.new(@herbarium_record, observation: @observation))
     end
 
     def render_observation_box
