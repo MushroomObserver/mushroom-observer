@@ -111,7 +111,7 @@ module Views::Controllers::Checklists
 
     def taxon_remove_button_items(name_id)
       return [] unless @context.admin?
-      return [] unless @context.project.target_name_ids.include?(name_id)
+      return [] unless target_name?(name_id)
 
       [taxon_remove_button(name_id)]
     end
