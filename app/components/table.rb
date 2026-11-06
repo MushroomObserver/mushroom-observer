@@ -124,7 +124,8 @@ class Components::Table < Components::Base
   # is ignored — only the `header` and per-column attrs are used,
   # and the caller's `row` / `body` block emits the cells.
   #
-  # @param header [String] the column header text
+  # @param header [String, nil] the column header text, or `nil` for a
+  #   header-less action column (e.g. an edit-link column with no label)
   # @param align [Symbol] `:center`, `:right`, or `:left` -- sets the
   #   matching Bootstrap text-align utility class on both the `<th>`
   #   and `<td>` for this column (column mode). Row/body-mode callers
