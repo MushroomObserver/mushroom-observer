@@ -133,8 +133,7 @@ module Views::Controllers::Checklists
 
     def render_deprecated_footnote
       p do
-        # See Panel#render_taxon_content for why :approve, not
-        # :deprecate.
+        # See Panel#taxon_marker_items for why :approve, not :deprecate
         Icon(type: :approve)
         whitespace
         plain(:checklist_any_deprecated.l)
