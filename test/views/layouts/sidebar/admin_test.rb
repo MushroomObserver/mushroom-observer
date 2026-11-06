@@ -43,13 +43,12 @@ class Views::Layouts::Sidebar
       # Should have "Turn Admin Off" button
       assert_includes(html, :app_turn_admin_off.t)
       assert_html(html, ".admin_mode_link")
-      assert_html(html, ".btn.btn-link")
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_heading_has_correct_css_classes
       html = render_component
 
-      # Heading should have the disabled and font-weight-bold classes
       assert_html(html, ".list-group-item.disabled.font-weight-bold")
     end
 

@@ -14,6 +14,7 @@ class Tab::Location::IndexActions < Tab::Collection
   def tabs
     [
       Tab::Location::New.new,
+      Tab::Location::Undefined.new,
       Tab::Location::Map.new(q_param: @q_param),
       Tab::Location::Countries.new,
       Tab::RelatedQuery.for(

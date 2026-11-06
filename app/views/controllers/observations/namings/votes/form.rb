@@ -43,7 +43,6 @@ module Views::Controllers::Observations::Namings::Votes
       super(vote || ::Vote.new,
             naming: naming, user: user, vote: vote, context: context,
             id: "naming_vote_form_#{naming.id}",
-            turbo: true,
             class: "naming-vote-form d-inline-block " \
                    "float-right float-sm-none",
             data: form_data(naming))

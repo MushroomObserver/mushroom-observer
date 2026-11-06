@@ -27,7 +27,7 @@
 #  updated_at::     Date/time it was last updated.
 #  user::           User that created it.
 #  target::         Object in question.
-#  state::          Either true (watching) or false (ignoring).
+#  state::          Enum: "watching" or "ignoring".
 #
 #  == Class methods
 #
@@ -53,6 +53,10 @@ class Interest < AbstractModel
   belongs_to :user
   belongs_to :target, polymorphic: true
 
+  # Backed by the existing boolean column -- Rails' enum macro maps
+  # directly onto raw true/false values, so no migration is needed.
+  enum :state, { ignoring: false, watching: true }
+
   # Maintain this Array of all models (targets) which take interests.
   ALL_TYPES = [
     Location, LocationDescription, Name, NameDescription, NameTracker,
@@ -61,6 +65,10 @@ class Interest < AbstractModel
 
   # Returns Array of all valid +target_type+ values (Symbols).
   ALL_TYPE_TAGS = ALL_TYPES.map { |type| type.to_s.underscore.to_sym }.freeze
+
+  # Returns Array of all valid +state+ values (Symbols), for
+  # `Query::Interests`.
+  ALL_STATE_TAGS = states.keys.map(&:to_sym).freeze
 
   # Allow explicit joining for all polymorphic associations,
   # e.g. `Interest.joins(:location).where(target_id: 29513)`,
@@ -73,6 +81,12 @@ class Interest < AbstractModel
   end
 
   scope :for_user, ->(user) { where(user: user) }
+  # MySQL's default collation is case-insensitive, so lowercase tags
+  # (:observation) match the capitalized target_type column values
+  # ("Observation") without translation -- same pattern as
+  # Comment.types.
+  scope :types, ->(types) { where(target_type: types) }
+  scope :state, ->(tag) { where(state: tag) }
 
   validates :target_type, inclusion: { in: ALL_TYPES.map(&:to_s) }
 
@@ -87,10 +101,31 @@ class Interest < AbstractModel
     where(target_type: obj.class.to_s, target_id: obj.id)
   end
 
+  # Mutates `recipients` in place: pushes each watcher's user, deletes
+  # each ignorer's user -- even if present for another reason (e.g.
+  # the target's owner). Returns `recipients`.
+  def self.update_recipients!(interests, recipients)
+    interests.each do |interest|
+      if interest.watching?
+        recipients.push(interest.user)
+      else
+        recipients.delete(interest.user)
+      end
+    end
+    recipients
+  end
+
   # `user` (this Interest's owner) is the only one who ever sees this,
   # via their own Interests index page.
   def target_format_name
     target.unique_format_name(user)
+  end
+
+  # `user` for target_format_name above; `target: [:name]` covers the
+  # two target types whose display needs it (Observation, NameTracker
+  # -- both belong_to :name; polymorphic eager-loading skips the rest).
+  def self.index_includes_tree
+    [:user, { target: [:name] }]
   end
 
   ##############################################################################

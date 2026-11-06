@@ -12,9 +12,10 @@ module Naming::Notify
   extend ActiveSupport::Concern
 
   class_methods do
-    # Bulk creators (the iNat importer) wrap naming creation in this block so
-    # create_emails sends nothing per-naming; the caller then sends one
-    # digest per interested user instead of thousands of individual emails.
+    # Bulk changers (the iNat importer, Name#merge) wrap naming saves in this
+    # block so create_emails sends nothing per-naming; the caller then sends
+    # one digest per interested user instead of thousands of individual
+    # emails.
     # Thread-local so concurrent requests/jobs don't affect each other.
     def suppress_notifications
       previous = Thread.current[:naming_suppress_notifications]
@@ -43,26 +44,27 @@ module Naming::Notify
   end
 
   # Union of user ids create_emails would notify (name-trackers + interested
-  # users, minus the namer). Does not filter no_emails — the digest caller
-  # does that once for the whole batch. Lets the import send one digest per
+  # users, minus the user who acted: the namer, unless a name merge moved
+  # the naming). Does not filter no_emails — the digest caller does that
+  # once for the whole batch. Lets an import or a merge send one digest per
   # user instead of firing per-naming emails.
-  def notified_user_ids
+  def notified_user_ids(actor_id: user_id)
     taxa = notification_taxa
     ids = Set.new(notification_trackers(taxa).map(&:user_id))
     ids.merge(interested_users(taxa).map(&:id))
-    ids.delete(user_id)
+    ids.delete(actor_id)
     ids
   end
 
   private
 
-  # The name plus its ancestor taxa (and Lichen, for lichens) — the chain
-  # subscribers are matched along.
+  # The name and its synonyms, then the approved name's ancestor taxa (and
+  # Lichen, for lichens) — the chain subscribers are matched along. Most
+  # specific first, so a user's closest tracker is the one they hear from.
   def notification_taxa
-    taxa = name.approved_name.all_parents
-    taxa.push(name)
+    taxa = name.synonyms + name.approved_name.all_parents
     taxa.push(Name.find_by(text_name: "Lichen")) if name.is_lichen?
-    taxa
+    taxa.uniq
   end
 
   # NameTrackers to notify along the taxon chain: not the namer, specimen
@@ -71,8 +73,9 @@ module Naming::Notify
     seen = Set.new
     taxa.flat_map do |taxon|
       NameTracker.where(name: taxon).includes(:user).select do |tracker|
-        tracker.user_id != user_id && seen.add?(tracker.user_id) &&
-          (!tracker.require_specimen || observation&.specimen)
+        tracker.user_id != user_id &&
+          (!tracker.require_specimen || observation&.specimen) &&
+          seen.add?(tracker.user_id)
       end
     end
   end
@@ -81,8 +84,9 @@ module Naming::Notify
     notification_trackers(taxa).each do |tracker|
       next if tracker.user.no_emails
 
-      NamingTrackerMailer.build(receiver: tracker.user, naming: self).
-        deliver_later
+      NamingTrackerMailer.build(
+        receiver: tracker.user, naming: self, name_tracker: tracker
+      ).deliver_later
       notify_tracker_observer(tracker)
     end
   end
@@ -107,7 +111,7 @@ module Naming::Notify
 
     users = observation_interest_users(obs)
     taxa.each do |taxon|
-      taxon.interests.each { |i| users.push(i.user) if i.state }
+      taxon.interests.each { |i| users.push(i.user) if i.watching? }
     end
     users.uniq
   end
@@ -115,10 +119,7 @@ module Naming::Notify
   def observation_interest_users(obs)
     users = []
     users.push(obs.user) if obs.user&.email_observations_naming
-    obs.interests.each do |i|
-      i.state ? users.push(i.user) : users.delete(i.user)
-    end
-    users
+    Interest.update_recipients!(obs.interests, users)
   end
 
   def notify_interested(taxa)

@@ -35,7 +35,8 @@ module Views::Controllers::Herbaria
       def render_delete_cell(user)
         Button(
           type: :delete,
-          name: "X",
+          name: :remove.ti,
+          icon: :remove,
           target: herbaria_curator_path(@herbarium, user: user.id),
           id: "delete_herbarium_curator_link_#{user.id}",
           variant: :strip

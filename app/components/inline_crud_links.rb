@@ -205,13 +205,9 @@ class Components::InlineCRUDLinks < Components::Base
     }
   end
 
-  # `px-2` spacing so the destroy icon doesn't hug the neighboring
-  # edit link -- on the button's own class, not `icon_class:` (a bare
-  # <svg> can't take padding, see Components::Icon).
   def destroy_class
     Components::InlineLinkBlock.item_class(
-      class_names("px-2",
-                  handler[:destroy_class] && send(handler[:destroy_class]))
+      handler[:destroy_class] && send(handler[:destroy_class])
     )
   end
 
@@ -379,10 +375,8 @@ class Components::InlineCRUDLinks < Components::Base
 
   # ---- :can_edit handlers -----------------------------------
 
-  # CollectionNumber: edit gated by the OBS's edit permission -- the
-  # pre-Phlex `_collection_numbers.erb` precomputed
-  # `can_edit = in_admin_mode? || obs.can_edit?(user)` once for the
-  # whole list and didn't recheck per-record.
+  # CollectionNumber: edit gated by the OBS's edit permission,
+  # rechecked per-record.
   def can_edit_via_observation?
     @observation &&
       (@observation.can_edit?(@user) || in_admin_mode?)
@@ -395,13 +389,9 @@ class Components::InlineCRUDLinks < Components::Base
     @target.can_edit?(@user) || in_admin_mode?
   end
 
-  # Owner-or-admin. Matches the `permission?` predicate that gates
-  # the helper-side `[ edit | destroy ]` rendering in
-  # `namings_helper.rb#naming_name_html`. Comments fix a pre-existing
-  # pre-Phlex divergence: `_comment.erb` always rendered the mod
-  # links regardless of ownership; the controller would reject the
-  # action server-side. Gating at the render side hides misleading
-  # affordances.
+  # Owner-or-admin. Gating at the render side hides misleading
+  # affordances rather than letting the controller reject the action
+  # server-side after a user sees a link they can't use.
   def can_edit_via_owner?
     @target.user == @user || in_admin_mode?
   end

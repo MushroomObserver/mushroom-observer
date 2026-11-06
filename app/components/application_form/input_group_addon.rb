@@ -17,6 +17,10 @@ class Components::ApplicationForm < Superform::Rails::Form
   #   :button_title    tooltip / accessible name
   #   :button_icon     glyph symbol from `Components::Icon::GLYPHS`,
   #                    rendered after the text via `Components::Icon`
+  #   :addon           text content for a plain (non-button) addon
+  #   :addon_position  :prepend or :append (default) -- BS3's addon
+  #                    span carries no prepend/append class of its
+  #                    own, so position is just DOM order here
   module InputGroupAddon
     def render_input_group_button(&block)
       InputGroup do
@@ -26,15 +30,21 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_input_group_addon(&block)
+      position = wrapper_options.fetch(:addon_position, :append)
       InputGroup do
+        render_addon if position == :prepend
         yield
-        render(Components::InputGroup::Addon.new(variant: :addon)) do
-          wrapper_options[:addon]
-        end
+        render_addon if position == :append
       end
     end
 
     private
+
+    def render_addon
+      render(Components::InputGroup::Addon.new(variant: :addon)) do
+        wrapper_options[:addon]
+      end
+    end
 
     def render_addon_element
       if wrapper_options[:button_href]

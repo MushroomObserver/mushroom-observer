@@ -6,6 +6,7 @@ module Observations
     before_action :login_required
     before_action :store_location, only: :edit
 
+    # rubocop:disable MO/NoLongCommentBlock
     ############################################################################
     #
     #  :section: Associate Observations with "undefined" +where+ strings
@@ -40,6 +41,7 @@ module Observations
     # The form is not really a `form`, but the buttons do commit to "update".
     # It contains links to assign the observations sharing the +where+ string
     # to the given Location (AR record)
+    # rubocop:enable MO/NoLongCommentBlock
 
     def edit
       # NOTE: Don't use or pass Location.user_format for @where. Needs "postal".
@@ -51,6 +53,7 @@ module Observations
       render(Views::Controllers::Observations::Locations::Edit.new(
                where: @where,
                matches: @matches,
+               observation_counts: ObservationCounter.counts_for(@matches),
                pagination_data: @pagination_data,
                user: @user
              ))
@@ -82,6 +85,11 @@ module Observations
     private
 
     def locations_matching_where
+      # Location.name_has("") would match every Location (AbstractModel
+      # ::Scopes#search_columns treats a blank phrase as "no filter") --
+      # fine for an ordinary search bar, not for this picker.
+      return Location.none if @where.blank?
+
       matches = Location.name_has(@where)
 
       # Try for segments: split by comma, or by space if no commas

@@ -9,17 +9,21 @@ module Views::Controllers::Projects::FieldSlips
     prop :trackers, _Array(::FieldSlipJobTracker)
 
     def view_template
-      add_page_title(page_title)
-      container_class(:text_image)
+      render_page_chrome
 
-      div(class: "mt-3 pb-2") do
-        render_max_info
-        render_form
-        render_tracker_table if member?
-      end
+      render_max_info
+      render_form
+      render_tracker_table if member?
     end
 
     private
+
+    def render_page_chrome
+      add_page_title(page_title)
+      add_project_banner(@project)
+      container_class(:text_image)
+      content_padding(:panels)
+    end
 
     def page_title
       [
@@ -40,7 +44,7 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_max_info
-      div do
+      p do
         plain(
           :field_slips_max_for_project.t(
             max: @field_slip_max
@@ -50,25 +54,24 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_form
-      render(Views::Controllers::Projects::FieldSlips::Form.new(
-               FormObject::ProjectFieldSlip.new(
-                 field_slips: default_count
-               ),
-               project: @project
-             ))
+      ContentPadded do
+        render(Views::Controllers::Projects::FieldSlips::Form.new(
+                 FormObject::ProjectFieldSlip.new(
+                   field_slips: default_count
+                 ),
+                 project: @project
+               ))
+      end
     end
 
-    # Each `<tr>` is a Stimulus root rendered by `TrackerRow` —
+    # Each `<tr>` is a Stimulus root rendered by `TrackerRow` --
     # `data-controller="field-slip-job"` + per-tracker data attrs the
-    # JS uses to mutate cells in place as job state changes. The
+    # JS uses to mutate cells as job state changes.
     # `tbody#field_slip_job_trackers` is also a Turbo Stream target
-    # (`field_slips_controller#create` does
-    # `turbo_stream.prepend(:field_slip_job_trackers) { ... }` to
-    # append a newly-created tracker without a full page refresh).
-    #
-    # Uses `Components::Table`'s row mode: `column(header, …)`
-    # defines just the `<th>` chrome; `row { |tracker| … }` renders
-    # the entire `<tr>` per tracker via `TrackerRow`.
+    # (`field_slips_controller#create` prepends a newly-created
+    # tracker there). Uses `Components::Table`'s row mode:
+    # `column(header, …)` defines the `<th>` chrome; `row { |tracker|
+    # … }` renders each `<tr>` via `TrackerRow`.
     def render_tracker_table
       Table(@trackers,
             identifier: "field-slip-trackers",

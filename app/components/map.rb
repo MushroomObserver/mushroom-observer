@@ -141,7 +141,9 @@ class Components::Map < Components::Base
   # so emit through `trusted_html` rather than `plain` which would
   # escape the entities.
   def render_nothing_to_map
-    div(class: "w-100") { trusted_html(nothing_to_map_text) }
+    div(id: "map_nothing_to_map", class: "w-100") do
+      trusted_html(nothing_to_map_text)
+    end
   end
 
   # --------------------------------------------------------------

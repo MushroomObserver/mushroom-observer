@@ -28,7 +28,9 @@ class Components::Matrix::Box
                 nil
               end,
         who: @object.user,
-        name: @object.unique_format_name.t,
+        # format_name, not unique_format_name -- the badge already
+        # shows the id.
+        name: @object.format_name.t,
         what: @object,
         where: nil,
         location: nil,
@@ -43,7 +45,7 @@ class Components::Matrix::Box
         id: @object.id,
         type: :observation,
         when: @object.when.web_date,
-        who: @object.user,
+        who_obs: @object,
         name: @object.format_name(@object.user).t.break_name.small_author,
         what: @object,
         where: @object.where,
@@ -71,7 +73,7 @@ class Components::Matrix::Box
         id: target&.id || @object.id,
         type: @object.target_type || :rss_log,
         when: target.respond_to?(:when) ? target.when&.web_date : nil,
-        who: target&.user,
+        **rss_log_who_data(target),
         what: target || @object,
         detail: rss_log_detail_tag(@object),
         time: @object.updated_at
@@ -81,6 +83,12 @@ class Components::Matrix::Box
       add_rss_log_location_data(data, target)
       add_rss_log_image_data(data, target)
       data
+    end
+
+    def rss_log_who_data(target)
+      return { who_obs: target } if target.is_a?(::Observation)
+
+      { who: target&.user }
     end
 
     # The [tag, args] pair identifying an RssLog's most recent update,

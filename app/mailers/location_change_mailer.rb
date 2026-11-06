@@ -44,10 +44,7 @@ class LocationChangeMailer < ApplicationMailer
   # editor/author, reporting "admin" means opting out via the "stop
   # sending" link actually stops these notifications, since they'd
   # otherwise still qualify via the narrower role), then editor, and
-  # lastly author. The pre-Phlex ERB template checked editor/author
-  # before admin — a longstanding bug never caught because ERB
-  # mailers had no real test coverage for this branch; fixed here
-  # now that it's testable.
+  # lastly author.
   def location_email_type(receiver, loc_change, desc_change)
     new_loc = loc_change.new_clone
     old_loc = loc_change.old_clone

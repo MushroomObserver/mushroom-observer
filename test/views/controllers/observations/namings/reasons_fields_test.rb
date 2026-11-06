@@ -31,7 +31,7 @@ module Views::Controllers::Observations::Namings
       end
 
       # Bootstrap collapse structure
-      assert_html(html, "div.collapse textarea")
+      assert_html(html, ".collapse textarea")
       assert_html(html, "label[data-toggle='collapse']")
       # Unchecked reason should be collapsed (has "collapse" but NOT "in")
       assert_html(html, "div#naming_reasons_1_notes.collapse:not(.in)")

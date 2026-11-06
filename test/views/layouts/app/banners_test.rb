@@ -34,8 +34,8 @@ module Views::Layouts::App
       banner = banners(:one)
       html = render_banners(banner: banner)
 
-      assert_html(html, "div.alert.message-banner[data-banner-target='banner']")
-      assert_html(html, ".alert div.banner-message",
+      assert_html(html, ".alert.message-banner[data-banner-target='banner']")
+      assert_html(html, ".alert .banner-message",
                   text: banner.message.t.as_displayed)
       assert_html(html,
                   "#dismiss-banner[data-banner-target='dismissButton']" \

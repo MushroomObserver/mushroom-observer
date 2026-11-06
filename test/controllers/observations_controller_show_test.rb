@@ -161,8 +161,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     obs = observations(:owner_accepts_general_questions)
     project = obs.projects[0]
     get(:show, params: { id: obs.id })
-    assert_select("#observation_projects",
-                  text: /#{Regexp.escape(project.title)}/)
+    assert_select_text_includes("#observation_projects", project.title)
   end
 
   def test_show_observation_change_thumbnail_size
@@ -177,28 +176,28 @@ class ObservationsControllerShowTest < FunctionalTestCase
   def test_show_observation_vague_location
     login
     obs1 = observations(:california_obs)
-    vague_re = /#{Regexp.escape(:show_observation_vague_location.l)}/
-    improve_re = /#{Regexp.escape(:show_observation_improve_location.l)}/
+    vague = :show_observation_vague_location.l
+    improve = :show_observation_improve_location.l
     get(:show, params: { id: obs1.id })
-    assert_select(".vague-location-notice", text: vague_re)
-    assert_select(".vague-location-notice", text: improve_re, count: 0)
+    assert_select_text_includes(".vague-location-notice", vague)
+    assert_select_text_includes(".vague-location-notice", improve, count: 0)
 
     # Make sure it suggests choosing a better location if owner is current user
     login("dick")
     get(:show, params: { id: obs1.id })
-    assert_select(".vague-location-notice", text: vague_re)
-    assert_select(".vague-location-notice", text: improve_re)
+    assert_select_text_includes(".vague-location-notice", vague)
+    assert_select_text_includes(".vague-location-notice", improve)
 
     # Make sure it doesn't show for observations with non-vague location
     obs2 = observations(:amateur_obs)
     get(:show, params: { id: obs2.id })
-    assert_select(".vague-location-notice", text: vague_re, count: 0)
+    assert_select_text_includes(".vague-location-notice", vague, count: 0)
   end
 
   def test_show_observation_hidden_gps
     obs = observations(:unknown_with_lat_lng)
     gps_re = /34\.1622|118\.3521/
-    hidden_re = /#{Regexp.escape(:show_observation_gps_hidden.l)}/
+    hidden = :show_observation_gps_hidden.l
 
     login
     get(:show, params: { id: obs.id })
@@ -211,7 +210,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login("mary")
     get(:show, params: { id: obs.id })
     assert_select(".obs-where-gps", text: gps_re)
-    assert_select(".obs-where-gps i", text: hidden_re)
+    assert_select_text_includes(".obs-where-gps i", hidden)
 
     # roy admins current_project (which contains this obs). Per #4439, a
     # project admin can reveal hidden GPS only when the owner is a
@@ -224,7 +223,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
                           user: obs.user, trust_level: "hidden_gps")
     get(:show, params: { id: obs.id })
     assert_select(".obs-where-gps", text: gps_re)
-    assert_select(".obs-where-gps i", text: hidden_re)
+    assert_select_text_includes(".obs-where-gps i", hidden)
   end
 
   def test_show_obs_view_stats
@@ -279,9 +278,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_select(
-      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/
-    )
+    assert_select_text_includes("a", :herbarium_record_collection.l)
     assert_select("a[href=?]", herbarium_record.mcp_url, true,
                   "Missing link to MyCoPortal record")
   end
@@ -301,9 +298,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_select(
-      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/
-    )
+    assert_select_text_includes("a", :herbarium_record_collection.l)
     assert_select("a[href=?]", herbarium_record.mcp_url, true,
                   "Missing link to MyCoPortal record")
   end
@@ -321,9 +316,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     login(user.login)
     get(:show, params: { id: obs.id })
 
-    assert_select(
-      "a", text: /#{Regexp.escape(:herbarium_record_collection.l)}/, count: 0
-    )
+    assert_select_text_includes("a", :herbarium_record_collection.l,
+                                count: 0)
     assert_select(
       "a[href=?]", herbarium_record.mcp_url, false,
       "Obs shouldn't link to MyCoPortal for Herbarium Record in a Herbarium " \

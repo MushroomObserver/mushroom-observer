@@ -14,10 +14,17 @@ module Views::Controllers::Projects
     prop :remove, _Boolean, default: false
     prop :add, _Boolean, default: false
     prop :violation_kinds, _Array(Symbol), default: -> { [] }
+    # Only the index page passes this -- nil here means "don't show a
+    # badge", not "zero observations".
+    prop :observation_count, _Nilable(Integer), default: nil
 
     def view_template
       render_info
-      render_manage_section if @remove || @add
+      if @remove || @add
+        render_manage_section
+      elsif @observation_count
+        CountBadge(count: @observation_count)
+      end
     end
 
     private
@@ -89,14 +96,13 @@ module Views::Controllers::Projects
 
     def render_remove_obs_button
       Button(
-        type: :put,
+        type: :delete,
         variant: :outline,
         icon: :remove,
-        icon_class: "text-danger",
         name: :remove.ti,
-        label: true,
+        show_label: :responsive,
         target: observation_project_path(
-          id: @observation.id, project_id: @project.id, commit: "remove"
+          id: @observation.id, project_id: @project.id
         ),
         confirm: :are_you_sure.l
       )
@@ -107,9 +113,9 @@ module Views::Controllers::Projects
         type: :put,
         name: :add.ti,
         icon: :attach,
-        label: true,
+        show_label: :responsive,
         target: observation_project_path(
-          id: @observation.id, project_id: @project.id, commit: "add"
+          id: @observation.id, project_id: @project.id
         )
       )
     end

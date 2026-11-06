@@ -14,49 +14,43 @@
 // file in mushroom_observer.scss.
 .has-id-indicator .mo-icon,
 .find-btn .mo-icon,
-.keep-btn .mo-icon,
-.edit-btn .mo-icon,
+.keep-edit-toggle .mo-icon,
 .create-button .mo-icon {
   width: 1.3em;
   height: 1.3em;
 }
 
-// autocompleter state - do we have a match?
-.has-id-indicator {
-  display: none;
-}
-.has-id {
-  .has-id-indicator {
-    // inline-flex + align-items: center, not inline-block -- the
-    // icon inside is shorter than the span's own content-driven
-    // height (an inline-block SVG taller than the surrounding text's
-    // line-height expands its line box), so even a parent row with
-    // its own align-items: center has nothing left to center against
-    // once this span already fills the row's full height. Centering
-    // the icon within its OWN wrapper first fixes that regardless of
-    // what the row around it does.
-    display: inline-flex;
+// autocompleter state (do we have a match?) is no longer handled
+// here -- the autocompleter controller's cssHasIdOrNo toggles
+// `.has-id-indicator`'s visibility directly. Unlike find-btn/
+// keep-edit-toggle/create-button (which toggle `d-none`),
+// has-id-indicator toggles `invisible` so its box stays in the
+// label row's layout, reserving space for whatever renders after it
+// (see autocompleter_field.rb#render_has_id_indicator). Its span also
+// carries `.inline-flex-center` (see _icons.scss) directly for the
+// icon centering, rather than relying on an implicit selector.
+
+// An autocompleter used as one item in a `.flex-bar` row (field +
+// submit button on one line, e.g. Components::Description::
+// NewDraftForm) needs its box to grow and fill the row -- its label
+// row (if any) and visible input still stack normally inside it, so
+// `.form-group` itself stays a plain block, not a flex container.
+// Scoped under `.flex-bar` so it doesn't change the stacked
+// label-row layout every other autocompleter uses.
+.flex-bar {
+  .autocompleter {
+    display: flex;
     align-items: center;
+    flex: 1;
   }
-}
 
-.keep-btn {
-  display: none;
-}
-.create {
-  .keep-btn {
-    display: inline-block;
+  .autocompleter .form-group {
+    flex: 1;
+    margin-bottom: 0;
   }
-}
 
-// initially we may not have id, but we also don't offer create
-// until they've typed something
-.create-button {
-  display: none;
-}
-.offer-create {
-  .create-button {
-    display: inline-block;
+  .autocompleter .form-control {
+    width: 100%;
   }
 }
 

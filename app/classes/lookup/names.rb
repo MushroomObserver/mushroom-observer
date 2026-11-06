@@ -98,6 +98,7 @@ class Lookup::Names < Lookup
   # NOTE: Name.parse_name returns a ParsedName instance, not an Name instance.
   # A ParsedName is a hash of segments and formatted strings of the name.
   def find_matching_names(val)
+    val = val.to_s.strip_textile_for_names
     parse = Name.parse_name(val)
     srch_str = if parse
                  parse.search_name

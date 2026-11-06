@@ -244,12 +244,12 @@ module ObservationsController::New
   end
 
   # Adding a field-slip project: always check it; for other already-
-  # checked projects, keep them checked UNLESS they have their own
+  # checked projects, keep them checked UNLESS they have a
   # field_slip_prefix (in which case adding a new field-slip project
-  # supersedes them — original ERB had this exclusive behavior).
+  # supersedes them).
   #
   # An explicit `?project=` wins over the project derived from the code
-  # prefix: `AddDispatchController` sends it precisely so the page the
+  # prefix: `ListAddDispatchController` sends it precisely so the page the
   # user pressed "Add" on can override the slip's own project.
   def add_field_slip_project(code)
     project = Project.safe_find(params[:project]) ||

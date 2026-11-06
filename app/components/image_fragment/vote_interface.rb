@@ -28,15 +28,13 @@ class Components::ImageFragment::VoteInterface < Components::Base
   prop :votes, _Boolean, default: true
   # Which surface this renders on -- governs styling class, tooltip
   # container, and id prefixing. `:matrix`/`:carousel` are both
-  # overlay-styled (`.vote-section`) and both point tooltips up; only
-  # the container differs -- `:carousel` targets the full-width
-  # `.carousel-caption` instead of `.vote-section` itself, since a
-  # carousel's `.vote-section` is narrower (auto-width, centered) and
-  # would crowd a wide tooltip at the edges. `:lightbox` gets
-  # `.vote-section-lightbox`, keeps the downward tooltip (nothing
-  # below it to collide with), and is the only context whose ids get
-  # `lightbox_`-prefixed, since it's the only one where a second live
-  # copy can coexist in the DOM.
+  # overlay-styled and point tooltips up; only the container differs
+  # -- `:carousel` targets `.carousel-caption` instead of
+  # `.vote-section`, since a carousel's `.vote-section` is narrower
+  # and would crowd a wide tooltip. `:lightbox` gets
+  # `.vote-section-lightbox`, keeps the downward tooltip, and is the
+  # only context whose ids get `lightbox_`-prefixed, since a second
+  # live copy can coexist in the DOM there.
   prop :context, _Union(:matrix, :carousel, :lightbox), default: :matrix
 
   # The root element's own id -- also what a lazy-loading Turbo Frame

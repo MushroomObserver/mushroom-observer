@@ -4,7 +4,7 @@
 # `Projects::AliasesController#{new,edit}`. Project aliases map
 # short names to Users or Locations for field slip forms.
 #
-# Uses a type-switch controller to show/hide the appropriate
+# Uses a collapse-switch controller to show/hide the appropriate
 # autocompleter based on the target_type select value.
 module Views::Controllers::Projects::Aliases
   class Form < ::Components::ApplicationForm
@@ -12,7 +12,7 @@ module Views::Controllers::Projects::Aliases
 
     def around_template
       @attributes[:data] ||= {}
-      @attributes[:data][:controller] = "type-switch"
+      @attributes[:data][:controller] = "collapse-switch"
       super
     end
 
@@ -47,8 +47,8 @@ module Views::Controllers::Projects::Aliases
         label: :project_alias_type,
         inline: true,
         data: {
-          type_switch_target: "select",
-          action: "type-switch#switch"
+          collapse_switch_target: "select",
+          action: "collapse-switch#switch"
         }
       )
     end
@@ -62,8 +62,8 @@ module Views::Controllers::Projects::Aliases
 
     def render_user_autocompleter
       Collapsible(expanded: panel_expanded?("user"),
-                  data: { type_switch_target: "panel",
-                          type_switch_type: "user" }) do
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: "user" }) do
         autocompleter_field(
           :term,
           type: :user,
@@ -77,8 +77,8 @@ module Views::Controllers::Projects::Aliases
 
     def render_location_autocompleter
       Collapsible(expanded: panel_expanded?("location"),
-                  data: { type_switch_target: "panel",
-                          type_switch_type: "location" }) do
+                  data: { collapse_switch_target: "panel",
+                          collapse_switch_type: "location" }) do
         autocompleter_field(
           :term,
           type: :location,

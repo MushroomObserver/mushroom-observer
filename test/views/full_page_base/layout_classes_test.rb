@@ -138,8 +138,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
 
   # ----- content_padding setter ----------------------------------
 
-  def test_content_padding_no_panels_writes_p_3
-    assert_equal("p-3", captured_slot(:content_padding) do
+  def test_content_padding_no_panels_writes_px_3
+    assert_equal("px-3", captured_slot(:content_padding) do
       content_padding(:no_panels)
     end)
   end
@@ -158,10 +158,10 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     end)
   end
 
-  def test_content_padding_default_for_new_action_is_p_3
+  def test_content_padding_default_for_new_action_is_px_3
     stub_action_name("new")
 
-    assert_equal("p-3", captured_slot(:content_padding) do
+    assert_equal("px-3", captured_slot(:content_padding) do
       content_padding
     end)
   end

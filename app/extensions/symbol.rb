@@ -65,6 +65,7 @@ class Symbol
         "BOGUS_DEFAULT")
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Wrapper on the old +localize+ method that:
   # 1. converts '\n' into newline throughout
   # 2. maps '[arg]' via optional hash you can pass in
@@ -133,6 +134,7 @@ class Symbol
   # *NOTE*: Square brackets are NOT allowed in the literals, even if quoted!
   # That would make the parsing non-trivial and potentially slow.
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def localize(args = {}, level = [])
     result = nil
     Language.note_usage_of_tag(self)
@@ -335,24 +337,14 @@ class Symbol
   TI_TURKIC_LOCALES = [:tr].freeze
 
   # Locales where translators predominantly write multi-word ALL-CAPS
-  # content as per-word title-case, confirmed against real translated
-  # content (#4844 deviation audit against a production checkpoint).
-  # Everyone here goes through `capitalize_each_word`, never Rails'
-  # `.titleize` -- `.titleize`'s word-start regex (`[a-z]`) is
-  # ASCII-only, so it silently fails to capitalize any word starting
-  # with an accented letter (í, ó, ą, ź, etc.), and its plural-acronym
-  # handling ("IDs") needs a dedicated inflection just to work at all.
-  # `capitalize_each_word` has neither problem: `String#capitalize` is
-  # Unicode-aware, and its own acronym handling (see below) needs no
-  # config. `en` was on `.titleize` until it wasn't -- once `at`/`by`/
-  # `or` were confirmed as English's own connector-word exceptions
-  # (same pattern as es/pt's "de"), there was no remaining reason for
-  # English to be the one locale on a different code path. `pl`/`ru`
-  # are deliberately NOT here: the same audit showed the opposite for
-  # them, dominated by sentence-case (67%/68% of their deviations),
-  # confirmed further by a same-tag cross-reference against `uk`
-  # showing zero counter-examples -- they're in the sentence-case
-  # default below instead.
+  # content as per-word title-case, confirmed against production
+  # translations. These go through `capitalize_each_word`, not Rails'
+  # `.titleize` -- `.titleize`'s word-start regex is ASCII-only, so it
+  # fails on accented letters, and its acronym handling needs a
+  # dedicated inflection. `capitalize_each_word`'s `String#capitalize`
+  # is Unicode-aware and needs no such config. `pl`/`ru` are
+  # deliberately excluded: the same audit showed them dominated by
+  # sentence-case instead.
   TI_WORD_CAPITALIZE_LOCALES = [:en, :es, :pt, :el, :uk, :be].freeze
 
   # Small connector words (articles, prepositions, conjunctions) that
@@ -388,17 +380,11 @@ class Symbol
     capitalize_first_letter_only(str)
   end
 
-  # Capitalizes just the first letter, leaving the rest of +str+
-  # exactly as stored -- unlike `String#capitalize`, which also
-  # downcases everything after the first letter. That downcasing
-  # destroys an embedded acronym the lowercase tag already stores
-  # correctly whenever it isn't the very first word (confirmed against
-  # real content: Polish's `icn_id` tag stores `"ICN Identyfikator"`,
-  # and plain `.capitalize` was flattening it to `"Icn identyfikator"`,
-  # lowercasing "ICN" and destroying "Identyfikator" along with it).
-  # Same "translators already store correct casing" premise as
-  # `TI_NO_OP_LOCALES` -- sentence-case only needs to add the one
-  # letter of capitalization the lowercase tag doesn't already have.
+  # Capitalizes just the first letter, leaving the rest of +str+ as
+  # stored -- unlike `String#capitalize`, which downcases everything
+  # after the first letter, destroying an embedded acronym the
+  # lowercase tag already stores correctly (e.g. Polish's "ICN
+  # Identyfikator" flattened to "Icn identyfikator").
   def self.capitalize_first_letter_only(str)
     return str if str.empty?
 
@@ -406,27 +392,14 @@ class Symbol
   end
 
   # Capitalizes every run of letters in +str+, treating apostrophes,
-  # hyphens, and parentheses as part of the word they're attached to
-  # (same word-boundary behavior `.titleize` has, including its
-  # French/Italian elision-prefix limitation -- which is why those two
-  # locales aren't routed through this method either). Parentheses
-  # matter for grammatical-gender suffix notation, e.g. Portuguese
-  # "editor(a)"/"editores(as)" -- without them, the lone letter inside
-  # the parens gets matched as its own "word" and capitalized
-  # ("Editor(A)"), which is wrong; keeping it attached to the
-  # preceding word means only the word's own first letter is ever
-  # touched. A word that already has an uppercase letter past its
-  # first position is left untouched instead of being run through
-  # `.capitalize` -- which
-  # would downcase everything after the first letter, destroying a
-  # real acronym the lowercase tag already stores correctly. Confirmed
-  # against real content across nearly every word-capitalize locale:
-  # fully-uppercase acronyms ("API key" -> ours was flattening this to
-  # "Api Key"; same for "ICN", "OK", "ДНК") and mixed-case ones too
-  # ("IDs" -> ours was flattening this to "Ids"). No acronym config
-  # needed -- if the lowercase tag already capitalized a letter that
-  # isn't the word's first, that's a deliberate signal to leave it
-  # alone. Applies `TI_LOWERCASE_WORDS` exceptions to any non-first
+  # hyphens, and parentheses as part of the word (matters for
+  # grammatical-gender notation, e.g. Portuguese "editor(a)" --
+  # without that, the lone letter inside parens gets capitalized as
+  # a separate word). A word with an uppercase letter past the first
+  # position is left untouched instead of run through `.capitalize`,
+  # which would destroy an acronym the lowercase tag already stores
+  # correctly (e.g. "API key" flattened to "Api Key", "IDs" to
+  # "Ids"). Applies `TI_LOWERCASE_WORDS` exceptions to any non-first
   # word.
   def self.capitalize_each_word(str, turkic: false)
     exceptions = TI_LOWERCASE_WORDS[I18n.locale.to_sym] || []

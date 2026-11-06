@@ -60,8 +60,9 @@ module Names
     end
 
     def initialize_tracking_form_edit
-      @note_template = @name_tracker.note_template
-      @name_tracker.note_template_enabled = @note_template.present?
+      saved_template = @name_tracker.note_template
+      @name_tracker.note_template_enabled = saved_template.present?
+      @note_template = saved_template.presence || default_note_template
       @interest = Interest.find_by(target: @name_tracker)
     end
 
@@ -108,7 +109,7 @@ module Names
                                       name_id: name_id,
                                       note_template: @note_template,
                                       approved: false)
-      @interest = Interest.new(user: @user, target: @name_tracker, state: 1)
+      @interest = Interest.new(user: @user, target: @name_tracker, state: true)
       flash_notice(
         :email_tracking_now_tracking.t(name: @name.display_name(@user))
       )

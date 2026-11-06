@@ -34,6 +34,9 @@ class Inat
       "#{SITE}/oauth/authorize?client_id=#{APP_ID}" \
       "&redirect_uri=#{REDIRECT_URI}&response_type=code".freeze
 
+    # Shape of an iNat login: lowercase letters, digits, "_" and "-".
+    LOGIN_PATTERN = /\A[a-z][a-z0-9_-]{0,39}\z/
+
     # The iNat API
     API_BASE = "https://api.inaturalist.org/v1"
 

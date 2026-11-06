@@ -14,7 +14,7 @@ module Views::Controllers::Images::EXIFGeocode
         html,
         'turbo-frame[data-geocode*=\'"lat":45.5231\']'
       )
-      assert_html(html, "span.exif_lat_wrapper:not(.d-none)")
+      assert_html(html, ".exif_lat_wrapper:not(.d-none)")
       assert_html(html, "button.use_exif_btn:not(.d-none)")
       # data-exif-date must be JSON matching form-exif_controller.js's
       # SimpleDate shape ({day:, month:, year:}), not the display
@@ -34,7 +34,7 @@ module Views::Controllers::Images::EXIFGeocode
                          date_differs: true)
 
       assert_html(html, "turbo-frame#camera_info_exif_7[data-geocode='']")
-      assert_html(html, "span.exif_lat_wrapper.d-none")
+      assert_html(html, ".exif_lat_wrapper.d-none")
       assert_html(html, "button.use_exif_btn:not(.d-none)")
     end
 

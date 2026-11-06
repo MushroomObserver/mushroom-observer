@@ -31,6 +31,7 @@
 #  ---
 #  nowrap::             Surround HTML string inside '<nowrap>' span.
 #  strip_squeeze::      Strip and squeeze spaces.
+#  strip_textile_for_names:: Remove the Textile markup Names use.
 #  rand_char::          Pick a single random character from the string.
 #  dealphabetize::      Reverse Integer#alphabetize.
 #  is_ascii_character?:: Does string start with ASCII character?
@@ -388,6 +389,15 @@ class String
   # an HTML tag.
   HTML_TAG_PATTERN = %r{</*[A-Za-z][^>]*>}
 
+  # `<!-- ... -->` -- not matched by HTML_TAG_PATTERN, since a comment's
+  # `<!--` isn't followed by a letter. A Phlex component's rendered
+  # output can carry one of these (e.g. a dev-mode source annotation),
+  # and strip_html's callers (title_tag_contents's document_title,
+  # html_to_ascii's plain-text output) need the comment text gone too,
+  # not just hidden -- it isn't a tag, so HTML_TAG_PATTERN alone lets
+  # it through as visible text.
+  HTML_COMMENT_PATTERN = /<!--.*?-->/m
+
   ### Textile-related methods ###
 
   def t(sanitize = true)
@@ -460,15 +470,37 @@ class String
       gsub("\n", '\\n')
   end
 
-  # Remove HTML tags (not entities) from string.  Used to make sure title is
-  # safe for HTML header field.
+  # Remove HTML tags and comments (not entities) from string.  Used to
+  # make sure title is safe for HTML header field.
   def strip_html
-    gsub(HTML_TAG_PATTERN, "")
+    gsub_until_stable(HTML_COMMENT_PATTERN, HTML_TAG_PATTERN)
   end
 
-  # Remove hyperlinks from an HTML string.
+  # Repeatedly removes matches of each pattern until no pattern
+  # matches anything, instead of trusting one pass of each. A single
+  # pass can leave a dangerous substring behind when removing one
+  # match exposes a new one that wasn't contiguous in the original
+  # string -- e.g. "<scr<script>ipt>" loses only the inner match in
+  # one pass, reassembling "<script>" from what's left on either
+  # side (CodeQL: incomplete multi-character sanitization).
+  def gsub_until_stable(*patterns)
+    result = to_str
+    loop do
+      stripped = patterns.reduce(result) do |str, pattern|
+        str.gsub(pattern, "")
+      end
+      return stripped if stripped == result
+
+      result = stripped
+    end
+  end
+
+  # Remove hyperlinks from an HTML string. Removing tags from safe HTML
+  # leaves safe HTML, so the result keeps the receiver's html_safe flag,
+  # which gsub alone drops.
   def strip_links
-    gsub(%r{</?a.*?>}, "")
+    result = to_str.gsub(%r{</?a.*?>}, "")
+    html_safe? ? ActiveSupport::SafeBuffer.new(result) : result
   end
 
   # Truncate an HTML string, being careful to close off any open formatting
@@ -517,7 +549,8 @@ class String
   # problem, but this seems to work pretty well on the output of RedCloth at
   # least.
   def html_to_ascii
-    gsub(/\s*\n\s*/, " "). # remove all newlines first
+    gsub_until_stable(HTML_COMMENT_PATTERN). # remove comments before tags
+      gsub(/\s*\n\s*/, " "). # remove all newlines first
       gsub(%r{</?div[^>]*>}, ""). # divs are messing things up, too
       gsub(%r{<br */> *}, "\n"). # put \n after every line break
       gsub(%r{</li> *}, "\n"). # put \n after every list item
@@ -526,7 +559,11 @@ class String
       gsub(%r{</td> *}, "\t"). # put tabs between table columns
       gsub(/[ \t]+(\n|$)/, '\\1'). # remove superfluous trailing whitespace
       gsub(/\n+\Z/, ""). # remove superfluous newlines at end
-      gsub(HTML_TAG_PATTERN, ""). # remove all <tags>
+      # Combined, not just HTML_TAG_PATTERN alone -- removing a tag
+      # here can expose a comment marker that survived the earlier
+      # comment pass untouched (it wasn't a complete comment until
+      # this step's tag removal revealed it).
+      gsub_until_stable(HTML_COMMENT_PATTERN, HTML_TAG_PATTERN).
       gsub(/^ +|[ \t]+$/, ""). # remove leading/trailing sp on each line
       gsub_html_special_chars # convert &xxx; and &#nnn; to ascii
   end
@@ -593,6 +630,7 @@ class String
     insert(ind + offset, '<small class="text-nowrap">'.html_safe)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Strip leading and trailing spaces, and squeeze embedded spaces.
   # Differs from Rails "squish" which works on all whitespace
   #
@@ -609,6 +647,7 @@ class String
   #
   #   string.strip_squeeze == "This type of string."
   #
+  # rubocop:enable MO/NoLongCommentBlock
   def strip_squeeze
     strip.squeeze(" ")
   end
@@ -620,6 +659,12 @@ class String
   # This gets rid of them both. Turns all newlines into single spaces.
   def wring_out_textile
     gsub("\r\n", " ").squeeze(" ")
+  end
+
+  # Remove whatever Textile markup Name display strings carry, so a name
+  # copied from a rendered page parses: "**__Amanita__** Pers."
+  def strip_textile_for_names
+    gsub(/\*\*|__/, "")
   end
 
   # Generate a string of random characters of length +len+.  By default it

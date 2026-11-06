@@ -84,8 +84,7 @@ module Names
       return if performed?
 
       render(Views::Controllers::Names::Descriptions::Show.new(
-               description: @description, user: @user,
-               versions: @versions, projects: @projects
+               description: @description, user: @user, versions: @versions
              ))
     end
 
@@ -105,7 +104,6 @@ module Names
     def gather_show_ivars
       update_view_stats(@description)
       @canonical_url = description_canonical_url(@description)
-      @projects = users_projects_which_dont_have_desc_of_this(@name)
       @versions = @description.versions.to_a
       @comments = @description.comments&.sort_by(&:created_at)&.reverse
     end
@@ -128,9 +126,13 @@ module Names
       initialize_description_source
       return if performed?
 
+      @project_chosen = @description.project.present?
+      set_project_ivar
+
       render(Views::Controllers::Names::Descriptions::New.new(
                name: @name, description: @description,
-               user: @user, licenses: @licenses
+               user: @user, licenses: @licenses, project: @project,
+               project_chosen: @project_chosen
              ))
     end
 
@@ -178,10 +180,13 @@ module Names
       redirect_to(@description.show_link_args)
     end
 
-    # called by :create. Make this the "default" description
-    # if there isn't one and this is publicly readable and writable.
+    # called by :create. Make this the "default" description if there
+    # isn't one, this is publicly readable and writable, and it has
+    # content -- a blank submission (issue #5585) shouldn't become a
+    # Name's permanent default.
     def set_default_description_if_public
-      return unless !@name.description && @description.fully_public?
+      return unless !@name.description && @description.fully_public? &&
+                    @description.notes?
 
       @name.description = @description
     end

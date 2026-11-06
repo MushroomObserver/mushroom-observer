@@ -2,8 +2,7 @@
 
 # The project-alias index table. Rendered from
 # `Views::Controllers::Projects::Aliases::Index` and from the
-# turbo_stream re-render in `_target_update.erb` after a CRUD on
-# any one alias.
+# turbo_stream re-render after a CRUD on any one alias.
 #
 # Composes via `Components::Table` in column mode; each column block
 # emits the cell's content via Phlex DSL.
@@ -52,12 +51,13 @@ module Views::Controllers::Projects::Aliases
 
     def render_actions_cell(alias_)
       Button(
-        type: :edit,
+        type: :modal,
         target: edit_project_alias_path(
           project_id: alias_.project_id, id: alias_.id
         ),
+        modal_id: "project_alias_#{alias_.id}",
         name: :edit_object.t(type: :project_alias),
-        variant: :strip
+        icon: :edit, variant: :strip
       )
       span(class: "mx-2")
       Button(

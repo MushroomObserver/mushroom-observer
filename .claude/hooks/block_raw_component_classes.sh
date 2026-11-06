@@ -75,6 +75,8 @@ is_exempt_file() {
     app/components/accordion.rb|\
     app/components/application_form/input_group_addon.rb|\
     app/components/application_form/radio_field.rb|\
+    app/components/application_form/button_style_checkbox.rb|\
+    app/components/application_form/button_style_radio.rb|\
     app/components/carousel/controls.rb|\
     app/views/controllers/observations/namings/reasons_fields.rb) return 0 ;;
     *) return 1 ;;
@@ -124,6 +126,8 @@ case "$TOOL" in
       ':(exclude)app/components/accordion.rb' \
       ':(exclude)app/components/application_form/input_group_addon.rb' \
       ':(exclude)app/components/application_form/radio_field.rb' \
+      ':(exclude)app/components/application_form/button_style_checkbox.rb' \
+      ':(exclude)app/components/application_form/button_style_radio.rb' \
       ':(exclude)app/components/carousel/controls.rb' \
       ':(exclude)app/views/controllers/observations/namings/reasons_fields.rb' \
       | grep '^+[^+]' \

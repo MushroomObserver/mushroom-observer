@@ -29,37 +29,27 @@
 #     identify: true
 #   ))
 class Components::Matrix::Table < Components::Base
-  # Bump when the rendered MatrixBox HTML changes (or any
-  # observable behavior the cached fragment captures). This is the
-  # invalidation lever for cached `MatrixBox` fragments — both the
-  # write site (`render_cached_boxes`) and the controller's
-  # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
-  # read this through `cache_key_for`. Phlex's automatic class +
-  # method + line digest doesn't survive into the controller's
-  # check, so we encode the version explicitly.
-  # v2: image URLs in the fragment now carry a cache-busting
-  # ?<updated_at> token (#4808) -- fragments cached under v1 embed
-  # tokenless URLs and must be regenerated.
-  CACHE_VERSION = "v2"
+  # Bump when the rendered MatrixBox HTML changes. The invalidation
+  # lever for cached `MatrixBox` fragments -- both the write site
+  # (`render_cached_boxes`) and the controller's pre-check
+  # (`ApplicationController::Indexes#uncached_object_ids`) read this
+  # through `cache_key_for`, since Phlex's automatic digest doesn't
+  # survive into the controller's check.
+  # v2: image URLs in the fragment carry a cache-busting
+  # ?<updated_at> token -- fragments cached under v1 are stale.
+  # v3: observation boxes name the collector, not the entering user.
+  CACHE_VERSION = "v3"
 
   # The cache key MatrixBox fragments are stored under, used by both
-  # the write inside this component and the controller's batched
-  # `read_multi` pre-check in
-  # `ApplicationController::Indexes#uncached_object_ids`. Keeping
-  # both ends on one method ensures they agree on the key shape.
+  # the write here and the controller's batched `read_multi`
+  # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
+  # -- one method keeps both ends agreeing on the key shape.
   #
-  # Folds in the thumb image record itself so the expanded key tracks
-  # the thumb's updated_at (cache_versioning is off in MO, so an AR
-  # object in the key array expands via cache_key, which embeds its
-  # updated_at timestamp). The rendered HTML embeds the thumb's URL,
-  # tokened on that same updated_at (#4808), so the fragment must bust
-  # whenever it changes. `object` alone isn't enough:
-  # Verifier#mark_transferred touch_all's related Observations when a
-  # transfer completes, but RssLogs are never touched, so an RssLog
-  # box cached before a rotate would otherwise serve the pre-rotate
-  # URL token indefinitely. (An `Image` object IS its own thumb and
-  # already keys on its own timestamp via `object` --
-  # `try(:thumb_image)` is nil there, which is fine.)
+  # Folds in the thumb image record so the key tracks its
+  # updated_at. `object` alone isn't enough: `Verifier#
+  # mark_transferred` touch_all's related Observations on transfer,
+  # but RssLogs are not touched, so a box cached before a rotate
+  # would serve the stale URL token indefinitely.
   def self.cache_key_for(object, locale)
     ["MatrixBox", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end
@@ -89,6 +79,8 @@ class Components::Matrix::Table < Components::Base
   # Project context — passed through to each MatrixBox so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
+  # Passed through to each MatrixBox -- see the prop comment there.
+  prop :suppress_occurrence_link, _Boolean, default: false
 
   def view_template(&block)
     Row(
@@ -135,7 +127,8 @@ class Components::Matrix::Table < Components::Base
       else
         render(Components::Matrix::Box.new(
                  user: @user, object: object,
-                 identify: @identify, project: @project
+                 identify: @identify, project: @project,
+                 suppress_occurrence_link: @suppress_occurrence_link
                ))
       end
     end
@@ -170,7 +163,7 @@ class Components::Matrix::Table < Components::Base
   # diverge from the cached non-admin / non-identify markup, so the
   # cache must be bypassed.
   def cacheable_render?(object)
-    !@identify && !project_admin_view? &&
+    !@identify && !project_admin_view? && !@suppress_occurrence_link &&
       self.class.should_cache_object?(object)
   end
 
@@ -182,7 +175,8 @@ class Components::Matrix::Table < Components::Base
     @objects.each do |object|
       render(Components::Matrix::Box.new(
                user: @user, object: object,
-               identify: @identify, project: @project
+               identify: @identify, project: @project,
+               suppress_occurrence_link: @suppress_occurrence_link
              ))
     end
   end

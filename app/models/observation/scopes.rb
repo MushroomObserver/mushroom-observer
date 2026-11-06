@@ -93,6 +93,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       end
     }
 
+    # rubocop:disable MO/NoLongCommentBlock
     # Filters for confidence on vote_cache scale -3.0..3.0
     # To translate percentage to vote_cache: (val.to_f / (100 / 3))
     #
@@ -107,6 +108,7 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # from max:
     # - "Promising" to "I'd Call It That": vote_cache > 1.0 AND <= 3.0
     # - "Not Likely" to "Promising": vote_cache >= -2.0 AND <= 2.0
+    # rubocop:enable MO/NoLongCommentBlock
     scope :confidence, lambda { |min, max = nil|
       min, max = min if min.is_a?(Array)
 
@@ -579,6 +581,31 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       )
     }
 
+    # Drop a non-primary member only when its primary is in the same
+    # result set -- dropping it unconditionally hides a member from
+    # every list its primary can't appear in (a user's observations
+    # list, an advanced search by user, an import's results). The
+    # subquery is first narrowed to primaries of occurrences holding
+    # a non-primary member (~1,852 occurrences vs. 643,000
+    # observations); asking the filters about every row instead
+    # costs a flat ~260ms whenever the query reads past a LIMIT.
+    scope :exclude_non_primary_when_primary_present, lambda {
+      members = Observation.arel_table.alias("members")
+      contested = Occurrence.joins(
+        Occurrence.arel_table.join(members).
+          on(members[:occurrence_id].eq(Occurrence[:id]).
+             and(members[:id].not_eq(Occurrence[:primary_observation_id]))).
+          join_sources
+      ).distinct.select(:primary_observation_id)
+
+      present = where(id: contested).select(:id)
+      left_outer_joins(:occurrence).where(
+        Observation[:occurrence_id].eq(nil).
+          or(Occurrence[:primary_observation_id].eq(Observation[:id])).
+          or(Occurrence[:primary_observation_id].not_in(present.arel))
+      )
+    }
+
     scope :has_field_slip, lambda { |bool = true|
       if bool
         joins(:occurrence).where.not(occurrences: { field_slip_id: nil })
@@ -631,6 +658,44 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
       where(id: project_violation_ids(project)).includes(:name, :location).
         order_by(:name)
+    }
+    # Observations matching the given project's target names/
+    # locations, within its date range and bbox when it has one --
+    # regardless of whether they're already in the project. See the
+    # project_candidate_* class methods below for the per-kind logic.
+    scope :project_candidates, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      name_ids = project_candidate_name_ids(project)
+      loc_ids = project_candidate_location_ids(project)
+      return none if name_ids.nil? && loc_ids.nil?
+
+      scope = if name_ids && loc_ids
+                where(id: name_ids).where(id: loc_ids)
+              elsif name_ids
+                where(id: name_ids)
+              else
+                where(id: loc_ids)
+              end
+      scope = project_constrain_to_date_range(scope, project)
+      project_constrain_to_bbox(scope, project).order(created_at: :desc)
+    }
+    # project_candidates, minus observations already in the project
+    # or already excluded from it. Backs the project Updates tab's
+    # default list and its badge count.
+    scope :project_new_candidates, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      project_candidates(project).
+        where.not(id: project.observations.select(:id)).
+        where.not(id: project_excluded(project).select(:id))
+    }
+    # Observations the given project's admin has excluded from its
+    # Updates tab candidate list. Read-only; use
+    # Project#exclude_observation/#include_observation! to mutate.
+    scope :project_excluded, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      joins(:project_excluded_observations).
+        where(project_excluded_observations: { project: project }).
+        order(created_at: :desc)
     }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
@@ -794,19 +859,13 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
 
     # ----- helpers for the project_violations scope -----
     #
-    # Each helper runs a separate query plucking the ids of
-    # observations violating one constraint kind. project_violation_ids
-    # merges the four id sets in Ruby, rather than combining four
-    # relations into one query with Relation#or. Relation#or dedups
-    # the two sides' where clauses by comparing Arel nodes with ==,
-    # and for two predicates that are structurally similar but
-    # semantically different (see project_target_location_violation_ids)
-    # that == is wrong, so Relation#or can silently drop one of them.
-    #
-    # Public so Project#count_violations can take just the Set's size,
-    # skipping the includes/order_by/distinct project_violations adds
-    # for display -- a count doesn't need the observations sorted or
-    # their name/location eager-loaded.
+    # Each helper plucks the ids violating one constraint kind;
+    # project_violation_ids merges the four id sets in Ruby rather
+    # than one query with Relation#or, since Relation#or dedups
+    # where clauses by comparing Arel nodes with ==, which is wrong
+    # for structurally similar but semantically different predicates
+    # (see project_target_location_violation_ids). Public so
+    # Project#count_violations can take just the Set's size.
     def project_violation_ids(project)
       ids = Set.new
       ids.merge(project_date_violation_ids(project))
@@ -899,6 +958,52 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     def no_location_violation_ids(base, project)
       base.where(location_id: nil).
         where.not(project.where_suffix_conditions).ids
+    end
+
+    # ----- helpers for the project_candidates/project_new_candidates
+    # scopes -----
+
+    def project_candidate_name_ids(project)
+      return unless project.target_names.any?
+
+      names(lookup: project.target_name_ids, include_synonyms: true,
+            include_subtaxa: true).select(:id)
+    end
+
+    # `Observation[:id]`, not a bare `:id` -- after the `joins(:location)`
+    # below, a plain `select(:id)` is ambiguous between
+    # `observations.id` and `locations.id`.
+    def project_candidate_location_ids(project)
+      return unless project.target_locations.any?
+
+      scope = joins(:location).where(project.location_suffix_conditions)
+      scope = scope.merge(in_box(**project.location.bounding_box)) if
+        project.location
+      scope.select(Observation[:id])
+    end
+
+    def project_constrain_to_date_range(scope, project)
+      start_date = project.start_date
+      end_date = project.end_date
+      return scope if start_date.nil? && end_date.nil?
+      return scope.where(Observation[:when].lteq(end_date)) if start_date.nil?
+      return scope.where(Observation[:when].gteq(start_date)) if end_date.nil?
+
+      scope.where(Observation[:when].between(start_date..end_date))
+    end
+
+    def project_constrain_to_bbox(scope, project)
+      location = project.location
+      return scope if location.nil?
+
+      box_kwargs = location.bounding_box
+      m_box = Mappable::Box.new(**box_kwargs)
+      return scope unless m_box.valid?
+
+      gps_in_ids = gps_in_box(m_box).select(:id)
+      no_gps_in_ids = where(lat: nil).joins(:location).
+                      merge(Location.in_box(**box_kwargs)).select(:id)
+      scope.where(id: gps_in_ids).or(scope.where(id: no_gps_in_ids))
     end
   end
 end

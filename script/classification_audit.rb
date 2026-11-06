@@ -297,26 +297,13 @@ def apply_winning_classification(members, winning_cls, cls_set, syn_id,
   stale.length
 end
 
-# Phase 3 of the classification roadmap (#4163, #4166): switch from
-# `update_all` (bypasses `acts_as_versioned`) to per-row save so each
-# affected Name gets a `name_versions` row. Phase 2 of the audit can
-# change a Name's classification without any parent edit to fall back
-# on, so the smart version browser can't infer historical state from
-# ancestors — we have to record it directly.
-#
-# `validate: false` — some legacy Name rows have `author` strings that
-# fail current format rules (grandfathered in from before the
-# validation tightened). We're only touching `classification`; failing
-# the whole batch on an unrelated column would block legitimate audit
-# work.
-#
-# `Name#notify_users` skips classification-only saves at the model
-# level, so per-row save here doesn't generate mail (matches the
-# rest of the propagate / inherit / manual-edit paths).
-#
-# Volume is bounded (~7-10K rows per weekly run on production-scale
-# data), so the slower per-row path is fine. Description and
-# observation cache writes went away with the column itself in #4165.
+# Per-row save, not `update_all`, so each affected Name gets a
+# `name_versions` row -- the version browser can't otherwise infer
+# this classification change from a parent edit. `validate: false`
+# since some legacy Name rows have `author` strings that fail
+# current format rules, and failing the batch on that unrelated
+# column would block legitimate audit work. `Name#notify_users`
+# skips classification-only saves, so this doesn't generate mail.
 def sync_synonym_classification(name_ids, classification)
   webmaster = User.find(WEBMASTER_ID)
   Name.transaction do

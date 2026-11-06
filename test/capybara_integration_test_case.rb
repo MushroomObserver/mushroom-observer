@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+# rubocop:disable MO/NoLongCommentBlock
 #  = Capybara Integration Test Case
 #
 #  The test case class that all Capybara integration tests currently derive
@@ -61,6 +62,7 @@
 # -- AN 10/2022
 #
 ################################################################################
+# rubocop:enable MO/NoLongCommentBlock
 
 # Allow simuluation of user-browser interaction with capybara
 require("capybara/rails")

@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
 # Index-action filter caption strip, rendered between the top nav
-# and the page body on index actions (and on `maps` show). Replaces
-# `_index_bar.erb`. Reads two content_for slots:
+# and the page body on index actions (and on `maps` show,
+# `observations/downloads#new`). Reads two
+# content_for slots:
 #
 #   - `:filters`     — set by `Views::FullPageBase#add_query_filters`,
 #                      the long filter-caption HTML

@@ -29,7 +29,7 @@ class Views::Controllers::Observations::Show::Namings::RowsTest <
     html = render_rows
     expected = @consensus.merged_namings.count
 
-    assert_html(html, "div.list-group-item:not(.none-yet)",
+    assert_html(html, ".list-group-item:not(.none-yet)",
                 count: expected)
   end
 
@@ -39,7 +39,7 @@ class Views::Controllers::Observations::Show::Namings::RowsTest <
     html = render_rows
     first_naming = @consensus.merged_namings.first
 
-    assert_html(html, "div.list-group-item " \
+    assert_html(html, ".list-group-item " \
                       "div#observation_naming_#{first_naming.id}")
   end
 
@@ -50,7 +50,7 @@ class Views::Controllers::Observations::Show::Namings::RowsTest <
     # ships but stays hidden.
     html = render_rows
 
-    assert_html(html, "div.list-group-item.none-yet")
+    assert_html(html, ".list-group-item.none-yet")
     assert_includes(html, :show_namings_no_names_yet.t)
   end
 
@@ -60,9 +60,9 @@ class Views::Controllers::Observations::Show::Namings::RowsTest <
     @consensus.stub(:merged_namings, []) do
       html = render_rows
 
-      assert_html(html, "div.list-group-item",
+      assert_html(html, ".list-group-item",
                   count: 1)
-      assert_html(html, "div.list-group-item.none-yet")
+      assert_html(html, ".list-group-item.none-yet")
     end
   end
 

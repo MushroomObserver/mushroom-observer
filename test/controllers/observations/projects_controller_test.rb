@@ -31,7 +31,7 @@ module Observations
       proj = projects(:eol_project)
       obs = observations(:coprinus_comatus_obs)
       assert_not(proj.observations.member?(obs))
-      params = { id: obs.id, project_id: proj.id, commit: "add" }
+      params = { id: obs.id, project_id: proj.id }
 
       login("rolf")
       put(:update, params: params)
@@ -44,28 +44,12 @@ module Observations
       proj = projects(:eol_project)
       obs = observations(:coprinus_comatus_obs)
       assert_not(proj.observations.member?(obs))
-      params = { id: obs.id, project_id: proj.id, commit: "add" }
+      params = { id: obs.id, project_id: proj.id }
 
       login("dick")
       put(:update, params: params)
 
       assert_redirected_to(project_path(proj.id))
-      assert_not(proj.reload.observations.member?(obs))
-    end
-
-    def test_add_observation_to_project_invalid_mode
-      proj = projects(:eol_project)
-      obs = observations(:coprinus_comatus_obs)
-      assert_not(proj.observations.member?(obs))
-      params = { id: obs.id, project_id: proj.id, commit: "invalid_param" }
-
-      login("rolf")
-      put(:update, params: params)
-
-      assert_flash_error
-      # Same-URL re-render needs non-2xx or Turbo hangs (see
-      # .claude/rules/turbo_submit_forms.md).
-      assert_unprocessable
       assert_not(proj.reload.observations.member?(obs))
     end
 
@@ -73,16 +57,16 @@ module Observations
       proj = projects(:eol_project)
       obs = observations(:coprinus_comatus_obs)
       proj.add_observation(obs)
-      params = { id: obs.id, project_id: proj.id, commit: "remove" }
+      params = { id: obs.id, project_id: proj.id }
 
       login("dick")
-      put(:update, params: params)
+      delete(:destroy, params: params)
       assert_redirected_to(project_path(proj.id))
       assert(proj.reload.observations.member?(obs),
              "Non-member should not be able to remove the observation")
 
       login("rolf")
-      put(:update, params: params)
+      delete(:destroy, params: params)
       assert_redirected_to(project_path(proj.id))
       assert_not(proj.reload.observations.member?(obs))
     end
@@ -102,10 +86,10 @@ module Observations
         o.update!(occurrence: occ)
         proj.add_observation(o)
       end
-      params = { id: obs.id, project_id: proj.id, commit: "remove" }
+      params = { id: obs.id, project_id: proj.id }
 
       login("mary")
-      put(:update, params: params)
+      delete(:destroy, params: params)
 
       assert_redirected_to(project_path(proj.id))
       assert_not_includes(proj.reload.observations, obs)
@@ -116,16 +100,34 @@ module Observations
                       ).as_displayed)
     end
 
-    def test_add_observation_to_project_invalid_mode_escapes_commit_value
-      proj = projects(:eol_project)
+    # The sorter dropdown's links carry the chosen order via the q[]
+    # round trip (`Views::Layouts::Header::Sorter#sort_tuple`), not a
+    # flat `by` param -- confirms the edit page picks it up.
+    def test_edit_applies_sort_order_from_q_param
       obs = observations(:coprinus_comatus_obs)
-      params = { id: obs.id, project_id: proj.id,
-                 commit: "<script>alert(1)</script>" }
-
       login("rolf")
-      put(:update, params: params)
 
-      assert_not_includes(get_last_flash.to_s, "<script>")
+      get(:edit, params: {
+            id: obs.id,
+            q: { model: "Project", order_by: "created_at" }
+          })
+
+      assert_response(:success)
+      assert_equal("created_at", assigns(:all_projects).params[:order_by])
+    end
+
+    def test_edit_invalid_sort_order_falls_back_to_default_order
+      obs = observations(:coprinus_comatus_obs)
+      login("rolf")
+
+      get(:edit, params: {
+            id: obs.id,
+            q: { model: "Project", order_by: "totally_bogus_sort_key" }
+          })
+
+      assert_response(:success)
+      all_projects = assigns(:all_projects)
+      assert_equal("name", all_projects.params[:order_by])
     end
 
     def test_edit_renders_add_and_remove_forms
@@ -140,14 +142,12 @@ module Observations
 
       assert_select(
         "form[action=?]",
-        observation_project_path(id: obs.id, project_id: member_proj.id,
-                                 commit: "remove"),
+        observation_project_path(id: obs.id, project_id: member_proj.id),
         count: 1
       )
       assert_select(
         "form[action=?]",
-        observation_project_path(id: obs.id, project_id: other_proj.id,
-                                 commit: "add"),
+        observation_project_path(id: obs.id, project_id: other_proj.id),
         count: 1
       )
     end

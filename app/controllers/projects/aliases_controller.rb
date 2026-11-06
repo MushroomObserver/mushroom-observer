@@ -5,12 +5,9 @@ module Projects
     before_action :login_required
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
 
-    # Aliases lives under the project Admin tab now (issue #4148).
-    def active_project_tab
-      "admin"
-    end
-    helper_method :active_project_tab
-
+    # NOTE: this loads every alias unpaginated. If a project's alias
+    # list grows large enough to matter, give ProjectAlias a Query
+    # class (query_attr(:project, Project)) and paginate through it.
     def index
       @project = Project.find(params[:project_id])
       @project_aliases = ProjectAlias.index_includes.
@@ -149,9 +146,7 @@ module Projects
     end
 
     # Replaces the target widget and the aliases table, then closes
-    # and removes the modal. Inlined from the deleted
-    # `projects/aliases/_target_update.erb` partial. Emits four
-    # turbo_stream actions.
+    # and removes the modal. Emits four turbo_stream actions.
     def render_project_alias_target_change(project)
       project_aliases = project.aliases.includes(:target).order(name: :asc).
                         to_a

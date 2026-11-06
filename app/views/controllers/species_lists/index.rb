@@ -9,6 +9,7 @@ module Views::Controllers::SpeciesLists
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::SpeciesList)
     prop :project, _Nilable(::Project), default: nil
+    prop :observation_counts, _Hash(Integer, Integer), default: -> { {} }
 
     def view_template
       add_project_banner(@project) if @project
@@ -35,8 +36,10 @@ module Views::Controllers::SpeciesLists
           list.item(
             class: "d-flex justify-content-between align-items-start"
           ) do
+            count = @observation_counts[species_list.id].to_i
             render(Listing.new(
-                     species_list: species_list, project: @project
+                     species_list: species_list, project: @project,
+                     observation_count: count
                    ))
           end
         end

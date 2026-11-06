@@ -203,6 +203,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
   # NEW
   #
   def test_new_herbarium_record
+    get(:new)
+    get(:new, params: { observation_id: "bogus" })
+
     obs_id = observations(:unknown_with_no_naming).id
     get(:new, params: { observation_id: obs_id })
     assert_response(:redirect)
@@ -498,11 +501,11 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
                           obs.user.preferred_herbarium.autocomplete_name }
     }
 
-    # Prove that query params are added to form action.
+    # Prove the observation is carried as a hidden form field.
     login(obs.user.login)
     get(:new, params:)
     assert_select(
-      "form[action*='records?observation_id=#{obs.id}']"
+      "input[name='observation_id'][value='#{obs.id}']"
     )
     assert_session_query_record_is_correct
 
@@ -531,8 +534,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
          params: params.deep_merge(herbarium_record: { modal: "true" }),
          format: :turbo_stream)
 
-    # _section_update.erb deleted; controllers now render two
-    # turbo_stream actions inline (replace + page_flash update).
+    # Controllers render two turbo_stream actions inline (replace +
+    # page_flash update).
     assert_select("turbo-stream[target='observation_herbarium_records']")
     assert_select("turbo-stream[target='page_flash']")
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)

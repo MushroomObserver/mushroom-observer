@@ -20,10 +20,10 @@ module Form
       def test_renders_row_with_image_and_form_columns
         html = render_item
 
-        assert_html(html, "div.row > div.col-xs-12.col-md-6 > " \
-                          "div.image-position > img")
-        assert_html(html, "div.row > div.col-xs-12.col-md-6 > " \
-                          "div.form-panel")
+        assert_html(html, ".row > .col-xs-12.col-md-6 > " \
+                          ".image-position > img")
+        assert_html(html, ".row > .col-xs-12.col-md-6 > " \
+                          ".form-panel")
       end
 
       # Sibling slides (cross-observation thumbnail reuse) render the
@@ -34,7 +34,7 @@ module Form
       def test_sibling_renders_readonly_panel_suppresses_edit_fields
         html = render_item(sibling: true)
 
-        assert_html(html, "div.form-panel #camera_info_#{@image.id}")
+        assert_html(html, ".form-panel #camera_info_#{@image.id}")
         assert_no_html(
           html, "textarea[name='observation[good_image][#{@image.id}][notes]']"
         )
@@ -67,7 +67,7 @@ module Form
       def test_upload_renders_status_overlay
         html = render_item(upload: true)
 
-        assert_html(html, "div.upload-status-overlay.d-none" \
+        assert_html(html, ".upload-status-overlay.d-none" \
                           "[data-form-images-target='uploadStatus']")
       end
 

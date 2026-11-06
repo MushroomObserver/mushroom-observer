@@ -3,6 +3,8 @@
 # Notify observation owner when their observation is added to or
 # removed from an occurrence.
 class OccurrenceChangeMailer < ApplicationMailer
+  after_action :news_delivery, only: [:build]
+
   def build(sender:, receiver:, observation:, action:)
     setup_user(receiver)
     # Plain text_name, not the Textile-marked-up format_name used in

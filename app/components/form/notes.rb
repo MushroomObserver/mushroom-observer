@@ -21,18 +21,16 @@
 # `NotesFieldPart` objects, etc.) into uniform `Part` structs before
 # passing — see `ObservationForm#observation_form_note_parts`.
 class Components::Form::Notes < Components::Base
-  # One notes part. `key` becomes the Superform field key under `:notes`
-  # (`form[notes][<key>]`), `value` is the current value, `label` labels
-  # the textarea.
+  # One notes part. `key` becomes the Superform field key under
+  # `:notes` (`form[notes][<key>]`); `value` is the current value;
+  # `label` labels the textarea.
   #
-  # A plain part (`notes_state` nil) renders a normal Superform textarea.
-  # An *occurrence* part (a notes key shared with the other observations
-  # of the primary's occurrence) carries `adopt_options` -- a list of
-  # [source_obs_id, value] sibling values -- and a `notes_state` of one
-  # of :set / :hide / :inherit describing what this observation currently
-  # shows for the key. It renders value + action buttons (This
-  # Observation / each sibling / Inherit / Hide / All) that drive the
-  # textarea; see `render_occurrence_part`.
+  # A plain part (`notes_state` nil) renders a normal textarea. An
+  # *occurrence* part (a key shared with the occurrence's other
+  # observations) carries `adopt_options` (sibling [obs_id, value]
+  # pairs) and a `notes_state` of :set/:hide/:inherit; it renders
+  # value + action buttons that drive the textarea -- see
+  # `render_occurrence_part`.
   Part = Data.define(:key, :value, :label, :adopt_options, :notes_state,
                      :inherited_value) do
     def initialize(key:, value:, label:, adopt_options: nil,
@@ -121,24 +119,16 @@ class Components::Form::Notes < Components::Base
     end
   end
 
-  # A notes key shared with the occurrence's other observations. Rendered
-  # through the same Superform textarea field as the plain rows (so it
-  # gets the matching id + `<label for>` association and submits under
-  # `observation[notes][<key>]` identically), with the value + action
-  # buttons in the field's `prepend` slot. They pick what this observation
-  # shows for the key -- its own value, an inherited value, nothing
-  # (hide), or a specific sibling's value -- and drive the textarea.
+  # A notes key shared with the occurrence's other observations, with
+  # action buttons in the `prepend` slot choosing what shows: this
+  # observation's value, an inherited value, nothing (hide), or a
+  # sibling's value.
   #
-  # :inherit -> disabled, showing the value it inherits (greyed, so you
-  # see what will display) -- disabled submits nothing, so the value
-  # stays inherited via the display-time merge.
-  # :hide -> readonly, not disabled: a readonly field still submits its
-  # (blank) value, so the merge suppresses the inherited one, but can't
-  # be typed into (which would silently turn Hide into a stored value) --
-  # to change it you click another button. Both render greyed.
-  #
-  # The inherited value also rides on the row (data-notes-inherited-value)
-  # so clicking Inherit later can restore it without re-querying siblings.
+  # :inherit disables the field (submits nothing, keeping the
+  # inherited value); :hide makes it readonly (submits blank,
+  # suppressing the inherited value, but blocks typing a new one).
+  # The inherited value also rides on the row for Inherit to restore
+  # it later without re-querying siblings.
   def render_occurrence_part(notes_ns, part)
     inherit = part.notes_state == :inherit
     hide = part.notes_state == :hide

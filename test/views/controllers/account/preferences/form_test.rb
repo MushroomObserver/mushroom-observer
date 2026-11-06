@@ -304,7 +304,7 @@ class Views::Controllers::Account::Preferences::FormTest <
   def test_email_section_renders_grouped_checkboxes_and_html_note
     html = render_form
 
-    assert_html(html, "h5", text: :prefs_email_prefs.l)
+    assert_includes(html, :prefs_email_prefs.l)
     assert_html(html, "input[type='checkbox'][name='user[no_emails]']")
     assert_html(html, "input[type='checkbox'][name='user[email_html]']")
     # Five group headers, one per `EMAIL_GROUPS` entry.

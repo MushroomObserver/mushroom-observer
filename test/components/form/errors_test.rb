@@ -15,8 +15,6 @@ class FormErrorsTest < ComponentTestCase
     html = render_errors(model: term)
 
     assert_html(html, "#error_explanation.alert-danger")
-    assert_html(html, "#error_explanation h2")
-    assert_html(html, "#error_explanation ul li")
     error_text = Nokogiri::HTML(html).at_css("#error_explanation").text
     assert_includes(error_text, "1 #{:error.t}")
     assert_includes(

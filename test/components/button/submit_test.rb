@@ -3,10 +3,10 @@
 require("test_helper")
 
 class Components::Button::SubmitTest < ComponentTestCase
-  def test_renders_button_with_submit_type_and_default_style
+  def test_renders_button_with_submit_type
     html = render_submit(name: "Save")
 
-    assert_html(html, "button[type='submit'].btn.btn-default", text: "Save")
+    assert_html(html, "button[type='submit']", text: "Save")
   end
 
   def test_default_disable_with_matches_name
@@ -28,6 +28,7 @@ class Components::Button::SubmitTest < ComponentTestCase
     assert_html(html, "button[data-turbo-submits-with='Saving…']")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_accepts_variant_override
     html = render_submit(name: "Create", variant: :primary)
 
@@ -35,10 +36,11 @@ class Components::Button::SubmitTest < ComponentTestCase
     assert_no_html(html, "button.btn-default")
   end
 
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_accepts_size
     html = render_submit(name: "Go", size: :sm)
 
-    assert_html(html, "button.btn.btn-default.btn-sm[type='submit']")
+    assert_html(html, ".btn-sm[type='submit']")
   end
 
   def test_html_name_overrides_the_name_attribute

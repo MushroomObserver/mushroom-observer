@@ -27,9 +27,11 @@ class SpeciesListsController < ApplicationController # rubocop:disable Metrics/C
   # action method; index needs the hook because it routes through
   # `show_index_of_objects` which calls render itself.
   def render_index_view
+    @objects.each(&:strict_loading!)
     render(Views::Controllers::SpeciesLists::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects, project: @project
+             objects: @objects, project: @project,
+             observation_counts: ObservationCounter.counts_for(@objects)
            ))
   end
 

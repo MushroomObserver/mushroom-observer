@@ -41,6 +41,10 @@ class Components::Matrix::Box < Components::Base
   # project-filtered observations index, a project admin sees an Exclude
   # button that moves the observation to the project's excluded list.
   prop :project, _Nilable(Project), default: nil
+  # The occurrence show page renders every member of one Occurrence --
+  # the "See matching observations" link back to that same page is
+  # redundant there.
+  prop :suppress_occurrence_link, _Boolean, default: false
 
   def view_template(&block)
     if @object
@@ -155,6 +159,7 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_occurrence_link
+    return if @suppress_occurrence_link
     return unless (occ = @data[:occurrence])
 
     obs_count = if occ.observations.loaded?
@@ -166,7 +171,8 @@ class Components::Matrix::Box < Components::Base
 
     div(class: "small mt-3") do
       Link(type: :get, target: occurrence_path(occ),
-           name: :matrix_box_occurrence.l, icon: :matrix, label: true,
+           name: :matrix_box_occurrence.l, icon: :matrix,
+           show_label: :responsive,
            class: "occurrence-link")
     end
   end
@@ -223,10 +229,16 @@ class Components::Matrix::Box < Components::Base
       small(class: "nowrap-ellipsis") do
         span(class: "rss-when") { @data[:when] }
         plain(": ")
-        Link(type: :user,
-             user: @data[:who],
-             attributes: { class: "rss-who" })
+        render_who
       end
+    end
+  end
+
+  def render_who
+    if @data[:who_obs]
+      render(Components::Matrix::Box::Who.new(obs: @data[:who_obs]))
+    else
+      span(class: "rss-who") { Link(type: :user, user: @data[:who]) }
     end
   end
 

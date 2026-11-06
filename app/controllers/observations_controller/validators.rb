@@ -68,15 +68,13 @@ module ObservationsController::Validators
 
   # Helper methods for nested form params (Superform nests under
   # :observation, with a top-level fallback for the field-slip
-  # redirect path). Permitting from the top-level `params` object
-  # (rather than digging first and calling `.permit` on the extracted
-  # value) guarantees each key is a scalar (String) or absent --
-  # calling `.permit` on an already-dug-out value raises NoMethodError
-  # if a scanner or malformed request sends a scalar where the nested
-  # hash was expected (e.g. `?observation[collection_number]=abc`),
-  # since `.permit` only exists on ActionController::Parameters, not
-  # String. Permitting both shapes up front filters either malformed
-  # case to nil instead.
+  # redirect path). Permits from the top-level `params` object
+  # rather than digging first and calling `.permit` on the extracted
+  # value: `.permit` only exists on ActionController::Parameters, so
+  # a malformed request sending a scalar where the nested hash was
+  # expected (`?observation[collection_number]=abc`) would raise
+  # NoMethodError on a dug-out String. Permitting both shapes up
+  # front filters either malformed case to nil instead.
   def collection_number_params
     permitted = params.permit(
       observation: { collection_number: [:name, :number] },

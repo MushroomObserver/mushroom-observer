@@ -12,6 +12,9 @@ module Views::Controllers::CollectionNumbers
     def test_new_record_form
       html = render_form(model: CollectionNumber.new)
 
+      assert_html(
+        html, "input[name='observation_id'][value='#{@observation.id}']"
+      )
       assert_html(html, "input[name='collection_number[name]']")
       assert_html(html, "input[name='collection_number[number]']")
       assert_html(html, "button[type='submit']", text: :add.ti)
@@ -22,6 +25,7 @@ module Views::Controllers::CollectionNumbers
       record = collection_numbers(:coprinus_comatus_coll_num)
       html = render_form(model: record)
 
+      assert_html(html, "input[name='observation_id']", count: 0)
       assert_html(html, "button[type='submit']", text: :save.ti)
     end
 

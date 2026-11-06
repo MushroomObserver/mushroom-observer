@@ -17,13 +17,22 @@ module Views::Controllers::SpeciesLists
     prop :remove, _Boolean, default: false
     prop :add, _Boolean, default: false
     prop :project, _Nilable(::Project), default: nil
+    # Only the index page passes this -- nil here means "don't show a
+    # badge", not "zero observations".
+    prop :observation_count, _Nilable(Integer), default: nil
 
     # Row contents only — the surrounding `<div class="list-group-item
     # d-flex justify-content-between align-items-start">` is emitted by
-    # `Components::ListGroup#item` in the Index view.
+    # `Components::ListGroup#item` in the Index view. The flex item's
+    # `justify-content-between` pushes whichever of these two renders
+    # (mutually exclusive) flush right of `render_info`.
     def view_template
       render_info
-      render_manage_section if @remove || @add
+      if @remove || @add
+        render_manage_section
+      elsif @observation_count
+        CountBadge(count: @observation_count)
+      end
     end
 
     private
@@ -88,16 +97,14 @@ module Views::Controllers::SpeciesLists
 
     def render_remove_obs_button
       Button(
-        type: :put,
+        type: :delete,
         variant: :outline,
         icon: :remove,
-        icon_class: "text-danger",
         name: :remove.ti,
-        label: true,
+        show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
-          species_list_id: @species_list.id,
-          commit: "remove"
+          species_list_id: @species_list.id
         ),
         confirm: :are_you_sure.l
       )
@@ -107,10 +114,11 @@ module Views::Controllers::SpeciesLists
       Button(
         type: :put,
         name: :add.ti,
+        icon: :attach,
+        show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
-          species_list_id: @species_list.id,
-          commit: "add"
+          species_list_id: @species_list.id
         )
       )
     end

@@ -64,10 +64,23 @@ module Descriptions::Moves
     end
 
     def check_dest_exists!
-      target = params.dig(:description_move_or_merge, :target).to_s
-      return true if (@dest = find_or_goto_index(@src.parent.class, target))
+      target = params.dig(:description_move_or_merge, :target_id).to_s
+      return check_dest_not_src_parent! if
+        (@dest = find_or_goto_index(@src.parent.class, target))
 
       flash_error(:runtime_invalid.t(type: '"target"', value: target))
+      false
+    end
+
+    # The Location autocompleter offers every Location, including the
+    # one @src already belongs to -- catch that case server-side
+    # rather than relying on the picker to filter it out.
+    def check_dest_not_src_parent!
+      return true unless @dest == @src.parent
+
+      flash_error(:runtime_description_move_same_parent.
+                  t(type: @src.parent.type_tag))
+      redirect_to(action: :new, id: @src.id)
       false
     end
 

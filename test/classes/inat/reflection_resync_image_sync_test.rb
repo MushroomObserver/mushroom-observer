@@ -117,6 +117,21 @@ class Inat::ReflectionResyncImageSyncTest < UnitTestCase
     assert_not_nil(ExternalLink.find_by(target: created, external_id: "3"))
   end
 
+  # The observer opted out of MO: the photos already here stay, and a new
+  # one is not imported.
+  def test_opted_out_observer_keeps_images_and_gets_no_new_ones
+    kept = add_image(1)
+    ExcludedInatUser.create!(inat_login: "someone_on_inat")
+
+    outcome = API2.stub(:execute, ->(_) { flunk("should not upload") }) do
+      sync([photo(1), photo(3)])
+    end
+
+    assert_equal(0, outcome.added)
+    assert_equal(0, outcome.removed)
+    assert_includes(@obs.reload.images, kept)
+  end
+
   def test_failed_import_is_reported
     add_image(1)
     error = API2::MissingParameter.new(:upload_url)

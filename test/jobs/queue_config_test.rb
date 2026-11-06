@@ -55,7 +55,33 @@ class QueueConfigTest < UnitTestCase
                  "config/queue.yml and config/database.yml")
   end
 
+  # test_database_pool_is_large_enough_for_configured_worker_threads only
+  # checks the pool for RAILS_ENV, which is always "test" here -- it can't
+  # catch a template whose development/production pool is too small for
+  # config/queue.yml's workers (the exact gap that let a Solid Queue
+  # supervisor boot crash slip through: the "test" pool got fixed to 10,
+  # "development" didn't, until the alerts queue in #5416 pushed it over).
+  def test_db_templates_development_pool_matches_test_pool
+    test_pool = db_template_pool("db/ubuntu/database.yml", "test")
+
+    %w[db/macos/database.yml db/docker/database.yml
+       db/ubuntu/database.yml].each do |path|
+      dev_pool = db_template_pool(path, "development")
+      assert(dev_pool && dev_pool >= test_pool,
+             "#{path}'s development.primary.pool (#{dev_pool.inspect}) " \
+             "must be at least as large as its test pool " \
+             "(#{test_pool.inspect}) -- both run the same " \
+             "config/queue.yml workers")
+    end
+  end
+
   private
+
+  def db_template_pool(relative_path, env)
+    rendered = ERB.new(Rails.root.join(relative_path).read).result
+    config = YAML.safe_load(rendered, aliases: true)
+    (config.dig(env, "primary", "pool") || config.dig(env, "pool"))&.to_i
+  end
 
   def all_queues_covered?
     configured_worker_queues.include?("*")

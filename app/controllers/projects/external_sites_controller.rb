@@ -19,12 +19,6 @@ module Projects
   class ExternalSitesController < ApplicationController
     before_action :login_required
 
-    # External sites live under the project Admin tab.
-    def active_project_tab
-      "admin"
-    end
-    helper_method :active_project_tab
-
     def index
       return unless find_project!
 
@@ -140,10 +134,7 @@ module Projects
     # What the saved configuration would bring in, asked of iNat rather
     # than guessed at.
     def candidates
-      Inat::CandidateCount.for(
-        project: @project,
-        project_site: project_sites[inat_site.id]
-      )
+      Inat::CandidateCount.for(project_site: project_sites[inat_site.id])
     end
 
     def find_project!

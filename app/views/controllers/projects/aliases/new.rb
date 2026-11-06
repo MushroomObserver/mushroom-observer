@@ -9,12 +9,11 @@ module Views::Controllers::Projects::Aliases
 
     def view_template
       add_project_banner(@project)
-      add_page_title(:project_alias_new.l)
+      add_new_title(:create_object, :project_alias)
       container_class(:text)
 
       render(Views::Controllers::Projects::Aliases::Form.new(
-               @project_alias, user: @user,
-                               turbo: true
+               @project_alias, user: @user
              ))
       a(href: project_aliases_path(
         project_id: @project_alias.project_id

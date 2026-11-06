@@ -115,7 +115,7 @@ class OccurrencesController < ApplicationController
     occ.recalculate_consensus!(@user)
     apply_project_resolution(occ, gaps)
     warn_if_locations_differ(selected)
-    flash_notice(:occurrence_created.t(id: occ.id))
+    flash_notice(:runtime_created_id.t(type: :occurrence, value: occ.id))
     redirect_to(occurrence_path(occ.id))
   end
 

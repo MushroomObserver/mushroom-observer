@@ -20,8 +20,7 @@ module Views::Controllers::SpeciesLists::Projects
                list: @list,
                projects: @projects,
                object_states: @object_states,
-               project_states: @project_states,
-               turbo: true
+               project_states: @project_states
              ))
     end
   end

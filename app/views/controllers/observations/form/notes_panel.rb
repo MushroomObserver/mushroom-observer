@@ -36,29 +36,14 @@ module Views::Controllers::Observations
                ))
       end
 
-      # "Id by" and "Other Codes" — the two field-slip note fields that
-      # aren't plain text. Id by is a user autocompleter (it resolves to a
-      # user through project aliases on save) and Other Codes carries the
-      # "this is an iNat id" checkbox that turns it into a link. Both live
-      # in the notes area per #4932; the Scientific Name field already
-      # covers what the slip form called "ID", so that one doesn't move.
+      # "Id by" (user autocompleter) and "Other Codes" (carries the
+      # "this is an iNat id" checkbox, a transform flag routed
+      # through `@form` as a top-level `inat` param, not a note).
       #
       # `instance_exec`'d by the Notes component inside its `:notes`
-      # namespace, so `notes_ns` fields submit as
-      # `observation[notes][<key>]` alongside the parts. The iNat checkbox
-      # is not a note — it is a transform flag — so it goes through
-      # `@form` as a top-level `inat` param, the same shape the slip form
-      # uses.
-      #
-      # Values are read here and captured by the closure, exactly as the
-      # ordinary parts pass `part.value`. Superform can't resolve them
-      # from the model on its own — `notes` is a Hash, not an association
-      # — and a field that renders empty submits empty, which
-      # `notes_to_sym_and_compact` then drops. Editing an observation
-      # would silently delete both values.
-      #
-      # An iNat-flagged code shows as the bare id with the box ticked,
-      # rather than as the generated markup, so the pair round-trips.
+      # namespace, so `notes_ns` fields submit alongside the parts.
+      # Values are read here and captured by the closure, since
+      # Superform can't resolve them from `notes` (a Hash).
       def field_slip_note_fields
         return nil if editable_field_code.blank?
 

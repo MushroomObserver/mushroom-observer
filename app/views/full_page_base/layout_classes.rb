@@ -38,6 +38,11 @@ module Views::FullPageBase::LayoutClasses
     content_for(:right_columns, flush: true) do
       right_column_class_for(columns)
     end
+    # Lets Header::PageTitle tell a two-column split from the :twelve
+    # (untouched, full-width) default -- right-column content (interest
+    # icons, the prev/next pager) only has a column to render into
+    # when this is set.
+    content_for(:has_columns, flush: true) { columns == :twelve ? "" : "1" }
   end
 
   def default_column_classes
@@ -46,12 +51,12 @@ module Views::FullPageBase::LayoutClasses
     column_classes
   end
 
-  # ----- Vertical padding inside the main container ----------------
+  # ----- Padding inside the main container --------------------------
 
   def content_padding(content_has = nil)
     content_has ||= action_name.in?(%w[index show]) ? :panels : :no_panels
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "p-3" : "p-0"
+      content_has == :no_panels ? "px-3" : "p-0"
     end
   end
 

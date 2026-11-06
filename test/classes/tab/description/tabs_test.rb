@@ -123,19 +123,5 @@ module Tab::Description
       assert_equal(:put, tab.html_options[:button])
       assert_equal(:publish, tab.html_options[:icon])
     end
-
-    def test_new_for_project
-      project = projects(:eol_project)
-      tab = Tab::Description::NewForProject.new(
-        parent: @name, project: project
-      )
-
-      assert_equal(project.title, tab.title)
-      assert_equal(routes.new_name_description_path(
-                     project: project.id, source: "project",
-                     name_id: @name.id
-                   ), tab.path)
-      assert_equal(NameDescription, tab.model)
-    end
   end
 end

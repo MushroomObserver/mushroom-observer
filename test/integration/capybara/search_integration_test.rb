@@ -132,7 +132,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       click_link(href: "#observations_connected")
 
       # Wait for the panel to expand
-      assert_selector("#query_observations_species_lists", visible: true)
+      assert_selector("#query_observations_species_lists", visible: :visible)
 
       # Fill in the autocompleter with multiple values (newline-separated)
       form.fill_in("query_observations_species_lists",
@@ -166,7 +166,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       click_link(href: "#observations_connected")
 
       # Wait for the panel to expand
-      assert_selector("#query_observations_project_lists", visible: true)
+      assert_selector("#query_observations_project_lists", visible: :visible)
 
       # Fill in the autocompleter with the project title
       form.fill_in("query_observations_project_lists", with: proj.title)
@@ -196,7 +196,7 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
       click_link(href: "#observations_connected")
 
       # Wait for the panel to expand
-      assert_selector("#query_observations_herbaria", visible: true)
+      assert_selector("#query_observations_herbaria", visible: :visible)
 
       # Fill in the autocompleter with multiple values (newline-separated)
       form.fill_in("query_observations_herbaria",

@@ -16,9 +16,6 @@
 #    accumulated flash messages so the user sees the success /
 #    error notice without a page reload
 #
-#  Replaces the `observations/show/_section_update.erb` partial
-#  that all five controllers used to render.
-#
 module ApplicationController::SectionUpdater
   private
 

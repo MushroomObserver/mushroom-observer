@@ -163,5 +163,83 @@ module Tab::SpeciesList
       assert_equal(:app_your_lists.l, tab.title)
       assert_equal(routes.species_lists_path(by_user: @user.id), tab.path)
     end
+
+    def test_map
+      tab = Tab::SpeciesList::Map.new(q_param: "abc123")
+
+      assert_equal(:map.ti, tab.title)
+      assert_equal(routes.map_observations_path(q: "abc123"), tab.path)
+      assert_equal("map", tab.alt_title)
+    end
+
+    def test_observations
+      tab = Tab::SpeciesList::Observations.new(q_param: "abc123")
+
+      assert_equal(:observations.ti, tab.title)
+      assert_equal(routes.observations_path(q: "abc123"), tab.path)
+      assert_equal("observations", tab.alt_title)
+    end
+
+    def test_observations_with_count
+      tab = Tab::SpeciesList::Observations.new(count: 5)
+
+      assert_equal("5 #{:observations.ti}", tab.title)
+    end
+
+    def test_names
+      tab = Tab::SpeciesList::Names.new(species_list: @list)
+
+      assert_equal(:names.ti, tab.title)
+      assert_equal(
+        routes.checklist_path(species_list_id: @list.id), tab.path
+      )
+      assert_equal("names", tab.alt_title)
+    end
+
+    def test_names_with_project
+      project = projects(:bolete_project)
+      tab = Tab::SpeciesList::Names.new(species_list: @list, project: project)
+
+      assert_equal(
+        routes.checklist_path(species_list_id: @list.id,
+                              project: project.id),
+        tab.path
+      )
+    end
+
+    def test_names_with_count
+      tab = Tab::SpeciesList::Names.new(species_list: @list, count: 3)
+
+      assert_equal("3 #{:names.ti}", tab.title)
+    end
+
+    # `#path` delegates to Tab::RelatedQuery, which needs a live
+    # request context (controller.add_q_param) -- covered at the
+    # controller-test level (species_lists_controller_test.rb), not
+    # here. See test/classes/tab/related_query_test.rb's header
+    # comment for the same split.
+    def test_locations
+      query = ::Query.lookup(:Observation)
+      tab = Tab::SpeciesList::Locations.new(query: query, controller: nil)
+
+      assert_equal(:locations.ti, tab.title)
+      assert_equal("locations", tab.alt_title)
+    end
+
+    def test_locations_with_count
+      query = ::Query.lookup(:Observation)
+      tab = Tab::SpeciesList::Locations.new(query: query, controller: nil,
+                                            count: 2)
+
+      assert_equal("2 #{:locations.ti}", tab.title)
+    end
+
+    def test_images
+      query = ::Query.lookup(:Observation)
+      tab = Tab::SpeciesList::Images.new(query: query, controller: nil)
+
+      assert_equal(:images.ti, tab.title)
+      assert_equal("images", tab.alt_title)
+    end
   end
 end

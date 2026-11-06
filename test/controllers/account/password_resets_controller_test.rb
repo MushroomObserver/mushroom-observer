@@ -74,10 +74,9 @@ module Account
                        "New password should be different from old")
     end
 
-    # A failing password change used to fall through with no render or
-    # redirect at all -- a real request would raise, since there's no
-    # ERB fallback template in this Phlex-only app (found via Copilot
-    # review on #5058). Force the failure by stubbing `save` on the
+    # A failing password change must render or redirect explicitly --
+    # with neither, the request raises (found via Copilot review on
+    # #5058). Force the failure by stubbing `save` on the
     # looked-up user, routed through a real request so the response
     # itself (not just a directly-invoked private method) proves the
     # fix.

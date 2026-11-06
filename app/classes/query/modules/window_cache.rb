@@ -67,17 +67,15 @@ module Query::Modules::WindowCache
   end
 
   # Bounded fetch: `window_radius` ids per direction via the keyset
-  # predicate (`Query::Modules::Seek`), each edge flagged as true when
-  # its fetch came up short of the radius. Returns nil -- falling back
-  # to `full_scan_window` -- when the order shape isn't seekable or
-  # the current row's sort key is ambiguous across a to-many join.
+  # predicate (`Query::Modules::Seek`), each edge flagged true when
+  # its fetch came up short. Returns nil -- falling back to
+  # `full_scan_window` -- when the order shape isn't seekable or the
+  # current row's sort key is ambiguous across a to-many join.
   #
-  # The current row's own read and the two directional fetches are
-  # three separate queries -- wrapped in a transaction so they share
-  # one consistent snapshot (MySQL's default REPEATABLE READ). Without
-  # this, a concurrent write to the current row's own sort columns
-  # (e.g. another user's vote) landing between the reads could seed
-  # the window from a value that's already stale by the later queries.
+  # The current-row read and the two directional fetches run in one
+  # transaction, sharing a snapshot (MySQL's REPEATABLE READ) -- else
+  # a concurrent write to the row's sort columns between reads could
+  # seed the window from a stale value.
   def seek_window(current_id)
     cols = seekable_cols
     return nil unless cols

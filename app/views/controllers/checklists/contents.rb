@@ -117,7 +117,8 @@ module Views::Controllers::Checklists
       h4 { plain(:checklist_missing_taxa.t) }
       render(Panel.new(
                data: @project_data,
-               context: Context.new(project: @context.project),
+               context: Context.new(project: @context.project,
+                                    logged_out: @context.logged_out),
                taxa: missing, panel_id: "checklist_missing_panel"
              ))
     end

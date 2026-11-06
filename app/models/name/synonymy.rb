@@ -122,6 +122,7 @@ module Name::Synonymy
     end
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Makes two Name's synonymous.  If either Name already has a Synonym, it will
   # merge the Synonym(s) into a single Synonym.  Returns nothing.  Any changes
   # are saved.
@@ -138,6 +139,7 @@ module Name::Synonymy
   #   after 1:  1, 2, 3
   #   after 2:  1, 2, 3
   #
+  # rubocop:enable MO/NoLongCommentBlock
   # rubocop:disable Style/RedundantSelf
   # I think these methods read much better with self explicitly included. -JPH
   # rubocop:disable Metrics/AbcSize

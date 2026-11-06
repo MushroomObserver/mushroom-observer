@@ -4,7 +4,8 @@ module InatImportsController::FormBuilders
   # Params carried verbatim from the new form through the confirm page.
   PASSTHROUGH_PARAM_KEYS = [
     :inat_username, :inat_ids, :inat_url, :original_inat_url, :consent,
-    :recheck_all, :skip_inat_writeback, :inat_project, :inat_project_id
+    :recheck_all, :skip_inat_writeback, :inat_project, :inat_project_id,
+    :project_site
   ].freeze
 
   # Params that are literally "1" when checked/selected, absent or any
@@ -29,6 +30,7 @@ module InatImportsController::FormBuilders
         form: build_new_form,
         super_importer: InatImport.super_importer?(@user),
         admin: in_admin_mode?,
+        project_site: scoped_project_site,
         has_prior_imports: InatImport.exists?(user: @user)
       ),
       status: status, **render_opts
@@ -47,10 +49,15 @@ module InatImportsController::FormBuilders
       inat_ids: params[:inat_ids],
       inat_url: reload_inat_url,
       choose_method: params[:choose_method] || derive_choose_method,
-      inat_project: params[:inat_project],
-      inat_project_id: params[:inat_project_id],
+      **project_form_params,
       **checkbox_flag_params, **defaulted_checkbox_params
     )
+  end
+
+  def project_form_params
+    { inat_project: params[:inat_project],
+      inat_project_id: params[:inat_project_id],
+      project_site: params[:project_site] }
   end
 
   def checkbox_flag_params
@@ -60,7 +67,18 @@ module InatImportsController::FormBuilders
   # Checkboxes whose fresh-form state is not simply unchecked.
   def defaulted_checkbox_params
     { skip_inat_writeback: initial_skip_writeback,
-      create_skeletons: initial_create_skeletons }
+      create_skeletons: initial_create_skeletons,
+      import_others: initial_import_others }
+  end
+
+  # A project admin's import covers the project's observations,
+  # whoever made them, so it arrives turned on (#5416). On reload the
+  # checkbox's hidden "0" field keeps the key, so honor its value.
+  def initial_import_others
+    return ("1" if params[:import_others] == "1") if
+      params.key?(:import_others)
+
+    ("1" if project_admin_import?)
   end
 
   # `normalize_inat_url_param!` overwrites params[:inat_url] in place

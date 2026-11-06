@@ -41,6 +41,24 @@ class Name::ScopesTest < UnitTestCase
   #    Explicit tests of some scopes to improve coverage
   # ----------------------------------------------------
 
+  def test_scope_with_rank_above
+    assert_includes(Name.with_rank_above(:Genus), names(:agaricaceae))
+    assert_not_includes(Name.with_rank_above(:Genus), names(:boletus))
+    assert_not_includes(Name.with_rank_above(:Genus), names(:coprinus_comatus))
+
+    # Group is excluded regardless of threshold, even though its rank
+    # value clears a Species threshold numerically.
+    assert_not_includes(Name.with_rank_above(:Species),
+                        names(:boletus_edulis_group))
+
+    # No-op when rank is falsy, matching with_rank_below.
+    assert_includes(Name.with_rank_above(nil), names(:boletus))
+
+    # with_rank_above_genus now delegates to with_rank_above -- same result.
+    assert_equal(Name.with_rank_above(:Genus).sort,
+                 Name.with_rank_above_genus.sort)
+  end
+
   def test_scope_subtaxa_of
     mispelled_name = Name.create!(
       text_name: "Amanita boodairy",

@@ -21,7 +21,16 @@ module Observations
       return unless permission_to_change_membership?
 
       set_project_ivars
-      dispatch_commit
+      add_observation_to_project(@project, @observation)
+    end
+
+    def destroy
+      return unless (@project = find_project!) &&
+                    (@observation = find_observation!)
+      return unless permission_to_change_membership?
+
+      set_project_ivars
+      remove_observation_from_project(@project, @observation)
     end
 
     private
@@ -34,24 +43,11 @@ module Observations
       false
     end
 
-    def dispatch_commit
-      case params[:commit]
-      when "add"
-        add_observation_to_project(@project, @observation)
-      when "remove"
-        remove_observation_from_project(@project, @observation)
-      else
-        flash_error(:runtime_invalid.t(type: '"mode"', value: params[:commit]))
-        render_edit_view_invalid(
-          location: edit_observation_projects_path(id: @observation.id)
-        )
-      end
-    end
-
     def render_edit_view(**render_opts)
       render(
         Views::Controllers::Observations::Projects::Edit.new(
           observation: @observation,
+          all_projects: @all_projects,
           obs_projects: @obs_projects,
           other_projects: @other_projects
         ),
@@ -64,13 +60,15 @@ module Observations
     # ListItem's meta row reads `project.user` -- preload all of them
     # so neither is an N+1 across the list.
     def set_project_ivars
-      member_ids = @observation.project_ids.to_set
-      all_projects = @user.projects_member(
-        order: :title,
-        include: [:location, :target_names, :target_locations, :user]
+      @all_projects = Query.lookup(
+        :Project, members: @user,
+                  order_by: sort_order_from_params(:Project, :name)
       )
+      member_ids = @observation.project_ids.to_set
       @obs_projects, @other_projects =
-        all_projects.partition { |project| member_ids.include?(project.id) }
+        @all_projects.results(
+          include: [:location, :target_names, :target_locations, :user]
+        ).partition { |project| member_ids.include?(project.id) }
     end
 
     def find_observation!

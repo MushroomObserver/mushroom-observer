@@ -217,12 +217,20 @@ tbody.collapse.in {
 }
 
 // Baseline correction for icon+text pairs that aren't framed as a
-// .btn: plain Link::Get (.inline-icon-link sets top: 0 instead) and
-// the sidebar heading icons. The `> span >` variants cover
-// Components::Icon's title: wrap (moves tooltip attrs off the <svg>
-// onto a wrapping <span>).
-a:not(.btn):not(.inline-icon-link) > .mo-icon,
-a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
+// .btn and the sidebar heading icons. `.inline-icon-link` (plain or
+// form.button_to-wrapped) gets the matching +2px correction from its
+// wrapping `.inline-link-block`'s `margin-top` instead (see
+// _links_buttons_alerts.scss), so it's excluded here rather than
+// duplicated. `.inline-flex-center` triggers (e.g.
+// `.info-collapse-trigger`) are also excluded -- those are icon-only,
+// flex-centered against their row's siblings, not paired with
+// adjacent text, so this nudge only pushes them out of alignment.
+// The `> span >` variants cover Components::Icon's title: wrap
+// (moves tooltip attrs off the <svg> onto a wrapping <span>).
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > .mo-icon,
+a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
+  > span > .mo-icon,
 .list-group-item > .mo-icon,
 .list-group-item > span > .mo-icon {
   top: 2px;
@@ -249,6 +257,11 @@ a:not(.btn):not(.inline-icon-link) > span > .mo-icon,
 // goto button, and the pagination prev/next links (.btn-link, so
 // previously outside .btn:not(.btn-link)'s scope entirely) all at once.
 .btn:has(.mo-icon) {
+  display: inline-flex;
+  align-items: center;
+}
+
+.inline-flex-center {
   display: inline-flex;
   align-items: center;
 }

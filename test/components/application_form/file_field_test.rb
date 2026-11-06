@@ -17,7 +17,7 @@ class FileFieldTest < ComponentTestCase
     end
 
     # Wrapper with file-input controller
-    assert_html(form, "div.form-group[data-controller='file-input']")
+    assert_html(form, ".form-group[data-controller='file-input']")
     assert_includes(form, "Upload Image")
 
     # File input with accept attribute (default: image/*)

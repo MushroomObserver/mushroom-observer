@@ -99,6 +99,14 @@ class ExternalSite < AbstractModel
     find_by!(name: MYCOPORTAL_NAME)
   end
 
+  # Which site to preselect on the "add an external link" form.
+  # iNaturalist is the overwhelmingly common source of new
+  # observations, so prefer it over whatever order `sites` happens to
+  # come back in.
+  def self.default_new_link_site(sites)
+    sites&.find { |s| s.name == INATURALIST_NAME } || sites&.first
+  end
+
   # Which site, if any, serves media from this host. MO downloads by URL
   # from places that belong to no site, so nil is an ordinary answer.
   def self.serving_media(host)

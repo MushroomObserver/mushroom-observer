@@ -64,8 +64,8 @@ module Observations::Namings
     # HTML requests: Redirects to show_observation.
     # Turbo requests: depends on params[:context]
     # when namings_table (show_observation)
-    #   Updates namings_table (+ maybe obs title) via update_observation.js.erb
-    #   and stimulus naming-vote_controller, which handles <select> bindings
+    #   Updates namings_table (+ maybe obs title) via turbo_stream and
+    #   stimulus naming-vote_controller, which handles <select> bindings
     # when matrix_box (help_identify)
     #   updates the lightbox and matrix_box
 

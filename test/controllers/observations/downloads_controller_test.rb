@@ -13,6 +13,8 @@ module Observations
 
       assert_no_flash
       assert_response(:success)
+      # The query filter caption, like on the Observations index.
+      assert_select("#index_bar")
       # Permanently exempt -- see .claude/rules/turbo_submit_forms.md.
       assert_select("form[data-turbo='false']")
       assert_select(
@@ -23,6 +25,32 @@ module Observations
         "input[type=radio]" \
         "[id=download_format_mycoportal_image_list]", false,
         "Missing a MyCoPortal Images radio button"
+      )
+    end
+
+    # Regression: the page showed no project banner even when the
+    # query was scoped to one project -- derive_ivar_from_query needs
+    # to run before the view renders. Also checks the Observations
+    # tab and the Download observation sub-tab both highlight --
+    # ProjectNavs derives both from controller_path, not from a
+    # per-controller active_project_tab override.
+    def test_new_with_project_query_shows_project_banner
+      project = projects(:open_membership_project)
+      query = Query.lookup_and_save(:Observation, projects: project)
+
+      login(:rolf)
+      get(:new, params: { q: @controller.q_param(query) })
+
+      assert_response(:success)
+      assert_select("#project_banner")
+      assert_select(
+        "#project_tabs a.nav-link.active[href='#{observations_path(
+          project: project.id, by: "thumbnail_quality"
+        )}']"
+      )
+      assert_select(
+        "#project_observation_subtabs a.nav-link.active" \
+        "[href^='#{new_observations_download_path}']"
       )
     end
 
@@ -301,8 +329,10 @@ module Observations
       # \pard is paragraph command in rtf, one paragraph per result
       assert_equal(query.num_results, @response.body.scan("\\pard").size)
       # RTF (not HTML) — use string search rather than assert_select
+      # rubocop:disable MO/NoFullHtmlAssertion
       assert_includes(@response.body, "314159") # fundis id
       assert_includes(@response.body, "Mary Newbie 174") # collection number
+      # rubocop:enable MO/NoFullHtmlAssertion
 
       # Alternative entry point.
       post(
@@ -341,6 +371,7 @@ module Observations
       trusted_hidden = observations(:trusted_hidden)
       untrusted_hidden = observations(:untrusted_hidden)
       # RTF (not HTML) — use string search rather than assert_select
+      # rubocop:disable-next MO/NoFullHtmlAssertion
       assert_includes(@response.body, trusted_hidden.lat.to_s)
       assert_not_includes(@response.body, untrusted_hidden.lat.to_s)
     end

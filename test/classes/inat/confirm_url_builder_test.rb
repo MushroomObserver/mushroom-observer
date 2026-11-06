@@ -134,6 +134,23 @@ class Inat
                  "With skeletons, unlicensed obss are imported too")
     end
 
+    def test_expected_obs_url_leaves_out_opted_out_observers
+      ExcludedInatUser.create!(inat_login: "excluded_on_inat")
+      users(:mary).update!(inat_username: "mary_on_inat",
+                           inat_import_opt_out: true)
+      args = expected_link_args("project_id=303327", import_others: "1")
+
+      assert_equal(%w[excluded_on_inat mary_on_inat],
+                   args["not_user_id"].split(",").sort,
+                   "Expected link should leave out opted-out observers")
+
+      args = expected_link_args("project_id=303327",
+                                import_others: "1", create_skeletons: "1")
+
+      assert_nil(args["not_user_id"],
+                 "With skeletons, opted-out observers are imported too")
+    end
+
     # Regression (#4706): a user-supplied iconic_taxa superset must be
     # narrowed to the importable subset, not passed through unfiltered.
     def test_expected_obs_url_strips_unimportable_iconic_taxa

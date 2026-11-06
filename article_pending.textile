@@ -1,0 +1,11 @@
+|{white-space:nowrap}. 2026-11-05 | Allow anyone to view project and species list checklists | "PR#5612":https://github.com/MushroomObserver/mushroom-observer/pull/5612 |
+|{white-space:nowrap}. 2026-11-05 | Add sub-tabs for Observations, Map, Images, and Downloads on project pages | "PR#5631":https://github.com/MushroomObserver/mushroom-observer/pull/5631 |
+|{white-space:nowrap}. 2026-11-05 | Notify Name trackers about namings that use a synonym | "PR#5463":https://github.com/MushroomObserver/mushroom-observer/pull/5463 |
+|{white-space:nowrap}. 2026-11-04 | Simplify the Project and Observation List page layouts | "PR#5614":https://github.com/MushroomObserver/mushroom-observer/pull/5614 |
+|{white-space:nowrap}. 2026-11-04 | Fix Name tracking emails continuing after you disable them | "PR#5462":https://github.com/MushroomObserver/mushroom-observer/pull/5462 |
+|{white-space:nowrap}. 2026-11-04 | Fix the blank API documentation page | "PR#5615":https://github.com/MushroomObserver/mushroom-observer/pull/5615 |
+|{white-space:nowrap}. 2026-11-03 | Fix the occurrence page's title, matrix grid, and duplicate links | "PR#5610":https://github.com/MushroomObserver/mushroom-observer/pull/5610 |
+|{white-space:nowrap}. 2026-11-03 | Fix a crash and improve the location-merge match list | "PR#5604":https://github.com/MushroomObserver/mushroom-observer/pull/5604 |
+|{white-space:nowrap}. 2026-11-03 | Improve the add-external-link form and fix a crash on image links | "PR#5605":https://github.com/MushroomObserver/mushroom-observer/pull/5605 |
+|{white-space:nowrap}. 2026-11-03 | Simplify the propose/edit-name page layout | "PR#5606":https://github.com/MushroomObserver/mushroom-observer/pull/5606 |
+|{white-space:nowrap}. 2026-11-03 | Add autocomplete suggestions when copying a classification from a parent taxon | "PR#5599":https://github.com/MushroomObserver/mushroom-observer/pull/5599 |

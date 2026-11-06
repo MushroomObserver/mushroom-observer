@@ -113,7 +113,7 @@ class Components::Button < Components::Base
   prop :icon_title, _Nilable(String), default: nil
   prop :active_icon, _Nilable(_Union(*ICONS)), default: nil
   prop :active_content, _Nilable(String), default: nil
-  prop :label, _Nilable(_Boolean), default: nil
+  prop :show_label, _Union(:hidden, :responsive, :always), default: :hidden
   prop :tag, _Union(*ALLOWED_TAGS), default: :button
   prop :type, _Union(String, Symbol), default: :button
   prop :attributes, _Hash(Symbol, _Any?), :**
@@ -147,7 +147,7 @@ class Components::Button < Components::Base
       icon_title: html_attrs.delete(:icon_title),
       active_icon: html_attrs.delete(:active_icon),
       active_content: html_attrs.delete(:active_content),
-      label: html_attrs.delete(:label)
+      show_label: html_attrs.delete(:show_label) || :hidden
     }
   end
 

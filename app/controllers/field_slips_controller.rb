@@ -22,7 +22,7 @@ class FieldSlipsController < ApplicationController
   def new
     @field_slip = FieldSlip.new
     @field_slip.current_user = @user
-    @field_slip.code = params[:code].upcase if params.include?(:code)
+    @field_slip.code = submitted_code.upcase if submitted_code
     @field_slip.field_slip_name = params[:name]
     @species_list = params[:species_list]
     @field_slip.project = Project.safe_find(params[:project]) ||
@@ -97,6 +97,13 @@ class FieldSlipsController < ApplicationController
 
   private
 
+  # The code-only entry form submits a namespaced field_slip[code];
+  # a QR-code scan link uses a flat ?code= query param.
+  def submitted_code
+    permitted = params.permit(:code, field_slip: [:code])
+    permitted[:code] || permitted.dig(:field_slip, :code)
+  end
+
   def adding_images?
     params[:commit] == :field_slip_add_images.t
   end
@@ -123,8 +130,7 @@ class FieldSlipsController < ApplicationController
     # The `:new` action populates these; the `:create` validation-
     # failure path and the project-gaps path enter through render_
     # new_phlex without running `:new`, so backfill from params /
-    # the user's recent activity. Same shape as the ERB-era
-    # implicit `render(:new)`, which read the same ivars.
+    # the user's recent activity.
     @species_list ||= params[:species_list]
     @recent_observations ||= recent_observations_for_field_slip
     render(
@@ -142,8 +148,7 @@ class FieldSlipsController < ApplicationController
   def render_edit_view(**render_opts)
     # The `:edit` action populates `@recent_observations`; the
     # `:update` validation-failure and project-gaps re-render
-    # paths skip it, so backfill via the same query the action
-    # uses. Matches ERB-era behavior.
+    # paths skip it, so backfill via the same query the action uses.
     @recent_observations ||= recent_edit_observations
     render(
       Views::Controllers::FieldSlips::Edit.new(

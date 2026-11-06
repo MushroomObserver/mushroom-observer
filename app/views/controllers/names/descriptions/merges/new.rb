@@ -9,14 +9,14 @@ module Views::Controllers::Names::Descriptions::Merges
 
     def view_template
       add_page_title(:merge_descriptions_title.t(
-                       object: @description.format_name
-                     ))
+        object: @description.format_name
+      ).small_author)
       add_context_nav(::Tab::NameDescription::FormPermissions.new(
                         description: @description
                       ))
 
       render(Views::Controllers::Descriptions::Merges::Form.new(
-               @description, user: @user, turbo: true
+               @description, user: @user
              ))
     end
   end

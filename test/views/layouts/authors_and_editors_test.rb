@@ -15,11 +15,12 @@ module Views::Layouts
         @type_tag = type_tag
       end
 
-      def admin?(user)
-        user&.admin?
-      end
+      # Same rule as Description#can_review_authors?
+      def can_review_authors?(user)
+        return false unless user
 
-      alias is_admin? admin?
+        authors.include?(user) || user.in_group?("reviewers")
+      end
     end
 
     # Test double for non-description objects
@@ -68,61 +69,42 @@ module Views::Layouts
       assert_match(/[Ee]ditor/, text)
     end
 
-    def test_description_with_admin_user
-      rolf = users(:rolf)
-      mary = users(:mary)
+    def test_reviewer_gets_review_link
+      desc = TestDescription.new(authors: [users(:mary)], editors: [], id: 123)
 
-      desc = TestDescription.new(
-        authors: [mary],
-        editors: [],
-        id: 123
-      )
+      html = render_component(obj: desc, versions: [], user: users(:rolf))
 
-      # Make rolf an admin for this test
-      def rolf.admin?
-        true
-      end
-
-      html = render_component(obj: desc, versions: [], user: rolf)
-
-      assert_includes(html, "Mary")
-      # Component should render successfully for admin users
-      assert_not_nil(html)
+      assert_html(html, "a[href='#{review_path(desc)}']",
+                  text: "(#{:review_authors_review_authors.l})")
+      assert_no_html(html, "a[href='#{request_path(desc)}']")
     end
 
-    def test_description_with_non_author_user
-      rolf = users(:rolf)
+    def test_author_gets_review_link
       mary = users(:mary)
+      desc = TestDescription.new(authors: [mary], editors: [], id: 123)
 
-      desc = TestDescription.new(
-        authors: [mary],
-        editors: [],
-        id: 123
-      )
+      html = render_component(obj: desc, versions: [], user: mary)
 
-      html = render_component(obj: desc, versions: [], user: rolf)
-
-      assert_includes(html, "Mary")
-      # Component should render successfully for non-author users
-      assert_not_nil(html)
+      assert_html(html, "a[href='#{review_path(desc)}']")
     end
 
-    def test_description_with_author_user_no_extra_link
-      rolf = users(:rolf)
-      mary = users(:mary)
+    def test_other_user_gets_request_link
+      desc = TestDescription.new(authors: [users(:dick)], editors: [], id: 123)
 
-      desc = TestDescription.new(
-        authors: [rolf, mary],
-        editors: [],
-        id: 123
-      )
+      html = render_component(obj: desc, versions: [], user: users(:mary))
 
-      html = render_component(obj: desc, versions: [], user: rolf)
+      assert_html(html, "a[href='#{request_path(desc)}']",
+                  text: "(#{:show_description_author_request.l})")
+      assert_no_html(html, "a[href='#{review_path(desc)}']")
+    end
 
-      assert_includes(html, "Rolf")
-      assert_includes(html, "Mary")
-      # Should not have review/request link since user is an author
-      assert_not_includes(html, "Review")
+    def test_no_authors_link_when_logged_out
+      desc = TestDescription.new(authors: [users(:dick)], editors: [], id: 123)
+
+      html = render_component(obj: desc, versions: [], user: nil)
+
+      assert_no_html(html, "a[href='#{review_path(desc)}']")
+      assert_no_html(html, "a[href='#{request_path(desc)}']")
     end
 
     def test_description_with_empty_authors_list
@@ -258,6 +240,19 @@ module Views::Layouts
 
     def render_component(**)
       render(AuthorsAndEditors.new(**))
+    end
+
+    def review_path(desc)
+      routes.description_authors_path(id: desc.id, type: desc.type_tag)
+    end
+
+    def request_path(desc)
+      routes.new_description_author_requests_path(id: desc.id,
+                                                  type: desc.type_tag)
+    end
+
+    def routes
+      Rails.application.routes.url_helpers
     end
   end
 end

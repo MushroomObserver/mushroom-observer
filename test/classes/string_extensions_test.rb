@@ -26,6 +26,12 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(false, "0".to_boolean)
   end
 
+  def test_strip_textile_for_names
+    assert_equal("Amanita Pers.",
+                 "**__Amanita__** Pers.".strip_textile_for_names)
+    assert_equal("Amanita", "Amanita".strip_textile_for_names)
+  end
+
   def test_random_no_seed_string
     srand(314_159)
     random_str = String.random(10)
@@ -56,6 +62,16 @@ class StringExtensionsTest < UnitTestCase
     assert_equal("<i>12</i>3<b>4...</b>",
                  "<i>12</i>3<b>456</b>".truncate_html(5))
     assert_equal("malformatted", "malformatted<; HTML".truncate_html(20))
+  end
+
+  def test_strip_links
+    html = 'A &amp; <a href="/x">B</a>'
+    assert_equal("A &amp; B", html.strip_links)
+    assert_not(html.strip_links.html_safe?)
+
+    stripped = html.html_safe.strip_links # rubocop:disable Rails/OutputSafety
+    assert_equal("A &amp; B", stripped)
+    assert(stripped.html_safe?, "Safe HTML should stay safe")
   end
 
   def test_iconv
@@ -115,5 +131,25 @@ class StringExtensionsTest < UnitTestCase
   def test_small_author_tag_at_end_with_nothing_after
     str = "<b><i>Abeliella xanthoconium</i></b>"
     assert_equal(str, str.dup.small_author)
+  end
+
+  def test_strip_html
+    assert_equal("plain text", "<b>plain</b> <i>text</i>".strip_html)
+    assert_equal("text", "<!-- a comment -->text".strip_html)
+    assert_equal("no tags here", "no tags here".strip_html)
+  end
+
+  # A single gsub pass over each pattern can leave a dangerous
+  # substring behind when removing one match exposes a new one that
+  # wasn't contiguous in the original string (CodeQL: incomplete
+  # multi-character sanitization) -- strip_html must loop until
+  # nothing more matches.
+  def test_strip_html_reconstituted_comment
+    assert_equal("", "<!<script>-- -->".strip_html)
+  end
+
+  def test_html_to_ascii
+    assert_equal("text", "<!-- a comment -->text".html_to_ascii)
+    assert_equal("", "<!<script>-- -->".html_to_ascii)
   end
 end

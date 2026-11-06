@@ -30,13 +30,14 @@ class Inat
     Candidates = Data.define(:configured, :total, :unresolved_names,
                              :unresolved_locations)
 
-    def self.for(project:, project_site:)
-      new(project, project_site).candidates
+    def self.for(project_site:)
+      new(project_site).candidates
     end
 
-    def initialize(project, project_site)
+    def initialize(project_site)
       @project_site = project_site
-      @mapper = Inat::ConstraintMapper.new(project)
+      @search = Inat::ProjectSearch.new(project_site)
+      @mapper = @search.mapper
     end
 
     def candidates
@@ -57,16 +58,7 @@ class Inat
                      unresolved_locations: [])
     end
 
-    def search_params
-      params = {}
-      params.merge!(@mapper.params) if @project_site.use_constraints?
-      if @project_site.remote_project_id.present?
-        params[:project_id] = @project_site.remote_project_id
-      end
-      # Whatever else is set, MO imports fungi and slime moulds.
-      params[:taxon_id] ||= IMPORTABLE_TAXON_IDS_ARG
-      params
-    end
+    def search_params = @search.params
 
     def count
       query = search_params.merge(BASE_FILTER_PARAMS).

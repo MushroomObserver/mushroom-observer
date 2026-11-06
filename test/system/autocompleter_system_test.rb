@@ -33,7 +33,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Test that nested modifier fields (synonyms, subtaxa) appear when typing
     # The collapse div should be visible now that a name is entered
     collapse_selector = "[data-autocompleter--name-target='collapseFields']"
-    assert_selector(collapse_selector, visible: true)
+    assert_selector(collapse_selector, visible: :visible)
     # Should contain the include_synonyms select field
     within(collapse_selector) do
       assert_selector("select[name*='include_synonyms']")
@@ -100,7 +100,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_field("query_observations_by_users", with: "Rolf Singer (rolf)")
 
     # Hidden ID should be set - wait for it to have a non-empty value
-    hidden_field = find_by_id("query_observations_by_users_id", visible: false)
+    hidden_field = find_by_id("query_observations_by_users_id", visible: :all)
     assert(hidden_field.value.present?,
            "Hidden ID should be set after selection")
 
@@ -302,6 +302,23 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #  Test that the green checkmark appears when values are selected
   # ---------------------------------------------------------------
 
+  # Regression: the checkmark must stay hidden on a freshly loaded,
+  # blank field -- it should only appear once the field has a
+  # matched id, not by default.
+  def test_blank_autocompleter_hides_checkmark
+    login!(@roy)
+
+    visit("/observations/search/new")
+    assert_selector("body.search__new")
+
+    field = find_field("query_observations_by_users")
+    autocompleter = field.ancestor(".autocompleter")
+
+    within(autocompleter) do
+      assert_no_selector(".has-id-indicator", visible: :visible)
+    end
+  end
+
   def test_multi_value_autocompleter_shows_checkmark_after_selections
     login!(@roy)
 
@@ -340,13 +357,13 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_match(/Tricky Dick/, final_value, "Third user should be present")
 
     # Hidden IDs should have all three
-    hidden_field = find_by_id("query_observations_by_users_id", visible: false)
+    hidden_field = find_by_id("query_observations_by_users_id", visible: :all)
     ids = hidden_field.value.split(",")
     assert_equal(3, ids.length, "Should have 3 IDs in hidden field")
 
     # Checkmark should be visible
     within(autocompleter) do
-      assert_selector(".has-id-indicator", visible: true)
+      assert_selector(".has-id-indicator", visible: :visible)
     end
   end
 
@@ -381,7 +398,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     field.send_keys(:tab)
 
     # Wait for staggered fetch requests: 0ms, 450ms, 900ms for 3 users
-    hidden_field = find_by_id("query_observations_by_users_id", visible: false)
+    hidden_field = find_by_id("query_observations_by_users_id", visible: :all)
 
     # Poll for IDs to appear (up to 5 seconds)
     ids = []
@@ -398,7 +415,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Checkmark should be visible
     autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
-      assert_selector(".has-id-indicator", visible: true)
+      assert_selector(".has-id-indicator", visible: :visible)
     end
   end
 
@@ -429,14 +446,14 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     assert_match(/Bolete/, field.value)
 
     # Hidden field should have all 3 IDs
-    hidden_field = find_by_id("query_observations_projects_id", visible: false)
+    hidden_field = find_by_id("query_observations_projects_id", visible: :all)
     ids = hidden_field.value.split(",")
     assert_equal(3, ids.length, "Should have 3 IDs prefilled")
 
     # Checkmark should be visible
     autocompleter = field.ancestor(".autocompleter")
     within(autocompleter) do
-      assert_selector(".has-id-indicator", visible: true)
+      assert_selector(".has-id-indicator", visible: :visible)
     end
   end
 

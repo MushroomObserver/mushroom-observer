@@ -55,9 +55,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
   private :assert_create_species_list
 
   def assert_edit_species_list
-    # `edit.html.erb` and its child form partial are both Phlex now
-    # (`Views::Controllers::SpeciesLists::Edit` →
-    # `Components::SpeciesListForm`). Phlex views don't appear in
+    # `Views::Controllers::SpeciesLists::Edit` renders
+    # `Components::SpeciesListForm`. Phlex views don't appear in
     # `assert_template`'s rendered-list — use the layout's
     # `<body class="species_lists__edit">` action marker instead.
     assert_select("body.species_lists__edit")
@@ -223,9 +222,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     # there's no banner for this project
     assert_page_title(:species_lists.ti)
     spl = project.species_lists.first
-    assert_select(
-      "a[href*='species_lists/#{spl.id}?project=#{project.id}']",
-      text: /#{Regexp.escape(spl.title)}/
+    assert_select_text_includes(
+      "a[href*='species_lists/#{spl.id}?project=#{project.id}']", spl.title
     )
   end
 
@@ -263,12 +261,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_select("body.species_lists__show")
     assert_select("#comments_for_object")
-    assert_select(
-      "form:match('action', ?)",
-      %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: 0 },
-      "Non owner should not get buttons to remove Observations from List"
-    )
+    observations.each do |obs|
+      assert_select(
+        "form[action='#{observation_species_list_path(
+          id: obs.id, species_list_id: list.id
+        )}']",
+        { count: 0 },
+        "Non owner should not get buttons to remove Observations from List"
+      )
+    end
   end
 
   def test_show_species_list_owner_logged_in
@@ -282,12 +283,15 @@ class SpeciesListsControllerTest < FunctionalTestCase
 
     assert_select("body.species_lists__show")
     assert_select("#comments_for_object")
-    assert_select(
-      "form:match('action', ?)",
-      %r{/observations/\d+/species_lists/#{list.id}/remove},
-      { count: observations.size },
-      "Observation List owner should get 1 Remove button per Observation"
-    )
+    observations.each do |obs|
+      assert_select(
+        "form[action='#{observation_species_list_path(
+          id: obs.id, species_list_id: list.id
+        )}']",
+        { count: 1 },
+        "Observation List owner should get 1 Remove button per Observation"
+      )
+    end
   end
 
   def test_show_species_list_for_project
@@ -296,8 +300,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     project = spl.projects[0]
 
     get(:show, params: { id: spl.id, project: project.id })
-    assert_select("#project_banner",
-                  text: /#{Regexp.escape(project.title)}/)
+    assert_select_text_includes("#project_banner", project.title)
     assert_select("h1#title", /#{spl.title}/,
                   "H1 title element should exist and contain content")
     assert_select(
@@ -306,6 +309,23 @@ class SpeciesListsControllerTest < FunctionalTestCase
       { count: 1 },
       "Names button should carry the project context to the checklist"
     )
+  end
+
+  def test_show_species_list_action_tabs
+    spl = species_lists(:unknown_species_list)
+    login(spl.user.login)
+
+    get(:show, params: { id: spl.id })
+
+    assert_select("ul#project_species_list_buttons.nav.nav-tabs")
+    assert_select(
+      "#project_species_list_buttons a[href=?]",
+      checklist_path(species_list_id: spl.id), { count: 1 }
+    )
+    # Map, Observations, Names, Locations, Images -- the last two
+    # gate on the Location-via-Observation bridge (Query.related?),
+    # which every observation query satisfies, so all five render.
+    assert_select("#project_species_list_buttons li.nav-item", count: 5)
   end
 
   # Regression test for bug where params[:q] as a String (saved query ID)
@@ -337,22 +357,19 @@ class SpeciesListsControllerTest < FunctionalTestCase
     spl = species_lists(:first_species_list)
     assert_obj_arrays_equal([], spl.projects)
 
-    proj1_re = /#{Regexp.escape(proj1.title)}/
-    proj2_re = /#{Regexp.escape(proj2.title)}/
-
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re, count: 0)
-    assert_select("#list_details", text: proj2_re, count: 0)
+    assert_select_text_includes("#list_details", proj1.title, count: 0)
+    assert_select_text_includes("#list_details", proj2.title, count: 0)
 
     proj1.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re)
-    assert_select("#list_details", text: proj2_re, count: 0)
+    assert_select_text_includes("#list_details", proj1.title)
+    assert_select_text_includes("#list_details", proj2.title, count: 0)
 
     proj2.add_species_list(spl)
     get(:show, params: { id: spl.id })
-    assert_select("#list_details", text: proj1_re)
-    assert_select("#list_details", text: proj2_re)
+    assert_select_text_includes("#list_details", proj1.title)
+    assert_select_text_includes("#list_details", proj2.title)
   end
 
   def test_show_species_list_edit_links
@@ -366,7 +383,7 @@ class SpeciesListsControllerTest < FunctionalTestCase
     login("rolf")
     get(:show, params: { id: spl.id })
     assert_no_edit_button(spl)
-    assert_select("form[action=?]", add_dispatch_path, count: 1)
+    assert_select("form[action=?]", list_add_dispatch_path, count: 1)
     get(:edit, params: { id: spl.id })
     assert_response(:redirect)
     delete(:destroy, params: { id: spl.id })

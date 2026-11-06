@@ -92,11 +92,12 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     html = render(panel_with(@obs))
 
     form_selector = "form[action='#{routes.observation_species_list_path(
-      id: @obs.id, species_list_id: spl.id, commit: "remove"
+      id: @obs.id, species_list_id: spl.id
     )}']"
     assert_html(html, "#{form_selector} button svg.mo-icon-remove")
-    assert_html(html, "#{form_selector} button span.sr-only",
+    assert_html(html, "#{form_selector} button .sr-only",
                 text: :remove.ti)
+    assert_html(html, "#{form_selector} input[name='_method'][value='delete']")
   end
 
   private

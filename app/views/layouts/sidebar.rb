@@ -41,7 +41,8 @@ class Views::Layouts::Sidebar < Views::Base
 
   def view_template
     Column(element: :nav, id: "sidebar", xs: 8, sm: 2,
-           class: "sidebar-offcanvas hidden-print") do
+           class: "sidebar-offcanvas hidden-print",
+           aria: { label: :app_sidebar_nav_label.l }) do
       comment { "SIDEBAR LOGO AND NAVIGATION" }
       div(id: "navigation") do
         render_logo

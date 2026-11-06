@@ -71,13 +71,7 @@ module Comment::Callbacks
   end
 
   def add_interested_users!(recipients)
-    Interest.where_target(target).each do |interest|
-      if interest.state
-        recipients.push(interest.user)
-      else
-        recipients.delete(interest.user)
-      end
-    end
+    Interest.update_recipients!(Interest.where_target(target), recipients)
   end
 
   def send_comment_notifications(users)

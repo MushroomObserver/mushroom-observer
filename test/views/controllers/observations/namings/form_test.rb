@@ -28,7 +28,7 @@ module Views::Controllers::Observations::Namings
 
       # Blank context collapses fields, has blank vote option
       assert_html(
-        html, "div.collapse[data-autocompleter--name-target='collapseFields']"
+        html, ".collapse[data-autocompleter--name-target='collapseFields']"
       )
       assert_html(html, "select[name='naming[vote][value]'] option[value='']")
     end

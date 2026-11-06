@@ -13,7 +13,7 @@ module Observations
     # :manage_species_lists
     #
     # Form (table of post_button links) to let user add/remove one observation
-    # at a time from a species_list. Maybe use param[:commit] like above?
+    # at a time from a species_list.
     def edit
       return unless (@observation = find_observation!)
 
@@ -21,34 +21,32 @@ module Observations
       render_edit_view
     end
 
-    # new endpoint for :add_observation_to_species_list and
-    # :remove_observation_from_species_list. use params[:commit]
     def update
       return unless (@species_list = find_species_list!) &&
                     (@observation = find_observation!)
-
-      unless permission!(@species_list)
-        return redirect_with_query(permanent_observation_path(@observation.id))
-      end
+      return unless permission_to_edit?
 
       set_list_ivars
+      add_observation_to_species_list(@species_list, @observation)
+    end
 
-      case params[:commit]
-      when "add"
-        add_observation_to_species_list(@species_list, @observation)
-      when "remove"
-        remove_observation_from_species_list(@species_list, @observation)
-      else
-        flash_error("Invalid mode: #{params[:commit].inspect}")
-        render_edit_view_invalid(
-          location: edit_observation_species_lists_path(
-            id: @observation.id
-          )
-        )
-      end
+    def destroy
+      return unless (@species_list = find_species_list!) &&
+                    (@observation = find_observation!)
+      return unless permission_to_edit?
+
+      set_list_ivars
+      remove_observation_from_species_list(@species_list, @observation)
     end
 
     private
+
+    def permission_to_edit?
+      return true if permission!(@species_list)
+
+      redirect_with_query(permanent_observation_path(@observation.id))
+      false
+    end
 
     def render_edit_view(**render_opts)
       render(
@@ -63,9 +61,9 @@ module Observations
     end
 
     def set_list_ivars
-      order_by = params[:by] || :date
       @all_lists = Query.lookup(
-        :SpeciesList, editable_by_user: @user, order_by:
+        :SpeciesList, editable_by_user: @user,
+                      order_by: sort_order_from_params(:SpeciesList)
       )
 
       # Which of these lists already contain the observation, in ONE query

@@ -395,4 +395,15 @@ class DescriptionTest < UnitTestCase
     assert(desc.writers.exclude?(user_group))
     assert(desc.readers.exclude?(user_group))
   end
+
+  def test_can_review_authors
+    desc = name_descriptions(:peltigera_user_desc)
+    desc.authors.clear
+    desc.add_author(mary)
+
+    assert(desc.can_review_authors?(mary), "an author")
+    assert(desc.can_review_authors?(rolf), "a reviewer")
+    assert_not(desc.can_review_authors?(katrina), "anyone else")
+    assert_not(desc.can_review_authors?(nil), "logged out")
+  end
 end
