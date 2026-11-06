@@ -295,6 +295,12 @@
   margin-top: 2rem !important;
 }
 
+// Needs `$enable-negative-margins: true` at the Bootstrap 4 upgrade --
+// off by default.
+.mt-n2 {
+  margin-top: -0.5rem !important;
+}
+
 .mb-0 {
   margin-bottom: 0 !important;
 }
@@ -317,6 +323,10 @@
 
 .mb-5 {
   margin-bottom: 2rem !important;
+}
+
+.mb-n3 {
+  margin-bottom: -1rem !important;
 }
 
 .mx-auto {

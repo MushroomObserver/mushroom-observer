@@ -53,18 +53,6 @@
   border: none !important;
 }
 
-// Bootstrap's negative-margin utilities need `$enable-negative-
-// margins: true` to generate -- not confirmed enabled for this app's
-// eventual Bootstrap 4 config, so these stay hand-written rather than
-// moving to _utilities_bs4.scss.
-.mt-n2 {
-  margin-top: -0.5rem !important;
-}
-
-.mb-n3 {
-  margin-bottom: -1rem !important;
-}
-
 // Custom, non-Bootstrap class.
 .indent {
   padding-left: 1rem !important;
