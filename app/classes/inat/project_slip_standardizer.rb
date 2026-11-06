@@ -17,7 +17,9 @@ class Inat
   #      native's occurrence (its correct slip wins); the native stays
   #      primary, since a reflection may not be an occurrence's
   #      primary. A slip already on the import observation yields via
-  #      `Occurrence.merge!`.
+  #      `Occurrence.merge!`. Failing a citation, a native whose
+  #      MycoMap voucher number matches the iNat "Voucher Number(s)"
+  #      field is the same partner.
   #   2. A slip already attached (reused/spare, wrong project): the
   #      slip is reassigned to the target project.
   #   3. A target-prefix code in the notes (the collector wrote the
@@ -35,6 +37,15 @@ class Inat
   # recorded on the import for review.
   class ProjectSlipStandardizer
     INAT_REF = %r{(?:observations/|iNat[^0-9]{0,4})(\d{6,})}i
+    MYCOMAP_VOUCHER_KEY = :MycoMap_Voucher_Number
+
+    # Values of the iNat "Voucher Number(s)" observation field, upcased.
+    # One field may list several numbers.
+    def self.voucher_numbers(inat_obs_fields)
+      inat_obs_fields&.find do |field|
+        field[:field_id] == Inat::Constants::VOUCHER_NUMBERS_FIELD_ID
+      end&.dig(:value).to_s.upcase.split(/[\s,;]+/).compact_blank
+    end
 
     def self.reconcile_after_attach(observation)
       import = observation.inat_import
@@ -53,10 +64,11 @@ class Inat
       @project.present?
     end
 
-    def standardize(observation, inat_id:)
+    def standardize(observation, inat_id:, vouchers: [])
       return unless active?
 
-      native = native_partner(observation, inat_id.to_s)
+      native = native_partner(observation, inat_id.to_s) ||
+               voucher_partner(observation, vouchers)
       if native
         link_to_native(observation, native)
       elsif (slip = observation.occurrence&.field_slip)
@@ -98,6 +110,30 @@ class Inat
     def native_match?(cand, inat_id)
       cand.occurrence&.field_slip_id &&
         cand.notes.to_s.scan(INAT_REF).flatten.include?(inat_id)
+    end
+
+    # A native observation on one of this project's slips whose
+    # MycoMap voucher number equals one on the iNat observation. Only
+    # links when the number names a single occurrence: the same number
+    # typed onto two specimens' slips is left for review.
+    def voucher_partner(observation, vouchers)
+      vouchers.each do |voucher|
+        natives = voucher_natives(observation, voucher)
+        return natives.first if natives.map(&:occurrence_id).uniq.one?
+      end
+      nil
+    end
+
+    def voucher_natives(observation, voucher)
+      Observation.where(Observation[:notes].matches("%#{voucher}%")).
+        where(reflected_at: nil).where.not(id: observation.id).
+        joins(occurrence: :field_slip).
+        where(field_slips: { project_id: @project.id }).
+        select { |cand| cand_voucher(cand) == voucher }
+    end
+
+    def cand_voucher(cand)
+      cand.notes[MYCOMAP_VOUCHER_KEY].to_s.strip.upcase
     end
 
     # Case 1: join the native's occurrence; its slip wins.

@@ -66,6 +66,77 @@ class InatProjectSlipStandardizerTest < UnitTestCase
     assert_includes(@project.observations.reload, obs)
   end
 
+  def native_with_voucher(fixture, code:, voucher:)
+    obs = observations(fixture)
+    obs.update_column(:occurrence_id, nil)
+    obs.update!(field_slip: FieldSlip.find_or_create_by_code(code, @user))
+    obs.update!(notes: { MycoMap_Voucher_Number: voucher })
+    obs
+  end
+
+  def test_voucher_numbers
+    fields = [{ field_id: Inat::Constants::VOUCHER_NUMBERS_FIELD_ID,
+                name: "Voucher Number(s)", value: "n26-0005, N26-0006" },
+              { field_id: 1162, name: "Voucher Specimen Taken",
+                value: "Yes" }]
+
+    assert_equal(%w[N26-0005 N26-0006],
+                 Inat::ProjectSlipStandardizer.voucher_numbers(fields))
+    assert_empty(Inat::ProjectSlipStandardizer.voucher_numbers([]))
+    assert_empty(Inat::ProjectSlipStandardizer.voucher_numbers(nil))
+  end
+
+  def test_joins_native_by_mycomap_voucher
+    native = native_with_voucher(:coprinus_comatus_obs, code: "OPEN-9011",
+                                                        voucher: "N26-0005")
+    obs = import_obs(:detailed_unknown_obs)
+
+    standardizer.standardize(obs, inat_id: "391437873",
+                                  vouchers: %w[N26-0005])
+
+    assert_equal(native.reload.occurrence_id, obs.reload.occurrence_id,
+                 "A matching MycoMap voucher joins the native's occurrence")
+    assert_equal("OPEN-9011", obs.occurrence.field_slip.code)
+  end
+
+  def test_voucher_match_is_exact
+    native_with_voucher(:coprinus_comatus_obs, code: "OPEN-9012",
+                                               voucher: "N26-00050")
+    obs = import_obs(:detailed_unknown_obs)
+
+    standardizer.standardize(obs, inat_id: "391437874",
+                                  vouchers: %w[N26-0005])
+
+    assert_nil(obs.reload.occurrence_id,
+               "A number containing the voucher is not a match")
+  end
+
+  def test_voucher_naming_two_occurrences_is_not_linked
+    native_with_voucher(:coprinus_comatus_obs, code: "OPEN-9013",
+                                               voucher: "N26-0497")
+    native_with_voucher(:agaricus_campestris_obs, code: "OPEN-9014",
+                                                  voucher: "N26-0497")
+    obs = import_obs(:detailed_unknown_obs)
+
+    standardizer.standardize(obs, inat_id: "391437875",
+                                  vouchers: %w[N26-0497])
+
+    assert_nil(obs.reload.occurrence_id,
+               "An ambiguous voucher is left for review")
+    assert_includes(@project.observations.reload, obs)
+  end
+
+  def test_voucher_on_another_projects_slip_is_not_linked
+    native_with_voucher(:coprinus_comatus_obs, code: "EOL-9015",
+                                               voucher: "N26-0006")
+    obs = import_obs(:detailed_unknown_obs)
+
+    standardizer.standardize(obs, inat_id: "391437876",
+                                  vouchers: %w[N26-0006])
+
+    assert_nil(obs.reload.occurrence_id)
+  end
+
   # #5317: the native, created in the id room with a rough default,
   # adopts its reflection's non-obscured iNat location on import.
   def test_adopts_reflection_location_onto_native

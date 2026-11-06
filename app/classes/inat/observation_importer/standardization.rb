@@ -22,7 +22,13 @@ class Inat
       # Inline standardization against the import's target project. A
       # failure is logged; the observation's import still counts.
       def standardize_for_project
-        standardizer.standardize(@observation, inat_id: @inat_obs[:id])
+        standardizer.standardize(
+          @observation,
+          inat_id: @inat_obs[:id],
+          vouchers: Inat::ProjectSlipStandardizer.voucher_numbers(
+            @inat_obs.inat_obs_fields
+          )
+        )
       rescue StandardError => e
         log_with_response_error(
           "Standardization failed for iNat #{@inat_obs[:id]}: #{e.message}"
