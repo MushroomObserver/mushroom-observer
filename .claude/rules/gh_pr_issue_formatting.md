@@ -88,6 +88,12 @@ Lists and tables and code blocks still use their natural line structure — this
 
 Cut the word outright rather than substituting a synonym ("truly," "legitimately," etc. have the same problem). "A real caller" → "a caller." "This actually broke" → "this broke." If the sentence needs support for the claim, add the evidence instead of an intensifier.
 
+## Test plan: only what you verified, never a full-suite line
+
+**Never add a checklist line like "Full suite -- ask the user to run"** (or any variant implying the full suite is still an open step). CI already runs the full suite automatically on every PR, whether or not the session does anything — listing it as a checklist item misrepresents it as a manual step someone still has to remember.
+
+List only what the session actually did: specific test files run (`bin/rails test test/...`), specific manual/browser checks performed. If a broader local run would be useful before opening the PR, ask the user to run it in chat — that's a chat request, not a PR checklist line.
+
 ## Why
 
 Inside `$(...)`, backticks must be escaped as `` \` ``. The escape
