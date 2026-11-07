@@ -2,10 +2,11 @@
 
 # Shared "icon + optional text" rendering — the icon glyph plus a
 # text `<span>` whose visibility depends on `show_label:`: `:hidden`
-# is `.sr-only` (default), `:responsive` is hidden on `xs`, visible
-# at `sm`+ (for a cramped inline control that can spare the label
-# only once there's room), `:always` is visible at every breakpoint
-# (for a full-width heading with no space pressure to hide behind).
+# is `.sr-only` (default), `:responsive` is hidden below `md`,
+# visible at `md`+ (for a cramped inline control that can spare the
+# label only once there's room), `:always` is visible at every
+# breakpoint (for a full-width heading with no space pressure to
+# hide behind).
 # Included by `Components::Button::Content`, in turn included
 # by both `Components::Button` and `Components::Link` (the `Link::Get`
 # family) -- so both get the optional active-icon/active-label swap
@@ -20,10 +21,10 @@
 # rule).
 module Components::IconWithText
   # `icon-text-gap`, not a `.pl-*` rem-based utility -- the gap needs
-  # to scale with the surrounding font-size (a `.panel-title` heading's
+  # to scale with the surrounding font-size (a `.card-title` heading's
   # bold type needs visibly more gap than small body text), which only
   # an em-based value does. See `_icons.scss` for the rule.
-  RESPONSIVE_TEXT_CLASSES = "d-none d-sm-inline icon-text-gap"
+  RESPONSIVE_TEXT_CLASSES = "d-none d-md-inline icon-text-gap"
   ALWAYS_VISIBLE_TEXT_CLASSES = "icon-text-gap"
 
   private

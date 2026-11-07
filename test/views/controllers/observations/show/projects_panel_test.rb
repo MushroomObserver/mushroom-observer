@@ -61,6 +61,9 @@ class Views::Controllers::Observations::Show::ProjectsPanelTest <
     assert_html(member_html, "#{form_selector} button svg.mo-icon-remove")
     assert_html(member_html,
                 "#{form_selector} input[name='_method'][value='delete']")
+    # Must render inside InlineLinkBlock's wrapper -- that's what
+    # supplies the group's spacing from the project link beside it.
+    assert_html(member_html, ".inline-link-block #{form_selector}")
 
     non_member_html = render(panel_with(obs, users(:rolf)))
     assert_no_html(non_member_html, form_selector)

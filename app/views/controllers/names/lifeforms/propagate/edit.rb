@@ -9,7 +9,9 @@ class Views::Controllers::Names::Lifeforms::Propagate::Edit <
 
   def view_template
     add_page_title(
-      :propagate_lifeform_title.t(name: @name.display_name(current_user))
+      :propagate_lifeform_title.t(
+        name: @name.display_name(current_user)
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
     container_class(:text_image)

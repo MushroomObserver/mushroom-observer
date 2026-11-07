@@ -31,7 +31,7 @@ class InteractiveImageTest < ComponentTestCase
   # asserted the unrelated `image-sizer` and missed a regression where
   # the sub-component call was malformed and silently no-op'd).
   # #4895: the vote section is a lazy-loading Turbo Frame now, not
-  # rendered inline -- Matrix::Box's fragment cache has no user
+  # rendered inline -- Grid::Box's fragment cache has no user
   # component in its key, so rendering vote state directly here would
   # bake one viewer's votes into the shared cached HTML for everyone.
   def test_renders_with_votes_enabled

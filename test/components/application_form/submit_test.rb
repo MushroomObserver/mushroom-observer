@@ -17,7 +17,7 @@ class SubmitTest < ComponentTestCase
     end
 
     assert_html(form, "button[type='submit'].center-block")
-    assert_includes(form, "my-3")
+    assert_includes(form, "my-2")
   end
 
   # `as:` other than :button delegates to Superform's submit, which renders an

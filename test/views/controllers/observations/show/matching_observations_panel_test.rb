@@ -19,7 +19,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
       "a[href='#{routes.new_occurrence_path(observation_id: @obs.id)}']",
       text: :show_observation_add_matching_observations.l
     )
-    assert_no_html(html, ".panel-body ul",
+    assert_no_html(html, ".card-body ul",
                    "Expected no sibling list when occurrence is nil")
   end
 

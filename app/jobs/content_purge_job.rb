@@ -104,7 +104,7 @@ class ContentPurgeJob < ApplicationJob
     RssLog.where(observation_id: obs_ids).find_each do |rss_log|
       I18n.available_locales.each do |locale|
         Rails.cache.delete(
-          Components::Matrix::Table.cache_key_for(rss_log, locale)
+          Components::Grid.cache_key_for(rss_log, locale)
         )
       end
     end

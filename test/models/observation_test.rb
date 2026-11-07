@@ -2229,11 +2229,11 @@ class ObservationTest < UnitTestCase
 
   # source_credit/external_credit_link were deleted (#4868) -- the
   # tag/args they used to build now live directly at the render call
-  # sites (Matrix::Box#render_source_credit_inner,
+  # sites (Grid::Box#render_source_credit_inner,
   # Views::Controllers::Observations::Show#render_source_credit).
   # This test covers what's left on the model: source, import_link,
   # source_noteworthy?. Rendered-text coverage for the moved logic is
-  # in test/components/matrix/box_test.rb
+  # in test/components/grid/box_test.rb
   # (test_enum_source_credit_renders_credit_text,
   # test_external_source_credit_renders_new_tab_link).
   def test_source_credit

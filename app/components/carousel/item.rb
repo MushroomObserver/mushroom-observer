@@ -11,7 +11,7 @@
 # - `Components::ImageGallery::Item` — show-page slide,
 #   `:large` + `original: true` (full-resolution view inside the
 #   show-page Panel).
-# - `Components::Matrix::Carousel::Item` — per-matrix-box slide,
+# - `Components::Grid::Box::Carousel::Item` — per-grid-box slide,
 #   `:medium` + `original: false` (keeps per-box render cost down;
 #   the lightbox is the explicit path to full resolution).
 #
@@ -28,7 +28,7 @@
 # (inside the `.image-info.d-none.d-sm-block` wrapper, hidden on xs
 # and visible from sm+ viewports) when both conditions hold:
 #   - the slide is in `original: true` mode (the show-page gallery is;
-#     the matrix-box carousel is not),
+#     the grid-box carousel is not),
 #   - the image owner has `keep_filenames == "keep_and_show"`
 #     OR the viewing user has edit permission on the image.
 # `LurkerIntegrationTest#test_show_observation` pins this contract
@@ -50,7 +50,7 @@ class Components::Carousel::Item < Components::Image::Base
     # between the full observation-detail caption and the image-only
     # one -- thread `object:` into it when it IS an Observation, or
     # the caption silently falls back to image-only on every
-    # carousel-driven lightbox (observation show page, matrix-box
+    # carousel-driven lightbox (observation show page, grid-box
     # mini-carousel) regardless of caller intent.
     props[:obs] = props[:object] if props[:object].is_a?(::Observation)
     super
@@ -91,7 +91,7 @@ class Components::Carousel::Item < Components::Image::Base
   end
 
   # See Image::Base#vote_context -- every carousel slide (show-page
-  # gallery, matrix-box mini-carousel) shares this caption layout, so
+  # gallery, grid-box mini-carousel) shares this caption layout, so
   # both need the :carousel tooltip treatment, not just :matrix.
   def vote_context
     :carousel

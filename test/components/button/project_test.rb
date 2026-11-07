@@ -14,7 +14,7 @@ class Components::ProjectButtonTest < ComponentTestCase
   def test_renders_at_lg_size
     html = render_button
 
-    assert_html(html, ".btn-lg[href='/some/path']")
+    assert_html(html, "a.btn.btn-secondary.btn-lg.my-3.mr-3[href='/some/path']")
   end
 
   private

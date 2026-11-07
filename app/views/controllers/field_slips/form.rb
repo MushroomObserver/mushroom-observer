@@ -60,7 +60,7 @@ module Views::Controllers::FieldSlips
 
     def render_code_only_form
       text_field(:code, label: :field_slip_code)
-      submit(:field_slip_create_obs.t, class: "mt-5")
+      submit(:field_slip_create_obs.t, class: "mt-3")
     end
 
     # --- Main form: full field-slip editing.
@@ -109,7 +109,8 @@ module Views::Controllers::FieldSlips
       text_field(:other_codes,
                  label: "#{:field_slip_other_codes.l} " \
                         "(#{:field_slip_other_example.l})")
-      checkbox_field(:inat, label: :field_slip_other_inat)
+      checkbox_field(:inat, label: :field_slip_other_inat,
+                            wrap_class: "mb-3")
     end
 
     def render_project_select
@@ -187,7 +188,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_submit_add_images
-      submit(:field_slip_add_images.t, class: "mt-5")
+      submit(:field_slip_add_images.t, class: "mt-3")
     end
 
     def render_edit_action_submits
@@ -264,21 +265,25 @@ module Views::Controllers::FieldSlips
       # `value:` option, no Superform model binding.
       @checked_ids = checked_ids
       @primary_id = primary_id
-      Row(element: :ul, class: "list-unstyled mt-3", data: matrix_data) do
+      # Can't delegate to Grid here (it has no `data:`
+      # passthrough for the Stimulus wiring below), so its
+      # row-cols-* grid classes are reproduced by hand -- Grid::Box's
+      # `columns:` default assumes it's rendered inside one of those.
+      Row(element: :ul,
+          class: class_names(Components::Grid::ROW_COLS_CLASSES,
+                             "list-unstyled mt-3"),
+          data: matrix_data) do
         observations.each { |obs| render_observation_row(obs) }
       end
     end
 
     def matrix_data
-      {
-        controller: "matrix-table field-slip-form",
-        action: "resize@window->matrix-table#rearrange"
-      }
+      { controller: "field-slip-form" }
     end
 
     def render_observation_row(obs)
-      render(Components::Matrix::Box.new(user: @user, object: obs,
-                                         votes: false)) do
+      render(Components::Grid::Box.new(user: @user, object: obs,
+                                       votes: false)) do
         render_include_checkbox(obs)
         render_primary_radio(obs)
         render_field_slip_link(obs.field_slip) if obs.field_slip

@@ -9,7 +9,7 @@ module Views::Controllers::Descriptions
 
       html = render_panels(description: desc)
 
-      assert_html(html, ".panel-body", text: desc.gen_desc.to_s.tpl.strip_html)
+      assert_html(html, ".card-body", text: desc.gen_desc.to_s.tpl.strip_html)
     end
 
     def test_renders_empty_message_when_no_notes

@@ -3,11 +3,11 @@
 # Backs `Components::ImageFragment::ReuseForm` — the small one-field form
 # that lets a viewer attach an existing image to an observation,
 # user profile, or glossary term by its numeric ID. The form's
-# only field is `img_id`; the surrounding image matrix
-# (`Components::Matrix::Table` of clickable thumbnails) submits to
+# only field is `img_id`; the surrounding image grid
+# (`Components::Grid` of clickable thumbnails) submits to
 # the same controller action via a bare URL param, so the receiving
 # action reads both the namespaced FormObject param and the raw
-# `params[:img_id]` from the matrix click.
+# `params[:img_id]` from the grid click.
 class FormObject::ImageReuse < FormObject::Base
   attribute :img_id, :integer
 end

@@ -20,9 +20,9 @@ module Form
       def test_renders_row_with_image_and_form_columns
         html = render_item
 
-        assert_html(html, ".row > .col-xs-12.col-md-6 > " \
+        assert_html(html, ".row > .col-12.col-md-6 > " \
                           ".image-position > img")
-        assert_html(html, ".row > .col-xs-12.col-md-6 > " \
+        assert_html(html, ".row > .col-12.col-md-6 > " \
                           ".form-panel")
       end
 

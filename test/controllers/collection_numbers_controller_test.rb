@@ -200,7 +200,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select("body.collection_numbers__new")
     # Sidebar preview of the target Observation is rendered.
-    assert_select(".matrix-box", minimum: 1)
+    assert_select(".grid-box", minimum: 1)
     assert(assigns(:collection_number))
 
     make_admin("mary")
@@ -239,8 +239,8 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     get(:edit, params: { id: number.id })
     assert_response(:success)
     assert_select("body.collection_numbers__edit")
-    # Sidebar list of MatrixBox previews for each associated obs.
-    assert_select(".matrix-box", minimum: number.observations.size)
+    # Sidebar list of Grid::Box previews for each associated obs.
+    assert_select(".grid-box", minimum: number.observations.size)
     assert_objs_equal(number, assigns(:collection_number))
 
     make_admin("mary")
@@ -339,6 +339,26 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_difference("CollectionNumber.count", 1) do
       post(:create, params: params, format: :turbo_stream)
     end
+  end
+
+  def test_create_collection_number_with_modal
+    obs = observations(:strobilurus_diminutivus_obs)
+    user = obs.user
+    params = {
+      observation_id: obs.id,
+      collection_number: {
+        name: user.login,
+        number: "1234",
+        modal: "true"
+      }
+    }
+    login(user.login)
+    assert_difference("CollectionNumber.count", 1) do
+      post(:create, params: params, format: :turbo_stream)
+    end
+    assert_select(
+      "turbo-stream[action='replace'][target='observation_collection_numbers']"
+    )
   end
 
   def test_create_collection_number_turbo_validation_error

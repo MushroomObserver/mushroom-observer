@@ -1,12 +1,9 @@
 # frozen_string_literal: true
 
-# The default application layout. `Views::FullPageBase#around_template`
-# wraps every action view in this layout when `session[:layout]` is
-# anything other than `"printable"`.
-#
-# Extends `Components::Base` directly, NOT `Views::Base`: the wrap
-# lives on `Views::FullPageBase < Views::Base`, and re-entering it
-# from the layout itself would recurse.
+# The default application layout; `Views::FullPageBase#around_template`
+# wraps every action view in this when `session[:layout]` isn't
+# "printable". Extends `Components::Base`, not `Views::Base`, to avoid
+# recursing back into the wrap.
 module Views::Layouts
   class Application < Components::Base
     register_value_helper :browser
@@ -84,10 +81,10 @@ module Views::Layouts
 
     def render_main_container(&block)
       banner = ::Banner.current
-      div(id: "main_container", class: "px-sm-3",
+      div(id: "main_container", class: "px-sm-2",
           data: main_container_data(banner)) do
         render(Views::Layouts::App::Banners.new(banner: banner))
-        Row(class: "row-offcanvas row-offcanvas-left",
+        div(class: "row-offcanvas row-offcanvas-left",
             data: { nav_target: "offcanvas" }) do
           render(Views::Layouts::Sidebar.new(
                    user: current_user,
@@ -111,7 +108,10 @@ module Views::Layouts
     end
 
     def render_right_side(banner:, &block)
-      Column(id: "right_side", xs: 12, md: 10) do
+      # Fixed width via `#right_side` in mo/_layout.scss (calc'd
+      # against the sidebar's fixed `$sidebar-max-width`), not a
+      # Bootstrap grid column.
+      div(id: "right_side") do
         render_nav_chrome(banner: banner)
         render_header_and_main(&block)
       end
@@ -197,7 +197,6 @@ module Views::Layouts
     def render_bottom_singletons
       Modal(type: :progress_spinner)
       Modal(type: :confirm)
-      render(Views::Layouts::App::MediaQueryTests.new)
       render(Views::Layouts::App::GtmFooter.new)
     end
 
@@ -212,11 +211,9 @@ module Views::Layouts
     end
 
     # `create` failures fall through to `new`, `update` failures to
-    # `edit`. The body class reflects "the page the user is looking
-    # at" rather than "the verb that brought us here" so test
-    # assertions like `assert_select("body.<thing>__new")` don't need
-    # a separate variant for the re-rendered-after-validation-failure
-    # path.
+    # `edit` -- body class reflects the page shown, not the verb that
+    # got here, so `assert_select("body.<thing>__new")` doesn't need
+    # a separate re-rendered-after-failure variant.
     def controller_action_class
       action = case controller.action_name
                when "create" then "new"

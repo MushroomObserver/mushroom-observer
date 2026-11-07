@@ -1,0 +1,114 @@
+# frozen_string_literal: true
+
+class Components::Grid::Box
+  # Footer rendering methods for Components::Grid::Box.
+  #
+  # Included by Box to keep the footer slot logic in a separate file.
+  # Methods here call `panel.with_footer(classes:) { ... }` on the
+  # Panel passed in from `render_object_layout`.
+  module Footer
+    private
+
+    def render_log_footer(panel)
+      return unless @data[:detail].present? || @data[:time].present?
+
+      panel.with_footer(classes: "log-footer log-text") do
+        ul(class: "list-unstyled") do
+          render_footer_detail(@data[:detail])
+          render_footer_time(@data[:time])
+        end
+      end
+    end
+
+    def render_footer_detail(detail)
+      return if detail.blank?
+
+      case detail
+      when User then render_user_detail(detail)
+      when Array then render_rss_detail(detail)
+      end
+    end
+
+    # `detail` is an [tag, args] pair from RenderData#rss_log_detail_tag,
+    # unresolved until now.
+    def render_rss_detail(detail)
+      tag, args = detail
+      return unless tag
+
+      li(class: "log-detail hanging-indent") do
+        trusted_html(resolve_rss_detail(tag, args))
+      end
+    end
+
+    # RssLog#detail used to wrap this same resolution in a dev/
+    # production-aware rescue before this logic moved to the view
+    # layer; keep the same protection here.
+    def resolve_rss_detail(tag, args)
+      tag.t(args || {})
+    rescue StandardError => e
+      Rails.env.production? ? raise(e) : ""
+    end
+
+    def render_footer_time(time)
+      return unless time
+
+      li(
+        class: "log-what log-updated-at hanging-indent",
+        data: { controller: "local-time",
+                local_time_utc_value: time.utc.iso8601 }
+      ) do
+        time.display_time
+      end
+    end
+
+    def render_user_detail(user)
+      li(class: "log-detail hanging-indent") do
+        plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
+        br
+        plain("#{:list_users_contribution.l}: #{user.contribution}")
+        br
+        Link(type: :get, name: :observations.ti,
+             target: observations_path(by_user: user.id))
+      end
+    end
+
+    def render_identify_footer(panel)
+      return unless @observation_view
+
+      panel.with_footer(
+        classes: "card-active text-center position-relative"
+      ) do
+        ObservationFragment(
+          type: :mark_as_reviewed_toggle,
+          observation_view: @observation_view,
+          selector: "box_reviewed",
+          label_class: "stretched-link"
+        )
+      end
+    end
+
+    def render_project_admin_footer(panel)
+      return unless show_project_exclude_button?
+
+      panel.with_footer(classes: "text-center") do
+        Button(
+          type: :post,
+          name: :exclude.ti,
+          target: exclude_observation_project_update_path(
+            project_id: @project.id, id: @data[:what].id
+          ),
+          size: :sm
+        )
+      end
+    end
+
+    def render_custom_footer(panel, &block)
+      panel.with_footer(classes: "text-center", &block)
+    end
+
+    def show_project_exclude_button?
+      @project && @data && @data[:type] == :observation &&
+        @project.is_admin?(@user)
+    end
+  end
+end

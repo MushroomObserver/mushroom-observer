@@ -57,7 +57,7 @@ module Views::Controllers::Support
                           collapse_switch_type: "other" }) do
         text_field(:other_amount, size: 6, label: false,
                                   addon: "$", addon_position: :prepend,
-                                  wrap_class: "ml-3",
+                                  wrap_class: "ml-4",
                                   data: { donate_target: "otherAmount",
                                           action: "click->donate#checkOther " \
                                                   "keyup->donate#convert" })

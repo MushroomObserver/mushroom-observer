@@ -120,7 +120,7 @@ class FormCheckboxPanelTest < ComponentTestCase
   def test_heading_is_pluralized_translation_of_type
     html = render_panel(objects: [@proj1])
 
-    assert_html(html, ".panel-title", text: :projects.ti)
+    assert_html(html, ".card-title", text: :projects.ti)
   end
 
   def test_species_list_type

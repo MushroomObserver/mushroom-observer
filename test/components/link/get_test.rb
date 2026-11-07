@@ -23,21 +23,25 @@ class LinkGetTest < ComponentTestCase
     assert_html(html, "a .sr-only", text: :edit.ti)
   end
 
-  def test_show_label_responsive_hides_text_on_xs_shows_from_sm
+  # ---- show_label: visibility modes ---------------------------------------
+
+  def test_show_label_responsive_renders_text_hidden_below_sm
     html = render_link(name: :edit.ti, target: @path, icon: :edit,
                        show_label: :responsive)
 
-    assert_html(html, "a .d-none.d-sm-inline", text: :edit.ti)
+    hide_classes = Components::Column.mobile_hide_classes(display: :inline).
+                   join(".")
+    assert_html(html, "a .#{hide_classes}", text: :edit.ti)
     assert_no_html(html, "a .sr-only")
   end
 
-  def test_show_label_always_shows_text_at_every_breakpoint
+  def test_show_label_always_renders_text_visible_at_every_breakpoint
     html = render_link(name: :edit.ti, target: @path, icon: :edit,
                        show_label: :always)
 
-    assert_html(html, "a .icon-text-gap", text: :edit.ti)
-    assert_no_html(html, "a .sr-only")
+    assert_html(html, "a span", text: :edit.ti)
     assert_no_html(html, "a .d-none")
+    assert_no_html(html, "a .sr-only")
   end
 
   def test_block_renders_inside_anchor

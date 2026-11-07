@@ -345,8 +345,8 @@ class OccurrencesControllerTest < FunctionalTestCase
     occ = create_occurrence(@obs1, @obs2)
     get(:show, params: { id: occ.id })
     assert_response(:success)
-    # Observation name is rendered inside a MatrixBox title link.
-    assert_select_text_includes(".matrix-box",
+    # Observation name is rendered inside a Grid::Box title link.
+    assert_select_text_includes(".grid-box",
                                 @obs1.format_name.t.html_to_ascii)
   end
 

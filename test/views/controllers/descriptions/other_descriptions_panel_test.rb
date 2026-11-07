@@ -42,7 +42,7 @@ class Views::Controllers::Descriptions::OtherDescriptionsPanelTest <
     # description link, no `project` param.
     assert_html(
       html,
-      "#other_descriptions .panel-heading-links a[href='" \
+      "#other_descriptions .card-header-links a[href='" \
       "#{routes.new_name_description_path(name_id: desc.parent.id)}']"
     )
   end

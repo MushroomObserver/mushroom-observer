@@ -6,6 +6,7 @@ module Views::Controllers::Locations
     # sibling class.
     class Show < Views::FullPageBase
       def view_template
+        content_padding(:no_panels)
         render(Help.new)
       end
     end

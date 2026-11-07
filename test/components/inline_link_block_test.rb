@@ -26,16 +26,15 @@ class InlineLinkBlockTest < ComponentTestCase
     assert_equal("", html.to_s.strip)
   end
 
-  # rubocop:disable-next MO/RedundantTagInSelector
   def test_single_item_rendered_inside_inline_link_block_span
     html = render_links(items: ["<b>edit</b>".html_safe])
 
-    assert_html(html, "span.inline-link-block b", text: "edit")
+    assert_html(html, ".inline-link-block b", text: "edit")
   end
 
   def test_no_separator_characters_between_items
     html = render_links(items: %w[a b c])
-    text = Nokogiri::HTML(html).at_css("span.inline-link-block").text
+    text = Nokogiri::HTML(html).at_css(".inline-link-block").text
 
     assert_equal("abc", text,
                  "Items should render with no nbsp/whitespace text " \

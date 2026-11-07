@@ -3,7 +3,7 @@
 require("application_system_test_case")
 
 # #4895: the in-page (overlay) vote interface is a lazy-loading Turbo
-# Frame now, not rendered inline -- Matrix::Box's fragment cache has
+# Frame now, not rendered inline -- Grid::Box's fragment cache has
 # no user component in its key, so baking vote state directly into
 # that cached HTML would show one viewer's votes to everyone else.
 # Confirms the frame actually fetches and renders real vote content in

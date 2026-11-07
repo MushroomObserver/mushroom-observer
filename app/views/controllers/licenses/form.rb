@@ -39,7 +39,8 @@ module Views::Controllers::Licenses
     end
 
     def render_deprecated_checkbox
-      checkbox_field(:deprecated, label: :license_form_checkbox_deprecated)
+      checkbox_field(:deprecated, label: :license_form_checkbox_deprecated,
+                                  wrap_class: "mb-3")
     end
   end
 end

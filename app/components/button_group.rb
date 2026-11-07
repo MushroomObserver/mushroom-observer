@@ -10,9 +10,8 @@ module Components
   # missing it) — pass `role:` explicitly to override for the rare
   # case of nesting inside a `.btn-toolbar`.
   #
-  # `.btn-group` itself doesn't rename across BS3/4/5, so this
-  # component exists for DRY + accessibility consistency, not to
-  # absorb a future class-rename.
+  # `.btn-group` is a stable class name, so this component exists for
+  # DRY + accessibility consistency, not to absorb a future rename.
   #
   # @example
   #   ButtonGroup do

@@ -181,8 +181,10 @@ module Views::Controllers::Occurrences
       assert(cb, "Expected include checkbox for recent obs")
       assert_equal("occurrence-form#includeToggled",
                    cb["data-action"])
-      label = cb.parent
-      assert_equal("label", label.name)
+      # Checkbox and label are siblings (custom-control markup), not
+      # nested.
+      label = cb.parent.at_css("label[for='#{cb["id"]}']")
+      assert(label, "Expected a sibling label for the checkbox")
       assert_includes(label.text, "Include")
     end
 
@@ -313,9 +315,9 @@ module Views::Controllers::Occurrences
                               observations: [@source],
                               candidates: [candidate])
 
-      # Candidate section rendered a second matrix grid (one is
-      # always present for @observations).
-      assert_html(html, "ul[data-controller~='matrix-table']", count: 2)
+      # Candidate section rendered a second grid (one is always
+      # present for @observations).
+      assert_html(html, "ul.grid-row", count: 2)
 
       # Candidate has unchecked Include checkbox
       doc = Nokogiri::HTML(html)
@@ -345,9 +347,9 @@ module Views::Controllers::Occurrences
                               observations: [@source],
                               candidates: [])
 
-      # Only the always-present @observations matrix grid -- no
-      # second one for an empty candidate list.
-      assert_html(html, "ul[data-controller~='matrix-table']", count: 1)
+      # Only the always-present @observations grid -- no second one
+      # for an empty candidate list.
+      assert_html(html, "ul.grid-row", count: 1)
     end
 
     def test_edit_field_slip_link_on_observation
