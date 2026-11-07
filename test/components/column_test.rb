@@ -72,6 +72,11 @@ class ColumnTest < ComponentTestCase
                  ))
   end
 
+  def test_mobile_only_classes_shorthand_hide_at_override
+    assert_equal(%w[d-block d-md-none],
+                 Components::Column.mobile_only_classes(hide_at: :md))
+  end
+
   def test_default_renders_div_with_no_width_classes
     html = render_column
 
