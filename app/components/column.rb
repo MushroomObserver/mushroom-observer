@@ -126,13 +126,14 @@ class Components::Column < Components::Base
     visibility_classes(hide_at: :xs, show_at: :sm, display: display)
   end
 
-  # Visible at xs only, hidden from sm up (mobile-only; replaces bare
-  # BS3 `.visible-xs`). Named to match the `:mobile_only` terminology
-  # already used at call sites like `Views::Layouts::Sidebar::
-  # CSS_CLASSES`. `display:` defaults to `:block`, matching BS3's
-  # bare `.visible-xs` (itself `display: block !important`).
-  def self.mobile_only_classes(display: :block)
-    visibility_classes(show_at: :xs, hide_at: :sm, display: display)
+  # Visible at xs only, hidden from `hide_at:` up (`:sm` by default,
+  # mobile-only; replaces bare BS3 `.visible-xs`). Named to match the
+  # `:mobile_only` terminology already used at call sites like
+  # `Views::Layouts::Sidebar::CSS_CLASSES`. `display:` defaults to
+  # `:block`, matching BS3's bare `.visible-xs` (itself `display:
+  # block !important`).
+  def self.mobile_only_classes(hide_at: :sm, display: :block)
+    visibility_classes(show_at: :xs, hide_at: hide_at, display: display)
   end
 
   # `xs` is Bootstrap 3's mobile-first base -- there's no `d-xs-*` class,
