@@ -63,6 +63,10 @@
 class Components::Modal < Components::Base
   include Phlex::Slotable
 
+  # Bootstrap 4's shown-modal class (Bootstrap 3's was "in" -- same
+  # migration risk as Components::Collapsible::EXPANDED_CLASS).
+  SHOWN_CLASS = "show"
+
   prop :id, String
   prop :title, _Nilable(String), default: nil
   # Bootstrap modal-dialog size variant.
@@ -157,12 +161,12 @@ class Components::Modal < Components::Base
   private
 
   def render_backdrop
-    div(class: "modal-backdrop fade show")
+    div(class: "modal-backdrop fade #{SHOWN_CLASS}")
   end
 
   def modal_class
     classes = ["modal"]
-    classes << "fade show" if @auto_open
+    classes << "fade #{SHOWN_CLASS}" if @auto_open
     classes << "fade" unless @auto_open
     classes << @extra_class if @extra_class.present?
     classes.join(" ")
