@@ -145,7 +145,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Expand the Location panel to reveal the region field
     find("[aria-controls='observations_location']").click
     assert_selector(
-      "#observations_location.#{Components::Collapsible::EXPANDED_CLASS}",
+      "#observations_location.#{EXPANDED}",
       wait: 3
     )
 

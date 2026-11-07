@@ -22,15 +22,14 @@ class Views::Layouts::SearchNavTest < ComponentTestCase
   end
 
   # The navbar wrapper itself is the collapse target (`.collapse`,
-  # starting closed -- no `Components::Collapsible::EXPANDED_CLASS`)
-  # so its padding/border disappear along with its content, rather
-  # than a nested div collapsing inside an always-visible navbar.
+  # starting closed -- no `EXPANDED`) so its padding/border disappear
+  # along with its content, rather than a nested div collapsing
+  # inside an always-visible navbar.
   def test_renders_as_the_collapse_target
     html = render(Views::Layouts::SearchNav.new)
 
     assert_html(html, "div#search_nav.collapse")
-    assert_no_html(html,
-                   "#search_nav.#{Components::Collapsible::EXPANDED_CLASS}")
+    assert_no_html(html, "#search_nav.#{EXPANDED}")
   end
 
   # Regression for #4492: Stimulus Array values must be JSON-encoded,

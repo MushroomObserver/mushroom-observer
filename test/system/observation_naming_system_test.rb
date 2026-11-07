@@ -163,7 +163,7 @@ class ObservationNamingSystemTest < ApplicationSystemTestCase
       assert_selector("#naming_reasons_4_notes", visible: :hidden)
       find("label[for='naming_reasons_4_check']").click
       assert_selector(
-        "#naming_reasons_4_notes.#{Components::Collapsible::EXPANDED_CLASS}",
+        "#naming_reasons_4_notes.#{EXPANDED}",
         wait: 4
       )
     end
