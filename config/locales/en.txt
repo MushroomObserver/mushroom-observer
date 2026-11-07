@@ -3010,6 +3010,7 @@
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
+  inat_id_out_of_range: "[ids] cannot be iNat observation IDs; they are larger than any iNat ID. Check them for extra digits."
   inat_missing_username: Missing your iNat Username
   inat_list_xor_all: "Choose exactly one: (1) list observation IDs, (2) supply a URL, or (3) check \"[:inat_import_all]\""
   inat_url_label: Observations from an iNat search URL
@@ -3024,6 +3025,7 @@
   inat_observed_missing_date: Observed Missing Date
   inat_cannot_communicate: Cannot communicate with iNat. Please try again later. If you keep getting this message, please notify webmaster.
   inat_unknown_param: "iNat rejected the request: [error]"
+  inat_request_error: "iNat returned an error (HTTP [status]) for this request: [error]"
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"

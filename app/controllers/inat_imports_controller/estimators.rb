@@ -17,10 +17,20 @@ module InatImportsController::Estimators
     flash_warning(:inat_unknown_param.t(error: inat_error_text(e)))
     false
   rescue RestClient::Exception, JSON::ParserError => e
+    estimate_failed(e)
+  end
+
+  # nil means iNat could not be reached; false means it answered with an
+  # error, which is reported as such rather than as a connection failure.
+  def estimate_failed(error)
     Rails.logger.warn(
-      "iNat estimate request failed: #{e.class}: #{e.message}"
+      "iNat estimate request failed: #{error.class}: #{error.message}"
     )
-    nil
+    return nil unless error.respond_to?(:http_code) && error.http_code
+
+    flash_warning(:inat_request_error.t(status: error.http_code,
+                                        error: inat_error_text(error)))
+    false
   end
 
   def fetch_raw_requested_count
@@ -67,7 +77,8 @@ module InatImportsController::Estimators
   end
 
   def inat_error_text(exception)
-    JSON.parse(exception.response.body)["error"]
+    body = JSON.parse(exception.response.body)
+    (body.is_a?(Hash) && body["error"]) || exception.message
   rescue JSON::ParserError
     exception.message
   end
