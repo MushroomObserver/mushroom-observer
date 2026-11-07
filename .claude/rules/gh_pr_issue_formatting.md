@@ -94,6 +94,10 @@ Cut the word outright rather than substituting a synonym ("truly," "legitimately
 
 List only what the session actually did: specific test files run (`bin/rails test test/...`), specific manual/browser checks performed. If a broader local run would be useful before opening the PR, ask the user to run it in chat — that's a chat request, not a PR checklist line.
 
+## Update `.claude/local/todos.md` as part of opening/merging the PR
+
+Before `gh pr create`, check whether the PR resolves, partially resolves, or creates follow-up for anything already tracked in `.claude/local/todos.md`, and update that file in the same pass — delete a resolved item, trim a partially-resolved one to what's left, or add a new entry for a follow-up found along the way. Don't wait to be asked; that file is gitignored and local to this machine, so nothing else keeps it in sync.
+
 ## Why
 
 Inside `$(...)`, backticks must be escaped as `` \` ``. The escape
