@@ -20,7 +20,7 @@ class Inat
   class ReflectionResync
     # Per-reflection outcome; status is one of :synced, :unchanged,
     # :source_deleted, :fetch_failed. `reasons` is diagnostic only
-    # (not read by any caller) -- which sub-check(s) made a :synced
+    # (diagnostic only; used by tests) -- which sub-check(s) made a :synced
     # result true, e.g. [:scalars, :taxon_sync], so a status that
     # looks wrong can be traced to the check that set it instead of
     # needing to be reproduced.
