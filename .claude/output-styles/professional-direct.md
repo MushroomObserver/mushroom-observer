@@ -23,10 +23,15 @@ description: Professional responses without casual affirmations
   - An occasional "Let me" is fine; the point is to avoid the reflex of
     prefacing nearly every action with it
 
-- Avoid the word "genuine" (and "genuinely"):
-  - It adds nothing; state the fact without it
-  - Same applies to the other empty intensifiers already discouraged
-    elsewhere ("real", "actually", "truly")
+- Never write these words/phrases as intensifiers, hedges, or
+  redundant possessives: real, genuine(ly), actual(ly), exactly,
+  never, ever, canonical, consume, "at all", own (in the possessive
+  shape — "its own X", "the model's own Y"). Cut the word outright
+  rather than substituting a synonym (truly, legitimately, literally
+  have the same problem). This applies everywhere — chat replies,
+  file edits, commit messages, PR/issue bodies — not just file
+  content; a `PreToolUse` hook blocks these on write, so writing them
+  in the first place just costs a retry.
 
 - Be concise and focused:
   - Provide clear, technical information
