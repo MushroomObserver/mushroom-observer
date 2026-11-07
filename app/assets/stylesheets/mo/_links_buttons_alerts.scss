@@ -197,6 +197,16 @@ form.button_to {
 
 // badges
 
+// A lighter-weight badge variant: outlined in text-color, no fill,
+// normal (not bold) weight -- for a count/label that shouldn't read
+// as loudly as Bootstrap's solid-background default.
+.badge-outline {
+  font-weight: normal;
+  background-color: transparent;
+  color: $text-color;
+  border: 1px solid $text-color;
+}
+
 // Record id badge. No inherent font-size -- every caller states one
 // of the .badge-* sizes below.
 .badge-id {
@@ -251,22 +261,23 @@ button.badge-id:hover {
 }
 
 // Wrapper for a group of inline mod/add links (Components::
-// InlineLinkBlock). Flex + gap spaces items evenly with no trailing
-// margin after the last one, so a lone or final item's width matches
-// its content. `margin-top` baseline-corrects the block against
-// adjacent inline text (a name link, "Field Slip:" label, etc.) --
-// the title bar's `.object_edit .inline-link-block` (_content.scss)
-// sets a different margin-top, since that block sits next to other
-// icons, not text, and doesn't want this correction.
+// InlineLinkBlock). Flex + gap spaces items evenly, no trailing
+// margin after the last item. vertical-align: middle aligns this
+// inline-flex box against adjacent inline text -- its default
+// vertical-align: baseline doesn't land near text's visual center,
+// which a flat margin-top (RESOLVED, don't reintroduce) can only
+// patch for one font-size at a time. .object_edit .inline-link-block
+// (_content.scss) sets a margin-top separately, for spacing against
+// the heading above it, not this.
 .inline-link-block {
   display: inline-flex;
   align-items: center;
+  vertical-align: middle;
   white-space: nowrap;
   // em, not rem -- scales with the surrounding context's font-size
   // (a title-bar heading vs. small body text), same reasoning as
   // .icon-text-gap in _icons.scss.
   gap: 0.75em;
-  margin-top: 2px;
 }
 
 // Trailing observation-count column on the locations list-group --

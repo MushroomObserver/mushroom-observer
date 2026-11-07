@@ -117,9 +117,10 @@ class Inat::ObservationResyncerTest < UnitTestCase
     # Bring everything else in line with the source first.
     resync(found: { @id => @raw })
     before = sync_state(@obs)
-    status = resync(found: { @id => @raw }).first.status
-    assert_equal(:unchanged, status,
-                 "Test requires a placeholder already in sync; changed: " \
+    result = resync(found: { @id => @raw }).first
+    assert_equal(:unchanged, result.status,
+                 "Test requires a placeholder already in sync; reasons: " \
+                 "#{result.reasons.inspect}; changed: " \
                  "#{sync_state_diff(before, sync_state(@obs)).inspect}")
 
     result = resync(found: { @id => raw }).first

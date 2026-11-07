@@ -45,22 +45,41 @@ module Views::Controllers::Checklists
       li_class = target_name?(name_id) ? "checklist-target-name" : nil
       li(class: li_class) do
         if @context.logged_out
-          render_taxon_content(name, deprecated, synonym_id)
+          render_taxon_name(name)
         else
           Link(type: :get, name: name, target: taxon_link_path(name_id)) do
-            render_taxon_content(name, deprecated, synonym_id)
+            render_taxon_name(name)
           end
         end
-        render_taxon_remove_button(name_id)
+        # One InlineLinkBlock for the count badge, markers, and the
+        # remove button -- same gap-based spacing and
+        # vertical-align: middle baseline alignment for all of them,
+        # instead of separately-spaced groups.
+        InlineLinkBlock(items: taxon_marker_items(name, deprecated,
+                                                  synonym_id) +
+                               taxon_remove_button_items(name_id))
       end
     end
 
-    def render_taxon_content(name, deprecated, synonym_id)
+    def render_taxon_name(name)
       i { plain(name) }
-      whitespace
-      plain("(#{@data.counts[name]})")
-      plain(" *") if deprecated
-      plain(" +") if @data.duplicate_synonyms&.include?(synonym_id)
+    end
+
+    def taxon_marker_items(name, deprecated, synonym_id)
+      items = [Components::CountBadge.new(count: @data.counts[name],
+                                          class: "badge-outline ml-2")]
+      if deprecated
+        # :approve, not :deprecate -- Tab::Name::Approve's icon is the
+        # "currently deprecated" state indicator (see its comment);
+        # Tab::Name::Deprecate's icon means the opposite (currently
+        # approved).
+        items << Components::Icon.new(type: :approve,
+                                      title: :checklist_any_deprecated.t)
+      end
+      return items unless @data.duplicate_synonyms&.include?(synonym_id)
+
+      items << Components::Icon.new(type: :observations,
+                                    title: :checklist_duplicate_synonyms.t)
     end
 
     def taxon_link_path(name_id)
@@ -90,11 +109,15 @@ module Views::Controllers::Checklists
         @data.target_name_ids.include?(name_id)
     end
 
-    def render_taxon_remove_button(name_id)
-      return unless @context.admin?
-      return unless @context.project.target_name_ids.include?(name_id)
+    def taxon_remove_button_items(name_id)
+      return [] unless @context.admin?
+      return [] unless target_name?(name_id)
 
-      Button(
+      [taxon_remove_button(name_id)]
+    end
+
+    def taxon_remove_button(name_id)
+      Components::Button.new(
         type: :delete,
         name: :remove.ti,
         target: project_target_name_path(
@@ -104,8 +127,8 @@ module Views::Controllers::Checklists
           name: Name.safe_find(name_id)&.text_name
         ),
         icon: :remove,
-        variant: :link,
-        class: "p-0 ml-1"
+        variant: :strip,
+        class: Components::InlineLinkBlock.item_class
       )
     end
   end
