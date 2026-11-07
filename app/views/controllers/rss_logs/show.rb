@@ -16,10 +16,25 @@ module Views::Controllers::RssLogs
     private
 
     def render_page_chrome
-      add_page_title(:show_rss_log_title.t(title: @rss_log.unique_format_name))
+      add_page_title(composed_page_title)
       add_pager_for(@rss_log)
       container_class(:text_image)
-      content_padding(:no_panels)
+      content_padding(:panels)
+    end
+
+    def composed_page_title
+      capture do
+        trusted_html(append_colon(:log.ti))
+        whitespace
+        IDBadge(object: target, size: :sm) if target
+        trusted_html(@rss_log.format_name.t.small_author)
+      end
+    end
+
+    def target
+      return @target if defined?(@target)
+
+      @target = @rss_log.target
     end
 
     def render_log_table
@@ -36,11 +51,12 @@ module Views::Controllers::RssLogs
     end
 
     def render_target_link
-      target = @rss_log.target
       return unless target
 
-      Link(type: :get, name: :show_object.l(type: target.type_tag),
-           target: target.show_link_args)
+      ContentPadded do
+        Button(type: :get, name: :show_object.l(type: target.type_tag),
+               target: target.show_link_args, variant: :outline)
+      end
     end
   end
 end
