@@ -64,19 +64,17 @@ class Inat
       @project.present?
     end
 
+    # The row lock reloads the observation: a field slip scan of one of
+    # its photos may have given it an occurrence since the importer
+    # loaded it, and linking from the stale copy would strand that
+    # occurrence.
     def standardize(observation, inat_id:, vouchers: [])
       return unless active?
 
-      native = native_partner(observation, inat_id.to_s) ||
-               voucher_partner(observation, vouchers)
-      if native
-        link_to_native(observation, native)
-      elsif (slip = observation.occurrence&.field_slip)
-        reassign_slip(slip)
-      elsif (code = notes_slip_code(observation))
-        attach_from_notes(observation, code)
+      observation.with_lock do
+        link_observation(observation, inat_id.to_s, vouchers)
+        ensure_member(observation)
       end
-      ensure_member(observation)
     end
 
     # Case 2 for a slip attached after the inline pass (QR scan,
@@ -94,6 +92,18 @@ class Inat
     end
 
     private
+
+    def link_observation(observation, inat_id, vouchers)
+      native = native_partner(observation, inat_id) ||
+               voucher_partner(observation, vouchers)
+      if native
+        link_to_native(observation, native)
+      elsif (slip = observation.occurrence&.field_slip)
+        reassign_slip(slip)
+      elsif (code = notes_slip_code(observation))
+        attach_from_notes(observation, code)
+      end
+    end
 
     # A native observation citing this iNat number in its notes and
     # carrying a field slip. Reflections are excluded -- another
@@ -188,11 +198,21 @@ class Inat
     # Case 2. Set the column directly: `FieldSlip#project=` gates on
     # the current user's add-slip permission and silently keeps nil
     # here. The change fires `cascade_project_change`, which files the
-    # occurrence's observations into the project.
+    # occurrence's observations into the project -- or, when one of
+    # them violates the project's constraints, declines and leaves the
+    # slip without a project. An admin's import keeps the slip and adds
+    # the violating observations anyway (#4932 invariant 1), for the
+    # Constraint Violations page.
     def reassign_slip(slip)
       return if slip.project_id == @project.id
 
       slip.update!(project_id: @project.id)
+      return unless admin_import? && slip.reload.project_id.nil?
+
+      slip.update_column(:project_id, @project.id)
+      slip.occurrence&.observations&.each do |obs|
+        @project.add_observation(obs)
+      end
     end
 
     # Case 3: attach the slip named by a target-prefix code found in
@@ -203,10 +223,10 @@ class Inat
       keep_native_primary(observation.reload.occurrence)
     end
 
-    # An in-use code joins an existing occurrence and `Attacher` makes
-    # the joiner primary -- wrong when the joiner is a reflection and a
-    # native member is present. Hand primary to the oldest native
-    # member; an all-reflection occurrence keeps the reflection.
+    # A reflection may not be an occurrence's primary. When one is (an
+    # occurrence the slip scan created around the import), hand primary
+    # to the oldest native member; an all-reflection occurrence keeps
+    # the reflection.
     def keep_native_primary(occurrence)
       return unless occurrence
 

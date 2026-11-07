@@ -278,6 +278,82 @@ class InatProjectSlipStandardizerTest < UnitTestCase
     assert_empty(@import.reload.constraint_violation_obs_ids)
   end
 
+  def test_admin_notes_join_keeps_the_slip_despite_violation
+    admin = use_admin_importer
+    native = observations(:coprinus_comatus_obs)
+    native.update_column(:occurrence_id, nil)
+    native.update!(field_slip: FieldSlip.find_or_create_by_code("OPEN-9020",
+                                                                @user))
+    limit_dates_to(native.when)
+    @project.add_observation(native)
+    obs = import_obs(:minimal_unknown_obs)
+    obs.update!(user: admin, notes: { Other: "OPEN-9020" },
+                when: native.when - 1.year)
+    assert(@project.violates_constraints?(obs), "premise")
+
+    standardizer.standardize(obs, inat_id: "111223001")
+
+    slip = FieldSlip.find_by(code: "OPEN-9020")
+    assert_equal(@project.id, slip.project_id,
+                 "An admin import keeps the slip in the project")
+    assert_includes(@project.observations.reload, obs)
+    assert_includes(@project.observations, native)
+  end
+
+  def test_admin_reassign_keeps_a_violating_slip
+    use_admin_importer
+    obs = import_obs(:minimal_unknown_obs)
+    slip = FieldSlip.find_or_create_by_code("EOL-9021", @user)
+    obs.update!(field_slip: slip, when: Date.new(2024, 6, 1))
+    limit_dates_to(Date.new(2020, 1, 1))
+    assert(@project.violates_constraints?(obs), "premise")
+
+    standardizer.standardize(obs, inat_id: "111223002")
+
+    assert_equal(@project.id, slip.reload.project_id)
+    assert_includes(@project.observations.reload, obs)
+  end
+
+  def test_notes_code_join_restores_the_previous_native_primary
+    older, newer = [observations(:coprinus_comatus_obs),
+                    observations(:agaricus_campestris_obs)].sort_by(&:id)
+    [older, newer].each { it.update_column(:occurrence_id, nil) }
+    older.update!(field_slip: FieldSlip.find_or_create_by_code("OPEN-9022",
+                                                               @user))
+    occurrence = older.reload.occurrence
+    newer.update!(occurrence: occurrence)
+    occurrence.update!(primary_observation: newer)
+    obs = import_obs(:detailed_unknown_obs)
+    obs.update!(notes: { Other: "slip OPEN-9022" })
+
+    standardizer.standardize(obs, inat_id: "111223003")
+
+    assert_equal(occurrence.id, obs.reload.occurrence_id)
+    assert_equal(newer.id, occurrence.reload.primary_observation_id,
+                 "The primary from before the join comes back")
+  end
+
+  # A field slip scan of one of the import's photos runs as a separate
+  # job and can give the observation an occurrence after the importer
+  # loaded it.
+  def test_stale_observation_does_not_strand_a_scanned_occurrence
+    inat_id = "987650002"
+    native = native_with_slip(:coprinus_comatus_obs, code: "OPEN-9023",
+                                                     citing: inat_id)
+    obs = import_obs(:detailed_unknown_obs)
+    stale = Observation.find(obs.id)
+    FieldSlip::Attacher.attach(observation: Observation.find(obs.id),
+                               code: "OPEN-9024", user: @user)
+    scanned = obs.reload.occurrence_id
+    assert(scanned, "premise: the scan gave the observation an occurrence")
+
+    standardizer.standardize(stale, inat_id: inat_id)
+
+    assert_equal(native.reload.occurrence_id, obs.reload.occurrence_id)
+    assert_nil(Occurrence.find_by(id: scanned),
+               "The scanned occurrence merges into the native's")
+  end
+
   def test_reconcile_after_attach_reassigns_slip_and_membership
     obs = import_obs(:minimal_unknown_obs)
     slip = FieldSlip.find_or_create_by_code("EOL-9006", @user)
@@ -298,5 +374,20 @@ class InatProjectSlipStandardizerTest < UnitTestCase
     Inat::ProjectSlipStandardizer.reconcile_after_attach(obs)
 
     assert_not_equal(@project.id, slip.reload.project_id)
+  end
+
+  private
+
+  def use_admin_importer
+    admin = @project.admin_group.users.first
+    assert(admin, "premise: project has an admin")
+    @import.update!(user: admin)
+    admin
+  end
+
+  # The project's dates cover only `date`, so any other date violates
+  # them.
+  def limit_dates_to(date)
+    @project.update!(start_date: date, end_date: date)
   end
 end

@@ -347,6 +347,22 @@ class FieldSlip::AttacherTest < UnitTestCase
     assert_not_includes(@project.observations.reload, @obs)
   end
 
+  # #4932 invariant 1: an admin may add a violating observation, so an
+  # admin's attach keeps the slip in the project.
+  def test_an_admin_attaching_a_violating_observation_keeps_the_slip
+    @project.update!(location: locations(:albion))
+    admin = @project.admin_group.users.first
+    assert(admin, "premise: project has an admin")
+    assert(@project.violates_constraints?(@obs), "premise")
+
+    result = attach(code: "OPEN-0231", user: admin)
+    slip = FieldSlip.find_by(code: "OPEN-0231")
+
+    assert_equal(:attached, result)
+    assert_equal(@project, slip.reload.project)
+    assert_includes(@project.observations.reload, @obs)
+  end
+
   # An existing slip in a project the user can neither join nor is a
   # member of: attaching would put the observation there against
   # invariant 4 (#4932).
