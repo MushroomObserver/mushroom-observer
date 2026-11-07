@@ -65,7 +65,11 @@ class Checklist
       )
     end
 
-    delegate :target_name_ids, to: :@project
+    # Not delegated to `@project.target_name_ids` -- same staleness
+    # risk as `target_names` above.
+    def target_name_ids
+      target_names.map(&:id)
+    end
 
     # Number of target names attached to the project.
     def num_targets
@@ -122,8 +126,14 @@ class Checklist
       merge_target_names_into_counts
     end
 
+    # Queried directly via ProjectTargetName, not `@project.target_names`
+    # -- that association is eager-loaded (strict_loading) at the start
+    # of nearly every request, so it's stale by the time an action adds
+    # or removes a target name earlier in the same request (#5629).
     def target_names
-      @target_names ||= @project.target_names.to_a
+      @target_names ||= Name.where(
+        id: ProjectTargetName.where(project_id: @project.id).select(:name_id)
+      ).to_a
     end
 
     # Target name ids whose own name appears as the consensus name of
