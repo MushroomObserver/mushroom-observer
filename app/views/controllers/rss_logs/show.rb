@@ -7,8 +7,7 @@ module Views::Controllers::RssLogs
     prop :rss_log, ::RssLog
 
     def view_template
-      add_page_title(:show_rss_log_title.t(title: @rss_log.unique_format_name))
-      add_pager_for(@rss_log)
+      render_page_chrome
 
       render_log_table if @rss_log.notes
       render_target_link
@@ -16,22 +15,24 @@ module Views::Controllers::RssLogs
 
     private
 
-    def render_log_table
-      table do
-        @rss_log.parse_log.each do |key, args, time|
-          next if key == :log_orphan
+    def render_page_chrome
+      add_page_title(:show_rss_log_title.t(title: @rss_log.unique_format_name))
+      add_pager_for(@rss_log)
+      container_class(:text_image)
+      content_padding(:no_panels)
+    end
 
-          render_log_row(key, args, time)
+    def render_log_table
+      Table(log_rows) do |t|
+        t.column(:date.ti, class: "text-nowrap align-text-top") do |row|
+          row[2].web_time
         end
+        t.column(:change.ti) { |row| trusted_html(row[0].t(row[1])) }
       end
     end
 
-    def render_log_row(key, args, time)
-      tr do
-        td(class: "text-nowrap align-text-top") { plain(time.web_time) }
-        td(style: "width:10px") { ":" }
-        td { trusted_html(key.t(args)) }
-      end
+    def log_rows
+      @rss_log.parse_log.reject { |key, _args, _time| key == :log_orphan }
     end
 
     def render_target_link
