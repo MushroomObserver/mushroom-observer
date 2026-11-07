@@ -26,7 +26,7 @@ class Inat
           @observation,
           inat_id: @inat_obs[:id],
           vouchers: Inat::ProjectSlipStandardizer.voucher_numbers(
-            @inat_obs.inat_obs_fields
+            @inat_obs[:ofvs]
           )
         )
       rescue StandardError => e
