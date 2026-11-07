@@ -20,6 +20,7 @@ module Views::Controllers::FieldSlips
       add_project_banner(@project) if @project
       add_index_title(@query)
       add_context_nav(Tab::FieldSlip::IndexActions.new)
+      add_filter_to_sorter_slot unless @project
       add_pagination(@pagination_data)
       container_class(:wide)
 
@@ -29,6 +30,13 @@ module Views::Controllers::FieldSlips
     end
 
     private
+
+    # No sort options on this index -- the filter form takes the
+    # pagination row's sorter slot instead, so it sits beside the
+    # pagination controls rather than as a separate block in the body.
+    def add_filter_to_sorter_slot
+      content_for(:sorter) { capture { render_filter_form } }
+    end
 
     def render_notice
       return unless @notice

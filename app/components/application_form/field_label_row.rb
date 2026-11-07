@@ -24,7 +24,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       if label_end_present?
         render_label_flex_row(label_text, inline)
       elsif label_appends_present?
-        render_label_with_appends(label_text)
+        render_label_with_appends(label_text, inline: inline)
       else
         label(for: field.dom.id, class: label_class) do
           render_label_content(label_text)
@@ -174,13 +174,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     # An inline field (e.g. a select beside its label) needs trailing
     # space between the appends row and the input that follows it.
     # Applied once, on the outer row, so it doesn't compound with an
-    # append's leading margin.
+    # append's leading margin. `inline-trailing-space` is a stable
+    # hook for tests to key off, independent of whichever margin
+    # utility supplies the space.
     def label_row_trailing_class
       return nil unless wrapper_options[:inline]
       return nil unless respond_to?(:help_slot) && help_slot &&
                         wrapper_options[:help_collapse]
 
-      "mr-3"
+      class_names("mr-3", "inline-trailing-space")
     end
 
     # d-flex align-items-center is needed since the label and appended
@@ -189,10 +191,12 @@ class Components::ApplicationForm < Superform::Rails::Form
     # wrap_class: nil since it already supplies that class and already
     # applied label_row_trailing_class to its outer div.
     def render_label_with_appends(label_text,
-                                  wrap_class: "label-row-with-appends")
+                                  wrap_class: "label-row-with-appends",
+                                  inline: false)
       row_class = wrap_class && class_names(wrap_class,
                                             label_row_trailing_class)
-      div(class: class_names("d-flex", "align-items-center", row_class)) do
+      display = inline ? "d-inline-flex" : "d-flex"
+      div(class: class_names(display, "align-items-center", row_class)) do
         label(for: field.dom.id,
               class: label_class(trailing_margin: false)) do
           render_label_content(label_text)

@@ -2087,7 +2087,7 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     post(:create, params: params)
 
     assert_flash_warning
-    assert_select("#observation_projects_inner.collapse.in",
+    assert_select("#observation_projects_inner.collapse.#{EXPANDED}",
                   { count: 1 },
                   "the panel holding the explanation must be expanded")
     assert_select("input[name='observation[use_spare_slip]']" \

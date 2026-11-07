@@ -26,9 +26,11 @@ module Views::Controllers::Names::Synonyms
 
     def view_template
       Row do
-        Column(xs: 12, sm: 6) do
-          render_existing_synonyms
-          render_proposed_synonyms
+        if left_column_has_content?
+          Column(xs: 12, sm: 6) do
+            render_existing_synonyms
+            render_proposed_synonyms
+          end
         end
         Column(xs: 12, sm: 6) do
           render_members_section
@@ -39,6 +41,14 @@ module Views::Controllers::Names::Synonyms
     end
 
     private
+
+    # render_existing_synonyms/render_proposed_synonyms both return
+    # early with nothing when there's nothing to list -- skip the
+    # column itself in that case, rather than printing an empty one
+    # that pushes the members column to the right half of the row.
+    def left_column_has_content?
+      @current_synonyms.size > 1 || @proposed_synonyms.present?
+    end
 
     def render_existing_synonyms
       return unless @current_synonyms.size > 1

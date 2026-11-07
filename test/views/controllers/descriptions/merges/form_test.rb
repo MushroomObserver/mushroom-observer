@@ -152,7 +152,8 @@ module Views::Controllers::Descriptions::Merges
       # The auto-checked radio's preview starts expanded -- with only
       # one radio in the group, no `change` event fires to open it.
       assert_html(html,
-                  "[data-collapse-switch-type='#{target.id}'].in")
+                  "[data-collapse-switch-type='#{target.id}']" \
+                  ".#{Components::Collapsible::EXPANDED_CLASS}")
     end
 
     private

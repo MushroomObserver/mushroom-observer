@@ -16,26 +16,34 @@ class ProjectAliasFormSystemTest < ApplicationSystemTestCase
     # By default, location type is selected (first option alphabetically
     # is "Location" in our select)
     # Location autocompleter should be visible, user autocompleter hidden.
-    # Panels toggle via Bootstrap .collapse/.collapse.in (collapse-switch
+    # Panels toggle via Bootstrap's collapse mechanism (collapse-switch
     # controller), not .d-none.
-    assert_selector("[data-collapse-switch-type='location'].collapse.in")
-    assert_selector("[data-collapse-switch-type='user'].collapse:not(.in)",
-                    visible: :all)
+    assert_selector(
+      "[data-collapse-switch-type='location'].collapse.#{EXPANDED}"
+    )
+    assert_no_selector(
+      "[data-collapse-switch-type='user'].collapse.#{EXPANDED}", visible: :all
+    )
 
     # Switch to User type
     select(:user.ti, from: "project_alias[target_type]")
 
     # Now user autocompleter should be visible, location hidden
-    assert_selector("[data-collapse-switch-type='user'].collapse.in")
-    assert_selector("[data-collapse-switch-type='location'].collapse:not(.in)",
-                    visible: :all)
+    assert_selector("[data-collapse-switch-type='user'].collapse.#{EXPANDED}")
+    assert_no_selector(
+      "[data-collapse-switch-type='location'].collapse.#{EXPANDED}",
+      visible: :all
+    )
 
     # Switch back to Location
     select(:location.ti, from: "project_alias[target_type]")
 
     # Location visible again, user hidden
-    assert_selector("[data-collapse-switch-type='location'].collapse.in")
-    assert_selector("[data-collapse-switch-type='user'].collapse:not(.in)",
-                    visible: :all)
+    assert_selector(
+      "[data-collapse-switch-type='location'].collapse.#{EXPANDED}"
+    )
+    assert_no_selector(
+      "[data-collapse-switch-type='user'].collapse.#{EXPANDED}", visible: :all
+    )
   end
 end

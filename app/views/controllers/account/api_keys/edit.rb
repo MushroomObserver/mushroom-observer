@@ -9,7 +9,7 @@ module Views::Controllers::Account::APIKeys
     prop :key, ::APIKey
 
     def view_template
-      add_page_title(:account_api_keys_title.t)
+      add_edit_title(@key)
       add_context_nav(Tab::Account::APIActions.new)
       trusted_html(:account_api_keys_help.tp)
       # Form's full_page_form hidden field makes #update redirect

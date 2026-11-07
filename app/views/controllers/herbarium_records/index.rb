@@ -31,16 +31,30 @@ module Views::Controllers::HerbariumRecords
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
       Table(@objects, class: "table-striped",
-                      show_headers: false) do |t|
-        t.column("") { |rec| render_edit_link(rec) }
-        t.column("") { |rec| render_herbarium_link(rec) }
-        t.column("") { |rec| render_record_link(rec) }
-        t.column("") { |rec| render_observation_links(rec) }
-        t.column("") { |rec| render_delete_button(rec) }
+                      identifier: "herbarium_record") do |t|
+        build_table_columns(t)
       end
+    end
+
+    def build_table_columns(table)
+      table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      table.column(:label.ti) { |rec| render_record_link(rec) }
+      table.column(:observations.ti) { |rec| render_observation_links(rec) }
+      build_trailing_columns(table)
+    end
+
+    def build_trailing_columns(table)
+      table.column("") { |rec| render_edit_link(rec) }
+      table.column("") { |rec| render_delete_button(rec) }
+      table.column(:mo_id.ti, class: "text-right") do |rec|
+        render_id_badge(rec)
+      end
+    end
+
+    def render_id_badge(rec)
+      IDBadge(object: rec, size: :lg, extra_class: nil)
     end
 
     def render_edit_link(rec)

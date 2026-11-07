@@ -38,7 +38,7 @@ class Views::Layouts::TopNav < Views::Base
   # would shrink to content width instead of filling the navbar.
   # `flex-bar` is mo/_top_nav.scss's `d-flex` + `justify-content-
   # between` + `align-items-center` alias.
-  CONTAINER_CLASSES = %w[container-fluid px-3 w-100 flex-bar].freeze
+  CONTAINER_CLASSES = %w[container-fluid px-card w-100 flex-bar].freeze
   LEFT_CLASSES = %w[
     d-flex flex-row align-items-center flex-grow-1 navbar_left
   ].freeze
@@ -104,7 +104,7 @@ class Views::Layouts::TopNav < Views::Base
   # The hamburger that opens the offcanvas sidebar on mobile /
   # small-tablet widths. Uses the MO favicon as the glyph.
   def render_left_nav_toggle
-    div(class: class_names("pr-3 pr-sm-4",
+    div(class: class_names("pr-2",
                            Components::Column.visibility_classes(
                              show_at: :xs, hide_at: :md
                            ))) do

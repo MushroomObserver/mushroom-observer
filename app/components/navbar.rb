@@ -91,6 +91,9 @@ module Components
     prop :element, Symbol, default: :nav
     prop :variant, _Union(:default, :inverse)
     prop :flex, _Boolean, default: true
+    # Overrides the default zero padding -- see `base_class` below for
+    # why this needs a dedicated prop instead of a class override.
+    prop :padding, String, default: "p-0"
     # `_Any?`, not bare `_Any` -- Literal's `_Any` excludes `NilClass`,
     # so a caller passing an explicit `key: nil` (not just omitting the
     # key) would otherwise raise a Literal::TypeError.
@@ -109,17 +112,15 @@ module Components
       }
     end
 
-    # `p-0` is baked in (rather than left for each caller to add)
-    # because the bridge rule's `padding` is a real value, not a
-    # no-op - every current caller wants zero, so callers shouldn't
-    # have to remember it. `.p-0` is `!important`
-    # (`mo/_utilities.scss`), so a future caller wanting *different*
-    # padding can't just add another padding utility class alongside
-    # it and expect a predictable winner - that'll need a real
-    # mechanism (e.g. a `padding:` prop), not a class override.
+    # `p-0` default since the bridge rule's `padding` is nonzero, not
+    # a no-op - most callers want zero, so they shouldn't have to
+    # remember it. Bootstrap padding utilities are all `!important`
+    # (`mo/_utilities.scss`), so a caller needing different padding
+    # must override via `padding:`, not by adding another padding
+    # utility class alongside it.
     def base_class
       class_names("navbar", ("navbar-flex" if @flex), "navbar-#{@variant}",
-                  "p-0")
+                  @padding)
     end
   end
 end

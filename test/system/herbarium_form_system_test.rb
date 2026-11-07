@@ -125,7 +125,8 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
 
       # Wait for autocomplete dropdown and select using keyboard
       assert_selector(".auto_complete", wait: 5)
-      assert_selector(".auto_complete ul li a", text: /Burbank/i, wait: 5)
+      assert_selector(".auto_complete .dropdown-item", text: /Burbank/i,
+                                                       wait: 5)
       browser.keyboard.type(:down, :tab)
 
       # Verify location was selected (has-id class and hidden field populated)
@@ -142,7 +143,7 @@ class HerbariumFormSystemTest < ApplicationSystemTestCase
       fill_in("herbarium_place_name", with: "genohlac gard france")
 
       # Wait for create button to appear, then click via JS
-      # (button text is hidden on small viewports via d-none d-sm-inline,
+      # (button text is hidden on small viewports via d-none d-md-inline,
       # so Cuprite can't click it directly)
       assert_selector(".create-button", visible: :all, wait: 5)
       btn = find(".create-button", visible: :all)

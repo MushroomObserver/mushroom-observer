@@ -77,12 +77,9 @@ class Views::Layouts::Sidebar
                     "##{Languages::COLLAPSE_ID} " \
                     "form[action='#{routes.switch_locale_path}']" \
                     "[method='post']")
-        # `.indent` (not a deeper `pl-*`) — same left padding as the
-        # toggle's own `pl-3`, so rows line up with "Languages:"
-        # rather than sitting under it.
         assert_html(html,
                     "##{Languages::COLLAPSE_ID} " \
-                    "button.list-group-item.indent##{id}" \
+                    "button.list-group-item##{id}" \
                     "[data-locale='#{lang.locale}']")
         assert_html(html,
                     "##{Languages::COLLAPSE_ID} form input[type='hidden']" \

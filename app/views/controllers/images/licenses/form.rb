@@ -20,7 +20,7 @@ module Views::Controllers::Images::Licenses
     def view_template
       super do
         Container(width: :text) do
-          trusted_html(:image_updater_help.tp)
+          p(class: "mb-3") { trusted_html(:image_updater_help.t) }
         end
         render_table if model.rows.any?
         submit(:image_updater_update.l, center: true)
@@ -31,7 +31,8 @@ module Views::Controllers::Images::Licenses
 
     def render_table
       Table(model.rows,
-            variant: :striped, identifier: "license-updater") do |t|
+            variant: :striped, identifier: "license-updater",
+            class: "table-align-middle") do |t|
         t.column(:image_updater_count.t)
         t.column(:image_updater_holder.t)
         t.column(:image_updater_license.t)
@@ -63,7 +64,12 @@ module Views::Controllers::Images::Licenses
     end
 
     def render_license_cell(row_ns, row)
-      render(row_ns.field(:new_id).select(row.licenses))
+      render(row_ns.field(:new_id).select(
+               row.licenses, wrapper_options: { label: :license.ti,
+                                                inline: true,
+                                                label_sr_only: true,
+                                                wrap_class: "mb-0" }
+             ))
       render(row_ns.field(:old_id).hidden)
     end
   end

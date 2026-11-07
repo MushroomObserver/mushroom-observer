@@ -193,14 +193,21 @@ class Components::ApplicationForm < Superform::Rails::Form
     # The help trigger renders as a sibling of `<label>`, not nested
     # inside it -- a click anywhere inside a checkbox's `<label>`
     # toggles the checkbox itself.
+    #
+    # Label + help-icon + append sit in an inner flex div, separate
+    # from the outer wrapper -- `render_help_after_field`'s
+    # block-level help text/Collapsible renders as a sibling below
+    # that row, not as a flex item beside it.
     def render_boolean_with_wrapper(label_for: checkbox_id, &checkbox_block)
       div(class: boolean_wrap_class) do
-        label_attrs = label_attributes
-        label_attrs = label_attrs.merge(for: label_for) if label_for
-        label(**label_attrs) { render_boolean_content(&checkbox_block) }
-        render_help_in_label_row
+        div(class: "d-flex align-items-center") do
+          label_attrs = label_attributes
+          label_attrs = label_attrs.merge(for: label_for) if label_for
+          label(**label_attrs) { render_boolean_content(&checkbox_block) }
+          render_help_in_label_row
+          render(append_slot) if append_slot
+        end
         render_help_after_field
-        render(append_slot) if append_slot
       end
     end
 
@@ -260,8 +267,13 @@ class Components::ApplicationForm < Superform::Rails::Form
       classes
     end
 
-    # Each per-option label gets its own .checkbox wrapper too
-    alias option_wrap_class boolean_wrap_class
+    # Array mode has no help block below the row, so its per-option
+    # wrapper keeps `d-flex align-items-center` directly -- it centers
+    # the checkbox + label text against each other, same reasoning as
+    # FieldLabelRow, with no flex-vs-block-help conflict to avoid.
+    def option_wrap_class
+      "#{boolean_wrap_class} d-flex align-items-center"
+    end
 
     def wrap_class?
       wrapper_options[:wrap_class].present?

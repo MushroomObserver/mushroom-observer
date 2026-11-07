@@ -586,6 +586,17 @@
   opacity: .75 !important;
 }
 
+.no-gutters {
+  margin-right: 0 !important;
+  margin-left: 0 !important;
+
+  > .col,
+  > [class*="col-"] {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+}
+
 @media screen and (min-width: $screen-sm-min) {
   .d-sm-none {
     display: none !important;
@@ -636,6 +647,10 @@
     margin-left: 0.5em !important;
   }
 
+  .ml-sm-0 {
+    margin-left: 0 !important;
+  }
+
   .ml-sm-2 {
     margin-left: 0.5em !important;
   }
@@ -652,6 +667,11 @@
   .px-sm-0 {
     padding-left: 0 !important;
     padding-right: 0 !important;
+  }
+
+  .px-sm-2 {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
   }
 
   .px-sm-3 {
