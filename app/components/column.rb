@@ -125,12 +125,12 @@ class Components::Column < Components::Base
     visibility_classes(hide_at: :xs, show_at: :md, display: display)
   end
 
-  # Visible at xs only, hidden from md up.
+  # Visible at xs only, hidden from `hide_at:` up (`:md` by default).
   # Named to match the `:mobile_only` terminology already used at call sites
   # like `Views::Layouts::Sidebar::CSS_CLASSES`.
   # `display:` defaults to `:block`.
-  def self.mobile_only_classes(display: :block)
-    visibility_classes(show_at: :xs, hide_at: :md, display: display)
+  def self.mobile_only_classes(hide_at: :md, display: :block)
+    visibility_classes(show_at: :xs, hide_at: hide_at, display: display)
   end
 
   # `xs` is the mobile-first base tier -- there's no `d-xs-*` class,

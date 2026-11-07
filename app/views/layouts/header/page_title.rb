@@ -50,11 +50,13 @@ module Views::Layouts
 
     # Only visible below `sm` -- the `sm`+ layout keeps these pieces
     # in their desktop positions (`render_left_column`/
-    # `render_right_column`). `xs: 12` keeps Bootstrap's default
+    # `render_right_column`). `col-12` keeps Bootstrap's default
     # padding so `.row`'s negative margin cancels it; `px-card` goes
     # on the nested div instead.
     def render_mobile_top_row
-      Column(xs: 12, hide_at: :sm) do
+      div(class: class_names(
+        "col-12", Components::Column.mobile_only_classes(hide_at: :sm)
+      )) do
         div(class: "d-flex flex-wrap justify-content-between " \
                    "align-items-center px-card mb-2") do
           trusted_html(content_for(:id_badge))
