@@ -75,6 +75,15 @@ class Query::SequencesTest < UnitTestCase
     assert_query_scope(ids, scope, :Sequence, observations: [obs.id])
   end
 
+  def test_sequence_name_id
+    obs = observations(:agaricus_campestris_obs)
+    seq = Sequence.create!(user: users(:rolf), observation: obs,
+                           locus: "ITS", bases: "ACGT")
+
+    scope = Sequence.name_id(obs.name_id).order_by_default
+    assert_query_scope([seq], scope, :Sequence, name_id: obs.name_id)
+  end
+
   def test_sequence_pattern_search
     assert_query([], :Sequence, pattern: "nonexistent")
 

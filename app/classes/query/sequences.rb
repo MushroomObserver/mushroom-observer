@@ -6,6 +6,10 @@ class Query::Sequences < Query
   query_attr(:id_in_set, [Sequence])
   query_attr(:by_users, [User], param_alias: :by_user, always_index: false)
   query_attr(:observations, [Observation], param_alias: :observation)
+  # `:name` collides with `Class#name` (Sequence.name is the model's
+  # class name), so the attr/scope is `:name_id` with `?name=` as the
+  # URL shortcut.
+  query_attr(:name_id, [Name], param_alias: :name)
   query_attr(:locus, [:string])
   query_attr(:locus_has, :string)
   query_attr(:archive, [:string])

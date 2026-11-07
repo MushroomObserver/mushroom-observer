@@ -47,6 +47,8 @@ class Sequence < AbstractModel
 
   scope :observations,
         ->(ids) { where(observation_id: ids) }
+  scope :name_id,
+        ->(ids) { joins(:observation).where(observations: { name_id: ids }) }
   scope :locus,
         ->(locus) { where(locus:) }
   scope :locus_has,

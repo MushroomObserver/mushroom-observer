@@ -14,10 +14,33 @@ module Views::Controllers::Sequences
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
 
+      render_filter_form
       PaginatedResults { render_list }
     end
 
     private
+
+    def render_filter_form
+      name_field = Components::ApplicationForm::FieldProxy.new(
+        nil, :name_term, filtered_name_text
+      )
+      IndexFilter(to: sequences_path, submit_text: :filter.ti) do
+        render(Components::ApplicationForm::AutocompleterField.new(
+                 name_field,
+                 type: :name, hidden_name: :name, inline: true,
+                 size: 60, class: "mb-0",
+                 label: :sequence_filter_by
+               ))
+      end
+    end
+
+    def filtered_name_text
+      cached_name_filter&.text_name.to_s
+    end
+
+    def cached_name_filter
+      @query&.params_cache&.dig(:name_id)
+    end
 
     def render_list
       ListGroup do |list|

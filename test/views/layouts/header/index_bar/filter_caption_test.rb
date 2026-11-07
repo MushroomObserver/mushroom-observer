@@ -98,6 +98,22 @@ module Views::Layouts
                   text: names(:coprinus_comatus).text_name)
     end
 
+    # `name_id` is Query::Sequences' flat (non-grouped) Name-id attr --
+    # unlike `names: { lookup: [...] }` above, it goes straight through
+    # `render_plain_param`, not `render_grouped_params`. It's in
+    # PARAM_LOOKUPS AND ITALICIZE_LOOKUP_KEYS, so the resolved name
+    # still renders inside `<b><i>…</i></b>`, not the raw id.
+    def test_sequence_name_id_lookup_renders_italicized_inside_b
+      query = Query.lookup_and_save(
+        :Sequence, name_id: names(:coprinus_comatus).id
+      )
+
+      html = render_for(query)
+
+      assert_html(html, "#caption-truncated b i",
+                  text: names(:coprinus_comatus).text_name)
+    end
+
     def test_many_lookups_emit_truncation_marker
       ids = Name.where(rank: "Species").limit(5).pluck(:id)
       query = Query.lookup_and_save(:Name, names: { lookup: ids })
