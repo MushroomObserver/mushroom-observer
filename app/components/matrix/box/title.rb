@@ -26,7 +26,7 @@ class Components::Matrix::Box::Title < Components::Base
 
   def view_template
     span(
-      class: class_names("rss-name", title_weight),
+      class: class_names("log-name", title_weight),
       id: "box_title_#{@id}"
     ) { @name }
   end

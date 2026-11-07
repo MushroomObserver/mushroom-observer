@@ -126,22 +126,26 @@ class Components::Matrix::Box < Components::Base
 
   # Render details section
   def render_details_section(panel)
-    panel.with_body(classes: "rss-box-details") do
+    panel.with_body(classes: "log-details log-text") do
       render_what_section
-      render_where_section
-      render_when_who_section
-      render_source_credit
-      render_occurrence_link
+      ul(class: "list-unstyled") do
+        render_where_section
+        render_when_who_section
+        render_source_credit
+        render_occurrence_link
+      end
     end
   end
 
   def render_what_section
     h_style = @data[:image] ? "h5" : "h3"
 
-    div(class: "rss-what") do
-      h5(class: class_names(%w[mt-0 rss-heading], h_style)) do
-        Link(type: :get, name: @data[:name],
-             target: @data[:what].show_link_args) { render_title }
+    div(class: "log-what") do
+      div(class: "log-heading") do
+        h5(class: class_names(["mt-0"], h_style)) do
+          Link(type: :get, name: @data[:name],
+               target: @data[:what].show_link_args) { render_title }
+        end
         whitespace
         IDBadge(object: @data[:what], size: :md, extra_class: nil)
       end
@@ -169,7 +173,7 @@ class Components::Matrix::Box < Components::Base
                 end
     return unless obs_count > 1
 
-    div(class: "small mt-3") do
+    li(class: "hanging-indent mt-3") do
       Link(type: :get, target: occurrence_path(occ),
            name: :matrix_box_occurrence.l, icon: :matrix,
            show_label: :responsive,
@@ -213,21 +217,19 @@ class Components::Matrix::Box < Components::Base
   def render_where_section
     return unless @data[:where]
 
-    div(class: "rss-where") do
-      small do
-        Link(type: :location,
-             where: @data[:where],
-             location: @data[:location])
-      end
+    li(class: "log-where hanging-indent") do
+      Link(type: :location,
+           where: @data[:where],
+           location: @data[:location])
     end
   end
 
   def render_when_who_section
     return if @data[:when].blank?
 
-    div(class: "rss-what") do
-      small(class: "nowrap-ellipsis") do
-        span(class: "rss-when") { @data[:when] }
+    li(class: "log-when-who hanging-indent") do
+      span(class: "nowrap-ellipsis") do
+        span(class: "log-when") { @data[:when] }
         plain(": ")
         render_who
       end
@@ -238,7 +240,7 @@ class Components::Matrix::Box < Components::Base
     if @data[:who_obs]
       render(Components::Matrix::Box::Who.new(obs: @data[:who_obs]))
     else
-      span(class: "rss-who") { Link(type: :user, user: @data[:who]) }
+      span(class: "log-who") { Link(type: :user, user: @data[:who]) }
     end
   end
 
@@ -247,10 +249,8 @@ class Components::Matrix::Box < Components::Base
     return unless target.respond_to?(:source_noteworthy?) &&
                   target.source_noteworthy?
 
-    div(class: "small mt-3") do
-      div(class: "source-credit") do
-        small { render_source_credit_inner(target) }
-      end
+    li(class: "log-source-credit hanging-indent mt-3") do
+      render_source_credit_inner(target)
     end
   end
 
