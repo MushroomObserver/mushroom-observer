@@ -503,6 +503,17 @@ class ProjectTest < UnitTestCase
     assert_not_includes(proj.new_candidate_observations.reload, obs)
   end
 
+  # Hidden GPS is not used to place an observation, so its location
+  # decides whether it falls in the project's area.
+  def test_new_candidate_observations_with_hidden_gps
+    proj = projects(:rare_fungi_project)
+    proj.update!(location: locations(:burbank))
+    obs = observations(:agaricus_campestris_obs)
+    obs.update!(lat: 34.18, lng: -118.33, gps_hidden: true)
+
+    assert_includes(proj.new_candidate_observations, obs)
+  end
+
   def test_new_candidate_observations_excludes_in_project
     proj = projects(:rare_fungi_project)
     obs = observations(:agaricus_campestris_obs)
