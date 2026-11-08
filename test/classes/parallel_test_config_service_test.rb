@@ -112,6 +112,37 @@ class ParallelTestConfigServiceTest < UnitTestCase
     end
   end
 
+  # Regression: config/database.yml is an ERB template whose `test:`
+  # entry is multi-db, so the credentials sit under `primary:`. Parsing
+  # it as plain YAML raises on the `<%` line, and reading the
+  # credentials off `test:` itself finds nothing and silently falls
+  # back to the mo/mo defaults.
+  def test_setup_config_files_with_erb_and_nested_primary
+    config_path = @rails_root.join("config")
+    FileUtils.mkdir_p(config_path)
+    File.write(config_path.join("database.yml"), <<~YAML)
+      <%
+        test_db = ENV.fetch("MO_TEST_DATABASE", "mo_test")
+      %>
+      test:
+        primary:
+          database: <%= test_db %>
+          username: nested_user
+          password: nested_pass
+        cache:
+          database: cache_test
+          username: cache_user
+          password: cache_pass
+    YAML
+
+    result = @service.setup_config_files
+
+    assert(result, "setup_config_files should return true")
+    content = File.read(@rails_root.join("config/mysql-test-0.cnf"))
+    assert_match(/user=nested_user/, content)
+    assert_match(/password=nested_pass/, content)
+  end
+
   # Regression: config/database.yml uses a YAML anchor/merge key to
   # share credentials across environments (`<<: *credentials`).
   # `YAML.dump`-built fixtures (create_database_yml) don't produce an
