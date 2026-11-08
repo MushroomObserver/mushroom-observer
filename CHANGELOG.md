@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-08 (deploy-2026-11-08-23-00)
+
+- Add `valign:` to `Components::Table` columns, sweep `align:`/`valign:` callers ([PR5637](https://github.com/MushroomObserver/mushroom-observer/pull/5637), @nimmolo)
+- Add a unique index on `name_trackers (user_id, name_id)` ([PR5467](https://github.com/MushroomObserver/mushroom-observer/pull/5467), @JoeCohen)
+- Split Bootstrap-4-native duplicates out of `_utilities.scss` ([PR5641](https://github.com/MushroomObserver/mushroom-observer/pull/5641), @nimmolo)
+- Fix `Checklist::ForProject` target-name staleness, cleanup checklist markup ([PR5642](https://github.com/MushroomObserver/mushroom-observer/pull/5642), @nimmolo)
+- Don't list the full suite in a PR test-plan checklist ([PR5643](https://github.com/MushroomObserver/mushroom-observer/pull/5643), @nimmolo)
+- Add todos.md upkeep step to PR formatting rules ([PR5646](https://github.com/MushroomObserver/mushroom-observer/pull/5646), @nimmolo)
+- Add banned-words list to the Professional Direct output style ([PR5645](https://github.com/MushroomObserver/mushroom-observer/pull/5645), @nimmolo)
+- Converge `page_title.rb` mobile row onto `Column.mobile_only_classes(hide_at:)` ([PR5644](https://github.com/MushroomObserver/mushroom-observer/pull/5644), @nimmolo)
+- Add `Components::Modal::SHOWN_CLASS` constant ([PR5648](https://github.com/MushroomObserver/mushroom-observer/pull/5648), @nimmolo)
+- Fix `test_placeholder_omissions_follow_the_source` flake (#5551) ([PR5647](https://github.com/MushroomObserver/mushroom-observer/pull/5647), @nimmolo)
+- Fix intermittent `ObservationResyncerTest` failure: stale `saved_changes` in `sync_scalars` ([PR5658](https://github.com/MushroomObserver/mushroom-observer/pull/5658), @mo-nathan)
+- Page-review fixes: `Publications` help placement, `RssLogs` table + title badge ([PR5649](https://github.com/MushroomObserver/mushroom-observer/pull/5649), @nimmolo)
+- Fix `lang:update` cache write and parallel-test credential parsing ([PR5661](https://github.com/MushroomObserver/mushroom-observer/pull/5661), @mo-nathan)
+- Add claude local dir to .gitignore ([PR5662](https://github.com/MushroomObserver/mushroom-observer/pull/5662), @mo-nathan)
+- Add a `name_has` Name filter to the `Sequences` index ([PR5659](https://github.com/MushroomObserver/mushroom-observer/pull/5659), @nimmolo)
+- Link foray iNat imports by MycoMap voucher; fix field slip import bugs; chunk id lists ([PR5651](https://github.com/MushroomObserver/mushroom-observer/pull/5651), @mo-nathan)
+- Default field slip dates and locations to the project event (`FieldSlip#default_date`) ([PR5656](https://github.com/MushroomObserver/mushroom-observer/pull/5656), @mo-nathan)
+- Unique indexes on `project_observations` and `project_images` ([PR5657](https://github.com/MushroomObserver/mushroom-observer/pull/5657), @mo-nathan)
+- Add `--pause-before-start` to `script/deploy.sh` ([PR5663](https://github.com/MushroomObserver/mushroom-observer/pull/5663), @mo-nathan)
+- Bind the server session to `auth_code` and add a forced password reset ([PR5666](https://github.com/MushroomObserver/mushroom-observer/pull/5666), @mo-nathan)
+
 ## 2026-11-06 (deploy-2026-11-06-00-00)
 
 - Translate genus-rank classification flash messages; block rubocop on locale `.txt` files ([PR5600](https://github.com/MushroomObserver/mushroom-observer/pull/5600), @nimmolo)
