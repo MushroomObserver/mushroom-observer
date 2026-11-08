@@ -556,6 +556,7 @@
   edit: edit
   enable: enable
   exclude: exclude
+  filter: filter
   help: help
   import: import
   index_object: "[TYPE] [:index.ti]"
@@ -2262,6 +2263,7 @@
   show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
+  sequence_filter_by: Filter by [:name.ti]
 
   # account/signup
   signup_title: Account signup
