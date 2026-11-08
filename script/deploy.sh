@@ -257,7 +257,9 @@ maybe_pause_before_start() {
     echo ""
     trap abort_during_pause INT TERM
     printf "Press Enter to start puma and finish the deploy: "
-    read -r _
+    # A failed `read` is Ctrl-D or a closed stdin, which would
+    # otherwise fall through to starting puma unconfirmed.
+    read -r _ || abort_during_pause
     # Back to the script-wide handler (see the trap below).
     trap 'rm -f public/maintenance.html' EXIT INT TERM
     echo "Continuing."
