@@ -148,10 +148,14 @@ class Inat
       login.present? && login.casecmp?(inat_obs[:user].to_h[:login].to_s)
     end
 
-    # The saved changes, minus the timestamp.
+    # The saved changes, minus the timestamp. Empty without a save:
+    # `saved_changes` would otherwise report the object's previous save,
+    # such as the last sync's log entry moving `log_updated_at`.
     def sync_scalars(obs, inat_obs)
       obs.assign_attributes(scalar_attributes(obs, inat_obs))
-      obs.save! if obs.changed?
+      return {} unless obs.changed?
+
+      obs.save!
       obs.saved_changes.except("updated_at")
     end
 
