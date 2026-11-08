@@ -87,8 +87,8 @@ class ParallelTestConfigService
     # aliases: true because it merges shared credentials via YAML
     # anchors (`<<: *credentials`), which Psych's safe-load default
     # rejects.
-    config = YAML.load(ERB.new(File.read(config_path)).result,
-                       aliases: true)["test"]
+    config = YAML.safe_load(ERB.new(File.read(config_path)).result,
+                            aliases: true)["test"]
     return nil unless config
 
     # `test:` is multi-db (primary/cache), so the credentials sit one

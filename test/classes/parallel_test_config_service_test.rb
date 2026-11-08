@@ -135,12 +135,13 @@ class ParallelTestConfigServiceTest < UnitTestCase
           password: cache_pass
     YAML
 
-    result = @service.setup_config_files
-
-    assert(result, "setup_config_files should return true")
-    content = File.read(@rails_root.join("config/mysql-test-0.cnf"))
-    assert_match(/user=nested_user/, content)
-    assert_match(/password=nested_pass/, content)
+    with_parallel_workers(1) do
+      assert(@service.setup_config_files,
+             "setup_config_files should return true")
+      content = File.read(@rails_root.join("config/mysql-test-0.cnf"))
+      assert_match(/user=nested_user/, content)
+      assert_match(/password=nested_pass/, content)
+    end
   end
 
   # Regression: config/database.yml uses a YAML anchor/merge key to
