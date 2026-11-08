@@ -175,6 +175,32 @@ class ObservationsControllerCreateTest < FunctionalTestCase
     assert_equal(project.location, assigns(:observation).location)
   end
 
+  # Entered after the event, a slip's observation is dated into the
+  # project's dates rather than to the day it was typed in.
+  def test_new_from_field_slip_after_event_dates_into_project
+    project = projects(:current_project)
+    project.update_columns(start_date: 10.days.ago.to_date,
+                           end_date: 5.days.ago.to_date)
+
+    login("mary")
+    get(:new, params: { field_code: "#{project.field_slip_prefix}-9998" })
+
+    assert_equal(project.end_date, assigns(:observation).when)
+  end
+
+  # During the event, the last-observation default stands: a user
+  # entering yesterday's collections keeps yesterday's date.
+  def test_new_from_field_slip_during_event_keeps_last_observation_date
+    project = projects(:current_project)
+    last = Observation.recent_by_user(users(:mary)).last
+    last.update_columns(when: 3.days.ago.to_date, created_at: Time.zone.now)
+
+    login("mary")
+    get(:new, params: { field_code: "#{project.field_slip_prefix}-9997" })
+
+    assert_equal(3.days.ago.to_date, assigns(:observation).when)
+  end
+
   # A field code with surrounding whitespace and mixed case still resolves
   # the existing slip's project onto the new observation --
   # add_field_slip_project normalizes the code the same way
