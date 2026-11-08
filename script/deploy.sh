@@ -130,6 +130,7 @@ served_sprite_matches() {
 # puma/solidqueue stop, db:migrate, lang:update) applies to a
 # licensed-asset-only refresh.
 icons_flag=0
+pause_before_start=0
 case "$1" in
     --icons-only)
         refresh_icon_library || exit 1
@@ -181,10 +182,69 @@ case "$1" in
         echo SUCCESS\!
         exit 0
         ;;
-    --icons)
-        icons_flag=1
-        ;;
 esac
+
+# Every flag but --icons-only, which exited above. A loop rather than
+# another `case "$1"`, so --icons and --pause-before-start combine, and
+# an unknown argument stops the deploy instead of being dropped -- a
+# typo'd --pause-before-start would otherwise deploy and bring the site
+# straight back up, which is the one outcome the flag exists to prevent.
+for arg in "$@"; do
+    case "$arg" in
+        --icons)
+            icons_flag=1
+            ;;
+        --pause-before-start)
+            pause_before_start=1
+            ;;
+        *)
+            echo "Unknown argument: $arg"
+            echo "Usage: script/deploy.sh [--icons] [--pause-before-start]"
+            echo "       script/deploy.sh --icons-only"
+            exit 1
+            ;;
+    esac
+done
+
+# --pause-before-start holds the deploy with the new code on disk,
+# migrations applied and assets built, while the site is still behind
+# the maintenance page -- the window for a one-off script that has to
+# run against the new schema before any request is served. It sits
+# after the build steps, so a deploy destined to fail does so before
+# the operator runs anything.
+maybe_pause_before_start() {
+    [ "$pause_before_start" = "1" ] || return 0
+
+    # A `read` with no terminal returns at once, which would skip the
+    # pause and start puma -- refuse instead.
+    if [ ! -t 0 ]; then
+        echo "--pause-before-start has no terminal to wait on."
+        echo "Refusing to skip the pause, so the deploy stops here and"
+        echo "the failure branch below brings puma back up."
+        return 1
+    fi
+
+    echo ""
+    echo "Paused before starting puma."
+    echo "  Code:       pulled, bundle installed"
+    echo "  Migrations: applied"
+    echo "  Assets:     built"
+    echo "  Site:       behind the maintenance page, puma stopped,"
+    echo "              queues paused"
+    echo ""
+    echo "Run what has to happen before traffic returns, in another"
+    echo "shell on this box, then come back here."
+    echo ""
+    echo "Ctrl-C aborts and leaves puma stopped. Recover with:"
+    echo "  sudo service puma start"
+    echo "  sudo service solidqueue start"
+    echo "  bundle exec rails runner script/resume_jobs.rb"
+    echo "  rm -f public/maintenance.html"
+    echo ""
+    printf "Press Enter to start puma and finish the deploy: "
+    read -r _
+    echo "Continuing."
+}
 
 if [ "$(git branch | grep '^\*')" != "* main" ]; then
     echo Please switch to main branch.
@@ -403,6 +463,7 @@ echo Installing bundle... && bundle install && \
 echo Checking for migrations... && rake db:migrate && \
 echo Updating translations... && script/lang_update_if_needed.sh && \
 echo Precompiling assets... && rake assets:precompile && \
+maybe_pause_before_start && \
 echo Starting puma... && sudo service puma start && \
 echo Starting solidqueue... && sudo service solidqueue start && \
 echo Resuming queues... && bundle exec rails runner script/resume_jobs.rb && \
