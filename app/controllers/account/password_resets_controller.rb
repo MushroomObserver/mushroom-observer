@@ -41,19 +41,21 @@ module Account
 
     def set_random_password_for_new_user_and_email_them
       password = String.random(10)
-      # `change_password` persists immediately via `update_attribute`
-      # (bypassing validations) and returns that save's result -- a
-      # separate `@new_user.save` afterward would be redundant, and
-      # worse, misleading: it can't undo a password change that
-      # already landed, so checking it as the success signal risks
-      # flashing an error (no redirect, no email) after the password
-      # was already silently changed underneath the user.
+      # `change_password` persists immediately, skipping validations,
+      # and returns that save's result. A `@new_user.save` here could
+      # not undo a change that already landed, so checking it instead
+      # risks flashing an error after the password had changed.
       if @new_user.change_password(password)
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
         # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
         PasswordMailer.build(receiver: @new_user, password:).deliver_later
+        # Read back by Account::LoginController#login_success, which
+        # nudges them to replace the emailed password. Scoped to the
+        # id, so requesting a reset for one account and logging into
+        # another does not carry the nudge across.
+        session[:password_emailed_to] = @new_user.id
         redirect_to(new_account_login_path)
       else
         flash_object_errors(@new_user)

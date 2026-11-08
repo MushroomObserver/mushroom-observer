@@ -341,7 +341,7 @@ module SpeciesLists
         member: { notes: Observation.no_notes },
         list: {}
       }
-      @request.session[:user_id] = rolf.id
+      login(rolf.login)
 
       params[:list][:members] = [
         "Fungi",

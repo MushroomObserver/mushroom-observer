@@ -74,6 +74,31 @@ module Account
                        "New password should be different from old")
     end
 
+    # The nudge to replace the emailed password is flashed at the next
+    # login, so this request has to leave a marker behind for it.
+    def test_create_marks_the_session_for_the_login_nudge
+      user = users(:roy)
+
+      post(:create, params: { new_user: { login: user.login } })
+
+      assert_equal(user.id, session[:password_emailed_to])
+    end
+
+    # The forced-reset page sends the user here, and completing the
+    # reset has to clear the flag, or they land straight back on it.
+    def test_create_clears_a_forced_reset_flag
+      user = users(:roy)
+      user.update_column(:password_reset_required, true)
+      was = user.auth_code
+
+      post(:create, params: { new_user: { login: user.login } })
+
+      user.reload
+
+      assert_not(user.password_reset_required)
+      assert_not_equal(was, user.auth_code)
+    end
+
     # A failing password change must render or redirect explicitly --
     # with neither, the request raises (found via Copilot review on
     # #5058). Force the failure by stubbing `save` on the
