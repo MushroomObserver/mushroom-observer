@@ -282,7 +282,7 @@ class FieldSlip < AbstractModel
   end
 
   def users_last_date
-    return nil unless @current_user
+    return nil unless @current_user && project
 
     Observation.joins(occurrence: :field_slip).merge(users_slips_in_project).
       where(Observation[:when].between(project.start_date..project.end_date)).
