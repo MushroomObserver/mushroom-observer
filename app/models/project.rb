@@ -465,16 +465,13 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     bulk_add_observations([obs.id])
   end
 
-  # Bulk variant of add_observation. Given a list of observation ids,
-  # inserts all needed project_observations / project_images rows in
-  # set-based SQL rather than emitting ~8 queries per observation.
-  # Idempotent: pre-existing project_observations are left alone, and
-  # any project_excluded_observations rows for these ids are dropped.
+  # Bulk variant of add_observation, in set-based SQL. Idempotent, and
+  # drops any project_excluded_observations rows for these ids.
   #
   # Two writers can add the same observation at once (the observation
-  # form and DetectFieldSlipQRJob both file a slip's observation into
-  # its project), so the pluck below is only a shortcut: the unique
-  # indexes make insert_all skip a row the other writer got in first.
+  # form and DetectFieldSlipQRJob), so the pluck is only a shortcut: the
+  # unique indexes make insert_all skip the other writer's row, via
+  # MySQL's ON DUPLICATE KEY (`unique_by:` is unsupported there).
   def bulk_add_observations(obs_ids)
     obs_ids = Array(obs_ids).map(&:to_i).uniq
     return 0 if obs_ids.empty?
