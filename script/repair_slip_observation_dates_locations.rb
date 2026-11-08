@@ -4,7 +4,8 @@
 # placed outside the project, mostly entered after the event with the
 # form's defaults. Each takes the earliest in-range date and the largest
 # in-area location among its slip's other observations, else the
-# project's location. Reflections mirror iNat and are left alone.
+# project's nearer end date (its last day, after an event) and location.
+# Reflections mirror iNat and are left alone.
 #
 #   bin/rails runner script/repair_slip_observation_dates_locations.rb
 #   bin/rails runner script/repair_slip_observation_dates_locations.rb \
@@ -87,9 +88,10 @@ class SlipObservationRepair
     return [nil, nil] unless project.violates_date_range?(obs)
 
     dates = siblings.map(&:when).select { |day| project.covers_date?(day) }
-    return [nil, "date: no in-range sibling"] if dates.empty?
+    return [dates.min, "date -> #{dates.min} (sibling)"] if dates.any?
 
-    [dates.min, "date -> #{dates.min} (sibling)"]
+    day = project.nearest_covered_date(obs.when)
+    [day, "date -> #{day} (project)"]
   end
 
   # [attributes, note or nil]
