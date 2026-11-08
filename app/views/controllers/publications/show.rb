@@ -6,8 +6,7 @@ module Views::Controllers::Publications
     prop :publication, ::Publication
 
     def view_template
-      add_page_title(:publication.ti)
-      add_edit_icons(@publication, current_user) if current_user
+      render_page_chrome
 
       render_full
       render_link if @publication.link.present?
@@ -17,6 +16,12 @@ module Views::Controllers::Publications
     end
 
     private
+
+    def render_page_chrome
+      add_page_title(:publication.ti)
+      add_edit_icons(@publication, current_user) if current_user
+      content_padding(:no_panels)
+    end
 
     def render_full
       p do
