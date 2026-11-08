@@ -979,9 +979,21 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # the right boolean without raising. Verified locally; see Copilot
   # review on PR #4182.
   def violates_date_range?(observation)
-    return false if start_date.nil? && end_date.nil?
+    !covers_date?(observation.when)
+  end
 
-    !(start_date..end_date).cover?(observation.when)
+  def covers_date?(date)
+    return true if start_date.nil? && end_date.nil?
+
+    (start_date..end_date).cover?(date)
+  end
+
+  # The date itself when the project's range covers it, else the nearer
+  # end of the range.
+  def nearest_covered_date(date)
+    return date if covers_date?(date)
+
+    start_date && date < start_date ? start_date : end_date
   end
 
   # Target-name violation: project has a non-empty target_names list

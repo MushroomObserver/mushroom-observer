@@ -256,21 +256,48 @@ class FieldSlip < AbstractModel
       project&.location || users_last_observation_location
   end
 
-  # Location of the user's most recently updated field slip in this
-  # project that has a located observation (slips without one are
-  # skipped). Requires a project: a nil here would match every
-  # project-less slip the user owns -- an orphaned-spares bucket, not
-  # an event cohort -- and resurrect whatever location a batch job
-  # last touched (a fresh "2026-NAMA-0001" slip once defaulted to a
-  # year-old spare's site this way).
+  # Location of the user's most recently updated slip in this project
+  # with a located observation inside the project's area -- one entered
+  # at home after a foray would otherwise default every later slip.
+  # Requires a project: without one this matches every project-less
+  # spare the user owns and resurrects a year-old site.
   def users_last_location
     return nil unless @current_user && project
 
     Location.joins(observations: { occurrence: :field_slip }).
-      where(field_slips: { user_id: @current_user.id,
-                           project_id: project.id }).
+      merge(users_slips_in_project).merge(in_project_area).
       order(FieldSlip.arel_table[:updated_at].desc,
             FieldSlip.arel_table[:id].desc).first
+  end
+
+  # Default date, for the observation the slip's code starts: today (or
+  # the day the slip was made) when the project's dates cover it. Entered
+  # after the event, it is the date of the user's latest slip observation
+  # in this project, else the nearer end of the project's dates.
+  def default_date
+    day = created_at&.to_date || Time.zone.today
+    return day if project.nil? || project.covers_date?(day)
+
+    users_last_date || project.nearest_covered_date(day)
+  end
+
+  def users_last_date
+    return nil unless @current_user && project
+
+    Observation.joins(occurrence: :field_slip).merge(users_slips_in_project).
+      where(Observation[:when].between(project.start_date..project.end_date)).
+      order(FieldSlip.arel_table[:updated_at].desc,
+            FieldSlip.arel_table[:id].desc).pick(:when)
+  end
+
+  def users_slips_in_project
+    FieldSlip.where(user_id: @current_user.id, project_id: project.id)
+  end
+
+  def in_project_area
+    return Location.all unless project.location
+
+    Location.in_box(**project.location.bounding_box)
   end
 
   def users_last_observation_location
@@ -288,7 +315,7 @@ class FieldSlip < AbstractModel
   end
 
   def date
-    observation&.when || created_at
+    observation&.when || default_date
   end
 
   def field_slip_name

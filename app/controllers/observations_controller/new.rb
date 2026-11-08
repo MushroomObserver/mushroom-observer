@@ -55,6 +55,7 @@ module ObservationsController::New
     # Must follow defaults_from_last_observation_created, which copies the
     # user's last observation's location unconditionally.
     apply_field_slip_location(@field_code)
+    apply_field_slip_date(@field_code)
     add_list(SpeciesList.safe_find(params[:species_list]))
     @observation.when = params[:date] if params[:date]
     add_field_slip_project(@field_code)
@@ -145,6 +146,16 @@ module ObservationsController::New
     @observation.location = location
     @observation.where = location.name
     @location = location
+  end
+
+  # Only replaces a date the slip's project would reject: during the
+  # event, the last-observation default (yesterday's batch) stands.
+  def apply_field_slip_date(code)
+    slip = field_slip_for_code(code)
+    project = slip&.project
+    return if project.nil? || project.covers_date?(@observation.when)
+
+    @observation.when = slip.date
   end
 
   # Reuses `FieldSlip#calc_location` rather than restating the precedence,
