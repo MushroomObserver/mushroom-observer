@@ -206,6 +206,23 @@ for arg in "$@"; do
     esac
 done
 
+# Ctrl-C during the pause has to leave the maintenance page up: puma is
+# stopped at that point, so dropping the sentinel -- what the
+# script-wide EXIT trap does -- would hand users connection errors
+# instead of the maintenance notice. Clear that trap, then report the
+# state and the way back.
+abort_during_pause() {
+    trap - EXIT INT TERM
+    echo ""
+    echo "Aborted. The site is still behind the maintenance page and"
+    echo "puma is stopped. Bring it back up with:"
+    echo "  sudo service puma start"
+    echo "  sudo service solidqueue start"
+    echo "  bundle exec rails runner script/resume_jobs.rb"
+    echo "  rm -f public/maintenance.html"
+    exit 1
+}
+
 # --pause-before-start holds the deploy with the new code on disk,
 # migrations applied and assets built, while the site is still behind
 # the maintenance page -- the window for a one-off script that has to
@@ -235,14 +252,14 @@ maybe_pause_before_start() {
     echo "Run what has to happen before traffic returns, in another"
     echo "shell on this box, then come back here."
     echo ""
-    echo "Ctrl-C aborts and leaves puma stopped. Recover with:"
-    echo "  sudo service puma start"
-    echo "  sudo service solidqueue start"
-    echo "  bundle exec rails runner script/resume_jobs.rb"
-    echo "  rm -f public/maintenance.html"
+    echo "Ctrl-C aborts, leaving the maintenance page up and puma"
+    echo "stopped; the recovery commands are printed if you do."
     echo ""
+    trap abort_during_pause INT TERM
     printf "Press Enter to start puma and finish the deploy: "
     read -r _
+    # Back to the script-wide handler (see the trap below).
+    trap 'rm -f public/maintenance.html' EXIT INT TERM
     echo "Continuing."
 }
 
