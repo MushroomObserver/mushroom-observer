@@ -552,6 +552,28 @@ class ProjectTest < UnitTestCase
     assert_equal(img_count_before, proj.images.reload.size)
   end
 
+  # Another writer's rows land after this one read the table: the read
+  # finds nothing, and the unique indexes keep the inserts from
+  # duplicating what the other writer wrote.
+  def test_add_observation_racing_another_writer_adds_one_row_each
+    proj = projects(:eol_project)
+    obs = observations(:detailed_unknown_obs)
+    img = obs.images.find { |i| i.user_id == obs.user_id }
+    assert(img, "fixture must have an owner-attributed image")
+    ProjectObservation.create!(project: proj, observation: obs)
+    ProjectImage.create!(project: proj, image: img)
+
+    proj.stub(:project_observations, ProjectObservation.none) do
+      proj.add_observation(obs)
+    end
+    proj.add_image(img)
+
+    assert_equal(1, ProjectObservation.where(project: proj,
+                                             observation: obs).count)
+    assert_equal(1, ProjectImage.where(project: proj, image: img).count)
+    assert_includes(proj.observations, obs)
+  end
+
   def test_bulk_add_observations_unexcludes
     proj = projects(:rare_fungi_project)
     obs = observations(:agaricus_campestris_obs)
