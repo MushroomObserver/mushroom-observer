@@ -34,44 +34,37 @@ module Views::Controllers::SpeciesLists::Projects
 
     def build_form_object(object_states, project_states)
       FormObject::SpeciesListProjects.new(
-        objects_list: object_states[:list] ? "1" : "0",
-        objects_obs: object_states[:obs] ? "1" : "0",
-        objects_img: object_states[:img] ? "1" : "0",
+        objects: object_states.select { |_type, on| on }.keys.map(&:to_s),
         project_ids: project_states.select { |_id, on| on }.keys.map(&:to_s)
       )
     end
 
     def render_object_checkboxes
-      div(class: "form-group form-inline mt-3") do
-        label(for: "species_list_projects_objects_list") do
+      div(class: "form-group mt-3") do
+        label(for: "species_list_projects_objects") do
           plain(:species_list_projects_which_objects.t)
         end
-        checkbox_field(:objects_list,
-                       label: :species_list_projects_this_list,
-                       checked_value: "1", unchecked_value: "0")
-        checkbox_field(:objects_obs,
-                       label: :species_list_projects_observations,
-                       checked_value: "1", unchecked_value: "0")
-        checkbox_field(:objects_img,
-                       label: :species_list_projects_images,
-                       checked_value: "1", unchecked_value: "0")
+        checkbox_field(:objects,
+                       [:species_list_projects_this_list.t, "list"],
+                       [:species_list_projects_observations.t, "obs"],
+                       [:species_list_projects_images.t, "img"])
       end
     end
 
     def render_project_checkboxes
-      div(class: "form-group form-inline mt-3") do
-        label(for: "species_list_projects_project_ids") do
-          plain(:species_list_projects_which_projects.t)
-        end
-        # Array-mode checkboxes: each renders
-        # `<input type="checkbox" name="...[project_ids][]" value="<id>">`
-        # so the controller receives `project_ids: ["1", "2", ...]`.
-        # Rails-shape `[label, value]` pairs.
-        options = @projects.sort_by(&:text_name).map do |proj|
-          [proj.title.t, proj.id.to_s]
-        end
-        checkbox_field(:project_ids, *options)
-      end
+      render(
+        Components::Form::CheckboxPanel.new(
+          form: self,
+          type: :project,
+          form_object_name: "species_list_projects",
+          objects: @projects,
+          checked_ids: checked_project_ids
+        )
+      )
+    end
+
+    def checked_project_ids
+      @project_states.select { |_id, on| on }.keys
     end
 
     def render_submit_buttons
