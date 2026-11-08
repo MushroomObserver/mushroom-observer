@@ -1185,6 +1185,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_08_120000) do
     t.integer "original_image_quota", default: 0
     t.integer "label_format", default: 1
     t.boolean "inat_import_opt_out", default: false, null: false
+    t.boolean "password_reset_required", default: false, null: false
     t.index ["inat_username"], name: "index_users_on_inat_username"
     t.index ["login"], name: "login_index"
     t.index ["name"], name: "index_users_on_name"

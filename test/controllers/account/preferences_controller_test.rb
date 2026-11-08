@@ -218,6 +218,25 @@ module Account
       assert_equal("new@email.com", user.reload.email)
     end
 
+    # Changing a password rotates auth_code, which drops every session
+    # bound to the previous one -- including this browser's, unless the
+    # update re-issues the credential it just invalidated.
+    def test_password_change_keeps_this_session_logged_in
+      login("rolf")
+      was = rolf.auth_code
+
+      patch(:update, params: { user: GOOD_PARAMS })
+
+      assert_flash(:runtime_prefs_success)
+      assert_not_equal(was, rolf.reload.auth_code)
+      assert_equal(rolf.auth_code, session[:auth])
+
+      get(:edit)
+
+      assert_response(:success)
+      assert_equal(rolf.id, @controller.send(:current_user)&.id)
+    end
+
     def test_edit_prefs_with_email_with_trailing_space
       params = GOOD_PARAMS.merge({ email: " trim@this.com " })
       login("rolf")

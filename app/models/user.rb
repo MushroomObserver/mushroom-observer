@@ -283,6 +283,8 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   ##############################################################################
 
+  before_save :ensure_auth_code
+
   # Encrypt password before saving the first time.  (Subsequent modifications
   # go through +change_password+.)
   before_create :crypt_password
@@ -535,8 +537,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   #
   #   user.change_password('new_password')
   #
+  # Rotating `auth_code` here drops every session and autologin cookie
+  # carrying the previous code, so changing the password ends access
+  # that predates the change.
   def change_password(pass)
-    update_attribute("password", self.class.sha1(pass)) if pass.present?
+    return if pass.blank?
+
+    assign_attributes(password: self.class.sha1(pass),
+                      auth_code: String.random(40),
+                      password_reset_required: false)
+    # Matches update_attribute's validation-skipping save: a password
+    # change has to go through for an account whose other columns no
+    # longer satisfy current validations.
+    save(validate: false)
   end
 
   # Mark a User account as "verified".
@@ -546,6 +559,19 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
     self.last_login = now
     self.last_activity = now
     save
+  end
+
+  # Enough of the email address for its owner to recognise, shown on
+  # the forced-password-reset page. That page sits behind a correct
+  # password, so it discloses nothing to anyone who does not hold one.
+  #
+  #   user.masked_email  # => "na**an@co************ce.com"
+  #
+  def masked_email
+    local, at, domain = email.to_s.rpartition("@")
+    return mask_label(domain) if at.blank?
+
+    "#{mask_label(local)}@#{mask_domain(domain)}"
   end
 
   ##############################################################################
@@ -1038,7 +1064,13 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
   # change_password for that instead.)
   def crypt_password
     self["password"] = self.class.sha1(password) if password.present?
-    self["auth_code"] = String.random(40)
+  end
+
+  # A blank +auth_code+ matches no session and no autologin cookie, so
+  # it locks the user out of staying logged in until something resets
+  # it. Fill one in on the way to the database instead of storing it.
+  def ensure_auth_code
+    self["auth_code"] = String.random(40) if self["auth_code"].blank?
   end
 
   ##############################################################################
@@ -1047,6 +1079,28 @@ class User < AbstractModel # rubocop:disable Metrics/ClassLength
 
   def user_group_names
     @user_group_names ||= user_groups.map(&:name)
+  end
+
+  # Masks the registrable label, keeping the rest of the domain, so
+  # "collectivesource.com" stays recognisable as a .com.
+  def mask_domain(domain)
+    label, dot, rest = domain.partition(".")
+    "#{mask_label(label)}#{dot}#{rest}"
+  end
+
+  # Keeps the first and last two characters. Four characters or fewer
+  # keep only the first, since first-two-plus-last-two would spell out
+  # the whole thing.
+  def mask_label(text)
+    return text if text.length <= 1
+
+    if text.length <= 4
+      stars = "*" * (text.length - 1)
+      "#{text[0]}#{stars}"
+    else
+      stars = "*" * (text.length - 4)
+      "#{text[0, 2]}#{stars}#{text[-2, 2]}"
+    end
   end
 
   validate :user_requirements

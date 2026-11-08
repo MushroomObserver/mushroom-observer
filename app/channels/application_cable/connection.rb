@@ -24,10 +24,18 @@ module ApplicationCable
     end
 
     # Mirrors ApplicationController::Authentication#session_user +
-    # #user_verified_and_allowed?.
+    # #user_verified_and_allowed?, including the stored `auth_code`
+    # binding that lets a rotation close open connections.
     def validate_user_in_session
       user = User.safe_find(request.session[:user_id])
-      user if user&.verified && !user.blocked?
+      return unless session_auth_valid?(user)
+
+      user if user.verified && !user.blocked?
+    end
+
+    def session_auth_valid?(user)
+      auth = request.session[:auth]
+      user && auth.present? && auth == user.auth_code
     end
 
     def validate_user_in_autologin_cookie
