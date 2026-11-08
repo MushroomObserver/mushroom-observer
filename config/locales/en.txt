@@ -4623,7 +4623,6 @@
   query_members: members
   query_misspellings: misspellings
   query_name_has: name has
-  query_name_id: "[:name]"
   query_needs_description: needs description
   query_needs_naming: needing identification
   query_nonpersonal: nonpersonal

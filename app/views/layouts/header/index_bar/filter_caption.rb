@@ -23,7 +23,6 @@ module Views::Layouts
       locations: :Locations,
       within_locations: :Locations,
       names: :Names,
-      name_id: :Names,
       lookup: :Names,
       clade: :Names,
       look_alikes: :Names,
@@ -53,7 +52,7 @@ module Views::Layouts
     CAPTION_TRUNCATE = 3
     # Lookup keys whose joined string is italicized inside the `<b>`
     # tag (Latin / taxonomic names).
-    ITALICIZE_LOOKUP_KEYS = [:names, :name_id, :lookup, :look_alikes,
+    ITALICIZE_LOOKUP_KEYS = [:names, :lookup, :look_alikes,
                              :related_taxa, :any_name, :name_proposed,
                              :this_name, :other_names].freeze
 

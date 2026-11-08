@@ -10,6 +10,7 @@ module Views::Controllers::Sequences
     prop :pagination_data, ::PaginationData
 
     def view_template
+      container_class(:text_image)
       add_index_title(@query)
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
@@ -20,59 +21,79 @@ module Views::Controllers::Sequences
 
     private
 
+    # The visible input itself carries the submitted `name_has` param
+    # -- not just a hidden id field -- so typed-but-unselected text
+    # still filters (Sequence.name_has matches it as a text_name
+    # substring). The autocompleter JS sets the visible value to the
+    # matched name's text on selection (base_controller.js#selectRow
+    # -> setSearchToken), so a selection submits that exact text
+    # instead of an id, and still matches via the same substring
+    # scope.
     def render_filter_form
       name_field = Components::ApplicationForm::FieldProxy.new(
-        nil, :name_term, filtered_name_text
+        nil, "name_has", filtered_name_text
       )
-      IndexFilter(to: sequences_path, submit_text: :filter.ti) do
-        render(Components::ApplicationForm::AutocompleterField.new(
-                 name_field,
-                 type: :name, hidden_name: :name, inline: true,
-                 size: 60, class: "mb-0",
-                 label: :sequence_filter_by
-               ))
+      ContentPadded do
+        IndexFilter(to: sequences_path, submit_text: :filter.ti) do
+          render(Components::ApplicationForm::AutocompleterField.new(
+                   name_field,
+                   type: :name,
+                   wrapper_options: { label: :sequence_filter_by,
+                                      inline: true },
+                   attributes: { size: 60, class: "mb-0" }
+                 ))
+        end
       end
     end
 
+    # The submitted value is already display text (either typed, or
+    # the exact name the autocompleter filled in on selection) -- no
+    # Name lookup needed to redisplay it in the field.
     def filtered_name_text
-      cached_name_filter&.text_name.to_s
-    end
-
-    def cached_name_filter
-      @query&.params_cache&.dig(:name_id)
+      @query&.params&.dig(:name_has).to_s
     end
 
     def render_list
       ListGroup do |list|
-        @sequences.each { |seq| list.item { render_row(seq) } }
+        @sequences.each do |seq|
+          list.item(class: "d-flex align-items-start") { render_row(seq) }
+        end
       end
     end
 
     def render_row(seq)
-      render_top_links(seq)
-      render_deposit_line(seq) if seq.deposit?
-      small { plain(seq.created_at.web_time) }
-      plain(": ")
-      Link(type: :user, user: seq.user)
+      div(class: "id-badge-col") { IDBadge(object: seq, size: :lg) }
+      div(class: "flex-grow-1") do
+        render_obs_link(seq)
+        render_meta(seq)
+      end
     end
 
-    def render_top_links(seq)
-      Link(type: :get, name: seq.unique_format_name,
-           target: seq.show_link_args)
-      br
+    def render_obs_link(seq)
       obs_name = viewer_aware_unique_format_name(seq.observation).t
       Link(type: :get, name: obs_name,
            target: seq.observation.show_link_args) do
         trusted_html(obs_name)
       end
-      br
+    end
+
+    def render_meta(seq)
+      div do
+        Link(type: :get, name: seq.format_name, target: seq.show_link_args)
+        whitespace
+        small { plain(seq.created_at.web_time) }
+        plain(": ")
+        Link(type: :user, user: seq.user)
+      end
+      render_deposit_line(seq) if seq.deposit?
     end
 
     def render_deposit_line(seq)
-      render_archive_link(seq)
-      plain(": ")
-      render_accession_link(seq)
-      br
+      div do
+        render_archive_link(seq)
+        plain(": ")
+        render_accession_link(seq)
+      end
     end
 
     def render_archive_link(seq)

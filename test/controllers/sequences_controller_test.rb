@@ -117,8 +117,7 @@ class SequencesControllerTest < FunctionalTestCase
       overrides: {
         id_in_set: sequences(:local_sequence).id,
         by_users: rolf.id,
-        observations: observations(:minimal_unknown_obs).id,
-        name_id: names(:boletus_edulis).id
+        observations: observations(:minimal_unknown_obs).id
       }
     )
   end

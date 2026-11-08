@@ -85,13 +85,14 @@ module Views::Controllers::FieldSlips
         nil, :project_name, project_title
       )
       IndexFilter(
-        to: field_slips_path, submit_text: "Filter"
+        to: field_slips_path, submit_text: :filter.ti
       ) do
         render(Components::ApplicationForm::AutocompleterField.new(
                  project_field,
-                 type: :project, hidden_name: :project, inline: true,
-                 size: 60, class: "mb-0",
-                 label: :field_slip_filter_by
+                 type: :project, hidden_name: :project,
+                 wrapper_options: { label: :field_slip_filter_by,
+                                    inline: true },
+                 attributes: { size: 60, class: "mb-0" }
                ))
       end
     end
