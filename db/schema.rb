@@ -797,8 +797,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_08_120000) do
     t.integer "observation_id", null: false
     t.integer "project_id", null: false
     t.index ["observation_id"], name: "index_project_observations_on_observation_id"
-    t.index ["project_id"], name: "index_project_observations_on_project_id"
     t.index ["project_id", "observation_id"], name: "index_project_observations_unique", unique: true
+    t.index ["project_id"], name: "index_project_observations_on_project_id"
   end
 
   create_table "project_species_lists", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
