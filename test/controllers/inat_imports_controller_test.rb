@@ -420,8 +420,9 @@ class InatImportsControllerTest < FunctionalTestCase
                  "Test needs InatImport fixture without prior imports")
 
     id = 1_234_567_890
-    reps = InatImportsController::Validators::MAX_ID_LIST_SIZE / id.to_s.length
-    id_list = (id.to_s * reps).chop
+    reps = InatImportsController::Validators::MAX_ID_LIST_SIZE /
+           "#{id},".length
+    id_list = Array.new(reps) { |n| id + n }.join(",")
 
     login(user.login)
 
@@ -1258,17 +1259,44 @@ class InatImportsControllerTest < FunctionalTestCase
     inat_ids = "123"
 
     stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
-      to_return(status: 500, body: "error")
+      to_timeout
     login(user.login)
 
     post(:create,
          params: { inat_ids: inat_ids, inat_username: inat_username,
                    consent: 1 })
 
-    assert_flash_error
+    assert_flash_error(:inat_cannot_communicate)
     assert_unprocessable
     assert_select("form#inat_import_form")
     assert_select("form[data-turbo='true']")
+  end
+
+  # iNat answering with an error is reported as that error, not as a
+  # failure to reach iNat.
+  def test_create_confirmation_estimate_inat_error
+    stub_request(:get, %r{api\.inaturalist\.org/v1/observations}).
+      to_return(status: 500, body: { error: "Internal error" }.to_json)
+    login(users(:rolf).login)
+
+    post(:create,
+         params: { inat_ids: "123", inat_username: "rolf", consent: 1 })
+
+    assert_flash_warning(:inat_request_error,
+                         status: 500, error: "Internal error")
+    assert_unprocessable
+    assert_select("form#inat_import_form")
+  end
+
+  def test_create_rejects_ids_larger_than_any_inat_id
+    login(users(:rolf).login)
+
+    post(:create,
+         params: { inat_ids: "123, 3873398214", inat_username: "rolf",
+                   consent: 1 })
+
+    assert_flash_warning(:inat_id_out_of_range, ids: "3873398214")
+    assert_select("form#inat_import_form")
   end
 
   def test_authorization_response_denied

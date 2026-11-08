@@ -146,6 +146,27 @@ module Projects
       assert_flash(:project_updates_added_all, count: count)
     end
 
+    # The list shows one member per occurrence; Add All takes the hidden
+    # members too.
+    def test_add_all_includes_hidden_occurrence_members
+      primary, member = occurrence_of_two_candidates
+
+      post(:add_all, params: { project_id: @project.id })
+
+      observations = @project.observations.reload
+      assert_includes(observations, primary)
+      assert_includes(observations, member)
+    end
+
+    def test_add_observation_brings_its_occurrence_candidates
+      primary, member = occurrence_of_two_candidates
+
+      post(:add_observation,
+           params: { project_id: @project.id, id: primary.id })
+
+      assert_includes(@project.observations.reload, member)
+    end
+
     def test_add_all_with_show_excluded
       @project.exclude_observation(@matching_obs)
 
@@ -209,6 +230,22 @@ module Projects
     end
 
     private
+
+    # A candidate and a copy of it made into one occurrence, so the
+    # Updates list shows only the primary.
+    def occurrence_of_two_candidates
+      primary = @matching_obs
+      member = primary.dup
+      member.update!(occurrence_id: nil, rss_log_id: nil)
+      candidates = @project.new_candidate_observations
+      assert_includes(candidates, member, "premise: the copy is a candidate")
+      occurrence = Occurrence.create!(user: primary.user,
+                                      primary_observation: primary)
+      [primary, member].each do |obs|
+        obs.update_column(:occurrence_id, occurrence.id)
+      end
+      [primary, member]
+    end
 
     # Helper to pull observations from the rendered view for assertions.
     def assigns_matrix_observations

@@ -10,6 +10,10 @@ module InatImportsController::Validators
   MAX_ID_LIST_SIZE =
     [1024 * 10, ActionDispatch::Cookies::MAX_COOKIE_SIZE].min - 256
 
+  # iNat ids are 32-bit; iNat answers a search naming a larger one with
+  # a 500, which would otherwise surface as a connection failure.
+  MAX_INAT_ID = 2_147_483_647
+
   private
 
   def params_valid?
@@ -125,11 +129,19 @@ module InatImportsController::Validators
   end
 
   def valid_inat_ids_param?
-    return true unless contains_illegal_characters? ||
-                       contains_malformed_id_tokens? ||
-                       (listing_ids? && inat_id_list.none?)
+    if contains_illegal_characters? || contains_malformed_id_tokens? ||
+       (listing_ids? && inat_id_list.none?)
+      flash_warning(:runtime_illegal_inat_id.l)
+      return false
+    end
+    ids_in_range?
+  end
 
-    flash_warning(:runtime_illegal_inat_id.l)
+  def ids_in_range?
+    too_large = inat_id_list.select { |id| id > MAX_INAT_ID }
+    return true if too_large.empty?
+
+    flash_warning(:inat_id_out_of_range.l(ids: too_large.join(", ")))
     false
   end
 

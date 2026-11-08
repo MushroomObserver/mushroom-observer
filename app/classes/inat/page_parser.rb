@@ -34,18 +34,76 @@ class Inat
     # multiple times.
     # https://stackoverflow.com/a/11251654/3357635
     def next_page
+      return next_id_list_page if id_list_mode?
+
       result = if url_mode?
                  next_url_request(id_above: @last_import_id)
                else
                  next_request(id: inat_ids, id_above: @last_import_id)
                end
+      parse(result)
+    end
+
+    # Whether a page after `parsed_page` remains. iNat's count covers one
+    # request, so an id list is done only when no listed id lies above
+    # the cursor.
+    def more_pages?(parsed_page)
+      return remaining_ids.any? if id_list_mode?
+
+      parsed_page["total_results"] >
+        parsed_page["page"] * parsed_page["per_page"]
+    end
+
+    private
+
+    def parse(result)
       return nil if response_bad?(result)
       return nil if result.body.blank?
 
       JSON.parse(result)
     end
 
-    private
+    def id_list_mode?
+      !url_mode? && inat_ids.present?
+    end
+
+    # An id list goes to iNat at most `per_page` ids at a time, the next
+    # ones above the cursor, rather than the whole list in one URL. A
+    # chunk whose ids are all filtered out (not fungi, say) returns no
+    # results, so move past it and ask for the next. `total_results` is
+    # replaced by the listed ids still ahead, an upper bound on what is
+    # left to import.
+    def next_id_list_page
+      loop do
+        chunk = remaining_ids.first(@per_page)
+        return empty_page if chunk.empty?
+
+        parsed = parse(next_request(id: chunk.join(","),
+                                    id_above: @last_import_id))
+        return nil unless parsed
+        return with_remaining_total(parsed) if parsed["results"].present?
+
+        @last_import_id = chunk.last
+      end
+    end
+
+    def remaining_ids
+      listed_ids.select { |id| id > @last_import_id }
+    end
+
+    def listed_ids
+      @listed_ids ||= inat_ids.to_s.split(/[\s,]+/).grep(/\A\d+\z/).
+                      map(&:to_i).uniq.sort
+    end
+
+    def with_remaining_total(parsed)
+      parsed.merge("total_results" => remaining_ids.size)
+    end
+
+    def empty_page
+      { "total_results" => 0, "page" => 1, "per_page" => @per_page,
+        "results" => [] }
+    end
 
     def url_mode?
       @import.inat_url.present?
