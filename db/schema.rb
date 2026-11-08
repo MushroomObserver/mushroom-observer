@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_08_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -782,6 +782,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
   create_table "project_images", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
+    t.index ["project_id", "image_id"], name: "index_project_images_unique", unique: true
   end
 
   create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -797,6 +798,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.integer "project_id", null: false
     t.index ["observation_id"], name: "index_project_observations_on_observation_id"
     t.index ["project_id"], name: "index_project_observations_on_project_id"
+    t.index ["project_id", "observation_id"], name: "index_project_observations_unique", unique: true
   end
 
   create_table "project_species_lists", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|

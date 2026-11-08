@@ -446,7 +446,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Add image this project if not already done so.  Saves it.
   def add_image(img)
-    images.push(img) unless images.include?(img)
+    insert_project_images([img.id])
     touch
   end
 
@@ -458,29 +458,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     touch
   end
 
-  # Add observation (and its images) to this project if not already done so.
-  # If the observation was excluded, remove it from the excluded list.
-  # Saves it.
+  # Add observation (and its owner's images) to this project if not
+  # already done so. If the observation was excluded, remove it from the
+  # excluded list. Saves it.
   def add_observation(obs)
-    unexclude_observation(obs)
-    return if observations.include?(obs)
-
-    imgs = if obs.association(:images).loaded?
-             obs.images.select { |img| img.user_id == obs.user_id }
-           else
-             Image.where(id: obs.image_ids, user_id: obs.user_id).to_a
-           end
-    observations.push(obs)
-    imgs.each { |img| images.push(img) }
-    touch
+    bulk_add_observations([obs.id])
   end
 
   # Bulk variant of add_observation. Given a list of observation ids,
   # inserts all needed project_observations / project_images rows in
   # set-based SQL rather than emitting ~8 queries per observation.
   # Idempotent: pre-existing project_observations are left alone, and
-  # any project_excluded_observations rows for these ids are dropped
-  # (matching add_observation's un-exclude side effect).
+  # any project_excluded_observations rows for these ids are dropped.
+  #
+  # Two writers can add the same observation at once (the observation
+  # form and DetectFieldSlipQRJob both file a slip's observation into
+  # its project), so the pluck below is only a shortcut: the unique
+  # indexes make insert_all skip a row the other writer got in first.
   def bulk_add_observations(obs_ids)
     obs_ids = Array(obs_ids).map(&:to_i).uniq
     return 0 if obs_ids.empty?
@@ -491,7 +485,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     return 0 if new_obs_ids.empty?
 
     insert_project_observations(new_obs_ids)
-    insert_project_images_for(new_obs_ids)
+    insert_project_images(owner_image_ids(new_obs_ids))
+    observations.reset
     invalidate_visible_observations_cache!
     touch
     new_obs_ids.size
@@ -502,29 +497,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     ProjectObservation.insert_all(rows)
   end
 
-  # Pull image_ids whose owner matches the observation owner (matching
-  # add_observation's per-row filter), excluding any (project_id, image_id)
-  # rows already in project_images so we don't insert duplicates. (There
-  # is no unique index on project_images, so this dedup is the only
-  # protection — see #4181.)
-  def insert_project_images_for(obs_ids)
-    image_ids = ObservationImage.
-                joins("INNER JOIN images ON images.id = " \
-                      "observation_images.image_id").
-                joins("INNER JOIN observations ON observations.id = " \
-                      "observation_images.observation_id").
-                where(observation_id: obs_ids).
-                where("images.user_id = observations.user_id").
-                distinct.pluck(:image_id)
-    return if image_ids.empty?
-
-    image_ids -= project_images.where(image_id: image_ids).pluck(:image_id)
+  def insert_project_images(image_ids)
     return if image_ids.empty?
 
     rows = image_ids.map { |img_id| { project_id: id, image_id: img_id } }
     ProjectImage.insert_all(rows)
+    images.reset
   end
-  private :insert_project_observations, :insert_project_images_for
+
+  # Only the observer's photos join a project with their observation.
+  def owner_image_ids(obs_ids)
+    ObservationImage.joins(:image, :observation).
+      where(observation_id: obs_ids).
+      where(Image[:user_id].eq(Observation[:user_id])).
+      distinct.pluck(:image_id)
+  end
+  private :insert_project_observations, :insert_project_images,
+          :owner_image_ids
 
   # Remove observation (and its images) from this project. Saves it.
   # Removing one observation of an occurrence removes them all, and drops
