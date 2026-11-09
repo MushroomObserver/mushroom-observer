@@ -51,7 +51,7 @@ class Views::Layouts::TopNav < Views::Base
   # itself, the rubric becomes a link to the index.
   NAV_INDEXABLES = %w[
     observations names species_lists projects locations images herbaria
-    glossary_terms comments rss_logs field_slips
+    glossary_terms comments rss_logs field_slips visual_models
   ].freeze
 
   # Controllers that support the green "+ Add" button. Description
@@ -60,7 +60,7 @@ class Views::Layouts::TopNav < Views::Base
   # from observation pages.
   NAV_CREATABLES = %w[
     observations names species_lists projects locations images herbaria
-    glossary_terms field_slips articles publications
+    glossary_terms field_slips articles publications visual_models
   ].freeze
 
   def view_template

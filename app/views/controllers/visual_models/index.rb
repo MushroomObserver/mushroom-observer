@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 # Action view for `visual_models#index`.
-# admin-only page listing every visual model with edit / destroy
-# links + a "New Visual Model" link.
+# Lists every visual model with edit / destroy links + a "New
+# Visual Model" link.
 module Views::Controllers::VisualModels
   class Index < Views::FullPageBase
     prop :visual_models, _Array(VisualModel)
