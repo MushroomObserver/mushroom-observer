@@ -104,7 +104,7 @@ module Projects
       if group.users.include?(user)
         flash_notice(:"add_members_already_added_#{type}".t(user: user.login))
       else
-        group.users << user unless group.users.member?(user)
+        group.add_user(user)
         project.send(:"log_add_#{type}", user)
         flash_notice(:"add_members_added_#{type}".t(user: user.login))
       end

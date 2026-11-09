@@ -301,7 +301,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     ProjectMember.create!(project: self, user:,
                           trust_level: "editing")
-    user_group.users << user unless user_group.users.member?(user)
+    user_group.add_user(user)
   end
 
   # Promote +user+ to Project Admin. Adds to user_group and admin_group,
@@ -314,8 +314,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     ProjectMember.find_or_create_by(project: self, user: user) do |pm|
       pm.trust_level = "editing"
     end
-    user_group.users << user unless user_group.users.member?(user)
-    admin_group.users << user unless admin_group.users.member?(user)
+    user_group.add_user(user)
+    admin_group.add_user(user)
     log_add_admin(user)
   end
 
