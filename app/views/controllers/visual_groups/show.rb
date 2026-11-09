@@ -43,9 +43,6 @@ module Views::Controllers::VisualGroups
     end
 
     def render_nav_links
-      Link(type: :get, name: :visual_group_edit.t,
-           target: edit_visual_group_path(@visual_group))
-      plain(" | ")
       Link(type: :get, name: :visual_group_index.t,
            target: visual_model_visual_groups_path(
              @visual_group.visual_model
