@@ -19,7 +19,7 @@ module Views::Controllers::VisualModels
     def view_template
       ContentPadded do
         render_top_nav
-        h4 { plain(:visual_groups.ti) }
+        h4(class: "mt-5 mb-0") { plain(:visual_groups.ti) }
       end
       render_table
     end
@@ -74,11 +74,13 @@ module Views::Controllers::VisualModels
     def render_top_nav
       ButtonGroup do
         Button(type: :get, name: :visual_group_create.t,
-               target: new_visual_model_visual_group_path(@visual_model))
+               target: new_visual_model_visual_group_path(@visual_model),
+               variant: :outline)
         Button(type: :get, name: :edit_object.t(type: :visual_model),
-               target: edit_visual_model_path(@visual_model))
+               target: edit_visual_model_path(@visual_model),
+               variant: :outline)
         Button(type: :get, name: :show_visual_model_index.t,
-               target: visual_models_path)
+               target: visual_models_path, variant: :outline)
       end
     end
 
