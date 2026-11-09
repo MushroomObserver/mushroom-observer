@@ -75,7 +75,7 @@ module Views::Controllers::Interests
 
     def render_interests_table
       rows = @interests.select(&:target)
-      Table(rows, class: "table-striped table-align-middle",
+      Table(rows, variant: :striped, class: "table-align-middle",
                   identifier: "interests", show_headers: false) do |t|
         t.column("summary") { |item| summary_cell(item) }
         t.column("actions", align: :right) { |item| actions_cell(item) }

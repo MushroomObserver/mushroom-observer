@@ -10,7 +10,7 @@ module Views::Controllers::VisualModels
     def view_template
       Table(
         @visual_models,
-        class: "table-striped table-visual-model mb-3 mt-3"
+        variant: :striped, class: "table-visual-model mb-3 mt-3"
       ) do |t|
         t.column("Name", width: "33%") do |vm|
           Link(type: :get, name: vm.name, target: vm)

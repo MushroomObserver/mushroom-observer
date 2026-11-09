@@ -41,7 +41,7 @@ module Views::Controllers::Account::APIKeys
       render(Components::Table.new(
                sorted_keys,
                id: "account_api_keys_table",
-               class: "table-striped"
+               variant: :striped
              )) do |t|
         register_table_columns(t)
         t.footer { render_new_form_panel }
