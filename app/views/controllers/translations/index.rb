@@ -45,13 +45,13 @@ module Views::Controllers::Translations
     end
 
     def render_index_panel
-      div(id: "translations_index", class: "p-3") do
+      div(id: "translations_index", class: "p-2") do
         @index.each { |item| render_item(item) }
       end
     end
 
     def render_ui_panel
-      div(id: "translation_ui") do
+      div(id: "translation_ui", class: "p-2") do
         if @edit_tags.any?
           render(Form.new(lang: @lang, tag: @tag, edit_tags: @edit_tags,
                           strings: @strings, for_page: @for_page,
