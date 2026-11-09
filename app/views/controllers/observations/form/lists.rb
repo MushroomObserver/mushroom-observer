@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Species lists section of the observation form. Collapsible panel
-# with species list checkboxes. Sub-component of
-# `Views::Controllers::Observations::Form`.
+# Species lists section of the observation form. Owns the
+# collapsible Panel (heading, caret, help text);
+# `Components::Form::OverflowCheckboxList` only renders the checkbox
+# list itself. Sub-component of `Views::Controllers::Observations::Form`.
 #
 # Wire shape: `observation[species_list_ids][]=<id>`. Checkedness
 # defaults to `model.species_list_ids`; failure-reload uses
@@ -22,20 +23,38 @@ class Views::Controllers::Observations::Form::Lists < Views::Base
   prop :submitted_list_ids, _Nilable(_Array(String)), default: nil
 
   def view_template
-    render(
-      Components::Form::CheckboxPanel.new(
-        form: @form,
-        type: :species_list,
-        form_object_name: "observation",
-        objects: @lists,
-        checked_ids: checked_list_ids,
-        disabled_ids: disabled_list_ids,
-        help_text: :form_observations_list_help.t
-      )
-    )
+    render(panel) do |p|
+      p.with_heading { plain(:species_lists.ti) }
+      p.with_body(collapse: true) { render_panel_body }
+    end
   end
 
   private
+
+  def panel
+    Components::Panel.new(
+      panel_id: panel_id,
+      collapsible: true,
+      collapse_target: "##{panel_id}_inner",
+      expanded: checked_list_ids.any?
+    )
+  end
+
+  def panel_id
+    "observation_species_lists"
+  end
+
+  def render_panel_body
+    Help(content: :form_observations_list_help.t)
+    render(Components::Form::OverflowCheckboxList.new(
+             form: @form,
+             type: :species_list,
+             form_object_name: "observation",
+             objects: @lists,
+             checked_ids: checked_list_ids,
+             disabled_ids: disabled_list_ids
+           ))
+  end
 
   def checked_list_ids
     if @submitted_list_ids

@@ -51,16 +51,22 @@ module Views::Controllers::SpeciesLists::Projects
       end
     end
 
+    # No Panel wrap here -- this is a one-page attach/remove utility,
+    # not a form full of other fields, so a plain heading + the
+    # overflow-scrolled list is enough.
     def render_project_checkboxes
-      render(
-        Components::Form::CheckboxPanel.new(
-          form: self,
-          type: :project,
-          form_object_name: "species_list_projects",
-          objects: @projects,
-          checked_ids: checked_project_ids
-        )
-      )
+      div(class: "form-group mt-3") do
+        label(for: "species_list_projects_project_ids") do
+          plain(:species_list_projects_which_projects.t)
+        end
+        render(Components::Form::OverflowCheckboxList.new(
+                 form: self,
+                 type: :project,
+                 form_object_name: "species_list_projects",
+                 objects: @projects,
+                 checked_ids: checked_project_ids
+               ))
+      end
     end
 
     def checked_project_ids
