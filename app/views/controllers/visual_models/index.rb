@@ -8,7 +8,6 @@ module Views::Controllers::VisualModels
     prop :visual_models, _Array(VisualModel)
 
     def view_template
-      h1 { plain("Visual Models") }
       Table(
         @visual_models,
         class: "table-striped table-visual-model mb-3 mt-3"
