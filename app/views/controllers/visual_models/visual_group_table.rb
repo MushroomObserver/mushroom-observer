@@ -76,9 +76,7 @@ module Views::Controllers::VisualModels
         Button(type: :get, name: :visual_group_create.t,
                target: new_visual_model_visual_group_path(@visual_model),
                variant: :outline)
-        Button(type: :get, name: :edit_object.t(type: :visual_model),
-               target: edit_visual_model_path(@visual_model),
-               variant: :outline)
+        Button(type: :edit, target: @visual_model, variant: :outline)
         Button(type: :get, name: :show_visual_model_index.t,
                target: visual_models_path, variant: :outline)
       end
