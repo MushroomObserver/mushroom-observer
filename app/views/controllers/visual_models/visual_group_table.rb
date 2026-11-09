@@ -83,11 +83,7 @@ module Views::Controllers::VisualModels
     end
 
     def render_destroy_link(group)
-      Button(
-        type: :delete,
-        target: visual_group_path(group),
-        variant: :strip
-      )
+      Button(type: :delete, target: group, variant: :strip)
     end
 
     def groups
