@@ -49,6 +49,16 @@ class ApplicationCable::ConnectionTest < ActionCable::Connection::TestCase
     assert_reject_connection { connect }
   end
 
+  # A cookie carrying only an id splits to a nil secret, which would
+  # compare equal to a null stored code.
+  def test_cookie_refuses_blank_auth_code
+    rolf = users(:rolf)
+    rolf.update_column(:auth_code, nil)
+    cookies["mo_user"] = rolf.id.to_s
+
+    assert_reject_connection { connect }
+  end
+
   def test_rejects_connection
     # Use `assert_reject_connection` matcher to verify that
     # connection is rejected

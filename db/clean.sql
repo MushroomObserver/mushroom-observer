@@ -74,10 +74,23 @@ delete from query_records;
 update users set email = 'webmaster@mushroomobserver.org';
 # Set all passwords to just "password".
 update users set password = 'ae98587c6f1599fbdcc800e66db6874a8fa0e713';
+# `auth_code` is the remember-me secret and binds the server session, so
+# a snapshot carrying it can mint a login for any account.
+update users
+ set auth_code = substr(sha2(concat(id, uuid()), 256), 1, 40);
 
 update votes
  inner join users on users.id = votes.user_id
  set votes.user_id = 0
  where users.votes_anonymous > 1;
+
+# Both columns are newer than the oldest snapshots the image server
+# retains, so they come last: on a dump predating them, the
+# unknown-column error aborts the script with everything above applied.
+
+# Blocks login, leaving those accounts unusable in a copy.
+update users set password_reset_required = false;
+# An iNaturalist OAuth code or JWT for the importing user's iNat account.
+update inat_imports set token = null;
 
 commit;
