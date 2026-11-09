@@ -27,9 +27,12 @@ scp "$remote:$latest" ./checkpoint.gz
 # and short. A download smaller than the finished remote file read it
 # mid-transfer.
 remote_size=$(ssh "$remote" "stat -c %s '$latest'")
-if [ "$(wc -c < checkpoint.gz)" != "$remote_size" ]; then
-  echo "checkpoint.gz is short of $latest - the dump was still being" >&2
-  echo "written. Re-run this script." >&2
+# BSD wc pads its count with a leading space, so compare numerically.
+local_size=$(wc -c < checkpoint.gz | tr -d '[:space:]')
+if [ "$local_size" -ne "$remote_size" ]; then
+  echo "checkpoint.gz is $local_size bytes, $latest is $remote_size." >&2
+  echo "A short download means the dump was still being written." >&2
+  echo "Re-run this script." >&2
   exit 1
 fi
 
