@@ -10,11 +10,11 @@ module Views::FullPageBase::Icons
   # actions slot (`Header::PageTitle#render_title_bar_actions`).
   # Permission gating + button rendering live on
   # `Views::Layouts::Header::EditDeleteIcons`.
-  def add_edit_icons(object, user)
+  def add_edit_icons(object, user, show_delete: true)
     content_for(:title_bar_actions) do
       capture do
         render(::Views::Layouts::Header::EditDeleteIcons.new(
-                 object: object, user: user
+                 object: object, user: user, show_delete: show_delete
                ))
       end
     end
