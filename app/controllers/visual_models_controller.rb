@@ -5,7 +5,7 @@ class VisualModelsController < ApplicationController
 
   # GET /visual_models
   def index
-    @visual_models = VisualModel.order(:name).to_a
+    @visual_models = VisualModel.includes(:visual_groups).order(:name).to_a
     render(Views::Controllers::VisualModels::Index.new(
              visual_models: @visual_models
            ))

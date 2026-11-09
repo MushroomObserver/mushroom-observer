@@ -10,15 +10,19 @@ module Views::Controllers::VisualModels
     def view_template
       Table(
         @visual_models,
-        variant: :striped, class: "table-visual-model mb-3 mt-3"
+        variant: :striped,
+        class: "table-visual-model table-align-middle mb-3 mt-3"
       ) do |t|
-        t.column("Name", width: "33%") do |vm|
+        t.column("Name") do |vm|
           Link(type: :get, name: vm.name, target: vm)
         end
-        t.column(nil, width: "33%") do |vm|
-          Link(type: :get, name: "Edit", target: edit_visual_model_path(vm))
+        t.column("Groups", align: :center) do |vm|
+          CountBadge(count: vm.visual_groups.size, type: :visual_group)
         end
-        t.column(nil, width: "33%") { |vm| render_destroy_link(vm) }
+        t.column(nil, align: :center) do |vm|
+          Button(type: :edit, target: vm, variant: :strip)
+        end
+        t.column(nil, align: :center) { |vm| render_destroy_link(vm) }
       end
       br
       Link(type: :get, name: "New Visual Model", target: new_visual_model_path)
@@ -27,11 +31,7 @@ module Views::Controllers::VisualModels
     private
 
     def render_destroy_link(visual_model)
-      Button(
-        type: :delete,
-        target: visual_model_path(visual_model),
-        variant: :strip
-      )
+      Button(type: :delete, target: visual_model, variant: :strip)
     end
   end
 end
