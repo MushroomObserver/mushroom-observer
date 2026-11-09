@@ -2292,6 +2292,7 @@
   species_list_add_remove_add_success: Successfully added [num] observation(s) to observation list.
   species_list_add_remove_remove_success: Successfully removed [num] observation(s) from observation list.
   species_list_add_remove_no_query: Missing observation query results, or query has expired.
+  species_list_add_remove_large_query: That's a very large number.
   species_list_add_remove_bad_name: "Unrecognized observation list id or title: [name]"
 
   # species_list/manage_species_lists
