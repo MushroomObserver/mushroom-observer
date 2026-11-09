@@ -201,7 +201,7 @@ module SpeciesLists
       unless @user.projects_member.include?(proj)
         imgs.select! { |i| i.user == @user }
       end
-      imgs &= proj.observations
+      imgs &= proj.images
       return unless imgs.any?
 
       proj.remove_images(imgs)
