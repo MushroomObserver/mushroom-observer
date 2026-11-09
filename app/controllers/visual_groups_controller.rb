@@ -17,8 +17,12 @@ class VisualGroupsController < ApplicationController
   def show
     @filter = params.permit(:filter)[:filter]
     @visual_group = VisualGroup.find(params[:id])
-    @vals = calc_show_vals
-    setup_pagination
+    if @filter.present?
+      @vals = filtered_show_vals
+      setup_pagination
+    else
+      paginate_group_images(true)
+    end
     render(Views::Controllers::VisualGroups::Show.new(
              visual_group: @visual_group, user: @user, filter: @filter,
              pagination_data: @pagination_data, subset: @subset
@@ -40,8 +44,12 @@ class VisualGroupsController < ApplicationController
     @filter = edit_filter.filter
     @filter = @visual_group.name unless @filter && @filter != ""
     @status = edit_filter.status
-    @vals = calc_edit_vals
-    setup_pagination
+    if @status == "needs_review"
+      @vals = needs_review_vals
+      setup_pagination
+    else
+      paginate_group_images(@status != "excluded")
+    end
     render(Views::Controllers::VisualGroups::Edit.new(
              visual_group: @visual_group, user: @user,
              filter: @filter, status: @status,
@@ -57,6 +65,23 @@ class VisualGroupsController < ApplicationController
     )
     @pagination_data.num_total = @vals.length
     @subset = @vals[@pagination_data.from..@pagination_data.to]
+  end
+
+  # Unfiltered show/edit case (every image at this included status,
+  # no name filter): paginate at the DB level via Query instead of
+  # loading every visual_group_image + its Image into memory and
+  # slicing the array -- a group with thousands of images would
+  # otherwise do that full load on every page request.
+  def paginate_group_images(included)
+    @pagination_data = PaginationData.new(
+      number_arg: :page,
+      number: params[:page],
+      num_per_page: calc_layout_params["count"]
+    )
+    query = create_query(:Image, visual_groups: [@visual_group],
+                                 visual_group_included: included)
+    images = query.paginate(@pagination_data)
+    @subset = images.map { |image| [image, included] }
   end
 
   def edit_filter
@@ -118,10 +143,8 @@ class VisualGroupsController < ApplicationController
     params.require(:visual_group).permit(:name, :approved, :description)
   end
 
-  def calc_show_vals
-    return unfiltered_images if !@filter || @filter == ""
-
-    # For filtered results, get raw arrays then eager-load images
+  def filtered_show_vals
+    # Get raw arrays then eager-load images
     raw_vals = VisualGroupImages.new(@visual_group, @filter, :included).vals
 
     # Extract image IDs and eager-load images
@@ -132,16 +155,8 @@ class VisualGroupsController < ApplicationController
     raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
   end
 
-  def unfiltered_images
-    @visual_group.visual_group_images.
-      where(included: true).includes(:image).
-      map { |vgi| [vgi.image, vgi.included] }
-  end
-
-  def calc_edit_vals
-    return relevant_images if @status != "needs_review"
-
-    # For "needs_review" status, get raw arrays then eager-load images
+  def needs_review_vals
+    # Get raw arrays then eager-load images
     raw_vals = VisualGroupImages.new(@visual_group, @filter, :any).vals -
                VisualGroupImages.new(@visual_group, @filter, :reviewed).vals
 
@@ -151,12 +166,6 @@ class VisualGroupsController < ApplicationController
 
     # Map back to [image, included] format
     raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
-  end
-
-  def relevant_images
-    @visual_group.visual_group_images.
-      where(included: @status != "excluded").includes(:image).
-      map { |vgi| [vgi.image, vgi.included] }
   end
 
   def save_visual_group

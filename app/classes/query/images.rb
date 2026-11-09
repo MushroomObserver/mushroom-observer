@@ -25,6 +25,8 @@ class Query::Images < Query
                                    always_index: false,
                                    redirect_to: :model_index)
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list)
+  query_attr(:visual_groups, [VisualGroup], param_alias: :visual_group)
+  query_attr(:visual_group_included, :boolean)
   query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by

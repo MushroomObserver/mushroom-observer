@@ -141,6 +141,19 @@ class Query::ImagesTest < UnitTestCase
     assert_query(scope, :Image, species_lists: spl)
   end
 
+  def test_image_visual_groups
+    vg = visual_groups(:visual_group_one)
+    scope = Image.visual_groups(vg).order_by_default
+    assert_query(scope, :Image, visual_groups: vg)
+  end
+
+  def test_image_visual_group_included
+    vg = visual_groups(:visual_group_one)
+    scope = Image.visual_groups(vg).visual_group_included(true).
+            order_by_default
+    assert_query(scope, :Image, visual_groups: vg, visual_group_included: true)
+  end
+
   def test_image_by_users
     expects = Image.by_users(rolf.id).order_by_default
     assert_query(expects, :Image, by_users: rolf)

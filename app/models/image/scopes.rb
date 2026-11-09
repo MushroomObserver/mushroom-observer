@@ -97,6 +97,18 @@ module Image::Scopes
       joins(observation_images: { observation: :species_list_observations }).
         where(species_list_observations: { species_list_id: ids })
     }
+    scope :visual_groups, lambda { |visual_groups|
+      joins(:visual_group_images).
+        where(visual_group_images: { visual_group: visual_groups })
+    }
+    # Both `visual_groups` and `visual_group_included` join the same
+    # `visual_group_images` association -- Rails merges repeated
+    # identical-association joins into one, so the two scopes' where
+    # clauses apply to the same joined row, not two separate joins.
+    scope :visual_group_included, lambda { |included|
+      joins(:visual_group_images).
+        where(visual_group_images: { included: included })
+    }
 
     # rubocop:disable MO/NoLongCommentBlock
     # FOR FUTURE REFERENCE
