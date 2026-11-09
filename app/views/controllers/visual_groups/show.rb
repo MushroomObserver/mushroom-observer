@@ -16,7 +16,6 @@ module Views::Controllers::VisualGroups
       add_edit_icons(@visual_group, @user)
       container_class(:full)
 
-      render_top_nav
       render_description_and_approval
       hr
       if @filter
@@ -32,17 +31,6 @@ module Views::Controllers::VisualGroups
     end
 
     private
-
-    def render_top_nav
-      p { render_nav_links }
-    end
-
-    def render_nav_links
-      Link(type: :get, name: :visual_group_index.t,
-           target: visual_model_visual_groups_path(
-             @visual_group.visual_model
-           ))
-    end
 
     def render_description_and_approval
       p do
