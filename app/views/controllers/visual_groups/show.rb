@@ -72,14 +72,12 @@ module Views::Controllers::VisualGroups
     end
 
     def render_distinct_name_links
-      @visual_group.distinct_names.each do |name|
-        Link(type: :get, name: name.text_name,
-             target: visual_group_path(@visual_group,
-                                       filter: name.text_name)) do
-          trusted_html(name.format_name(@user).t)
-        end
-        br
-      end
+      render(DistinctNames.new(
+               visual_group: @visual_group, user: @user,
+               path_for: lambda { |text_name|
+                 visual_group_path(@visual_group, filter: text_name)
+               }
+             ))
     end
 
     def render_image_matrix

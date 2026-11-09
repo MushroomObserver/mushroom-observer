@@ -62,11 +62,10 @@ module Views::Controllers::VisualGroups
       p do
         strong { append_colon(:visual_group_includes_names.t) }
         br
-        @visual_group.distinct_names.each do |name|
-          Link(type: :get, name: name.text_name,
-               target: distinct_name_filter_path(name.text_name))
-          br
-        end
+        render(DistinctNames.new(
+                 visual_group: @visual_group, user: @user,
+                 path_for: method(:distinct_name_filter_path).to_proc
+               ))
       end
     end
 
