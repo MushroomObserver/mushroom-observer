@@ -109,6 +109,18 @@ module Image::Scopes
       joins(:visual_group_images).
         where(visual_group_images: { included: included })
     }
+    # Images with no visual_group_images row for these groups --
+    # not reviewed yet (neither included nor excluded).
+    scope :visual_group_unreviewed, lambda { |visual_groups|
+      where.not(id: VisualGroupImage.where(visual_group: visual_groups).
+                    select(:image_id))
+    }
+    # Images of observations whose consensus is this Name (string),
+    # no synonyms. Mirrors Query::Observations' `this_name:`.
+    scope :this_name, lambda { |name_strs|
+      joins(observation_images: :observation).distinct.
+        merge(Observation.this_name(name_strs))
+    }
 
     # rubocop:disable MO/NoLongCommentBlock
     # FOR FUTURE REFERENCE

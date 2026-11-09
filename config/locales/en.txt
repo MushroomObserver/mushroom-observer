@@ -2655,9 +2655,6 @@
   # visual_groups/update
   update_visual_group_success: "[:updated.ti] [name] [:visual_group.ti]"
 
-  # visual_models/show
-  show_visual_model_index: "[:visual_model.ti] [:index.ti]"
-
   # visual_models/destroy
   destroy_visual_model_success: "[:visual_model.ti] [:destroyed]"
 

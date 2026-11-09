@@ -17,12 +17,10 @@ class VisualGroupsController < ApplicationController
   def show
     @filter = params.permit(:filter)[:filter]
     @visual_group = VisualGroup.find(params[:id])
-    if @filter.present?
-      @vals = filtered_show_vals
-      setup_pagination
-    else
-      paginate_group_images(true)
-    end
+    query_params = { visual_groups: [@visual_group],
+                     visual_group_included: true }
+    query_params[:this_name] = @filter if @filter.present?
+    paginate_group_images(query_params, true)
     render(Views::Controllers::VisualGroups::Show.new(
              visual_group: @visual_group, user: @user, filter: @filter,
              pagination_data: @pagination_data, subset: @subset
@@ -45,10 +43,12 @@ class VisualGroupsController < ApplicationController
     @filter = @visual_group.name unless @filter && @filter != ""
     @status = edit_filter.status
     if @status == "needs_review"
-      @vals = needs_review_vals
-      setup_pagination
+      paginate_group_images({ visual_group_unreviewed: [@visual_group],
+                              this_name: @filter }, nil)
     else
-      paginate_group_images(@status != "excluded")
+      included = @status != "excluded"
+      paginate_group_images({ visual_groups: [@visual_group],
+                              visual_group_included: included }, included)
     end
     render(Views::Controllers::VisualGroups::Edit.new(
              visual_group: @visual_group, user: @user,
@@ -57,29 +57,20 @@ class VisualGroupsController < ApplicationController
            ))
   end
 
-  def setup_pagination
+  # Paginates at the DB level via Query instead of loading every
+  # matching visual_group_image + its Image into memory and slicing
+  # the array -- a group with thousands of images would otherwise
+  # do that full load on every page request. `included` is the
+  # fixed included/excluded/nil (needs_review) value every row in
+  # this query_params shares -- not a per-row value from the join,
+  # since each branch's query already filters down to one value.
+  def paginate_group_images(query_params, included)
     @pagination_data = PaginationData.new(
       number_arg: :page,
       number: params[:page],
       num_per_page: calc_layout_params["count"]
     )
-    @pagination_data.num_total = @vals.length
-    @subset = @vals[@pagination_data.from..@pagination_data.to]
-  end
-
-  # Unfiltered show/edit case (every image at this included status,
-  # no name filter): paginate at the DB level via Query instead of
-  # loading every visual_group_image + its Image into memory and
-  # slicing the array -- a group with thousands of images would
-  # otherwise do that full load on every page request.
-  def paginate_group_images(included)
-    @pagination_data = PaginationData.new(
-      number_arg: :page,
-      number: params[:page],
-      num_per_page: calc_layout_params["count"]
-    )
-    query = create_query(:Image, visual_groups: [@visual_group],
-                                 visual_group_included: included)
+    query = create_query(:Image, **query_params)
     images = query.paginate(@pagination_data)
     @subset = images.map { |image| [image, included] }
   end
@@ -141,31 +132,6 @@ class VisualGroupsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def visual_group_params
     params.require(:visual_group).permit(:name, :approved, :description)
-  end
-
-  def filtered_show_vals
-    # Get raw arrays then eager-load images
-    raw_vals = VisualGroupImages.new(@visual_group, @filter, :included).vals
-
-    # Extract image IDs and eager-load images
-    image_ids = raw_vals.map(&:first)
-    images_by_id = Image.where(id: image_ids).index_by(&:id)
-
-    # Map back to [image, included] format
-    raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
-  end
-
-  def needs_review_vals
-    # Get raw arrays then eager-load images
-    raw_vals = VisualGroupImages.new(@visual_group, @filter, :any).vals -
-               VisualGroupImages.new(@visual_group, @filter, :reviewed).vals
-
-    # Extract image IDs and eager-load images
-    image_ids = raw_vals.map(&:first)
-    images_by_id = Image.where(id: image_ids).index_by(&:id)
-
-    # Map back to [image, included] format
-    raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
   end
 
   def save_visual_group

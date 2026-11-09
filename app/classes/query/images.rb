@@ -27,6 +27,8 @@ class Query::Images < Query
   query_attr(:species_lists, [SpeciesList], param_alias: :species_list)
   query_attr(:visual_groups, [VisualGroup], param_alias: :visual_group)
   query_attr(:visual_group_included, :boolean)
+  query_attr(:visual_group_unreviewed, [VisualGroup])
+  query_attr(:this_name, [:string], default_order: :confidence)
   query_attr(:observation_query, { subquery: :Observation })
 
   def alphabetical_by
