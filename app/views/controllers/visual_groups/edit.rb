@@ -49,13 +49,6 @@ module Views::Controllers::VisualGroups
     def render_back_nav_links
       Link(type: :get, name: :visual_group_show.t,
            target: visual_group_path(@visual_group))
-      whitespace
-      plain("|")
-      whitespace
-      Link(type: :get, name: :visual_group_index.t,
-           target: visual_model_visual_groups_path(
-             @visual_group.visual_model
-           ))
     end
 
     def render_filter_section
