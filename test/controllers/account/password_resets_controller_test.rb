@@ -139,6 +139,27 @@ module Account
                    "The exact spelling should decide which account resets")
     end
 
+    # Nothing stops a login from being spelled like an email address,
+    # and thousands of accounts do. The login is what people are
+    # asked for, so it decides.
+    def test_create_prefers_a_login_over_another_accounts_email
+      email_holder, login_holder = [users(:roy), users(:mary)].sort_by(&:id)
+      shared = "collision@example.org"
+      email_holder.update_column(:email, shared)
+      login_holder.update_column(:login, shared)
+      email_password = email_holder.password
+
+      assert_enqueued_with(
+        job: QuietMailDeliveryJob,
+        args: ->(args) { args[3][:args][0][:receiver] == login_holder }
+      ) do
+        post(:create, params: { new_user: { login: shared } })
+      end
+
+      assert_equal(email_password, email_holder.reload.password,
+                   "A login should outrank another account's email")
+    end
+
     # A failing password change must render or redirect explicitly --
     # with neither, the request raises (found via Copilot review on
     # #5058). Force the failure by stubbing `save` on the
