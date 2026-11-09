@@ -34,17 +34,23 @@ module ApplicationCable
     end
 
     def session_auth_valid?(user)
-      auth = request.session[:auth]
-      user && auth.present? && auth == user.auth_code
+      user && auth_code_matches?(user, request.session[:auth])
     end
 
     def validate_user_in_autologin_cookie
       return unless (cookie = cookies["mo_user"]) &&
                     (split = cookie.split) &&
                     (user = User.safe_find(split[0])) &&
-                    (split[1] == user.auth_code)
+                    auth_code_matches?(user, split[1])
 
       user if user.verified && !user.blocked?
+    end
+
+    # The blank-`auth_code` guard is the one in
+    # ApplicationController::Authentication#validate_user_in_autologin_cookie
+    # -- see the reason there.
+    def auth_code_matches?(user, code)
+      user.auth_code.present? && code == user.auth_code
     end
   end
 end

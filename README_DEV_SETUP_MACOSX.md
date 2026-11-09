@@ -295,14 +295,7 @@ You will need to enter your account username for `images.mushroomobserver.org`, 
 
 This will install yesterday's database backup, stripped of passwords and private GPS data, in MySQL as `mo_development` for user `mo`. You can skip ahead to `rails lang:update` below.
 
-**Public alternative:** Every so often we generate a public, ready-made stripped checkpoint on the server, but it is likely _not at all current_. You can get this here:
-- download the snapshot from <http://images.mushroomobserver.org/checkpoint_stripped.gz>
-- copy (or move) the downloaded .gz file to the `mushroom-observer` directory.
-- install the database in MySQL:
-
-```sh
-gunzip -c checkpoint_stripped.gz | mysql -u mo -pmo mo_development
-```
+**Without an images-server account:** there is no publicly downloadable snapshot. Either ask a core developer for a stripped dump — `db/strip_checkpoint` has a commented-out `mysqldump` line that writes one, and only that stripped file may be shared — or work against an empty database. The test suite builds everything it needs from `test/fixtures`, so a snapshot is a convenience for browsing live content, not a requirement.
 
 Then:
 
@@ -329,7 +322,7 @@ which was fixed by running
 cp db/macos/database.yml config
 ```
 
-Optionally delete `checkpoint_stripped.gz` from the mushroom-observer directory
+`db/download_checkpoint` leaves the downloaded `checkpoint.gz` in the `mushroom-observer` directory. Keep it — `db/strip_checkpoint` can re-import it without another download — but note it is the unstripped production dump, so do not pass it on to anyone.
 
 ## Run the rest of the mo-dev script
 
