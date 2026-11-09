@@ -9,6 +9,7 @@ module Views::Controllers::VisualGroups
 
     def view_template
       add_show_title(@visual_model)
+      add_edit_icons(@visual_model, current_user)
       render(Views::Controllers::VisualModels::VisualGroupTable.new(
                visual_model: @visual_model,
                visual_groups: @visual_groups

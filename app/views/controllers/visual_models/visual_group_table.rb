@@ -17,11 +17,11 @@ module Views::Controllers::VisualModels
     prop :visual_groups, _Array(VisualGroup)
 
     def view_template
-      ContentPadded do
-        render_top_nav
-        h4(class: "mt-5 mb-0") { plain(:visual_groups.ti) }
+      Panel(panel_id: "visual_groups") do |panel|
+        panel.with_heading { plain(:visual_groups.ti) }
+        panel.with_heading_links { render_add_link }
+        panel.with_body(wrapper: false) { render_table }
       end
-      render_table
     end
 
     # Both callers (`VisualGroups::Index`, `VisualModels::Show`)
@@ -33,7 +33,7 @@ module Views::Controllers::VisualModels
 
     def render_table
       Table(
-        groups, class: "table-striped table-visual-model mb-3 mt-3"
+        groups, variant: :striped, class: "table-visual-model"
       ) do |t|
         define_columns(t)
       end
@@ -71,15 +71,11 @@ module Views::Controllers::VisualModels
       end
     end
 
-    def render_top_nav
-      ButtonGroup do
-        Button(type: :get, name: :visual_group_create.t,
-               target: new_visual_model_visual_group_path(@visual_model),
-               variant: :outline)
-        Button(type: :edit, target: @visual_model, variant: :outline)
-        Button(type: :get, name: :show_visual_model_index.t,
-               target: visual_models_path, variant: :outline)
-      end
+    def render_add_link
+      Button(type: :new,
+             target: new_visual_model_visual_group_path(@visual_model),
+             name: :visual_group_create.t, show_label: false,
+             variant: :strip)
     end
 
     def render_destroy_link(group)
