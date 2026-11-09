@@ -12,7 +12,8 @@ module Views::Controllers::VisualModels
 
     def test_renders_form_with_name_field
       assert_html(@html, "input[name='visual_model[name]']")
-      assert_html(@html, ".form-group.field", text: :visual_model.ti)
+      assert_html(@html, "label[for='visual_model_name']",
+                  text: :visual_model.ti)
     end
 
     def test_renders_submit_button

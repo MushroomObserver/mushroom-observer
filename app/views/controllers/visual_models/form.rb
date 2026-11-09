@@ -9,18 +9,8 @@ module Views::Controllers::VisualModels
     def view_template
       super do
         render(Components::Form::Errors.new(model: model))
-        render_name_field
+        text_field(:name, label: :visual_model.ti, class: "form-control")
         submit(:submit.ti, center: true)
-      end
-    end
-
-    private
-
-    def render_name_field
-      div(class: "form-group field") do
-        text_field(:name, class: "form-control", label: false)
-        whitespace
-        plain(:visual_model.ti)
       end
     end
   end
