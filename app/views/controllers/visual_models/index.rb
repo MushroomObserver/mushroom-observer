@@ -30,7 +30,7 @@ module Views::Controllers::VisualModels
       Button(
         type: :delete,
         target: visual_model_path(visual_model),
-        variant: :outline
+        variant: :strip
       )
     end
   end

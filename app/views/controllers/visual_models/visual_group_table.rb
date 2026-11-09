@@ -17,8 +17,10 @@ module Views::Controllers::VisualModels
     prop :visual_groups, _Array(VisualGroup)
 
     def view_template
-      render_top_nav
-      h3 { plain("Visual Groups") }
+      ContentPadded do
+        render_top_nav
+        h4 { plain(:visual_groups.ti) }
+      end
       render_table
     end
 
@@ -44,37 +46,39 @@ module Views::Controllers::VisualModels
     end
 
     def define_name_column(table)
-      table.column(:name.ti) do |g|
+      table.column(:name.ti, valign: :middle) do |g|
         Link(type: :get, name: g.name, target: visual_group_path(g))
       end
     end
 
     def define_count_columns(table)
-      table.column(:visual_group_included.t) do |g|
+      table.column(:visual_group_included.t, align: :center,
+                                             valign: :middle) do |g|
         count_in(included_counts, g)
       end
-      table.column(:visual_group_excluded.t) do |g|
+      table.column(:visual_group_excluded.t, align: :center,
+                                             valign: :middle) do |g|
         count_in(excluded_counts, g)
       end
     end
 
     def define_action_columns(table)
-      table.column(:edit.ti) do |g|
-        Link(type: :get, name: :edit.ti, target: edit_visual_group_path(g))
+      table.column(:edit.ti, align: :center, valign: :middle) do |g|
+        Button(type: :edit, target: g, variant: :strip)
       end
-      table.column(:destroy.ti) { |g| render_destroy_link(g) }
+      table.column(:destroy.ti, align: :center, valign: :middle) do |g|
+        render_destroy_link(g)
+      end
     end
 
     def render_top_nav
-      p do
-        Link(type: :get, name: :visual_group_create.t,
-             target: new_visual_model_visual_group_path(@visual_model))
-        plain(" | ")
-        Link(type: :get, name: :edit_object.t(type: :visual_model),
-             target: edit_visual_model_path(@visual_model))
-        plain(" | ")
-        Link(type: :get, name: :show_visual_model_index.t,
-             target: visual_models_path)
+      ButtonGroup do
+        Button(type: :get, name: :visual_group_create.t,
+               target: new_visual_model_visual_group_path(@visual_model))
+        Button(type: :get, name: :edit_object.t(type: :visual_model),
+               target: edit_visual_model_path(@visual_model))
+        Button(type: :get, name: :show_visual_model_index.t,
+               target: visual_models_path)
       end
     end
 
@@ -82,7 +86,7 @@ module Views::Controllers::VisualModels
       Button(
         type: :delete,
         target: visual_group_path(group),
-        variant: :outline
+        variant: :strip
       )
     end
 
