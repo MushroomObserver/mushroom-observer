@@ -41,9 +41,7 @@ module Views::Controllers::SpeciesLists::Projects
 
     def render_object_checkboxes
       div(class: "form-group mt-3") do
-        label(for: "species_list_projects_objects") do
-          plain(:species_list_projects_which_objects.t)
-        end
+        label { plain(:species_list_projects_which_objects.t) }
         checkbox_field(:objects,
                        [:species_list_projects_this_list.t, "list"],
                        [:species_list_projects_observations.t, "obs"],
@@ -56,9 +54,7 @@ module Views::Controllers::SpeciesLists::Projects
     # overflow-scrolled list is enough.
     def render_project_checkboxes
       div(class: "form-group mt-3") do
-        label(for: "species_list_projects_project_ids") do
-          plain(:species_list_projects_which_projects.t)
-        end
+        label { plain(:species_list_projects_which_projects.t) }
         render(Components::Form::OverflowCheckboxList.new(
                  form: self,
                  type: :project,
