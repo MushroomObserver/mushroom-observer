@@ -377,8 +377,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
     assert(spl.projects.include?(proj))           # owned by bolete project
-    assert_equal([mary.id, dick.id],
-                 proj.user_group.users.map(&:id)) # dick is only project member
+    # dick is only project member (order of membership isn't guaranteed)
+    assert_user_arrays_equal([mary, dick], proj.user_group.users, :sort)
 
     login("rolf")
     get(:show, params: { id: spl.id })
