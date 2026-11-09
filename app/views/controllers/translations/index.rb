@@ -16,8 +16,8 @@ module Views::Controllers::Translations
     prop :translated_records, _Hash(::String, ::TranslationString)
 
     def view_template
-      container_class(:wide)
-      add_page_title(:edit_translations_title.t)
+      render_page_chrome
+
       render_help_block
       Row do
         Column(xs: 6, class: "translation_container") do
@@ -31,14 +31,21 @@ module Views::Controllers::Translations
 
     private
 
+    def render_page_chrome
+      container_class(:wide)
+      add_page_title(:edit_translations_title.t)
+    end
+
     def render_help_block
       Container(width: :text) do
-        Help(element: :p, content: :edit_translations_help.t)
+        ContentPadded do
+          Help(element: :p, content: :edit_translations_help.t)
+        end
       end
     end
 
     def render_index_panel
-      div(id: "translations_index") do
+      div(id: "translations_index", class: "p-3") do
         @index.each { |item| render_item(item) }
       end
     end
