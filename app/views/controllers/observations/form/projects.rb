@@ -1,8 +1,9 @@
 # frozen_string_literal: true
 
-# Projects section of the observation form. Collapsible panel with
-# project checkboxes and constraint messages. Sub-component of
-# `Views::Controllers::Observations::Form`.
+# Projects section of the observation form. Owns the collapsible
+# Panel (heading, caret, help text) and the constraint messages;
+# `Components::Form::OverflowCheckboxList` only renders the checkbox
+# list itself. Sub-component of `Views::Controllers::Observations::Form`.
 #
 # Wire shape: `observation[project_ids][]=<id>` (Rails-idiomatic
 # has_many-through array). Checkedness defaults to
@@ -40,21 +41,39 @@ class Views::Controllers::Observations::Form::Projects < Views::Base
   prop :slip_target_project, _Nilable(Project), default: nil
 
   def view_template
-    render(
-      Components::Form::CheckboxPanel.new(
-        form: @form,
-        type: :project,
-        form_object_name: "observation",
-        objects: @projects,
-        checked_ids: checked_project_ids,
-        disabled_ids: disabled_project_ids,
-        help_text: :form_observations_project_help.t,
-        expanded: any_checked? || constraint_issues?
-      )
-    ) { render_constraint_messages }
+    render(panel) do |p|
+      p.with_heading { plain(:projects.ti) }
+      p.with_body(collapse: true) { render_panel_body }
+    end
   end
 
   private
+
+  def panel
+    Components::Panel.new(
+      panel_id: panel_id,
+      collapsible: true,
+      collapse_target: "##{panel_id}_inner",
+      expanded: any_checked? || constraint_issues?
+    )
+  end
+
+  def panel_id
+    "observation_projects"
+  end
+
+  def render_panel_body
+    render_constraint_messages
+    Help(content: :form_observations_project_help.t)
+    render(Components::Form::OverflowCheckboxList.new(
+             form: @form,
+             type: :project,
+             form_object_name: "observation",
+             objects: @projects,
+             checked_ids: checked_project_ids,
+             disabled_ids: disabled_project_ids
+           ))
+  end
 
   def checked_project_ids
     if @submitted_project_ids

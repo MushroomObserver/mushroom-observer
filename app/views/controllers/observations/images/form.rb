@@ -63,17 +63,18 @@ module Views::Controllers::Observations::Images
     end
 
     def render_project_checkboxes
-      render(
-        Components::Form::CheckboxPanel.new(
-          form: self,
-          type: :project,
-          form_object_name: "image",
-          objects: @projects,
-          checked_ids: checked_project_ids,
-          disabled_ids: disabled_project_ids,
-          help_text: :form_images_project_help.t
-        )
-      )
+      div(class: "form-group mt-3") do
+        label { plain(:projects.ti) }
+        Help(content: :form_images_project_help.t)
+        render(Components::Form::OverflowCheckboxList.new(
+                 form: self,
+                 type: :project,
+                 form_object_name: "image",
+                 objects: @projects,
+                 checked_ids: checked_project_ids,
+                 disabled_ids: disabled_project_ids
+               ))
+      end
     end
 
     def checked_project_ids

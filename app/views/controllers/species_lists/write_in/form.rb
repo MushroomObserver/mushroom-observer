@@ -162,18 +162,19 @@ module Views::Controllers::SpeciesLists::WriteIn
 
     def render_coord_fields
       div(class: "form-group form-inline") do
-        render_coord_field(:lat, @member_lat, :latitude.ti, 8)
-        render_coord_field(:lng, @member_lng, :longitude.ti, 8)
+        render_coord_field(:lat, @member_lat, :latitude.ti, 8, spaced: true)
+        render_coord_field(:lng, @member_lng, :longitude.ti, 8, spaced: true)
         render_coord_field(:alt, @member_alt, :altitude.ti, 6)
       end
     end
 
-    def render_coord_field(field, value, label_text, size)
+    def render_coord_field(field, value, label_text, size, spaced: false)
       text_field("member[#{field}]",
                  value: value,
                  size: size,
                  label: label_text,
-                 inline: true)
+                 inline: true,
+                 wrap_class: spaced ? "mr-3" : nil)
     end
 
     def render_is_collection_location_checkbox

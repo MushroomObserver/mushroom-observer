@@ -89,18 +89,22 @@ module Views::Controllers::SpeciesLists
                                        label: :where.ti)
     end
 
+    # No Panel wrap here -- the fields above the list already fill the
+    # page, so a second collapsible card would be one card too many.
+    # Just a plain heading + the overflow-scrolled list.
     def render_project_checkboxes
-      render(
-        Components::Form::CheckboxPanel.new(
-          form: self,
-          type: :project,
-          form_object_name: "species_list",
-          objects: @projects,
-          checked_ids: checked_project_ids,
-          disabled_ids: disabled_project_ids,
-          help_text: :form_species_lists_project_help.t
-        )
-      )
+      div(class: "form-group mt-3") do
+        label { plain(:projects.ti) }
+        Help(content: :form_species_lists_project_help.t)
+        render(Components::Form::OverflowCheckboxList.new(
+                 form: self,
+                 type: :project,
+                 form_object_name: "species_list",
+                 objects: @projects,
+                 checked_ids: checked_project_ids,
+                 disabled_ids: disabled_project_ids
+               ))
+      end
     end
 
     def checked_project_ids
