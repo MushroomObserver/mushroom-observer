@@ -83,6 +83,26 @@ class TableTest < ComponentTestCase
     assert_html(html, "table.table.table-striped.table-hover")
   end
 
+  def test_align_middle_kwarg_adds_vertical_align_class
+    rows = [TestRow.new(name: "Test")]
+
+    html = render_table(rows, align_middle: true) do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, "table.table.table-align-middle")
+  end
+
+  def test_align_middle_false_omits_vertical_align_class
+    rows = [TestRow.new(name: "Test")]
+
+    html = render_table(rows, align_middle: false) do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_no_html(html, "table.table-align-middle")
+  end
+
   def test_identifier_kwarg_adds_table_identifier_class
     rows = [TestRow.new(name: "Test")]
 

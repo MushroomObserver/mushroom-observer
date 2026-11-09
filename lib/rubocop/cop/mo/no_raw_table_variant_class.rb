@@ -3,42 +3,56 @@
 module RuboCop
   module Cop
     module MO
-      # `Table(...)` (Components::Table) exposes `variant:` to apply
-      # Bootstrap table modifier classes -- passing the same class
-      # via `class:`/`class!:` instead skips that kwarg for no
-      # reason. Detects a `Table(...)` call whose `class:` string
-      # contains one of Bootstrap's table modifier classes and
-      # suggests `variant:` instead.
+      # `Table(...)` (Components::Table) exposes `variant:` and
+      # `align_middle:` for classes it can emit itself -- passing one
+      # of those classes via `class:`/`class!:` instead skips the
+      # kwarg for no reason. Detects a `Table(...)` call whose
+      # `class:` string contains one of those classes and suggests
+      # the matching kwarg.
       #
       # @example
       #   # bad
       #   Table(@rows, class: "table-striped")
+      #   Table(@rows, class: "table-align-middle")
       #
       #   # good
       #   Table(@rows, variant: :striped)
+      #   Table(@rows, align_middle: true)
       class NoRawTableVariantClass < Base
         include ClassKeywordPair
 
-        MSG = "Don't pass `table-%<variant>s` via class: -- use " \
-              "`variant: :%<variant>s` on Table(...) instead."
+        MSG = "Don't pass `%<css_class>s` via class: -- use " \
+              "`%<kwarg>s` on Table(...) instead."
 
         RESTRICT_ON_SEND = [:Table].freeze
 
-        # Bootstrap 3's table modifier classes (Components::Table's
-        # `variant:` just emits "table-#{v}" for any symbol, but only
-        # these are Bootstrap classes -- matching on an unrestricted
-        # "table-*" pattern would also flag app-specific identifier
-        # classes like "table-visual-model").
-        TABLE_VARIANTS = %w[striped condensed hover bordered].freeze
+        # Classes Components::Table can emit itself. Bootstrap 3's
+        # table modifiers (variant: just emits "table-#{v}" for any
+        # symbol, but only these are Bootstrap classes -- matching on
+        # an unrestricted "table-*" pattern would also flag
+        # app-specific identifier classes like "table-visual-model")
+        # plus the table-wide vertical-align class
+        # (app/assets/stylesheets/mo/_tables.scss).
+        RAW_CLASS_TO_KWARG = {
+          "table-striped" => "variant: :striped",
+          "table-condensed" => "variant: :condensed",
+          "table-hover" => "variant: :hover",
+          "table-bordered" => "variant: :bordered",
+          "table-align-middle" => "align_middle: true"
+        }.freeze
 
         def on_send(node)
           class_arg = class_keyword_value(node)
           return unless class_arg&.str_type?
 
-          variant = matching_variant(class_arg.value)
-          return unless variant
+          css_class = matching_class(class_arg.value)
+          return unless css_class
 
-          add_offense(node, message: format(MSG, variant: variant))
+          add_offense(node,
+                      message: format(MSG, css_class: css_class,
+                                           kwarg: RAW_CLASS_TO_KWARG[
+                                             css_class
+                                           ]))
         end
 
         private
@@ -51,9 +65,9 @@ module RuboCop
           pair&.value
         end
 
-        def matching_variant(class_string)
+        def matching_class(class_string)
           tokens = class_string.to_s.split(/\s+/)
-          TABLE_VARIANTS.find { |variant| tokens.include?("table-#{variant}") }
+          RAW_CLASS_TO_KWARG.keys.find { |c| tokens.include?(c) }
         end
       end
     end
