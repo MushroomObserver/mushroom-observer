@@ -19,19 +19,23 @@ remote="$user_name@images.mushroomobserver.org"
 # ahead of the newest file for anyone west of UTC and a day behind it for
 # anyone far enough east.
 latest=$(ssh "$remote" "ls -1 $backup_dir/database-[0-9]*.gz | sort | tail -1")
+# The remote pipeline ends in tail, which succeeds even when ls matched
+# nothing, so an empty result is the only signal that none is there.
+if [ -z "$latest" ]; then
+  echo "No database-[0-9]*.gz found in $remote:$backup_dir." >&2
+  exit 1
+fi
 echo "Downloading $latest"
 scp "$remote:$latest" ./checkpoint.gz
 
-# script/backup_database.sh scp's the dump into place under its final
-# name, so for the few seconds that transfer takes the file is readable
-# and short. A download smaller than the finished remote file read it
-# mid-transfer.
+# script/backup_database.sh publishes via a .part rename, so the final
+# name only appears on a finished file -- a size mismatch here means this
+# scp stopped early.
 remote_size=$(ssh "$remote" "stat -c %s '$latest'")
 # BSD wc pads its count with a leading space, so compare numerically.
 local_size=$(wc -c < checkpoint.gz | tr -d '[:space:]')
 if [ "$local_size" -ne "$remote_size" ]; then
   echo "checkpoint.gz is $local_size bytes, $latest is $remote_size." >&2
-  echo "A short download means the dump was still being written." >&2
   echo "Re-run this script." >&2
   exit 1
 fi

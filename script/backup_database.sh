@@ -19,9 +19,10 @@ db=mo_$RAILS_ENV
 # gets published as an intact .gz holding partial SQL. Scoped to this
 # pipeline: the cull below relies on a subshell's status being masked.
 set -o pipefail
-mysqldump --defaults-extra-file=$config_file $db | gzip -c - > $snapshot_file
+mysqldump --defaults-extra-file="$config_file" "$db" |
+  gzip -c - > "$snapshot_file"
 set +o pipefail
-chmod 640 $snapshot_file
+chmod 640 "$snapshot_file"
 
 # Transfer snapshot to image server and abort if this fails. It goes to a
 # .part name and is renamed into place, so the final name never names a
@@ -29,12 +30,12 @@ chmod 640 $snapshot_file
 # is newest, and the transfer takes several seconds. A .part left by a
 # failed run matches none of the keep-list patterns below, so the next
 # day's cull removes it.
-dest=$remote_host:$backup_dir/$backup_file.part
-if ! scp $snapshot_file $dest; then
+dest="$remote_host:$backup_dir/$backup_file.part"
+if ! scp "$snapshot_file" "$dest"; then
   echo "Failed to transfer $snapshot_file to $dest!"
   exit 1
 fi
-ssh $remote_host "mv $backup_dir/$backup_file.part $backup_dir/$backup_file"
+ssh "$remote_host" "mv $backup_dir/$backup_file.part $backup_dir/$backup_file"
 
 # Get listing of snapshots currently on the image server.
 # (Make extra certain that these are actually files in the backup dir!!)

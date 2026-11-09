@@ -293,7 +293,7 @@ db/download_checkpoint
 
 You will need to enter your account username for `images.mushroomobserver.org`, because these database snapshots are not publicly available.
 
-This will install yesterday's database backup, stripped of passwords and private GPS data, in MySQL as `mo_development` for user `mo`. You can skip ahead to `rails lang:update` below.
+This downloads the most recent nightly backup and installs it in MySQL as `mo_development` for user `mo`, stripped of passwords, login secrets, API keys, emails and private GPS data. You can skip ahead to `rails lang:update` below.
 
 **Without an images-server account:** there is no publicly downloadable snapshot. Either ask a core developer for a stripped dump — `db/strip_checkpoint` has a commented-out `mysqldump` line that writes one, and only that stripped file may be shared — or work against an empty database. The test suite builds everything it needs from `test/fixtures`, so a snapshot is a convenience for browsing live content, not a requirement.
 
