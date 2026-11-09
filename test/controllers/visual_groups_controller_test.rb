@@ -72,6 +72,11 @@ class VisualGroupsControllerTest < FunctionalTestCase
           visual_model_id: @visual_model.id
         })
     assert_response(:success)
+    # The rubric links back to the visual model's index, even though
+    # the show route is shallow and carries no visual_model_id.
+    assert_select(
+      "#rubric a[href='#{visual_model_visual_groups_path(@visual_model)}']"
+    )
   end
 
   def test_should_show_visual_group_with_filter

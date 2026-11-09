@@ -29,16 +29,11 @@ module Views::Controllers::VisualGroups
                subset: @subset, status: "included",
                pagination_data: @pagination_data
              ))
-      render_bottom_nav
     end
 
     private
 
     def render_top_nav
-      p { render_nav_links }
-    end
-
-    def render_bottom_nav
       p { render_nav_links }
     end
 

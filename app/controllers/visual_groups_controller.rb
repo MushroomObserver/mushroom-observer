@@ -57,6 +57,17 @@ class VisualGroupsController < ApplicationController
            ))
   end
 
+  # Top-nav rubric support (Views::Layouts::TopNav#extra_nav_index_params):
+  # the index route is nested under visual_model_id, which show/edit
+  # don't carry in params (shallow routing flattens member actions) --
+  # derive it from the loaded record instead.
+  def nav_index_params
+    model = @visual_group&.visual_model || @visual_model
+    return {} unless model
+
+    { visual_model_id: model.id }
+  end
+
   # Paginates at the DB level via Query instead of loading every
   # matching visual_group_image + its Image into memory and slicing
   # the array -- a group with thousands of images would otherwise
