@@ -79,6 +79,19 @@ class VisualGroupsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_should_show_visual_group_with_nil_description
+    group = visual_groups(:visual_group_one)
+    group.update_column(:description, nil)
+
+    login
+    get(:show, params: {
+          id: group.id,
+          visual_model_id: group.visual_model.id
+        })
+
+    assert_response(:success)
+  end
+
   def test_should_show_visual_group_with_filter
     login
     get(:show, params: {

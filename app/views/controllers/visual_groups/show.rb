@@ -42,7 +42,7 @@ module Views::Controllers::VisualGroups
       p do
         strong { append_colon(:description.ti) }
         br
-        trusted_html(@visual_group.description.t)
+        trusted_html(@visual_group.description.to_s.t)
       end
       p do
         strong { append_colon(:approved.ti) }

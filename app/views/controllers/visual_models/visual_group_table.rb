@@ -74,8 +74,7 @@ module Views::Controllers::VisualModels
     def render_add_link
       Button(type: :new,
              target: new_visual_model_visual_group_path(@visual_model),
-             name: :visual_group_create.t, show_label: false,
-             variant: :strip)
+             name: :visual_group_create.t, variant: :strip)
     end
 
     def render_destroy_link(group)
