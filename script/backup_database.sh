@@ -4,9 +4,6 @@
 # as /data/images/backup/database-YYYYMMDD.gz, then culls old snapshots.
 
 set -e
-# Without this the mysqldump pipeline below reports gzip's status, so a
-# dump that dies midway publishes an intact .gz holding partial SQL.
-set -o pipefail
 
 app_root="$( cd "$(dirname "$0")"; pwd -P | sed 's/\/script*//' )"
 config_file=$app_root/config/mysql-$RAILS_ENV.cnf
@@ -18,7 +15,12 @@ temp_file=/tmp/backup_database.$$
 db=mo_$RAILS_ENV
 
 # Create a new snapshot.
+# pipefail, or this reports gzip's status and a dump that dies midway
+# gets published as an intact .gz holding partial SQL. Scoped to this
+# pipeline: the cull below relies on a subshell's status being masked.
+set -o pipefail
 mysqldump --defaults-extra-file=$config_file $db | gzip -c - > $snapshot_file
+set +o pipefail
 chmod 640 $snapshot_file
 
 # Transfer snapshot to image server and abort if this fails. It goes to a
