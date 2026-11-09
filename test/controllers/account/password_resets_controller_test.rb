@@ -29,12 +29,9 @@ module Account
       assert_select("form#account_password_reset_form")
     end
 
-    # A missing/blank `login` param used to build `User[:name].eq(nil)`
-    # -> `name IS NULL` in the query, which could match an arbitrary
-    # user who never set a display name (`users.name` has no NOT NULL
-    # constraint), silently resetting a stranger's password (Copilot
-    # review on #5072). Create a user with a nil name so this test
-    # would have matched them before the `login.blank?` guard.
+    # A blank `login` once built `email IS NULL` into the query, which
+    # matched an arbitrary user and reset their password. The user here
+    # has a nil name, which the lookup no longer reads at all.
     def test_create_blank_login_does_not_match_nil_name_user
       nameless_user = User.create!(login: "nameless_login_user",
                                    email: "nameless_login_user@example.com")
@@ -57,7 +54,7 @@ module Account
       old_password = user.password
 
       assert_enqueued_with(
-        job: ActionMailer::MailDeliveryJob,
+        job: QuietMailDeliveryJob,
         args: lambda { |args|
           args[0] == "PasswordMailer" &&
             args[1] == "build" &&
@@ -97,6 +94,49 @@ module Account
 
       assert_not(user.password_reset_required)
       assert_not_equal(was, user.auth_code)
+    end
+
+    # `users.name` is neither unique nor an identifier, and matching it
+    # handed the reset to whichever account had the lower id: the
+    # requester stayed locked out with their password untouched while a
+    # stranger's password was changed and mailed away.
+    def test_create_prefers_the_login_owner_over_a_matching_display_name
+      impostor, owner = [users(:roy), users(:mary)].sort_by(&:id)
+      impostor.update_column(:name, owner.login)
+      impostor_password = impostor.password
+      owner_password = owner.password
+
+      assert_enqueued_with(
+        job: QuietMailDeliveryJob,
+        args: ->(args) { args[3][:args][0][:receiver] == owner }
+      ) do
+        post(:create, params: { new_user: { login: owner.login } })
+      end
+
+      assert_redirected_to(new_account_login_path)
+      assert_not_equal(owner_password, owner.reload.password,
+                       "The login's owner should get the new password")
+      assert_equal(impostor_password, impostor.reload.password,
+                   "A display name should not capture someone's reset")
+    end
+
+    # Logins collate case-insensitively, so two accounts can match one
+    # string and the lower id would answer for both.
+    def test_create_prefers_the_exact_login_over_a_case_variant
+      user = users(:roy)
+      twin = User.new(login: user.login.upcase, email: "twin@example.org")
+      twin.save(validate: false)
+      user_password = user.password
+
+      assert_enqueued_with(
+        job: QuietMailDeliveryJob,
+        args: ->(args) { args[3][:args][0][:receiver] == twin }
+      ) do
+        post(:create, params: { new_user: { login: twin.login } })
+      end
+
+      assert_equal(user_password, user.reload.password,
+                   "The exact spelling should decide which account resets")
     end
 
     # A failing password change must render or redirect explicitly --

@@ -12,7 +12,7 @@ module Account
 
     def create
       @login = params[:new_user] && params[:new_user][:login]
-      @new_user = find_user_by_login_name_or_email(@login)
+      @new_user = find_user_by_login_or_email(@login)
       if @new_user.nil?
         flash_error(:runtime_email_new_password_failed.t(user: @login))
         return render_new_view_invalid
@@ -23,14 +23,21 @@ module Account
 
     private
 
-    def find_user_by_login_name_or_email(login)
+    # `users.name` is a display name, not an identifier: accounts carry
+    # names that match other accounts' logins, and the lowest id among
+    # the matches wins -- so matching it reset a stranger's password and
+    # left the requester's own password in place.
+    def find_user_by_login_or_email(login)
       return nil if login.blank?
 
-      User.find_by(
-        User[:login].eq(login).
-        or(User[:name].eq(login)).
-        or(User[:email].eq(login))
-      )
+      match = User[:login].eq(login).or(User[:email].eq(login))
+      first = User.find_by(match)
+      return first if first.nil? || [first.login, first.email].include?(login)
+
+      # Both columns collate case- and trailing-space-insensitively, so
+      # another account can match the same string. The spelling the
+      # person typed wins.
+      User.where(match).find { |user| user.login == login } || first
     end
 
     def render_new_view(status: :ok, **render_opts)
