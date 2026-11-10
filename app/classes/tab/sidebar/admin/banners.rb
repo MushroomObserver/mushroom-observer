@@ -7,6 +7,6 @@ class Tab::Sidebar::Admin::Banners < Tab::Base
   end
 
   def path
-    admin_banners_path
+    new_admin_banner_path
   end
 end

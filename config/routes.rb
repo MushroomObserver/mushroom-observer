@@ -319,7 +319,7 @@ MushroomObserver::Application.routes.draw do
     resources :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
     get("review_donations", to: "donations#edit") # alternate path
-    resources :banners, only: [:index, :create]
+    resources :banners, only: [:new, :create]
     resource :blocked_ips, only: [:edit, :update]
     resources :excluded_inat_users, only: [:index, :create, :destroy] do
       resource :content_purge, only: [:new, :create],
