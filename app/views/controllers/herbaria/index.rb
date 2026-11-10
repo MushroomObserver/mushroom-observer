@@ -50,7 +50,7 @@ module Views::Controllers::Herbaria
 
     def build_table_columns(table)
       build_main_columns(table)
-      table.column(:mo_id.ti, class: "text-right") do |h|
+      table.column(:mo_id.ti, align: :right) do |h|
         render_id_badge(h)
       end
     end
