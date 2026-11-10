@@ -41,7 +41,7 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_elapsed_time_cell
-      td(class: "text-center",
+      td(class: Components::Table.align_class(:center),
          data: { field_slip_job_target: "seconds" }) do
         plain(number_with_precision(
                 @tracker.elapsed_time, precision: 1
@@ -50,14 +50,14 @@ module Views::Controllers::Projects::FieldSlips
     end
 
     def render_pages_cell
-      td(class: "text-center",
+      td(class: Components::Table.align_class(:center),
          data: { field_slip_job_target: "pages" }) do
         plain(@tracker.pages.to_s)
       end
     end
 
     def render_status_cell
-      td(class: "text-right",
+      td(class: Components::Table.align_class(:right),
          data: { field_slip_job_target: "status" }) do
         plain(@tracker.status)
       end

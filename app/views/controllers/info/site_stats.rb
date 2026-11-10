@@ -50,7 +50,9 @@ module Views::Controllers::Info
 
               tr do
                 td { plain(label) }
-                td(class: "text-right") { plain(count.to_s) }
+                td(class: Components::Table.align_class(:right)) do
+                  plain(count.to_s)
+                end
               end
             end
           end
