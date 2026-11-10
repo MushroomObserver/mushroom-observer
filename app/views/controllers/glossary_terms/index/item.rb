@@ -18,7 +18,7 @@ module Views::Controllers::GlossaryTerms
       private
 
       def render_left
-        h4 do
+        h4(class: "glossary-term-title mt-1") do
           Link(type: :get, name: @glossary_term.name,
                target: glossary_term_path(@glossary_term.id))
           plain(":")
