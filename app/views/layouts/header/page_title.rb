@@ -39,8 +39,13 @@ module Views::Layouts
       "show_title_nav d-flex justify-content-start align-items-start " \
       "px-card"
 
+    # Form pages (new/edit, plus a failed create/update redisplaying
+    # the same form) need more breathing room below the title bar
+    # than a show/index page does.
+    FORM_ACTIONS = %w[new edit create update].freeze
+
     def view_template
-      Row(id: "title_bar", class: "mb-1") do
+      Row(id: "title_bar", class: title_bar_margin_class) do
         render_mobile_top_row unless suppress_title?
         render_left_column unless suppress_title?
         render_right_column if show_desktop_right_column?
@@ -151,6 +156,10 @@ module Views::Layouts
 
     def suppress_title?
       controller.action_name == "index" || on_project_page?
+    end
+
+    def title_bar_margin_class
+      FORM_ACTIONS.include?(controller.action_name) ? "mb-2" : "mb-1"
     end
 
     # A right column to render interest-icons/pager into only exists
