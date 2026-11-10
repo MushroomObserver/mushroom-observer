@@ -296,6 +296,7 @@
   news: news
   notification: notification
   notifications: notifications
+  label: label
   mo_id: MO ID
   # generic object
   object: object
