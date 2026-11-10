@@ -2,6 +2,9 @@
 
 # User forgot their password.
 class PasswordMailer < ApplicationMailer
+  # The cleartext password is one of this mailer's job arguments.
+  self.delivery_job = QuietMailDeliveryJob
+
   after_action :webmaster_delivery, only: [:build]
 
   def build(receiver:, password:)
