@@ -47,7 +47,7 @@ class Views::Controllers::Account::Preferences::Form <
 
   def render_login_section
     text_field(:login, prefs: true)
-    text_field(:email, prefs: true)
+    text_field(:email, prefs: true, type: "email")
     password_field(:password, label: :prefs_password_new)
     password_field(:password_confirmation,
                    label: :prefs_password_confirm)
