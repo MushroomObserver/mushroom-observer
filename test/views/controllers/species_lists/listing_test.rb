@@ -20,8 +20,8 @@ module Views::Controllers::SpeciesLists
 
       assert_no_html(html, ".list-group-item")
       assert_html(html, ".list_info")
-      # badge-xl badge with species_list id
-      assert_html(html, ".badge-xl")
+      # ID badge with the species_list id
+      assert_html(html, ".badge-id")
       # text_name link → species_list show path
       assert_html(html, ".list_what")
       assert_html(html, ".list_when")
