@@ -59,6 +59,8 @@ class Query::ImagesTest < UnitTestCase
     assert_query(expects, :Image, content_types: %w[jpg gif png])
     expects = Image.content_types(%w[raw]).order_by_default
     assert_query(expects, :Image, content_types: %w[raw])
+    expects = Image.content_types(%w[jpg raw]).order_by_default
+    assert_query(expects, :Image, content_types: %w[jpg raw])
   end
 
   def test_image_has_notes

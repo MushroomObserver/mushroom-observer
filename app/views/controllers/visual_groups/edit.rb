@@ -14,8 +14,7 @@ module Views::Controllers::VisualGroups
     # Each row is `[Image, included]` where `included` is the
     # boolean from `visual_group_images.included` — `true`, `false`,
     # or `nil` for the `:any` raw-SQL branch.
-    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean))),
-         default: -> { [] }
+    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean)))
 
     def view_template
       add_edit_title(@visual_group)
