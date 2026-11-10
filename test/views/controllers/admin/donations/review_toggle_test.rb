@@ -6,7 +6,7 @@ module Views::Controllers::Admin::Donations
   class ReviewToggleTest < ComponentTestCase
     def setup
       super
-      @donation = Donation.first
+      @donation = donations(:unreviewed)
     end
 
     def test_renders_self_submitting_form
