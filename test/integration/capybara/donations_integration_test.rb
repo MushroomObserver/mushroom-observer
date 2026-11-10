@@ -28,6 +28,12 @@ class DonationsIntegrationTest < CapybaraIntegrationTestCase
     assert_in_delta(100.0, donation.amount)
   end
 
+  # Each row's checkbox submits on change via a Stimulus `change`
+  # listener -- rack_test (this test case's driver) runs no
+  # JavaScript, so the submit-on-change round trip itself is covered
+  # at the controller-test level
+  # (Admin::DonationsControllerTest#test_update_reviewed_donations_turbo_stream)
+  # instead. This only proves the page renders the per-row form.
   def test_edit_donation
     # Login as admin
     login(users(:admin))
@@ -41,17 +47,8 @@ class DonationsIntegrationTest < CapybaraIntegrationTestCase
     visit(edit_admin_donations_path)
     assert_selector("body.donations__edit")
 
-    # The edit page shows all donations in a table with checkboxes
-    assert_selector("#admin_review_donations_form")
-
-    # Check the "reviewed" checkbox for the unreviewed donation
-    within("#admin_review_donations_form") do
-      check("reviewed_#{donation.id}")
-      click_commit
-    end
-
-    # Verify database effect - donation should now be marked as reviewed
-    donation.reload
-    assert(donation.reviewed, "Donation should have been marked as reviewed")
+    # The edit page shows a self-submitting form per donation row
+    assert_selector("#donation_reviewed_#{donation.id} " \
+                    "input[type=checkbox]")
   end
 end
