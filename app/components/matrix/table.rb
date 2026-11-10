@@ -38,7 +38,8 @@ class Components::Matrix::Table < Components::Base
   # v3: observation boxes name the collector, not the entering user.
   # v4: rss-* classes renamed to log-*, heading structure changed.
   # v5: ID badge bumped from size: :md to :lg.
-  CACHE_VERSION = "v5"
+  # v6: user-detail footer li drops hanging-indent.
+  CACHE_VERSION = "v6"
 
   # The cache key MatrixBox fragments are stored under, used by both
   # the write here and the controller's batched `read_multi`
