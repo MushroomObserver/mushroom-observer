@@ -30,8 +30,14 @@ class VisualGroup < AbstractModel
     end
   end
 
+  # Returns Name records, not strings, so callers can render each
+  # one's stored display_name (bold/italic textile markup, author
+  # trimmed per viewer pref) via Name#format_name(user) instead of
+  # re-deriving formatting from a bare string.
   def distinct_names
-    VisualGroup.connection.select_rows(VisualGroupNames.new(id, 10).sql_query)
+    Name.joins(observations: { observation_images: :image }).
+      merge(Image.visual_groups(self).visual_group_included(true)).
+      distinct.order(Name[:text_name]).limit(10)
   end
 
   def included_image_ids

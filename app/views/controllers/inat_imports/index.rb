@@ -13,7 +13,7 @@ module Views::Controllers::InatImports
       container_class(:wide)
       add_page_title(:inat_imports_index_title.l)
       add_context_nav(Tab::InatImport::Actions.new(include_index: false))
-      Table(@imports, class: "table-striped") do |t|
+      Table(@imports, variant: :striped) do |t|
         render_columns(t)
       end
     end

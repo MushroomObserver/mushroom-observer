@@ -31,7 +31,7 @@ module Views::Controllers::Admin::Donations
     def render_donations_table
       Table(
         @donations,
-        class: "table-striped table-review-donations my-3"
+        variant: :striped, class: "table-review-donations my-3"
       ) do |t|
         define_columns(t)
       end
