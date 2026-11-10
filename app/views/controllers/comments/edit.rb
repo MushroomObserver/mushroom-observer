@@ -33,11 +33,13 @@ module Views::Controllers::Comments
     # Mirrors `_object.rb`: render the comments-for-object
     # panel for the target.
     def render_object_panel
-      render(CommentsForObject.new(
-               object: @target,
-               comments: @comments.to_a,
-               user: @user, editable: false, limit: 10
-             ))
+      div(class: "mt-3") do
+        render(CommentsForObject.new(
+                 object: @target,
+                 comments: @comments.to_a,
+                 user: @user, editable: false, limit: 10
+               ))
+      end
     end
   end
 end
