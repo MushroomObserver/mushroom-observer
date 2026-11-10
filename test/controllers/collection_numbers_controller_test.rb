@@ -40,7 +40,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_by_users.l}: Rolf Singer")
     # In results, expect 1 row per collection_number.
-    assert_select("#results tr", query.num_results)
+    assert_select("#results tbody tr", query.num_results)
   end
 
   def test_index_with_id_and_sorted
