@@ -19,7 +19,7 @@ module FieldSlipProjectJoinable
   def join_field_slip_project(project)
     return unless project&.can_join?(@user)
 
-    project.user_group.users << @user
+    project.user_group.add_user(@user)
     flash_notice(:field_slip_welcome.t(title: project.title))
     grant_field_slip_project_membership(project)
   end

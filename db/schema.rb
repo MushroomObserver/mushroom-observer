@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_09_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_09_140000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -1094,6 +1094,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_09_120000) do
   create_table "user_group_users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
+    t.index ["user_group_id", "user_id"], name: "index_user_group_users_unique", unique: true
   end
 
   create_table "user_groups", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
