@@ -191,8 +191,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   #
   #   Views::Controllers::Account::APIKeys::Form
   #     → account_api_key_form
-  #   Views::Controllers::Admin::Donations::ReviewForm
-  #     → admin_donation_review_form
+  #   Views::Controllers::Admin::Donations::ReviewToggle
+  #     → admin_donation_review_toggle
   #   Views::Controllers::Admin::BlockedIps::Manager
   #     → admin_blocked_ip_manager
   #   Views::Controllers::Names::Synonyms::Approve::Form
