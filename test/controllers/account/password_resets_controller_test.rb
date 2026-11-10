@@ -96,6 +96,24 @@ module Account
       assert_not_equal(was, user.auth_code)
     end
 
+    # Someone who has forgotten which login they chose resets by
+    # email instead, so that spelling has to resolve as well.
+    def test_create_resolves_an_email_address
+      user = users(:roy)
+      old_password = user.password
+
+      assert_enqueued_with(
+        job: QuietMailDeliveryJob,
+        args: ->(args) { args[3][:args][0][:receiver] == user }
+      ) do
+        post(:create, params: { new_user: { login: user.email } })
+      end
+
+      assert_redirected_to(new_account_login_path)
+      assert_not_equal(old_password, user.reload.password,
+                       "A reset by email should reach that account")
+    end
+
     # `users.name` is neither unique nor an identifier, and matching it
     # handed the reset to whichever account had the lower id: the
     # requester stayed locked out with their password untouched while a
