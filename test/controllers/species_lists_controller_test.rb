@@ -85,8 +85,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_users_equal(mary, @spl2.user)
     assert_obj_arrays_equal([], @spl1.projects)
     assert_obj_arrays_equal([@proj2], @spl2.projects)
-    assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users)
+    # Membership order isn't guaranteed; compare as sets.
+    assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users,
+                            :sort)
+    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users, :sort)
   end
   private :init_for_project_checkbox_tests
 
