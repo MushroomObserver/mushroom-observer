@@ -26,7 +26,8 @@ module Views::Controllers::GlossaryTerms
         render(::Views::Layouts::ObjectFooter.new(
                  user: current_user,
                  obj: @glossary_term,
-                 versions: @versions.to_a
+                 versions: @versions.to_a,
+                 no_wrap: true
                ))
       end
 

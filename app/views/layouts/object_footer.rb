@@ -31,15 +31,19 @@ module Views::Layouts
     # so test doubles work too.
     prop :versions, _Array(_Interface(:user_id)), default: -> { [] }
     prop :minimal, _Boolean, default: false
+    # Skip the ContentPadded (p-card) wrap -- for callers whose page
+    # handles its padding already (content_padding(:no_panels), a
+    # surrounding Panel, ...), where ContentPadded's padding would
+    # just double up. The "small"/"footer-view-stats" classes still
+    # land on a plain wrapping div either way.
+    prop :no_wrap, _Boolean, default: false
 
     def view_template
       return render_minimal if @minimal
 
       num_versions = @versions.length
 
-      ContentPadded(
-        class: "small footer-view-stats"
-      ) do
+      render_wrapper("small footer-view-stats") do
         if num_versions.positive? && @obj.version < num_versions
           render_old_version_metadata(num_versions)
         else
@@ -52,12 +56,19 @@ module Views::Layouts
 
     private
 
-    # The bare-bones footer that absorbed `Views::Layouts::Timestamps`.
+    def render_wrapper(wrapper_class, &block)
+      if @no_wrap
+        div(class: wrapper_class, &block)
+      else
+        ContentPadded(class: wrapper_class, &block)
+      end
+    end
+
+    # The bare-bones footer with timestamps.
     # Date-only formatting (`.web_date`), no user attribution, none
-    # of the optional chunks. Renders for `herbarium_records/show`
-    # and `collection_numbers/show`.
+    # of the optional chunks.
     def render_minimal
-      ContentPadded(class: "small") do
+      render_wrapper("small") do
         p do
           plain("#{:created_at.ti}: #{@obj.created_at.web_date}")
           br
