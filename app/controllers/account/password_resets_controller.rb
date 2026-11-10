@@ -12,7 +12,7 @@ module Account
 
     def create
       @login = params[:new_user] && params[:new_user][:login]
-      @new_user = find_user_by_login_name_or_email(@login)
+      @new_user = find_user_by_login_or_email(@login)
       if @new_user.nil?
         flash_error(:runtime_email_new_password_failed.t(user: @login))
         return render_new_view_invalid
@@ -23,14 +23,33 @@ module Account
 
     private
 
-    def find_user_by_login_name_or_email(login)
+    # `users.name` is a display name, not an identifier: accounts carry
+    # names that match other accounts' logins, and the lowest id among
+    # the matches wins -- so matching it reset a stranger's password and
+    # left the requester's password in place.
+    def find_user_by_login_or_email(login)
       return nil if login.blank?
 
-      User.find_by(
-        User[:login].eq(login).
-        or(User[:name].eq(login)).
-        or(User[:email].eq(login))
-      )
+      match = User[:login].eq(login).or(User[:email].eq(login))
+      first = User.find_by(match)
+      # Nothing outranks an exact login, and this is also the cheap
+      # path: neither column is indexed, so the scan stops at the
+      # first row here instead of reading all of `users`.
+      return first if first.nil? || first.login == login
+
+      highest_ranking_match(login, match)
+    end
+
+    # Both columns collate case- and trailing-space-insensitively, and
+    # a login can be spelled like an email, so one string can match
+    # several accounts. `login` is the identifier people are asked
+    # for, so it outranks a stranger's email, and either exact
+    # spelling outranks a collation match.
+    def highest_ranking_match(login, match)
+      matches = User.where(match)
+      matches.find { |user| user.login == login } ||
+        matches.find { |user| user.email == login } ||
+        matches.first
     end
 
     def render_new_view(status: :ok, **render_opts)

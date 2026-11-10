@@ -93,4 +93,10 @@ update users set password_reset_required = false;
 # An iNaturalist OAuth code or JWT for the importing user's iNat account.
 update inat_imports set token = null;
 
+# `PasswordMailer` carries its cleartext password as a job argument, and
+# Solid Queue keeps a finished job's arguments for a week -- so a
+# snapshot hands over a working password for every account that reset
+# in that window. The executions tables cascade.
+delete from solid_queue_jobs where arguments like '%"PasswordMailer"%';
+
 commit;
