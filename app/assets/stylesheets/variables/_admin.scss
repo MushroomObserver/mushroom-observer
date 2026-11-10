@@ -98,7 +98,7 @@ $LEFT_BAR_HOVER_BG_COLOR:           $blue;
 // Top Navigation Bar
 // --------------------------------------------------
 
-$TOP_BAR_BORDER_COLOR:              none;
+$TOP_BAR_BORDER_COLOR:              $BODY_TEXT_COLOR;
 $TOP_BAR_TEXT_COLOR:                $BODY_TEXT_COLOR;
 $TOP_BAR_BG_COLOR:                  $BODY_BG_COLOR;
 $TOP_BAR_LINK_TEXT_COLOR:           $TOP_BAR_TEXT_COLOR;
