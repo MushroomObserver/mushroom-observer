@@ -186,8 +186,10 @@ module Observations
       assert_obj_arrays_equal([proj2], obs2.projects)
       assert_obj_arrays_equal([proj2], img1.projects)
       assert_obj_arrays_equal([],      img2.projects)
-      assert_obj_arrays_equal([rolf, mary, katrina], proj1.user_group.users)
-      assert_obj_arrays_equal([mary, dick], proj2.user_group.users)
+      # Membership order isn't guaranteed; compare as sets.
+      assert_obj_arrays_equal([rolf, mary, katrina], proj1.user_group.users,
+                              :sort)
+      assert_obj_arrays_equal([mary, dick], proj2.user_group.users, :sort)
 
       # NOTE: It is impossible, apparently, to get edit_image to fail,
       # so there is no way to test init_project_vars_for_reload().

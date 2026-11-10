@@ -85,8 +85,10 @@ class SpeciesListsControllerTest < FunctionalTestCase
     assert_users_equal(mary, @spl2.user)
     assert_obj_arrays_equal([], @spl1.projects)
     assert_obj_arrays_equal([@proj2], @spl2.projects)
-    assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users)
-    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users)
+    # Membership order isn't guaranteed; compare as sets.
+    assert_obj_arrays_equal([rolf, mary, katrina], @proj1.user_group.users,
+                            :sort)
+    assert_obj_arrays_equal([mary, dick], @proj2.user_group.users, :sort)
   end
   private :init_for_project_checkbox_tests
 
@@ -377,8 +379,8 @@ class SpeciesListsControllerTest < FunctionalTestCase
     proj = projects(:bolete_project)
     assert_equal(mary.id, spl.user_id)            # owned by mary
     assert(spl.projects.include?(proj))           # owned by bolete project
-    assert_equal([mary.id, dick.id],
-                 proj.user_group.users.map(&:id)) # dick is only project member
+    # dick is only project member (order of membership isn't guaranteed)
+    assert_user_arrays_equal([mary, dick], proj.user_group.users, :sort)
 
     login("rolf")
     get(:show, params: { id: spl.id })
