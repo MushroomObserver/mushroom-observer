@@ -44,8 +44,8 @@ module Views::Controllers::Herbaria
 
     def render_table
       Table(@objects,
-            variant: :striped, identifier: "herbarium",
-            class: "w-100 mt-3") { |t| build_table_columns(t) }
+            variant: :striped,
+            identifier: "herbarium") { |t| build_table_columns(t) }
     end
 
     def build_table_columns(table)
