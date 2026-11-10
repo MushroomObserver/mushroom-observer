@@ -29,20 +29,24 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
 
   # This test is not much more than a stub.
   # Should test somebody making a donation, admin reviews.
+  # Each row's checkbox submits on change via a Stimulus `change`
+  # listener -- rack_test (this test case's driver) runs no
+  # JavaScript, so the submit-on-change round trip itself is covered
+  # at the controller-test level
+  # (DonationsControllerTest#test_update_reviewed_donations_turbo_stream)
+  # instead. This only proves the page renders the per-row forms.
   def test_review_donations
     visit("/admin/donations/edit")
     assert_flash(:permission_denied)
 
     put_user_in_admin_mode(rolf)
 
+    unreviewed = donations(:unreviewed)
+
     visit("/admin/review_donations")
     assert_selector("body.donations__edit")
-
-    within("#admin_review_donations_form") do
-      click_commit
-    end
-
-    assert_selector("#admin_review_donations_form")
+    assert_selector("#donation_reviewed_#{unreviewed.id} " \
+                    "input[type=checkbox]")
   end
 
   def test_switch_users
