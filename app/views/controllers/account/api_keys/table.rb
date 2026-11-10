@@ -143,7 +143,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_new_form_panel
-      Accordion(id: "new_key_row") do |accordion|
+      Accordion(id: "new_key_row", class: "mb-0") do |accordion|
         accordion.with_pane(id: "new_key_button_container",
                             expanded: true) { render_new_button }
         accordion.with_pane(id: "new_key_form_container") do
