@@ -226,6 +226,8 @@
   api_keys: API keys
   article: article
   articles: articles
+  banner: banner
+  banners: banners
   checklists: checklists
   clade: clade
   clades: clades
