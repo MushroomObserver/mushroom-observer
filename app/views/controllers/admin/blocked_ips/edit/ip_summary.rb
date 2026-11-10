@@ -27,7 +27,7 @@ module Views::Controllers::Admin::BlockedIps
 
       def render_table
         Table(
-          sorted_ips, class: "ips ips-lined table-align-middle"
+          sorted_ips, align_middle: true, class: "ips ips-lined"
         ) { |t| render_table_columns(t) }
       end
 

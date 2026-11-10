@@ -32,7 +32,7 @@ module Views::Controllers::Images::Licenses
     def render_table
       Table(model.rows,
             variant: :striped, identifier: "license-updater",
-            class: "table-align-middle") do |t|
+            align_middle: true) do |t|
         t.column(:image_updater_count.t)
         t.column(:image_updater_holder.t)
         t.column(:image_updater_license.t)

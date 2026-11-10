@@ -226,6 +226,8 @@
   api_keys: API keys
   article: article
   articles: articles
+  banner: banner
+  banners: banners
   checklists: checklists
   clade: clade
   clades: clades
@@ -3509,16 +3511,10 @@
   # support/review_donations
   review_donations_title: Review All Donations
   review_donations_not_allowed: Only admins can review donations
-  review_donations_update: Update
   review_donations_tab: Review Donations
   review_donations_success: Donations updated.
-  review_reviewed: Reviewed
-  review_id: Id
-  review_who: Who
   review_anon: Anon
   review_amount: Amount
-  review_email: Email
-  review_date: Date
 
   user_add_tool: User Creation Tool
   user_add_email_prompt: Enter email
@@ -4712,6 +4708,7 @@
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"
   sort_by_activity: "[:activity.ti]"
+  sort_by_amount: Amount
   sort_by_box_area: Area
   sort_by_code: Code
   sort_by_confidence: "[:confidence_level.ti]"
@@ -4744,6 +4741,7 @@
   sort_by_title: "[:title.ti]"
   sort_by_updated_at: Time Last Modified
   sort_by_user: "[:user.ti]"
+  sort_by_who: "[:who.ti]"
 
   ##############################################################################
 

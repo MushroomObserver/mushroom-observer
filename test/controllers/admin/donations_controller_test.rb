@@ -40,9 +40,10 @@ module Admin
       assert_response(:redirect)
       make_admin
       get(:edit)
-      # Phlex `Admin::Donations::Edit` renders the review form (id pinned
-      # by the form Phlex class).
-      assert_select("form#admin_review_donations_form")
+      # Phlex `Admin::Donations::DonationsTable` renders one
+      # self-submitting ReviewToggle form per donation row.
+      unreviewed = donations(:unreviewed)
+      assert_select("form#donation_reviewed_#{unreviewed.id}")
     end
 
     def test_update_reviewed_donations
@@ -54,6 +55,19 @@ module Admin
       assert_redirected_to(edit_admin_donations_path)
       reloaded = Donation.find(unreviewed.id)
       assert(reloaded.reviewed)
+    end
+
+    def test_update_reviewed_donations_turbo_stream
+      make_admin
+      unreviewed = donations(:unreviewed)
+      assert_equal(false, unreviewed.reviewed)
+      params = { reviewed: { unreviewed.id => true } }
+      put(:update, params: params, format: :turbo_stream)
+      assert(Donation.find(unreviewed.id).reviewed)
+      assert_select(
+        "turbo-stream[action='replace']" \
+        "[target='donation_reviewed_#{unreviewed.id}']"
+      )
     end
   end
 end
