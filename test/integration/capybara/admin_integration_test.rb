@@ -49,6 +49,12 @@ class AdminIntegrationTest < CapybaraIntegrationTestCase
     refute_selector(class: "switch_users_link")
 
     put_user_in_admin_mode(rolf)
+
+    # Alternate path -- not linked from anywhere in the app, but
+    # declared as a reachable URL alongside /admin/review_donations.
+    visit("/admin/switch_users")
+    assert_selector("#admin_switch_users_form")
+
     click_on(class: "switch_users_link")
 
     within("#admin_switch_users_form") do

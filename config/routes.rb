@@ -314,7 +314,7 @@ MushroomObserver::Application.routes.draw do
     # controls turning admin mode on and off, and switching users
     resource :session, only: [:create, :edit, :update], controller: "session",
                        as: "mode"
-    get("switch_users", to: "mode#edit") # alternate path
+    get("switch_users", to: "session#edit") # alternate path
 
     resources :users, only: [:edit, :update, :destroy]
     resource :donations, only: [:new, :create, :edit, :update, :destroy]
