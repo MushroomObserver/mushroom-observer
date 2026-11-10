@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 class Admin::BannersController < AdminController
-  def index
+  def new
     @banner = Banner.current || Banner.new
-    render_index_view
+    render_new_view
   end
 
   def create
@@ -11,24 +11,19 @@ class Admin::BannersController < AdminController
 
     if @banner.save
       flash_notice(:banner_update_success.t)
-      redirect_to(admin_banners_path)
+      redirect_to(new_admin_banner_path)
     else
       flash_error(:banner_update_failure.t)
       @banner = Banner.current || @banner
-      render_index_view_invalid
+      render_new_view_invalid
     end
   end
 
   private
 
-  def render_index_view(status: :ok, **render_opts)
-    render(Views::Controllers::Admin::Banners::Index.new(banner: @banner),
+  def render_new_view(status: :ok, **render_opts)
+    render(Views::Controllers::Admin::Banners::New.new(banner: @banner),
            status: status, **render_opts)
-  end
-
-  def render_index_view_invalid(**)
-    render_index_view(**)
-    self.status = :unprocessable_content
   end
 
   def banner_params
