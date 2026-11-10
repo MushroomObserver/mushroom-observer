@@ -29,6 +29,8 @@ require:
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
+  - ./lib/rubocop/cop/mo/no_raw_table_cell_align_class
+  - ./lib/rubocop/cop/mo/no_raw_table_column_align_class
   - ./lib/rubocop/cop/mo/no_raw_table_variant_class
   - ./lib/rubocop/cop/mo/no_regexp_escape
   - ./lib/rubocop/cop/mo/no_render_phlex_method_name
@@ -298,6 +300,38 @@ MO/NoRawTableVariantClass:
     # Table's own implementation -- legitimately builds the
     # table-* classes this cop exists to make everyone else use
     # variant: for instead.
+    - "app/components/table.rb"
+
+MO/NoRawTableColumnAlignClass:
+  Description: >-
+    Table#column (Components::Table) exposes align:/valign: for
+    text-align/vertical-align classes -- passing the same class via
+    class:/class!: instead skips that kwarg for no reason. See
+    lib/rubocop/cop/mo/no_raw_table_column_align_class.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # Table's own implementation -- legitimately builds the
+    # text-*/align-* classes this cop exists to make everyone else
+    # use align:/valign: for instead.
+    - "app/components/table.rb"
+
+MO/NoRawTableCellAlignClass:
+  Description: >-
+    A hand-rolled td/th should use Components::Table.align_class/
+    .valign_class instead of hand-typing the text-align/
+    vertical-align utility class string -- see
+    lib/rubocop/cop/mo/no_raw_table_cell_align_class.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
+  Exclude:
+    # Table's own implementation -- legitimately builds the
+    # text-*/align-* classes this cop exists to make everyone else
+    # use Components::Table.align_class/.valign_class for instead.
     - "app/components/table.rb"
 
 MO/NoRawLinkOrButtonTo:

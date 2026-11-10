@@ -8,12 +8,21 @@ module RuboCop
       # of those classes via `class:`/`class!:` instead skips the
       # kwarg for no reason. Detects a `Table(...)` call whose
       # `class:` string contains one of those classes and suggests
-      # the matching kwarg.
+      # the matching kwarg. Covers both the table-specific
+      # `table-align-middle` class and the generic Bootstrap
+      # `align-middle` utility class -- the two cascade the same
+      # vertical-align rule (see app/assets/stylesheets/mo/_tables.scss
+      # and _utilities_bs4.scss), so both map to the same kwarg.
+      #
+      # For a raw `text-center`/`text-right`/`align-middle` class on a
+      # `.column(...)` call instead of `Table(...)` itself, see
+      # MO/NoRawTableColumnAlignClass.
       #
       # @example
       #   # bad
       #   Table(@rows, class: "table-striped")
       #   Table(@rows, class: "table-align-middle")
+      #   Table(@rows, class: "align-middle")
       #
       #   # good
       #   Table(@rows, variant: :striped)
@@ -38,7 +47,8 @@ module RuboCop
           "table-condensed" => "variant: :condensed",
           "table-hover" => "variant: :hover",
           "table-bordered" => "variant: :bordered",
-          "table-align-middle" => "align_middle: true"
+          "table-align-middle" => "align_middle: true",
+          "align-middle" => "align_middle: true"
         }.freeze
 
         def on_send(node)
