@@ -45,11 +45,9 @@ module Views::Controllers::FieldSlips
     end
 
     def render_project_or_filter_section
-      if @project
-        render_project_info_section
-      else
-        ContentPadded { render_filter_form }
-      end
+      return unless @project
+
+      render_project_info_section
     end
 
     def render_project_info_section
@@ -109,7 +107,11 @@ module Views::Controllers::FieldSlips
       PaginatedResults do
         ListGroup do |list|
           @objects.each do |fs|
-            list.item do
+            # The matrix box's margin-bottom already separates it
+            # from the next row -- the list-item's bottom padding
+            # would double that space up.
+            item_class = "pb-0" if fs.observations.any?
+            list.item(class: item_class) do
               render(FieldSlipPanel.new(
                        field_slip: fs, prepend: row_prepend(fs)
                      ))
