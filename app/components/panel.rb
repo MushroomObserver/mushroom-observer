@@ -111,9 +111,9 @@ class Components::Panel < Components::Base
     if title
       classes = classes.presence || "h4 panel-title"
       div(class: "panel-heading") do
-        div(class: classes) do
+        div(class: class_names(classes, "d-flex justify-content-between " \
+                                        "align-items-center")) do
           span(&content)
-          whitespace
           render_heading_links if heading_links_slot? || @collapsible
         end
       end
@@ -126,7 +126,7 @@ class Components::Panel < Components::Base
 
   # May contain passed-in links, a collapse trigger, or both
   def render_heading_links
-    span(class: "panel-heading-links float-right") do
+    span(class: "panel-heading-links inline-flex-center") do
       render(heading_links_slot) if heading_links_slot?
       render_collapse_icons if @collapsible
     end
