@@ -2005,7 +2005,7 @@
 
   # account/reverify
   reverify_link: Reverify
-  reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
+  reverify_note: "Your account, <b>[user]</b>, has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
   # rss_logs/rss
   rss_description: List of changes to [:app_title] as they happen.
