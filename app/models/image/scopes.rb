@@ -97,6 +97,30 @@ module Image::Scopes
       joins(observation_images: { observation: :species_list_observations }).
         where(species_list_observations: { species_list_id: ids })
     }
+    scope :visual_groups, lambda { |visual_groups|
+      joins(:visual_group_images).
+        where(visual_group_images: { visual_group: visual_groups })
+    }
+    # Both `visual_groups` and `visual_group_included` join the same
+    # `visual_group_images` association -- Rails merges repeated
+    # identical-association joins into one, so the two scopes' where
+    # clauses apply to the same joined row, not two separate joins.
+    scope :visual_group_included, lambda { |included|
+      joins(:visual_group_images).
+        where(visual_group_images: { included: included })
+    }
+    # Images with no visual_group_images row for these groups --
+    # not reviewed yet (neither included nor excluded).
+    scope :visual_group_unreviewed, lambda { |visual_groups|
+      where.not(id: VisualGroupImage.where(visual_group: visual_groups).
+                    select(:image_id))
+    }
+    # Images of observations whose consensus is this Name (string),
+    # no synonyms. Mirrors Query::Observations' `this_name:`.
+    scope :this_name, lambda { |name_strs|
+      joins(observation_images: :observation).distinct.
+        merge(Observation.this_name(name_strs))
+    }
 
     # rubocop:disable MO/NoLongCommentBlock
     # FOR FUTURE REFERENCE

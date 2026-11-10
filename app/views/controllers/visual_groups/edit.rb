@@ -14,8 +14,7 @@ module Views::Controllers::VisualGroups
     # Each row is `[Image, included]` where `included` is the
     # boolean from `visual_group_images.included` — `true`, `false`,
     # or `nil` for the `:any` raw-SQL branch.
-    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean))),
-         default: -> { [] }
+    prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean)))
 
     def view_template
       add_edit_title(@visual_group)
@@ -49,13 +48,6 @@ module Views::Controllers::VisualGroups
     def render_back_nav_links
       Link(type: :get, name: :visual_group_show.t,
            target: visual_group_path(@visual_group))
-      whitespace
-      plain("|")
-      whitespace
-      Link(type: :get, name: :visual_group_index.t,
-           target: visual_model_visual_groups_path(
-             @visual_group.visual_model
-           ))
     end
 
     def render_filter_section
@@ -69,11 +61,10 @@ module Views::Controllers::VisualGroups
       p do
         strong { append_colon(:visual_group_includes_names.t) }
         br
-        @visual_group.distinct_names.each do |name|
-          Link(type: :get, name: name[0],
-               target: distinct_name_filter_path(name[0]))
-          br
-        end
+        render(DistinctNames.new(
+                 visual_group: @visual_group, user: @user,
+                 path_for: method(:distinct_name_filter_path).to_proc
+               ))
       end
     end
 

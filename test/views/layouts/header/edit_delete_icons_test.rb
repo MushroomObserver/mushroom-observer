@@ -42,6 +42,16 @@ module Views::Layouts
       assert_html(html, ".object_edit form[action='#{destroy_action}']")
     end
 
+    def test_show_delete_false_suppresses_delete_item
+      html = render_icons(user: @owner, show_delete: false)
+      edit_href = routes.edit_observation_path(@obs.id)
+      destroy_action = routes.observation_path(@obs.id)
+
+      assert_html(html, ".object_edit .inline-icon-link", count: 1)
+      assert_html(html, ".object_edit a[href='#{edit_href}']")
+      assert_no_html(html, ".object_edit form[action='#{destroy_action}']")
+    end
+
     # A read-only reflection (#4214) keeps both icons: Edit opens a
     # linked companion observation for the changes, and Delete works as
     # for any observation since a reflection can be reimported (#5180).
