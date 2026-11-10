@@ -46,9 +46,9 @@ module Views::Controllers::HerbariumRecords
     end
 
     def build_trailing_columns(table)
-      table.column("") { |rec| render_edit_link(rec) }
-      table.column("") { |rec| render_delete_button(rec) }
-      table.column(:mo_id.ti, class: "text-right") do |rec|
+      table.column(nil) { |rec| render_edit_link(rec) }
+      table.column(nil) { |rec| render_delete_button(rec) }
+      table.column(:mo_id.ti, align: :right) do |rec|
         render_id_badge(rec)
       end
     end
