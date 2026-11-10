@@ -47,6 +47,18 @@ class Sequence < AbstractModel
 
   scope :observations,
         ->(ids) { where(observation_id: ids) }
+  # Accepts a Name id (e.g. an autocompleter-matched selection) or a
+  # bare string, matched as a substring against the observation's
+  # Name#text_name -- "Galerina" (or "Galerin") finds every sequence
+  # whose observation is identified to a Name in that genus.
+  scope :name_has, lambda { |val|
+    scope = joins(observation: :name)
+    if val.to_s.match?(/\A\d+\z/)
+      scope.merge(Name.where(id: val))
+    else
+      scope.merge(Name.text_name_has(val))
+    end
+  }
   scope :locus,
         ->(locus) { where(locus:) }
   scope :locus_has,

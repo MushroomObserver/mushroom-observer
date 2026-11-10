@@ -147,27 +147,28 @@ class API2::ProjectsTest < UnitTestCase
     assert_api_pass(params.merge(set_summary: "new summary"))
     assert_equal("new summary", proj.reload.summary)
 
+    # Membership order isn't guaranteed; compare as sets (:sort).
     assert_api_pass(params.merge(add_admins: "dick, roy"))
     assert_user_arrays_equal([rolf, mary, dick, roy],
-                             proj.reload.admin_group.users)
+                             proj.reload.admin_group.users, :sort)
     assert_user_arrays_equal([rolf, mary, katrina],
-                             proj.reload.user_group.users)
+                             proj.reload.user_group.users, :sort)
     assert_api_pass(params.merge(remove_admins: "dick, roy"))
     assert_user_arrays_equal([rolf, mary],
-                             proj.reload.admin_group.users)
+                             proj.reload.admin_group.users, :sort)
     assert_user_arrays_equal([rolf, mary, katrina],
-                             proj.reload.user_group.users)
+                             proj.reload.user_group.users, :sort)
 
     assert_api_pass(params.merge(add_members: "dick, roy"))
     assert_user_arrays_equal([rolf, mary],
-                             proj.reload.admin_group.users)
+                             proj.reload.admin_group.users, :sort)
     assert_user_arrays_equal([rolf, mary, katrina, dick, roy],
-                             proj.reload.user_group.users)
+                             proj.reload.user_group.users, :sort)
     assert_api_pass(params.merge(remove_members: "dick, roy"))
     assert_user_arrays_equal([rolf, mary],
-                             proj.reload.admin_group.users)
+                             proj.reload.admin_group.users, :sort)
     assert_user_arrays_equal([rolf, mary, katrina],
-                             proj.reload.user_group.users)
+                             proj.reload.user_group.users, :sort)
 
     imgs = mary.images.first.id
     assert_api_fail(params.merge(add_images: imgs))

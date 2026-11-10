@@ -77,6 +77,19 @@ class UserGroup < AbstractModel
     name.to_s
   end
 
+  # Adds +user+ to this group if not already a member. A concurrent
+  # duplicate add (e.g. a field-slip scan and the observation form both
+  # filing a project join for the same user at once, #5636) is a no-op:
+  # insert_all skips the row on the unique index instead of raising
+  # RecordNotUnique, the same pattern #4181 used for project_observations/
+  # project_images.
+  def add_user(user)
+    return if users.member?(user)
+
+    UserGroupUser.insert_all([{ user_group_id: id, user_id: user.id }])
+    users.reset
+  end
+
   # Request-scoped memo for the 3 meta-group lookups below --
   # `Thread.current[...]`, not a class ivar or `Rails.cache`, so
   # it's isolated per request/thread. These get called many times

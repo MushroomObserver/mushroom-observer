@@ -130,6 +130,51 @@ class FieldSlipTest < UnitTestCase
     assert_equal(locations(:burbank), slip.location)
   end
 
+  # A slip entered away from the event must not become the default for
+  # the slips after it: only a location inside the project's area counts.
+  def test_location_skips_latest_slip_outside_project_area
+    projects(:eol_project).update_columns(location_id: locations(:albion).id)
+    observations(:minimal_unknown_obs).
+      update_columns(location_id: locations(:albion).id)
+    observations(:owner_accepts_general_questions).
+      update_columns(location_id: locations(:burbank).id)
+    field_slips(:field_slip_one).update_columns(updated_at: 2.days.ago)
+    field_slips(:field_slip_two).update_columns(updated_at: 1.day.ago)
+
+    slip = field_slips(:field_slip_no_obs)
+    slip.current_user = mary
+
+    assert_equal(locations(:albion), slip.location)
+  end
+
+  # ---------- default date ----------
+
+  def test_default_date_is_creation_day_within_project_dates
+    slip = slip_for_event(Date.parse("2026-07-30")..Date.parse("2026-08-02"),
+                          created: Time.zone.parse("2026-07-31 20:00"))
+
+    assert_equal(Date.parse("2026-07-31"), slip.date)
+  end
+
+  def test_default_date_after_event_uses_latest_slip_in_project_dates
+    observations(:minimal_unknown_obs).update_columns(when: "2026-08-01")
+    observations(:owner_accepts_general_questions).
+      update_columns(when: "2026-08-07")
+    field_slips(:field_slip_one).update_columns(updated_at: 2.days.ago)
+    field_slips(:field_slip_two).update_columns(updated_at: 1.day.ago)
+    slip = slip_for_event(Date.parse("2026-07-30")..Date.parse("2026-08-02"),
+                          created: Time.zone.parse("2026-08-07 21:00"))
+
+    assert_equal(Date.parse("2026-08-01"), slip.date)
+  end
+
+  def test_default_date_after_event_without_history_is_last_day
+    slip = slip_for_event(Date.parse("2026-07-30")..Date.parse("2026-08-02"),
+                          created: Time.zone.parse("2026-08-07 21:00"))
+
+    assert_equal(Date.parse("2026-08-02"), slip.date)
+  end
+
   def test_location_falls_back_to_project_location
     observations(:minimal_unknown_obs).update_columns(location_id: nil)
     observations(:owner_accepts_general_questions).
@@ -202,5 +247,17 @@ class FieldSlipTest < UnitTestCase
     slip.update_columns(code: "ZZZX-12781", project_id: nil)
 
     assert_nil(slip.reload.event_project)
+  end
+
+  private
+
+  # field_slip_no_obs in eol_project, with the project dated to the event.
+  def slip_for_event(dates, created:)
+    projects(:eol_project).update_columns(start_date: dates.begin,
+                                          end_date: dates.end)
+    slip = field_slips(:field_slip_no_obs)
+    slip.update_columns(created_at: created)
+    slip.current_user = mary
+    slip
   end
 end

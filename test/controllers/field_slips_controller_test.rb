@@ -719,8 +719,11 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_input_value(:field_slip_collector, field_slip.collector)
   end
 
+  # The previous slip's location wins over the project's, as long as it
+  # lies inside the project's area (here California, around Salt Point).
   def test_should_show_previous_field_slip_location
     field_slip = field_slips(:field_slip_previous)
+    field_slip.project.update_columns(location_id: locations(:california).id)
     assert_not(field_slip.location == field_slip.project.location.display_name)
     login(field_slip.user.login)
     get(:new, params: { code: "#{field_slip.code}0" })
@@ -1118,7 +1121,7 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_unprocessable
     assert_select("form[data-turbo='true']")
     assert_select(
-      "#modal_resolve_projects.modal.fade.in",
+      "#modal_resolve_projects.modal.fade.#{Components::Modal::SHOWN_CLASS}",
       { count: 1 },
       "Expected Components::Modal for project-gaps overlay"
     )
@@ -1328,12 +1331,12 @@ class FieldSlipsControllerTest < FunctionalTestCase
     # Components::Modal markup proves the new modal composition
     # rendered, not just that we got a 200.
     assert_select(
-      "#modal_resolve_projects.modal.fade.in",
+      "#modal_resolve_projects.modal.fade.#{Components::Modal::SHOWN_CLASS}",
       { count: 1 },
       "Expected Components::Modal for project-gaps overlay"
     )
     assert_select(".modal-dialog.modal-lg")
-    assert_select(".modal-backdrop.fade.in")
+    assert_select(".modal-backdrop.fade.#{Components::Modal::SHOWN_CLASS}")
     # Resolve modal's submit buttons (Skip + Add All) are posted under
     # the FormObject's namespace.
     assert_select("[name='occurrence_projects[resolution]']", count: 2)

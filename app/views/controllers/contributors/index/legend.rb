@@ -78,8 +78,8 @@ module Views::Controllers::Contributors
 
       def render_example_math_table
         Table(
-          show_headers: false,
-          class: "table-condensed bg-none w-auto mx-auto"
+          show_headers: false, variant: :condensed,
+          class: "bg-none w-auto mx-auto"
         ) do |t|
           t.body { render_example_math_rows }
         end

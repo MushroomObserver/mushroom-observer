@@ -608,12 +608,16 @@ class ProjectsControllerTest < FunctionalTestCase
 
   def test_user_group_save_fail
     title = "Bad User Group"
-    user_group = user_groups(:bolete_users)
-    user_group.stub(:save, false) do
-      UserGroup.stub(:new, user_group) do
-        post_requires_login(:create, build_params(title, title))
-        assert_nil(Project.find_by(title: title))
-      end
+    # Every UserGroup.new inside the controller (one for members, one
+    # for admins -- two distinct new records, matching production)
+    # gets save stubbed false, rather than aliasing both calls to one
+    # shared, already-persisted fixture: that would make both
+    # group-creation paths insert the same user into the same
+    # user_group_users row, hitting the unique index (#5636) in a way
+    # production's two UserGroup.new calls would not.
+    stub_save_false_on(UserGroup) do
+      post_requires_login(:create, build_params(title, title))
+      assert_nil(Project.find_by(title: title))
     end
   end
 
@@ -932,5 +936,22 @@ class ProjectsControllerTest < FunctionalTestCase
 
     assert(site.reload.alerts?(admin),
            "A form with no subscription field should not unsubscribe")
+  end
+
+  # Stub `klass.new(*args)` so every instance built inside the
+  # controller has `save` returning false. MiniTest's `stub` can't do
+  # "any_instance" -- intercept the constructor and stub each
+  # instance after it's built, so distinct calls still get distinct
+  # objects (see test_user_group_save_fail).
+  def stub_save_false_on(klass)
+    original_new = klass.method(:new)
+    klass.define_singleton_method(:new) do |*args, **kwargs|
+      obj = original_new.call(*args, **kwargs)
+      obj.define_singleton_method(:save) { |*| false }
+      obj
+    end
+    yield
+  ensure
+    klass.singleton_class.remove_method(:new)
   end
 end

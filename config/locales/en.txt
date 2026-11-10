@@ -557,6 +557,7 @@
   edit: edit
   enable: enable
   exclude: exclude
+  filter: filter
   help: help
   import: import
   index_object: "[TYPE] [:index.ti]"
@@ -1738,6 +1739,9 @@
   login_forgot_password: I forgot my password. "Email me a new one.":/account/password_reset/new
   login_no_account: I don't have an account. "Create a new account.":/account/signup
   login_having_problems: If you are having problems logging into your account, send "email to the webmaster":/admin/emails/webmaster_questions/new.
+  login_reset_required_title: Password Reset Required
+  login_reset_required_explanation: As a security precaution, your account needs a new password before you can continue. Click below to have a password reset email sent to the address on file ([email]). If you cannot access that email, send "email to the webmaster":/admin/emails/webmaster_questions/new with the name and email you believe are on your account, so we can find it.
+  login_reset_required_button: Email me a password reset
   email_new_password_help: When you complete this page and click "Send", we will send you an email with verification information.
   email_spam_notice: If you do not see the email in your inbox, check your spam folder. If it's in your spam folder, please (1) notify your email provider that it's not spam and (2) whitelist "mushroomobserver.org". This may prevent future MO emails from ending up in your -- or other users' -- spam folders.
   login_layout_description: A website to record observations about mushrooms, help people identify unfamiliar mushrooms, and expand the community around the scientific exploration of mushrooms (mycology).
@@ -2231,7 +2235,6 @@
   # object/show_past_versions
 
   # observer/show_rss_log
-  show_rss_log_title: Log for [title]
 
   # info/site_stats
   show_site_stats_title: Site Statistics
@@ -2266,6 +2269,7 @@
   show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
+  sequence_filter_by: Filter by [:name.ti]
 
   # account/signup
   signup_title: Account signup
@@ -2291,6 +2295,7 @@
   species_list_add_remove_add_success: Successfully added [num] observation(s) to observation list.
   species_list_add_remove_remove_success: Successfully removed [num] observation(s) from observation list.
   species_list_add_remove_no_query: Missing observation query results, or query has expired.
+  species_list_add_remove_large_query: That's a very large number.
   species_list_add_remove_bad_name: "Unrecognized observation list id or title: [name]"
 
   # species_list/manage_species_lists
@@ -2636,8 +2641,6 @@
   visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
-  visual_group_index: "[:visual_group.ti] Index"
-  visual_group_edit: Edit [:visual_group.ti]
   visual_group_show: Show [:visual_group.ti]
   visual_group_create: Create [:visual_group.ti]
 
@@ -2652,9 +2655,6 @@
 
   # visual_groups/update
   update_visual_group_success: "[:updated.ti] [name] [:visual_group.ti]"
-
-  # visual_models/show
-  show_visual_model_index: "[:visual_model.ti] [:index.ti]"
 
   # visual_models/destroy
   destroy_visual_model_success: "[:visual_model.ti] [:destroyed]"
@@ -3013,6 +3013,7 @@
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
+  inat_id_out_of_range: "[ids] cannot be iNat observation IDs; they are larger than any iNat ID. Check them for extra digits."
   inat_missing_username: Missing your iNat Username
   inat_list_xor_all: "Choose exactly one: (1) list observation IDs, (2) supply a URL, or (3) check \"[:inat_import_all]\""
   inat_url_label: Observations from an iNat search URL
@@ -3027,6 +3028,7 @@
   inat_observed_missing_date: Observed Missing Date
   inat_cannot_communicate: Cannot communicate with iNat. Please try again later. If you keep getting this message, please notify webmaster.
   inat_unknown_param: "iNat rejected the request: [error]"
+  inat_request_error: "iNat returned an error (HTTP [status]) for this request: [error]"
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
@@ -4216,6 +4218,7 @@
   runtime_location_merge_failed: Failed to merge observation [name].
   runtime_login_failed: Login unsuccessful.
   runtime_login_success: Login successful.
+  runtime_login_emailed_password: You are logged in with the password we emailed you. Please "change it":/account/preferences/edit to something only you know.
   runtime_map_nothing_to_map: Nothing to map.
   runtime_no_upload_image: Had problems uploading image '[name]'.
   runtime_object_deleted: This object has been deleted.

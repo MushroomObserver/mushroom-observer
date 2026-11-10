@@ -326,8 +326,9 @@ module API2Extensions
     assert_users_equal(@user, proj.user)
     assert_equal(@title, proj.title)
     assert_equal(@summary, proj.summary)
-    assert_user_arrays_equal(@admins, proj.admin_group.users)
-    assert_user_arrays_equal(@members, proj.user_group.users)
+    # Membership order isn't guaranteed; compare as sets.
+    assert_user_arrays_equal(@admins, proj.admin_group.users, :sort)
+    assert_user_arrays_equal(@members, proj.user_group.users, :sort)
   end
 
   def assert_last_sequence_correct(seq = nil)

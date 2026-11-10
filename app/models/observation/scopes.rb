@@ -1000,10 +1000,23 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       m_box = Mappable::Box.new(**box_kwargs)
       return scope unless m_box.valid?
 
-      gps_in_ids = gps_in_box(m_box).select(:id)
-      no_gps_in_ids = where(lat: nil).joins(:location).
-                      merge(Location.in_box(**box_kwargs)).select(:id)
-      scope.where(id: gps_in_ids).or(scope.where(id: no_gps_in_ids))
+      scope.where(id: project_gps_in_box_ids(m_box)).
+        or(scope.where(id: project_location_in_box_ids(box_kwargs)))
+    end
+
+    # The violations check reads GPS whether hidden or dubious, so the
+    # candidate filter does too: gps_in_box's search-trust rule would
+    # leave a hidden-GPS observation out of both branches.
+    def project_gps_in_box_ids(box)
+      where.not(incomplete_or_missing_geoloc).
+        where(Observation[:lat].between(box.south..box.north).
+              and(Observation[:lng].between(box.west..box.east))).
+        select(:id)
+    end
+
+    def project_location_in_box_ids(box_kwargs)
+      where(incomplete_or_missing_geoloc).joins(:location).
+        merge(Location.in_box(**box_kwargs)).select(:id)
     end
   end
 end

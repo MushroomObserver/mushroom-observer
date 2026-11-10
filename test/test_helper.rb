@@ -254,6 +254,14 @@ module ActiveSupport
     # override `def teardown` without calling `super`.
     teardown { WebMock.reset_executed_requests! }
 
+    # Otherwise ActionMailer::Base.deliveries accumulates every email
+    # sent anywhere in this worker process, so a test that scans
+    # `deliveries` for a message (e.g. `.find { |m| m.to == [...] }`)
+    # can match a stale delivery left by an earlier test instead of
+    # the one it just triggered. Same leakage pattern as WebMock
+    # above, same fix.
+    teardown { ActionMailer::Base.deliveries.clear }
+
     # Standard teardown to run after every test.  Just makes sure any
     # images that might have been uploaded are cleared out.
     def teardown

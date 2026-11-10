@@ -141,7 +141,9 @@ module Account
       return unless (password = params[:user]&.dig(:password))
 
       if password == params[:user][:password_confirmation]
-        @user.change_password(password)
+        # change_password rotates auth_code, which invalidates this
+        # session along with the rest.
+        refresh_login_credentials(@user) if @user.change_password(password)
       else
         @user.errors.add(:password, :runtime_prefs_password_no_match)
       end

@@ -245,6 +245,33 @@ class ApplicationControllerTest < FunctionalTestCase
     IpStats.reset!
   end
 
+  # The session carries the user's auth_code, so rotating it logs out
+  # sessions already open, not just the autologin cookie.
+  def test_session_dropped_when_auth_code_rotates
+    user = login("rolf")
+    get(:intro)
+
+    assert_equal(user.id, @controller.send(:current_user)&.id)
+
+    user.update_column(:auth_code, String.random(40))
+    get(:intro)
+
+    assert_nil(@controller.send(:current_user))
+    assert_nil(session[:user_id])
+  end
+
+  # A session predating the auth_code binding carries no code, and
+  # counts as invalid rather than as a free pass.
+  def test_session_without_auth_code_rejected
+    user = login("rolf")
+    @request.session[:auth] = nil
+
+    get(:intro)
+
+    assert_nil(@controller.send(:current_user))
+    assert_not_equal(user.id, session[:user_id])
+  end
+
   # `ApplicationController::Indexes#index_display_opts`'s base
   # implementation merges into an empty hash -- every controller with
   # an index overrides it, so InfoController (no index action) is the

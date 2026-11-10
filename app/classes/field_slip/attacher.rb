@@ -34,8 +34,11 @@ class FieldSlip
     # Returns what happened, for the caller's log line.
     ATTACHED_RESULTS = [:attached, :joined, :merged].freeze
 
+    # The row lock reloads the observation, so an attach racing the
+    # import's standardization (DetectFieldSlipQRJob runs once per
+    # photo) sees the occurrence the other side just set.
     def attach
-      result = perform_attach
+      result = @observation.with_lock { perform_attach }
       reconcile_import_project(result)
       result
     end
@@ -116,8 +119,11 @@ class FieldSlip
 
       link(slip)
       # The reviewed observation carries the slip's freshly applied
-      # data, so it becomes the record the slip's /qr/ page shows.
-      slip.occurrence.update!(primary_observation_id: @observation.id)
+      # data, so it becomes the record the slip's /qr/ page shows -- unless
+      # it is a reflection, which may not be primary.
+      unless @observation.reflection?
+        slip.occurrence.update!(primary_observation_id: @observation.id)
+      end
       Occurrence.log_field_slip_added([@observation], @user)
       :joined
     end
@@ -194,11 +200,13 @@ class FieldSlip
 
     # Using a slip for an open-membership project enrolls the user, the
     # way scanning one always has -- that is what a printed prefix
-    # means. The observation then joins the project too, unless it
-    # violates the project's constraints, in which case the slip goes
-    # spare along with its observation (#4932 invariant 2) -- the
-    # review's reconcile restores both, via the printed prefix, once
-    # the real data lands.
+    # means. The observation then joins the project too. One that
+    # violates the project's constraints joins only when a project
+    # admin attaches it (#4932 invariant 1), and is left for the
+    # Constraint Violations page; otherwise the slip goes spare along
+    # with its observation (invariant 2) -- the review's reconcile
+    # restores both, via the printed prefix, once the slip's data
+    # lands.
     def apply_project(slip)
       project = slip.project
       return unless project
@@ -206,7 +214,8 @@ class FieldSlip
       project.join(@user)
       return unless project.member?(@user)
 
-      if project.violates_constraints?(@observation)
+      if project.violates_constraints?(@observation) &&
+         !project.is_admin?(@user)
         slip.update!(project: nil)
         return
       end

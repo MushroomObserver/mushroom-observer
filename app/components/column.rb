@@ -126,6 +126,7 @@ class Components::Column < Components::Base
     visibility_classes(hide_at: :xs, show_at: :sm, display: display)
   end
 
+  # Visible at xs only, hidden from `hide_at:` up (`:sm` by default).
   def self.mobile_only_classes(hide_at: :sm, display: :block)
     visibility_classes(show_at: :xs, hide_at: hide_at, display: display)
   end

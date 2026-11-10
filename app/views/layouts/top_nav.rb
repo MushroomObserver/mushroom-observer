@@ -51,7 +51,8 @@ class Views::Layouts::TopNav < Views::Base
   # itself, the rubric becomes a link to the index.
   NAV_INDEXABLES = %w[
     observations names species_lists projects locations images herbaria
-    glossary_terms comments rss_logs field_slips
+    glossary_terms comments rss_logs field_slips visual_models
+    visual_groups
   ].freeze
 
   # Controllers that support the green "+ Add" button. Description
@@ -60,7 +61,7 @@ class Views::Layouts::TopNav < Views::Base
   # from observation pages.
   NAV_CREATABLES = %w[
     observations names species_lists projects locations images herbaria
-    glossary_terms field_slips articles publications
+    glossary_terms field_slips articles publications visual_models
   ].freeze
 
   def view_template
@@ -160,11 +161,22 @@ class Views::Layouts::TopNav < Views::Base
 
     Link(
       type: :get, name: rubric_text,
-      target: { controller: "/#{ctrlr.controller_path}", action: :index },
+      target: { controller: "/#{ctrlr.controller_path}", action: :index,
+                **extra_nav_index_params(ctrlr) },
       class: "#{ctrlr.controller_name}_index_link",
       data: { tooltip_target: "tip", placement: :bottom,
               title: :index_object.ti(type: ctrlr.controller_name.to_sym) }
     )
+  end
+
+  # Extra route params the target controller's index needs beyond
+  # `action: :index` -- e.g. a nested-only index route's parent id,
+  # which a shallow-routed member action (show/edit) doesn't carry in
+  # `params` the way a non-shallow nested route would. A controller
+  # opts in by defining a public `nav_index_params` returning the
+  # hash to merge; everything else gets `{}`.
+  def extra_nav_index_params(ctrlr)
+    ctrlr.try(:nav_index_params) || {}
   end
 
   # Resolves the controller whose index page the rubric links to.

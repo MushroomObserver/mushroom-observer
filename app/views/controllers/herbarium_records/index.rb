@@ -32,7 +32,7 @@ module Views::Controllers::HerbariumRecords
     private
 
     def render_rows_table
-      Table(@objects, class: "table-striped",
+      Table(@objects, variant: :striped,
                       identifier: "herbarium_record") do |t|
         build_table_columns(t)
       end

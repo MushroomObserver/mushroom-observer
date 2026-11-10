@@ -85,12 +85,16 @@ module ControllerExtensions
     assert(user, "Failed to authenticate user <#{user}> " \
                  "with password <#{password}>.")
     @request.session[:user_id] = user.id
+    # Mirrors session_user_set: session_user rejects a session that
+    # carries no auth_code, or one that no longer matches the user's.
+    @request.session[:auth] = user.auth_code
     user
   end
 
   # Log a user out (affects session only).
   def logout
     @request.session[:user_id] = nil
+    @request.session[:auth] = nil
     @request.session[:admin] = nil
   end
 
