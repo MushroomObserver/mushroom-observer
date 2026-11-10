@@ -16,5 +16,9 @@ mysql -u "$username" -p"$password" \
   -e "DROP DATABASE IF EXISTS \`$database\`; CREATE DATABASE \`$database\`;"
 gunzip -c checkpoint.gz | mysql -u "$username" -p"$password" "$database"
 mysql -u "$username" -p"$password" "$database" < db/clean.sql
+
+# A fresh import leaves InnoDB statistics stale, and a plan built on them
+# can run for hours (see .claude/rules/db_scripts.md).
+mysqlcheck -u "$username" -p"$password" --analyze "$database"
 # Uncomment this if there's a need to output a stripped checkpoint locally.
 # mysqldump -u "$username" -p"$password" "$database" | gzip > checkpoint_stripped.gz

@@ -1,19 +1,51 @@
 #!/bin/bash
+set -euo pipefail
 
-# Downloads a db snapshot from the images server to the `/mushroom-observer`
-# root directory, renames it `checkpoint.gz`, imports and uses it in MySQL,
-# and calls `db/clean.sql` to strip passwords and private gps data from the
-# database. Uses yesterday's db backup because these are not guaranteed to
-# exist yet for today's date.
+# Downloads the most recent db snapshot from the images server to the
+# `/mushroom-observer` root directory as `checkpoint.gz`, verifies it is a
+# complete dump, then calls `db/strip_checkpoint` to import it into MySQL
+# as `mo_development` and strip passwords, login secrets and private gps
+# data via `db/clean.sql`.
 # Requires the user calling the script to have an SSH account on `images`.
-# Note this uses MacOSX shell syntax, intended for local use only.
-yesterdays_date=$(date -v -1d '+%Y%m%d')
+
+backup_dir=/data/images/backup
 
 # Prompt the user for their name
 read -p "Your account name on the images server: " user_name
+remote="$user_name@images.mushroomobserver.org"
 
-# Download the checkpoint and rename it
-scp "$user_name@images.mushroomobserver.org:/data/images/backup/database-$yesterdays_date.gz" "./checkpoint.gz"
+# Ask the server which snapshot is newest. A date computed from the local
+# clock guesses wrong: the dump lands at 05:44 UTC, so "today" is a day
+# ahead of the newest file for anyone west of UTC and a day behind it for
+# anyone far enough east.
+latest=$(ssh "$remote" "ls -1 $backup_dir/database-[0-9]*.gz | sort | tail -1")
+# The remote pipeline ends in tail, which succeeds even when ls matched
+# nothing, so an empty result is the only signal that none is there.
+if [ -z "$latest" ]; then
+  echo "No database-[0-9]*.gz found in $remote:$backup_dir." >&2
+  exit 1
+fi
+echo "Downloading $latest"
+scp "$remote:$latest" ./checkpoint.gz
+
+# script/backup_database.sh publishes via a .part rename, so the final
+# name only appears on a finished file -- a size mismatch here means this
+# scp stopped early.
+remote_size=$(ssh "$remote" "stat -c %s '$latest'")
+# BSD wc pads its count with a leading space, so compare numerically.
+local_size=$(wc -c < checkpoint.gz | tr -d '[:space:]')
+if [ "$local_size" -ne "$remote_size" ]; then
+  echo "checkpoint.gz is $local_size bytes, $latest is $remote_size." >&2
+  echo "Re-run this script." >&2
+  exit 1
+fi
+
+# mysqldump's own last line, and the only check that covers a dump which
+# died midway: that still produces an intact .gz of partial SQL.
+if ! gunzip -c checkpoint.gz | tail -c 200 | grep -q "Dump completed"; then
+  echo "checkpoint.gz is not a complete mysqldump." >&2
+  exit 1
+fi
 
 # Strip the checkpoint
 ./db/strip_checkpoint

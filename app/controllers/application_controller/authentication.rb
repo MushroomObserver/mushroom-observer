@@ -97,10 +97,14 @@ module ApplicationController::Authentication
     user&.verified && !user.blocked?
   end
 
+  # A blank stored `auth_code` must match nothing: a cookie carrying
+  # only an id splits to a nil secret, which would otherwise compare
+  # equal to a null code and authenticate without one.
   def validate_user_in_autologin_cookie
     return unless (cookie = cookies["mo_user"]) &&
                   (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
+                  user.auth_code.present? &&
                   (split[1] == user.auth_code)
 
     user
