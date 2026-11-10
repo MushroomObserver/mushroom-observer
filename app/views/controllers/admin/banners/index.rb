@@ -6,6 +6,8 @@ module Views::Controllers::Admin::Banners
     prop :banner, ::Banner
 
     def view_template
+      content_padding(:no_panels)
+
       h1 { :change_banner_title.t }
       render(Form.new(@banner))
     end
