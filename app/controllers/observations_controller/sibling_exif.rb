@@ -1,24 +1,28 @@
 # frozen_string_literal: true
 
 # Camera-info for the edit form's occurrence-sibling images -- images
-# on a read-only iNat reflection member of the occurrence. The panel is
-# read-only: it shows the image's immutable metadata (date, copyright,
-# license) and a link to the source observation, and reads the image's
-# EXIF for location (iNat usually strips it). "Use this info" is offered
-# only when there is a location or a differing date to adopt onto the
-# primary (#5317).
+# on another member of the occurrence, which may be a read-only iNat
+# reflection or another editable observation of the same specimen. The
+# panel is read-only either way, since neither image belongs to the
+# observation being edited: it shows the image's immutable metadata
+# (date, copyright, license) and reads the image's EXIF for location
+# (iNat usually strips it). Only a reflection's metadata is owned
+# elsewhere, so only a reflection carries `reflection: true`, the
+# imported-source wording and a link to the source observation.
+# "Use this info" is offered only when there is a location or a
+# differing date to adopt onto the primary (#5317).
 module ObservationsController::SiblingEXIF
   private
 
   # Keyed by image id: the image's EXIF (get_exif_data shape) merged
-  # with the read-only reflection metadata the panel displays.
+  # with the read-only metadata the panel displays.
   def sibling_exif_data
     by_member = sibling_images_by_member
     return {} if by_member.empty?
 
     exif = get_exif_data(by_member.keys)
     by_member.each_with_object({}) do |(image, member), data|
-      data[image.id] = exif[image.id].merge(reflection_meta(member, image))
+      data[image.id] = exif[image.id].merge(sibling_meta(member, image))
     end
   end
 
@@ -53,9 +57,10 @@ module ObservationsController::SiblingEXIF
     end
   end
 
-  def reflection_meta(member, image)
+  def sibling_meta(member, image)
     {
       read_only: true,
+      reflection: member.reflection?,
       copyright_holder: image.copyright_holder,
       license_name: image.license&.display_name,
       source_url: reflection_source_url(member),

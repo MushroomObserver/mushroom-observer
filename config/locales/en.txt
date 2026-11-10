@@ -1637,6 +1637,8 @@
   image_reflection_info: Reflection image
   image_reflection_readonly_note: Read-only image from an imported observation. This information can only be changed at the source.
   image_reflection_source_link: View the source observation
+  image_sibling_info: Image from a matching observation
+  image_sibling_readonly_note: Image from another observation of the same specimen. It can only be changed on that observation.
   image_file_name: File name
   image_file_size: File size
 
