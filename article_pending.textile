@@ -1,5 +1,1 @@
-|{white-space:nowrap}. 2026-11-08 | Add a Name filter to the DNA Sequences list | "PR#5659":https://github.com/MushroomObserver/mushroom-observer/pull/5659 |
-|{white-space:nowrap}. 2026-11-08 | Fix Observations listed twice in a Project | "PR#5657":https://github.com/MushroomObserver/mushroom-observer/pull/5657 |
-|{white-space:nowrap}. 2026-11-08 | Default Field Slip dates and Locations to the Project's event | "PR#5656":https://github.com/MushroomObserver/mushroom-observer/pull/5656 |
-|{white-space:nowrap}. 2026-11-08 | Link imported iNat foray Observations to Field Slips more reliably | "PR#5651":https://github.com/MushroomObserver/mushroom-observer/pull/5651 |
-|{white-space:nowrap}. 2026-11-06 | Fix the project checklist not refreshing after adding or removing a target name | "PR#5642":https://github.com/MushroomObserver/mushroom-observer/pull/5642 |
+|{white-space:nowrap}. 2026-11-10 | Fix password resets reaching the wrong account | "PR#5669":https://github.com/MushroomObserver/mushroom-observer/pull/5669 |

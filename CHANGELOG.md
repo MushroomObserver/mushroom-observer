@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-11-10 (deploy-2026-11-10-00-30)
+
+- Clear `ActionMailer::Base.deliveries` between tests ([PR5667](https://github.com/MushroomObserver/mushroom-observer/pull/5667), @nimmolo)
+- Simplify `SpeciesLists::Projects::Form` and refactor `CheckboxPanel` into `OverflowCheckboxList` ([PR5665](https://github.com/MushroomObserver/mushroom-observer/pull/5665), @nimmolo)
+- Improve stripped database snapshots ([PR5668](https://github.com/MushroomObserver/mushroom-observer/pull/5668), @mo-nathan)
+- Resolve a password reset by `login` or `email`, not display name ([PR5669](https://github.com/MushroomObserver/mushroom-observer/pull/5669), @mo-nathan)
+
 ## 2026-11-08 (deploy-2026-11-08-23-00)
 
 - Add `valign:` to `Components::Table` columns, sweep `align:`/`valign:` callers ([PR5637](https://github.com/MushroomObserver/mushroom-observer/pull/5637), @nimmolo)
