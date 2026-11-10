@@ -31,11 +31,10 @@ module Views::Controllers::Observations::Show::OccurrenceStatusIcons
   end
 
   # The :read_only glyph (a lock) reads as "can't be edited" to
-  # users -- #5655. :observations' twinned-tags glyph reads as
-  # "linked copy" instead, without implying the observation is
-  # locked down.
+  # users -- #5655. :reflection's cloud glyph reads as "linked
+  # copy" instead, without implying the observation is locked down.
   def status_icon_glyph(type)
-    type == :read_only ? :observations : type
+    type == :read_only ? :reflection : type
   end
 
   def status_icon_title(type)

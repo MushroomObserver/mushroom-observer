@@ -93,7 +93,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                              occurrence: occurrence))
 
     assert_html(html, ".mo-icon-is-primary")
-    assert_no_html(html, ".mo-icon-observations")
+    assert_no_html(html, ".mo-icon-reflection")
   end
 
   def test_reflection_gets_read_only_icon
@@ -105,7 +105,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     html = render(panel_with(obs: primary, siblings: [sibling],
                              occurrence: occurrence))
 
-    assert_html(html, ".mo-icon-observations")
+    assert_html(html, ".mo-icon-reflection")
   end
 
   # The star icon isn't tied to "is the current observation" -- a
@@ -138,7 +138,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
 
     assert_html(html, ".mo-icon-is-primary")
     assert_no_html(html, ".icon-text-gap > .mo-icon-is-primary")
-    assert_html(html, ".icon-text-gap > .mo-icon-observations")
+    assert_html(html, ".icon-text-gap > .mo-icon-reflection")
   end
 
   private
