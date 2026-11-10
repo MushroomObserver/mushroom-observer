@@ -60,7 +60,7 @@ module Views::Controllers::FieldSlips
 
     def render_code_only_form
       text_field(:code, label: :field_slip_code)
-      submit(:field_slip_create_obs.t, class: "mt-3")
+      submit(:field_slip_create_obs.t, class: "mt-2")
     end
 
     # --- Main form: full field-slip editing.
