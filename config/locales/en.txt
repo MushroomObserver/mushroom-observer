@@ -1526,8 +1526,8 @@
   observation_field_slip_blank: Please enter a field slip code.
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
-  edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
-  edit_reflection_tooltip: Copy to editable [:companion_observation]
+  edit_observation_is_reflection: This observation is a reflection of its imported source. Use the edit icon on this page to add your own notes and data.
+  edit_reflection_tooltip: Add your own notes and data
   edit_observation_companion_created: Created "[:companion_observation]":/articles/53.
   edit_observation_companion_existing: Editing existing "[:companion_observation]":/articles/53.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
@@ -2772,7 +2772,7 @@
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations
   show_observation_occurrence_primary: Primary observation of this occurrence
-  show_observation_reflection_read_only: Read-only reflection of an imported source
+  show_observation_reflection_read_only: Reflection of an imported source
   show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   edit_occurrence_add_heading: Add Recently Viewed Observations
