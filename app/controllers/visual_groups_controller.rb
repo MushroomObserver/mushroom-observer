@@ -17,8 +17,10 @@ class VisualGroupsController < ApplicationController
   def show
     @filter = params.permit(:filter)[:filter]
     @visual_group = VisualGroup.find(params[:id])
-    @vals = calc_show_vals
-    setup_pagination
+    query_params = { visual_groups: [@visual_group],
+                     visual_group_included: true }
+    query_params[:this_name] = @filter if @filter.present?
+    paginate_group_images(query_params, true)
     render(Views::Controllers::VisualGroups::Show.new(
              visual_group: @visual_group, user: @user, filter: @filter,
              pagination_data: @pagination_data, subset: @subset
@@ -40,8 +42,14 @@ class VisualGroupsController < ApplicationController
     @filter = edit_filter.filter
     @filter = @visual_group.name unless @filter && @filter != ""
     @status = edit_filter.status
-    @vals = calc_edit_vals
-    setup_pagination
+    if @status == "needs_review"
+      paginate_group_images({ visual_group_unreviewed: [@visual_group],
+                              this_name: @filter }, nil)
+    else
+      included = @status != "excluded"
+      paginate_group_images({ visual_groups: [@visual_group],
+                              visual_group_included: included }, included)
+    end
     render(Views::Controllers::VisualGroups::Edit.new(
              visual_group: @visual_group, user: @user,
              filter: @filter, status: @status,
@@ -49,14 +57,33 @@ class VisualGroupsController < ApplicationController
            ))
   end
 
-  def setup_pagination
+  # Top-nav rubric support (Views::Layouts::TopNav#extra_nav_index_params):
+  # the index route is nested under visual_model_id, which show/edit
+  # don't carry in params (shallow routing flattens member actions) --
+  # derive it from the loaded record instead.
+  def nav_index_params
+    model = @visual_group&.visual_model || @visual_model
+    return {} unless model
+
+    { visual_model_id: model.id }
+  end
+
+  # Paginates at the DB level via Query instead of loading every
+  # matching visual_group_image + its Image into memory and slicing
+  # the array -- a group with thousands of images would otherwise
+  # do that full load on every page request. `included` is the
+  # fixed included/excluded/nil (needs_review) value every row in
+  # this query_params shares -- not a per-row value from the join,
+  # since each branch's query already filters down to one value.
+  def paginate_group_images(query_params, included)
     @pagination_data = PaginationData.new(
       number_arg: :page,
       number: params[:page],
       num_per_page: calc_layout_params["count"]
     )
-    @pagination_data.num_total = @vals.length
-    @subset = @vals[@pagination_data.from..@pagination_data.to]
+    query = create_query(:Image, **query_params)
+    images = query.paginate(@pagination_data)
+    @subset = images.map { |image| [image, included] }
   end
 
   def edit_filter
@@ -116,47 +143,6 @@ class VisualGroupsController < ApplicationController
   # Only allow a list of trusted parameters through.
   def visual_group_params
     params.require(:visual_group).permit(:name, :approved, :description)
-  end
-
-  def calc_show_vals
-    return unfiltered_images if !@filter || @filter == ""
-
-    # For filtered results, get raw arrays then eager-load images
-    raw_vals = VisualGroupImages.new(@visual_group, @filter, :included).vals
-
-    # Extract image IDs and eager-load images
-    image_ids = raw_vals.map(&:first)
-    images_by_id = Image.where(id: image_ids).index_by(&:id)
-
-    # Map back to [image, included] format
-    raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
-  end
-
-  def unfiltered_images
-    @visual_group.visual_group_images.
-      where(included: true).includes(:image).
-      map { |vgi| [vgi.image, vgi.included] }
-  end
-
-  def calc_edit_vals
-    return relevant_images if @status != "needs_review"
-
-    # For "needs_review" status, get raw arrays then eager-load images
-    raw_vals = VisualGroupImages.new(@visual_group, @filter, :any).vals -
-               VisualGroupImages.new(@visual_group, @filter, :reviewed).vals
-
-    # Extract image IDs and eager-load images
-    image_ids = raw_vals.map(&:first)
-    images_by_id = Image.where(id: image_ids).index_by(&:id)
-
-    # Map back to [image, included] format
-    raw_vals.map { |row| [images_by_id[row[0]], row[1]] }
-  end
-
-  def relevant_images
-    @visual_group.visual_group_images.
-      where(included: @status != "excluded").includes(:image).
-      map { |vgi| [vgi.image, vgi.included] }
   end
 
   def save_visual_group

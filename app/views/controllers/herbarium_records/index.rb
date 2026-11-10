@@ -33,7 +33,7 @@ module Views::Controllers::HerbariumRecords
 
     # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
-      Table(@objects, class: "table-striped",
+      Table(@objects, variant: :striped,
                       show_headers: false) do |t|
         t.column("") { |rec| render_edit_link(rec) }
         t.column("") { |rec| render_herbarium_link(rec) }

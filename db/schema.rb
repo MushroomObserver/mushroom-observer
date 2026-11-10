@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_08_200000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_09_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -1195,6 +1195,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_08_200000) do
     t.integer "image_id"
     t.integer "visual_group_id"
     t.boolean "included", default: true, null: false
+    t.index ["image_id"], name: "index_visual_group_images_on_image_id"
+    t.index ["visual_group_id", "included"], name: "index_visual_group_images_on_visual_group_id_and_included"
   end
 
   create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

@@ -17,7 +17,7 @@ module Views::Controllers::VisualGroups
     def view_template
       div(class: "status_buttons text-center small",
           id: "visual_group_status_links_#{@image_id}") do
-        render_status_link_trio
+        ButtonGroup(class: "status-btn-group") { render_status_link_trio }
         br
         render_image_id_line
         br
@@ -30,10 +30,7 @@ module Views::Controllers::VisualGroups
     private
 
     def render_status_link_trio
-      [nil, true, false].each_with_index do |link, idx|
-        plain("|") if idx.positive?
-        render_status_link(link)
-      end
+      [nil, true, false].each { |link| render_status_link(link) }
     end
 
     # One status link: bold if it's the current status (a non-clickable
@@ -43,7 +40,7 @@ module Views::Controllers::VisualGroups
       link_text = status_text(link)
       state_text = status_text(@status)
       if link_text == state_text
-        b { plain(link_text) }
+        b(class: "status-link-current") { plain(link_text) }
       else
         render_status_patch_button(link, link_text)
       end
@@ -54,6 +51,7 @@ module Views::Controllers::VisualGroups
         type: :patch,
         variant: :strip,
         name: link_text,
+        class: "status-link",
         target: visual_group_image_path(
           id: @image_id, visual_group_id: @visual_group.id,
           status: link

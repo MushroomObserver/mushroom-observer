@@ -72,6 +72,24 @@ class VisualGroupsControllerTest < FunctionalTestCase
           visual_model_id: @visual_model.id
         })
     assert_response(:success)
+    # The rubric links back to the visual model's index, even though
+    # the show route is shallow and carries no visual_model_id.
+    assert_select(
+      "#rubric a[href='#{visual_model_visual_groups_path(@visual_model)}']"
+    )
+  end
+
+  def test_should_show_visual_group_with_nil_description
+    group = visual_groups(:visual_group_one)
+    group.update_column(:description, nil)
+
+    login
+    get(:show, params: {
+          id: group.id,
+          visual_model_id: group.visual_model.id
+        })
+
+    assert_response(:success)
   end
 
   def test_should_show_visual_group_with_filter

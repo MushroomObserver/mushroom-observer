@@ -87,6 +87,12 @@ class Components::Table < Components::Base
   # test/JS targeting (e.g. `identifier: "location-help"` →
   # `class="… table-location-help"`).
   prop :identifier, _Nilable(String), default: nil
+  # Vertically centers every cell — adds "table-align-middle" (see
+  # app/assets/stylesheets/mo/_tables.scss), overriding Bootstrap
+  # 3's `th, td { vertical-align: top }` default for the whole
+  # table. Per-column valign: (on #column) still applies for a
+  # single column that needs to differ from the rest.
+  prop :align_middle, _Boolean, default: false
   # Catch-all for class:, data:, cols:, ARIA attrs, and any other
   # HTML attrs forwarded to the `<table>` element -- matches
   # Icon/Collapsible's pattern.
@@ -258,13 +264,17 @@ class Components::Table < Components::Base
   def table_attributes
     attrs = @attributes.except(:class)
     attrs[:class] = class_names("table", variant_classes, identifier_class,
-                                @attributes[:class])
+                                align_middle_class, @attributes[:class])
     attrs[:id] = @id if @id
     attrs
   end
 
   def variant_classes
     Array(@variant).map { |v| "table-#{v}" }
+  end
+
+  def align_middle_class
+    "table-align-middle" if @align_middle
   end
 
   def identifier_class
