@@ -45,14 +45,15 @@
 }
 
 // Shared size for .log-details and .log-footer -- one declaration
-// instead of each wrap repeating the same value.
+// instead of each wrap repeating the same value. BS3-only values --
+// take cutover's .log-text size when switching to BS4.
 .log-text {
-  font-size: 0.81rem;
+  font-size: 0.75rem;
 }
 
 @media screen and (min-width: $screen-lg-min) {
   .log-text {
-    font-size: 0.85rem;
+    font-size: 0.78rem;
   }
 }
 

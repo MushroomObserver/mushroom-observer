@@ -147,7 +147,10 @@ class Components::Matrix::Box < Components::Base
                target: @data[:what].show_link_args) { render_title }
         end
         whitespace
-        IDBadge(object: @data[:what], size: :md, extra_class: nil)
+        # size: :lg is a BS3-only value, ported straight from
+        # cutover -- it may already be correct there; re-check
+        # against cutover's value when switching to BS4.
+        IDBadge(object: @data[:what], size: :lg, extra_class: nil)
       end
 
       render_identify_ui if @identify
