@@ -18,7 +18,7 @@ module Views::Controllers::Admin::Donations
       Table(
         @donations,
         variant: :striped, align_middle: true,
-        class: "table-review-donations my-3"
+        class: "table-review-donations"
       ) do |t|
         define_columns(t)
       end
