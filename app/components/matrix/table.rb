@@ -38,7 +38,8 @@ class Components::Matrix::Table < Components::Base
   # v2: image URLs in the fragment carry a cache-busting
   # ?<updated_at> token -- fragments cached under v1 are stale.
   # v3: observation boxes name the collector, not the entering user.
-  CACHE_VERSION = "v3"
+  # v4: rss-* classes renamed to log-*, heading structure changed.
+  CACHE_VERSION = "v4"
 
   # The cache key MatrixBox fragments are stored under, used by both
   # the write here and the controller's batched `read_multi`
