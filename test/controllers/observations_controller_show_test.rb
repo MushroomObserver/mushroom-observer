@@ -421,8 +421,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
       assert_select(".comment-summary", /complicated/)
     end
     # Test that the panel title and new comment link appears.
-    assert_select("#comments_for_object .panel-heading",
-                  text: "#{:comments.ti} #{:show_comments_add_comment.l}")
+    assert_select("#comments_for_object .panel-title > span:first-child",
+                  text: :comments.ti)
+    assert_select("#comments_for_object .panel-heading-links",
+                  text: :show_comments_add_comment.l)
 
     # You must be logged in to get the show_obs naming table now.
     # Test it on obs with two namings (Rolf's and Mary's), with owner logged in.
