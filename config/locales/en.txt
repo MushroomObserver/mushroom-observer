@@ -1625,8 +1625,6 @@
   form_synonyms_missing_names: The following names could not be found.
   form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names. If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
-  image_title_with_subject: "[subject] image"
-
   # images/new
   image_set_default: Set as default thumbnail
   image_add_default: Default thumbnail

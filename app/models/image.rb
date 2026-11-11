@@ -348,10 +348,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Do the same without the ID, for new page titles that generate an ID UI
   def format_name(_user = nil)
-    title = title_subjects
-    return :image.ti if title.blank?
-
-    :image_title_with_subject.l(subject: title)
+    title_subjects.presence || :image.ti
   end
 
   # How this image is refered to in the rss logs.
