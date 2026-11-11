@@ -3,9 +3,9 @@
 # Query/pagination support for InatImportsController#index.
 module InatImportsController::IndexQuery
   # Sort options for the iNat imports index. Read by `add_sorter`
-  # in the view. `by_user` only makes sense in Admin Mode -- a
-  # non-admin's rows share one user, and the User column itself
-  # only renders there too.
+  # in the view. The `user` sort option only makes sense in Admin Mode --
+  # a non-admin's rows share one user, and the User column itself only
+  # renders there too.
   def index_sort_options(admin:)
     options = [
       ["updated_at", :sort_by_updated_at.t],
