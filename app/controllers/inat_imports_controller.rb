@@ -30,6 +30,7 @@ class InatImportsController < ApplicationController
   include ProjectScope
   include PreviousImports
   include AccountLinking
+  include IndexQuery
   include Inat::Constants
 
   before_action :login_required
@@ -39,12 +40,16 @@ class InatImportsController < ApplicationController
 
   def index
     admin = in_admin_mode? == true
-    scope = admin ? InatImport.all : InatImport.where(user: @user)
-    imports = scope.order(updated_at: :desc).to_a
+    @query = find_or_create_query(:InatImport, **index_query_args(admin))
+    update_stored_query(@query)
+    @pagination_data = index_pagination_data
+    imports = @query.paginate(@pagination_data)
     render(Views::Controllers::InatImports::Index.new(
              imports: imports,
              admin: admin,
-             result_import_ids: import_ids_with_results(imports)
+             result_import_ids: import_ids_with_results(imports),
+             query: @query,
+             pagination_data: @pagination_data
            ))
   end
 
@@ -137,15 +142,6 @@ class InatImportsController < ApplicationController
   # ---------------------------------
 
   private
-
-  # Ids of the imports that actually have linked observations. Historic
-  # imports predate the observations.inat_import_id link, so their Results
-  # link would lead nowhere; the index hides it for them. One query, to
-  # avoid an N+1 across the (unpaginated) admin list.
-  def import_ids_with_results(imports)
-    Observation.where(inat_import_id: imports.map(&:id)).
-      distinct.pluck(:inat_import_id)
-  end
 
   def confirm_import
     @expected = fetch_expected_count
