@@ -49,6 +49,13 @@
 #
 #
 class InatImport < ApplicationRecord
+  # Not an AbstractModel subclass -- that would also pull in RSS-log
+  # autologging and user-contribution callbacks this import-tracking
+  # record has no use for. OrderingScopes is a self-contained concern
+  # (no callbacks), so it's included directly to get `order_by` for
+  # Query::InatImports' sorting.
+  include AbstractModel::OrderingScopes
+
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
 
   enum :state, {
@@ -107,6 +114,16 @@ class InatImport < ApplicationRecord
   # An import stuck in Importing state longer than this is assumed to have
   # crashed. Must match the schedule in config/recurring.yml.
   STUCK_THRESHOLD = 3.minutes
+
+  scope :order_by_default, -> { order_by(::Query::InatImports.default_order) }
+
+  # Filters the index to one owner's imports -- Query::InatImports'
+  # `by_users` query_attr. Same body as AbstractModel::Scopes#by_users;
+  # hand-written here since InatImport doesn't include that concern.
+  scope :by_users, lambda { |users|
+    ids = Lookup::Users.new(users).ids
+    where(user: ids)
+  }
 
   scope :stuck, lambda {
     where(state: "Importing", ended_at: nil).
