@@ -41,8 +41,10 @@ module Views::Layouts
     def reflection_item
       return nil unless reflection?
 
+      # :reflection's cloud glyph, not :read_only's lock -- the lock
+      # read as "can't be edited" to users; see #5655.
       ::Components::Icon.new(
-        type: :read_only,
+        type: :reflection,
         title: :show_observation_reflection_read_only.l,
         wrap_class: ::Components::InlineLinkBlock.item_class,
         center_tooltip: true
