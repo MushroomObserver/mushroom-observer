@@ -1701,9 +1701,8 @@
   list_observations_download_as_csv: Download Observations
 
   # locations/list_place_names (list_locations)
+  list_place_names_header: Location Name
   list_place_names_map: Map Locations
-  list_place_names_merge: Merge
-  list_place_names_parenthetical: Number shows Observation count.
   list_place_names_undef: Unmapped Place Names
   list_place_names_undef_tooltip: Observations with this place name
   list_place_names_undef_merge_tooltip: Merge with a mapped location
