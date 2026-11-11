@@ -91,28 +91,28 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_wrapper_body(&block)
       render(prepend_slot) if prepend_present?
-      if wrapper_options[:wrap_append_in_input_group] && append_present?
-        render_append_in_input_group(&block)
+      if input_group_needed?
+        render_input_group(&block)
       else
         yield
         render(append_slot) if append_present?
       end
     end
 
-    # Opt-in for fields whose append content (e.g. the autocompleter's
-    # dropdown-menu) needs `position: relative` scoped to just the
-    # field, not the whole form-group -- `.form-group.dropdown`'s
-    # `position: relative` sits too high in the tree (it also wraps
-    # the label and help text), so a `position: absolute; top: 100%`
-    # descendant lands below all of that instead of below the field.
-    # `Components::InputGroup` already provides this tight wrapper
-    # (and its CSS is already scoped to .input-group, not every
-    # form-group), so this reuses it rather than adding a new rule.
-    def render_append_in_input_group
-      InputGroup do
-        yield
-        render(append_slot)
-      end
+    # `:button`/`:addon` (InputGroupAddon) and the autocompleter's
+    # append-slot dropdown (`wrap_append_in_input_group`, below) each
+    # want an `.input-group` wrapper -- routed through one
+    # `render_input_group` call (InputGroupAddon) instead of two
+    # separate wraps, which would otherwise nest. Guarded by
+    # `respond_to?` since only TextField/SelectField include
+    # InputGroupAddon -- StaticTextField/ReadOnlyField have no
+    # `:button`/`:addon` support, so `render_input_group` is undefined
+    # for them.
+    def input_group_needed?
+      return false unless respond_to?(:render_input_group, true)
+
+      wrapper_options[:button] || wrapper_options[:addon] ||
+        (wrapper_options[:wrap_append_in_input_group] && append_present?)
     end
   end
 end
