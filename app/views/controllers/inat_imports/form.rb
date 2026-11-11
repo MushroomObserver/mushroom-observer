@@ -188,7 +188,7 @@ module Views::Controllers::InatImports
       Panel do |panel|
         panel.with_heading { plain(:inat_details_heading.l) }
         panel.with_body do
-          ul(class: "pl-4") do
+          ul(class: "pl-3") do
             detail_items.each { |key| li { plain(key.l) } }
           end
         end
