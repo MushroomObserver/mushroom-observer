@@ -34,6 +34,7 @@ class ProjectExternalSiteAlert < AbstractModel
   validates :remote_identification_id, presence: true
   validates :remote_observation_id, presence: true
   validates :kind, inclusion: { in: KINDS }
+  validates :target_name, presence: true
 
   scope :for_project, ->(project) { where(project: project) }
   scope :order_by_default, -> { order(alerted_at: :desc, id: :desc) }

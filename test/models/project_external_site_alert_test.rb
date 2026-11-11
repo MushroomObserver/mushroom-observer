@@ -103,6 +103,15 @@ class ProjectExternalSiteAlertTest < UnitTestCase
     assert_not(alert.valid?)
   end
 
+  # The subject line names the watched name and the grouping keys on
+  # it, so a row without one has no message to belong to.
+  def test_a_missing_watched_name_is_rejected
+    alert = record
+    alert.target_name = nil
+
+    assert_not(alert.valid?)
+  end
+
   def test_remote_url_points_at_the_observation
     assert_equal("#{Inat::Constants::SITE}/observations/12345",
                  record.remote_url)
