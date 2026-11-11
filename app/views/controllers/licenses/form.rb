@@ -31,7 +31,7 @@ module Views::Controllers::Licenses
     end
 
     def render_url_field
-      text_field(:url, label: :license_url) do |f|
+      text_field(:url, label: :license_url, type: "url") do |f|
         f.with_append do
           Help(content: :license_url_help.t)
         end

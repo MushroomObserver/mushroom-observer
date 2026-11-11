@@ -181,7 +181,7 @@ module Views::Controllers::Herbaria
 
     def render_contact_fields
       text_field(:email, label: :create_herbarium_email,
-                         label_appends: :optional)
+                         label_appends: :optional, type: "email")
       textarea_field(
         :mailing_address,
         label: :create_herbarium_mailing_address,

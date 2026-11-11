@@ -32,10 +32,11 @@ module Views::Controllers::Account
       assert_includes(html, :signup_confirm_password.l)
 
       # Email fields
-      assert_html(html, "input[name='new_user[email]'][type='text']")
+      assert_html(html, "input[name='new_user[email]'][type='email']")
       assert_includes(html, :signup_email_address.l)
       assert_html(html,
-                  "input[name='new_user[email_confirmation]'][type='text']")
+                  "input[name='new_user[email_confirmation]']" \
+                  "[type='email']")
       assert_includes(html, :signup_email_confirmation.l)
 
       # Email help text

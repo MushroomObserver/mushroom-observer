@@ -32,7 +32,7 @@ module Views::Controllers::Publications
     end
 
     def render_link_field
-      text_field(:link, label: :publication_link)
+      text_field(:link, label: :publication_link, type: "url")
     end
 
     def render_peer_reviewed_field
