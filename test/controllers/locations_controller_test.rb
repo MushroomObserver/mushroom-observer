@@ -358,7 +358,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { project: project.id })
 
     location = project.observations[0].location
-    assert_select(".list-group-item a", text: /#{location.display_name}/)
+    assert_select("table td a", text: /#{location.display_name}/)
   end
 
   def test_index_species_list
@@ -370,7 +370,7 @@ class LocationsControllerTest < FunctionalTestCase
     get(:index, params: { q: @controller.q_param(query) })
 
     location = sl.observations.joins(:location).first&.location
-    assert_select(".list-group-item a", text: /#{location.display_name}/)
+    assert_select("table td a", text: /#{location.display_name}/)
   end
 
   def test_index_pattern_multiple_hits
