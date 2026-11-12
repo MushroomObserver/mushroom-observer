@@ -5,19 +5,22 @@ module Views::Controllers::Publications
   # publications with peer-review and MO-mentioned flags + admin
   # edit/destroy links.
   class Index < Views::FullPageBase
-    prop :query, _Nilable(::Query), default: nil
-    prop :publications, _Array(::Publication)
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
+    prop :objects, _Array(::Publication)
 
+    # Counts are over the full query result set, not just the
+    # current page's `@objects`.
     def full_count
-      @full_count ||= @publications.length
+      @full_count ||= @query.num_results
     end
 
     def peer_count
-      @peer_count ||= @publications.count(&:peer_reviewed)
+      @peer_count ||= @query.results.count(&:peer_reviewed)
     end
 
     def mo_count
-      @mo_count ||= @publications.count(&:mo_mentioned)
+      @mo_count ||= @query.results.count(&:mo_mentioned)
     end
 
     INTRO_CITATION_URL =
@@ -29,10 +32,12 @@ module Views::Controllers::Publications
     def view_template
       add_index_title(@query)
       add_context_nav(::Tab::Publication::IndexActions.new)
+      add_sorter(@query, controller.index_sort_options)
+      add_pagination(@pagination_data)
       container_class(:wide)
 
       Container(width: :text) { render_intro }
-      render_publications_table
+      PaginatedResults { render_publications_table }
       ContentPadded do
         trusted_html(:publication_legend.tp)
       end
@@ -49,7 +54,7 @@ module Views::Controllers::Publications
     end
 
     def render_publications_table
-      Table(@publications,
+      Table(@objects,
             variant: :striped, identifier: "publications",
             class: "mb-3 mt-3") do |tbl|
         add_full_link_column(tbl)

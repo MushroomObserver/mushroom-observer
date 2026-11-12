@@ -7,7 +7,7 @@ class PublicationsControllerTest < FunctionalTestCase
   def test_should_get_index
     get(:index)
     assert_response(:success)
-    assert_not_nil(assigns(:publications))
+    assert_not_nil(assigns(:objects))
   end
 
   def test_should_get_index_for_user_who_owns_a_publication
@@ -15,7 +15,7 @@ class PublicationsControllerTest < FunctionalTestCase
     login("rolf")
     get(:index)
     assert_response(:success)
-    assert_not_nil(assigns(:publications))
+    assert_not_nil(assigns(:objects))
     # InlineCRUDLinks (via Tab::Publication::Edit) renders an
     # icon-only link, not visible "Edit" text -- select on the tab's
     # own derived class instead of `assert_link_in_html`'s text match.
@@ -33,6 +33,21 @@ class PublicationsControllerTest < FunctionalTestCase
       "form[action='#{publication_path(pub_id)}'] " \
       "input[type='hidden'][name='_method'][value='delete']"
     )
+  end
+
+  # `Query::Publications` has no `name`/`title` column -- its
+  # alphabetize-by field is `full` -- so sorting "by name" must
+  # dispatch to `order_publications_by_name`, ordering on `full`.
+  def test_index_sorted_by_name_orders_by_full
+    # `order_by`'s generic dispatcher appends `order(id: :desc)` as a
+    # tiebreak for equal `full` values -- match it so ties in the
+    # fixtures (two "MyText" rows) don't make this flaky.
+    expected = Publication.order(Publication[:full].asc, Publication[:id].desc)
+    login
+    get(:index, params: { by: :name })
+
+    assert_response(:success)
+    assert_equal(expected.map(&:id), assigns(:objects).map(&:id))
   end
 
   # Covers the `link_cell` branch in
