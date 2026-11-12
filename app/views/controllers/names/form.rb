@@ -157,11 +157,11 @@ module Views::Controllers::Names
     end
 
     def render_misspelling_fields
-      div(class: "my-4 mx-0") do
+      div(class: "form-group") do
         checkbox_field(:misspelling,
                        label: :form_names_misspelling,
                        checked: @misspelling,
-                       wrap_class: "mb-3")
+                       wrap_class: "form-group")
 
         autocompleter_field(
           :correct_spelling,

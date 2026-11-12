@@ -110,7 +110,7 @@ module Views::Controllers::FieldSlips
                  label: "#{:field_slip_other_codes.l} " \
                         "(#{:field_slip_other_example.l})")
       checkbox_field(:inat, label: :field_slip_other_inat,
-                            wrap_class: "mb-3")
+                            wrap_class: "form-group")
     end
 
     def render_project_select

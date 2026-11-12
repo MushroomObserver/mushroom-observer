@@ -42,7 +42,7 @@ module Views::Controllers::Names::Trackers
                label: :email_tracking_note,
                expanded: note_template_enabled?,
                attributes: {
-                 wrap_class: "mb-3",
+                 wrap_class: "form-group",
                  help: :email_tracking_note_help.t
                }
              ))

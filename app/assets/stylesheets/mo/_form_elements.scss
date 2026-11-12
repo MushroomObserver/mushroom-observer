@@ -55,6 +55,12 @@
   }
 }
 
+// Drop this rule on Bootstrap 4 -- `.checkbox`'s margin-bottom: 10px
+// otherwise wins over `.form-group`'s.
+.checkbox.form-group {
+  margin-bottom: $form-group-margin-bottom;
+}
+
 // Theme- AND variant-aware "pressed" styles for button-styled
 // radios/checkboxes that drive their active state via
 // `:has(input:checked)` rather than the BS3 `.active` class.

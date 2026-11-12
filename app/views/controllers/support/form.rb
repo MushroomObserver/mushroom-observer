@@ -22,10 +22,10 @@ module Views::Controllers::Support
           render_other_amount_inputs
         end
         checkbox_field(:recurring, label: :donate_recurring,
-                                   wrap_class: "mb-3")
+                                   wrap_class: "form-group")
         text_field(:who, size: 30, label: :donate_who, inline: true)
         checkbox_field(:anonymous, label: :donate_anonymous,
-                                   wrap_class: "mb-3")
+                                   wrap_class: "form-group")
         text_field(:email, size: 30, label: :donate_email, inline: true,
                            type: "email")
         submit(:donate_confirm.l, center: true)

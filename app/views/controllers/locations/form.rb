@@ -112,7 +112,7 @@ module Views::Controllers::Locations
 
     def render_locked_checkbox
       checkbox_field(:locked, label: :form_locations_locked,
-                              wrap_class: "mb-3")
+                              wrap_class: "form-group")
     end
 
     def render_notes_field

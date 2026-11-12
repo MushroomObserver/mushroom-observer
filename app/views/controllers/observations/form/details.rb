@@ -148,7 +148,7 @@ class Views::Controllers::Observations::Form::Details < Views::Base
     @form.checkbox_field(
       :is_collection_location,
       label: :form_observations_is_collection_location,
-      wrap_class: "mb-3",
+      wrap_class: "form-group",
       help: :form_observations_is_collection_location_help.t,
       help_collapse: true
     )
