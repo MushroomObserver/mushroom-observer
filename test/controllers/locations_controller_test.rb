@@ -351,6 +351,15 @@ class LocationsControllerTest < FunctionalTestCase
     check_index_sorted_by(:name, do_login: false)
   end
 
+  # `auto_letters?` strips a `reverse_` prefix before checking against
+  # "name"/"title" -- confirms a reverse-sorted query still qualifies
+  # for the letter pager, not just the forward-sorted one.
+  def test_auto_letters_recognizes_reverse_name_order
+    query = Query.lookup_and_save(:Location, order_by: "reverse_name")
+
+    assert(@controller.send(:auto_letters?, query))
+  end
+
   def test_index_project
     project = projects(:open_membership_project)
 

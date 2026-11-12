@@ -2,6 +2,8 @@
 
 # rubocop:disable-next Metrics/ClassLength
 class NamesController < ApplicationController
+  self.create_button_in_rubric = true
+
   class RankWarning < RuntimeError; end
 
   before_action :store_location, except: [:index]
@@ -67,7 +69,6 @@ class NamesController < ApplicationController
 
   def index_display_opts(opts, query)
     {
-      letters: true,
       num_per_page: index_num_per_page(query),
       include: [{ description: :authors }]
     }.merge(opts)

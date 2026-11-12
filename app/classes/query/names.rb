@@ -66,10 +66,6 @@ class Query::Names < Query
     query_attr(param_name, accepts)
   end
 
-  def alphabetical_by
-    @alphabetical_by ||= Name[:sort_name]
-  end
-
   def self.default_order
     :name
   end

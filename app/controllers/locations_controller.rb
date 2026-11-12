@@ -20,6 +20,8 @@
 # Locations controller.
 # rubocop:disable-next Metrics/ClassLength
 class LocationsController < ApplicationController
+  self.create_button_in_rubric = true
+
   include ::Locationable
 
   before_action :store_location, except: [:index, :destroy]

@@ -21,14 +21,21 @@
 # nil for top-level controllers. Used directly by TopNav's
 # `nav_linkable_parent_controller` and by `rubric` itself.
 #
-# Lives in its own module so `ComponentTestCase` can include it on
-# the test controller without pulling in the rest of
+# `create_button_in_rubric` is a per-controller opt-in
+# (`self.create_button_in_rubric = true` in the controller body) for
+# the green "+ Add" button `Views::Layouts::TopNav` renders beside
+# the rubric. Defaults to `false`.
+#
+# Lives in a dedicated module so `ComponentTestCase` can include it
+# on the test controller without pulling in the rest of
 # `ApplicationController` — the Phlex layout / TopNav rendering path
 # walks through all three of these in every component test.
 module ApplicationController::ControllerLabels
   def self.included(base)
     base.helper_method(:rubric, :parent_controller_module,
                        :controller_model_name)
+    base.class_attribute(:create_button_in_rubric, instance_writer: false,
+                                                   default: false)
   end
 
   # Singular CamelCase model name. `ObservationsController` → `Observation`.
