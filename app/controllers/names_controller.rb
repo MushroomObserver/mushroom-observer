@@ -2,6 +2,8 @@
 
 # rubocop:disable-next Metrics/ClassLength
 class NamesController < ApplicationController
+  self.create_button_in_rubric = true
+
   class RankWarning < RuntimeError; end
 
   before_action :store_location, except: [:index]
