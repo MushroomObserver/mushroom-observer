@@ -7,7 +7,7 @@ module Views::Controllers::Licenses
     prop :license, ::License
 
     def view_template
-      add_page_title(:create_license_title.l)
+      add_page_title(:create_object.l(type: :license))
       add_context_nav(::Tab::License::FormNew.new)
 
       render(Form.new(@license))

@@ -61,7 +61,7 @@ class Views::Layouts::TopNav < Views::Base
   # from observation pages.
   NAV_CREATABLES = %w[
     observations names species_lists projects locations images herbaria
-    glossary_terms field_slips articles publications visual_models
+    glossary_terms field_slips articles publications visual_models licenses
   ].freeze
 
   def view_template
