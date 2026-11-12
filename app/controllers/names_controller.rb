@@ -67,7 +67,6 @@ class NamesController < ApplicationController
 
   def index_display_opts(opts, query)
     {
-      letters: true,
       num_per_page: index_num_per_page(query),
       include: [{ description: :authors }]
     }.merge(opts)
