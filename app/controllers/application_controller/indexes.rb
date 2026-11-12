@@ -358,12 +358,13 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # explicitly (e.g. Observations, whose index isn't a sorted list).
   # `alphabetical_by` returns nil when the model's "sort by name"
   # isn't a plain column, which disables this the same way.
-  def auto_letters?(query)
-    order = (query.params[:order_by] || query.default_order).to_s
-    return false unless order.in?(%w[name title])
+def auto_letters?(query)
+  order = (query.params[:order_by] || query.default_order).to_s
+  order = order.sub(/^reverse_/, "")
+  return false unless order.in?(%w[name title])
 
-    query.alphabetical_by.present?
-  end
+  query.alphabetical_by.present?
+end
 
   def num_per_page(display_opts)
     return @layout["count"] if display_opts[:matrix]
