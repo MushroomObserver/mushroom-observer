@@ -24,7 +24,11 @@ class Views::Controllers::Names::Show::LifeformPanel < Views::Base
   end
 
   def render_body
-    render_lifeform_terms if @name.lifeform.present?
+    if @name.lifeform.present?
+      render_lifeform_terms
+    elsif @first_child.nil?
+      plain(:none.ti)
+    end
     render_propagate_link if @first_child
   end
 
