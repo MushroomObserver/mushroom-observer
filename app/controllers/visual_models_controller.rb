@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class VisualModelsController < ApplicationController
+  self.create_button_in_rubric = true
+
   before_action :login_required
 
   # GET /visual_models
