@@ -13,7 +13,6 @@ module Views::Controllers::Locations
       def view_template
         register_chrome
 
-        h4(class: "px-card") { plain(:descriptions.ti) }
         PaginatedResults do
           render_table if @descriptions.any?
         end
@@ -30,6 +29,28 @@ module Views::Controllers::Locations
         add_sorter(@query, controller.index_sort_options)
         add_pagination(@pagination_data)
         container_class(:wide)
+        add_descriptions_caption
+      end
+
+      # Puts "Descriptions" ahead of whatever filter caption
+      # `add_index_title` set (or didn't -- the rubric alone just
+      # reads "Locations", with no indication this index is
+      # descriptions rather than locations themselves).
+      def add_descriptions_caption
+        content_for(:filters, flush: true) do
+          capture do
+            span { plain(:descriptions.ti) }
+            render_filter_caption_if_present
+          end
+        end
+      end
+
+      def render_filter_caption_if_present
+        klass = ::Views::Layouts::Header::IndexBar::FilterCaption
+        return unless klass.filters_present?(@query)
+
+        whitespace
+        render(klass.new(query: @query))
       end
 
       def render_table
