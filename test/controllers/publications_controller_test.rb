@@ -138,6 +138,12 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_response(:success)
   end
 
+  def test_should_not_get_edit_without_permission
+    login("mary")
+    get(:edit, params: { id: publications(:one_pub).id })
+    assert_redirected_to(publications_path)
+  end
+
   # Show with peer_reviewed + mo_mentioned + link set + an
   # updated_at distinct from created_at. Covers the branches in
   # `Views::Controllers::Publications::Show` for those four
