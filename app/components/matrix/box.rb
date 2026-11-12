@@ -41,6 +41,10 @@ class Components::Matrix::Box < Components::Base
   # project-filtered observations index, a project admin sees an Exclude
   # button that moves the observation to the project's excluded list.
   prop :project, _Nilable(Project), default: nil
+  # The occurrence show page renders every member of one Occurrence --
+  # the "See matching observations" link back to that same page is
+  # redundant there.
+  prop :suppress_occurrence_link, _Boolean, default: false
 
   def view_template(&block)
     if @object
@@ -155,6 +159,7 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_occurrence_link
+    return if @suppress_occurrence_link
     return unless (occ = @data[:occurrence])
 
     obs_count = if occ.observations.loaded?

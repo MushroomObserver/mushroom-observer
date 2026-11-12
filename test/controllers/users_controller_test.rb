@@ -14,7 +14,11 @@ class UsersControllerTest < FunctionalTestCase
     login
 
     assert_all_top_level_params_survive(
-      Query::Users, :User, overrides: { id_in_set: rolf.id }
+      Query::Users, :User,
+      overrides: {
+        id_in_set: rolf.id,
+        member_of_project: projects(:bolete_project).id
+      }
     )
   end
 

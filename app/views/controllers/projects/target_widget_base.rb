@@ -1,14 +1,10 @@
 # frozen_string_literal: true
 
-# Shared base for the two inline forms that add target names or target
-# locations to a Project (Pattern B / Superform). Subclasses fill in
-# the few pieces that vary per type via the abstract methods listed
-# below; the rendering shape is otherwise identical.
+# Shared base for the inline forms that add target names, target
+# locations, or members to a Project (Pattern B / Superform).
 #
 # The DOM id stays distinct per subclass (turbo-stream wrappers
-# replace by id), and `_form_elements.scss` targets those ids for the
-# textarea-width override. Both subclasses also share the
-# `project-target-widget` class.
+# replace by id).
 class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationForm
   prop :project, ::Project
 
@@ -16,23 +12,27 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
   # compatibility (ignored) — see Pattern B in
   # .claude/rules/phlex_reference.md.
   def initialize(_model = nil, project:, **attrs)
-    super(form_object, project: project, id: dom_id, turbo: true, **attrs)
+    super(form_object, project: project, id: dom_id, **attrs)
   end
 
   def around_template
-    @attributes[:class] = "form-inline mb-3 project-target-widget"
+    @attributes[:class] = "mb-3 project-target-widget"
     super
   end
 
   def view_template
-    super do
-      autocompleter_field(
-        field_name,
-        type: autocompleter_type,
-        textarea: true,
-        label: label_key
-      )
-      submit(submit_key.l, class: "ml-2 mt-2")
+    div(class: "mt-3") do
+      super do
+        autocompleter_field(
+          field_name,
+          type: autocompleter_type,
+          textarea: true,
+          label: label_key,
+          wrap_class: "d-inline-block align-middle",
+          cols: 60
+        )
+        submit(submit_key.l, class: "d-inline-block align-middle ml-3")
+      end
     end
   end
 

@@ -15,8 +15,7 @@ module Views::Controllers::Account::PasswordResets
       render(Form.new(
                @new_user || ::User.new,
                action: account_password_reset_path,
-               id: "account_password_reset_form",
-               turbo: true
+               id: "account_password_reset_form"
              ))
     end
   end

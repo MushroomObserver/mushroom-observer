@@ -28,8 +28,6 @@ module Views::Controllers::Observations::Downloads
     end
 
     def view_template
-      h3(class: "mt-5") { :species_list_download_header.l }
-
       render_format_section
       render_encoding_section
       render_submit_buttons

@@ -66,15 +66,7 @@ class ParallelTestConfigService
       return nil
     end
 
-    # database.yml is ERB, not plain YAML (#4807 added a multi-line <% %>
-    # block computing test_db/cache_test_db before the `test:` section) --
-    # YAML.load_file can't parse that raw, unlike Rails' config loading,
-    # which always renders ERB first. aliases: true -- config/database.yml
-    # merges shared credentials via YAML anchors (`<<: *credentials`);
-    # Psych's safe-load default rejects alias nodes.
-    rendered = ERB.new(File.read(config_path)).result
-    database_config = YAML.safe_load(rendered, aliases: true)
-    test_config = database_config["test"]
+    test_config = test_configuration(config_path)
 
     unless test_config
       output_handler.puts(
@@ -83,14 +75,25 @@ class ParallelTestConfigService
       return nil
     end
 
-    # test: is multi-db (primary/cache, #4807) like development/production
-    # now -- fall back to test_config itself for an old flat-shaped file.
-    primary_config = test_config["primary"] || test_config
-
     {
-      username: primary_config["username"] || "mo",
-      password: primary_config["password"] || "mo"
+      username: test_config["username"] || "mo",
+      password: test_config["password"] || "mo"
     }
+  end
+
+  def test_configuration(config_path)
+    # database.yml is an ERB template -- the test env reads
+    # MO_TEST_DATABASE -- so it has to be rendered before parsing.
+    # aliases: true because it merges shared credentials via YAML
+    # anchors (`<<: *credentials`), which Psych's safe-load default
+    # rejects.
+    config = YAML.safe_load(ERB.new(File.read(config_path)).result,
+                            aliases: true)["test"]
+    return nil unless config
+
+    # `test:` is multi-db (primary/cache), so the credentials sit one
+    # level down; a flat `test:` keeps them at the top.
+    config["primary"] || config
   end
 
   def generate_config_files(workers, credentials)

@@ -197,6 +197,16 @@ form.button_to {
 
 // badges
 
+// A lighter-weight badge variant: outlined in text-color, no fill,
+// normal (not bold) weight -- for a count/label that shouldn't read
+// as loudly as Bootstrap's solid-background default.
+.badge-outline {
+  font-weight: normal;
+  background-color: transparent;
+  color: $text-color;
+  border: 1px solid $text-color;
+}
+
 // Record id badge. No inherent font-size -- every caller states one
 // of the .badge-* sizes below.
 .badge-id {
@@ -251,12 +261,18 @@ button.badge-id:hover {
 }
 
 // Wrapper for a group of inline mod/add links (Components::
-// InlineLinkBlock). Flex + gap spaces items evenly with no trailing
-// margin after the last one, so a lone or final item's width matches
-// its content.
+// InlineLinkBlock). Flex + gap spaces items evenly, no trailing
+// margin after the last item. vertical-align: middle aligns this
+// inline-flex box against adjacent inline text -- its default
+// vertical-align: baseline doesn't land near text's visual center,
+// which a flat margin-top (RESOLVED, don't reintroduce) can only
+// patch for one font-size at a time. .object_edit .inline-link-block
+// (_content.scss) sets a margin-top separately, for spacing against
+// the heading above it, not this.
 .inline-link-block {
   display: inline-flex;
   align-items: center;
+  vertical-align: middle;
   white-space: nowrap;
   // em, not rem -- scales with the surrounding context's font-size
   // (a title-bar heading vs. small body text), same reasoning as
@@ -272,8 +288,9 @@ button.badge-id:hover {
 }
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
-// mo-icon's usual top offset and 1.12em size are tuned for looser
-// contexts -- undone/shrunk here.
+// mo-icon's usual size is tuned for looser contexts -- shrunk here.
+// The baseline correction against adjacent text lives on the
+// wrapping `.inline-link-block`'s margin-top, just above, not here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
@@ -286,7 +303,6 @@ button.badge-id:hover {
   }
 
   .mo-icon {
-    top: 0;
     width: 1em;
     height: 1em;
   }
@@ -294,12 +310,12 @@ button.badge-id:hover {
 
 // button_to's <form> wrapper around a destroy .inline-icon-link keeps
 // the browser's default line-height, taller than `line-height: 1` on
-// the button -- baseline-aligns the icon a pixel or two off from a
-// plain <a>'s. Flex centering (matches .btn:has(.mo-icon)) collapses
-// the form to its content height instead.
+// the button -- flex-centering collapses the form to its content
+// height so the icon doesn't float inside extra line-height.
 form:has(> .inline-icon-link) {
   display: inline-flex;
   align-items: center;
+  position: relative;
 }
 
 //

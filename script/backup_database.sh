@@ -1,16 +1,8 @@
 #!/usr/bin/env bash
 #
-#  USAGE::
-#
-#    script/backup_database.sh
-#
-#  DESCRIPTION::
-#
-#  Makes a new snapshot of the database on the image server:
-#
-#    /data/images/backup/database-YYYYMMDD.gz
-#
-################################################################################
+# script/backup_database.sh -- snapshots the database to the image server
+# as /data/images/backup/database-YYYYMMDD.gz, then culls old snapshots.
+
 set -e
 
 app_root="$( cd "$(dirname "$0")"; pwd -P | sed 's/\/script*//' )"
@@ -23,15 +15,27 @@ temp_file=/tmp/backup_database.$$
 db=mo_$RAILS_ENV
 
 # Create a new snapshot.
-mysqldump --defaults-extra-file=$config_file $db | gzip -c - > $snapshot_file
-chmod 640 $snapshot_file
+# pipefail, or this reports gzip's status and a dump that dies midway
+# gets published as an intact .gz holding partial SQL. Scoped to this
+# pipeline: the cull below relies on a subshell's status being masked.
+set -o pipefail
+mysqldump --defaults-extra-file="$config_file" "$db" |
+  gzip -c - > "$snapshot_file"
+set +o pipefail
+chmod 640 "$snapshot_file"
 
-# Transfer snapshot to image server and abort if this fails.
-dest=$remote_host:$backup_dir/$backup_file
-if ! scp $snapshot_file $dest; then
+# Transfer snapshot to image server and abort if this fails. It goes to a
+# .part name and is renamed into place, so the final name never names a
+# half-transferred file -- db/download_checkpoint takes whichever snapshot
+# is newest, and the transfer takes several seconds. A .part left by a
+# failed run matches none of the keep-list patterns below, so the next
+# day's cull removes it.
+dest="$remote_host:$backup_dir/$backup_file.part"
+if ! scp "$snapshot_file" "$dest"; then
   echo "Failed to transfer $snapshot_file to $dest!"
   exit 1
 fi
+ssh "$remote_host" "mv $backup_dir/$backup_file.part $backup_dir/$backup_file"
 
 # Get listing of snapshots currently on the image server.
 # (Make extra certain that these are actually files in the backup dir!!)

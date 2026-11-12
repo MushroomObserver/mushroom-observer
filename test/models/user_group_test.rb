@@ -95,6 +95,42 @@ class UserGroupTest < UnitTestCase
                  "and one_user's memo")
   end
 
+  def test_add_user_adds_the_user
+    group = UserGroup.create!(name: "add_user test group")
+    user = users(:rolf)
+
+    group.add_user(user)
+
+    assert_includes(group.users, user)
+  end
+
+  def test_add_user_is_a_noop_when_already_a_member
+    group = UserGroup.create!(name: "add_user noop test group")
+    user = users(:rolf)
+    group.add_user(user)
+
+    group.add_user(user)
+
+    assert_equal(1, UserGroupUser.where(user_group: group, user:).count)
+  end
+
+  # #5636: two requests racing the same add (e.g. a field-slip scan and
+  # the observation form both filing a project join at once) can each
+  # pass a `member?` check before either has inserted -- the unique
+  # index plus insert_all's skip-on-conflict semantics keep the second
+  # a no-op instead of a duplicate row or a RecordNotUnique crash.
+  def test_add_user_tolerates_a_concurrent_duplicate_insert
+    group = UserGroup.create!(name: "add_user race test group")
+    user = users(:rolf)
+    row = { user_group_id: group.id, user_id: user.id }
+
+    assert_nothing_raised do
+      UserGroupUser.insert_all([row])
+      UserGroupUser.insert_all([row])
+    end
+    assert_equal(1, UserGroupUser.where(user_group: group, user:).count)
+  end
+
   # Regression guard for the #3589 thread-safety fix: even with a
   # per-request memo, concurrent calls on separate threads must never
   # cross-contaminate -- each thread's Thread.current is independent.

@@ -73,7 +73,7 @@ module InatImportJobTestDoubles
   def stub_inat_observation_request(id_above: 0, body_nil: false)
     query_args = {
       taxon_id: IMPORTABLE_TAXON_IDS_ARG,
-      id: @inat_import.inat_ids,
+      id: requested_id_chunk(id_above),
       id_above: id_above,
       per_page: InatImportJob::BATCH_SIZE,
       only_id: false,
@@ -105,6 +105,16 @@ module InatImportJobTestDoubles
       "Authorization" => "Bearer MockJWT",
       "Host" => "api.inaturalist.org" }).
       to_return(body: body)
+  end
+
+  # Mirrors PageParser#next_id_list_page: listed ids go to iNat sorted,
+  # the next BATCH_SIZE above the cursor.
+  def requested_id_chunk(id_above)
+    return nil if @inat_import.inat_ids.blank?
+
+    @inat_import.inat_ids.split(/[\s,]+/).grep(/\A\d+\z/).map(&:to_i).
+      uniq.sort.select { |id| id > id_above }.
+      first(InatImportJob::BATCH_SIZE).join(",")
   end
 
   def stub_inat_photo_requests

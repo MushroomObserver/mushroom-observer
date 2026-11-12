@@ -26,14 +26,13 @@ module Views::Controllers::FieldSlips
     def view_template
       add_page_title("#{:field_slip_new.t}: #{@field_slip.code}")
       add_context_nav(Tab::FieldSlip::Index.new)
-      container_class(:full)
+      container_class(@field_slip.code ? :full : :text)
 
       render(Form.new(
                @field_slip,
                species_list: @species_list,
                recent_observations: @recent_observations,
-               user: current_user,
-               turbo: true
+               user: current_user
              ))
 
       render_unresolved_projects_modal if @field_slip_project_gaps&.any?
@@ -51,8 +50,7 @@ module Views::Controllers::FieldSlips
           render(Views::Controllers::Occurrences::Projects::Form.new(
                    gaps: @field_slip_project_gaps,
                    primary: @field_slip_occurrence.primary_observation,
-                   occurrence: @field_slip_occurrence,
-                   turbo: true
+                   occurrence: @field_slip_occurrence
                  ))
         end
       end

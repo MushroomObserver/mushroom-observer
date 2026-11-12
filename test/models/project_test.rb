@@ -503,6 +503,17 @@ class ProjectTest < UnitTestCase
     assert_not_includes(proj.new_candidate_observations.reload, obs)
   end
 
+  # The candidate filter reads GPS even when hidden, as the violations
+  # check does, so hidden GPS inside the area makes a candidate.
+  def test_new_candidate_observations_with_hidden_gps
+    proj = projects(:rare_fungi_project)
+    proj.update!(location: locations(:burbank))
+    obs = observations(:agaricus_campestris_obs)
+    obs.update!(lat: 34.18, lng: -118.33, gps_hidden: true)
+
+    assert_includes(proj.new_candidate_observations, obs)
+  end
+
   def test_new_candidate_observations_excludes_in_project
     proj = projects(:rare_fungi_project)
     obs = observations(:agaricus_campestris_obs)
@@ -539,6 +550,28 @@ class ProjectTest < UnitTestCase
     assert_equal(0, count)
     assert_equal(obs_count_before, proj.observations.reload.size)
     assert_equal(img_count_before, proj.images.reload.size)
+  end
+
+  # Another writer's rows land after this one read the table: the read
+  # finds nothing, and the unique indexes keep the inserts from
+  # duplicating what the other writer wrote.
+  def test_add_observation_racing_another_writer_adds_one_row_each
+    proj = projects(:eol_project)
+    obs = observations(:detailed_unknown_obs)
+    img = obs.images.find { |i| i.user_id == obs.user_id }
+    assert(img, "fixture must have an owner-attributed image")
+    ProjectObservation.create!(project: proj, observation: obs)
+    ProjectImage.create!(project: proj, image: img)
+
+    proj.stub(:project_observations, ProjectObservation.none) do
+      proj.add_observation(obs)
+    end
+    proj.add_image(img)
+
+    assert_equal(1, ProjectObservation.where(project: proj,
+                                             observation: obs).count)
+    assert_equal(1, ProjectImage.where(project: proj, image: img).count)
+    assert_includes(proj.observations, obs)
   end
 
   def test_bulk_add_observations_unexcludes

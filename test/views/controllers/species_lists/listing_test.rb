@@ -27,7 +27,7 @@ module Views::Controllers::SpeciesLists
       assert_html(html, ".list_when")
     end
 
-    # No `remove` / `add` flag → no `.list_manage` slot at all.
+    # No `remove` / `add` flag → no `.list_manage` slot.
     def test_does_not_render_manage_section_by_default
       html = render_listing
 
@@ -35,32 +35,46 @@ module Views::Controllers::SpeciesLists
       assert_no_html(html, "form")
     end
 
-    # `remove: true` → put-button with `commit=remove`, modern Turbo
-    # confirm (data-turbo-confirm, not the legacy data-confirm).
+    # No `observation_count` passed (the observation-attach edit
+    # page's case) → no badge, not a "0" badge.
+    def test_does_not_render_count_badge_by_default
+      html = render_listing
+
+      assert_no_html(html, ".count-badge")
+    end
+
+    # `observation_count` passed (the index page's case) → badge shows
+    # that count, even when `remove`/`add` aren't set.
+    def test_renders_count_badge_when_observation_count_passed
+      html = render_listing(observation_count: 5)
+
+      assert_html(html, ".count-badge", text: "5")
+    end
+
+    # `remove: true` → delete-button, modern Turbo confirm
+    # (data-turbo-confirm, not the legacy data-confirm).
     def test_renders_remove_button_when_remove_true
       html = render_listing(observation: @observation, remove: true)
 
       assert_html(html, ".list_manage form")
       remove_path = routes.observation_species_list_path(
         id: @observation.id,
-        species_list_id: @species_list.id,
-        commit: "remove"
+        species_list_id: @species_list.id
       )
       assert_html(html, "form[action='#{remove_path}']")
-      assert_html(html, "input[name='_method'][value='put']")
+      assert_html(html, "input[name='_method'][value='delete']")
       assert_html(html, "[data-turbo-confirm]")
       assert_html(html, "form button", text: :remove.ti)
     end
 
-    # `add: true` → put-button with `commit=add`; no confirm.
+    # `add: true` → put-button; no confirm.
     def test_renders_add_button_when_add_true
       html = render_listing(observation: @observation, add: true)
 
       assert_html(html, ".list_manage form")
       add_path = routes.observation_species_list_path(
         id: @observation.id,
-        species_list_id: @species_list.id,
-        commit: "add"
+        species_list_id: @species_list.id
       )
       assert_html(html, "form[action='#{add_path}']")
       assert_html(html, "input[name='_method'][value='put']")
@@ -93,15 +107,9 @@ module Views::Controllers::SpeciesLists
 
     private
 
-    def render_listing(species_list: @species_list,
-                       observation: nil, remove: false, add: false,
-                       project: nil)
+    def render_listing(species_list: @species_list, **)
       render(Views::Controllers::SpeciesLists::Listing.new(
-               species_list: species_list,
-               observation: observation,
-               remove: remove,
-               add: add,
-               project: project
+               species_list: species_list, **
              ))
     end
   end

@@ -54,10 +54,11 @@ module Views::Controllers::Account
     end
 
     def render_email_fields
-      text_field(:email, label: :signup_email_address)
+      text_field(:email, label: :signup_email_address, type: "email")
       text_field(
         :email_confirmation,
-        label: :signup_email_confirmation
+        label: :signup_email_confirmation,
+        type: "email"
       ) do |f|
         f.with_append { render_email_help }
       end

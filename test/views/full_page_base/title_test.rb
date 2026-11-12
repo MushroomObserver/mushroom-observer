@@ -45,6 +45,21 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     assert_equal("Russula", result)
   end
 
+  def test_title_tag_contents_strips_html_comments
+    # A captured Phlex component's rendered output can carry a
+    # dev-mode "Before ClassName" comment (Components::Base
+    # #before_template) -- HTML_TAG_PATTERN doesn't match `<!--`
+    # (no letter follows it), so this needs a separate strip.
+    result = @page.send(
+      :title_tag_contents,
+      "<!-- Before Components::Link::Object -->Russula",
+      action: "show"
+    )
+
+    assert_no_match(/[<>]/, result)
+    assert_equal("Russula", result)
+  end
+
   def test_title_tag_contents_strips_entity_encoded_html_tags
     # Regression — `unescape_html` runs BEFORE `strip_html` so
     # entity-encoded tags (`&lt;i&gt;…&lt;/i&gt;` from translation

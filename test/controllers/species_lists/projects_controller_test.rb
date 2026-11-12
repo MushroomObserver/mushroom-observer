@@ -50,9 +50,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "1",
-            objects_img: "0",
+            objects: %w[list obs],
             project_ids: [proj.id.to_s]
           },
           commit: :remove.ti
@@ -72,9 +70,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj.id.to_s]
           },
           commit: :attach.ti
@@ -93,9 +89,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj.id.to_s]
           },
           commit: :attach.ti
@@ -134,9 +128,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: []
           },
           commit: "bogus"
@@ -152,9 +144,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: []
           },
           commit: :attach.ti
@@ -169,9 +159,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj2.id.to_s]
           },
           commit: :attach.ti
@@ -185,9 +173,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj1.id.to_s]
           },
           commit: :attach.ti
@@ -201,9 +187,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj1.id.to_s]
           },
           commit: :attach.ti
@@ -217,9 +201,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: []
           },
           commit: :remove.ti
@@ -233,9 +215,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj2.id.to_s]
           },
           commit: :remove.ti
@@ -249,9 +229,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj2.id.to_s]
           },
           commit: :remove.ti
@@ -265,9 +243,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "1",
-            objects_obs: "0",
-            objects_img: "0",
+            objects: ["list"],
             project_ids: [proj1.id.to_s]
           },
           commit: :remove.ti
@@ -290,9 +266,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: []
           },
           commit: :attach.ti
@@ -305,9 +279,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: []
           },
           commit: :remove.ti
@@ -320,9 +292,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: [proj2.id.to_s]
           },
           commit: :attach.ti
@@ -336,9 +306,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: [proj2.id.to_s]
           },
           commit: :attach.ti
@@ -352,9 +320,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: [proj1.id.to_s]
           },
           commit: :attach.ti
@@ -370,9 +336,7 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: [proj2.id.to_s]
           },
           commit: :remove.ti
@@ -389,15 +353,48 @@ module SpeciesLists
         params: {
           id: list.id,
           species_list_projects: {
-            objects_list: "0",
-            objects_obs: "1",
-            objects_img: "1",
+            objects: %w[obs img],
             project_ids: [proj2.id.to_s]
           },
           commit: :remove.ti
         }
       )
       assert_flash_warning # already done
+    end
+
+    # `remove_images_from_project`'s acting user owns the species list
+    # but isn't a member of the target project -- `projects_to_manage`
+    # only includes a non-member project via the list's current
+    # project_ids, so the list must already belong to it.
+    def test_remove_images_only_removes_acting_users_own
+      obs = observations(:minimal_unknown_obs)
+      list = SpeciesList.create!(user: dick, title: "Image Removal Test List",
+                                 "when" => Time.zone.now,
+                                 where: locations(:burbank).name)
+      list.observations << obs
+      proj = Project.create!(user: mary, title: "Image Removal Test Project")
+      mary_image = Image.create!(user: mary, observations: [obs])
+      dick_image = Image.create!(user: dick, observations: [obs])
+      proj.add_images([mary_image, dick_image])
+      proj.add_species_list(list)
+
+      login("dick")
+      put(
+        :update,
+        params: {
+          id: list.id,
+          species_list_projects: {
+            objects: ["img"],
+            project_ids: [proj.id.to_s]
+          },
+          commit: :remove.ti
+        }
+      )
+
+      assert_flash_success
+      proj.reload
+      assert_includes(proj.images, mary_image)
+      assert_not_includes(proj.images, dick_image)
     end
   end
 end

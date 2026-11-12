@@ -13,6 +13,7 @@
 #  rank(ranks)
 #  with_rank(rank)
 #  with_rank_below(rank)
+#  with_rank_above(rank)
 #  with_rank_and_name_in_classification(rank, text_name)
 #  with_rank_at_or_below_genus
 #  with_rank_above_genus
@@ -164,6 +165,13 @@ module Name::Scopes
     scope :with_rank_below, lambda { |rank|
       where(Name[:rank] < ranks[rank]) if rank
     }
+    # Group is used for both species-groups and clades (#below_genus?),
+    # so it's excluded regardless of the rank threshold.
+    scope :with_rank_above, lambda { |rank|
+      next unless rank
+
+      where(Name[:rank] > ranks[rank]).where(Name[:rank].not_eq(ranks[:Group]))
+    }
     scope :with_rank_and_name_in_classification, lambda { |rank, text_name|
       where(Name[:classification].matches("%#{rank}: _#{text_name}_%"))
     }
@@ -171,8 +179,7 @@ module Name::Scopes
       where((Name[:rank] <= ranks[:Genus]).or(Name[:rank].eq(ranks[:Group])))
     }
     scope :with_rank_above_genus, lambda {
-      where(Name[:rank] > ranks[:Genus]).
-        where(Name[:rank].not_eq(ranks[:Group]))
+      with_rank_above(:Genus)
     }
     scope :subtaxa_of_genus_or_below, lambda { |text_name|
       # Note the space " " difference from :text_name_has scope

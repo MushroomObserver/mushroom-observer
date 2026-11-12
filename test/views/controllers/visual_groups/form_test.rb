@@ -13,7 +13,8 @@ module Views::Controllers::VisualGroups
 
     def test_renders_form_with_name_field
       assert_html(@html, "input[name='visual_group[name]'][size='40']")
-      assert_html(@html, "span", text: :visual_group.ti)
+      assert_html(@html, "label[for='visual_group_name']",
+                  text: :visual_group.ti)
     end
 
     def test_renders_form_with_description_field

@@ -43,12 +43,12 @@ thead tr {
 // width, instead of the two splitting it evenly. The toggle button's
 // label varies in width ("Mute notifications" vs "Resume
 // notifications"), which stretches the shrink-to-fit column to the
-// widest row -- right-align keeps the Delete button flush against
-// the row's trailing edge on every row instead of drifting with it.
+// widest row. Right-align (keeping the Delete button flush against
+// the row's trailing edge) is set via Components::Table's align:
+// on the actions column, not here.
 .table-interests > tbody > tr > td:last-child {
   width: 1%;
   white-space: nowrap;
-  text-align: right;
 }
 
 .table-naming-votes {
@@ -101,34 +101,8 @@ thead tr {
 }
 
 .table-donors {
-  text-align: center;
-
   td {
     padding: 0.1em 1em;
-  }
-}
-
-.table-herbarium {
-  table-layout: fixed;
-
-  th:nth-child(1),
-  td:nth-child(1),
-  th:nth-child(2),
-  td:nth-child(2) {
-    width: 7.5rem;
-    text-align: center;
-  }
-
-  th:nth-child(1),
-  td:nth-child(1) {
-    text-align: center;
-  }
-
-  td:nth-child(3),
-  td:nth-child(4) {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
@@ -171,14 +145,11 @@ thead tr {
     word-break: break-all;
   }
 
+  // Centering for these columns (peer/MO-mentioned/admin) is set via
+  // Components::Table's align: on the column, not here.
   td:nth-child(3),
   td:nth-child(4) {
-    text-align: center;
     font-weight: bold;
-  }
-
-  td:last-child {
-    text-align: center;
   }
 }
 

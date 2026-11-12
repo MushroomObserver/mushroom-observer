@@ -138,11 +138,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".remove_collection_number_link_#{c_n.id}").click
     end
     # confirm modal appears
-    assert_selector("#mo_confirm", visible: true)
+    assert_selector("#mo_confirm", visible: :visible)
     within("#mo_confirm") do
       click_button(class: "btn-danger")
     end
-    assert_no_selector("#mo_confirm", visible: true)
+    assert_no_selector("#mo_confirm", visible: :visible)
     assert_no_link(text: /#{updated_number}/)
   end
 
@@ -196,11 +196,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       click_button(:remove.ti)
     end
     # confirm modal appears
-    assert_selector("#mo_confirm", visible: true)
+    assert_selector("#mo_confirm", visible: :visible)
     within("#mo_confirm") do
       click_button(class: "btn-danger")
     end
-    assert_no_selector("#mo_confirm", visible: true)
+    assert_no_selector("#mo_confirm", visible: :visible)
 
     # Record should be removed from the list
     within("#observation_herbarium_records") do
@@ -276,11 +276,11 @@ class ObservationShowSystemTest < ApplicationSystemTestCase
       find(:css, ".destroy_sequence_link_#{seq.id}").click
     end
     # confirm modal appears
-    assert_selector("#mo_confirm", visible: true)
+    assert_selector("#mo_confirm", visible: :visible)
     within("#mo_confirm") do
       click_button(class: "btn-danger")
     end
-    assert_no_selector("#mo_confirm", visible: true)
+    assert_no_selector("#mo_confirm", visible: :visible)
 
     # Wait for the flash triggered by the delete action
     # so the link check doesn't race a still-in-flight page

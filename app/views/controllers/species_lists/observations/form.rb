@@ -31,13 +31,23 @@ module Views::Controllers::SpeciesLists::Observations
           label: :species_list_add_remove_label
         )
         div(class: "form-group center-block") do
-          submit(:add.ti)
-          submit(:remove.ti)
+          submit(:add.ti, class: "mr-3", data: confirm_data)
+          submit(:remove.ti, data: confirm_data)
         end
       end
     end
 
     private
+
+    # Above the threshold, Turbo's confirm dialog (confirm-modal
+    # controller) gates the submit until the user confirms. The
+    # modal's title is "Are you sure?" by default, so the body only
+    # needs the large-query warning.
+    def confirm_data
+      return {} unless @num_results > MO.max_species_list_bulk_edit
+
+      { turbo_confirm: :species_list_add_remove_large_query.t }
+    end
 
     def form_action
       url_for(controller: "/species_lists/observations",

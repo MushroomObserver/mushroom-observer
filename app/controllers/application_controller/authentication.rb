@@ -97,10 +97,14 @@ module ApplicationController::Authentication
     user&.verified && !user.blocked?
   end
 
+  # A blank stored `auth_code` must match nothing: a cookie carrying
+  # only an id splits to a nil secret, which would otherwise compare
+  # equal to a null code and authenticate without one.
   def validate_user_in_autologin_cookie
     return unless (cookie = cookies["mo_user"]) &&
                   (split = cookie.split) &&
                   (user = User.where(id: split[0]).first) &&
+                  user.auth_code.present? &&
                   (split[1] == user.auth_code)
 
     user
@@ -271,16 +275,38 @@ module ApplicationController::Authentication
     cookies.delete("mo_user")
   end
 
-  # Store User in session (id only).
+  # A logged-in user whose auth_code has just changed still holds the
+  # previous one in their session and autologin cookie. Re-issue both,
+  # so changing a password keeps them logged in to the browser they
+  # changed it in while logging out every other one.
+  def refresh_login_credentials(user)
+    session_user_set(user)
+    autologin_cookie_set(user) if cookies["mo_user"].present?
+  end
+
+  # Store User in session (id, plus the credential binding the session
+  # to them).
   def session_user_set(user)
     session[:user_id] = user&.id
+    session[:auth] = user&.auth_code
     user
   end
 
   # Retrieve the User from session.  Returns freshly loaded User object or nil.
   # (Does not check verified status or anything.)
   def session_user
-    User.safe_find(session[:user_id])
+    user = User.safe_find(session[:user_id])
+    return unless user && session_auth_valid?(user)
+
+    user
+  end
+
+  # The session carries the user's `auth_code`, so rotating that code
+  # invalidates every open session for them, not just the autologin
+  # cookie. A session holding no code predates this binding and is
+  # treated as invalid.
+  def session_auth_valid?(user)
+    session[:auth].present? && session[:auth] == user.auth_code
   end
 
   # For actions that skip the standard `autologin` filter (via

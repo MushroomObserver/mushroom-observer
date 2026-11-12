@@ -36,6 +36,7 @@ const DEFAULT_OPTS = {
   PAGE_SIZE: 10,
   MAX_STRING_LENGTH: 50,
   SEPARATOR: null,
+  MIN_RANK: null,
   SHOW_ERRORS: false,
   ACT_LIKE_SELECT: false,
   WRAP_CLASS: 'dropdown',
@@ -163,6 +164,11 @@ export default class BaseAutocompleterController extends Controller {
 
     // Assign the separator for multiple-record autocompleters
     this.SEPARATOR = this.element.dataset.separator;
+
+    // Static extra param (e.g. the clade autocompleter's rank floor,
+    // scoping suggestions to the subject record's own rank rather than
+    // the type's default) sent with every fetch request, if present.
+    this.MIN_RANK = this.element.dataset.minRank;
 
     // Shared MO utilities
     this.EVENT_KEYS = EVENT_KEYS;
@@ -935,7 +941,7 @@ export default class BaseAutocompleterController extends Controller {
       this.wrapTarget.classList.add('has-id');
       this.wrapTarget.classList.remove('offer-create');
       if (this.hasHasIdIndicatorTarget) {
-        this.hasIdIndicatorTarget.classList.remove("d-none");
+        this.hasIdIndicatorTarget.classList.remove("invisible");
       }
       if (this.hasKeepOrEditBtnTarget) {
         this.keepOrEditBtnTarget.classList.remove("d-none");
@@ -951,7 +957,7 @@ export default class BaseAutocompleterController extends Controller {
         this.wrapTarget.classList.add('offer-create');
       }
       if (this.hasHasIdIndicatorTarget) {
-        this.hasIdIndicatorTarget.classList.add("d-none");
+        this.hasIdIndicatorTarget.classList.add("invisible");
       }
       if (this.hasKeepOrEditBtnTarget) {
         this.keepOrEditBtnTarget.classList.add("d-none");
@@ -1338,6 +1344,7 @@ export default class BaseAutocompleterController extends Controller {
 
     if (this.ACT_LIKE_SELECT) { query_params["all"] = true; }
     if (this.WHOLE_WORDS_ONLY) { query_params["whole"] = true; }
+    if (this.MIN_RANK) { query_params["min_rank"] = this.MIN_RANK; }
 
     const { string, ...new_params } = query_params;
     if (this.last_fetch_params && this.ACT_LIKE_SELECT &&

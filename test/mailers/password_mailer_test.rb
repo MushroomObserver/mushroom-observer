@@ -14,6 +14,13 @@ class PasswordMailerTest < MailerTestCase
     assert_includes(mail.body.to_s, "A password")
   end
 
+  # ActiveJob logs its arguments, and this mailer is handed a cleartext
+  # password, so the delivery job has to be the quiet one.
+  def test_delivery_job_keeps_arguments_out_of_the_log
+    assert_equal(QuietMailDeliveryJob, PasswordMailer.delivery_job)
+    assert_not(QuietMailDeliveryJob.log_arguments)
+  end
+
   def test_build_text
     rolf.update!(email_html: false)
 

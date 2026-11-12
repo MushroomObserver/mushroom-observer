@@ -466,10 +466,9 @@ class Name < AbstractModel
     (description.gen_desc.presence || description.diag_desc) if description # rubocop:disable Style/RedundantParentheses
   end
 
-  # Used by show_name.
+  # Used by the Names index's per-row count badge.
   def self.count_observations(names)
-    Hash[*Observation.group(:name_id).where(name: names).
-         pluck(:name_id, Arel.star.count).to_a.flatten]
+    ObservationCounter.counts_for(names)
   end
 
   # Resolves a name string or id to the ids of its parent taxa.

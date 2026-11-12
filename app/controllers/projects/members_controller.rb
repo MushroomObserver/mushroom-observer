@@ -9,22 +9,19 @@
 module Projects
   # CRUD for project members
   class MembersController < ApplicationController
-    before_action :login_required
+    include Projects::TabCountsRefreshable
+    include Projects::AddableObservations
+    include Projects::MembershipStatusUpdates
 
-    # Members lives under the project Admin tab now (issue #4148).
-    def active_project_tab
-      "admin"
-    end
-    helper_method :active_project_tab
+    before_action :login_required
 
     def index
       return unless find_project!
 
-      users = @project.user_group.users.includes(:image).to_a
-      project_member = ProjectMember.new(project: @project)
+      results = members_index_results
       render(Views::Controllers::Projects::Members::Index.new(
-               project: @project, users: users,
-               project_member: project_member, user: @user
+               project: @project, users: results[:users],
+               pagination: results[:pagination], user: @user
              ))
     end
 
@@ -34,7 +31,7 @@ module Projects
     #   params[:project_id] (was :id)
     #   params[:candidate]  (when click on user)
     # Outputs:
-    #   @project, @users, @project_member
+    #   @project, @users
     # "Posts" to the same action.  Stays on this view until done.
     def new
       return unless find_project!
@@ -44,25 +41,29 @@ module Projects
 
       users =
         User.where.not(verified: nil).order(last_login: :desc).limit(100).to_a
-      project_member = ProjectMember.new(project: @project)
       render(Views::Controllers::Projects::Members::New.new(
-               project: @project, users: users,
-               project_member: project_member, user: @user
+               project: @project, users: users, user: @user
              ))
     end
 
     def create
       return unless find_project!
 
-      candidate = params[:candidate] ||
-                  params.dig(:project_member, :candidate)
-      unless @project.is_admin?(@user) ||
-             (@project.open_membership && @user.id.to_s == candidate)
+      candidates = resolved_candidates
+      unless @project.is_admin?(@user) || self_only_open_join?(candidates)
         return must_be_project_admin!(@project.id)
       end
-      return unless candidate
 
-      add_member(candidate, @project)
+      if candidates.any?
+        candidates.each { |user| set_status(@project, :member, user, :add) }
+      else
+        flash_error(:project_members_not_found.t)
+      end
+
+      respond_to do |format|
+        format.turbo_stream { render_create_response }
+        format.html { return_to_caller(@project, params[:target]) }
+      end
     end
 
     # Form to make a given User either a member or an admin.
@@ -93,10 +94,6 @@ module Projects
 
       update_membership(@project, @project_member.user)
     end
-
-    # Per-click cap on "Add My Observations". Method (not constant) so
-    # tests can stub it via Minitest stub. See issue #4129.
-    def self.add_obs_batch_limit = 100
 
     # Turbo-stream modal showing how many of the candidate's observations
     # match current project constraints and aren't already in the project.
@@ -165,6 +162,16 @@ module Projects
       @project = find_or_goto_index(Project, params[:project_id].to_s)
     end
 
+    def members_index_results
+      scope = Query.lookup(:User, member_of_project: @project.id,
+                                  order_by: :login).scope.includes(:image)
+      pagination = number_pagination_data
+      pagination.num_total = scope.count
+      users = scope.offset(pagination.from).limit(pagination.num_per_page).
+              to_a
+      { users: users, pagination: pagination }
+    end
+
     def find_project_member!
       user = find_or_goto_index(User, params[:candidate])
       return unless user
@@ -173,15 +180,55 @@ module Projects
                         ProjectMember.new(project: @project, user: user)
     end
 
-    # Redirects back to show_project.
-    def add_member(str, project)
-      if (user = find_member(str))
-        set_status(project, :member, user, :add)
-        @candidate = nil
+    # A single flat `candidate` param (Members::New's per-row Add
+    # button, or a bookmarked link) resolves to at most one user; the
+    # inline AddForm widget on the members index submits a
+    # namespaced, newline/comma-separated list that can resolve to
+    # several -- same shape as the project's other add-target widgets
+    # (TargetNames/TargetLocations).
+    def resolved_candidates
+      return [find_member(params[:candidate])].compact if params[:candidate]
+
+      raw = params.dig(:project_members_add, :candidates).to_s
+      raw.split(/[,\n]/).filter_map { |entry| find_member(entry.strip) }
+    end
+
+    def self_only_open_join?(candidates)
+      @project.open_membership && candidates == [@user]
+    end
+
+    # The batch-add widget is the only turbo_stream caller whose page
+    # carries the #project_members_widget/#project_members_table
+    # targets this replaces -- the per-row Add button on the "new"
+    # page and the Join button on the project summary page also post
+    # here, turbo-enabled, from pages that don't have those ids, so
+    # they fall back to the redirect instead.
+    def render_create_response
+      if params[:project_members_add]
+        render_members_update
       else
-        flash_error(:add_members_not_found.t(user: str))
+        return_to_caller(@project, params[:target])
       end
-      return_to_caller(project, params[:target])
+    end
+
+    def render_members_update
+      users = members_index_results[:users]
+      render(turbo_stream: [
+               turbo_stream.replace(
+                 "project_members_widget",
+                 Views::Controllers::Projects::Members::AddForm.new(
+                   project: @project
+                 )
+               ),
+               turbo_stream.replace(
+                 "project_members_table",
+                 Views::Controllers::Projects::Members::Tables.new(
+                   project: @project, users: users, user: @user
+                 )
+               ),
+               turbo_stream_admin_subtabs("members"),
+               turbo_stream_flash_update
+             ])
     end
 
     def return_to_caller(project, target)
@@ -198,141 +245,9 @@ module Projects
       User.lookup_unique_text_name(str)
     end
 
-    def update_membership(project, candidate)
-      unless update_trust_status(project, candidate)
-        unless update_admin_status(project, candidate)
-          return must_be_project_admin!(project.id)
-        end
-
-        update_member_status(project, candidate)
-      end
-      return_to_caller(project, params[:target])
-    end
-
-    def update_trust_status(project, candidate)
-      if params[:commit] == :change_member_status_revoke_trust.l
-        flash_notice(:change_member_status_revoke_trust_flash.l)
-        set_trust(project, candidate, "no_trust")
-        true
-      elsif params[:commit] == :change_member_hidden_gps_trust.l
-        flash_notice(:change_member_hidden_gps_trust_flash.l)
-        set_trust(project, candidate, "hidden_gps")
-        true
-      elsif params[:commit] == :change_member_editing_trust.l
-        flash_notice(:change_member_editing_trust_flash.l)
-        set_trust(project, candidate, "editing")
-        true
-      elsif params[:commit] == :change_member_add_obs.l
-        count = add_observations(project, candidate)
-        flash_notice(:change_member_add_obs_flash.t(count: count))
-        true
-      else
-        false
-      end
-    end
-
-    def add_observations(project, candidate)
-      # Returns the count of observations added. Caps each click at
-      # add_obs_batch_limit most-recent matching observations so the
-      # request stays synchronous.
-      obs = addable_observations(project, candidate).
-            order(id: :desc).limit(self.class.add_obs_batch_limit)
-      before = project.observations.count
-      project.add_observations(obs)
-      project.observations.count - before
-    end
-
-    # Observations owned by candidate that match project constraints and
-    # are not already in project.observations. Date bounds are applied
-    # independently so projects with only a start_date or only an
-    # end_date still constrain correctly.
-    def addable_observations(project, candidate)
-      obs = candidate.observations
-      loc = project.location
-      if loc
-        obs = obs.in_box(north: loc.north, south: loc.south,
-                         east: loc.east, west: loc.west)
-      end
-      if project.start_date
-        obs = obs.found_after(project.start_date.strftime("%Y-%m-%d"))
-      end
-      if project.end_date
-        obs = obs.found_before(project.end_date.strftime("%Y-%m-%d"))
-      end
-      obs.where.not(id: project.observations.select(:id))
-    end
-
-    def set_trust(project, user, trust_level)
-      member = project.project_members.find_by(user:)
-      member.update(trust_level:)
-    end
-
-    def update_admin_status(project, candidate)
-      make_admin = (params[:commit] == :change_member_status_make_admin.l)
-      if project.is_admin?(@user)
-        set_status(project, :admin, candidate, make_admin)
-      elsif make_admin
-        return false
-      end
-      true
-    end
-
-    def update_member_status(project, candidate)
-      make_member = [
-        :change_member_status_make_admin.l,
-        :change_member_status_make_member.l
-      ].member?(params[:commit])
-      set_status(project, :member, candidate, make_member)
-    end
-
     def must_be_project_admin!(id)
       flash_error(:change_member_status_denied.t)
       redirect_to(project_members_path(id, q: q_param))
-    end
-
-    # Add/remove a given User to/from a given UserGroup.
-    # Changes should get logged
-    def set_status(project, type, user, add)
-      update_project_membership(project, type, user, add)
-      group = project.send(type == :member ? :user_group : :admin_group)
-      if add
-        set_status_add(project, type, user, group)
-      else
-        set_status_remove(project, type, user, group)
-      end
-    end
-
-    def update_project_membership(project, type, user, add)
-      project_member = ProjectMember.find_by(project:, user:)
-      unless project_member
-        project_member = ProjectMember.create(project:, user:,
-                                              trust_level: "editing")
-        flash_notice(:add_members_with_editing.l)
-      end
-      return unless project_member
-      return if type == :admin || add
-
-      project_member.destroy
-    end
-
-    def set_status_add(project, type, user, group)
-      if group.users.include?(user)
-        flash_notice(:"add_members_already_added_#{type}".t(user: user.login))
-      else
-        group.users << user unless group.users.member?(user)
-        project.send(:"log_add_#{type}", user)
-        flash_notice(:"add_members_added_#{type}".t(user: user.login))
-      end
-    end
-
-    def set_status_remove(project, type, user, group)
-      if group.users.include?(user)
-        group.users.delete(user)
-        project.send(:"log_remove_#{type}", user)
-        flash_notice(:"add_members_removed_#{type}".t(user: user.login))
-      else
-        flash_notice(:"add_members_already_removed_#{type}".t(user: user.login))
-      end
     end
   end
 end

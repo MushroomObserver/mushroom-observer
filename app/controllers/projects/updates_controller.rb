@@ -10,6 +10,11 @@ module Projects
 
     def index
       results = build_index_results
+      # Stores the query so clicking into an observation from here
+      # carries q: and its prev/next pager stays in this project's
+      # list, instead of falling back to whatever query was in the
+      # session before.
+      update_stored_query(updates_query)
       render(Views::Controllers::Projects::Updates::Index.new(
                project: @project, user: @user, results: results,
                show_excluded: show_excluded?
@@ -17,11 +22,13 @@ module Projects
     end
 
     # Single observation add via Turbo. If excluded, un-excludes as a side
-    # effect inside Project#add_observation.
+    # effect inside Project#add_observation. The list shows one member
+    # per occurrence, so the occurrence's other candidates come too.
     def add_observation
       obs = Observation.safe_find(params[:id])
       if obs
         @project.add_observation(obs)
+        add_candidate_members(obs)
         render_footer_update(obs)
       else
         head(:not_found)
@@ -39,9 +46,11 @@ module Projects
       end
     end
 
-    # Bulk add all observations on the current filtered list.
+    # Bulk add all observations on the current filtered list, including
+    # occurrence members the list hides behind their primary.
     def add_all
-      count = bulk_add_candidates(current_scope)
+      count = bulk_add_candidates(Observation.public_send(query_attr,
+                                                          @project))
       flash_notice(:project_updates_added_all.t(count: count))
       redirect_to(project_updates_path(project_id: @project.id,
                                        **filter_query_params))
@@ -63,11 +72,15 @@ module Projects
 
     # The observation list the Updates tab is currently showing.
     def current_scope
-      if show_excluded?
-        @project.excluded_observations.order(created_at: :desc)
-      else
-        @project.new_candidate_observations
-      end
+      updates_query.scope
+    end
+
+    def updates_query
+      @updates_query ||= create_query(:Observation, query_attr => @project.id)
+    end
+
+    def query_attr
+      show_excluded? ? :project_excluded : :project_new_candidates
     end
 
     def build_index_results
@@ -76,8 +89,7 @@ module Projects
       obs_page = paginated_observations(scope, pagination)
       { observations: obs_page,
         pagination: pagination,
-        current_count: pagination.num_total,
-        request_url: request.fullpath }
+        current_count: pagination.num_total }
     end
 
     def build_pagination(scope)
@@ -137,6 +149,13 @@ module Projects
 
     def bulk_add_candidates(scope)
       @project.bulk_add_observations(scope.pluck(:id))
+    end
+
+    def add_candidate_members(obs)
+      return unless obs.occurrence_id
+
+      bulk_add_candidates(Observation.project_new_candidates(@project).
+                          where(occurrence_id: obs.occurrence_id))
     end
   end
 end

@@ -29,7 +29,7 @@ class OccurrenceFormSystemTest < ApplicationSystemTestCase
     assert(checkboxes.any?, "Expected recent observation checkboxes")
     checkboxes.first.check
 
-    click_button(:create_occurrence_submit.l)
+    click_button(:create_object.t(type: :occurrence))
 
     # After successful creation, should redirect away from form
     assert_no_selector("#occurrence_form", wait: 5)

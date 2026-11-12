@@ -10,13 +10,14 @@ module Views::Controllers::Projects
     prop :query, ::Query::Projects
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Project)
+    prop :observation_counts, _Hash(Integer, Integer), default: -> { {} }
 
     def view_template
       add_index_title(@query)
       add_context_nav(Tab::Project::IndexNav.new)
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-      container_class(:text_image)
+      container_class(:wide)
 
       PaginatedResults { render_list_group }
     end
@@ -26,8 +27,11 @@ module Views::Controllers::Projects
     def render_list_group
       ListGroup do |list|
         @objects.each do |project|
-          list.item(class: "d-flex align-items-start") do
-            render(ListItem.new(project: project))
+          list.item(
+            class: "d-flex justify-content-between align-items-start"
+          ) do
+            count = @observation_counts[project.id].to_i
+            render(ListItem.new(project: project, observation_count: count))
           end
         end
       end

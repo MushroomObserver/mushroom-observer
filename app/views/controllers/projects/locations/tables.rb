@@ -87,14 +87,16 @@ module Views::Controllers::Projects::Locations
     def render_target_row(target, collapse_id, count, subs)
       tr do
         render_target_name_cell(target, collapse_id, subs)
-        td(class: "align-middle") { plain(count.to_s) }
+        td(class: Components::Table.valign_class(:middle)) do
+          plain(count.to_s)
+        end
         render_aliases_cell(target)
         render_target_column(target) if admin?
       end
     end
 
     def render_target_name_cell(target, collapse_id, subs)
-      td(class: "align-middle") do
+      td(class: Components::Table.valign_class(:middle)) do
         render_chevron(collapse_id) if subs.any?
         whitespace if subs.any?
         Link(
@@ -144,7 +146,7 @@ module Views::Controllers::Projects::Locations
         t.column(:project_aliases.ti)
         if admin?
           t.column(:project_target_locations_title.l,
-                   class: "text-center")
+                   align: :center)
         end
         yield(t)
       end
@@ -156,7 +158,9 @@ module Views::Controllers::Projects::Locations
       count = @obs_counts[loc.id] || 0
       tr do
         render_location_name_cell(loc, indent: indent)
-        td(class: "align-middle") { plain(count.to_s) }
+        td(class: Components::Table.valign_class(:middle)) do
+          plain(count.to_s)
+        end
         render_aliases_cell(loc)
         td { nil } if admin?
       end
@@ -164,7 +168,7 @@ module Views::Controllers::Projects::Locations
 
     def render_location_name_cell(loc, indent: false)
       style = indent ? "padding-left: 2em" : nil
-      td(class: "align-middle", style: style) do
+      td(class: Components::Table.valign_class(:middle), style: style) do
         Link(
           type: :get, name: loc.display_name,
           target: checklist_path(project_id: @project.id,
@@ -174,7 +178,7 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_aliases_cell(loc)
-      td(class: "align-middle") do
+      td(class: Components::Table.valign_class(:middle)) do
         render(Views::Controllers::Projects::Aliases::Widget.new(
                  project: @project, target: loc
                ))
@@ -182,7 +186,8 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_target_column(loc)
-      td(class: "align-middle text-center") do
+      td(class: class_names(Components::Table.valign_class(:middle),
+                            Components::Table.align_class(:center))) do
         render_remove_button(loc) if target?(loc)
       end
     end
@@ -201,7 +206,7 @@ module Views::Controllers::Projects::Locations
         confirm: :project_target_location_confirm_remove.t(
           name: loc.display_name
         ),
-        icon: :x,
+        icon: :remove,
         variant: :link,
         class: "p-0"
       )

@@ -28,7 +28,7 @@ class Views::Controllers::Account::Preferences::FormTest <
     html = render_form
 
     assert_html(html, "input[type='text'][name='user[login]'][value='rolf']")
-    assert_html(html, "input[type='text'][name='user[email]']")
+    assert_html(html, "input[type='email'][name='user[email]']")
     # Password fields default to empty value so the existing hash never
     # round-trips through the browser.
     assert_html(html, "input[type='password'][name='user[password]'][value='']")

@@ -138,6 +138,23 @@ class ExternalSiteTest < UnitTestCase
     assert_equal(external_sites(:inaturalist), ExternalSite.inaturalist)
   end
 
+  def test_default_new_link_site_prefers_inaturalist
+    sites = [external_sites(:mycoportal), external_sites(:inaturalist)]
+    assert_equal(external_sites(:inaturalist),
+                 ExternalSite.default_new_link_site(sites))
+  end
+
+  def test_default_new_link_site_falls_back_to_first
+    sites = [external_sites(:mycoportal)]
+    assert_equal(external_sites(:mycoportal),
+                 ExternalSite.default_new_link_site(sites))
+  end
+
+  def test_default_new_link_site_handles_nil_and_empty
+    assert_nil(ExternalSite.default_new_link_site(nil))
+    assert_nil(ExternalSite.default_new_link_site([]))
+  end
+
   def test_member_with_nil_project
     # production's iNaturalist site has no project; member? must return
     # false rather than raise NoMethodError on project.user_group

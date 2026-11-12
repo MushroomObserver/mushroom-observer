@@ -22,6 +22,7 @@ module Views::Layouts
   class Header::EditDeleteIcons < Views::Base
     prop :object, ::AbstractModel
     prop :user, _Nilable(::User), default: nil
+    prop :show_delete, _Boolean, default: true
 
     def view_template
       div(class: "h4 my-0 d-flex align-items-center object_edit") do
@@ -39,8 +40,10 @@ module Views::Layouts
     def reflection_item
       return nil unless reflection?
 
+      # :reflection's cloud glyph, not :read_only's lock -- the lock
+      # read as "can't be edited" to users; see #5655.
       ::Components::Icon.new(
-        type: :read_only,
+        type: :reflection,
         title: :show_observation_reflection_read_only.l,
         wrap_class: ::Components::InlineLinkBlock.item_class,
         center_tooltip: true
@@ -61,7 +64,7 @@ module Views::Layouts
     end
 
     def delete_item
-      return nil unless can_destroy_object?
+      return nil unless @show_delete && can_destroy_object?
 
       ::Components::Button::Delete.new(
         target: @object, variant: :strip,

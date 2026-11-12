@@ -8,13 +8,20 @@ module Views::Controllers::InatImports
     # Ids of imports that have linked observations; only these get a
     # Results link (historic imports predate the link — see the controller).
     prop :result_import_ids, _Array(::Integer), default: -> { [] }
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
 
     def view_template
       container_class(:wide)
       add_page_title(:inat_imports_index_title.l)
       add_context_nav(Tab::InatImport::Actions.new(include_index: false))
-      Table(@imports, class: "table-striped") do |t|
-        render_columns(t)
+      add_sorter(@query, controller.index_sort_options(admin: @admin))
+      add_pagination(@pagination_data)
+
+      PaginatedResults do
+        Table(@imports, variant: :striped) do |t|
+          render_columns(t)
+        end
       end
     end
 

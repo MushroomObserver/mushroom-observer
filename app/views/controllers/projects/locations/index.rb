@@ -22,6 +22,7 @@ module Views::Controllers::Projects::Locations
 
     def view_template
       container_class(:wide)
+      content_padding(:no_panels)
       add_project_banner(@project)
 
       render_target_location_form if @project.is_admin?(@user)

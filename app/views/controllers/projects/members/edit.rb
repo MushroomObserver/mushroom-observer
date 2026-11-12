@@ -20,7 +20,7 @@ module Views::Controllers::Projects::Members
                       ))
 
       render(Views::Controllers::Projects::Members::Form.new(
-               @project_member, project: @project, turbo: true
+               @project_member, project: @project
              ))
       render(Views::Controllers::Projects::Members::Groups.new(
                project: @project, user: @user

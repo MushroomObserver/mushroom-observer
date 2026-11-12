@@ -1,7 +1,8 @@
 # frozen_string_literal: true
 
 # Index-action filter caption strip, rendered between the top nav
-# and the page body on index actions (and on `maps` show). Reads two
+# and the page body on index actions (and on `maps` show,
+# `observations/downloads#new`). Reads two
 # content_for slots:
 #
 #   - `:filters`     — set by `Views::FullPageBase#add_query_filters`,

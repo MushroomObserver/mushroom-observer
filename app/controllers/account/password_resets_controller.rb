@@ -12,7 +12,7 @@ module Account
 
     def create
       @login = params[:new_user] && params[:new_user][:login]
-      @new_user = find_user_by_login_name_or_email(@login)
+      @new_user = find_user_by_login_or_email(@login)
       if @new_user.nil?
         flash_error(:runtime_email_new_password_failed.t(user: @login))
         return render_new_view_invalid
@@ -23,14 +23,33 @@ module Account
 
     private
 
-    def find_user_by_login_name_or_email(login)
+    # `users.name` is a display name, not an identifier: accounts carry
+    # names that match other accounts' logins, and the lowest id among
+    # the matches wins -- so matching it reset a stranger's password and
+    # left the requester's password in place.
+    def find_user_by_login_or_email(login)
       return nil if login.blank?
 
-      User.find_by(
-        User[:login].eq(login).
-        or(User[:name].eq(login)).
-        or(User[:email].eq(login))
-      )
+      match = User[:login].eq(login).or(User[:email].eq(login))
+      first = User.find_by(match)
+      # Nothing outranks an exact login, and this is also the cheap
+      # path: neither column is indexed, so the scan stops at the
+      # first row here instead of reading all of `users`.
+      return first if first.nil? || first.login == login
+
+      highest_ranking_match(login, match)
+    end
+
+    # Both columns collate case- and trailing-space-insensitively, and
+    # a login can be spelled like an email, so one string can match
+    # several accounts. `login` is the identifier people are asked
+    # for, so it outranks a stranger's email, and either exact
+    # spelling outranks a collation match.
+    def highest_ranking_match(login, match)
+      matches = User.where(match)
+      matches.find { |user| user.login == login } ||
+        matches.find { |user| user.email == login } ||
+        matches.first
     end
 
     def render_new_view(status: :ok, **render_opts)
@@ -41,19 +60,21 @@ module Account
 
     def set_random_password_for_new_user_and_email_them
       password = String.random(10)
-      # `change_password` persists immediately via `update_attribute`
-      # (bypassing validations) and returns that save's result -- a
-      # separate `@new_user.save` afterward would be redundant, and
-      # worse, misleading: it can't undo a password change that
-      # already landed, so checking it as the success signal risks
-      # flashing an error (no redirect, no email) after the password
-      # was already silently changed underneath the user.
+      # `change_password` persists immediately, skipping validations,
+      # and returns that save's result. A `@new_user.save` here could
+      # not undo a change that already landed, so checking it instead
+      # risks flashing an error after the password had changed.
       if @new_user.change_password(password)
         flash_notice(:runtime_email_new_password_success.tp +
                      :email_spam_notice.tp)
         # Migrated from QueuedEmail::Password to ActionMailer + ActiveJob.
         # See .claude/deliver_later_migration_plan.md for details.
         PasswordMailer.build(receiver: @new_user, password:).deliver_later
+        # Read back by Account::LoginController#login_success, which
+        # nudges them to replace the emailed password. Scoped to the
+        # id, so requesting a reset for one account and logging into
+        # another does not carry the nudge across.
+        session[:password_emailed_to] = @new_user.id
         redirect_to(new_account_login_path)
       else
         flash_object_errors(@new_user)

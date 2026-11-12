@@ -659,6 +659,44 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
       where(id: project_violation_ids(project)).includes(:name, :location).
         order_by(:name)
     }
+    # Observations matching the given project's target names/
+    # locations, within its date range and bbox when it has one --
+    # regardless of whether they're already in the project. See the
+    # project_candidate_* class methods below for the per-kind logic.
+    scope :project_candidates, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      name_ids = project_candidate_name_ids(project)
+      loc_ids = project_candidate_location_ids(project)
+      return none if name_ids.nil? && loc_ids.nil?
+
+      scope = if name_ids && loc_ids
+                where(id: name_ids).where(id: loc_ids)
+              elsif name_ids
+                where(id: name_ids)
+              else
+                where(id: loc_ids)
+              end
+      scope = project_constrain_to_date_range(scope, project)
+      project_constrain_to_bbox(scope, project).order(created_at: :desc)
+    }
+    # project_candidates, minus observations already in the project
+    # or already excluded from it. Backs the project Updates tab's
+    # default list and its badge count.
+    scope :project_new_candidates, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      project_candidates(project).
+        where.not(id: project.observations.select(:id)).
+        where.not(id: project_excluded(project).select(:id))
+    }
+    # Observations the given project's admin has excluded from its
+    # Updates tab candidate list. Read-only; use
+    # Project#exclude_observation/#include_observation! to mutate.
+    scope :project_excluded, lambda { |project|
+      project = Project.find(project) unless project.is_a?(Project)
+      joins(:project_excluded_observations).
+        where(project_excluded_observations: { project: project }).
+        order(created_at: :desc)
+    }
     scope :species_lists, lambda { |species_lists|
       spl_ids = Lookup::SpeciesLists.new(species_lists).ids
       joins(:species_list_observations).
@@ -920,6 +958,65 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     def no_location_violation_ids(base, project)
       base.where(location_id: nil).
         where.not(project.where_suffix_conditions).ids
+    end
+
+    # ----- helpers for the project_candidates/project_new_candidates
+    # scopes -----
+
+    def project_candidate_name_ids(project)
+      return unless project.target_names.any?
+
+      names(lookup: project.target_name_ids, include_synonyms: true,
+            include_subtaxa: true).select(:id)
+    end
+
+    # `Observation[:id]`, not a bare `:id` -- after the `joins(:location)`
+    # below, a plain `select(:id)` is ambiguous between
+    # `observations.id` and `locations.id`.
+    def project_candidate_location_ids(project)
+      return unless project.target_locations.any?
+
+      scope = joins(:location).where(project.location_suffix_conditions)
+      scope = scope.merge(in_box(**project.location.bounding_box)) if
+        project.location
+      scope.select(Observation[:id])
+    end
+
+    def project_constrain_to_date_range(scope, project)
+      start_date = project.start_date
+      end_date = project.end_date
+      return scope if start_date.nil? && end_date.nil?
+      return scope.where(Observation[:when].lteq(end_date)) if start_date.nil?
+      return scope.where(Observation[:when].gteq(start_date)) if end_date.nil?
+
+      scope.where(Observation[:when].between(start_date..end_date))
+    end
+
+    def project_constrain_to_bbox(scope, project)
+      location = project.location
+      return scope if location.nil?
+
+      box_kwargs = location.bounding_box
+      m_box = Mappable::Box.new(**box_kwargs)
+      return scope unless m_box.valid?
+
+      scope.where(id: project_gps_in_box_ids(m_box)).
+        or(scope.where(id: project_location_in_box_ids(box_kwargs)))
+    end
+
+    # The violations check reads GPS whether hidden or dubious, so the
+    # candidate filter does too: gps_in_box's search-trust rule would
+    # leave a hidden-GPS observation out of both branches.
+    def project_gps_in_box_ids(box)
+      where.not(incomplete_or_missing_geoloc).
+        where(Observation[:lat].between(box.south..box.north).
+              and(Observation[:lng].between(box.west..box.east))).
+        select(:id)
+    end
+
+    def project_location_in_box_ids(box_kwargs)
+      where(incomplete_or_missing_geoloc).joins(:location).
+        merge(Location.in_box(**box_kwargs)).select(:id)
     end
   end
 end

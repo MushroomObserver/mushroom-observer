@@ -79,20 +79,22 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_manage_observation
-      div(class: "manage_observation") { render_remove_obs_button }
+      div(class: "manage_observation flex-shrink-0") do
+        render_remove_obs_button
+      end
     end
 
     # `confirm:` is the Turbo-confirm kwarg; `data: { confirm: … }` is
     # a no-op under Turbo (rails-ujs is not wired).
     def render_remove_obs_button
       Button(
-        type: :put,
+        type: :delete,
         variant: :strip,
-        name: :remove.ti,
+        name: :remove.ti, icon: :remove,
+        show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
-          species_list_id: @species_list.id,
-          commit: "remove"
+          species_list_id: @species_list.id
         ),
         confirm: :are_you_sure.l
       )

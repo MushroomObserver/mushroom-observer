@@ -98,6 +98,21 @@ module Views::Layouts
                   text: names(:coprinus_comatus).text_name)
     end
 
+    # `name_has` matches either a Name id or a substring of the
+    # observation's Name#text_name (Sequence.name_has), so it's NOT in
+    # PARAM_LOOKUPS/ITALICIZE_LOOKUP_KEYS -- a substring like "Galerin"
+    # has no single Name for Lookup::Names to resolve, so the caption
+    # shows the typed value itself rather than an (often blank)
+    # lookup result.
+    def test_sequence_name_has_renders_raw_value_not_lookup
+      query = Query.lookup_and_save(:Sequence, name_has: "Galerin")
+
+      html = render_for(query)
+
+      assert_html(html, "#caption-truncated b", text: "Galerin")
+      assert_no_html(html, "#caption-truncated b i")
+    end
+
     def test_many_lookups_emit_truncation_marker
       ids = Name.where(rank: "Species").limit(5).pluck(:id)
       query = Query.lookup_and_save(:Name, names: { lookup: ids })

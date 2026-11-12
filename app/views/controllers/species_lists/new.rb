@@ -34,8 +34,7 @@ module Views::Controllers::SpeciesLists
                submitted_project_ids: @submitted_project_ids,
                user: @user,
                button: :create,
-               clone_id: @clone_id,
-               turbo: true
+               clone_id: @clone_id
              ))
     end
   end

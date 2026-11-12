@@ -18,7 +18,9 @@ class ImagesControllerTest < FunctionalTestCase
         observations: observations(:minimal_unknown_obs).id,
         locations: locations(:burbank).id,
         projects: projects(:bolete_project).id,
-        species_lists: species_lists(:first_species_list).id
+        species_lists: species_lists(:first_species_list).id,
+        visual_groups: visual_groups(:visual_group_one).id,
+        visual_group_unreviewed: visual_groups(:visual_group_one).id
       }
     )
   end
@@ -92,6 +94,29 @@ class ImagesControllerTest < FunctionalTestCase
     assert_select(".matrix-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
+    assert_select("#project_banner")
+  end
+
+  # Regression: reaching Images via the project's Images sub-tab --
+  # built as an Observations-query subquery (see
+  # Query::Modules::Subqueries#new_query_with_subquery), not a
+  # top-level `projects:` filter -- showed no project banner.
+  def test_index_project_observation_subquery_shows_project_banner
+    project = projects(:bolete_project) # 2 images -- no single-match redirect
+    obs_query = Query.lookup_and_save(:Observation, projects: project)
+    image_query = Query.current_or_related_query(:Image, :Observation,
+                                                 obs_query)
+    image_query.save
+
+    login
+    get(:index, params: { q: @controller.q_param(image_query) })
+
+    assert_response(:success)
+    assert_select("#project_banner")
+    assert_select(
+      "#project_observation_subtabs a.nav-link.active" \
+      "[href^='#{images_path}']"
+    )
   end
 
   def test_index_project_single_match_redirects

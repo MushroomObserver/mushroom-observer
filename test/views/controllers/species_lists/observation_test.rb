@@ -45,18 +45,17 @@ module Views::Controllers::SpeciesLists
     end
 
     # `remove: true` (set by the show page when the viewer can edit)
-    # renders the inline put-button.
+    # renders the inline delete-button.
     def test_renders_remove_button_when_remove_true
       html = render_row(remove: true)
 
       assert_html(html, ".manage_observation")
       remove_path = routes.observation_species_list_path(
         id: @observation.id,
-        species_list_id: @species_list.id,
-        commit: "remove"
+        species_list_id: @species_list.id
       )
       assert_html(html, "form[action='#{remove_path}']")
-      assert_html(html, "input[name='_method'][value='put']")
+      assert_html(html, "input[name='_method'][value='delete']")
       assert_html(html, "[data-turbo-confirm]")
     end
 

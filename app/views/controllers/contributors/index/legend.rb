@@ -64,22 +64,24 @@ module Views::Controllers::Contributors
         Table(
           ::UserStats.fields_with_weight.keys,
           show_headers: false,
-          class: "text-center bg-none mx-lg-5"
+          class: "bg-none mx-lg-5"
         ) do |t|
           # `user_stats_*` values are `[:images]`-style cross-refs to
           # plain-text root keys ("Images", "Votes", …); needs `.t`
           # for the cross-ref expansion, but the resolved text has
           # no HTML markup so `plain` is sufficient.
-          t.column("field") { |f| plain(:"user_stats_#{f}".t) }
-          t.column("weight") { |f| plain(::UserStats::ALL_FIELDS[f][:weight]) }
-          t.column("spacer") { plain("") }
+          t.column("field", align: :center) { |f| plain(:"user_stats_#{f}".t) }
+          t.column("weight", align: :center) do |f|
+            plain(::UserStats::ALL_FIELDS[f][:weight])
+          end
+          t.column("spacer", align: :center) { plain("") }
         end
       end
 
       def render_example_math_table
         Table(
-          show_headers: false,
-          class: "table-condensed bg-none w-auto mx-auto"
+          show_headers: false, variant: :condensed,
+          class: "bg-none w-auto mx-auto"
         ) do |t|
           t.body { render_example_math_rows }
         end

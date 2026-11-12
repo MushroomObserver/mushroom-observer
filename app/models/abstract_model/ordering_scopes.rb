@@ -89,6 +89,12 @@ module AbstractModel::OrderingScopes
       order(HerbariumRecord[:accession_number].asc)
     end
 
+    def order_by_amount
+      return all unless self == Donation
+
+      order(arel_table[:amount].desc)
+    end
+
     def order_by_box_area
       order(Location[:box_area].desc)
     end
@@ -245,6 +251,14 @@ module AbstractModel::OrderingScopes
       order(arel_table[:observation_id].desc)
     end
 
+    def order_by_observations
+      return all unless self == Location
+
+      # outer_join needed to show locations with no observations
+      left_outer_joins(:observations).group(Location[:id]).distinct.
+        order(Observation[:id].count.desc)
+    end
+
     def order_by_original_name
       return all unless self == Image
 
@@ -339,6 +353,12 @@ module AbstractModel::OrderingScopes
       return all unless column_names.include?("where")
 
       order(arel_table[:where].asc)
+    end
+
+    def order_by_who
+      return all unless self == Donation
+
+      order(arel_table[:who].asc)
     end
 
     ####### methods dispatched from order_by_name

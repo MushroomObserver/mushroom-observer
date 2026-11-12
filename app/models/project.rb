@@ -301,7 +301,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
     ProjectMember.create!(project: self, user:,
                           trust_level: "editing")
-    user_group.users << user unless user_group.users.member?(user)
+    user_group.add_user(user)
   end
 
   # Promote +user+ to Project Admin. Adds to user_group and admin_group,
@@ -314,8 +314,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     ProjectMember.find_or_create_by(project: self, user: user) do |pm|
       pm.trust_level = "editing"
     end
-    user_group.users << user unless user_group.users.member?(user)
-    admin_group.users << user unless admin_group.users.member?(user)
+    user_group.add_user(user)
+    admin_group.add_user(user)
     log_add_admin(user)
   end
 
@@ -446,7 +446,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # Add image this project if not already done so.  Saves it.
   def add_image(img)
-    images.push(img) unless images.include?(img)
+    insert_project_images([img.id])
     touch
   end
 
@@ -458,29 +458,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     touch
   end
 
-  # Add observation (and its images) to this project if not already done so.
-  # If the observation was excluded, remove it from the excluded list.
-  # Saves it.
+  # Add observation (and its owner's images) to this project if not
+  # already done so. If the observation was excluded, remove it from the
+  # excluded list. Saves it.
   def add_observation(obs)
-    unexclude_observation(obs)
-    return if observations.include?(obs)
-
-    imgs = if obs.association(:images).loaded?
-             obs.images.select { |img| img.user_id == obs.user_id }
-           else
-             Image.where(id: obs.image_ids, user_id: obs.user_id).to_a
-           end
-    observations.push(obs)
-    imgs.each { |img| images.push(img) }
-    touch
+    bulk_add_observations([obs.id])
   end
 
-  # Bulk variant of add_observation. Given a list of observation ids,
-  # inserts all needed project_observations / project_images rows in
-  # set-based SQL rather than emitting ~8 queries per observation.
-  # Idempotent: pre-existing project_observations are left alone, and
-  # any project_excluded_observations rows for these ids are dropped
-  # (matching add_observation's un-exclude side effect).
+  # Bulk variant of add_observation, in set-based SQL. Idempotent, and
+  # drops any project_excluded_observations rows for these ids.
+  #
+  # Two writers can add the same observation at once (the observation
+  # form and DetectFieldSlipQRJob), so the pluck is only a shortcut: the
+  # unique indexes make insert_all skip the other writer's row, via
+  # MySQL's ON DUPLICATE KEY (`unique_by:` is unsupported there).
   def bulk_add_observations(obs_ids)
     obs_ids = Array(obs_ids).map(&:to_i).uniq
     return 0 if obs_ids.empty?
@@ -491,7 +482,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     return 0 if new_obs_ids.empty?
 
     insert_project_observations(new_obs_ids)
-    insert_project_images_for(new_obs_ids)
+    insert_project_images(owner_image_ids(new_obs_ids))
+    observations.reset
     invalidate_visible_observations_cache!
     touch
     new_obs_ids.size
@@ -502,29 +494,23 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     ProjectObservation.insert_all(rows)
   end
 
-  # Pull image_ids whose owner matches the observation owner (matching
-  # add_observation's per-row filter), excluding any (project_id, image_id)
-  # rows already in project_images so we don't insert duplicates. (There
-  # is no unique index on project_images, so this dedup is the only
-  # protection — see #4181.)
-  def insert_project_images_for(obs_ids)
-    image_ids = ObservationImage.
-                joins("INNER JOIN images ON images.id = " \
-                      "observation_images.image_id").
-                joins("INNER JOIN observations ON observations.id = " \
-                      "observation_images.observation_id").
-                where(observation_id: obs_ids).
-                where("images.user_id = observations.user_id").
-                distinct.pluck(:image_id)
-    return if image_ids.empty?
-
-    image_ids -= project_images.where(image_id: image_ids).pluck(:image_id)
+  def insert_project_images(image_ids)
     return if image_ids.empty?
 
     rows = image_ids.map { |img_id| { project_id: id, image_id: img_id } }
     ProjectImage.insert_all(rows)
+    images.reset
   end
-  private :insert_project_observations, :insert_project_images_for
+
+  # Only the observer's photos join a project with their observation.
+  def owner_image_ids(obs_ids)
+    ObservationImage.joins(:image, :observation).
+      where(observation_id: obs_ids).
+      where(Image[:user_id].eq(Observation[:user_id])).
+      distinct.pluck(:image_id)
+  end
+  private :insert_project_observations, :insert_project_images,
+          :owner_image_ids
 
   # Remove observation (and its images) from this project. Saves it.
   # Removing one observation of an occurrence removes them all, and drops
@@ -694,53 +680,16 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # project's date range and (when set) bounding box. When only one
   # kind of target is set, matches on that alone. The date and bbox
   # filters mirror the violations-page rule so an obs is a candidate
-  # iff it would NOT be a violation if added.
+  # iff it would NOT be a violation if added. See
+  # Observation.project_candidates for the per-kind logic.
   def candidate_observations
-    name_ids = candidate_name_ids
-    loc_ids = candidate_location_ids
-    return Observation.none if name_ids.nil? && loc_ids.nil?
-
-    scope = if name_ids && loc_ids
-              Observation.where(id: name_ids).
-                where(id: loc_ids)
-            elsif name_ids
-              Observation.where(id: name_ids)
-            else
-              Observation.where(id: loc_ids)
-            end
-    scope = constrain_to_project_date_range(scope)
-    scope = constrain_to_project_bbox(scope)
-    scope.order(created_at: :desc)
-  end
-
-  # GPS-inside-bbox OR (no GPS AND obs.location bbox is fully
-  # contained in project bbox). Agrees with the bbox violation kind
-  # in Observation.project_violations on what "in" means.
-  def constrain_to_project_bbox(scope)
-    return scope if location.nil?
-
-    box_kwargs = location.bounding_box
-    m_box = Mappable::Box.new(**box_kwargs)
-    return scope unless m_box.valid?
-
-    gps_in_ids = Observation.gps_in_box(m_box).select(:id)
-    no_gps_in_ids = Observation.where(lat: nil).joins(:location).
-                    merge(Location.in_box(**box_kwargs)).select(:id)
-    scope.where(id: gps_in_ids).or(scope.where(id: no_gps_in_ids))
-  end
-
-  def constrain_to_project_date_range(scope)
-    return scope if start_date.nil? && end_date.nil?
-    return scope.where(Observation[:when].lteq(end_date)) if start_date.nil?
-    return scope.where(Observation[:when].gteq(start_date)) if end_date.nil?
-
-    scope.where(Observation[:when].between(start_date..end_date))
+    Observation.project_candidates(self)
   end
 
   private
 
-  # Same expansion rule as candidate_name_ids: each given name plus
-  # its synonyms plus sub-taxa of both.
+  # Same expansion rule as Observation.project_candidate_name_ids:
+  # each given name plus its synonyms plus sub-taxa of both.
   def expanded_target_name_ids(name_ids)
     return [] if name_ids.empty?
 
@@ -749,28 +698,12 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
                       include_subtaxa: true).ids
   end
 
-  def candidate_name_ids
-    return unless target_names.any?
-
-    Observation.names(lookup: target_name_ids,
-                      include_synonyms: true,
-                      include_subtaxa: true).select(:id)
-  end
-
-  def candidate_location_ids
-    return unless target_locations.any?
-
-    scope = Observation.joins(:location).
-            where(location_suffix_conditions)
-    scope = scope.merge(Observation.in_box(**location.bounding_box)) if location
-    scope.select("observations.id")
-  end
-
   public
 
   # OR clause: location.name LIKE '%, <target>' OR = '<target>'
   # Public: also called from Observation.project_violations (the
-  # target_location violation check).
+  # target_location violation check) and
+  # Observation.project_candidate_location_ids.
   def location_suffix_conditions
     tbl = Location.arel_table
     target_location_names.map do |name|
@@ -796,9 +729,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # Candidate observations not already in the project and not excluded.
   # Used for the default Updates tab list and its badge count.
   def new_candidate_observations
-    candidate_observations.
-      where.not(id: observations.select(:id)).
-      where.not(id: excluded_observations.select(:id))
+    Observation.project_new_candidates(self)
   end
 
   delegate :count, to: :new_candidate_observations,
@@ -1034,9 +965,21 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   # the right boolean without raising. Verified locally; see Copilot
   # review on PR #4182.
   def violates_date_range?(observation)
-    return false if start_date.nil? && end_date.nil?
+    !covers_date?(observation.when)
+  end
 
-    !(start_date..end_date).cover?(observation.when)
+  def covers_date?(date)
+    return true if start_date.nil? && end_date.nil?
+
+    (start_date..end_date).cover?(date)
+  end
+
+  # The date itself when the project's range covers it, else the nearer
+  # end of the range.
+  def nearest_covered_date(date)
+    return date if covers_date?(date)
+
+    start_date && date < start_date ? start_date : end_date
   end
 
   # Target-name violation: project has a non-empty target_names list

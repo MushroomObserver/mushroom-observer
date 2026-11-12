@@ -10,6 +10,30 @@ module Observations
       assert_select("body.maps__index")
     end
 
+    # Regression: the map showed no project banner even when the
+    # query was scoped to one project -- derive_ivar_from_query needs
+    # to run before the view renders. Also checks the Observations
+    # tab and the Map observation sub-tab both highlight.
+    def test_map_observations_project_query_shows_project_banner
+      project = projects(:open_membership_project)
+      query = Query.lookup_and_save(:Observation, projects: project)
+
+      login
+      get(:index, params: { q: @controller.q_param(query) })
+
+      assert_response(:success)
+      assert_select("#project_banner")
+      assert_select(
+        "#project_tabs a.nav-link.active[href='#{observations_path(
+          project: project.id, by: "thumbnail_quality"
+        )}']"
+      )
+      assert_select(
+        "#project_observation_subtabs a.nav-link.active" \
+        "[href^='#{map_observations_path}']"
+      )
+    end
+
     # Tests validation of nested params passed into Query
     def test_map_obs_by_pattern_user_in_box
       login

@@ -31,6 +31,15 @@ class VisualGroupTest < ActiveSupport::TestCase
     assert_equal(vg1.images.count, total)
   end
 
+  def test_distinct_names
+    vg = visual_groups(:visual_group_one)
+
+    names = vg.distinct_names
+
+    assert(names.all?(Name))
+    assert_includes(names.map(&:text_name), "Agaricus campestris")
+  end
+
   def mock_vgi
     vgi = Minitest::Mock.new
     vgi.expect(:image_in_group?, false) do |_id|

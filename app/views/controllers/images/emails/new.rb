@@ -14,8 +14,7 @@ module Views::Controllers::Images
         render(Form.new(
                  image: @image,
                  user: current_user,
-                 message: @message,
-                 turbo: true
+                 message: @message
                ))
       end
     end

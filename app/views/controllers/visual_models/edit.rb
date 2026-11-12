@@ -8,10 +8,8 @@ module Views::Controllers::VisualModels
     def view_template
       add_edit_title(@visual_model)
 
-      render(Form.new(@visual_model, turbo: true))
+      render(Form.new(@visual_model))
       Link(type: :get, name: "Show", target: visual_model_path(@visual_model))
-      plain(" | ")
-      Link(type: :get, name: "Back", target: visual_models_path)
     end
   end
 end

@@ -18,6 +18,13 @@ class Inat
 
     CACHE_TTL = 30.days
 
+    # iNat's maximum for place autocomplete.
+    PLACE_CANDIDATES = 20
+
+    # Part of the place cache key: a miss is cached too, so changing
+    # how places match needs a new version to look them up again.
+    PLACE_MATCHING_VERSION = 2
+
     # iNat writes an infraspecific name without the rank marker MO
     # uses: MO's "Hygrophorus nemoreus var. raphaneus" is its
     # "Hygrophorus nemoreus raphaneus". The dot is required for the
@@ -115,7 +122,8 @@ class Inat
     # what iNat calls the place: "Barnstable Co., Massachusetts, USA"
     # searches for "Barnstable Co.".
     def place_id_for(location)
-      id = Rails.cache.fetch(["inat_place", location.id, location.updated_at],
+      id = Rails.cache.fetch(["inat_place", PLACE_MATCHING_VERSION,
+                              location.id, location.updated_at],
                              expires_in: CACHE_TTL) do
         search_place(location)
       end
@@ -143,14 +151,24 @@ class Inat
     # "Washington DC" -- is no answer.
     def matching_place(query, spellings, location)
       place_candidates(query).find do |place|
-        spellings.any? { |name| place["name"].to_s.casecmp?(name) } &&
-          overlaps?(place, location)
+        place_names(place).any? do |place_name|
+          spellings.any? { |name| place_name.casecmp?(name) }
+        end && overlaps?(place, location)
       end&.dig("id")
     end
 
+    # iNat names a county by its bare name ("Adams") and spells it out
+    # only in the display name ("Adams County, US, PA").
+    def place_names(place)
+      [place["name"], place["display_name"].to_s.split(",").first].
+        compact.map { |name| name.to_s.strip }
+    end
+
+    # A common name fills the default ten results with places
+    # elsewhere: Adams County, PA is tenth for "Adams County".
     def place_candidates(query)
-      fetch_json("places/autocomplete?q=#{escape(query)}")&.
-        dig("results") || []
+      fetch_json("places/autocomplete?q=#{escape(query)}" \
+                 "&per_page=#{PLACE_CANDIDATES}")&.dig("results") || []
     end
 
     # A same-named place somewhere else is worse than no place at all:
@@ -180,9 +198,20 @@ class Inat
     def coordinate_points(geojson)
       return [] unless geojson.is_a?(Hash)
 
-      Array(geojson["coordinates"]).flatten(2).
-        select { |point| point.is_a?(Array) && point.size >= 2 }.
-        map { |point| [point.first.to_f, point.last.to_f] }
+      points_in(geojson["coordinates"])
+    end
+
+    # A Polygon nests its points one level less deeply than a
+    # MultiPolygon, so the depth is found rather than assumed.
+    def points_in(node)
+      return [] unless node.is_a?(Array)
+      return [[node[0].to_f, node[1].to_f]] if point?(node)
+
+      node.flat_map { |child| points_in(child) }
+    end
+
+    def point?(node)
+      node.size >= 2 && node.first(2).all?(Numeric)
     end
   end
 end

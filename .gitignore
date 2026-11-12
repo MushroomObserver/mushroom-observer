@@ -46,6 +46,7 @@ coverage
 # Ignore Claude code local config (but allow shared docs)
 .claude/settings.local.json
 .claude/developer.json
+.claude/local
 CLAUDE.local.md
 
 # Ignore sensitive config stuff.

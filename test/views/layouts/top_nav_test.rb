@@ -103,6 +103,19 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, selector, text: :observations.ti)
   end
 
+  def test_rubric_index_link_includes_controllers_nav_index_params
+    controller.params[:action] = "show"
+    define_singleton_action_name!("show")
+    controller.define_singleton_method(:nav_index_params) do
+      { visual_model_id: 42 }
+    end
+
+    html = render(top_nav(user: @user))
+
+    expected = routes.observations_path(visual_model_id: 42)
+    assert_html(html, "#rubric a[href='#{expected}']")
+  end
+
   def test_rubric_renders_as_plain_text_on_index_page
     define_singleton_action_name!("index")
 

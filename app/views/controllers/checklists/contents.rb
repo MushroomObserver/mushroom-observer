@@ -117,18 +117,34 @@ module Views::Controllers::Checklists
       h4 { plain(:checklist_missing_taxa.t) }
       render(Panel.new(
                data: @project_data,
-               context: Context.new(project: @context.project),
+               context: Context.new(project: @context.project,
+                                    logged_out: @context.logged_out),
                taxa: missing, panel_id: "checklist_missing_panel"
              ))
     end
 
     def render_footnotes
-      div do
-        p { plain(:checklist_any_deprecated.l) } if @data.any_deprecated?
-        if @data.duplicate_synonyms.present?
-          p { plain(:checklist_duplicate_synonyms.l) }
-        end
+      div(class: "checklist-legend") do
+        render_deprecated_footnote if @data.any_deprecated?
+        render_duplicate_synonyms_footnote if @data.duplicate_synonyms.present?
         render_target_remove_footnote if show_target_remove_footnote?
+      end
+    end
+
+    def render_deprecated_footnote
+      p do
+        # See Panel#taxon_marker_items for why :approve, not :deprecate
+        Icon(type: :approve)
+        whitespace
+        plain(:checklist_any_deprecated.l)
+      end
+    end
+
+    def render_duplicate_synonyms_footnote
+      p do
+        Icon(type: :observations)
+        whitespace
+        plain(:checklist_duplicate_synonyms.l)
       end
     end
 
@@ -138,7 +154,7 @@ module Views::Controllers::Checklists
 
     def render_target_remove_footnote
       p do
-        Icon(type: :x, class: "text-danger")
+        Icon(type: :remove, class: "text-danger")
         whitespace
         plain(:checklist_target_remove_footnote.l)
       end

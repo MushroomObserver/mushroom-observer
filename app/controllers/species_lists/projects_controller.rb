@@ -50,10 +50,11 @@ module SpeciesLists
     end
 
     def manage_object_states
+      selected = submitted_param(:objects) || []
       {
-        list: submitted_param(:objects_list) == "1",
-        obs: submitted_param(:objects_obs) == "1",
-        img: submitted_param(:objects_img) == "1"
+        list: selected.include?("list"),
+        obs: selected.include?("obs"),
+        img: selected.include?("img")
       }
     end
 
@@ -200,7 +201,7 @@ module SpeciesLists
       unless @user.projects_member.include?(proj)
         imgs.select! { |i| i.user == @user }
       end
-      imgs &= proj.observations
+      imgs &= proj.images
       return unless imgs.any?
 
       proj.remove_images(imgs)

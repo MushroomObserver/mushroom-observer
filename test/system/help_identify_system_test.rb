@@ -19,8 +19,8 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     assert_selector("#box_#{obs.id}")
 
     within("#box_#{obs.id}") do
-      assert_selector(".theater-btn", visible: false)
-      first(".theater-btn", visible: false).trigger("click").trigger("click")
+      assert_selector(".theater-btn", visible: :all)
+      first(".theater-btn", visible: :all).trigger("click").trigger("click")
     end
     # lightgallery specific:
     assert_selector(".lg-sub-html")
@@ -104,7 +104,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
 
     # Open the lightbox
     within(box_with_image) do
-      first(".theater-btn", visible: false).trigger("click").trigger("click")
+      first(".theater-btn", visible: :all).trigger("click").trigger("click")
     end
     assert_selector(".lg-sub-html")
 
@@ -149,7 +149,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
 
     # Open the lightbox and verify the caption checkbox synced
     within(box_with_image) do
-      first(".theater-btn", visible: false).trigger("click").trigger("click")
+      first(".theater-btn", visible: :all).trigger("click").trigger("click")
     end
     assert_selector(".lg-sub-html")
 

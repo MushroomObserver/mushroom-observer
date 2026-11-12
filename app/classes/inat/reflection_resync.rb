@@ -19,8 +19,12 @@ class Inat
   # refresh reflections nobody is allowed to hand-edit.
   class ReflectionResync
     # Per-reflection outcome; status is one of :synced, :unchanged,
-    # :source_deleted, :fetch_failed.
-    Result = Data.define(:status, :observation)
+    # :source_deleted, :fetch_failed. `reasons` is diagnostic only
+    # (diagnostic only; used by tests) -- which sub-check(s) made a :synced
+    # result true, e.g. [:scalars, :taxon_sync], so a status that
+    # looks wrong can be traced to the check that set it instead of
+    # needing to be reproduced.
+    Result = Data.define(:status, :observation, :reasons)
 
     # Messages from the sequence, taxon and image engines that declined
     # to act (ambiguous locus pairings, invalid iNat values, names MO
@@ -72,13 +76,13 @@ class Inat
     private
 
     def failed_result(reflection)
-      Result.new(status: :fetch_failed, observation: reflection)
+      Result.new(status: :fetch_failed, observation: reflection, reasons: [])
     end
 
     # Not in this incremental batch's results, so unchanged on iNat: leave
     # the reflection alone, don't even stamp -- it wasn't fetched.
     def unchanged(reflection)
-      Result.new(status: :unchanged, observation: reflection)
+      Result.new(status: :unchanged, observation: reflection, reasons: [])
     end
 
     # Detect a change from what persists, not from the assigned values:
@@ -92,20 +96,39 @@ class Inat
       # would not undo their uploads. If the sync raises, the next sync
       # brings in the full content; only the upgrade's log entry is lost.
       obs.update!(placeholder: false) if upgrading
-      changed = sync_source_data(obs, inat_obs) || upgrading
+      changed, reasons = sync_source_data(obs, inat_obs)
+      reasons << :upgraded_from_placeholder if upgrading
       # Log after the sync's entries, so the upgrade is the newest one.
       log_upgrade(obs) if upgrading
-      Result.new(status: changed ? :synced : :unchanged, observation: obs)
+      Result.new(status: changed || upgrading ? :synced : :unchanged,
+                 observation: obs, reasons: reasons)
     end
 
-    # Returns whether anything changed.
+    # Returns [whether anything changed, which sub-check(s) said so].
     def sync_source_data(obs, inat_obs)
       scalars_changed = sync_scalars(obs, inat_obs).present?
       outcomes = sync_engines(obs, inat_obs)
       omissions_changed = sync_skeleton_omissions(obs, inat_obs)
       mark_synced(obs)
       log_resync(obs) if scalars_changed || outcomes.any?(&:logs_resync?)
-      scalars_changed || omissions_changed || outcomes.any?(&:changed?)
+      reasons = sync_reasons(scalars_changed, omissions_changed, outcomes)
+      [reasons.any?, reasons]
+    end
+
+    def sync_reasons(scalars_changed, omissions_changed, outcomes)
+      reasons = []
+      reasons << :scalars if scalars_changed
+      reasons << :omissions if omissions_changed
+      outcomes.each do |outcome|
+        reasons << engine_name(outcome) if outcome.changed?
+      end
+      reasons
+    end
+
+    # :taxon_sync / :image_sync / :sequence_sync, from the Outcome's
+    # own class (Inat::ReflectionResync::TaxonSync::Outcome, etc).
+    def engine_name(outcome)
+      outcome.class.name.split("::")[-2].underscore.to_sym
     end
 
     # A placeholder becomes a full reflection when the user requesting the
@@ -125,10 +148,14 @@ class Inat
       login.present? && login.casecmp?(inat_obs[:user].to_h[:login].to_s)
     end
 
-    # The saved changes, minus the timestamp.
+    # The saved changes, minus the timestamp. Empty without a save:
+    # `saved_changes` would otherwise report the object's previous save,
+    # such as the last sync's log entry moving `log_updated_at`.
     def sync_scalars(obs, inat_obs)
       obs.assign_attributes(scalar_attributes(obs, inat_obs))
-      obs.save! if obs.changed?
+      return {} unless obs.changed?
+
+      obs.save!
       obs.saved_changes.except("updated_at")
     end
 
@@ -164,7 +191,7 @@ class Inat
     def deleted(obs)
       mark_synced(obs)
       obs.log(:log_observation_source_deleted, user: User.admin)
-      Result.new(status: :source_deleted, observation: obs)
+      Result.new(status: :source_deleted, observation: obs, reasons: [])
     end
 
     # update_column, not update!, so stamping the sync time isn't blocked
@@ -203,9 +230,18 @@ class Inat
     # imported. Returns whether it changed.
     def sync_skeleton_omissions(obs, inat_obs)
       omissions = skeleton_omissions(obs, inat_obs)
-      changed = obs.skeleton_omissions != omissions
+      changed = !omissions_equal?(obs.skeleton_omissions, omissions)
       obs.update!(skeleton_omissions: omissions) if changed
       changed
+    end
+
+    # Compares via JSON, not Ruby `==` -- `obs.skeleton_omissions` may
+    # have just round-tripped through the serialized text column (a
+    # reload earlier in the same sync, e.g. ImageSync#sync_thumbnail),
+    # while `omissions` is a freshly-built Hash. JSON is what the
+    # column stores either way, so it is the correct equality to test.
+    def omissions_equal?(current, fresh)
+      JSON.generate(current) == JSON.generate(fresh)
     end
 
     def skeleton_omissions(obs, inat_obs)

@@ -54,9 +54,13 @@ module Views::Controllers::Publications
             class: "mb-3 mt-3") do |tbl|
         add_full_link_column(tbl)
         tbl.column(:publication_link.l) { |pub| link_cell(pub) }
-        tbl.column("(#{peer_count})") { |pub| pub.peer_reviewed ? "P" : "" }
-        tbl.column("(#{mo_count})") { |pub| pub.mo_mentioned ? "M" : "" }
-        tbl.column("") { |pub| admin_cell(pub) }
+        tbl.column("(#{peer_count})", align: :center) do |pub|
+          pub.peer_reviewed ? "P" : ""
+        end
+        tbl.column("(#{mo_count})", align: :center) do |pub|
+          pub.mo_mentioned ? "M" : ""
+        end
+        tbl.column("", align: :center) { |pub| admin_cell(pub) }
       end
     end
 

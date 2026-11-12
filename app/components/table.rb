@@ -45,7 +45,7 @@
 #         variant: :striped,
 #         identifier: "user-list") do |t|
 #     t.column("Name", width: "33%") { |user| user.name }
-#     t.column("Actions", class: "text-right") do |u|
+#     t.column("Actions", align: :right) do |u|
 #       Button(type: :delete, target: u)
 #     end
 #   end
@@ -54,7 +54,7 @@
 #   Table(@trackers,
 #         tbody_id: "field_slip_job_trackers") do |t|
 #     t.column(:filename.ti)
-#     t.column(:status.ti, class: "text-right")
+#     t.column(:status.ti, align: :right)
 #     t.row { |tracker| render(TrackerRow.new(tracker: tracker, user: @user)) }
 #   end
 #
@@ -87,6 +87,12 @@ class Components::Table < Components::Base
   # test/JS targeting (e.g. `identifier: "location-help"` →
   # `class="… table-location-help"`).
   prop :identifier, _Nilable(String), default: nil
+  # Vertically centers every cell — adds "table-align-middle" (see
+  # app/assets/stylesheets/mo/_tables.scss), overriding Bootstrap
+  # 3's `th, td { vertical-align: top }` default for the whole
+  # table. Per-column valign: (on #column) still applies for a
+  # single column that needs to differ from the rest.
+  prop :align_middle, _Boolean, default: false
   # Catch-all for class:, data:, cols:, ARIA attrs, and any other
   # HTML attrs forwarded to the `<table>` element -- matches
   # Icon/Collapsible's pattern.
@@ -119,27 +125,72 @@ class Components::Table < Components::Base
     end
   end
 
-  # rubocop:disable MO/NoLongCommentBlock
   # Define a column. In column mode, the block is called for each
   # row to produce the cell content. In row / body mode, the block
   # is ignored — only the `header` and per-column attrs are used,
   # and the caller's `row` / `body` block emits the cells.
   #
-  # @param header [String] the column header text
+  # @param header [String, nil] the column header text, or `nil` for a
+  #   header-less action column (e.g. an edit-link column with no label)
+  # @param align [Symbol] `:center`, `:right`, or `:left` -- sets the
+  #   matching Bootstrap text-align utility class on both the `<th>`
+  #   and `<td>` for this column (column mode). Row/body-mode callers
+  #   that hand-roll a `<td>` can reach the same mapping via
+  #   `Components::Table.align_class(:center)` instead of writing the
+  #   utility class string directly.
+  # @param valign [Symbol] `:top`, `:middle`, or `:bottom` -- sets the
+  #   matching Bootstrap vertical-align utility class on both the
+  #   `<th>` and `<td>` for this column (column mode). Same
+  #   row/body-mode escape hatch as `align`, via
+  #   `Components::Table.valign_class(:middle)`.
   # @param class [String] CSS class for the th/td elements
   # @param attributes [Hash] arbitrary HTML attrs (e.g. `width: "33%"`,
   #   `data: { foo: "bar" }`) forwarded to both the `<th>` and `<td>`
   #   elements for this column
   # @yield [row] block that receives each row and returns cell content
   # @return [nil] -- a non-nil return from a builder block is rendered
-  # rubocop:enable MO/NoLongCommentBlock
-  def column(header, class: nil, **attributes, &content)
+  def column(header, align: nil, valign: nil, class: nil, **attributes,
+             &content)
+    col_class = [self.class.align_class(align),
+                 self.class.valign_class(valign), grab(class:)].
+                compact_blank.join(" ").presence
     @columns << {
       header: header,
-      attributes: mix(attributes, class: grab(class:)),
+      attributes: mix(attributes, class: col_class),
       content: content
     }
     nil
+  end
+
+  ALIGNS = [:left, :center, :right].freeze
+  VALIGNS = [:top, :middle, :bottom].freeze
+
+  # Dual access, matching Collapsible.collapse_classes /
+  # Button::Styling.btn_class -- callable directly by row/body-mode
+  # callers, and used internally by #column above.
+  def self.align_class(align)
+    return nil unless align
+    unless ALIGNS.include?(align)
+      raise(ArgumentError.new(
+              "Unknown Table align: #{align.inspect}. " \
+              "Valid values: #{ALIGNS.join(", ")}."
+            ))
+    end
+
+    "text-#{align}"
+  end
+
+  # Vertical-align counterpart to .align_class above.
+  def self.valign_class(valign)
+    return nil unless valign
+    unless VALIGNS.include?(valign)
+      raise(ArgumentError.new(
+              "Unknown Table valign: #{valign.inspect}. " \
+              "Valid values: #{VALIGNS.join(", ")}."
+            ))
+    end
+
+    "align-#{valign}"
   end
 
   # Register a row block for row mode. When set, Table renders the
@@ -213,13 +264,17 @@ class Components::Table < Components::Base
   def table_attributes
     attrs = @attributes.except(:class)
     attrs[:class] = class_names("table", variant_classes, identifier_class,
-                                @attributes[:class])
+                                align_middle_class, @attributes[:class])
     attrs[:id] = @id if @id
     attrs
   end
 
   def variant_classes
     Array(@variant).map { |v| "table-#{v}" }
+  end
+
+  def align_middle_class
+    "table-align-middle" if @align_middle
   end
 
   def identifier_class

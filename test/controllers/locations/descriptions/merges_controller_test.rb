@@ -40,7 +40,7 @@ module Locations::Descriptions
       login("rolf")
       params = {
         id: public_desc.id,
-        description_move_or_merge: { target: private_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: private_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash(:runtime_edit_description_denied)
@@ -54,7 +54,7 @@ module Locations::Descriptions
       params = {
         id: public_desc.id,
         description_move_or_merge: {
-          target: other_private_desc.id, delete: 0
+          target_id: other_private_desc.id, delete: 0
         }
       }
       post(:create, params: params)
@@ -74,7 +74,7 @@ module Locations::Descriptions
       login("dick")
       params = {
         id: public_desc.id,
-        description_move_or_merge: { target: "bogus", delete: 0 }
+        description_move_or_merge: { target_id: "bogus", delete: 0 }
       }
       post(:create, params: params)
       assert_flash(
@@ -89,7 +89,7 @@ module Locations::Descriptions
       login("rolf")
       params = {
         id: private_desc.id,
-        description_move_or_merge: { target: public_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: public_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error(:runtime_description_private)
@@ -101,7 +101,7 @@ module Locations::Descriptions
       login("rolf")
       params = {
         id: 999_999,
-        description_move_or_merge: { target: public_desc.id, delete: 0 }
+        description_move_or_merge: { target_id: public_desc.id, delete: 0 }
       }
       post(:create, params: params)
       assert_flash_error
@@ -137,7 +137,7 @@ module Locations::Descriptions
       login("rolf")
       params = {
         id: src_desc.id,
-        description_move_or_merge: { target: dest_desc.id, delete: "1" }
+        description_move_or_merge: { target_id: dest_desc.id, delete: "1" }
       }
       old_format_name = src_desc.format_name
       new_format_name = dest_desc.format_name
