@@ -3,7 +3,7 @@
 module Views::Controllers::InatImports
   # Table of iNat imports. Admins see all imports; regular users see their own.
   class Index < Views::FullPageBase
-    prop :imports, _Array(::InatImport)
+    prop :objects, _Array(::InatImport)
     prop :admin, _Boolean, default: false
     # Ids of imports that have linked observations; only these get a
     # Results link (historic imports predate the link — see the controller).
@@ -19,7 +19,7 @@ module Views::Controllers::InatImports
       add_pagination(@pagination_data)
 
       PaginatedResults do
-        Table(@imports, variant: :striped) do |t|
+        Table(@objects, variant: :striped) do |t|
           render_columns(t)
         end
       end
