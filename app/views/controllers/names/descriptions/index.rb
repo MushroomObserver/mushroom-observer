@@ -12,7 +12,6 @@ module Views::Controllers::Names::Descriptions
     def view_template
       register_chrome
 
-      h4(class: "px-card") { plain(:descriptions.ti) }
       PaginatedResults do
         render_table if @descriptions.any?
       end
@@ -39,7 +38,7 @@ module Views::Controllers::Names::Descriptions
     def build_table_columns(table)
       table.column(:name.ti) { |desc| render_name_cell(desc) }
       table.column(:type.ti) { |desc| render_type_cell(desc) }
-      table.column(:mo_id.t, align: :right, class: "text-nowrap") do |desc|
+      table.column(:mo_id.t, align: :right) do |desc|
         IDBadge(object: desc, size: :md, extra_class: "mr-0")
       end
     end
