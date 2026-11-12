@@ -72,13 +72,24 @@ module Query::Modules::Results
   # Tries to be light about it, by selecting only two values, `id` and `title`.
   # NOTE: `select(:id, :title)` would return AR instances having only those
   # attributes - lighter, but still objects, and too heavy. We have to call
-  # `connection.select_rows` to return simple arrays. The method
-  # `alphabetical_by` is defined in each letter-sortable Query class and returns
-  # an AR `Model[:column]`. We check the first four chars of that column.
+  # `connection.select_rows` to return simple arrays. `alphabetical_by`
+  # returns an AR `Model[:column]`. We check the first four chars of
+  # that column.
   def minimal_letter_query_of_all_results
     model.connection.select_rows(
       @scopes.select(model[:id], alphabetical_by[0..3].as("title")).distinct
     )
+  end
+
+  # The column `model.order_by(:name)` sorts by, as a bare Arel
+  # attribute -- no Query subclass needs to declare this separately.
+  # Nil when that column isn't a plain attribute (Image's "sort by
+  # name" groups by a `MIN(...)` aggregate instead); callers treat
+  # nil as "no letter pager available."
+  def alphabetical_by
+    node = model.order_by(:name, viewer: viewer).order_values.first
+    node = node.expr if node.respond_to?(:expr)
+    node if node.is_a?(Arel::Attributes::Attribute)
   end
 
   # Array of all results, instantiated.
