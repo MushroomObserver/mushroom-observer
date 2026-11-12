@@ -32,7 +32,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_input_group(&block)
       position = wrapper_options.fetch(:addon_position, :append)
       InputGroup do
-        render_addon if !wrapper_options[:button] && position == :prepend
+        render_addon if addon_present? && !wrapper_options[:button] &&
+                        position == :prepend
         yield
         # append_slot (e.g. the autocompleter's dropdown-menu) renders
         # before the trailing addon/button, not after: it's an
@@ -50,9 +51,13 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_input_group_trailing(position)
       if wrapper_options[:button]
         render(Components::InputGroup::Addon.new) { render_addon_element }
-      elsif position == :append
+      elsif position == :append && addon_present?
         render_addon
       end
+    end
+
+    def addon_present?
+      wrapper_options[:addon].present?
     end
 
     def render_addon
