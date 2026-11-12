@@ -95,8 +95,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:six_even)
     end
 
-    assert_equal("col-xs-12 col-lg-6", left)
-    assert_equal("col-xs-12 col-lg-6", right)
+    assert_equal("col-xs-12 col-md-6", left)
+    assert_equal("col-xs-12 col-md-6", right)
   end
 
   def test_column_classes_eight_four_writes_split_left_right
