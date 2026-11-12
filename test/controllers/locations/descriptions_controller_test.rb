@@ -129,6 +129,29 @@ module Locations
                     "Wrong number of results")
     end
 
+    # The nested route (/locations/:location_id/descriptions) maps
+    # location_id onto the :location query_attr -- same filtering as
+    # the flat ?location= param.
+    def test_index_by_location_id_of_multiple_descriptions
+      location = locations(:gualala)
+      descs_count = LocationDescription.where(location: location).count
+      assert_operator(
+        descs_count, :>, 1,
+        "Test needs a location with multiple descriptions"
+      )
+
+      login
+      get(:index, params: { location_id: location.id })
+
+      assert_select("body.descriptions__index")
+      assert_page_title(:location_descriptions.ti)
+      assert_displayed_filters(
+        "#{:query_locations.l}: #{location.display_name}"
+      )
+      assert_select("a:match('href',?)", %r{^/locations/descriptions/\d+},
+                    { count: descs_count }, "Wrong number of results")
+    end
+
     def test_index_by_author_of_no_descriptions
       user = users(:zero_user)
 
