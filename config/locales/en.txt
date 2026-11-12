@@ -350,7 +350,7 @@
   translations: translations
   type: type
   types: types
-  url: url
+  url: URL
   user: user
   users: users
   user_group: user group
@@ -3484,25 +3484,14 @@
   users_by_name_verified: Verified
 
 
-  # licenses
-  # licenses/index
-  index_license_header: Licenses
-
-  # licenses/show
-  index_license: Index
-
   # licenses/form
-  create_license_title: Create License
   license_display_name: Name (display_name)
   license_display_name_help: "Ex: Creative Commons Non-commercial v2.5"
-  license_form_checkbox_deprecated: Deprecated
-  license_url: url
   license_url_help: "Ex: https://creativecommons.org/licenses/by-nc-sa/2.5/"
 
 
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation
-  create_donation_add: Add
   create_donation_tab: Record Donation
   create_donation_success: Donation recorded.
 

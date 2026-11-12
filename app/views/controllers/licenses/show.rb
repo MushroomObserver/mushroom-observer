@@ -6,46 +6,50 @@ module Views::Controllers::Licenses
     prop :license, ::License
 
     def view_template
-      container_class(:wide)
-      add_page_title(show_title)
-      add_context_nav(::Tab::License::ShowActions.new(license: @license))
-
-      ContentPadded { render_fields }
+      render_page_chrome
+      render_fields
     end
 
     private
 
+    def render_page_chrome
+      container_class(:text)
+      add_page_title(show_title)
+      add_edit_icons(@license, current_user, show_delete: !@license.in_use?)
+      content_padding(:panels)
+    end
+
     def render_fields
-      render_id_and_name
-      labeled_field(:license_url.l, link_to_url)
-      labeled_field(:deprecated.ti, @license.deprecated.to_s)
-      render_timestamps
+      Table(field_rows, variant: :striped, identifier: "license",
+                        show_headers: false) do |t|
+        t.column(nil) { |row| trusted_html(append_colon(row.first)) }
+        t.column(nil) { |row| b { render_field_value(row.last) } }
+      end
     end
 
-    def render_id_and_name
-      labeled_field(:id.ti, @license.id)
-      labeled_field(:license_display_name.l, @license.display_name)
+    def field_rows
+      [
+        [:id.ti, @license.id],
+        [:license_display_name.l, @license.display_name],
+        [:url.l, link_to_url],
+        [:deprecated.ti, @license.deprecated.to_s],
+        [:created.ti, formatted_date(@license.created_at)],
+        [:updated.ti, formatted_date(@license.updated_at)]
+      ]
     end
 
-    def render_timestamps
-      labeled_field(:created.ti, formatted_date(@license.created_at))
-      labeled_field(:updated.ti, formatted_date(@license.updated_at))
+    def render_field_value(value)
+      if value.is_a?(::ActiveSupport::SafeBuffer)
+        trusted_html(value)
+      else
+        plain(value.to_s)
+      end
     end
 
     def show_title
       capture do
+        IDBadge(object: @license, size: :sm)
         plain(@license.display_name)
-        whitespace
-        span(class: "smaller") do
-          span { append_colon("#(#{@license.id || "?"})") }
-        end
-      end
-    end
-
-    def labeled_field(label, value)
-      p do
-        trusted_html(append_colon(label))
-        b { value.is_a?(::ActiveSupport::SafeBuffer) ? trusted_html(value) : plain(value.to_s) }
       end
     end
 

@@ -7,10 +7,9 @@ module Views::Controllers::Licenses
 
     def view_template
       container_class(:wide)
-      add_page_title(:index_license_header.l)
       add_context_nav(::Tab::License::IndexActions.new)
 
-      div { render_table }
+      div(class: "mt-3") { render_table }
     end
 
     private
@@ -27,23 +26,25 @@ module Views::Controllers::Licenses
     end
 
     def add_id_column(tbl)
-      tbl.column(append_colon(:id.ti)) { |lic| lic.id.to_s }
+      tbl.column(:mo_id.t) { |lic| lic.id.to_s }
     end
 
     def add_display_name_column(tbl)
-      tbl.column(:license_display_name.l) do |lic|
+      tbl.column(:license_display_name.t) do |lic|
         Link(type: :get, name: lic.display_name, target: lic)
       end
     end
 
     def add_url_column(tbl)
-      tbl.column(:license_url.l) do |lic|
+      tbl.column(:url.t) do |lic|
         Link(type: :get, name: lic.url, target: lic.url)
       end
     end
 
     def add_deprecated_column(tbl)
-      tbl.column("#{:deprecated.l}?") { |lic| lic.deprecated ? "X" : "" }
+      tbl.column("#{:deprecated.ti}?", align: :right) do |lic|
+        lic.deprecated ? "X" : ""
+      end
     end
   end
 end
