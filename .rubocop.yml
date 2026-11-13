@@ -216,7 +216,8 @@ MO/NoLongCommentBlock:
 MO/NoNestedAttributesKwarg:
   Description: >-
     A prop :attributes, ..., :** component (Table, Icon, Button,
-    Link, Help, etc.) forwards every unrecognized keyword directly --
+    Link, Panel, Help, etc.) forwards every unrecognized keyword
+    directly --
     passing attributes: { ... } lands as one more entry inside that
     double-splat instead of setting a real option. See
     lib/rubocop/cop/mo/no_nested_attributes_kwarg.rb.

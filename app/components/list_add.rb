@@ -108,7 +108,7 @@ class Components::ListAdd < Components::ApplicationForm
       end
       Help(element: :span, content: "(#{:optional.l})", class: "ml-2")
       Help(type: :collapse_info_trigger, target_id: "field_slip_help",
-           extra_class: "ml-2")
+           class: "ml-2")
       div(class: "flex-bar") do
         # `label: false` skips the form-group wrapper; the explicit
         # `<label>` above plays that role here.

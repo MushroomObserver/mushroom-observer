@@ -48,12 +48,8 @@ class Components::Help < Components::Base
   prop :well, _Boolean, default: false
   prop :arrow, _Nilable(_Union(:up, :down, "up", "down")), default: nil
   prop :collapse_id, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: nil
   prop :id, _Nilable(String), default: nil
-  # No `default:` — `#initialize` always passes `attributes:` via
-  # `super`, so the default lambda would be dead code (and a
-  # coverage gap).
-  prop :attributes, _Hash(_Union(Symbol, String), _Any?)
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   # Single-entry-point dispatcher. Pass `type:` to route to one of the
   # DOM-distinct subclasses in `DISPATCH`; omit it for the plain shape.
@@ -74,30 +70,12 @@ class Components::Help < Components::Base
     super
   end
 
-  # `arrow:` and `collapse_id:` both imply `well:`. Anything not
-  # extracted here (`data:`, `title:`, etc.) flows through to
-  # `**attributes` — kept as one `**kwargs` param (rather than
-  # naming each as its own keyword param) to stay under RuboCop's
-  # `Metrics/ParameterLists` limit.
-  def initialize(**kwargs)
-    extra_class = kwargs.delete(:class)
-    arrow = kwargs.delete(:arrow)
-    collapse_id = kwargs.delete(:collapse_id)
-    well_implied = !arrow.nil? || !collapse_id.nil?
-    super(element: kwargs.delete(:element) || :div,
-          content: kwargs.delete(:content),
-          well: kwargs.delete(:well) || well_implied,
-          arrow: arrow, collapse_id: collapse_id,
-          id: kwargs.delete(:id),
-          extra_class: extra_class, attributes: kwargs)
-  end
-
   def view_template(&block)
     return unless content?(&block)
 
     if @collapse_id
       render_collapse_wrapper(&block)
-    elsif @well
+    elsif show_well?
       render_well(&block)
     else
       render_plain(&block)
@@ -110,10 +88,13 @@ class Components::Help < Components::Base
     block || @content.present?
   end
 
+  def show_well?
+    @well || @arrow.present? || @collapse_id.present?
+  end
+
   def render_plain(&block)
     base_class = @element == :span ? "help-note" : "help-block form-text"
-    classes = class_names(base_class, @extra_class)
-    send(@element, class: classes, id: @id, **@attributes) do
+    send(@element, id: @id, **mix({ class: base_class }, @attributes)) do
       emit_content(&block)
     end
   end
