@@ -574,6 +574,59 @@ through different `case`-branches). If you find yourself
 reaching for `_Any` to silence a typecheck error, the answer is
 almost always to figure out the right concrete type instead.
 
+## Forwarding arbitrary HTML attributes — default to `:**`
+
+A component that renders one root element and should accept
+arbitrary extra attributes (`class:`, `data:`, `aria:`, an `id:`
+override, etc.) declares a double-splat catch-all prop, forwarded
+with Phlex's `mix()` helper so the component's own default
+`class:`/`data:` merge with the caller's instead of being
+overwritten:
+
+```ruby
+prop :attributes, _Hash(Symbol, _Any?), :**
+
+def view_template
+  div(**mix({ class: "panel panel-default" }, @attributes)) { ... }
+end
+```
+
+This is the default for any such component — `Table`, `Icon`,
+`Button`, `Alert`, `Panel`, `Help`, and ~30 others all follow it.
+**Do not** hand-roll the same job with a custom `initialize` that
+manually deletes known keys out of `**kwargs` and stuffs the rest
+into a plain named `Hash` prop — that shape still works, but it's
+the same catch-all with none of Literal's validation, and every
+example of it left in the codebase is something a future sweep
+(or a session pattern-matching off it) will copy as if it were a
+second legitimate convention.
+
+**The one real exception**: a component that needs two
+independent same-shaped buckets — `AutocompleterField` needs a
+`data:` for its outer wrapper and a separate `data:` for the
+inner input, which a single flat `:**` can't express without one
+silently overwriting the other. That structural collision is the
+bar for keeping a plain named `attributes:`/`options:` Hash prop
+instead of `:**`. "This component already has its own hand-rolled
+version and it isn't broken" is not that bar.
+
+**When sweeping a prop/kwarg convention across components**
+(renaming a prop, converting a family to `:**`, anything in the
+same spirit as issue #5702's flat-kwargs standardization): before
+calling the sweep done, grep the whole codebase for the same
+anti-pattern, not just the call sites already known going in. A
+component's own code comment explaining why it's "different" is
+the first thing to re-check, not a reason to leave it — verify the
+exclusion is structurally forced (the AutocompleterField shape
+above), not just convenient. This has been missed repeatedly
+across Phlex sweeps: issue #5702 itself first shipped with
+`Components::Help`'s hand-rolled `**kwargs` extraction left in
+place as a documented "exception" (it wasn't one — nothing stopped
+it from using `:**` like everything else), and once actually swept,
+a repo-wide grep immediately turned up two more unconverted
+stragglers (`DisplayNameBriefAuthorsLink`/
+`DisplayNameWithoutAuthorsLink`) with the identical pattern.
+
 ## Helpers available everywhere — no per-class registration
 
 A handful of helper sources are wired into the Phlex base classes:

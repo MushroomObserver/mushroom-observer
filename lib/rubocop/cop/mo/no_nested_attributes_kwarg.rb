@@ -26,8 +26,8 @@ module RuboCop
       # `:new`, `:modal`, `:user`) use a `:**` prop; `:external`/
       # `:location`/`:object` have no `attributes` prop, so they're
       # left unchecked here (they'd raise loudly instead of
-      # misrendering). `Help` also dispatches, but every target uses a
-      # plain named prop, so it isn't checked here.
+      # misrendering). `Help(type: ...)` is uniform -- every dispatch
+      # target uses a `:**` prop -- so it's a plain `KIT_NAMES` entry.
       #
       # @example
       #   # bad
@@ -35,12 +35,14 @@ module RuboCop
       #   Icon(type: :edit, attributes: { data: { foo: "bar" } })
       #   Link(type: :get, target: url, attributes: { data: { x: 1 } })
       #   Link(type: :user, user: u, attributes: { class: "x" })
+      #   Help(type: :tooltip, label: "(?)", attributes: { class: "x" })
       #
       #   # good
       #   Table(@rows, align: "center", cellspacing: "2")
       #   Icon(type: :edit, data: { foo: "bar" })
       #   Link(type: :get, target: url, data: { x: 1 })
       #   Link(type: :user, user: u, class: "x")
+      #   Help(type: :tooltip, label: "(?)", class: "x")
       class NoNestedAttributesKwarg < Base
         MSG = "Don't pass `attributes:` to `%<name>s` -- it forwards " \
               "unrecognized keywords directly (a `**` prop), so a " \
@@ -54,7 +56,7 @@ module RuboCop
           :Table, :Icon, :Button, :Alert, :Column, :Row, :Accordion,
           :NavTabs, :Container, :Collapsible, :CountBadge,
           :LanguageSwitchButton, :Navbar, :ButtonGroup, :ContentPadded,
-          :InputGroup, :ListGroup, :Panel
+          :InputGroup, :ListGroup, :Panel, :Help
         ].freeze
 
         # `Link(type: ...)` targets confirmed to use a `:**` prop
@@ -64,8 +66,10 @@ module RuboCop
           :user
         ].freeze
 
-        # Full constant paths only reachable via `.new` (nested classes
-        # with no Kit sugar).
+        # Classes only reachable via `.new`, matching the call site's
+        # source: a full `Components::` path for nested classes with
+        # no Kit sugar, or a bare name for a `Views::` class
+        # referenced unqualified from inside its namespace.
         NEW_ONLY_CLASSES = %w[
           Components::Navbar::Text
           Components::Form::CheckboxCollapse
@@ -78,6 +82,11 @@ module RuboCop
           Components::Modal::CloseButton
           Components::ListGroup::Item
           Components::ListGroup::LinkItem
+          Components::Help::Tooltip
+          Components::Help::CollapseBlock
+          Components::Help::CollapseInfoTrigger
+          DisplayNameBriefAuthorsLink
+          DisplayNameWithoutAuthorsLink
         ].freeze
 
         RESTRICT_ON_SEND = (KIT_NAMES + [:Link, :new]).freeze
