@@ -98,7 +98,8 @@ class FormCameraInfoTest < ComponentTestCase
   # A read-only reflection image shows the read-only note, immutable
   # copyright/license, and a link to the source observation.
   def test_read_only_reflection_panel
-    html = render_info(read_only: true, copyright_holder: "(c) Jane",
+    html = render_info(read_only: true, reflection: true,
+                       copyright_holder: "(c) Jane",
                        license_name: "CC BY-NC", date_differs: true,
                        source_url: "https://www.inaturalist.org/observations/9")
 
@@ -112,6 +113,21 @@ class FormCameraInfoTest < ComponentTestCase
       "a.reflection_source_link" \
       "[href='https://www.inaturalist.org/observations/9']"
     )
+  end
+
+  # A sibling image on another editable observation of the same specimen
+  # is read-only here too, but nothing about it is owned by an imported
+  # source -- so it gets the sibling wording, not the reflection's.
+  def test_read_only_sibling_panel
+    html = render_info(read_only: true, reflection: false,
+                       copyright_holder: "(c) Jane",
+                       license_name: "CC BY-NC")
+
+    assert_includes(html, :image_sibling_info.l)
+    assert_html(html, ".reflection_readonly_note",
+                text: :image_sibling_readonly_note.l)
+    assert_html(html, ".reflection_copyright", text: "(c) Jane")
+    assert_no_html(html, "a.reflection_source_link")
   end
 
   # Read-only with a location OR a differing date offers "Use this info".
@@ -159,12 +175,14 @@ class FormCameraInfoTest < ComponentTestCase
   # rubocop:disable-next Metrics/ParameterLists
   def render_info(lat: nil, lng: nil, alt: nil, date: "2024-01-15",
                   file_name: nil, file_size: nil, read_only: false,
-                  copyright_holder: nil, license_name: nil,
-                  source_url: nil, date_differs: false, upload: true)
+                  reflection: false, copyright_holder: nil,
+                  license_name: nil, source_url: nil, date_differs: false,
+                  upload: true)
     render(Components::Form::CameraInfo.new(
              img_id: 123, upload: upload, lat: lat, lng: lng, alt: alt,
              date: date, file_name: file_name, file_size: file_size,
-             read_only: read_only, copyright_holder: copyright_holder,
+             read_only: read_only, reflection: reflection,
+             copyright_holder: copyright_holder,
              license_name: license_name, source_url: source_url,
              date_differs: date_differs
            ))
