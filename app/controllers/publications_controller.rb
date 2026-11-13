@@ -2,6 +2,8 @@
 
 # Control information about publications that benefit from or cite MO
 class PublicationsController < ApplicationController
+  self.create_button_in_rubric = true
+
   before_action :login_required, except: [:index, :show]
   before_action :require_successful_user, only: [:create]
   before_action :store_location, only: [:index, :show]

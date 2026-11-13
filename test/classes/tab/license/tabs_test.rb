@@ -8,14 +8,10 @@ module Tab::License
       Rails.application.routes.url_helpers
     end
 
-    def setup
-      @license = licenses(:ccbync)
-    end
-
     def test_index
       tab = Tab::License::Index.new
 
-      assert_equal(:index_license.t, tab.title)
+      assert_equal(:index_object.t(type: :license), tab.title)
       assert_equal(routes.licenses_path, tab.path)
       assert_equal(License, tab.model)
     end
@@ -23,26 +19,9 @@ module Tab::License
     def test_new
       tab = Tab::License::New.new
 
-      assert_equal(:create_license_title.t, tab.title)
+      assert_equal(:create_object.t(type: :license), tab.title)
       assert_equal(routes.new_license_path, tab.path)
       assert_equal(License, tab.model)
-    end
-
-    def test_edit
-      tab = Tab::License::Edit.new(license: @license)
-
-      assert_equal(:edit.ti, tab.title)
-      assert_equal(routes.edit_license_path(@license.id), tab.path)
-      assert_equal(@license, tab.model)
-    end
-
-    def test_destroy
-      tab = Tab::License::Destroy.new(license: @license)
-
-      assert_equal(:destroy.ti, tab.title)
-      assert_equal(@license, tab.path)
-      assert_equal(:destroy, tab.html_options[:button])
-      assert_equal(@license, tab.model)
     end
   end
 
@@ -68,27 +47,6 @@ module Tab::License
 
       assert_equal(
         [Tab::Object::Return, Tab::License::Index],
-        tabs.map(&:class)
-      )
-    end
-
-    def test_show_actions_in_use
-      @license.define_singleton_method(:in_use?) { true }
-      tabs = Tab::License::ShowActions.new(license: @license).to_a
-
-      assert_equal(
-        [Tab::License::Index, Tab::License::New, Tab::License::Edit],
-        tabs.map(&:class)
-      )
-    end
-
-    def test_show_actions_not_in_use
-      @license.define_singleton_method(:in_use?) { false }
-      tabs = Tab::License::ShowActions.new(license: @license).to_a
-
-      assert_equal(
-        [Tab::License::Index, Tab::License::New, Tab::License::Edit,
-         Tab::License::Destroy],
         tabs.map(&:class)
       )
     end

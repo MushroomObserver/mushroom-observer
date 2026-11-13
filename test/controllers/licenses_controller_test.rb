@@ -18,7 +18,7 @@ class LicensesControllerTest < FunctionalTestCase
     end
     assert_select(
       "a[href = '#{new_license_path}']", true,
-      "License Index missing link to #{:create_license_title.l}"
+      "License Index missing link to #{:create_object.l(type: :license)}"
     )
   end
 
@@ -54,7 +54,7 @@ class LicensesControllerTest < FunctionalTestCase
       "License page missing link to edit License"
     )
     assert_select(
-      "button", { text: :destroy.ti, count: 0 },
+      "button", { text: :destroy_object.t(type: :license), count: 0 },
       "Show page for License in use should not have Delete button"
     )
   end
@@ -79,12 +79,10 @@ class LicensesControllerTest < FunctionalTestCase
       "a[href = '#{edit_license_path(license.id)}']", true,
       "License page missing link to edit License"
     )
-    # Two destroy buttons: one in the top-bar dropdown, one in the
-    # mobile-sidebar context-nav (the sidebar collapsed every tuple
-    # to a plain link before #4392; now it correctly emits the
-    # destroy form so mobile users can actually trigger the delete).
+    # Two: one in the title-bar, one in the mobile-sidebar duplicate
+    # of the same title_bar_actions slot.
     assert_select(
-      "button", { text: :destroy.ti, count: 2 },
+      "button", { text: :destroy_object.t(type: :license), count: 2 },
       "Show page for unused License in use should have Delete button"
     )
   end

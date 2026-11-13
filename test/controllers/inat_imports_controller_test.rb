@@ -74,6 +74,39 @@ class InatImportsControllerTest < FunctionalTestCase
     )
   end
 
+  def test_index_sort_options_admin_includes_user
+    options = @controller.index_sort_options(admin: true)
+
+    assert_includes(options.map(&:first), "user")
+  end
+
+  def test_index_sort_options_non_admin_excludes_user
+    options = @controller.index_sort_options(admin: false)
+
+    assert_not_includes(options.map(&:first), "user")
+  end
+
+  def test_index_admin_sorts_by_user
+    make_admin
+    katrina_import = inat_imports(:katrina_inat_import)
+    rolf_import = inat_imports(:rolf_inat_import)
+
+    get(:index, params: { by: "user" })
+
+    assert_response(:success)
+    rows = css_select("tbody tr")
+    katrina_row = rows.index do |row|
+      css_select(row, "a[href='#{inat_import_path(katrina_import)}']").any?
+    end
+    rolf_row = rows.index do |row|
+      css_select(row, "a[href='#{inat_import_path(rolf_import)}']").any?
+    end
+    assert_not_nil(katrina_row, "expected a row for Katrina's import")
+    assert_not_nil(rolf_row, "expected a row for Rolf's import")
+    assert_operator(katrina_row, :<, rolf_row,
+                    "Katrina should sort before Rolf Singer by user name")
+  end
+
   def test_results_redirects_to_observations_with_query
     import = inat_imports(:lone_wolf_import)
     import.update!(imported_count: 2)

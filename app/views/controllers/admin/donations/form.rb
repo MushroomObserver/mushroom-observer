@@ -13,7 +13,7 @@ module Views::Controllers::Admin::Donations
         checkbox_field(:anonymous, label: :donate_anonymous)
         text_field(:email, size: 50, label: :email.ti, inline: true,
                            type: "email")
-        submit(:create_donation_add.l, center: true)
+        submit(:add.ti, center: true)
       end
     end
 

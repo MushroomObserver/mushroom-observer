@@ -70,8 +70,9 @@ module Views::Controllers::Observations::ExternalLinks
       end
     end
 
-    # Read-only reflections (#4214) can't be edited on MO; the note tells
-    # the user to change the record at its source and resync.
+    # A reflection's scalar core (date, location, GPS, notes) can't be
+    # edited directly on MO; the note points to the linked companion
+    # observation (#4214) for adding notes and data.
     def render_read_only_note
       div(class: "reflection-read-only-note text-muted small mt-1") do
         plain(:observation_reflection_read_only_note.l)

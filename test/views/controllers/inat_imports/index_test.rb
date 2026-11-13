@@ -8,6 +8,7 @@ module Views::Controllers::InatImports
       super
       @user = users(:rolf)
       controller.instance_variable_set(:@user, @user)
+      controller.define_singleton_method(:index_sort_options) { |**| [] }
       @import = inat_imports(:rolf_inat_import)
     end
 
@@ -75,8 +76,12 @@ module Views::Controllers::InatImports
     private
 
     def render_index(imports:, admin: false, result_import_ids: [])
-      render(Index.new(imports: imports, admin: admin,
-                       result_import_ids: result_import_ids))
+      render(Index.new(
+               imports: imports, admin: admin,
+               result_import_ids: result_import_ids,
+               query: Query.lookup_and_save(:InatImport),
+               pagination_data: PaginationData.new
+             ))
     end
   end
 end

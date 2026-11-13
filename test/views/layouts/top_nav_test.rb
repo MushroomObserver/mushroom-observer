@@ -13,6 +13,10 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     stub_controller_name!("observations")
     stub_controller_path!("observations")
     define_action_methods!([:new, :index, :show])
+    # Matches ObservationsController's `self.create_button_in_rubric =
+    # true` -- the test controller has no class-level opt-in, so each
+    # test stubs the instance method directly.
+    stub_creatable!(true)
   end
 
   # ---- nav_create (+ Add button) -------------------------------------
@@ -43,10 +47,7 @@ class Views::Layouts::TopNavTest < ComponentTestCase
   end
 
   def test_nav_create_hidden_for_non_creatable_controller
-    # `articles` IS in NAV_CREATABLES; pick one that isn't:
-    # `descriptions`.
-    stub_controller_name!("descriptions")
-    stub_controller_path!("descriptions")
+    stub_creatable!(false)
 
     html = render(top_nav(user: @user))
 
@@ -238,6 +239,10 @@ class Views::Layouts::TopNavTest < ComponentTestCase
 
   def stub_controller_path!(path)
     controller.define_singleton_method(:controller_path) { path }
+  end
+
+  def stub_creatable!(value)
+    controller.define_singleton_method(:create_button_in_rubric?) { value }
   end
 
   # Make controller.methods.include?(:new) return what the test wants.

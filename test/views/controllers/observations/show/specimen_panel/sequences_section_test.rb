@@ -70,7 +70,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       )
       html = render(panel_with(obs.reload))
 
-      assert_html(html, "#sequence_#{seq.id} .mo-icon-read-only")
+      assert_html(html, "#sequence_#{seq.id} .mo-icon-reflection")
       assert_no_html(html, "#sequence_#{seq.id} .mo-icon-is-primary")
     end
 

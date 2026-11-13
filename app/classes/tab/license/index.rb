@@ -3,7 +3,7 @@
 # "Licenses index" link.
 class Tab::License::Index < Tab::Base
   def title
-    :index_license.t
+    :index_object.t(type: :license)
   end
 
   def path
