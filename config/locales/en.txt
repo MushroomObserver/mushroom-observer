@@ -1637,6 +1637,8 @@
   image_reflection_info: Reflection image
   image_reflection_readonly_note: Read-only image from an imported observation. This information can only be changed at the source.
   image_reflection_source_link: View the source observation
+  image_sibling_info: Image from a matching observation
+  image_sibling_readonly_note: Image from another observation of the same specimen. It can only be changed on that observation.
   image_file_name: File name
   image_file_size: File size
 
@@ -3554,8 +3556,10 @@
   email_subject_inat_import_digest: "[count] new iNaturalist [:observations] matching your interests"
   email_subject_name_merge_digest: "[old] merged into [new]"
   email_subject_content_purge: "[count] images removed from records you created on Mushroom Observer"
-  email_subject_project_alert: "[count] new iNaturalist [:observations] for your [:projects]"
-  email_subject_project_alert_one: "[count] new iNaturalist [:observation] for your [:projects]"
+  email_subject_project_alert_find: "New [:observations] of [name] on [site]"
+  email_subject_project_alert_find_one: "New [:observation] of [name] on [site]"
+  email_subject_project_alert_activity: "Other activity on [:observations] of [name] at [site]"
+  email_subject_project_alert_activity_one: "Other activity on an [:observation] of [name] at [site]"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
   email_subject_occurrence_added: "[:observation.ti] Added to [:occurrence.ti], [name]"
@@ -3629,8 +3633,10 @@
   email_name_change_request: "User wants to change Name having dependents:\n\nuser : [user]\nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_inat_import_digest_intro: "h2. *iNaturalist Import*\n\nA recent import from iNaturalist added [count] [:observations] matching names you follow:"
-  email_project_alert_intro: "h2. *New observations from iNaturalist*\n\niNaturalist has [count] new [:observations] matching a [:project] you are watching:"
-  email_project_alert_intro_one: "h2. *New observations from iNaturalist*\n\niNaturalist has [count] new [:observation] matching a [:project] you are watching:"
+  email_project_alert_find_intro: "h2. *New observations of [name]*\n\n[site] has [count] new [:observations] matching a [:project] you are watching:"
+  email_project_alert_find_intro_one: "h2. *New observation of [name]*\n\n[site] has [count] new [:observation] matching a [:project] you are watching:"
+  email_project_alert_activity_intro: "h2. *Other activity on observations of [name]*\n\n[site] has new activity on [count] [:observations] matching a [:project] you are watching:"
+  email_project_alert_activity_intro_one: "h2. *Other activity on an observation of [name]*\n\n[site] has new activity on [count] [:observation] matching a [:project] you are watching:"
   email_project_alert_row: "[name], observed [date], in [projects]:"
   email_project_alert_row_undated: "[name], date unknown, in [projects]:"
   email_inat_import_digest_truncated: "This email shows the first [shown] of [count] matching [:observations]."

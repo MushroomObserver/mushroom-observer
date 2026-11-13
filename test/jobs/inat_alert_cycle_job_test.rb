@@ -24,6 +24,31 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
     end
   end
 
+  # One message per watched name per kind (#5677), so a subject line
+  # can name what was found and say whether it is a find or activity
+  # on something already reported.
+  def test_a_message_per_watched_name_and_kind
+    mary = users(:mary)
+    alerts = [
+      project_external_site_alert,
+      project_external_site_alert(remote_identification_id: "1000",
+                                  name: "Coprinus comatus var. ovatus"),
+      project_external_site_alert(
+        remote_identification_id: "1001",
+        kind: ProjectExternalSiteAlert::OTHER_ACTIVITY
+      ),
+      project_external_site_alert(remote_identification_id: "1002",
+                                  remote_observation_id: "12346",
+                                  name: "Agaricus campestris",
+                                  target_name: "Agaricus campestris")
+    ]
+    scanner = fake_scanner({ mary => alerts })
+
+    assert_enqueued_emails(3) do
+      Inat::AlertScanner.stub(:new, scanner) { InatAlertCycleJob.perform_now }
+    end
+  end
+
   def test_nothing_to_say_sends_nothing
     assert_no_enqueued_emails do
       Inat::AlertScanner.stub(:new, fake_scanner({})) do
@@ -45,12 +70,14 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
     assert_equal(["too many pages"], raised)
   end
 
-  def project_external_site_alert
+  def project_external_site_alert(**args)
     ProjectExternalSiteAlert.create!(
-      project: projects(:rare_fungi_project),
-      external_site: external_sites(:inaturalist),
-      remote_identification_id: "999", remote_observation_id: "12345",
-      name: "Coprinus comatus", alerted_at: Time.zone.now
+      { project: projects(:rare_fungi_project),
+        external_site: external_sites(:inaturalist),
+        remote_identification_id: "999", remote_observation_id: "12345",
+        name: "Coprinus comatus", target_name: "Coprinus comatus",
+        kind: ProjectExternalSiteAlert::NEW_OBSERVATION,
+        alerted_at: Time.zone.now }.merge(args)
     )
   end
 
