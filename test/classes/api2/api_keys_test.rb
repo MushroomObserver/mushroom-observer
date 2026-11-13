@@ -114,6 +114,24 @@ class API2::APIKeysTest < UnitTestCase
     assert_not_nil(api_key.reload.verified)
   end
 
+  # The password of an account flagged for a reset may be one someone
+  # else holds, so it does not verify the key. The request falls back to
+  # emailing the owner, the same as a request with no password.
+  def test_posting_api_key_for_a_flagged_user
+    katrina.update_column(:password_reset_required, true)
+    @for_user = katrina
+    @app = "Mushroom Mapper"
+    @verified = false
+    params = params_post(app: @app, for_user: katrina.id,
+                         password: "testpassword")
+
+    assert_enqueued_with(job: ActionMailer::MailDeliveryJob) do
+      api = API2.execute(params)
+      assert_no_errors(api, "Errors while posting api key")
+      assert_last_api_key_correct
+    end
+  end
+
   def test_patching_api_keys
     params = params_patch(id: @api_key.id, set_app: "new app")
     # No PATCH requests allowed now.
