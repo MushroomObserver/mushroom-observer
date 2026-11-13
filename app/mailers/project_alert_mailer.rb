@@ -1,10 +1,16 @@
 # frozen_string_literal: true
 
-# One message per project admin per cycle, naming the observations an
-# external site has newly identified as something the project watches
-# (#5416). A digest rather than a message per identification: a taxon
-# swap on iNat landing on a watched name would be surprising, but it is
-# the case that would otherwise flood an inbox.
+# One message per project admin per watched name per kind per cycle,
+# naming the observations an external site has newly identified as
+# something the project watches (#5416).
+#
+# A digest rather than a message per identification: a taxon swap on
+# iNat landing on a watched name would be surprising, but it is the
+# case that would otherwise flood an inbox. The subject names the
+# watched name and says whether this is a find or later activity on
+# something already reported (#5677) -- what a coordinator needs to
+# decide how soon to follow it up. The count and the projects stay in
+# the body, since neither changes what they do about it.
 class ProjectAlertMailer < ApplicationMailer
   after_action :news_delivery, only: [:build]
 
@@ -17,17 +23,27 @@ class ProjectAlertMailer < ApplicationMailer
                                     alerts: alerts })
   end
 
+  SUBJECT_TAGS = {
+    ProjectExternalSiteAlert::NEW_OBSERVATION =>
+      { one: :email_subject_project_alert_find_one,
+        many: :email_subject_project_alert_find },
+    ProjectExternalSiteAlert::OTHER_ACTIVITY =>
+      { one: :email_subject_project_alert_activity_one,
+        many: :email_subject_project_alert_activity }
+  }.freeze
+
   private
 
-  # One observation can match several of the receiver's projects, so
-  # the count is of observations, not of rows.
   def subject_for(alerts)
-    count = alerts.map(&:remote_observation_id).uniq.size
-    tag = if count == 1
-            :email_subject_project_alert_one
-          else
-            :email_subject_project_alert
-          end
-    tag.l(count: count)
+    alert = alerts.first
+    subject_tag(alerts).l(name: alert.target_name.to_s,
+                          site: alert.external_site&.name.to_s)
+  end
+
+  # One observation can match several of the receiver's projects, so
+  # the plural follows the observations, not the rows.
+  def subject_tag(alerts)
+    plurality = alerts.map(&:remote_observation_id).uniq.one? ? :one : :many
+    SUBJECT_TAGS.dig(alerts.first.kind, plurality)
   end
 end

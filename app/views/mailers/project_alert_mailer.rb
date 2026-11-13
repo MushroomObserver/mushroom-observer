@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 # What an external site newly identified as a name one of the
-# receiver's projects watches (#5416). Grouped by project, each row
-# naming the observation, the name applied and the date it was seen --
-# which is what says whether a voucher is still a possibility.
+# receiver's projects watches (#5416). One watched name and one kind
+# per message (#5677); each row names the observation, the name
+# applied and the date it was seen -- which is what says whether a
+# voucher is still a possibility.
 class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   prop :subject, ::String
   prop :receiver, ::User
@@ -35,16 +36,26 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
     end
   end
 
+  INTRO_TAGS = {
+    ::ProjectExternalSiteAlert::NEW_OBSERVATION =>
+      { one: :email_project_alert_find_intro_one,
+        many: :email_project_alert_find_intro },
+    ::ProjectExternalSiteAlert::OTHER_ACTIVITY =>
+      { one: :email_project_alert_activity_intro_one,
+        many: :email_project_alert_activity_intro }
+  }.freeze
+
   private
 
   def intro
     count = by_observation.size
-    tag = if count == 1
-            :email_project_alert_intro_one
-          else
-            :email_project_alert_intro
-          end
-    tag.l(count: count)
+    alert = @alerts.first
+    intro_tag(count).l(count: count, name: alert.target_name.to_s,
+                       site: alert.external_site&.name.to_s)
+  end
+
+  def intro_tag(count)
+    INTRO_TAGS.dig(@alerts.first.kind, count == 1 ? :one : :many)
   end
 
   # Grouped by observation rather than by project: one observation can
