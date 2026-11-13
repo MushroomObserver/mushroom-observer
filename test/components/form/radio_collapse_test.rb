@@ -19,7 +19,7 @@ class FormRadioCollapseTest < ComponentTestCase
   end
 
   def test_change_action_wires_collapse_switch
-    html = render_collapse(value: "other")
+    html = render_collapse(option_value: "other")
 
     assert_html(html,
                 "input[type='radio']" \
@@ -27,10 +27,8 @@ class FormRadioCollapseTest < ComponentTestCase
   end
 
   def test_caller_data_merges_alongside_collapse_switch_action
-    html = render_collapse(
-      value: "other",
-      attributes: { data: { donate_target: "otherCheck" } }
-    )
+    html = render_collapse(option_value: "other",
+                           data: { donate_target: "otherCheck" })
 
     assert_html(html,
                 "input[type='radio']" \
@@ -45,10 +43,8 @@ class FormRadioCollapseTest < ComponentTestCase
   # responsible for including the collapse-switch action itself if it
   # still wants that wiring.
   def test_caller_action_in_data_overrides_collapse_switch_action
-    html = render_collapse(
-      value: "other",
-      attributes: { data: { action: "click->other#thing" } }
-    )
+    html = render_collapse(option_value: "other",
+                           data: { action: "click->other#thing" })
 
     assert_html(html,
                 "input[type='radio'][data-action='click->other#thing']")
@@ -57,30 +53,29 @@ class FormRadioCollapseTest < ComponentTestCase
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_wrap_class_forwarded
-    html = render_collapse(value: "other",
-                           attributes: { wrap_class: "mb-3" })
+    html = render_collapse(option_value: "other", wrap_class: "mb-3")
 
     assert_html(html, ".mb-3 input[type='radio']")
   end
 
   def test_label_accepts_bare_string
-    html = render_collapse(value: "other", label: "Other Amount:")
+    html = render_collapse(option_value: "other", label: "Other Amount:")
 
     assert_html(html, "label", text: "Other Amount:")
   end
 
   private
 
-  def render_collapse(value:, label: "Other", attributes: {})
+  def render_collapse(option_value:, label: "Other", **attributes)
     form = TestForm.new(@donation, action: "/support")
     the_form = form
     form.render_block = proc do
       render(Components::Form::RadioCollapse.new(
                form: the_form,
                field: :amount,
-               value: value,
+               option_value: option_value,
                label: label,
-               attributes: attributes
+               **attributes
              ))
     end
     render(form)

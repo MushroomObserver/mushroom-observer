@@ -44,7 +44,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_definition_panel
-      Panel(panel_id: "glossary_term_definition") do |panel|
+      Panel(id: "glossary_term_definition") do |panel|
         panel.with_body do
           div(class: "description mb-3") do
             trusted_html(@glossary_term.description.tpl)

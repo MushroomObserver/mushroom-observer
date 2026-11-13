@@ -34,7 +34,7 @@ class Components::ListAdd < Components::ApplicationForm
   # the form tag.
   def around_template(&block)
     Panel(
-      panel_id: "list_add", panel_class: "mt-3"
+      id: "list_add", class: "mt-3"
     ) do |panel|
       panel.with_heading do
         plain(:list_add_heading.l(type: interpolation_type))

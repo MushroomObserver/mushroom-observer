@@ -26,7 +26,7 @@ module Views::Controllers::Contributors
       ].freeze
 
       def view_template
-        Panel(panel_id: "contribution_legend", panel_class: "mb-2",
+        Panel(id: "contribution_legend", class: "mb-2",
               collapse_target: "#contribution_legend_body") do |panel|
           panel.with_heading { render_heading }
           panel.with_heading_links { render_toggle_button }

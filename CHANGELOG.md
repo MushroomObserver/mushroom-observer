@@ -1,5 +1,28 @@
 # Changelog
 
+## 2026-11-13 (deploy-2026-11-13-14-30)
+
+- Users and Visual Models/Groups page-review fixes ([PR5670](https://github.com/MushroomObserver/mushroom-observer/pull/5670), @nimmolo)
+- Add unique index on `user_group_users` (#5636) ([PR5671](https://github.com/MushroomObserver/mushroom-observer/pull/5671), @nimmolo)
+- Add headers and `MO ID` column to Fungarium Records index ([PR5674](https://github.com/MushroomObserver/mushroom-observer/pull/5674), @nimmolo)
+- Fix a grab-bag of admin-page issues ([PR5673](https://github.com/MushroomObserver/mushroom-observer/pull/5673), @nimmolo)
+- Route raw `align-middle`/`text-center`/`text-right` table classes through `Table` kwargs, extend the cop ([PR5676](https://github.com/MushroomObserver/mushroom-observer/pull/5676), @nimmolo)
+- Use `type: "email"`/`type: "url"` on single-purpose email/URL text fields ([PR5683](https://github.com/MushroomObserver/mushroom-observer/pull/5683), @nimmolo)
+- Bump solid_queue from 1.7.0 to 1.7.2 ([PR5685](https://github.com/MushroomObserver/mushroom-observer/pull/5685), @app/dependabot)
+- Replace the reflection "lock" icon and fix its confusing help text (#5655) ([PR5675](https://github.com/MushroomObserver/mushroom-observer/pull/5675), @nimmolo)
+- Add `Query::InatImports`, paginate the iNat Imports index ([PR5689](https://github.com/MushroomObserver/mushroom-observer/pull/5689), @nimmolo)
+- Bump trilogy from 2.13.1 to 2.13.3 ([PR5686](https://github.com/MushroomObserver/mushroom-observer/pull/5686), @app/dependabot)
+- Bump oauth2 from 2.0.25 to 2.1.0 ([PR5687](https://github.com/MushroomObserver/mushroom-observer/pull/5687), @app/dependabot)
+- Fix nested `/locations/:location_id/descriptions` and `/names/:name_id/descriptions` filters ([PR5695](https://github.com/MushroomObserver/mushroom-observer/pull/5695), @nimmolo)
+- License show page: `IDBadge` in title, fields as a table (`#5580`) ([PR5697](https://github.com/MushroomObserver/mushroom-observer/pull/5697), @nimmolo)
+- Replace `TopNav::NAV_CREATABLES` with a `create_button_in_rubric?` controller flag ([PR5698](https://github.com/MushroomObserver/mushroom-observer/pull/5698), @nimmolo)
+- Give paging by letter to any index sorted by name/title ([PR5696](https://github.com/MushroomObserver/mushroom-observer/pull/5696), @nimmolo)
+- Name the taxon in a Project alert, and split finds from later activity ([PR5691](https://github.com/MushroomObserver/mushroom-observer/pull/5691), @mo-nathan)
+- Say a sibling image is imported only when it is ([PR5684](https://github.com/MushroomObserver/mushroom-observer/pull/5684), @mo-nathan)
+- Include target count on Names tab ([PR5694](https://github.com/MushroomObserver/mushroom-observer/pull/5694), @JoeCohen)
+- Move `InatImportsController#index` onto the generic Query pipeline ([PR5699](https://github.com/MushroomObserver/mushroom-observer/pull/5699), @nimmolo)
+- Move `PublicationsController#index` onto the generic Query pipeline ([PR5700](https://github.com/MushroomObserver/mushroom-observer/pull/5700), @nimmolo)
+
 ## 2026-11-10 (deploy-2026-11-10-00-30)
 
 - Clear `ActionMailer::Base.deliveries` between tests ([PR5667](https://github.com/MushroomObserver/mushroom-observer/pull/5667), @nimmolo)

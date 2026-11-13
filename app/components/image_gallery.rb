@@ -37,7 +37,7 @@ class Components::ImageGallery < Components::Base
     # page (Views::Controllers::Images::Show::ImagePanel) live-updates.
     # Cross-tab updates aren't a supported config; this page catches
     # up on the next load via the #4808 cache-busting URL token.
-    Panel(panel_id: @panel_id) do |panel|
+    Panel(id: @panel_id) do |panel|
       panel.with_heading { @title } if @thumbnails
       # `@links` is a `SafeBuffer` from a Rails `capture { … }` block;
       # in Phlex, slots that return a string escape it unless wrapped

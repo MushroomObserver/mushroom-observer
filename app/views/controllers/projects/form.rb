@@ -160,14 +160,14 @@ module Views::Controllers::Projects
     # dates" is the default, so it's listed first.
     def render_dates_any_radios
       render(Components::Form::RadioCollapse.new(
-               form: self, field: "project[dates_any]", value: "true",
+               form: self, field: "project[dates_any]", option_value: "true",
                label: :form_projects_accept_any_dates.t,
-               attributes: { value: @dates_any }
+               value: @dates_any
              ))
       render(Components::Form::RadioCollapse.new(
-               form: self, field: "project[dates_any]", value: "false",
+               form: self, field: "project[dates_any]", option_value: "false",
                label: :form_projects_enforce_date_range.t,
-               attributes: { value: @dates_any }
+               value: @dates_any
              ))
     end
 
