@@ -253,14 +253,14 @@ check \
   'raw Bootstrap table class' \
   'Components::Table.new(collection) do |t| … end' \
   '(^[[:space:]]*table\(class:|class:[[:space:]]*["'"'"'][^"'"'"']*\btable[^-])' \
-  'table_class:|Components::Table|Table\(|_class:'
+  'Components::Table|Table\(|_class:|[a-zA-Z]-table\b'
 
 # panel — exclude _class: kwargs and custom *-panel CSS class names
 check \
   'raw Bootstrap panel class' \
-  'Components::Panel.new (with panel_class: for variant overrides)' \
+  'Components::Panel.new (with variant: for color overrides)' \
   'class:[[:space:]]*["'"'"'][^"'"'"']*\bpanel\b' \
-  'panel_class:|panel-(body|heading|footer|title|group|collapse)|_class:|[a-zA-Z]-panel\b'
+  'panel-(body|heading|footer|title|group|collapse)|_class:|[a-zA-Z]-panel\b'
 
 # target="_blank" / target: "_blank" — use Link::External instead
 # exclude button_target: which is a Phlex component prop, not raw HTML
@@ -314,7 +314,7 @@ Quick reference:
   alert-link       → Components::Alert::Link.new(text, path)
   glyphicon        → Components::Icon.new(type: :symbol)
   table            → Components::Table.new(collection) do |t| … end
-  panel            → Components::Panel.new
+  panel            → Components::Panel.new (variant: for color)
   target="_blank"  → Components::Link::External.new("text", url)
   radio (div)      → radio_field(:field, [value, label], ...)
 FOOTER

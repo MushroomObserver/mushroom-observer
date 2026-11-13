@@ -37,7 +37,7 @@ module Views::Controllers::Projects
     end
 
     def render_summary_panel
-      Panel(panel_id: "project_summary") do |panel|
+      Panel(id: "project_summary") do |panel|
         panel.with_body do
           render_summary_body
         end

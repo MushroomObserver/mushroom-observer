@@ -1732,7 +1732,7 @@ render(Components::ApplicationForm::RadioField.new(
 proxy = ApplicationForm.image_field_proxy(:good_image, 123, :notes, "text")
 render(Components::ApplicationForm::TextField.new(
   proxy,
-  attributes: { rows: 2 },
+  rows: 2,
   wrapper_options: { label: "Notes:" }
 ))
 ```

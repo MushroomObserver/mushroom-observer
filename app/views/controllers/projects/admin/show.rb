@@ -42,8 +42,8 @@ module Views::Controllers::Projects::Admin
 
     def render_danger_zone
       Panel(
-        panel_class: "panel-danger mt-4",
-        panel_id: "project_danger_zone"
+        variant: :danger, class: "mt-4",
+        id: "project_danger_zone"
       ) do |panel|
         panel.with_heading do
           strong { plain(:show_project_admin_danger_zone.l) }

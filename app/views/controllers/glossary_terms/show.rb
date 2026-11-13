@@ -114,7 +114,7 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_authors_editors_panel
-      Panel(panel_id: "glossary_term_authors_editors") do |panel|
+      Panel(id: "glossary_term_authors_editors") do |panel|
         panel.with_body do
           render(::Views::Layouts::AuthorsAndEditors.new(
                    obj: @glossary_term,
