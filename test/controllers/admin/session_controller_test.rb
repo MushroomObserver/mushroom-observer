@@ -203,6 +203,28 @@ module Admin
       assert_nil(session[:real_user_id])
     end
 
+    # A non-admin may keep switching only while the session can produce
+    # the credential stored at switch time. An id by itself is a copy of
+    # a switched session, which reaches any account from here.
+    def test_update_refuses_a_sudo_session_with_no_credential
+      login(:mary)
+      session[:real_user_id] = rolf.id
+
+      put(:update, params: { admin_session: { user_id: dick.id } })
+
+      assert_response(:redirect)
+      assert_users_equal(mary, logged_in_user)
+    end
+
+    def test_edit_refuses_a_sudo_session_with_no_credential
+      login(:mary)
+      session[:real_user_id] = rolf.id
+
+      get(:edit)
+
+      assert_response(:redirect)
+    end
+
     # `find_user_by_id_login_or_email("")` returns `nil` for a blank
     # input. With no params at all, `@id` ends up blank and the
     # method's blank-string branch fires.

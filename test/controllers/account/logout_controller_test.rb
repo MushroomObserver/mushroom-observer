@@ -41,6 +41,7 @@ module Account
       ctrl.send(:switch_to_user, target)
 
       assert_equal(users(:rolf).id, session[:real_user_id])
+      assert_equal(users(:rolf).auth_code, session[:real_auth])
       assert_nil(session[:admin])
       assert_equal(target, ctrl.instance_variable_get(:@user))
     end
@@ -56,7 +57,67 @@ module Account
       ctrl.send(:switch_to_user, rolf)
 
       assert_nil(session[:real_user_id])
+      assert_nil(session[:real_auth])
       assert(session[:admin])
+    end
+
+    # The switched session can produce the credential stored at switch
+    # time, so the admin comes back with admin mode on.
+    def test_create_restores_the_admin_behind_a_switched_session
+      rolf.update!(admin: true)
+      login("mary")
+      session[:real_user_id] = rolf.id
+      session[:real_auth] = rolf.auth_code
+
+      post(:create)
+
+      assert_equal(rolf.id, session[:user_id])
+      assert_equal(true, session[:admin])
+      assert_nil(session[:real_user_id])
+    end
+
+    # A session carrying only the id -- one predating the binding, or a
+    # copy of a switched session whose admin has since rotated -- is
+    # logged out instead of promoted.
+    def test_create_refuses_a_sudo_session_with_no_credential
+      rolf.update!(admin: true)
+      login("mary")
+      session[:real_user_id] = rolf.id
+
+      post(:create)
+
+      assert_nil(session[:user_id])
+      assert_nil(session[:real_user_id])
+      assert_equal(false, session[:admin])
+      assert_redirected_to(account_logout_path)
+    end
+
+    def test_create_refuses_a_sudo_session_with_a_stale_credential
+      rolf.update!(admin: true)
+      login("mary")
+      session[:real_user_id] = rolf.id
+      session[:real_auth] = rolf.auth_code
+      rolf.change_password("something else")
+
+      post(:create)
+
+      assert_nil(session[:user_id])
+      assert_nil(session[:real_user_id])
+      assert_redirected_to(account_logout_path)
+    end
+
+    # `session_user_set(nil)` owns the clearing, so an ordinary logout
+    # leaves nothing behind for the branch above to act on.
+    def test_create_clears_sudo_keys_on_an_ordinary_logout
+      login("mary")
+      session[:real_user_id] = users(:dick).id
+      session[:real_auth] = users(:dick).auth_code
+
+      post(:create)
+
+      assert_nil(session[:real_user_id])
+      assert_nil(session[:real_auth])
+      assert_equal(false, session[:admin])
     end
   end
 end
