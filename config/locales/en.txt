@@ -2463,6 +2463,7 @@
 
   # publication/index
   publication_index: Publication List
+  publication_filter_by: Filter by text
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/admin/emails/webmaster_questions/new.
   publication_full_help: "When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author. The reference is formatted with <a href=\"/info/textile_sandbox/new\" target=\"_new\">Textile</a>, not HTML. Unlike other MO fields, text between underscores is shown in italics without a link to the Name: put a Name between underscores (&#95;Lactarius fragilis&#95;) and the journal or book title between double question marks (&#63;&#63;Journal Name&#63;&#63;). Type & and other characters as they are."
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
@@ -4582,6 +4583,7 @@
   query_editable_by_user: editable by
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
+  query_full_has: text has
   query_has_author: with author
   query_has_citation: with citation
   query_has_classification: with classification

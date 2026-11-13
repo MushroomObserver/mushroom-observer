@@ -50,6 +50,24 @@ class PublicationsControllerTest < FunctionalTestCase
     assert_equal(expected.map(&:id), assigns(:objects).map(&:id))
   end
 
+  # "MyText" matches two fixtures -- a single-match filter would
+  # redirect straight to that record's show page instead of
+  # rendering the index (`show_action_redirect`).
+  def test_index_filtered_by_full_has
+    one = publications(:one_pub)
+    two = publications(:two_pub)
+    spam = publications(:spam_pub)
+    login
+
+    get(:index, params: { full_has: "MyText" })
+
+    assert_response(:success)
+    assert_includes(assigns(:objects), one)
+    assert_includes(assigns(:objects), two)
+    assert_not_includes(assigns(:objects), spam)
+    assert_select("#filters", text: /#{:query_full_has.l}/)
+  end
+
   # Covers the `link_cell` branch in
   # `Views::Controllers::Publications::Index` when the publication
   # has a `link` set (current fixtures have none).

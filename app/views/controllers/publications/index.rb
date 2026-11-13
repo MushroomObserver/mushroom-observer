@@ -37,6 +37,7 @@ module Views::Controllers::Publications
       container_class(:wide)
 
       Container(width: :text) { render_intro }
+      ContentPadded { render_filter_form }
       PaginatedResults { render_publications_table }
       ContentPadded do
         trusted_html(:publication_legend.tp)
@@ -51,6 +52,27 @@ module Views::Controllers::Publications
         trusted_html(:publication_citation.tp)
         a(href: INTRO_CITATION_URL) { plain(INTRO_CITATION_TEXT) }
       end
+    end
+
+    # The visible input carries the submitted `full_has` param
+    # directly -- no autocompleter, no id, just a plain substring
+    # filter against `full`.
+    def render_filter_form
+      field = Components::ApplicationForm::FieldProxy.new(
+        nil, :full_has, filter_text
+      )
+      IndexFilter(to: publications_path, submit_text: :filter.ti) do
+        render(Components::ApplicationForm::TextField.new(
+                 field,
+                 wrapper_options: { label: :publication_filter_by,
+                                    inline: true },
+                 size: 60, class: "mb-0"
+               ))
+      end
+    end
+
+    def filter_text
+      @query&.params&.dig(:full_has).to_s
     end
 
     def render_publications_table
