@@ -148,7 +148,8 @@ svg.placeholder {
 }
 
 .status-btn-group {
-  @include btn-group-dividers(".status-link-current", $list-group-border);
+  @include btn-group-dividers(".status-link-current",
+                              $list-group-border-color);
 
   // Padding/border match `.status-link-current` (the current-status
   // indicator span), transparent border instead of visible, so the
