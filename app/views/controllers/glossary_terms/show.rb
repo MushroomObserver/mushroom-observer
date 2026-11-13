@@ -2,28 +2,31 @@
 
 module Views::Controllers::GlossaryTerms
   # GlossaryTerm show page: title + edit icons in the header,
-  # description + external-search panel on the left, thumbnail on
-  # the right, then a strip of other-image thumbnails, the previous-
-  # version footer, and an authors/editors panel.
+  # description + external-search link on the left, thumbnail on
+  # the right, then a strip of other-image thumbnails and a footer
+  # with the previous-version link, timestamps, and authors/editors.
   class Show < Views::FullPageBase
     prop :glossary_term, ::GlossaryTerm
     prop :other_images, _Array(::Image)
     prop :versions, _Array(::GlossaryTerm::Version)
 
     def view_template
-      add_show_title(@glossary_term)
-      add_edit_icons(@glossary_term, current_user)
-      container_class(:wide)
-      column_classes(:eight_four)
+      render_page_chrome
 
       render_main_row
-      render_image_action_links
       render_other_images
-      render_versions_footer
-      render_authors_editors_panel
     end
 
     private
+
+    def render_page_chrome
+      add_show_title(@glossary_term)
+      add_edit_icons(@glossary_term, current_user)
+      add_pager_for(@glossary_term)
+      container_class(:wide)
+      column_classes(:eight_four)
+      content_padding(:panels)
+    end
 
     def render_main_row
       Row do
@@ -33,12 +36,20 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_left_column
+      render_definition_panel
       ContentPadded do
-        div(class: "description") do
-          p { trusted_html(@glossary_term.description.tpl) }
-        end
-        div(id: "external_searches") do
-          p { render_wikipedia_link }
+        render_image_action_links
+        render_versions_footer
+      end
+    end
+
+    def render_definition_panel
+      Panel(id: "glossary_term_definition") do |panel|
+        panel.with_body do
+          div(class: "description mb-3") do
+            trusted_html(@glossary_term.description.tpl)
+          end
+          div(id: "external_searches") { render_wikipedia_link }
         end
       end
     end
@@ -63,13 +74,12 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_image_action_links
-      ContentPadded(class: "mb-3") do
+      div(class: "mb-3") do
         Link(type: :get, name: :show_glossary_term_reuse_image.t,
              target: reuse_images_for_glossary_term_path(@glossary_term.id))
         br
         Link(type: :get, name: :show_glossary_term_remove_image.t,
              target: remove_images_from_glossary_term_path(@glossary_term.id))
-        br
       end
     end
 
@@ -95,11 +105,16 @@ module Views::Controllers::GlossaryTerms
     end
 
     def render_versions_footer
-      ContentPadded(class: "mt-3") do
+      div(id: "glossary_term_authors_editors", class: "mt-3") do
         render(::Components::Description::PreviousVersion.new(
                  obj: @glossary_term, versions: @versions.to_a
                ))
         p(class: "Date") { render_timestamps }
+        render(::Views::Layouts::AuthorsAndEditors.new(
+                 obj: @glossary_term,
+                 versions: @versions.to_a,
+                 user: current_user
+               ))
       end
     end
 
@@ -111,18 +126,6 @@ module Views::Controllers::GlossaryTerms
       trusted_html(
         :footer_last_updated_at.t(date: @glossary_term.updated_at.web_time)
       )
-    end
-
-    def render_authors_editors_panel
-      Panel(panel_id: "glossary_term_authors_editors") do |panel|
-        panel.with_body do
-          render(::Views::Layouts::AuthorsAndEditors.new(
-                   obj: @glossary_term,
-                   versions: @versions.to_a,
-                   user: current_user
-                 ))
-        end
-      end
     end
   end
 end

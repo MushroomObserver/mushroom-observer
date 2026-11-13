@@ -102,4 +102,15 @@ class CollapseHelpBlockTest < ComponentTestCase
     ) { "Right" }
     assert_html(html_right, ".arrow-right.#{HIDE_CLASSES}")
   end
+
+  def test_passthrough_class_and_data_attrs
+    html = render_component(
+      Components::Help::CollapseBlock.new(
+        target_id: "help_10", class: "extra-thing", data: { foo: "bar" }
+      )
+    ) { "Content" }
+
+    assert_html(html, ".well.help-block.extra-thing")
+    assert_html(html, "[data-foo='bar']")
+  end
 end

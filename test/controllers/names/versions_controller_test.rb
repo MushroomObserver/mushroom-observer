@@ -5,9 +5,13 @@ require("test_helper")
 module Names
   class VersionsControllerTest < FunctionalTestCase
     def test_show_past_name
+      name = names(:coprinus_comatus)
+      assert(name.lifeform.blank?, "Fixture must have no lifeform")
+
       login
-      get(:show, params: { id: names(:coprinus_comatus).id })
+      get(:show, params: { id: name.id })
       assert_select("#nomenclature")
+      assert_select("#name_lifeform", text: /#{:none.ti}/)
     end
 
     def test_show_past_name_with_misspelling

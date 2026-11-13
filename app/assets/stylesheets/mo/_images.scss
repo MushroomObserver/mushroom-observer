@@ -126,6 +126,10 @@ svg.placeholder {
 .vote-btn-group {
   @include btn-group-dividers(".image-vote", rgba($white, 0.75));
 
+  // Overrides the mixin's 1.1rem -- 12px at the 16px root, see issue
+  // #5527.
+  font-size: 0.75rem;
+
   // Padding/color/hover live on the inner <button>, not the
   // <form.button_to> wrapper. Padding and border-width match
   // `.image-vote` (the selected-vote span), transparent border

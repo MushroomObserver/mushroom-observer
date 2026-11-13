@@ -23,7 +23,7 @@ module Views::Controllers::Names::Versions
     def view_template
       page_chrome_side_effects
 
-      Row(class: "mt-4") do
+      Row do
         render_left_column
         render_right_column
       end
@@ -43,7 +43,7 @@ module Views::Controllers::Names::Versions
       )
       add_context_nav(Tab::Name::VersionActions.new(name: @name, user: @user))
       container_class(:full)
-      column_classes(:six_even)
+      column_classes(:six)
     end
 
     # --- Left column ---------------------------------------------
@@ -78,7 +78,7 @@ module Views::Controllers::Names::Versions
     end
 
     def render_classification_panel
-      Panel(panel_id: "name_classification") do |panel|
+      Panel(id: "name_classification") do |panel|
         panel.with_heading { plain(:show_name_classification.l) }
         panel.with_body { render_classification_body }
       end

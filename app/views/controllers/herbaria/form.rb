@@ -105,7 +105,7 @@ module Views::Controllers::Herbaria
         label: :create_herbarium_personal,
         help: personal_checkbox_help,
         help_collapse: true,
-        wrap_class: "mb-3"
+        wrap_class: "form-group"
       )
     end
 

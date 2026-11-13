@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Component for rendering a Bootstrap 4 card (`.card`/`.card-header`/
-# `.card-body`/`.card-footer`). The prop/method names still say "panel"
-# throughout (`panel_class:`, `panel_id:`, `Panel(...)`) — that naming
-# is this component's identity, independent of the emitted CSS class.
+# `.card-body`/`.card-footer`). The call is still named `Panel(...)`
+# — that naming is this component's identity, independent of the
+# emitted CSS class.
 #
 # Accepts slots for panel subcomponents:
 #   heading, heading_links, thumbnail, body, footer
@@ -37,9 +37,15 @@
 #
 # @example Panel with custom class and ID
 #   Panel(
-#     panel_class: "custom-panel",
-#     panel_id: "my_panel"
+#     class: "custom-panel",
+#     id: "my_panel"
 #   ) do |panel|
+#     panel.with_body { "Content" }
+#   end
+#
+# @example Panel in a Bootstrap contextual color (default is :default)
+#   Panel(variant: :danger) do |panel|
+#     panel.with_heading { "Danger Zone" }
 #     panel.with_body { "Content" }
 #   end
 #
@@ -56,9 +62,13 @@
 class Components::Panel < Components::Base
   include Phlex::Slotable
 
-  prop :panel_class, _Nilable(String), default: nil
-  prop :panel_id, _Nilable(String), default: nil
-  prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any?), :**
+  # Bootstrap contextual color -- keeps the panel-* variant class out
+  # of the generic class: catch-all.
+  prop :variant,
+       _Nilable(_Union(:default, :primary, :success, :info, :warning,
+                       :danger)),
+       default: nil
   # Set collapsible: :true on component, plus panel.with_body(collapse: true)
   prop :collapsible, _Nilable(_Boolean), default: nil
   # Normally :collapse_target should be an id selector, like "#collapse_target".
@@ -82,7 +92,7 @@ class Components::Panel < Components::Base
     render_footer(classes:, &content)
   }, collection: true
 
-  # `h-100` (passed via `panel_class:`) needs the card to be a
+  # `h-100` (passed via `class:`) needs the card to be a
   # distinct child of the stretched flex item, not the stretched item
   # itself -- `height: 100%` on the same element being stretched by
   # `align-items: stretch` doesn't resolve the way it does against a
@@ -90,17 +100,23 @@ class Components::Panel < Components::Base
   # card in a separate `<li>` for that reason -- don't collapse them
   # into one element.
   def view_template
-    classes = class_names("card", @panel_class)
     define_collapse_target
-    div(
-      class: classes,
-      id: @panel_id,
-      **@attributes
-    ) do
+    div(**mix({ class: class_names("card", variant_class) }, @attributes)) do
       render(heading_slot) if heading_slot?
       render_middle_sections
       footer_slots.each { |slot| render(slot) } if footer_slots?
     end
+  end
+
+  # BS4 has no single class that paints a whole card by context the
+  # way BS3's `panel-danger` etc. did -- the established convention
+  # here is a plain `border-{color}` utility (see e.g. the project
+  # admin danger-zone panel). `:default` gets no extra class; it's
+  # just the bare, unbordered card.
+  def variant_class
+    return nil if @variant.nil? || @variant == :default
+
+    "border-#{@variant}"
   end
 
   def define_collapse_target

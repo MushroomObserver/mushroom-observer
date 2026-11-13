@@ -186,7 +186,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
          user: proposer,
          name: proposer.login,
          button: :link,
-         attributes: { class: "text-wrap text-left px-0" })
+         class: "text-wrap text-left px-0")
   end
 
   # ---- vote tally cell ------------------------------------------

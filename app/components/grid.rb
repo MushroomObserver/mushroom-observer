@@ -36,7 +36,7 @@ class Components::Grid < Components::Base
   # read this through `cache_key_for`. Phlex's automatic class +
   # method + line digest doesn't survive into the controller's
   # check, so the version is encoded explicitly here.
-  CACHE_VERSION = "v12"
+  CACHE_VERSION = "v13"
 
   # rubocop:disable MO/NoLongCommentBlock
   # The cache key Grid::Box fragments are stored under -- shared by

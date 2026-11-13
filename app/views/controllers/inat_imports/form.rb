@@ -69,7 +69,7 @@ module Views::Controllers::InatImports
     end
 
     def render_method_choices
-      Panel(panel_class: "my-4") do |panel|
+      Panel(class: "my-4") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           div(data: { controller: "collapse-switch" }) do
@@ -93,7 +93,7 @@ module Views::Controllers::InatImports
     # render as a query, and which says nothing an admin can act on.
     def render_project_scope_section
       hidden_field(:project_site)
-      Panel(panel_class: "my-4") do |panel|
+      Panel(class: "my-4") do |panel|
         panel.with_heading { plain(:inat_what_to_import.l) }
         panel.with_body do
           p { plain(:inat_import_project_scope.l(project: project_title)) }
@@ -106,9 +106,8 @@ module Views::Controllers::InatImports
 
     def render_radio_for_value(value, label_text)
       render(Components::Form::RadioCollapse.new(
-               form: self, field: :choose_method, value: value,
-               label: label_text,
-               attributes: { wrap_class: "mt-0 mb-2" }
+               form: self, field: :choose_method, option_value: value,
+               label: label_text, wrap_class: "mt-0 mb-2"
              ))
     end
 
@@ -188,7 +187,7 @@ module Views::Controllers::InatImports
       Panel do |panel|
         panel.with_heading { plain(:inat_details_heading.l) }
         panel.with_body do
-          ul(class: "pl-4") do
+          ul(class: "pl-3") do
             detail_items.each { |key| li { plain(key.l) } }
           end
         end

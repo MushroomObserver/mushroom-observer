@@ -105,8 +105,8 @@ module Views::FullPageBase::LayoutClasses
       [Components::Column.classes_for(xs: 12, md: 6, lg: 8),
        Components::Column.classes_for(xs: 12, md: 6, lg: 4)]
     when :six_even
-      [Components::Column.classes_for(xs: 12, lg: 6),
-       Components::Column.classes_for(xs: 12, lg: 6)]
+      [Components::Column.classes_for(xs: 12, md: 6),
+       Components::Column.classes_for(xs: 12, md: 6)]
     else
       full = Components::Column.classes_for(xs: 12)
       [full, full]

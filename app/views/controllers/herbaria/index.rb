@@ -44,13 +44,15 @@ module Views::Controllers::Herbaria
 
     def render_table
       Table(@objects,
-            variant: :striped, identifier: "herbarium",
-            class: "w-100 mt-3") { |t| build_table_columns(t) }
+            variant: :striped,
+            identifier: "herbarium") { |t| build_table_columns(t) }
     end
 
     def build_table_columns(table)
       build_main_columns(table)
-      table.column(:mo_id.ti, class: "text-right") { |h| render_id_badge(h) }
+      table.column(:mo_id.ti, align: :right) do |h|
+        render_id_badge(h)
+      end
     end
 
     def build_main_columns(table)

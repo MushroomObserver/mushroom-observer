@@ -32,7 +32,7 @@ module Views::Controllers::Images::Licenses
     def render_table
       Table(model.rows,
             variant: :striped, identifier: "license-updater",
-            class: "table-align-middle") do |t|
+            align_middle: true) do |t|
         t.column(:image_updater_count.t)
         t.column(:image_updater_holder.t)
         t.column(:image_updater_license.t)
@@ -48,7 +48,10 @@ module Views::Controllers::Images::Licenses
       # `namespace` resolves to Superform's namespace method.
       namespace(idx.to_s) do |row_ns|
         tr do
-          td { plain(row.license_count.to_s) }
+          td do
+            CountBadge(count: row.license_count, type: :image,
+                       variant: :outline)
+          end
           td { render_holder_cell(row_ns, row) }
           td { render_license_cell(row_ns, row) }
         end

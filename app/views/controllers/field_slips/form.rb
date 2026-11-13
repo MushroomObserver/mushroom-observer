@@ -60,7 +60,7 @@ module Views::Controllers::FieldSlips
 
     def render_code_only_form
       text_field(:code, label: :field_slip_code)
-      submit(:field_slip_create_obs.t, class: "mt-3")
+      submit(:field_slip_create_obs.t, class: "mt-2")
     end
 
     # --- Main form: full field-slip editing.
@@ -110,7 +110,7 @@ module Views::Controllers::FieldSlips
                  label: "#{:field_slip_other_codes.l} " \
                         "(#{:field_slip_other_example.l})")
       checkbox_field(:inat, label: :field_slip_other_inat,
-                            wrap_class: "mb-3")
+                            wrap_class: "form-group")
     end
 
     def render_project_select

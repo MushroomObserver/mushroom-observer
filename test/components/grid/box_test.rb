@@ -201,8 +201,8 @@ class Components::Grid::BoxTest < ComponentTestCase
       child_selector: "li.log-where"
     )
     # Should have when/who info (rendered with log-when and log-who classes)
-    assert_includes(html, "log-when")
-    assert_includes(html, "log-who")
+    assert_html(html, ".log-when")
+    assert_html(html, ".log-who")
   end
 
   def test_observation_title_includes_name

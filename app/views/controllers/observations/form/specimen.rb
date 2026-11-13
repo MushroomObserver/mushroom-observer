@@ -41,11 +41,9 @@ class Views::Controllers::Observations::Form::Specimen < Views::Base
              target_id: "specimen_fields",
              label: :form_observations_specimen_available,
              expanded: @observation.specimen,
-             attributes: {
-               wrap_class: "mt-0",
-               help: :form_observations_specimen_available_help.t,
-               help_collapse: true
-             }
+             wrap_class: "mt-0",
+             help: :form_observations_specimen_available_help.t,
+             help_collapse: true
            ))
   end
 

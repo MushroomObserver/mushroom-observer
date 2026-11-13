@@ -94,7 +94,7 @@ module Views::Controllers::Locations
       Row(class: "mt-5 vcenter") do
         Column(sm: 8) do
           render(Components::Form::CompassFields.new(
-                   form: self, location: model
+                   field_source: self, values: compass_values
                  ))
         end
         Column(sm: 4) do
@@ -105,9 +105,14 @@ module Views::Controllers::Locations
       end
     end
 
+    def compass_values
+      { north: model.north, south: model.south,
+        east: model.east, west: model.west }
+    end
+
     def render_locked_checkbox
       checkbox_field(:locked, label: :form_locations_locked,
-                              wrap_class: "mb-3")
+                              wrap_class: "form-group")
     end
 
     def render_notes_field

@@ -33,7 +33,7 @@ module Views::Controllers::Admin::BlockedIps
     def around_template(&block)
       turbo_frame_tag("#{@type}_ips_list") do
         Panel(
-          panel_class: "my-3",
+          class: "my-3",
           collapsible: true,
           collapse_target: "##{@type}_ips_body",
           expanded: true
@@ -157,8 +157,8 @@ module Views::Controllers::Admin::BlockedIps
             id: "#{@type}_ips",
             show_headers: false,
             align_middle: true,
-            class: "ips border-top",
-            attributes: { style: "order: 3" }) do |t|
+            class: "ips border-top mb-0",
+            style: "order: 3") do |t|
         t.column("ip", &:t)
         t.column("actions", align: :right) do |ip|
           render_remove_button(ip)

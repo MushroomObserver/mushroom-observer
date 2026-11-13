@@ -8,7 +8,6 @@ module Views::Controllers::Names::Lifeforms::Propagate
 
     def view_template
       render_add_section
-      br
       render_remove_section
       submit(:apply.ti, center: true)
     end

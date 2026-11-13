@@ -23,10 +23,17 @@
 }
 
 // Bootstrap squares a .form-control's right corner whenever it's
-// :first-child inside .input-group, assuming an addon/btn follows --
-// not the case here (has-id-indicator is a bare, borderless span),
-// so restore the input's full radius.
-.autocompleter .input-group > .form-control:first-child {
+// :first-child inside .input-group, assuming an addon/btn follows.
+// Usually not the case here (has-id-indicator is a bare, borderless
+// span), so restore the input's full radius -- except when a
+// `:button`/`:addon` sibling (e.g. the region field's "Find on Map")
+// does follow, which still needs the squared corner. BS4 wraps every
+// addon/button in an outer `.input-group-append`/`-prepend`
+// (`Components::InputGroup::Addon`), so that's what the exception
+// targets, not the addon/button's inner class.
+.autocompleter .input-group >
+  .form-control:first-child:not(:has(~ .input-group-append,
+                                      ~ .input-group-prepend)) {
   border-top-right-radius: $input-border-radius;
   border-bottom-right-radius: $input-border-radius;
 }

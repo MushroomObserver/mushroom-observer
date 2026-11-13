@@ -30,10 +30,10 @@ module Views::Controllers::Admin::Emails::MergeRequests
     def render_object_fields
       static_field(:old_obj, label: type_label,
                              value: viewer_aware_format_name(@old_obj),
-                             inline: true)
+                             inline: true, wrap_class: "mb-0")
       static_field(:new_obj, label: type_label,
                              value: viewer_aware_format_name(@new_obj),
-                             inline: true)
+                             inline: true, wrap_class: "mb-2")
     end
 
     # `Components::ApplicationForm` doesn't include the shared

@@ -22,7 +22,7 @@
 #   :lg -- copy-to-clipboard external-site record id (Link::External),
 #          Matching Observations panel row ids
 #   :md -- matrix box title and other index-row id badges (Grid::Box,
-#          Names::Index::Row, Occurrences::Projects::Form)
+#          Names::Index, Occurrences::Projects::Form)
 #   :sm -- sitting next to a large page-title heading
 #
 # `interactive:` (default true) is the copy-to-clipboard `<button>`

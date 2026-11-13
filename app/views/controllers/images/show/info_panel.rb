@@ -9,7 +9,7 @@ module Views::Controllers::Images
 
       def view_template
         Panel(
-          panel_id: "info_panel", panel_class: "py-2"
+          id: "info_panel", class: "py-2"
         ) do |panel|
           panel.with_heading { append_colon(:notes.ti) }
           panel.with_body { render_body }

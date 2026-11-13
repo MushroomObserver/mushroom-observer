@@ -7,11 +7,10 @@
 # `Components::Link::Get`, gated by user permissions and description
 # state.
 #
-# Sibling-in-spirit to `Components::InlineCRUDLinks` (the bracketed
-# `[edit | destroy]` strip that sits next to records in obs-show
-# sub-panels), but distinct in shape: this one is the icon row
-# attached to the panel heading, with " | " separators rather than
-# brackets.
+# Spaced via `Components::InlineLinkBlock` -- the same gap-based
+# spacing every other inline icon strip in the app uses (title-bar
+# edit/delete, `Components::InlineCRUDLinks`), rather than literal
+# " | " separators.
 class Components::Description::ModLinks < Components::Base
   prop :description, ::Description
   prop :user, _Nilable(::User), default: nil
@@ -20,10 +19,7 @@ class Components::Description::ModLinks < Components::Base
     icons = icon_components
     return if icons.empty?
 
-    icons.each_with_index do |component, idx|
-      plain(" | ") if idx.positive?
-      render(component)
-    end
+    InlineLinkBlock(items: icons)
   end
 
   private
@@ -44,7 +40,9 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def destroy_icon
-    Components::Button.new(type: :delete, target: @description, variant: :strip)
+    Components::Button.new(type: :delete, target: @description,
+                           variant: :strip,
+                           class: Components::InlineLinkBlock.item_class)
   end
 
   def admin_icons
@@ -102,7 +100,7 @@ class Components::Description::ModLinks < Components::Base
     unless tab.html_options[:button]
       return Components::Link.new(
         type: :get, tab: tab,
-        class: class_names("stateful-link", tab.html_options[:class])
+        class: item_class(tab.html_options[:class])
       )
     end
 
@@ -114,7 +112,11 @@ class Components::Description::ModLinks < Components::Base
                            icon: opts[:icon],
                            confirm: opts[:confirm],
                            variant: :strip,
-                           class: "stateful-link")
+                           class: item_class)
+  end
+
+  def item_class(*extra)
+    class_names("stateful-link", Components::InlineLinkBlock.item_class, *extra)
   end
 
   # -- predicates -------------------------------------------------

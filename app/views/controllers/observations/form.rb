@@ -142,7 +142,7 @@ module Views::Controllers::Observations
 
     def images_details_panel
       Components::Panel.new(
-        panel_id: "observation_images_details",
+        id: "observation_images_details",
         collapsible: true,
         collapse_target: ".observation_images_details_inner",
         expanded: true
@@ -197,7 +197,7 @@ module Views::Controllers::Observations
 
     def naming_specimen_panel
       Components::Panel.new(
-        panel_id: "observation_naming_specimen",
+        id: "observation_naming_specimen",
         collapsible: true,
         collapse_target: "#observation_naming_specimen_inner",
         expanded: create?

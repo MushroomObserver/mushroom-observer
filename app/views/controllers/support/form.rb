@@ -22,10 +22,10 @@ module Views::Controllers::Support
           render_other_amount_inputs
         end
         checkbox_field(:recurring, label: :donate_recurring,
-                                   wrap_class: "mb-3")
+                                   wrap_class: "form-group")
         text_field(:who, size: 30, label: :donate_who, inline: true)
         checkbox_field(:anonymous, label: :donate_anonymous,
-                                   wrap_class: "mb-3")
+                                   wrap_class: "form-group")
         text_field(:email, size: 30, label: :donate_email, inline: true,
                            type: "email")
         submit(:donate_confirm.l, center: true)
@@ -39,7 +39,7 @@ module Views::Controllers::Support
         PRESET_AMOUNTS.each do |amount|
           Column(xs: 3) do
             render(Components::Form::RadioCollapse.new(
-                     form: self, field: :amount, value: amount,
+                     form: self, field: :amount, option_value: amount,
                      label: "$#{amount.to_i}"
                    ))
           end
@@ -49,9 +49,9 @@ module Views::Controllers::Support
 
     def render_other_amount_inputs
       render(Components::Form::RadioCollapse.new(
-               form: self, field: :amount, value: "other",
+               form: self, field: :amount, option_value: "other",
                label: append_colon(:donate_other.l),
-               attributes: { data: { donate_target: "otherCheck" } }
+               data: { donate_target: "otherCheck" }
              ))
       Collapsible(expanded: other_amount_selected?,
                   data: { collapse_switch_target: "panel",

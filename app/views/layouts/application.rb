@@ -186,7 +186,7 @@ module Views::Layouts
         Help(type: :tooltip,
              label: "(#{:filtered.t})",
              title: :rss_filtered_mouseover.t,
-             extra_class: "filter-help")
+             class: "filter-help")
       end
     end
 

@@ -62,7 +62,7 @@ class Components::Grid::Box
     end
 
     def render_user_detail(user)
-      li(class: "log-detail hanging-indent") do
+      li(class: "log-detail") do
         plain("#{:list_users_joined.l}: #{user.created_at.web_date}")
         br
         plain("#{:list_users_contribution.l}: #{user.contribution}")

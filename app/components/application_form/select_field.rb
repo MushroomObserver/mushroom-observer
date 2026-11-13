@@ -30,7 +30,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       if wrapper_options[:label] == false
         render_select(&options_block)
       else
-        render_with_wrapper { render_select_field(&options_block) }
+        render_with_wrapper { render_select(&options_block) }
       end
     end
 
@@ -88,14 +88,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       base = ["form-control"]
       base << "w-auto" if wrapper_options[:width] == :auto
       class_names(attributes[:class], *base)
-    end
-
-    def render_select_field(&options_block)
-      if wrapper_options[:button]
-        render_input_group_button { render_select(&options_block) }
-      else
-        render_select(&options_block)
-      end
     end
   end
 end
