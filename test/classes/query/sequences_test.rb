@@ -75,6 +75,27 @@ class Query::SequencesTest < UnitTestCase
     assert_query_scope(ids, scope, :Sequence, observations: [obs.id])
   end
 
+  # `name_has` accepts (1) the id of an autocompleter-matched Name, or
+  # (2) a bare string, matched against Name.text_name as a substring
+  # -- "Amanit" and "Amanita" both match a Name whose text_name is
+  # "Amanita".
+  def test_sequence_name_has
+    name = names(:amanita)
+    obs = Observation.create!(user: users(:rolf), when: Time.zone.now,
+                              name: name)
+    seq = Sequence.create!(user: users(:rolf), observation: obs,
+                           locus: "ITS", bases: "ACGT")
+
+    scope = Sequence.name_has(name.id.to_s).order_by_default
+    assert_query_scope([seq], scope, :Sequence, name_has: name.id.to_s)
+
+    scope = Sequence.name_has("Amanita").order_by_default
+    assert_query_scope([seq], scope, :Sequence, name_has: "Amanita")
+
+    scope = Sequence.name_has("Amanit").order_by_default
+    assert_query_scope([seq], scope, :Sequence, name_has: "Amanit")
+  end
+
   def test_sequence_pattern_search
     assert_query([], :Sequence, pattern: "nonexistent")
 

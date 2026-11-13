@@ -2,6 +2,8 @@
 
 # create and edit Glossary terms
 class GlossaryTermsController < ApplicationController
+  self.create_button_in_rubric = true
+
   before_action :login_required, except: [:index, :show]
   before_action :store_location, except: [:create, :update, :destroy]
 

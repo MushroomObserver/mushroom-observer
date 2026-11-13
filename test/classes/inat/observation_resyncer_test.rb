@@ -105,6 +105,19 @@ class Inat::ObservationResyncerTest < UnitTestCase
                  "A placeholder should record what it did not import")
   end
 
+  # An earlier save on the same object (here moving log_updated_at, as a
+  # sync's log entry does when it lands in a new second) is not a change
+  # this sync made.
+  def test_earlier_save_is_not_a_scalar_change
+    resync(found: { @id => @raw })
+    @obs.update!(log_updated_at: 1.hour.ago)
+
+    result = resync(found: { @id => @raw }).first
+
+    assert_equal(:unchanged, result.status,
+                 "reasons: #{result.reasons.inspect}")
+  end
+
   # The "Not imported" list follows the source: a change on iNat to what
   # the skeleton leaves out is a sync change, so the page refreshes.
   def test_placeholder_omissions_follow_the_source
@@ -117,9 +130,10 @@ class Inat::ObservationResyncerTest < UnitTestCase
     # Bring everything else in line with the source first.
     resync(found: { @id => @raw })
     before = sync_state(@obs)
-    status = resync(found: { @id => @raw }).first.status
-    assert_equal(:unchanged, status,
-                 "Test requires a placeholder already in sync; changed: " \
+    result = resync(found: { @id => @raw }).first
+    assert_equal(:unchanged, result.status,
+                 "Test requires a placeholder already in sync; reasons: " \
+                 "#{result.reasons.inspect}; changed: " \
                  "#{sync_state_diff(before, sync_state(@obs)).inspect}")
 
     result = resync(found: { @id => raw }).first

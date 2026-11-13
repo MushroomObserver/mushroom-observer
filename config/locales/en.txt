@@ -226,6 +226,8 @@
   api_keys: API keys
   article: article
   articles: articles
+  banner: banner
+  banners: banners
   checklists: checklists
   clade: clade
   clades: clades
@@ -348,7 +350,7 @@
   translations: translations
   type: type
   types: types
-  url: url
+  url: URL
   user: user
   users: users
   user_group: user group
@@ -557,6 +559,7 @@
   edit: edit
   enable: enable
   exclude: exclude
+  filter: filter
   help: help
   import: import
   index_object: "[TYPE] [:index.ti]"
@@ -1526,8 +1529,8 @@
   observation_field_slip_blank: Please enter a field slip code.
   observation_field_slip_project_closed: 'Field slip "[code]" belongs to the [title] project, which you are not a member of and cannot join on your own. The observation was saved without the field slip code. You can "ask a project admin to add you":[url] and enter the code again once they do.'
   observation_field_slip_spare_used: Field slip [code] was attached as a spare, with no project.
-  edit_observation_is_reflection: This observation is a read-only reflection of its imported source. To change it, edit it at the source and resync.
-  edit_reflection_tooltip: Copy to editable [:companion_observation]
+  edit_observation_is_reflection: This observation is a read-only reflection of an import. Use the edit icon on this page to add your own notes and data.
+  edit_reflection_tooltip: Add your own notes and data
   edit_observation_companion_created: Created "[:companion_observation]":/articles/53.
   edit_observation_companion_existing: Editing existing "[:companion_observation]":/articles/53.
   create_observation_field_slip_invalid: 'Observation created, but the field slip code "[code]" was invalid and was not attached.'
@@ -1634,6 +1637,8 @@
   image_reflection_info: Reflection image
   image_reflection_readonly_note: Read-only image from an imported observation. This information can only be changed at the source.
   image_reflection_source_link: View the source observation
+  image_sibling_info: Image from a matching observation
+  image_sibling_readonly_note: Image from another observation of the same specimen. It can only be changed on that observation.
   image_file_name: File name
   image_file_size: File size
 
@@ -1738,6 +1743,9 @@
   login_forgot_password: I forgot my password. "Email me a new one.":/account/password_reset/new
   login_no_account: I don't have an account. "Create a new account.":/account/signup
   login_having_problems: If you are having problems logging into your account, send "email to the webmaster":/admin/emails/webmaster_questions/new.
+  login_reset_required_title: Password Reset Required
+  login_reset_required_explanation: As a security precaution, your account needs a new password before you can continue. Click below to have a password reset email sent to the address on file ([email]). If you cannot access that email, send "email to the webmaster":/admin/emails/webmaster_questions/new with the name and email you believe are on your account, so we can find it.
+  login_reset_required_button: Email me a password reset
   email_new_password_help: When you complete this page and click "Send", we will send you an email with verification information.
   email_spam_notice: If you do not see the email in your inbox, check your spam folder. If it's in your spam folder, please (1) notify your email provider that it's not spam and (2) whitelist "mushroomobserver.org". This may prevent future MO emails from ending up in your -- or other users' -- spam folders.
   login_layout_description: A website to record observations about mushrooms, help people identify unfamiliar mushrooms, and expand the community around the scientific exploration of mushrooms (mycology).
@@ -2231,7 +2239,6 @@
   # object/show_past_versions
 
   # observer/show_rss_log
-  show_rss_log_title: Log for [title]
 
   # info/site_stats
   show_site_stats_title: Site Statistics
@@ -2266,6 +2273,7 @@
   show_user_life_list_higher: "[higher] higher-level [taxa_word] observed"
 
   # sequence
+  sequence_filter_by: Filter by [:name.ti]
 
   # account/signup
   signup_title: Account signup
@@ -2291,6 +2299,7 @@
   species_list_add_remove_add_success: Successfully added [num] observation(s) to observation list.
   species_list_add_remove_remove_success: Successfully removed [num] observation(s) from observation list.
   species_list_add_remove_no_query: Missing observation query results, or query has expired.
+  species_list_add_remove_large_query: That's a very large number.
   species_list_add_remove_bad_name: "Unrecognized observation list id or title: [name]"
 
   # species_list/manage_species_lists
@@ -2456,6 +2465,7 @@
 
   # publication/index
   publication_index: Publication List
+  publication_filter_by: Filter by text
   publication_index_intro: This is a list of all known publications that benefitted in some way by the existence of the Mushroom Observer. If you are aware of an article that should be added to this list please "add it":/publications/new. If you find an error, please add the correct citation and "send us a note":/admin/emails/webmaster_questions/new.
   publication_full_help: "When possible please use the other citations as a model for how to format new ones and specifically start the citation with the family name of the lead author. The reference is formatted with <a href=\"/info/textile_sandbox/new\" target=\"_new\">Textile</a>, not HTML. Unlike other MO fields, text between underscores is shown in italics without a link to the Name: put a Name between underscores (&#95;Lactarius fragilis&#95;) and the journal or book title between double question marks (&#63;&#63;Journal Name&#63;&#63;). Type & and other characters as they are."
   publication_legend: "*P* indicates that it is a scientific, peer-reviewed article.\n*M* indicates that the article explicitly mentions or references the Mushroom Observer."
@@ -2636,8 +2646,6 @@
   visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
-  visual_group_index: "[:visual_group.ti] Index"
-  visual_group_edit: Edit [:visual_group.ti]
   visual_group_show: Show [:visual_group.ti]
   visual_group_create: Create [:visual_group.ti]
 
@@ -2652,9 +2660,6 @@
 
   # visual_groups/update
   update_visual_group_success: "[:updated.ti] [name] [:visual_group.ti]"
-
-  # visual_models/show
-  show_visual_model_index: "[:visual_model.ti] [:index.ti]"
 
   # visual_models/destroy
   destroy_visual_model_success: "[:visual_model.ti] [:destroyed]"
@@ -2775,7 +2780,7 @@
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations
   show_observation_occurrence_primary: Primary observation of this occurrence
-  show_observation_reflection_read_only: Read-only reflection of an imported source
+  show_observation_reflection_read_only: Reflection of an imported source
   show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   edit_occurrence_add_heading: Add Recently Viewed Observations
@@ -3013,6 +3018,7 @@
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace
+  inat_id_out_of_range: "[ids] cannot be iNat observation IDs; they are larger than any iNat ID. Check them for extra digits."
   inat_missing_username: Missing your iNat Username
   inat_list_xor_all: "Choose exactly one: (1) list observation IDs, (2) supply a URL, or (3) check \"[:inat_import_all]\""
   inat_url_label: Observations from an iNat search URL
@@ -3027,6 +3033,7 @@
   inat_observed_missing_date: Observed Missing Date
   inat_cannot_communicate: Cannot communicate with iNat. Please try again later. If you keep getting this message, please notify webmaster.
   inat_unknown_param: "iNat rejected the request: [error]"
+  inat_request_error: "iNat returned an error (HTTP [status]) for this request: [error]"
 
   inat_no_authorization: iNat import aborted; MO did not received authorization to access iNat user data
   inat_wrong_user: "[inat_logged_in_user] is logged into iNat. To import iNat observations of [inat_username] make sure that [inat_username] is logged into iNat on your device"
@@ -3482,41 +3489,24 @@
   users_by_name_verified: Verified
 
 
-  # licenses
-  # licenses/index
-  index_license_header: Licenses
-
-  # licenses/show
-  index_license: Index
-
   # licenses/form
-  create_license_title: Create License
   license_display_name: Name (display_name)
   license_display_name_help: "Ex: Creative Commons Non-commercial v2.5"
-  license_form_checkbox_deprecated: Deprecated
-  license_url: url
   license_url_help: "Ex: https://creativecommons.org/licenses/by-nc-sa/2.5/"
 
 
   # support/create_donation
   create_donation_title: Record Mushroom Observer Donation
-  create_donation_add: Add
   create_donation_tab: Record Donation
   create_donation_success: Donation recorded.
 
   # support/review_donations
   review_donations_title: Review All Donations
   review_donations_not_allowed: Only admins can review donations
-  review_donations_update: Update
   review_donations_tab: Review Donations
   review_donations_success: Donations updated.
-  review_reviewed: Reviewed
-  review_id: Id
-  review_who: Who
   review_anon: Anon
   review_amount: Amount
-  review_email: Email
-  review_date: Date
 
   user_add_tool: User Creation Tool
   user_add_email_prompt: Enter email
@@ -3569,8 +3559,10 @@
   email_subject_inat_import_digest: "[count] new iNaturalist [:observations] matching your interests"
   email_subject_name_merge_digest: "[old] merged into [new]"
   email_subject_content_purge: "[count] images removed from records you created on Mushroom Observer"
-  email_subject_project_alert: "[count] new iNaturalist [:observations] for your [:projects]"
-  email_subject_project_alert_one: "[count] new iNaturalist [:observation] for your [:projects]"
+  email_subject_project_alert_find: "New [:observations] of [name] on [site]"
+  email_subject_project_alert_find_one: "New [:observation] of [name] on [site]"
+  email_subject_project_alert_activity: "Other activity on [:observations] of [name] at [site]"
+  email_subject_project_alert_activity_one: "Other activity on an [:observation] of [name] at [site]"
   email_subject_name_tracker_approval: Research Request Emails Approved for [name]
   email_subject_new_password: New Password
   email_subject_occurrence_added: "[:observation.ti] Added to [:occurrence.ti], [name]"
@@ -3644,8 +3636,10 @@
   email_name_change_request: "User wants to change Name having dependents:\n\nuser : [user]\nold name : [old_name]\nnew name : [new_name]\nshow url : [show_url]\nedit url : [edit_url]\nnotes : [notes]"
   email_name_proposal_intro: "h2. *Name Proposal*\n\nA name was proposed for observation #[id]:"
   email_inat_import_digest_intro: "h2. *iNaturalist Import*\n\nA recent import from iNaturalist added [count] [:observations] matching names you follow:"
-  email_project_alert_intro: "h2. *New observations from iNaturalist*\n\niNaturalist has [count] new [:observations] matching a [:project] you are watching:"
-  email_project_alert_intro_one: "h2. *New observations from iNaturalist*\n\niNaturalist has [count] new [:observation] matching a [:project] you are watching:"
+  email_project_alert_find_intro: "h2. *New observations of [name]*\n\n[site] has [count] new [:observations] matching a [:project] you are watching:"
+  email_project_alert_find_intro_one: "h2. *New observation of [name]*\n\n[site] has [count] new [:observation] matching a [:project] you are watching:"
+  email_project_alert_activity_intro: "h2. *Other activity on observations of [name]*\n\n[site] has new activity on [count] [:observations] matching a [:project] you are watching:"
+  email_project_alert_activity_intro_one: "h2. *Other activity on an observation of [name]*\n\n[site] has new activity on [count] [:observation] matching a [:project] you are watching:"
   email_project_alert_row: "[name], observed [date], in [projects]:"
   email_project_alert_row_undated: "[name], date unknown, in [projects]:"
   email_inat_import_digest_truncated: "This email shows the first [shown] of [count] matching [:observations]."
@@ -4216,6 +4210,7 @@
   runtime_location_merge_failed: Failed to merge observation [name].
   runtime_login_failed: Login unsuccessful.
   runtime_login_success: Login successful.
+  runtime_login_emailed_password: You are logged in with the password we emailed you. Please "change it":/account/preferences/edit to something only you know.
   runtime_map_nothing_to_map: Nothing to map.
   runtime_no_upload_image: Had problems uploading image '[name]'.
   runtime_object_deleted: This object has been deleted.
@@ -4297,7 +4292,7 @@
   runtime_profile_uploaded_image: "[:runtime_uploaded_name(type=:image,value=name)]"
   runtime_sequence_success: "[:runtime_created_id(type=:SEQUENCE,value=id)]"
   sequence_on_reflection_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created a linked [:companion_observation] for your sequence. The two are grouped as one occurrence for the same specimen.
-  sequence_on_reflection_companion_existing: That observation is a read-only reflection of its imported source, so your sequence goes on its linked [:companion_observation] for the same specimen.
+  sequence_on_reflection_companion_existing: That observation is a reflection of its imported source, so your sequence goes on its linked [:companion_observation] for the same specimen.
   runtime_sequence_update_success: "[:runtime_updated_id(type=:sequence,value=id)]"
   runtime_species_list_add_observation_success: "[:runtime_added_id_to(type=:observation,value=id)]"
   runtime_species_list_create_success: "[:runtime_created_id(type=:species_list,value=id)]"
@@ -4437,7 +4432,7 @@
   api_must_be_owner: You must be the owner of the [type] "[name]" to do this.
   api_must_be_site_admin: This action requires a site administrator's API key.
   api_must_have_edit_permission: You do not have permission to edit [type] "[name]".
-  api_observation_is_read_only: '[type] "[name]" is a read-only reflection of an imported source. Edit it at the source and resync instead.'
+  api_observation_is_read_only: '[type] "[name]" is a reflection of an import. Edit it at the source and resync instead.'
   api_must_have_view_permission: You do not have permission to view [type] "[name]".
   api_must_not_have_any_herbaria: You can't edit this [:location] because there is an [:herbarium] there.
   api_must_own_all_descriptions: You can only edit [types] if you own all the [:descriptions].
@@ -4590,6 +4585,7 @@
   query_editable_by_user: editable by
   query_field_slip_prefix_has: field slip prefix
   query_for_user: for
+  query_full_has: text has
   query_has_author: with author
   query_has_citation: with citation
   query_has_classification: with classification
@@ -4709,6 +4705,7 @@
   # Sorting criteria.
   sort_by_accession_number: "[:herbarium_record_accession_number]"
   sort_by_activity: "[:activity.ti]"
+  sort_by_amount: Amount
   sort_by_box_area: Area
   sort_by_code: Code
   sort_by_confidence: "[:confidence_level.ti]"
@@ -4741,6 +4738,7 @@
   sort_by_title: "[:title.ti]"
   sort_by_updated_at: Time Last Modified
   sort_by_user: "[:user.ti]"
+  sort_by_who: "[:who.ti]"
 
   ##############################################################################
 

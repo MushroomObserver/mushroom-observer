@@ -16,6 +16,18 @@ class AutologinIntegrationTest < IntegrationTestCase
     try_autologin(dick_cookies, false)
   end
 
+  # Without the blank-auth_code guard, a cookie carrying only an id
+  # splits to a nil secret, which compares equal to a null stored code.
+  def test_autologin_refuses_blank_auth_code
+    rolf.update_column(:auth_code, nil)
+    sess = open_session
+    sess.cookies["mo_user"] = rolf.id.to_s
+    sess.get("/account/preferences/edit")
+
+    sess.assert_select("form[action='/account/preferences']", count: 0)
+    sess.assert_select("#account_login_form")
+  end
+
   def get_cookies(user, autologin)
     sess = open_session
     sess.login(user, "testpassword", autologin)

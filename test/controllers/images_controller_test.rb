@@ -18,7 +18,9 @@ class ImagesControllerTest < FunctionalTestCase
         observations: observations(:minimal_unknown_obs).id,
         locations: locations(:burbank).id,
         projects: projects(:bolete_project).id,
-        species_lists: species_lists(:first_species_list).id
+        species_lists: species_lists(:first_species_list).id,
+        visual_groups: visual_groups(:visual_group_one).id,
+        visual_group_unreviewed: visual_groups(:visual_group_one).id
       }
     )
   end

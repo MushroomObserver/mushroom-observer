@@ -112,7 +112,8 @@ class Inat
 
       ProjectExternalSiteAlert.record(
         project: criterion.project, external_site: @site,
-        identification: identification, observation: candidate.to_h
+        identification: identification, observation: candidate.to_h,
+        target_name: criterion.target_name_for(identification)
       )
     end
 

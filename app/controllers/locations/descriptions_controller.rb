@@ -14,7 +14,10 @@ module Locations
     ############################################################################
     # INDEX
     #
+    # Map the nested route's :location_id onto :location, the
+    # recognized query_attr param (see index_filter_params.md).
     def index
+      params[:location] = params[:location_id] if params[:location_id].present?
       build_index_with_query
     end
 

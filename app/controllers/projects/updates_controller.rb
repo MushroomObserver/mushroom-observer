@@ -22,11 +22,13 @@ module Projects
     end
 
     # Single observation add via Turbo. If excluded, un-excludes as a side
-    # effect inside Project#add_observation.
+    # effect inside Project#add_observation. The list shows one member
+    # per occurrence, so the occurrence's other candidates come too.
     def add_observation
       obs = Observation.safe_find(params[:id])
       if obs
         @project.add_observation(obs)
+        add_candidate_members(obs)
         render_footer_update(obs)
       else
         head(:not_found)
@@ -44,9 +46,11 @@ module Projects
       end
     end
 
-    # Bulk add all observations on the current filtered list.
+    # Bulk add all observations on the current filtered list, including
+    # occurrence members the list hides behind their primary.
     def add_all
-      count = bulk_add_candidates(current_scope)
+      count = bulk_add_candidates(Observation.public_send(query_attr,
+                                                          @project))
       flash_notice(:project_updates_added_all.t(count: count))
       redirect_to(project_updates_path(project_id: @project.id,
                                        **filter_query_params))
@@ -145,6 +149,13 @@ module Projects
 
     def bulk_add_candidates(scope)
       @project.bulk_add_observations(scope.pluck(:id))
+    end
+
+    def add_candidate_members(obs)
+      return unless obs.occurrence_id
+
+      bulk_add_candidates(Observation.project_new_candidates(@project).
+                          where(occurrence_id: obs.occurrence_id))
     end
   end
 end

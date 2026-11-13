@@ -48,6 +48,8 @@
 
 # View and modify Herbaria (displayed as "Fungaria")
 class HerbariaController < ApplicationController # rubocop:disable Metrics/ClassLength
+  self.create_button_in_rubric = true
+
   include ::Locationable
 
   before_action :login_required

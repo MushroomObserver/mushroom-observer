@@ -182,7 +182,7 @@ class InatImportJob < ApplicationJob
 
     import_parsed_page_of_observations(parsed_page)
     parser.last_import_id = parsed_page["results"].last["id"]
-    more_pages?(parsed_page)
+    parser.more_pages?(parsed_page)
   end
 
   def parsing_should_stop?(parsed_page)
@@ -213,10 +213,6 @@ class InatImportJob < ApplicationJob
       "#{parsed_page["results"].last["id"]}")
     log("Results on this page: #{parsed_page["results"].size}")
     log("Total results: #{parsed_page["total_results"]}")
-  end
-
-  def more_pages?(parsed_page)
-    parsed_page["total_results"] > parsed_page["page"] * parsed_page["per_page"]
   end
 
   def observation_importer

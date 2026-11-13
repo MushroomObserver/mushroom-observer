@@ -31,7 +31,7 @@ module Views::Controllers::Licenses
     end
 
     def render_url_field
-      text_field(:url, label: :license_url) do |f|
+      text_field(:url, label: :url, type: "url") do |f|
         f.with_append do
           Help(content: :license_url_help.t)
         end
@@ -39,8 +39,7 @@ module Views::Controllers::Licenses
     end
 
     def render_deprecated_checkbox
-      checkbox_field(:deprecated, label: :license_form_checkbox_deprecated,
-                                  wrap_class: "mb-3")
+      checkbox_field(:deprecated, label: :deprecated.ti, wrap_class: "mb-3")
     end
   end
 end

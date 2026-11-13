@@ -28,17 +28,18 @@ class Inat::ConstraintMapperTest < UnitTestCase
 
   # A place iNat gives a box for is accepted only when that box meets
   # the MO location's.
-  def stub_place(query, id, bounds)
-    geojson = { "coordinates" => [[bounds]] }
+  # `names` overrides the place's name and display_name, which default
+  # to the query.
+  def stub_place(query, id, bounds, type: "MultiPolygon", **names)
+    geojson = { "type" => type,
+                "coordinates" => type == "Polygon" ? [bounds] : [[bounds]] }
+    place = { id: id, name: query, bounding_box_geojson: geojson }.
+            merge(names)
     stub_request(
       :get,
       "#{Inat::Constants::API_BASE}/places/autocomplete?" \
-      "q=#{ERB::Util.url_encode(query)}"
-    ).to_return(
-      status: 200,
-      body: { results: [{ id: id, name: query,
-                          bounding_box_geojson: geojson }] }.to_json
-    )
+      "q=#{ERB::Util.url_encode(query)}&per_page=20"
+    ).to_return(status: 200, body: { results: [place] }.to_json)
   end
 
   def burbank_bounds
@@ -62,6 +63,18 @@ class Inat::ConstraintMapperTest < UnitTestCase
 
   # Unresolved names leave MO's own fungi-and-slime-moulds filter, so a
   # search is never opened up to every taxon on iNat.
+  # An alert reports the name the project entered, so the mapping back
+  # from the iNat taxon is what it reads (#5677).
+  def test_a_taxon_id_maps_back_to_the_name_targeted_through_it
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+
+    taxa = Inat::ConstraintMapper.new(@project).target_taxa
+
+    assert_equal({ 47_347 => "Coprinus comatus",
+                   48_701 => "Agaricus campestris" }, taxa)
+  end
+
   def test_unresolved_names_fall_back_to_the_importable_taxa
     stub_json("taxa", [])
     stub_json("places", [])
@@ -92,6 +105,24 @@ class Inat::ConstraintMapperTest < UnitTestCase
 
     assert_nil(params[:place_id])
     assert_equal(["Burbank, California, USA"], mapper.unresolved_locations)
+  end
+
+  # iNat sends a county's box as a Polygon: Adams County, CO is not
+  # Adams County, PA.
+  def test_a_polygon_place_elsewhere_is_rejected
+    stub_json("taxa", [])
+    stub_place("Burbank", 962, [[100.0, 10.0], [101.0, 11.0]],
+               type: "Polygon")
+
+    assert_nil(Inat::ConstraintMapper.new(@project).params[:place_id])
+  end
+
+  def test_a_polygon_place_that_overlaps_is_accepted
+    stub_json("taxa", [])
+    stub_place("Burbank", 962, burbank_bounds, type: "Polygon")
+
+    assert_equal("962",
+                 Inat::ConstraintMapper.new(@project).params[:place_id])
   end
 
   def test_the_project_box_and_dates
@@ -159,6 +190,21 @@ class Inat::ConstraintMapperTest < UnitTestCase
     assert_equal("7898", params[:place_id])
   end
 
+  # iNat names a county by its bare name; only the display name spells
+  # out "County".
+  def test_a_county_by_its_display_name
+    project = projects(:eol_project)
+    project.add_target_location(locations(:elgin_co))
+    stub_json("taxa", [])
+    stub_place_miss("Elgin Co.")
+    stub_place("Elgin County", 7_898, elgin_bounds,
+               name: "Elgin", display_name: "Elgin County, ON, CA")
+
+    params = Inat::ConstraintMapper.new(project).params
+
+    assert_equal("7898", params[:place_id])
+  end
+
   def elgin_bounds
     elgin = locations(:elgin_co)
     [[elgin.west, elgin.south], [elgin.east, elgin.north]]
@@ -176,7 +222,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_request(
       :get,
       "#{Inat::Constants::API_BASE}/places/autocomplete?" \
-      "q=#{ERB::Util.url_encode(query)}"
+      "q=#{ERB::Util.url_encode(query)}&per_page=20"
     ).to_return(status: 200, body: { results: [] }.to_json)
   end
 

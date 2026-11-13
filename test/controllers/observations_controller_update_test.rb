@@ -209,6 +209,7 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
     occ = Occurrence.create!(user: primary.user, primary_observation: primary)
     primary.update!(occurrence: occ)
     sibling.update!(occurrence: occ)
+    sibling.update_column(:reflected_at, Time.zone.now)
     login(primary.user.login)
     sib_image = sibling.images.first
     sib_image.update_column(:copyright_holder, "(c) Reflection Source")
@@ -228,6 +229,28 @@ class ObservationsControllerUpdateTest < FunctionalTestCase
       "#camera_info_#{sib_image.id} a.reflection_source_link" \
       "[href='https://www.inaturalist.org/observations/998877']"
     )
+  end
+
+  # An occurrence member that is not a reflection is editable on MO, so
+  # its image gets the sibling wording rather than the reflection's
+  # "can only be changed at the source" claim, and no source link.
+  def test_edit_sibling_image_panel_for_non_reflection_member
+    primary = observations(:coprinus_comatus_obs)
+    sibling = observations(:two_img_obs)
+    [primary, sibling].each { |obs| obs.update_column(:occurrence_id, nil) }
+    occ = Occurrence.create!(user: primary.user, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    login(primary.user.login)
+    sib_image = sibling.images.first
+
+    get(:edit, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#camera_info_#{sib_image.id} div.reflection_readonly_note",
+                  text: :image_sibling_readonly_note.l)
+    assert_select("#camera_info_#{sib_image.id} a.reflection_source_link",
+                  count: 0)
   end
 
   # An image attached to both the native and an occurrence sibling

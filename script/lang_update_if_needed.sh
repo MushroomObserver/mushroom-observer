@@ -48,4 +48,5 @@ if [ "$CURRENT_HASH" = "$CACHED_HASH" ]; then
 fi
 
 rake lang:update
+mkdir -p "$(dirname "$CACHE_FILE")"
 echo "$CURRENT_HASH" > "$CACHE_FILE"

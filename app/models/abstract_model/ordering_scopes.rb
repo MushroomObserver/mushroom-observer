@@ -89,6 +89,12 @@ module AbstractModel::OrderingScopes
       order(HerbariumRecord[:accession_number].asc)
     end
 
+    def order_by_amount
+      return all unless self == Donation
+
+      order(arel_table[:amount].desc)
+    end
+
     def order_by_box_area
       order(Location[:box_area].desc)
     end
@@ -349,6 +355,12 @@ module AbstractModel::OrderingScopes
       order(arel_table[:where].asc)
     end
 
+    def order_by_who
+      return all unless self == Donation
+
+      order(arel_table[:who].asc)
+    end
+
     ####### methods dispatched from order_by_name
 
     def order_images_by_name
@@ -391,6 +403,12 @@ module AbstractModel::OrderingScopes
       else
         order_by_default
       end
+    end
+
+    # Publication has neither a `name` nor a `title` column -- `full`
+    # (the citation text) is its alphabetize-by field.
+    def order_publications_by_name
+      order(Publication[:full].asc)
     end
   end
 end

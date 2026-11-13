@@ -18,6 +18,8 @@
 #  process_image::         (helper for add_image)
 #
 class ImagesController < ApplicationController
+  self.create_button_in_rubric = true
+
   before_action :login_required
   before_action :store_location, only: [:show]
 

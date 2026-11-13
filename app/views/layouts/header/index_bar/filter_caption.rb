@@ -52,9 +52,9 @@ module Views::Layouts
     CAPTION_TRUNCATE = 3
     # Lookup keys whose joined string is italicized inside the `<b>`
     # tag (Latin / taxonomic names).
-    ITALICIZE_LOOKUP_KEYS = [:names, :lookup, :look_alikes, :related_taxa,
-                             :any_name, :name_proposed, :this_name,
-                             :other_names].freeze
+    ITALICIZE_LOOKUP_KEYS = [:names, :lookup, :look_alikes,
+                             :related_taxa, :any_name, :name_proposed,
+                             :this_name, :other_names].freeze
 
     # Params forced server-side rather than chosen by the viewer,
     # keyed by model -- captioning them would just repeat "by users:

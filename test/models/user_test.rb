@@ -63,6 +63,35 @@ class UserTest < UnitTestCase
     assert_nil(User.authenticate(login: "mary", password: "marypasswd"))
   end
 
+  def test_password_change_rotates_auth_code
+    was = mary.auth_code
+    mary.update_column(:password_reset_required, true)
+
+    mary.change_password("marypasswd")
+
+    assert_not_equal(was, mary.auth_code)
+    assert_equal(40, mary.auth_code.length)
+    assert_not(mary.password_reset_required)
+    assert_not(mary.reload.password_reset_required)
+  end
+
+  def test_password_change_ignores_a_blank_password
+    was = mary.auth_code
+
+    mary.change_password("")
+
+    assert_equal(was, mary.auth_code)
+  end
+
+  def test_blank_auth_code_regenerated_on_save
+    mary.update_column(:auth_code, "")
+
+    mary.save
+
+    assert_equal(40, mary.auth_code.length)
+    assert_equal(mary.auth_code, mary.reload.auth_code)
+  end
+
   def test_disallowed_passwords
     u = User.new
     u.login = "nonbob"
@@ -434,6 +463,20 @@ class UserTest < UnitTestCase
       Digest::SHA1.hexdigest("SdFgJwLeRsecretWeRtWeRkTj"),
       User.old_auth_code("secret")
     )
+  end
+
+  def test_masked_email
+    assert_equal("na**an@co************ce.com",
+                 User.new(email: "nathan@collectivesource.com").masked_email)
+    # Four characters or fewer keep only the first, since the
+    # first-two-plus-last-two rule would spell the whole thing out.
+    assert_equal("a***@t***.com",
+                 User.new(email: "abcd@test.com").masked_email)
+    # Only the registrable label is masked, so the rest still reads.
+    assert_equal("a**@ex***le.co.uk",
+                 User.new(email: "abc@example.co.uk").masked_email)
+    assert_equal("no****gn", User.new(email: "noatsign").masked_email)
+    assert_equal("", User.new(email: nil).masked_email)
   end
 
   def test_email_too_long

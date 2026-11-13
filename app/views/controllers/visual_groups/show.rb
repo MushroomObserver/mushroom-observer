@@ -12,51 +12,37 @@ module Views::Controllers::VisualGroups
     prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean)))
 
     def view_template
-      add_show_title(@visual_group)
-      add_edit_icons(@visual_group, @user)
-      container_class(:full)
+      render_page_chrome
 
-      render_top_nav
-      render_description_and_approval
-      hr
-      if @filter
-        render_filter_banner
-      else
-        render_counts_and_names
-      end
-      render(ImageMatrix.new(
-               user: @user, visual_group: @visual_group,
-               subset: @subset, status: "included",
-               pagination_data: @pagination_data
-             ))
-      render_bottom_nav
+      render_content
+      render_image_matrix
     end
 
     private
 
-    def render_top_nav
-      p { render_nav_links }
+    def render_page_chrome
+      add_show_title(@visual_group)
+      add_edit_icons(@visual_group, @user)
+      container_class(:full)
     end
 
-    def render_bottom_nav
-      p { render_nav_links }
-    end
-
-    def render_nav_links
-      Link(type: :get, name: :visual_group_edit.t,
-           target: edit_visual_group_path(@visual_group))
-      plain(" | ")
-      Link(type: :get, name: :visual_group_index.t,
-           target: visual_model_visual_groups_path(
-             @visual_group.visual_model
-           ))
+    def render_content
+      ContentPadded do
+        render_description_and_approval
+        hr
+        if @filter
+          render_filter_banner
+        else
+          render_counts_and_names
+        end
+      end
     end
 
     def render_description_and_approval
       p do
         strong { append_colon(:description.ti) }
         br
-        plain(@visual_group.description.to_s)
+        trusted_html(@visual_group.description.to_s.t)
       end
       p do
         strong { append_colon(:approved.ti) }
@@ -65,10 +51,12 @@ module Views::Controllers::VisualGroups
     end
 
     def render_filter_banner
-      strong { plain("Showing definitional images for \"#{@filter}\"") }
-      br
-      Link(type: :get, name: "Show All Definitional Images",
-           target: visual_group_path(@visual_group))
+      p do
+        strong { plain("Showing definitional images for \"#{@filter}\"") }
+        br
+        Link(type: :get, name: "Show All Definitional Images",
+             target: visual_group_path(@visual_group))
+      end
     end
 
     def render_counts_and_names
@@ -84,11 +72,20 @@ module Views::Controllers::VisualGroups
     end
 
     def render_distinct_name_links
-      @visual_group.distinct_names.each do |name|
-        Link(type: :get, name: name[0],
-             target: visual_group_path(@visual_group, filter: name[0]))
-        br
-      end
+      render(DistinctNames.new(
+               visual_group: @visual_group, user: @user,
+               path_for: lambda { |text_name|
+                 visual_group_path(@visual_group, filter: text_name)
+               }
+             ))
+    end
+
+    def render_image_matrix
+      render(ImageMatrix.new(
+               user: @user, visual_group: @visual_group,
+               subset: @subset, status: "included",
+               pagination_data: @pagination_data
+             ))
     end
   end
 end

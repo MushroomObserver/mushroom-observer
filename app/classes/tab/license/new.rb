@@ -3,7 +3,7 @@
 # "Create license" link.
 class Tab::License::New < Tab::Base
   def title
-    :create_license_title.t
+    :create_object.t(type: :license)
   end
 
   def path

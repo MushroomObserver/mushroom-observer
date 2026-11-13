@@ -57,6 +57,7 @@ class Inat
     IMPORTABLE_ICONIC_TAXA_ARG = IMPORTABLE_ICONIC_TAXA.join(",").freeze
 
     MO_URL_OBSERVATION_FIELD_ID = 5005
+    VOUCHER_NUMBERS_FIELD_ID = 2863
     # iNat's `field:` search filter matches on the field name, not id
     # (field:5005 returns nothing); this is the name of field 5005.
     MO_URL_OBSERVATION_FIELD_NAME = "Mushroom Observer URL"

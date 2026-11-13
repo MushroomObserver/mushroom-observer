@@ -19,13 +19,13 @@ module Views::Controllers::Licenses
 
     def test_renders_form_with_url_field
       assert_html(@html, "label[for='license_url']",
-                  text: :license_url.l)
+                  text: :url.l)
       assert_html(@html, "input[name='license[url]']")
     end
 
     def test_renders_form_with_deprecated_checkbox
       assert_html(@html, "label[for='license_deprecated']",
-                  text: :license_form_checkbox_deprecated.l)
+                  text: :deprecated.ti)
       assert_html(@html,
                   "input[name='license[deprecated]'][type='checkbox']")
     end

@@ -334,6 +334,10 @@ MushroomObserver::Application.configure do
   # Maximum number of Observations that can be downloaded in a single request
   config.max_downloads = 5000
 
+  # Above this many Observations, SpeciesLists::ObservationsController's
+  # bulk add/remove asks for confirmation before running.
+  config.max_species_list_bulk_edit = 100
+
   # List of User ids of users that can see the image recognition
   # "Suggest Names" button on the observation page.
   config.image_model_beta_testers = [103_233]

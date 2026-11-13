@@ -71,6 +71,13 @@ class DateRangeParserTest < UnitTestCase
     assert_nil(parse("2026-08-2026-99"))
   end
 
+  # format's %d coerces a String via Kernel#Integer(), reading a
+  # leading zero as octal -- crashed in production on "0815".
+  def test_leading_zero_year_does_not_crash_or_use_octal
+    assert_equal(%w[0815-01-01 0815-12-31], parse("0815"))
+    assert_equal(%w[0012-01-01 0012-12-31], parse("0012"))
+  end
+
   # Exactly two endpoints: a list of three dates is rejected, not
   # silently spanned first-to-last.
   def test_separators_do_not_nest

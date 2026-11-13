@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class FieldSlipsController < ApplicationController
+  self.create_button_in_rubric = true
+
   include Show
   include Index
   include ObservationHandling

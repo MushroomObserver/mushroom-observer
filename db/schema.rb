@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_11_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -759,8 +759,11 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.datetime "alerted_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string "kind", limit: 20, default: "new_observation", null: false
+    t.string "target_name"
     t.index ["external_site_id"], name: "index_project_external_site_alerts_on_external_site_id"
     t.index ["project_id", "external_site_id", "remote_identification_id"], name: "index_project_site_alerts_on_project_site_and_ident", unique: true
+    t.index ["project_id", "external_site_id", "remote_observation_id"], name: "index_project_site_alerts_on_project_site_and_obs"
   end
 
   create_table "project_external_sites", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -782,6 +785,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
   create_table "project_images", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "image_id", null: false
     t.integer "project_id", null: false
+    t.index ["project_id", "image_id"], name: "index_project_images_unique", unique: true
   end
 
   create_table "project_members", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -796,6 +800,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.integer "observation_id", null: false
     t.integer "project_id", null: false
     t.index ["observation_id"], name: "index_project_observations_on_observation_id"
+    t.index ["project_id", "observation_id"], name: "index_project_observations_unique", unique: true
     t.index ["project_id"], name: "index_project_observations_on_project_id"
   end
 
@@ -1092,6 +1097,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
   create_table "user_group_users", charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "user_id", default: 0, null: false
     t.integer "user_group_id", default: 0, null: false
+    t.index ["user_group_id", "user_id"], name: "index_user_group_users_unique", unique: true
   end
 
   create_table "user_groups", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -1183,6 +1189,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.integer "original_image_quota", default: 0
     t.integer "label_format", default: 1
     t.boolean "inat_import_opt_out", default: false, null: false
+    t.boolean "password_reset_required", default: false, null: false
     t.index ["inat_username"], name: "index_users_on_inat_username"
     t.index ["login"], name: "login_index"
     t.index ["name"], name: "index_users_on_name"
@@ -1192,6 +1199,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_10_27_120000) do
     t.integer "image_id"
     t.integer "visual_group_id"
     t.boolean "included", default: true, null: false
+    t.index ["image_id"], name: "index_visual_group_images_on_image_id"
+    t.index ["visual_group_id", "included"], name: "index_visual_group_images_on_visual_group_id_and_included"
   end
 
   create_table "visual_groups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

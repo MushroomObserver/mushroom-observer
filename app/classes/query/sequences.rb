@@ -8,6 +8,11 @@ class Query::Sequences < Query
   query_attr(:observations, [Observation], param_alias: :observation)
   query_attr(:locus, [:string])
   query_attr(:locus_has, :string)
+  # Declared plain `:string`, not `[Name]` -- a record-backed type
+  # routes through the controller's single-record find-by-id-or-
+  # redirect resolution, which skips Sequence.name_has (id-or-
+  # substring match) entirely for a non-numeric value.
+  query_attr(:name_has, :string)
   query_attr(:archive, [:string])
   query_attr(:accession, [:string])
   query_attr(:accession_has, :string)

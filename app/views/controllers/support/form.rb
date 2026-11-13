@@ -26,7 +26,8 @@ module Views::Controllers::Support
         text_field(:who, size: 30, label: :donate_who, inline: true)
         checkbox_field(:anonymous, label: :donate_anonymous,
                                    wrap_class: "mb-3")
-        text_field(:email, size: 30, label: :donate_email, inline: true)
+        text_field(:email, size: 30, label: :donate_email, inline: true,
+                           type: "email")
         submit(:donate_confirm.l, center: true)
       end
     end

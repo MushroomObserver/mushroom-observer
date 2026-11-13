@@ -117,13 +117,15 @@ class ObservationsController
       }.merge(opts)
 
       # Offer pagination by letter only if the index has been filtered
-      # and we're sorting by user or name.
-      if query.params.except(:order_by).present? &&
-         %w[user reverse_user name reverse_name].include?(
-           query.params[:order_by]
-         )
-        opts[:letters] = true
-      end
+      # and we're sorting by user or name. Always set explicitly (not
+      # just in the true case) so the generic "sorted by name" default
+      # (ApplicationController::Indexes#auto_letters?) stays off for
+      # the unfiltered full-table browse.
+      opts[:letters] =
+        query.params.except(:order_by).present? &&
+        %w[user reverse_user name reverse_name].include?(
+          query.params[:order_by]
+        )
 
       opts
     end

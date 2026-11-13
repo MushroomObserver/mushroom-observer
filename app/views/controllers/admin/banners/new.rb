@@ -2,11 +2,13 @@
 
 module Views::Controllers::Admin::Banners
   # Banner-management page. Heading + Form component.
-  class Index < Views::FullPageBase
+  class New < Views::FullPageBase
     prop :banner, ::Banner
 
     def view_template
-      h1 { :change_banner_title.t }
+      add_new_title(:update_object, :banner)
+      content_padding(:no_panels)
+
       render(Form.new(@banner))
     end
   end

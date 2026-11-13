@@ -719,8 +719,11 @@ class FieldSlipsControllerTest < FunctionalTestCase
     assert_input_value(:field_slip_collector, field_slip.collector)
   end
 
+  # The previous slip's location wins over the project's, as long as it
+  # lies inside the project's area (here California, around Salt Point).
   def test_should_show_previous_field_slip_location
     field_slip = field_slips(:field_slip_previous)
+    field_slip.project.update_columns(location_id: locations(:california).id)
     assert_not(field_slip.location == field_slip.project.location.display_name)
     login(field_slip.user.login)
     get(:new, params: { code: "#{field_slip.code}0" })

@@ -92,31 +92,39 @@ svg.placeholder {
 // context -- a plain inline caller that isn't the lightbox, e.g. the
 // image show page) intentionally has no styling here yet.
 
-// Members carry no `.btn` class (`variant: :strip`), so
-// `.btn-group-xs > .btn` sizing never applies -- padding/font-size
-// are custom instead.
-.vote-btn-group {
+// Spacing/border skeleton for a row of text-label buttons
+// (variant: :strip, no .btn framing) divided by vertical borders.
+// $current-selector marks the non-clickable "active" item;
+// $border-color is a param since it needs to read against different
+// backgrounds per caller. Members carry no `.btn` class, so the
+// usual `.btn-group-xs > .btn` sizing doesn't apply -- padding/
+// font-size are set here instead.
+@mixin btn-group-dividers($current-selector, $border-color) {
   font-size: 0.75rem; // 12px at 16px root
 
   > form.button_to,
-  > .image-vote {
+  > #{$current-selector} {
     display: inline-block;
     margin: 0;
 
     &:not(:first-child) {
-      border-left: 1px solid rgba($white, 0.75);
+      border-left: 1px solid $border-color;
     }
   }
 
-  > .image-vote {
+  > #{$current-selector} {
     padding: 0.21rem 0.3rem;
-    border-top: 1px solid rgba($white, 0.75);
-    border-bottom: 1px solid rgba($white, 0.75);
+    border-top: 1px solid $border-color;
+    border-bottom: 1px solid $border-color;
 
     &:last-child {
-      border-right: 1px solid rgba($white, 0.75);
+      border-right: 1px solid $border-color;
     }
   }
+}
+
+.vote-btn-group {
+  @include btn-group-dividers(".image-vote", rgba($white, 0.75));
 
   // Padding/color/hover live on the inner <button>, not the
   // <form.button_to> wrapper. Padding and border-width match
@@ -134,6 +142,28 @@ svg.placeholder {
     &:focus {
       color: $black !important;
       background-color: $white;
+      text-decoration: none;
+    }
+  }
+}
+
+.status-btn-group {
+  @include btn-group-dividers(".status-link-current", $list-group-border);
+
+  // Padding/border match `.status-link-current` (the current-status
+  // indicator span), transparent border instead of visible, so the
+  // row height doesn't change depending on which status is current.
+  form.button_to button[type=submit].status-link {
+    display: inline-block;
+    padding: 0.21rem 0.3rem;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
+    color: $link-color !important;
+    transition: color 0.3s ease;
+
+    &:hover,
+    &:focus {
+      color: $link-hover-color !important;
       text-decoration: none;
     }
   }

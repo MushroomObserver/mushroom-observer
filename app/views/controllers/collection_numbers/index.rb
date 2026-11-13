@@ -31,7 +31,7 @@ module Views::Controllers::CollectionNumbers
 
     # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
-      Table(@objects, class: "table-striped",
+      Table(@objects, variant: :striped, class: "mt-3",
                       show_headers: false) do |t|
         t.column("") { |cn| render_id_badge(cn) }
         t.column("") { |cn| render_edit_link(cn) }

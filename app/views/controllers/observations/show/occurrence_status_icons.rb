@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Star/lock status icons for an occurrence member: occurrence-primary
+# Star/tags status icons for an occurrence member: occurrence-primary
 # (:is_primary) and read-only reflection (:read_only). Shared by the
 # Matching Observations panel and the Specimen panel's sequences
 # section so the iconography stays identical.
@@ -24,10 +24,17 @@ module Views::Controllers::Observations::Show::OccurrenceStatusIcons
   def render_status_icons(types)
     types.each_with_index do |type, index|
       wrap_class = "icon-text-gap" if index.positive?
-      Icon(type: type, title: status_icon_title(type),
+      Icon(type: status_icon_glyph(type), title: status_icon_title(type),
            wrap_class: wrap_class, center_tooltip: true,
            data: { tooltip_container: "li" })
     end
+  end
+
+  # The :read_only glyph (a lock) reads as "can't be edited" to
+  # users -- #5655. :reflection's cloud glyph reads as "linked
+  # copy" instead, without implying the observation is locked down.
+  def status_icon_glyph(type)
+    type == :read_only ? :reflection : type
   end
 
   def status_icon_title(type)
