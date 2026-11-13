@@ -8,19 +8,14 @@ module Views::Controllers::Publications
     prop :query, ::Query
     prop :pagination_data, ::PaginationData
     prop :objects, _Array(::Publication)
-
     # Counts are over the full query result set, not just the
-    # current page's `@objects`.
+    # current page's `@objects` -- computed by the controller; views
+    # don't run queries.
+    prop :peer_count, ::Integer
+    prop :mo_count, ::Integer
+
     def full_count
       @full_count ||= @query.num_results
-    end
-
-    def peer_count
-      @peer_count ||= @query.results.count(&:peer_reviewed)
-    end
-
-    def mo_count
-      @mo_count ||= @query.results.count(&:mo_mentioned)
     end
 
     INTRO_CITATION_URL =
@@ -81,10 +76,10 @@ module Views::Controllers::Publications
             class: "mb-3 mt-3") do |tbl|
         add_full_link_column(tbl)
         tbl.column(:publication_link.l) { |pub| link_cell(pub) }
-        tbl.column("(#{peer_count})", align: :center) do |pub|
+        tbl.column("(#{@peer_count})", align: :center) do |pub|
           pub.peer_reviewed ? "P" : ""
         end
-        tbl.column("(#{mo_count})", align: :center) do |pub|
+        tbl.column("(#{@mo_count})", align: :center) do |pub|
           pub.mo_mentioned ? "M" : ""
         end
         tbl.column("", align: :center) { |pub| admin_cell(pub) }

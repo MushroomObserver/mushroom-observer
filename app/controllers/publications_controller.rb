@@ -150,7 +150,9 @@ class PublicationsController < ApplicationController
   def render_index_view
     render(Views::Controllers::Publications::Index.new(
              query: @query, pagination_data: @pagination_data,
-             objects: @objects
+             objects: @objects,
+             peer_count: @query.scope.where(peer_reviewed: true).count,
+             mo_count: @query.scope.where(mo_mentioned: true).count
            ))
   end
 
