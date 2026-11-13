@@ -49,6 +49,21 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("td", text: other_import.state.to_s, count: 0)
   end
 
+  # `by_users` is the query_attr `by_user` aliases to -- a non-admin
+  # passing it directly (bypassing the alias) must not see another
+  # user's imports either. `Query.permit_filters` always lists the
+  # alias after its target attr, so the forced `by_user` resolves
+  # last and wins, regardless of which of the two params the request
+  # supplies.
+  def test_index_user_cannot_override_by_users_param
+    other_import = inat_imports(:katrina_inat_import)
+
+    login(users(:rolf).login)
+    get(:index, params: { by_users: other_import.user_id })
+
+    assert_select("td", text: other_import.state.to_s, count: 0)
+  end
+
   def test_index_admin_sees_all_imports
     make_admin
 
