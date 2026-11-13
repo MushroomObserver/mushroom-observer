@@ -51,8 +51,19 @@ class Inat
     # fungi-wide fallback, and why the alert cycle reads this rather
     # than `params`.
     def target_taxon_ids
-      @target_taxon_ids ||=
-        @project.target_names.filter_map { |name| taxon_id_for(name) }
+      target_taxa.keys
+    end
+
+    # iNat taxon id => the MO name targeted through it, which is the
+    # name an alert reports: MO may know the taxon under a synonym iNat
+    # does not prefer, and a coordinator watches the spelling they
+    # entered.
+    def target_taxa
+      @target_taxa ||=
+        @project.target_names.filter_map do |name|
+          id = taxon_id_for(name)
+          [id, name.text_name] if id
+        end.to_h
     end
 
     # iNat params for everything the project constrains. Empty when it

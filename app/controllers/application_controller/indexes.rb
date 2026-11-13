@@ -293,7 +293,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     store_location
     # clear_query_in_session if session[:query_record] != query.id
     update_stored_query(query)
-    query.need_letters = display_opts[:letters] if display_opts[:letters]
+    query.need_letters = display_opts.fetch(:letters) { auto_letters?(query) }
     set_index_view_ivars(query, display_opts)
     flash_query_validation_errors(query)
   end
@@ -343,7 +343,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   def calc_pages_and_objects(query, display_opts)
     number_arg = display_opts[:number_arg] || :page
     @pagination_data =
-      if display_opts[:letters]
+      if display_opts.fetch(:letters) { auto_letters?(query) }
         letter_pagination_data(display_opts[:letter_arg] || :letter,
                                number_arg, num_per_page(display_opts))
       else
@@ -351,6 +351,19 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
       end
     skip_if_coming_back(query, display_opts)
     find_objects(query, display_opts)
+  end
+
+  # Default: an index currently sorted by name/title gets the
+  # letter-jump pager, unless `index_display_opts` sets `letters:`
+  # explicitly (e.g. Observations, whose index isn't a sorted list).
+  # `alphabetical_by` returns nil when the model's "sort by name"
+  # isn't a plain column, which disables this the same way.
+  def auto_letters?(query)
+    order = (query.params[:order_by] || query.default_order).to_s
+    order = order.sub(/^reverse_/, "")
+    return false unless order.in?(%w[name title])
+
+    query.alphabetical_by.present?
   end
 
   def num_per_page(display_opts)

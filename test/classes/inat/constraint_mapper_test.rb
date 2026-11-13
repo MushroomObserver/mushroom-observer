@@ -63,6 +63,18 @@ class Inat::ConstraintMapperTest < UnitTestCase
 
   # Unresolved names leave MO's own fungi-and-slime-moulds filter, so a
   # search is never opened up to every taxon on iNat.
+  # An alert reports the name the project entered, so the mapping back
+  # from the iNat taxon is what it reads (#5677).
+  def test_a_taxon_id_maps_back_to_the_name_targeted_through_it
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+
+    taxa = Inat::ConstraintMapper.new(@project).target_taxa
+
+    assert_equal({ 47_347 => "Coprinus comatus",
+                   48_701 => "Agaricus campestris" }, taxa)
+  end
+
   def test_unresolved_names_fall_back_to_the_importable_taxa
     stub_json("taxa", [])
     stub_json("places", [])

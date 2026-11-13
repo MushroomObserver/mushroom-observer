@@ -58,11 +58,15 @@ class Inat
 
     private
 
+    # `ancestor_ids` runs from the kingdom down, so a project watching
+    # a genus recognizes an identification of one of its species by
+    # the genus appearing there.
     def identification(ident)
       taxon = ident["taxon"] || {}
       return nil if taxon["id"].blank?
 
-      { id: ident["id"], taxon_id: taxon["id"], name: taxon["name"].to_s }
+      { id: ident["id"], taxon_id: taxon["id"], name: taxon["name"].to_s,
+        ancestor_ids: Array(taxon["ancestor_ids"]) }
     end
 
     # iNat writes a point as "lat,lng" in `location`. An obscured

@@ -15,6 +15,8 @@
 #  Public methods      None (ideally)
 #
 class ArticlesController < ApplicationController
+  self.create_button_in_rubric = true
+
   before_action :login_required, except: [:index, :show]
   before_action :store_location, except: :destroy
   before_action :ignore_request_unless_permitted, except: [:index, :show]

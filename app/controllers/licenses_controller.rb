@@ -4,6 +4,8 @@
 # NOTE: inherits from AdminController in order to limit actions to admins
 # NOTE: for badges see app/components/license_badge.rb
 class LicensesController < AdminController
+  self.create_button_in_rubric = true
+
   before_action :store_location, except: :destroy
 
   def index
