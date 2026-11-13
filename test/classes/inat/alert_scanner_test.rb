@@ -52,9 +52,11 @@ class Inat::AlertScannerTest < UnitTestCase
       "identifications" => [identification] }.merge(overrides.stringify_keys)
   end
 
-  def identification(id: 999, taxon_id: 47_347, current: true)
+  def identification(id: 999, taxon_id: 47_347, current: true,
+                     name: "Coprinus comatus", ancestor_ids: [])
     { "id" => id, "current" => current,
-      "taxon" => { "id" => taxon_id, "name" => "Coprinus comatus" } }
+      "taxon" => { "id" => taxon_id, "name" => name,
+                   "ancestor_ids" => ancestor_ids } }
   end
 
   def stub_observations(results)
@@ -101,7 +103,43 @@ class Inat::AlertScannerTest < UnitTestCase
     alert = digests.values.first.first
 
     assert_equal("Coprinus comatus", alert.name)
+    assert_equal(@coprinus.text_name, alert.target_name)
+    assert_equal(ProjectExternalSiteAlert::NEW_OBSERVATION, alert.kind)
     assert_equal(Date.parse("2026-09-20"), alert.observed_on)
+    assert_equal("12345", alert.remote_observation_id)
+  end
+
+  # iNat's search includes a taxon's descendants, so a project watching
+  # a genus hears about its species -- reported under the name the
+  # project entered (#5677).
+  def test_an_identification_below_a_target_taxon_alerts
+    alerting_row
+    stub_observations([observation(
+      "identifications" => [identification(
+        taxon_id: 384_733, name: "Coprinus comatus var. ovatus",
+        ancestor_ids: [48_460, 47_170, 47_347]
+      )]
+    )])
+
+    alert = scan.values.first.first
+
+    assert_equal("Coprinus comatus var. ovatus", alert.name)
+    assert_equal(@coprinus.text_name, alert.target_name)
+  end
+
+  # A confirming identification on an observation the project has
+  # already been told about is activity, not a find (#5677).
+  def test_a_later_identification_is_other_activity
+    alerting_row
+    stub_observations([observation])
+    scan
+    stub_observations([observation(
+      "identifications" => [identification(id: 1000)]
+    )])
+
+    alert = scan.values.first.first
+
+    assert_equal(ProjectExternalSiteAlert::OTHER_ACTIVITY, alert.kind)
     assert_equal("12345", alert.remote_observation_id)
   end
 

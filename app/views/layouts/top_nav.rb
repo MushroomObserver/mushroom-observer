@@ -55,15 +55,6 @@ class Views::Layouts::TopNav < Views::Base
     visual_groups
   ].freeze
 
-  # Controllers that support the green "+ Add" button. Description
-  # / herbarium-record controllers are excluded: descriptions don't
-  # get a create button at all, and herbarium records are created
-  # from observation pages.
-  NAV_CREATABLES = %w[
-    observations names species_lists projects locations images herbaria
-    glossary_terms field_slips articles publications visual_models
-  ].freeze
-
   def view_template
     Navbar(variant: :default, class: "hidden-print mb-2", id: "top_nav",
            aria: { label: :app_top_nav_label.l }) do
@@ -221,7 +212,7 @@ class Views::Layouts::TopNav < Views::Base
   # than just :new.
   def nav_create_visible?
     @user && controller.methods.include?(:new) &&
-      NAV_CREATABLES.include?(controller.controller_name) &&
+      controller.create_button_in_rubric? &&
       %w[new create].exclude?(controller.action_name)
   end
 

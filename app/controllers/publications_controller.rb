@@ -2,6 +2,8 @@
 
 # Control information about publications that benefit from or cite MO
 class PublicationsController < ApplicationController
+  self.create_button_in_rubric = true
+
   before_action :login_required, except: [:index, :show]
   before_action :require_successful_user, only: [:create]
   before_action :store_location, only: [:index, :show]
@@ -9,11 +11,21 @@ class PublicationsController < ApplicationController
   # GET /publications
   # GET /publications.xml
   def index
-    @publications = Publication.order(:full).to_a
     respond_to do |format|
-      format.html { render_index_view }
-      format.xml  { render(xml: @publications) }
+      format.html { build_index_with_query }
+      format.xml  { render(xml: Publication.order(:full).to_a) }
     end
+  end
+
+  # Read by `add_sorter` in the view. Each key must resolve to
+  # `Publication.order_by_<key>`.
+  def index_sort_options
+    [
+      ["name",       :sort_by_name.t],
+      ["created_at", :sort_by_created_at.t],
+      ["updated_at", :sort_by_updated_at.t],
+      ["user",       :sort_by_user.t]
+    ].freeze
   end
 
   # GET /publications/1
@@ -122,6 +134,10 @@ class PublicationsController < ApplicationController
 
   private
 
+  def index_display_opts(opts, _query)
+    { num_per_page: 50, include: :user }.merge(opts)
+  end
+
   def permitted_publication_params
     if params[:publication]
       params[:publication].permit(:full, :link, :how_helped, :mo_mentioned,
@@ -133,7 +149,10 @@ class PublicationsController < ApplicationController
 
   def render_index_view
     render(Views::Controllers::Publications::Index.new(
-             publications: @publications
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects,
+             peer_count: @query.scope.where(peer_reviewed: true).count,
+             mo_count: @query.scope.where(mo_mentioned: true).count
            ))
   end
 

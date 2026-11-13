@@ -33,16 +33,25 @@ class Inat
     end
 
     def taxon_ids
-      @taxon_ids ||= Inat::ConstraintMapper.new(project).target_taxon_ids
+      @taxon_ids ||= target_taxa.keys
     end
 
     # The identification this project would be told about: a current
-    # one naming a taxon it watches. The newest wins when there are
-    # several, since that is what the observation now says.
+    # one naming a taxon it watches, or anything below one. The newest
+    # wins when there are several, since that is what the observation
+    # now says.
     def alertable_identification(candidate)
       candidate.current_identifications.
-        select { |ident| taxon_ids.include?(ident[:taxon_id]) }.
+        select { |ident| target_taxon_id_for(ident) }.
         max_by { |ident| ident[:id].to_i }
+    end
+
+    # The watched name the identification matched, which is what the
+    # message names. iNat's search includes a taxon's descendants, so
+    # a project watching Amanita hears about Amanita muscaria under
+    # the name it entered.
+    def target_name_for(identification)
+      target_taxa[target_taxon_id_for(identification)]
     end
 
     def matches?(candidate)
@@ -57,6 +66,21 @@ class Inat
     end
 
     private
+
+    def target_taxa
+      @target_taxa ||= Inat::ConstraintMapper.new(project).target_taxa
+    end
+
+    # The watched taxon the identification sits at or under. The
+    # deepest one when the project watches both a genus and one of its
+    # species, since `ancestor_ids` runs from the kingdom down and the
+    # species is the more particular answer.
+    def target_taxon_id_for(identification)
+      return identification[:taxon_id] if
+        taxon_ids.include?(identification[:taxon_id])
+
+      (identification[:ancestor_ids] & taxon_ids).last
+    end
 
     def within_dates?(observed_on)
       return true if observed_on.blank?

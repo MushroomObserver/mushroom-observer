@@ -14,7 +14,7 @@ module Views::Controllers::Admin::Donations
                                    wrap_class: "form-group")
         text_field(:email, size: 50, label: :email.ti, inline: true,
                            type: "email")
-        submit(:create_donation_add.l, center: true)
+        submit(:add.ti, center: true)
       end
     end
 

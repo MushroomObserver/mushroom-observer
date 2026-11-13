@@ -8,6 +8,8 @@
 #  Observation's to spring into existence.
 #
 class SpeciesListsController < ApplicationController # rubocop:disable Metrics/ClassLength
+  self.create_button_in_rubric = true
+
   include ::Locationable
 
   before_action :login_required

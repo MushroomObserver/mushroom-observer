@@ -56,6 +56,15 @@ class InatImport < ApplicationRecord
   # Query::InatImports' sorting.
   include AbstractModel::OrderingScopes
 
+  # `ApplicationController::Indexes#set_index_view_ivars` calls this
+  # unconditionally on any model wired onto the generic index
+  # pipeline. Not pulled in by `OrderingScopes` -- it's an
+  # `AbstractModel` class method, replicated here with the same
+  # default every `AbstractModel` subclass gets.
+  def self.type_tag
+    name.underscore.to_sym
+  end
+
   alias_attribute :canceled, :cancel # for readability, e.g., job.canceled?
 
   enum :state, {
