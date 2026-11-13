@@ -7,10 +7,11 @@
 #
 # For an occurrence sibling's image (`read_only: true`): the same EXIF
 # display plus the image's immutable copyright/license and a note saying
-# where it can be changed. `reflection: true` adds that the image mirrors
-# an imported source, with a link to the source observation. "Use this
-# info" appears only when there is a location or a differing date to
-# adopt onto the primary (#5317).
+# where it can be changed. `reflection: true` words that note for an
+# image mirroring an imported source; the link to that source follows
+# `source_url`, not `reflection`. "Use this info" appears only when
+# there is a location or a differing date to adopt onto the primary
+# (#5317).
 #
 # @example
 #   render Components::Form::CameraInfo.new(
@@ -48,7 +49,7 @@ class Components::Form::CameraInfo < Components::Base
   # The sibling mirrors an imported source (an iNat reflection) rather
   # than being another editable observation of the same specimen. Only
   # a reflection's metadata is owned elsewhere, so only a reflection
-  # gets the imported-source wording and the source link.
+  # gets the imported-source wording.
   prop :reflection, _Boolean, default: false
   prop :copyright_holder, _Nilable(String), default: nil
   prop :license_name, _Nilable(String), default: nil

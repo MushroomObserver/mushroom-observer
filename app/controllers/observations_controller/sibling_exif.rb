@@ -7,8 +7,9 @@
 # observation being edited: it shows the image's immutable metadata
 # (date, copyright, license) and reads the image's EXIF for location
 # (iNat usually strips it). Only a reflection's metadata is owned
-# elsewhere, so only a reflection carries `reflection: true`, the
-# imported-source wording and a link to the source observation.
+# elsewhere, so only a reflection carries `reflection: true` and the
+# imported-source wording. The source link follows the member's import
+# link, so an imported member not yet marked a reflection keeps it.
 # "Use this info" is offered only when there is a location or a
 # differing date to adopt onto the primary (#5317).
 module ObservationsController::SiblingEXIF
