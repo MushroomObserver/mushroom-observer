@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ProjectsController < ApplicationController
+  self.create_button_in_rubric = true
+
   include ::Locationable
   include Validators
   include Creation

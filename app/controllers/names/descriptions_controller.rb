@@ -26,7 +26,10 @@ module Names
     ############################################################################
     # INDEX
     #
+    # Map the nested route's :name_id onto :names' lookup shape (see
+    # index_filter_params.md).
     def index
+      params[:names] = { lookup: params[:name_id] } if params[:name_id].present?
       build_index_with_query
     end
 

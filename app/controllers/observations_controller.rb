@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
 class ObservationsController < ApplicationController
+  self.create_button_in_rubric = true
+
   include Index
   include Show
   include New

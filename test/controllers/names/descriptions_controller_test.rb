@@ -80,6 +80,28 @@ module Names
                     "Wrong number of results")
     end
 
+    # The nested route (/names/:name_id/descriptions) maps name_id onto
+    # the :names query_attr's lookup shape -- same filtering as the
+    # flat ?names= param.
+    def test_index_by_name_id_of_multiple_descriptions
+      name = names(:peltigera)
+      descs_count = NameDescription.where(name: name).count
+      assert_operator(
+        descs_count, :>, 1,
+        "Test needs a name with multiple descriptions"
+      )
+
+      login
+      get(:index, params: { name_id: name.id })
+
+      assert_select("body.descriptions__index")
+      assert_page_title(:name_descriptions.ti)
+      assert_displayed_filters("#{:query_names.l}: #{name.text_name}")
+      assert_select("a:match('href',?)", %r{^/names/descriptions/\d+},
+                    { count: descs_count },
+                    "Wrong number of results")
+    end
+
     def test_index_by_author_of_no_descriptions
       user = users(:zero_user)
 
