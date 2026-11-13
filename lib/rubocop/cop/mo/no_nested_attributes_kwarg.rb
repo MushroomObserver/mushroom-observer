@@ -34,12 +34,13 @@ module RuboCop
       #   Table(@rows, attributes: { align: "center", cellspacing: "2" })
       #   Icon(type: :edit, attributes: { data: { foo: "bar" } })
       #   Link(type: :get, target: url, attributes: { data: { x: 1 } })
+      #   Link(type: :user, user: u, attributes: { class: "x" })
       #
       #   # good
       #   Table(@rows, align: "center", cellspacing: "2")
       #   Icon(type: :edit, data: { foo: "bar" })
       #   Link(type: :get, target: url, data: { x: 1 })
-      #   Link(type: :user, user: u, attributes: { class: "x" }) # fine
+      #   Link(type: :user, user: u, class: "x")
       class NoNestedAttributesKwarg < Base
         MSG = "Don't pass `attributes:` to `%<name>s` -- it forwards " \
               "unrecognized keywords directly (a `**` prop), so a " \
