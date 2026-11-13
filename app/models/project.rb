@@ -827,10 +827,6 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     self.location = Location.place_name_to_location(place_name, current_user)
   end
 
-  def name_count
-    Checklist::ForProject.new(self).num_taxa
-  end
-
   def location_count
     obs_locs = Location.joins(:observations).
                merge(visible_observations).select(:id)

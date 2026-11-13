@@ -58,11 +58,45 @@ module Tab::Project
     def test_names
       tab = Tab::Project::Names.new(project: @project)
 
-      assert_match(/\A\d+ /, tab.title)
       assert_equal(routes.checklist_path(project_id: @project.id),
                    tab.path)
       assert_equal("checklists", tab.alt_title)
       assert_equal("checklists_link", link_class(tab))
+    end
+
+    def test_names_without_targets
+      project = projects(:empty_project)
+      assert_empty(project.target_names,
+                   "Fixture project should have no target Names")
+      assert_empty(project.observations,
+                   "Fixture project should start with no Observations")
+      obss = [observations(:coprinus_comatus_obs),
+              observations(:agaricus_campestris_obs)]
+      project.observations << obss
+
+      tab = Tab::Project::Names.new(project: project)
+
+      assert_equal(
+        "#{obss.map(&:name).uniq.size} #{:names.ti}",
+        tab.title,
+        "Names tab without targets should show observed Name count"
+      )
+    end
+
+    def test_names_with_targets
+      project = projects(:rare_fungi_project)
+      obs = observations(:coprinus_comatus_obs)
+      assert_includes(project.target_names, obs.name,
+                      "Observation should be of a target Name")
+      project.observations << obs
+
+      tab = Tab::Project::Names.new(project: project)
+
+      assert_equal(
+        "1/#{project.target_names.size} #{:names.ti}",
+        tab.title,
+        "Names tab with targets should show observed/total target Names"
+      )
     end
 
     def test_locations

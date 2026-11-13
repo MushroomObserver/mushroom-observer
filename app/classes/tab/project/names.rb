@@ -7,7 +7,7 @@ class Tab::Project::Names < Tab::Base
   end
 
   def title
-    "#{@project.name_count} #{:names.ti}"
+    "#{count_text} #{:names.ti}"
   end
 
   def path
@@ -16,5 +16,17 @@ class Tab::Project::Names < Tab::Base
 
   def alt_title
     "checklists"
+  end
+
+  private
+
+  def count_text
+    return checklist.num_taxa.to_s unless checklist.num_targets.positive?
+
+    "#{checklist.num_targets_observed}/#{checklist.num_targets}"
+  end
+
+  def checklist
+    @checklist ||= Checklist::ForProject.new(@project)
   end
 end
