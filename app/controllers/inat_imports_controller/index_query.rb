@@ -17,23 +17,29 @@ module InatImportsController::IndexQuery
 
   private
 
-  # Non-admins see only the imports they made; admins see everyone's,
-  # unfiltered. `by_users: nil` is skipped by Query (same as omitting
-  # the key), so this needn't branch into two separate `find_or_create_query`
-  # calls.
-  def index_query_args(admin)
-    {
-      by_users: (admin ? nil : [@user]),
-      order_by: order_by_or_flash_if_unknown
-    }
+  # Forces every non-admin request onto the generic index pipeline's
+  # filtered-index dispatch (`other_filter_param_present?`), scoped to
+  # the signed-in user. An overwrite, not `||=`: a non-admin's request
+  # can't supply a different `by_user` param to see another user's
+  # imports.
+  def force_own_imports_only_param
+    params[:by_user] = @user.id
   end
 
-  def index_pagination_data
-    PaginationData.new(
-      number_arg: :page,
-      number: params[:page],
-      num_per_page: calc_layout_params["count"]
-    )
+  # `opts` wins where it sets something unique; `always_index: true`
+  # must win regardless, since the hand-rolled index this replaces
+  # didn't redirect a single-result list to its show page.
+  def index_display_opts(opts, _query)
+    opts.merge(num_per_page: calc_layout_params["count"],
+               always_index: true)
+  end
+
+  def render_index_view
+    render(Views::Controllers::InatImports::Index.new(
+             query: @query, pagination_data: @pagination_data,
+             objects: @objects, admin: in_admin_mode? == true,
+             result_import_ids: import_ids_with_results(@objects)
+           ))
   end
 
   # Ids of the imports with linked observations. Historic imports predate
