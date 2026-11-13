@@ -17,4 +17,11 @@ class PublicationTest < UnitTestCase
     pub = Publication.new(user: users(:rolf))
     assert_not(pub.valid?)
   end
+
+  def test_full_has
+    spam = publications(:spam_pub)
+
+    assert_includes(Publication.full_has("spam"), spam)
+    assert_not_includes(Publication.full_has("nonexistent_phrase"), spam)
+  end
 end

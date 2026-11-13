@@ -404,5 +404,11 @@ module AbstractModel::OrderingScopes
         order_by_default
       end
     end
+
+    # Publication has neither a `name` nor a `title` column -- `full`
+    # (the citation text) is its alphabetize-by field.
+    def order_publications_by_name
+      order(Publication[:full].asc)
+    end
   end
 end
