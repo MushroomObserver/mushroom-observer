@@ -3134,6 +3134,7 @@
   merge_descriptions_move_header: Move / copy to a synonym
   merge_descriptions_move_location_header: Move / copy to another location
   merge_descriptions_no_others: "(there are no other descriptions)"
+  merge_descriptions_no_synonyms: "(there are no synonyms to move to)"
   merge_descriptions_preview_restricted: "(you do not have permission to view this description)"
   merge_descriptions_delete_after: Delete old description after merge?
   merge_descriptions_merge_help: This will copy any non-blank sections from the source description into the description you select below. If the target description already has text in any of those fields, you will be given an editing form with the text from both descriptions. This will allow you to reconcile any conflicts by hand before saving the form and making the merger official.
