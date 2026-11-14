@@ -67,12 +67,18 @@ class API2
     def valid_password?
       password = parse(:string, :password, help: :api_key_password)
       return @for_user == @user if password.blank?
-      if User.authenticate(login: @for_user.login,
-                           password: password) == @for_user
-        return true
-      end
+      raise(PasswordIncorrect.new) unless correct_password?(password)
 
-      raise(PasswordIncorrect.new)
+      # A flagged account's password may be one someone else holds, so
+      # it proves nothing here. Returning false leaves the key
+      # unverified and emails the owner to activate it, the same as a
+      # request that supplied no password.
+      !@for_user.password_reset_required
+    end
+
+    def correct_password?(password)
+      User.authenticate(login: @for_user.login, password: password) ==
+        @for_user
     end
   end
 end

@@ -251,14 +251,50 @@ module ApplicationController::Authentication
     session_user_set(new_user)
   end
 
+  # `real_auth` binds the stored admin id to that admin's credential,
+  # the way `session[:auth]` binds `user_id`. An id by itself restores
+  # the admin to whoever holds the session, so a copy of a switched
+  # session would outlive a rotation of that admin's code.
   def update_sudo_session(new_user)
     if session[:real_user_id].blank?
-      session[:real_user_id] = @user&.id
-      session[:admin] = nil
+      enter_sudo_session
     elsif session[:real_user_id] == new_user.id
-      session[:real_user_id] = nil
-      session[:admin] = true
+      leave_sudo_session
     end
+  end
+
+  def enter_sudo_session
+    session[:real_user_id] = @user&.id
+    session[:real_auth] = @user&.auth_code
+    session[:admin] = nil
+  end
+
+  def leave_sudo_session
+    session[:real_user_id] = nil
+    session[:real_auth] = nil
+    session[:admin] = true
+  end
+
+  # The admin behind a switch-user session, for the two actions that
+  # act on `session[:real_user_id]`. Nil unless the session can produce
+  # the credential stored at switch time and the account it names is
+  # still an admin -- losing admin has to end a switch already under
+  # way, not just the next one.
+  def sudo_real_user
+    return if session[:real_user_id].blank?
+
+    user = User.safe_find(session[:real_user_id])
+    user if user&.admin && sudo_auth_valid?(user)
+  end
+
+  def sudo_auth_valid?(user)
+    session[:real_auth].present? && session[:real_auth] == user.auth_code
+  end
+
+  def clear_sudo_session
+    session[:real_user_id] = nil
+    session[:real_auth] = nil
+    session[:admin] = false
   end
 
   # Create/update the auto-login cookie.
@@ -281,7 +317,14 @@ module ApplicationController::Authentication
   # changed it in while logging out every other one.
   def refresh_login_credentials(user)
     session_user_set(user)
-    autologin_cookie_set(user) if cookies["mo_user"].present?
+    autologin_cookie_set(user) if autologin_cookie_belongs_to?(user)
+  end
+
+  # In switch-user mode the cookie is the admin's while `user` is the
+  # account being edited, so re-issuing it would hand the admin's
+  # browser someone else's credentials.
+  def autologin_cookie_belongs_to?(user)
+    (cookie = cookies["mo_user"]).present? && cookie.split[0] == user.id.to_s
   end
 
   # Store User in session (id, plus the credential binding the session
@@ -289,6 +332,7 @@ module ApplicationController::Authentication
   def session_user_set(user)
     session[:user_id] = user&.id
     session[:auth] = user&.auth_code
+    clear_sudo_session if user.nil?
     user
   end
 

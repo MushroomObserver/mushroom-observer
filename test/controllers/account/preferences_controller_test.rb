@@ -237,6 +237,22 @@ module Account
       assert_equal(rolf.id, @controller.send(:current_user)&.id)
     end
 
+    # In switch-user mode the `mo_user` cookie is the admin's while the
+    # password being changed is the switched user's, so the cookie is
+    # left as it is rather than re-issued for the wrong account.
+    def test_password_change_leaves_another_users_cookie_alone
+      login("mary")
+      session[:real_user_id] = rolf.id
+      session[:real_auth] = rolf.auth_code
+      @request.cookies["mo_user"] = "#{rolf.id} #{rolf.auth_code}"
+
+      patch(:update, params: { user: GOOD_PARAMS.merge(login: "mary") })
+
+      assert_flash(:runtime_prefs_success)
+      assert_nil(@response.cookies["mo_user"])
+      assert_equal(mary.reload.auth_code, session[:auth])
+    end
+
     def test_edit_prefs_with_email_with_trailing_space
       params = GOOD_PARAMS.merge({ email: " trim@this.com " })
       login("rolf")
