@@ -14,7 +14,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(panel_id: "nomenclature") do |panel|
+    Panel(id: "nomenclature") do |panel|
       panel.with_heading { plain(:show_name_nomenclature.l) }
       panel.with_heading_links { render_edit_link } if @user
       panel.with_body { render_body }

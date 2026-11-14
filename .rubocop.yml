@@ -26,6 +26,7 @@ require:
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
   - ./lib/rubocop/cop/mo/no_long_comment_block
+  - ./lib/rubocop/cop/mo/no_nested_attributes_kwarg
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
   - ./lib/rubocop/cop/mo/no_raw_bootstrap_component
   - ./lib/rubocop/cop/mo/no_raw_link_or_button_to
@@ -211,6 +212,19 @@ MO/NoLongCommentBlock:
     exempt, so Max is tightened to 10.
   Enabled: true
   Max: 10
+
+MO/NoNestedAttributesKwarg:
+  Description: >-
+    A prop :attributes, ..., :** component (Table, Icon, Button,
+    Link, Panel, Help, etc.) forwards every unrecognized keyword
+    directly --
+    passing attributes: { ... } lands as one more entry inside that
+    double-splat instead of setting a real option. See
+    lib/rubocop/cop/mo/no_nested_attributes_kwarg.rb.
+  Enabled: true
+  Include:
+    - "app/components/**/*.rb"
+    - "app/views/**/*.rb"
 
 MO/NoQuerySubclassMutation:
   Description: >-

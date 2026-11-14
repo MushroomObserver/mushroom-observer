@@ -7,7 +7,7 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
   def view_template
     return if @obs.display_notes == ::Observation.no_notes
 
-    Panel(panel_id: "observation_notes") do |panel|
+    Panel(id: "observation_notes") do |panel|
       panel.with_heading { :notes.ti }
       panel.with_body { render_notes }
     end

@@ -17,7 +17,7 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
   def view_template
     return unless render_panel?
 
-    Panel(panel_id: "observation_projects") do |panel|
+    Panel(id: "observation_projects") do |panel|
       if @obs.projects.any?
         panel.with_heading { plain(:projects.ti) }
         panel.with_heading_links { manage_link } if manage_link?
