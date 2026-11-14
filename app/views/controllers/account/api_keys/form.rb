@@ -20,7 +20,6 @@ module Views::Controllers::Account::APIKeys
   #   Create button. Used by `new.rb` (no-JS fallback).
   class Form < ::Components::ApplicationForm
     prop :cancel_target, _Nilable(String), default: nil
-    prop :cancel_parent, _Nilable(String), default: nil
 
     def view_template
       if model.persisted?
@@ -77,8 +76,7 @@ module Views::Controllers::Account::APIKeys
              collapsed: false,
              icon: :cancel,
              icon_title: :cancel.ti,
-             button: :default,
-             data: { parent: "##{@cancel_parent}" })
+             button: :default)
       end
     end
 
@@ -111,14 +109,18 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_metadata_table
-      table do
-        metadata_row(:created.ti, model.created_at.web_date)
-        metadata_row(:account_api_keys_last_used_column_label.t,
-                     last_used_value)
-        metadata_row(:account_api_keys_num_uses_column_label.t,
-                     num_uses_value)
-        metadata_row(:api_key.ti, model.key)
+      Table(show_headers: false, class: "mt-3") do |t|
+        t.body { render_metadata_rows }
       end
+    end
+
+    def render_metadata_rows
+      metadata_row(:created.ti, model.created_at.web_date)
+      metadata_row(:account_api_keys_last_used_column_label.t,
+                   last_used_value)
+      metadata_row(:account_api_keys_num_uses_column_label.t,
+                   num_uses_value)
+      metadata_row(:api_key.ti, model.key)
     end
 
     def last_used_value

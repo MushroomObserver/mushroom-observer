@@ -1,6 +1,9 @@
 .thumbnail-container {
   background-color: rgba(0,0,0, 0.33);
   // background-color: rgba(0,0,0, 0.12); // for matrix_box_carousels
+  // Clips the contained <img> to the `card-img-top` top-corner
+  // rounding on this div -- the image itself has square corners.
+  overflow: hidden;
 }
 
 //
@@ -67,7 +70,7 @@ svg.placeholder {
 
 .vote-section,
 .vote-section-lightbox {
-  padding: 0.5em 0.25em;
+  padding: 0.5rem 0.25rem;
 }
 
 .vote-section {
@@ -93,9 +96,11 @@ svg.placeholder {
 // (variant: :strip, no .btn framing) divided by vertical borders.
 // $current-selector marks the non-clickable "active" item;
 // $border-color is a param since it needs to read against different
-// backgrounds per caller.
+// backgrounds per caller. Members carry no `.btn` class, so the
+// usual `.btn-group-xs > .btn` sizing doesn't apply -- padding/
+// font-size are set here instead.
 @mixin btn-group-dividers($current-selector, $border-color) {
-  font-size: 1.1rem;
+  font-size: 0.75rem; // 12px at 16px root
 
   > form.button_to,
   > #{$current-selector} {
@@ -108,20 +113,32 @@ svg.placeholder {
   }
 
   > #{$current-selector} {
-    padding: 0.25rem 0.5rem;
+    padding: 0.21rem 0.3rem;
     border-top: 1px solid $border-color;
     border-bottom: 1px solid $border-color;
+
+    &:last-child {
+      border-right: 1px solid $border-color;
+    }
   }
 }
 
 .vote-btn-group {
-  @include btn-group-dividers(".image-vote", rgba($white, 0.5));
+  @include btn-group-dividers(".image-vote", rgba($white, 0.75));
+
+  // Overrides the mixin's 1.1rem -- 12px at the 16px root, see issue
+  // #5527.
+  font-size: 0.75rem;
 
   // Padding/color/hover live on the inner <button>, not the
-  // <form.button_to> wrapper.
+  // <form.button_to> wrapper. Padding and border-width match
+  // `.image-vote` (the selected-vote span), transparent border
+  // instead of visible, so voting doesn't change row height.
   form.button_to button[type=submit].image-vote-link {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.21rem 0.3rem;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     color: white !important;
     transition: color 0.3s ease, background-color 0.3s ease;
 
@@ -135,11 +152,17 @@ svg.placeholder {
 }
 
 .status-btn-group {
-  @include btn-group-dividers(".status-link-current", $list-group-border);
+  @include btn-group-dividers(".status-link-current",
+                              $list-group-border-color);
 
+  // Padding/border match `.status-link-current` (the current-status
+  // indicator span), transparent border instead of visible, so the
+  // row height doesn't change depending on which status is current.
   form.button_to button[type=submit].status-link {
     display: inline-block;
-    padding: 0.25rem 0.5rem;
+    padding: 0.21rem 0.3rem;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     color: $link-color !important;
     transition: color 0.3s ease;
 
@@ -171,14 +194,14 @@ svg.placeholder {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  max-width: 200px;
-  height: 7px;
+  max-width: 12.5rem;
+  height: 0.4375rem;
   margin-bottom: 0;
   background-color: rgba($white, 0.5);
 
   .progress-bar {
-    font-size: 12px;
-    line-height: 5px;
+    font-size: 0.75rem;
+    line-height: 0.3125rem;
     color: $white;
     background-color: $white;
   }
@@ -196,8 +219,8 @@ svg.placeholder {
 }
 
 .banner-image-text {
-  background: $body_bg;
-  color: $text_color;
+  background: $body-bg;
+  color: $body-color;
   padding: 0.5em;
   margin-left: 18px;
 }

@@ -30,10 +30,8 @@ class Components::ApplicationForm < Superform::Rails::Form
                                                "form-control"))
       else
         render_with_wrapper do
-          render_field_input do
-            input(**attributes, class: class_names(attributes[:class],
-                                                   "form-control"))
-          end
+          input(**attributes, class: class_names(attributes[:class],
+                                                 "form-control"))
         end
       end
     end
@@ -44,16 +42,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       attributes[:type] == "hidden" ||
         (wrapper_options[:label] == false && !help_slot && !append_slot &&
          !wrapper_options[:button] && !wrapper_options[:addon])
-    end
-
-    def render_field_input(&block)
-      if wrapper_options[:button]
-        render_input_group_button(&block)
-      elsif wrapper_options[:addon]
-        render_input_group_addon(&block)
-      else
-        yield
-      end
     end
   end
 end

@@ -15,6 +15,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     include Phlex::Slotable
     include FieldWithHelp
     include FieldLabelRow
+    include FieldWrapperRendering
 
     slot :help
 
@@ -30,12 +31,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def view_template
-      inline = @wrapper_options[:inline] || false
-      wrap_class = @wrapper_options[:wrap_class]
-
-      div(class: form_group_class("form-group", inline, wrap_class)) do
-        render_label(label_text, inline) if show_label?
-        p(class: "form-control-static") do
+      render_with_wrapper do
+        p(class: static_text_class) do
           @wrapper_options[:value] || @wrapper_options[:text] || ""
         end
         input(**field_attributes)
@@ -44,19 +41,14 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     private
 
-    def show_label?
-      wrapper_options[:label] != false
-    end
+    # `.form-control-plaintext` is `display: block; width: 100%` --
+    # Bootstrap 4's `.form-inline .form-control` override doesn't
+    # cover this class, so it stays full-width even as a flex item,
+    # forcing the next sibling onto a new line.
+    def static_text_class
+      return "form-control-plaintext" unless inline?
 
-    def form_group_class(base, inline, wrap_class)
-      classes = base
-      classes += " form-inline" if inline && base == "form-group"
-      classes += " #{wrap_class}" if wrap_class.present?
-      classes
-    end
-
-    def render_label(text, _inline)
-      label(for: field.dom.id, class: "mr-3") { text } if text
+      "form-control-plaintext d-inline-block w-auto"
     end
 
     def field_attributes

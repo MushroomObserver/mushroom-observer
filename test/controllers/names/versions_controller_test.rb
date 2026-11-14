@@ -5,9 +5,13 @@ require("test_helper")
 module Names
   class VersionsControllerTest < FunctionalTestCase
     def test_show_past_name
+      name = names(:coprinus_comatus)
+      assert(name.lifeform.blank?, "Fixture must have no lifeform")
+
       login
-      get(:show, params: { id: names(:coprinus_comatus).id })
+      get(:show, params: { id: name.id })
       assert_select("#nomenclature")
+      assert_select("#name_lifeform", text: /#{:none.ti}/)
     end
 
     def test_show_past_name_with_misspelling
@@ -35,7 +39,7 @@ module Names
       assert_response(:success)
 
       # Check that the version table panel heading renders
-      assert_select("#name_versions .panel-heading") do |elements|
+      assert_select("#name_versions .card-header") do |elements|
         assert_equal(1, elements.size,
                      "Should find version table panel heading")
         assert_match(/Versions/, elements.first.text)

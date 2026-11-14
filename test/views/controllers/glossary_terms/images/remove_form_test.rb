@@ -46,9 +46,15 @@ module Views::Controllers::GlossaryTerms::Images
     def test_each_checkbox_wrap_has_my_0_class
       html = render_form
 
+      # Each per-image custom-control wrapper gets `my-0` so Bootstrap's
+      # default vertical margin doesn't leave visible gaps inside the
+      # Grid::Box cell.
       @model.images.each do |image|
-        assert_html(html,
-                    ".checkbox.my-0 input[name='selected[#{image.id}]']")
+        assert_html(
+          html,
+          ".custom-control.custom-checkbox.my-0 " \
+          "input[name='selected[#{image.id}]']"
+        )
       end
     end
 
@@ -61,10 +67,10 @@ module Views::Controllers::GlossaryTerms::Images
     def test_renders_matrix_with_one_box_per_image
       html = render_form
 
-      # Each MatrixBox contains the image preview + checkbox for one
+      # Each Grid::Box contains the image preview + checkbox for one
       # image.
-      assert_equal(@model.images.count, html.scan("matrix-box").count,
-                   "expected one .matrix-box per image")
+      assert_equal(@model.images.count, html.scan("grid-box").count,
+                   "expected one .grid-box per image")
     end
 
     private

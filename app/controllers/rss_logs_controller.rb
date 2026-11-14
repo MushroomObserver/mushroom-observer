@@ -59,7 +59,7 @@ class RssLogsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { matrix: true, cache: true,
+    { grid: true, cache: true,
       include: rss_log_includes }.merge(opts)
   end
 

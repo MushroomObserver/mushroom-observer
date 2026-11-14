@@ -41,7 +41,7 @@ module Views::Controllers::Account::APIKeys
       render(Components::Table.new(
                sorted_keys,
                id: "account_api_keys_table",
-               variant: :striped
+               variant: :striped, align_middle: true
              )) do |t|
         register_table_columns(t)
         t.footer { render_new_form_panel }
@@ -91,8 +91,8 @@ module Views::Controllers::Account::APIKeys
 
     # Read-only ✓ for verified keys, rendered via CheckboxField
     # so the markup stays in lockstep with form-mode checkboxes
-    # (BS3/4/5 migration changes one file, not many). The
-    # `disabled:` mode skips the hidden sidecar.
+    # (a future Bootstrap version change touches one file, not
+    # many). The `disabled:` mode skips the hidden sidecar.
     def render_verified_check_box(key)
       render(Components::ApplicationForm::CheckboxField.new(
                Components::ApplicationForm::FieldProxy.new(
@@ -104,7 +104,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_notes_accordion(key)
-      Accordion(id: "notes_#{key.id}") do |accordion|
+      Accordion(id: "notes_#{key.id}", class: "m-0") do |accordion|
         accordion.with_pane(id: "view_notes_#{key.id}_container",
                             expanded: true) { render_view_notes(key) }
         accordion.with_pane(id: "edit_notes_#{key.id}_container") do
@@ -120,7 +120,7 @@ module Views::Controllers::Account::APIKeys
            icon: :edit,
            closed_text: " #{:edit.ti}",
            button: :default,
-           data: { role: "edit_api_key", parent: "#notes_#{key.id}" })
+           data: { role: "edit_api_key" })
     end
 
     def render_edit_notes_form(key)
@@ -128,8 +128,8 @@ module Views::Controllers::Account::APIKeys
                key,
                action: account_api_key_path(key.id),
                id: "edit_api_key_#{key.id}_form",
-               cancel_target: "view_notes_#{key.id}_container",
-               cancel_parent: "notes_#{key.id}"
+               turbo: true,
+               cancel_target: "view_notes_#{key.id}_container"
              ))
     end
 
@@ -143,7 +143,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_new_form_panel
-      Accordion(id: "new_key_row") do |accordion|
+      Accordion(id: "new_key_row", class: "mb-0") do |accordion|
         accordion.with_pane(id: "new_key_button_container",
                             expanded: true) { render_new_button }
         accordion.with_pane(id: "new_key_form_container") do
@@ -163,8 +163,7 @@ module Views::Controllers::Account::APIKeys
            fallback_href: new_account_api_key_path,
            closed_text: :account_api_keys_create_button.l,
            button: :default,
-           id: "new_key_button",
-           data: { parent: "#new_key_row" })
+           id: "new_key_button")
     end
 
     def render_new_form
@@ -172,8 +171,8 @@ module Views::Controllers::Account::APIKeys
                ::APIKey.new,
                action: account_api_keys_path,
                id: "new_api_key_form",
-               cancel_target: "new_key_button_container",
-               cancel_parent: "new_key_row"
+               turbo: true,
+               cancel_target: "new_key_button_container"
              ))
     end
   end

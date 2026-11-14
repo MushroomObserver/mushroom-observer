@@ -1,6 +1,9 @@
 # frozen_string_literal: true
 
-# Component for rendering Bootstrap panels (cards).
+# Component for rendering a Bootstrap 4 card (`.card`/`.card-header`/
+# `.card-body`/`.card-footer`). The call is still named `Panel(...)`
+# — that naming is this component's identity, independent of the
+# emitted CSS class.
 #
 # Accepts slots for panel subcomponents:
 #   heading, heading_links, thumbnail, body, footer
@@ -73,10 +76,6 @@ class Components::Panel < Components::Base
   prop :collapse_target, _Nilable(String), default: nil
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
-  # Special for matrix boxes, for Bootstrap 3 "grid" effect via Stimulus:
-  # Wrap thumbnail and body in .panel-sizing div, equalized per row.
-  # Remove this when migrating to Bootstrap >= 4.
-  prop :sizing, _Boolean, default: false
 
   slot :heading, lambda { |classes: nil, title: true, &content|
     render_heading(classes:, title:, &content)
@@ -93,14 +92,31 @@ class Components::Panel < Components::Base
     render_footer(classes:, &content)
   }, collection: true
 
+  # `h-100` (passed via `class:`) needs the card to be a
+  # distinct child of the stretched flex item, not the stretched item
+  # itself -- `height: 100%` on the same element being stretched by
+  # `align-items: stretch` doesn't resolve the way it does against a
+  # parent with a definite height. `Components::Grid::Box` wraps this
+  # card in a separate `<li>` for that reason -- don't collapse them
+  # into one element.
   def view_template
     define_collapse_target
-    div(**mix({ class: "panel panel-#{@variant || :default}" },
-              @attributes)) do
+    div(**mix({ class: class_names("card", variant_class) }, @attributes)) do
       render(heading_slot) if heading_slot?
-      render_thumbnail_and_body
+      render_middle_sections
       footer_slots.each { |slot| render(slot) } if footer_slots?
     end
+  end
+
+  # BS4 has no single class that paints a whole card by context the
+  # way BS3's `panel-danger` etc. did -- the established convention
+  # here is a plain `border-{color}` utility (see e.g. the project
+  # admin danger-zone panel). `:default` gets no extra class; it's
+  # just the bare, unbordered card.
+  def variant_class
+    return nil if @variant.nil? || @variant == :default
+
+    "border-#{@variant}"
   end
 
   def define_collapse_target
@@ -115,16 +131,16 @@ class Components::Panel < Components::Base
 
   def render_heading(classes:, title:, &content)
     if title
-      classes = classes.presence || "h4 panel-title"
-      div(class: "panel-heading") do
-        div(class: classes) do
+      classes = classes.presence || "h4 card-title"
+      div(class: "card-header") do
+        div(class: class_names(classes, "d-flex justify-content-between " \
+                                        "align-items-center")) do
           span(&content)
-          whitespace
           render_heading_links if heading_links_slot? || @collapsible
         end
       end
     else
-      div(class: class_names("panel-heading", classes)) do
+      div(class: class_names("card-header", classes)) do
         yield if block_given?
       end
     end
@@ -132,7 +148,7 @@ class Components::Panel < Components::Base
 
   # May contain passed-in links, a collapse trigger, or both
   def render_heading_links
-    span(class: "panel-heading-links float-right") do
+    span(class: "card-header-links inline-flex-center") do
       render(heading_links_slot) if heading_links_slot?
       render_collapse_icons if @collapsible
     end
@@ -142,7 +158,7 @@ class Components::Panel < Components::Base
     Link(type: :collapse_toggle,
          target_id: @collapse_id || "",
          collapsed: !@expanded,
-         class: "panel-collapse-trigger ml-3",
+         class: "panel-collapse-trigger ml-3 inline-flex-center",
          data: collapse_toggle_data,
          aria: collapse_aria) do
       render_collapse_message
@@ -175,23 +191,18 @@ class Components::Panel < Components::Base
     end
   end
 
-  def render_thumbnail_and_body
-    # Special .panel-sizing div for matrix boxes, in Bootstrap 3 only
-    if @sizing
-      div(class: "panel-sizing") { render_middle_sections }
-    else
-      render_middle_sections
-    end
-  end
-
   def render_middle_sections
     render(thumbnail_slot) if thumbnail_slot?
     body_slots.each { |slot| render(slot) } if body_slots?
   end
 
   def render_thumbnail(classes:, id:, data:, &content)
-    # `classes` entirely replaceable here. .thumbnail-container is the default
-    classes ||= "thumbnail-container"
+    # `classes` entirely replaceable here. `card-img-top` rounds this
+    # div's top corners to match the card (BS4 -- see
+    # mo/_images.scss's matching `overflow: hidden` on
+    # `.thumbnail-container`, needed since the contained <img> itself
+    # isn't rounded).
+    classes ||= "thumbnail-container card-img-top"
     args = { class: classes, id:, data: }.compact
     div(**args, &content)
   end
@@ -207,7 +218,7 @@ class Components::Panel < Components::Base
   def render_plain_body(classes:, id:, data:, wrapper:, &content)
     return yield if wrapper == false
 
-    classes = class_names("panel-body", classes)
+    classes = class_names("card-body", classes)
     div(class: classes, id:, data:, &content)
   end
 
@@ -221,7 +232,7 @@ class Components::Panel < Components::Base
   end
 
   def render_footer(classes:)
-    classes = class_names("panel-footer", classes)
+    classes = class_names("card-footer", classes)
     div(class: classes) do
       yield if block_given?
     end

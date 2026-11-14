@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-# See test/components/matrix/table_test.rb for the render-site coverage
+# See test/components/grid_test.rb for the render-site coverage
 # (streams emitted after the boxes) and
 # test/components/image_fragment/lazy_vote_interface_test.rb for the
 # per-frame fallback these streams replace.

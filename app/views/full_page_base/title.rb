@@ -97,7 +97,7 @@ module Views::FullPageBase::Title
   # name on desktop, and again in the mobile-only top row. No
   # `extra_class:` here -- each placement site supplies the spacing
   # that context needs. `size: :xl`: neither placement nests the
-  # badge inside a heading, so it can't ride on an ancestor's
+  # badge inside a heading anymore, so it can't ride on an ancestor's
   # font-size the way `:sm`/`:md`/`:lg` are meant to; `:xl` is the
   # one size in `Components::IDBadge::SIZE_CLASSES` not scaled down.
   def add_id_badge(object)

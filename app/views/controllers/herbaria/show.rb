@@ -11,48 +11,53 @@ module Views::Controllers::Herbaria
     prop :herbarium, ::Herbarium
 
     def view_template
+      render_page_chrome
+
+      Row { render_body_columns }
+    end
+
+    private
+
+    def render_page_chrome
       add_show_title(@herbarium)
       add_edit_icons(@herbarium, current_user)
       add_pager_for(@herbarium)
       add_context_nav(::Tab::Herbarium::Show.new(q_param: q_param))
+      column_classes(map ? :eight_four : :twelve)
       container_class(:wide)
-
-      render_mcp_block if @herbarium.mcp_searchable?
-      Row { render_body_columns }
-      render_timestamps
+      content_padding(:no_panels)
     end
-
-    private
 
     def map
       @map ||= @herbarium.location
     end
 
+    # --- Left + right columns --------------------------------------
+
+    def render_body_columns
+      div(class: content_for(:left_columns)) { render_left_column }
+      render_right_column if map
+    end
+
+    def render_left_column
+      render_mcp_block if @herbarium.mcp_searchable?
+      render_records_link
+      render_curator_section
+      render_notes if @herbarium.description.present?
+      render_mailing_address if @herbarium.mailing_address.present?
+      render(::Views::Layouts::ObjectFooter.new(obj: @herbarium,
+                                                minimal: true, no_wrap: true))
+    end
+
     def render_mcp_block
-      div(id: "mcp_number", class: "mt-3") do
+      div(id: "mcp_number") do
         span(class: "font-weight-bold") { plain(:herbarium_mcp_db.t) }
         plain(": #{@herbarium.mcp_collid}")
       end
     end
 
-    # --- Left + right columns --------------------------------------
-
-    def render_body_columns
-      Column(xs: 12, sm: map ? 8 : 12) do
-        render_left_column
-      end
-      render_right_column if map
-    end
-
-    def render_left_column
-      render_records_link
-      render_curator_section
-      render_notes if @herbarium.description.present?
-      render_mailing_address if @herbarium.mailing_address.present?
-    end
-
     def render_records_link
-      div(class: "mt-3") do
+      p do
         Link(
           type: :get,
           name: :show_herbarium_herbarium_record_count.t(
@@ -65,14 +70,12 @@ module Views::Controllers::Herbaria
     end
 
     def render_curator_section
-      div(class: "mt-3") do
-        render(CuratorTable.new(herbarium: @herbarium)) \
-          if @herbarium.curators.present?
-        if curator_or_admin?
-          render(AddCuratorForm.new(herbarium: @herbarium))
-        else
-          render_curator_request_link
-        end
+      render(CuratorTable.new(herbarium: @herbarium)) \
+        if @herbarium.curators.present?
+      if curator_or_admin?
+        render(AddCuratorForm.new(herbarium: @herbarium))
+      else
+        render_curator_request_link
       end
     end
 
@@ -81,44 +84,32 @@ module Views::Controllers::Herbaria
     end
 
     def render_curator_request_link
-      Link(type: :get, name: :show_herbarium_curator_request.t,
-           target: new_herbaria_curator_request_path(id: @herbarium.id),
-           class: "new_herbaria_curator_request_link")
+      Button(type: :get, variant: :outline,
+             name: :show_herbarium_curator_request.t,
+             target: new_herbaria_curator_request_path(id: @herbarium.id),
+             class: "new_herbaria_curator_request_link")
     end
 
     def render_notes
-      div(class: "mt-3") do
-        div(class: "font-weight-bold") { trusted_html(append_colon(:notes.ti)) }
-        trusted_html(@herbarium.description.tpl)
-      end
+      div(class: "font-weight-bold") { trusted_html(append_colon(:notes.ti)) }
+      trusted_html(@herbarium.description.tpl)
     end
 
     def render_mailing_address
-      div(class: "mt-3") do
-        div(class: "font-weight-bold") do
-          trusted_html(append_colon(:herbarium_mailing_address.t))
-        end
-        trusted_html(@herbarium.mailing_address.tp)
+      div(class: "font-weight-bold") do
+        trusted_html(append_colon(:herbarium_mailing_address.t))
       end
+      trusted_html(@herbarium.mailing_address.tp)
     end
 
     def render_right_column
-      Column(xs: 12, sm: 4, class: "mt-3", style: "max-width:320px") do
+      div(class: class_names(content_for(:right_columns), "mt-3")) do
         div(class: "mb-3") do
           Map(objects: [@herbarium.location])
         end
         p(id: "herbarium_location") do
           plain("#{:location.ti}: #{@herbarium.location.text_name}")
         end
-      end
-    end
-
-    def render_timestamps
-      div(class: "mt-3", style: "max-width:#{map ? 930 : 600}px") do
-        plain("#{:created_at.ti}: #{@herbarium.created_at.web_date}")
-        br
-        plain("#{:updated_at.ti}: #{@herbarium.updated_at.web_date}")
-        br
       end
     end
   end

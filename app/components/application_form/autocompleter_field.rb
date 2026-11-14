@@ -85,6 +85,7 @@ class Components::ApplicationForm < Superform::Rails::Form
         render_input_field do
           render_dropdown
           render_hidden_field
+          render_has_id_indicator if inline?
         end
         # Render append slot content (e.g., map section)
         render(append_slot) if append_slot
@@ -98,6 +99,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     # pass `controller_id:`; forms that don't shouldn't get noise.
     def controller_id
       custom_controller_id
+    end
+
+    def inline?
+      wrapper_options[:inline] || false
     end
 
     def controller_data
@@ -182,6 +187,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       wrapper_options.merge(
         wrap_data: { target_attr_key => "wrap" },
         wrap_class: class_names(wrapper_options[:wrap_class], "dropdown"),
+        wrap_append_in_input_group: true,
         **addon_wrapper_options
       )
     end
@@ -216,19 +222,20 @@ class Components::ApplicationForm < Superform::Rails::Form
       field_component.with_append(&block) if block
     end
 
-    # has-id-indicator + find/keep/edit buttons sit inline with the
-    # label, inside the label row's flex container -- only when a
+    # find/keep/edit buttons sit inline with the label, only when a
     # label row will render. With `label: false`, addon_wrapper_options
-    # routes the same content into an input-group-addon instead.
+    # routes them into an input-group-addon instead. has-id-indicator
+    # is excluded here when inline -- see render_has_id_indicator.
     def add_label_appends_slot(field_component)
       return if wrapper_options[:label] == false
+      return if inline? && !find_text && !keep_text
 
       field_component.with_label_appends { render_label_after }
     end
 
     # Renders all label_after elements (goes in between slot after label)
     def render_label_after
-      render_has_id_indicator
+      render_has_id_indicator unless inline?
       render_find_button if find_text
       render_keep_edit_toggle if keep_text
       render(label_append_slot) if label_append_slot
@@ -257,16 +264,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # These four are plain `Button`s, not `Link`s -- none has a
-    # destination; they're client-side toggles (show/hide a map box,
-    # swap in create fields). `variant: :link, class: "... p-0"`
-    # gives Bootstrap's `.btn-link` reset with zero padding, without
-    # baking that padding in as a site-wide default (see
-    # `Components::Button::Styling`).
-    #
-    # `Link::Get` auto-wires a tooltip when `icon:` is present; plain
-    # `Button` doesn't, so each one builds the same tooltip_data shape
-    # by hand.
+    # Plain `Button`s, not `Link`s -- client-side toggles with no
+    # destination. `variant: :link, class: "... p-0"` gives Bootstrap's
+    # `.btn-link` reset with zero padding. `Link::Get` auto-wires a
+    # tooltip from `icon:`; plain `Button` doesn't, so each one below
+    # builds the same tooltip_data by hand.
     def render_find_button
       return unless find_text
 
@@ -282,16 +284,11 @@ class Components::ApplicationForm < Superform::Rails::Form
                      title: find_text })
     end
 
-    # One button, two appearances: "Use these bounds..." (apply icon)
-    # while the rectangle is draggable, swapping to "Edit this
-    # locality" (edit icon) once map#toggleBoxLock locks it -- CSS
-    # keys the swap off the `.active` class toggleBoxLock sets on this
-    # element (`_icons.scss`'s `.stateful-link` rule), so no Stimulus
-    # controller has to coordinate with another one to drive it.
-    # `active_title:` lets tooltip_controller.js swap the tooltip the
-    # same way, from the same `.active` signal -- `Link::Get` wires
-    # this automatically from `active_content:`; plain `Button` doesn't
-    # (see `render_find_button`'s comment), so it's passed by hand.
+    # CSS swaps the icon off the `.active` class map#toggleBoxLock
+    # sets on this element (`_icons.scss`'s `.stateful-link` rule).
+    # `active_title:` swaps the tooltip the same way -- `Link::Get`
+    # wires that from `active_content:` automatically; plain `Button`
+    # doesn't, so it's passed by hand (see `render_find_button`).
     def render_keep_edit_toggle
       return unless keep_text
 
@@ -353,20 +350,19 @@ class Components::ApplicationForm < Superform::Rails::Form
           action: "scroll->#{stimulus_controller_name}#scrollList:passive"
         }
       ) do
-        ul(class: "virtual_list",
-           data: { target_attr_key => "list" }) do
+        div(class: "virtual_list",
+            data: { target_attr_key => "list" }) do
           10.times do |i|
-            li(class: "dropdown-item") do
-              Link(
-                type: :get,
-                name: "",
-                target: "#",
-                data: {
-                  row: i,
-                  action: "click->#{stimulus_controller_name}#selectRow:prevent"
-                }
-              )
-            end
+            Link(
+              type: :get,
+              name: "",
+              target: "#",
+              class: "dropdown-item",
+              data: {
+                row: i,
+                action: "click->#{stimulus_controller_name}#selectRow:prevent"
+              }
+            )
           end
         end
       end
@@ -407,20 +403,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       "#{model_prefix}_#{hidden_name}"
     end
 
-    # rubocop:disable MO/NoLongCommentBlock
-    # Returns the model prefix and leaf-key segments of the field's
-    # `dom.name`. Splits on the LAST `[…]` group so the result is
-    # correct whether `field.key` is a Symbol (model-bound, leaf
-    # only) or a String that already contains the full namespaced
-    # name (e.g. `"list[members]"` from the String-form field
-    # helpers). Examples:
-    #
-    # | dom.name                  | namespace      | leaf      |
-    # | `species_list[place_name]`| `species_list` | `place_name` |
-    # | `list[members]`           | `list`         | `members` |
-    # | `member[notes][Cap]`      | `member[notes]`| `Cap`     |
-    # | `approved_rank` (no `[]`) | `""`           | `approved_rank` |
-    # rubocop:enable MO/NoLongCommentBlock
+    # Model prefix + leaf key from the field's `dom.name`, split on
+    # the LAST `[…]` group -- works whether `field.key` is a Symbol
+    # (leaf only) or a String with the namespaced name already in it.
+    # E.g. "member[notes][Cap]" -> ["member[notes]", "Cap"];
+    # "approved_rank" (no brackets) -> ["", "approved_rank"].
     def name_parts
       @name_parts ||= begin
                         name = field.dom.name.to_s

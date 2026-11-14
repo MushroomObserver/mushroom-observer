@@ -31,7 +31,7 @@ module Views::Controllers::Locations
         assert_html(html, "input[name='location[#{dir}]']")
       end
       # Compass inputs have º suffix, elevation inputs have m suffix
-      assert_html(html, ".input-group-addon", count: 6)
+      assert_html(html, ".input-group-text", count: 6)
       assert_html(html, "textarea[name='location[notes]']")
       assert_html(html, "input[type='checkbox'][name='location[hidden]']")
 
@@ -57,7 +57,7 @@ module Views::Controllers::Locations
 
       # Display name input group
       assert_html(html, ".input-group")
-      assert_html(html, ".input-group-btn")
+      assert_html(html, ".input-group-append")
 
       # Submit button for new record
       assert_html(html, "button[type='submit']", text: :create.ti)

@@ -35,11 +35,11 @@ module Views::Controllers::Occurrences
     end
 
     def render_observation_grid
-      render(Components::Matrix::Table.new(
-               objects: @observations,
-               user: @user,
-               suppress_occurrence_link: true
-             ))
+      Grid(
+        objects: @observations,
+        user: @user,
+        suppress_occurrence_link: true
+      )
     end
   end
 end

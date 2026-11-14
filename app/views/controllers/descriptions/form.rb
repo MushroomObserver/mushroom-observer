@@ -72,8 +72,9 @@ module Views::Controllers::Descriptions
                      class: "form-control")
       else
         hidden_field(:source_type)
-        whitespace
-        plain(source_type_label.to_s)
+        div(class: "mb-2") do
+          plain(source_type_label.to_s)
+        end
       end
     end
 

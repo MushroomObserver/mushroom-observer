@@ -28,17 +28,20 @@ module Views::Layouts
       html = render_page_title("show")
 
       # Mobile top row: one visibility-gated copy of each piece.
-      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
-      assert_html(html, ".col-xs-12.d-sm-none .cta-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .edit-icons-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .pager-marker")
+      assert_html(html, ".col-12.d-sm-none .badge-id")
+      assert_html(html, ".col-12.d-sm-none .cta-marker")
+      assert_html(html, ".col-12.d-sm-none .edit-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .interest-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .pager-marker")
 
       # Desktop positions: same pieces, gated the other way.
-      assert_html(html, ".d-none.d-sm-block .badge-id")
-      assert_html(html, ".show_title_nav .d-none.d-sm-block .cta-marker")
+      assert_html(html, ".id_badge_wrap.d-none.d-sm-block .badge-id")
       assert_html(html,
-                  ".show_title_nav .d-none.d-sm-flex .edit-icons-marker")
+                  ".show_title_nav .title_bar_cta_wrap.d-none.d-sm-block " \
+                  ".cta-marker")
+      assert_html(html,
+                  ".show_title_nav .title_bar_actions_wrap.d-none.d-sm-flex " \
+                  ".edit-icons-marker")
       assert_html(html, ".show_object_nav .interest-icons-marker")
       assert_html(html, ".show_object_nav .pager-marker")
 
@@ -46,18 +49,17 @@ module Views::Layouts
       assert_html(html, "#title .title-marker", count: 1)
     end
 
-    # CTA (a form's submit button) sits right after the title with a
-    # small gap (`ml-3`); the actions slot (edit/destroy icons) is
-    # pushed flush right (`ml-auto`) instead -- distinct slots for
-    # distinct positions, not one slot guessing from content.
-    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    # CTA (a form's submit button) sits right after the title; the
+    # actions slot (edit/destroy icons) sits in a separate wrapper
+    # after that -- distinct slots for distinct positions, not one
+    # slot guessing from content.
     def test_cta_sits_after_title_actions_sit_flush_right
       html = render_page_title("show")
 
-      assert_html(html, "#title + .ml-3.d-none.d-sm-block .cta-marker")
-      assert_no_html(html, ".ml-3 .edit-icons-marker")
-      assert_html(html, ".d-none.d-sm-flex .edit-icons-marker")
-      assert_no_html(html, ".d-none.d-sm-flex .cta-marker")
+      assert_html(html, "#title + .title_bar_cta_wrap .cta-marker")
+      assert_no_html(html, ".title_bar_cta_wrap .edit-icons-marker")
+      assert_html(html, ".title_bar_actions_wrap .edit-icons-marker")
+      assert_no_html(html, ".title_bar_actions_wrap .cta-marker")
     end
 
     def test_no_duplicate_ids_between_mobile_and_desktop_copies
@@ -74,22 +76,21 @@ module Views::Layouts
       assert_no_html(html, ".interest-icons-marker")
       assert_no_html(html, ".pager-marker")
       # Badge, CTA, and edit icons still appear at both positions.
-      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
-      assert_html(html, ".d-none.d-sm-block .badge-id")
-      assert_html(html, ".col-xs-12.d-sm-none .cta-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .edit-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .badge-id")
+      assert_html(html, ".id_badge_wrap.d-none.d-sm-block .badge-id")
+      assert_html(html, ".col-12.d-sm-none .cta-marker")
+      assert_html(html, ".col-12.d-sm-none .edit-icons-marker")
     end
 
     # `new`/`create` pages have no object yet, so `add_id_badge`/
-    # `add_edit_icons` don't run -- no empty, margined wrapper div
-    # should be left behind for any of the three slots.
-    # rubocop:disable-next MO/NoCosmeticClassAssertion
+    # `add_edit_icons` don't run -- no empty wrapper div should be
+    # left behind for any of the three slots.
     def test_id_badge_and_edit_icons_wrappers_absent_when_unset
       html = render_page_title_title_only("new")
 
-      assert_no_html(html, ".show_title_nav .mr-4")
-      assert_no_html(html, ".show_title_nav .ml-3")
-      assert_no_html(html, ".show_title_nav .ml-auto")
+      assert_no_html(html, ".id_badge_wrap")
+      assert_no_html(html, ".title_bar_cta_wrap")
+      assert_no_html(html, ".title_bar_actions_wrap")
       assert_html(html, "#title .title-marker")
     end
 
@@ -103,9 +104,9 @@ module Views::Layouts
       assert_no_html(html, ".show_object_nav")
       # Mobile row still omits the (unset) icons/pager, but keeps
       # the pieces that are set.
-      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
-      assert_no_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
-      assert_no_html(html, ".col-xs-12.d-sm-none .pager-marker")
+      assert_html(html, ".col-12.d-sm-none .badge-id")
+      assert_no_html(html, ".col-12.d-sm-none .interest-icons-marker")
+      assert_no_html(html, ".col-12.d-sm-none .pager-marker")
     end
 
     # A column-less show page (e.g. SpeciesLists::Show) has no right
@@ -117,13 +118,13 @@ module Views::Layouts
 
       assert_no_html(html, ".title_bar_right_col")
       assert_no_html(html, ".show_object_nav")
-      assert_html(html, ".d-none.d-sm-flex .interest-icons-marker")
-      assert_html(html, ".d-none.d-sm-flex .pager-marker")
-      assert_html(html, ".d-none.d-sm-flex .edit-icons-marker")
+      assert_html(html, ".title_bar_actions_wrap .interest-icons-marker")
+      assert_html(html, ".title_bar_actions_wrap .pager-marker")
+      assert_html(html, ".title_bar_actions_wrap .edit-icons-marker")
       # Mobile row is unaffected by has_columns -- same inline
       # treatment it always uses.
-      assert_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .pager-marker")
+      assert_html(html, ".col-12.d-sm-none .interest-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .pager-marker")
     end
 
     def test_suppressed_on_index_action

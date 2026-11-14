@@ -20,7 +20,7 @@ class Views::Controllers::Names::Classification::Inherit::New <
     add_page_title(
       :inherit_classification_title.t(
         name: @name.display_name(current_user)
-      )
+      ).small_author
     )
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
     container_class(:text)

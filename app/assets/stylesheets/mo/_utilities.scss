@@ -27,6 +27,15 @@
   max-height: 100% !important;
 }
 
+// A fixed-width gap between flex items, for a flex-wrap row where a
+// margin on either sibling would travel with it onto a wrapped
+// line and indent it -- the spacer itself stays small enough to
+// remain on the first line instead.
+.spacer {
+  display: inline-block;
+  width: 1rem;
+}
+
 .object-fit-cover {
   @extend .w-100, .h-100;
   object-fit: cover;
@@ -56,6 +65,31 @@
 // Custom, non-Bootstrap class.
 .indent {
   padding-left: 1rem !important;
+}
+
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- see .px-card below for the full explanation.
+.p-card {
+  padding: $card-spacer-x !important;
+}
+
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- the padding a card's body uses, applied here to
+// non-card chrome (nav bars, page-title strip) that wants to sit
+// flush with card content elsewhere on the page. See #5527.
+.px-card {
+  padding-left: $card-spacer-x !important;
+  padding-right: $card-spacer-x !important;
+}
+
+// See .px-card above.
+.pl-card {
+  padding-left: $card-spacer-x !important;
+}
+
+// See .px-card above.
+.pr-card {
+  padding-right: $card-spacer-x !important;
 }
 
 .overflow-ellipsis {
@@ -189,11 +223,14 @@
   background: none !important;
 }
 
-// Locks column widths to the first row's natural content. Use when
-// later rows can swap in wider content (e.g. an inline edit form)
-// and you don't want the columns to reflow on every state change.
-.table-layout-fixed {
-  table-layout: fixed;
+// The theme-aware page background. Named to match Bootstrap 5.3's
+// .bg-body so it's a no-op rename at upgrade.
+.bg-body {
+  background-color: $body-bg !important;
+}
+
+.bg-card {
+  background-color: $card-bg !important;
 }
 
 .bg-visible {
@@ -204,17 +241,15 @@
   background: rgba($black, 0.6);
 }
 
-// Bootstrap 4's badge-color generation may not be enabled the same
-// way in this app's eventual config, and the colors here are this
-// app's theme-mapped warning colors, not necessarily Bootstrap's
-// defaults -- kept hand-written rather than assumed-duplicate.
+// Lighter/translucent, not Bootstrap's solid-background native
+// `.badge-warning` -- kept hand-written rather than assumed-duplicate.
 .badge-warning {
-  background-color: $alert-warning-bg;
-  color: $alert-warning-text;
+  background-color: rgba($warning, 0.2);
+  color: $body-color;
   font-weight: normal;
 }
 
-// Bootstrap 3 - collapse "fade" instead of "slide"
+// Fade instead of slide for a `.collapsing` element.
 .fade-not-slide.collapsing {
   // transition-duration: 0.3s;
   transition: height 0s, opacity 0.3s;
@@ -255,9 +290,61 @@
   gap: 1rem !important;
 }
 
+// Bootstrap 5's row/column gutter mechanism, backported: --bs-gutter-x
+// and --bs-gutter-y read via calc() by .row's margin and every
+// column's padding, so a .gx-*/.gy-*/.g-* class can override one
+// row's gutter instead of the default below. Named to match
+// Bootstrap 5 -- nothing that uses these classes needs to change at
+// upgrade, only this backport gets deleted.
+// `.row`'s children don't read --bs-gutter-y yet (BS5 applies it as
+// margin-top on wrapped row children, not wired up here) --
+// `.grid-row`/`.grid-box` (_grid_box.scss) is the one place that
+// reads it so far, via its margin-bottom.
+.row {
+  --bs-gutter-x: #{$grid-gutter-width * .75};
+  --bs-gutter-y: 0px;
+  margin-right: calc(var(--bs-gutter-x) * -.5);
+  margin-left: calc(var(--bs-gutter-x) * -.5);
+}
+
+@media screen and (min-width: breakpoint-min(lg)) {
+  .row {
+    --bs-gutter-x: #{$grid-gutter-width};
+  }
+}
+
+.row > .col,
+.row > [class*="col-"] {
+  padding-right: calc(var(--bs-gutter-x) * .5);
+  padding-left: calc(var(--bs-gutter-x) * .5);
+}
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+
+    @each $key in (0, 1, 2, 3, 4, 5) {
+      $value: map-get($spacers, $key);
+
+      .g#{$infix}-#{$key} {
+        --bs-gutter-x: #{$value};
+        --bs-gutter-y: #{$value};
+      }
+
+      .gx#{$infix}-#{$key} {
+        --bs-gutter-x: #{$value};
+      }
+
+      .gy#{$infix}-#{$key} {
+        --bs-gutter-y: #{$value};
+      }
+    }
+  }
+}
+
 // Not a utility class -- a plain element override, so it isn't a
 // Bootstrap-duplicate candidate.
-@media screen and (min-width: $screen-sm-min) {
+@media screen and (min-width: breakpoint-min(sm)) {
   .table {
     overflow-x: scroll;
   }

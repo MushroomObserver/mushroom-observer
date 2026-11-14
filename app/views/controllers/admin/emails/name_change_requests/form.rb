@@ -23,14 +23,14 @@ module Views::Controllers::Admin::Emails::NameChangeRequests
       static_field(:name, label: :name.ti,
                           value: "#{@name.unique_search_name}" \
                                  "[##{@name.icn_id}]",
-                          inline: true)
+                          inline: true, wrap_class: "mb-0")
     end
 
     def render_new_name_field
       read_only_field(:new_name_with_icn_id,
                       label: :new_name,
                       value: @new_name_with_icn_id,
-                      inline: true)
+                      inline: true, wrap_class: "mb-2")
     end
 
     def render_message_field

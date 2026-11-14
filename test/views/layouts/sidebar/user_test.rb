@@ -13,8 +13,7 @@ class Views::Layouts::Sidebar
       html = render_component
 
       # Should have heading with icon and username
-      assert_html(html,
-                  ".list-group-item svg.mo-icon-user")
+      assert_html(html, ".list-group-item svg.mo-icon-user")
       assert_includes(html, @user.login)
 
       # Should have mobile_only class
@@ -74,7 +73,6 @@ class Views::Layouts::Sidebar
     def render_component
       classes = {
         heading: "list-group-item disabled font-weight-bold",
-        indent: "list-group-item indent",
         mobile_only: "mobile-only"
       }
       render(User.new(user: @user, classes: classes))

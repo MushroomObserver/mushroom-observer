@@ -20,6 +20,7 @@ module Views::Controllers::FieldSlips
       add_project_banner(@project) if @project
       add_index_title(@query)
       add_context_nav(Tab::FieldSlip::IndexActions.new)
+      add_filter_to_sorter_slot unless @project
       add_pagination(@pagination_data)
       container_class(:wide)
 
@@ -30,6 +31,13 @@ module Views::Controllers::FieldSlips
 
     private
 
+    # No sort options on this index -- the filter form takes the
+    # pagination row's sorter slot instead, so it sits beside the
+    # pagination controls rather than as a separate block in the body.
+    def add_filter_to_sorter_slot
+      content_for(:sorter) { capture { render_filter_form } }
+    end
+
     def render_notice
       return unless @notice
 
@@ -37,11 +45,9 @@ module Views::Controllers::FieldSlips
     end
 
     def render_project_or_filter_section
-      if @project
-        render_project_info_section
-      else
-        ContentPadded { render_filter_form }
-      end
+      return unless @project
+
+      render_project_info_section
     end
 
     def render_project_info_section
@@ -101,7 +107,11 @@ module Views::Controllers::FieldSlips
       PaginatedResults do
         ListGroup do |list|
           @objects.each do |fs|
-            list.item do
+            # The matrix box's margin-bottom already separates it
+            # from the next row -- the list-item's bottom padding
+            # would double that space up.
+            item_class = "pb-0" if fs.observations.any?
+            list.item(class: item_class) do
               render(FieldSlipPanel.new(
                        field_slip: fs, prepend: row_prepend(fs)
                      ))

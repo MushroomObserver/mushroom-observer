@@ -14,7 +14,7 @@
 #   Components::Modal.new(type: :turbo_form, identifier: "…",
 #                         title: "…", user: @user, model: @record)
 #
-# Encapsulates the Bootstrap 3
+# Encapsulates the
 # `modal > modal-dialog > modal-content > header / body / footer`
 # nesting and the close-button / title boilerplate so callers can
 # focus on the modal's content.
@@ -63,19 +63,19 @@
 class Components::Modal < Components::Base
   include Phlex::Slotable
 
-  # Bootstrap 3's shown-modal class; Bootstrap 4 renames it to "show"
-  # (same migration risk as Components::Collapsible::EXPANDED_CLASS).
-  SHOWN_CLASS = "in"
+  # Bootstrap 4's shown-modal class (Bootstrap 3's was "in" -- same
+  # migration risk as Components::Collapsible::EXPANDED_CLASS).
+  SHOWN_CLASS = "show"
 
   prop :id, String
   prop :title, _Nilable(String), default: nil
-  # Bootstrap modal-dialog size variants: "modal-dialog",
-  # "modal-dialog modal-lg", "modal-dialog modal-sm".
-  prop :dialog_class, String, default: "modal-dialog"
+  # Bootstrap modal-dialog size variant.
+  SIZES = [:sm, :lg].freeze
+  prop :size, _Nilable(_Union(*SIZES)), default: nil
   # When `true`, the modal is shown immediately on page load
   # (server-rendered for a redirect-like response, e.g.
   # `OccurrenceResolveModal`'s auto-open pattern). Adds the
-  # backdrop, the `fade in` class, and the `display: block` style.
+  # backdrop, the `fade show` class, and the `display: block` style.
   prop :auto_open, _Boolean, default: false
   prop :user, _Nilable(User), default: nil
   # Extra CSS class(es) appended to the modal root, e.g. `modal-form`
@@ -149,7 +149,7 @@ class Components::Modal < Components::Base
         style: (@auto_open ? "display: block;" : nil),
         aria: { labelledby: resolved_title_id },
         data: modal_data) do
-      div(class: @dialog_class, role: "document") do
+      div(class: dialog_class, role: "document") do
         div(class: "modal-content") do
           render_header if @header
           render_content
@@ -172,6 +172,10 @@ class Components::Modal < Components::Base
     classes.join(" ")
   end
 
+  def dialog_class
+    class_names("modal-dialog modal-dialog-centered", @size && "modal-#{@size}")
+  end
+
   def modal_data
     data = { controller: @controller }
     data[:modal_user_value] = @user.id if @user
@@ -186,9 +190,12 @@ class Components::Modal < Components::Base
     @body_id || "#{@id}_body"
   end
 
+  # Title before the close button: .modal-header is a flex container
+  # (justify-content: space-between), which spaces DOM children apart
+  # without reordering them -- the title has to come first in markup
+  # to land on the left.
   def render_header
     div(class: "modal-header") do
-      close_button
       h4(class: "modal-title", id: resolved_title_id) do
         if title_content_slot
           render(title_content_slot)
@@ -200,6 +207,7 @@ class Components::Modal < Components::Base
           trusted_html(@title)
         end
       end
+      close_button
     end
   end
 

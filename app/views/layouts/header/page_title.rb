@@ -36,11 +36,15 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-start align-items-start " \
-      "px-3 py-2"
+      "show_title_nav d-flex justify-content-start align-items-start px-card"
+
+    # Form pages (new/edit, plus a failed create/update redisplaying
+    # the same form) need more breathing room below the title bar
+    # than a show/index page does.
+    FORM_ACTIONS = %w[new edit create update].freeze
 
     def view_template
-      Row(id: "title_bar", class: "mb-2") do
+      Row(id: "title_bar", class: title_bar_margin_class) do
         render_mobile_top_row unless suppress_title?
         render_left_column unless suppress_title?
         render_right_column if show_desktop_right_column?
@@ -50,16 +54,26 @@ module Views::Layouts
     private
 
     def render_mobile_top_row
+      return unless mobile_top_row_content?
+
       Column(xs: 12,
              class: Components::Column.mobile_only_classes(hide_at: :sm)) do
         div(class: "d-flex flex-wrap justify-content-between " \
-                   "align-items-center px-3 mb-2") do
+                   "align-items-center px-card mb-2") do
           trusted_html(content_for(:id_badge))
           trusted_html(content_for(:title_bar_cta))
           trusted_html(content_for(:title_bar_actions))
           render_mobile_object_nav if object_nav?
         end
       end
+    end
+
+    # An unconditional wrapper here left an empty row on pages with
+    # none of these pieces (e.g. `new`) -- same bug `render_id_badge`
+    # already guards against, one level up.
+    def mobile_top_row_content?
+      content_for?(:id_badge) || content_for?(:title_bar_cta) ||
+        content_for?(:title_bar_actions) || object_nav?
     end
 
     def render_mobile_object_nav
@@ -87,7 +101,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "d-none d-sm-block mr-4 mt-sm-1") do
+      div(class: "id_badge_wrap d-none d-sm-block mr-3 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end
@@ -99,7 +113,7 @@ module Views::Layouts
     def render_title_bar_cta
       return unless content_for?(:title_bar_cta)
 
-      div(class: "d-none d-sm-block ml-3") do
+      div(class: "title_bar_cta_wrap d-none d-sm-block ml-3") do
         trusted_html(content_for(:title_bar_cta))
       end
     end
@@ -112,8 +126,8 @@ module Views::Layouts
       inline = inline_object_nav?
       return unless content_for?(:title_bar_actions) || inline
 
-      div(class: "d-none d-sm-flex ml-auto flex-nowrap " \
-                 "flex-shrink-0 align-items-start") do
+      div(class: "title_bar_actions_wrap d-none d-sm-flex ml-auto " \
+                 "flex-nowrap flex-shrink-0 align-items-start") do
         render_inline_object_nav if inline
         trusted_html(content_for(:title_bar_actions)) if
           content_for?(:title_bar_actions)
@@ -132,8 +146,8 @@ module Views::Layouts
                              "title_bar_right_col hidden-print " \
                              "text-right d-none d-sm-block")) do
         div(class: "show_object_nav d-flex justify-content-between " \
-                   "align-items-start pr-3 py-2") do
-          trusted_html(content_for(:interest_icons))
+                   "align-items-start px-card") do
+          div { trusted_html(content_for(:interest_icons)) }
           trusted_html(content_for(:prev_next_object))
         end
       end
@@ -141,6 +155,10 @@ module Views::Layouts
 
     def suppress_title?
       controller.action_name == "index" || on_project_page?
+    end
+
+    def title_bar_margin_class
+      FORM_ACTIONS.include?(controller.action_name) ? "mb-2" : "mb-1"
     end
 
     # A right column to render interest-icons/pager into only exists

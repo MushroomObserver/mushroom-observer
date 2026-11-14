@@ -15,7 +15,7 @@ class Views::Controllers::Names::Show::AltDescriptionsPanelTest <
 
     assert_html(
       html,
-      "#name_descriptions .panel-heading-links a[href='" \
+      "#name_descriptions .card-header-links a[href='" \
       "#{routes.new_name_description_path(name_id: names(:peltigera).id)}']"
     )
   end
@@ -23,7 +23,7 @@ class Views::Controllers::Names::Show::AltDescriptionsPanelTest <
   def test_omits_heading_link_when_logged_out
     html = render(new_panel(user: nil))
 
-    assert_no_html(html, "#name_descriptions .panel-heading-links")
+    assert_no_html(html, "#name_descriptions .card-header-links")
   end
 
   def test_renders_descriptions_list

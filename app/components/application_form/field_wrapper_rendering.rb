@@ -17,6 +17,8 @@ class Components::ApplicationForm < Superform::Rails::Form
   # it. Guarded with `respond_to?`, the same pattern FieldLabelRow
   # already uses for `label_end_slot`.
   module FieldWrapperRendering
+    include Phlex::Rails::Helpers::ClassNames
+
     attr_reader :wrapper_options
 
     private
@@ -30,14 +32,24 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def wrapper_class
-      form_group_class("form-group", inline?, wrapper_options[:wrap_class])
+      wrap_class = inline? ? nil : wrapper_options[:wrap_class]
+      form_group_class("form-group", wrap_class)
     end
 
-    def form_group_class(base, inline, wrap_class)
+    def form_group_class(base, wrap_class)
       classes = base
-      classes += " form-inline" if inline && base == "form-group"
       classes += " #{wrap_class}" if wrap_class.present?
       classes
+    end
+
+    # `.form-inline .form-group` already zeroes the inner div's
+    # margin-bottom, so `wrap_class` (if given) lands on this ancestor
+    # div instead -- the default `mb-3` fits a single standalone
+    # inline field; a group of fields sharing one block of spacing
+    # (e.g. Names::Form's locked fields) passes `wrap_class: "mb-0"`
+    # per field and puts the mb-3 on the group's outer wrapper.
+    def inline_wrapper_class
+      wrapper_options[:wrap_class] || "mb-3"
     end
 
     def prepend_present?
@@ -48,8 +60,27 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:append_slot) && append_slot
     end
 
+    # `inline?` wraps the form-group in a `.form-inline` ancestor div,
+    # so Bootstrap's `.form-inline .form-group` descendant selector
+    # matches as designed -- putting both classes on the form-group
+    # div itself matches nothing, since that selector needs two
+    # distinct elements. `wrap_data` follows `wrap_class` to this
+    # outer div too, so a Stimulus class toggle (e.g. .open) lands on
+    # the same element as "dropdown".
     def render_with_wrapper(&block)
-      div(class: wrapper_class, data: wrapper_options[:wrap_data]) do
+      if inline?
+        div(class: class_names("form-inline", inline_wrapper_class),
+            data: wrapper_options[:wrap_data]) do
+          render_form_group(&block)
+        end
+      else
+        render_form_group(&block)
+      end
+    end
+
+    def render_form_group(&block)
+      div(class: wrapper_class,
+          data: inline? ? nil : wrapper_options[:wrap_data]) do
         render_label_row(label_text, inline?) if show_label?
         render_between_block
         render_help_after_field if help_placement_above?
@@ -58,10 +89,30 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    def render_wrapper_body
+    def render_wrapper_body(&block)
       render(prepend_slot) if prepend_present?
-      yield
-      render(append_slot) if append_present?
+      if input_group_needed?
+        render_input_group(&block)
+      else
+        yield
+        render(append_slot) if append_present?
+      end
+    end
+
+    # `:button`/`:addon` (InputGroupAddon) and the autocompleter's
+    # append-slot dropdown (`wrap_append_in_input_group`, below) each
+    # want an `.input-group` wrapper -- routed through one
+    # `render_input_group` call (InputGroupAddon) instead of two
+    # separate wraps, which would otherwise nest. Guarded by
+    # `respond_to?` since only TextField/SelectField include
+    # InputGroupAddon -- StaticTextField/ReadOnlyField have no
+    # `:button`/`:addon` support, so `render_input_group` is undefined
+    # for them.
+    def input_group_needed?
+      return false unless respond_to?(:render_input_group, true)
+
+      wrapper_options[:button] || wrapper_options[:addon] ||
+        (wrapper_options[:wrap_append_in_input_group] && append_present?)
     end
   end
 end

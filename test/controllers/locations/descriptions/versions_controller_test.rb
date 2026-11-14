@@ -22,6 +22,8 @@ module Locations::Descriptions
       assert_select("html > head > title", count: 1)
       assert_select("body.versions__show")
       assert_select("#description_details")
+      assert_select(".card-header", text: :form_locations_gen_desc.l)
+      assert_select("#location_description_versions ~ #description_details")
     end
   end
 end

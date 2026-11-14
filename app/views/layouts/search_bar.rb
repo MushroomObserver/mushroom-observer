@@ -6,8 +6,6 @@
 # the advanced-search expander beneath the bar. When the viewer is
 # anonymous, renders a `<strong>` "Login required" reminder.
 class Views::Layouts::SearchBar < Views::Base
-  BAR_TOGGLE_CLASSES = [Components::Navbar::LINK_CLASS, "px-2"].freeze
-
   # Search types that have a per-type help expander. Mirrors
   # `Views::Layouts::SearchNav::SEARCH_HELP_TYPES`; passed through
   # so the bar can decide which toggle starts visible.
@@ -37,11 +35,12 @@ class Views::Layouts::SearchBar < Views::Base
   def render_collapse_bar
     Collapsible(id: "search_bar_elements",
                 expanded: on_search_page? || !advanced_default?,
+                class: "w-100",
                 data: {
                   search_type_target: "bar",
                   action: "$shown.bs.collapse->search-type#closeForm"
                 }) do
-      div(class: "flex-bar px-3 gap-2") do
+      div(class: "flex-bar px-card gap-2") do
         render_help_toggle
         render(Components::Form::PatternSearch.new(pattern_search_model))
         render_form_toggle unless on_search_page?
@@ -58,6 +57,7 @@ class Views::Layouts::SearchBar < Views::Base
   # matches the selected search type.
   def render_advanced_form_target
     Collapsible(id: "search_nav_form", expanded: advanced_default?,
+                class: "w-100",
                 data: { search_type_target: "form",
                         action: "$shown.bs.collapse->search-type#closeBar" })
   end
@@ -70,14 +70,14 @@ class Views::Layouts::SearchBar < Views::Base
          target_id: "search_bar_help",
          icon: :info,
          icon_title: :search_bar_help.l,
-         button: :link,
-         class: bar_toggle_class(visible: help_visible?),
+         button: :link, size: :lg,
+         class: toggle_class(visible: help_visible?),
          data: { search_type_target: "helpToggle" })
   end
 
   # Owns the `formToggle` Stimulus target and its `d-none` availability
   # toggle -- the `Link`s below carry only responsive classes, since a
-  # static `d-none` here would lose to `d-md-inline-block` at the
+  # static `d-none` here would lose to `d-lg-inline-block` at the
   # breakpoint (later in `_utilities.scss`'s source order).
   def render_form_toggle
     div(class: availability_class(visible: form_visible?),
@@ -87,34 +87,33 @@ class Views::Layouts::SearchBar < Views::Base
     end
   end
 
-  # Icon-only toggle, shown below `md`.
+  # Icon-only toggle, shown below `lg`.
   def render_form_toggle_icon
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
          collapsed: !advanced_default?,
          icon: :plus,
          icon_title: :search_bar_more_options.l,
-         button: :link,
-         class: class_names(BAR_TOGGLE_CLASSES,
-                            Components::Column.visibility_classes(
-                              hide_at: :md
-                            )))
+         button: :link, size: :lg,
+         class: class_names("p-0", Components::Column.visibility_classes(
+                                     hide_at: :lg
+                                   )))
   end
 
-  # Labeled outline-button toggle, shown from `md` up.
+  # Labeled outline-button toggle, shown from `lg` up.
   def render_form_toggle_button
     Link(type: :collapse_toggle,
          target_id: "search_nav_form",
          collapsed: !advanced_default?,
          button: :outline,
          class: class_names(Components::Column.visibility_classes(
-                              hide_at: :xs, show_at: :md,
+                              hide_at: :xs, show_at: :lg,
                               display: :"inline-block"
                             ))) { :search_bar_more_options.l }
   end
 
-  def bar_toggle_class(visible:)
-    classes = BAR_TOGGLE_CLASSES.dup
+  def toggle_class(visible:)
+    classes = ["p-0"]
     classes << "d-none" unless visible
     classes.join(" ")
   end
@@ -134,16 +133,9 @@ class Views::Layouts::SearchBar < Views::Base
     )
   end
 
-  # `session[:search_type]` is written either by
-  # `SearchController#pattern` (after it pluralizes the submitted
-  # form value) or by `ApplicationController::Queries` (which
-  # stores `Query#search_type`, already plural from the
-  # controller's module name). The latter stores it for EVERY
-  # query-backed index — including types the select has no option
-  # for (e.g. `:rss_logs` from the Activity Log). An unselectable
-  # value would leave the browser showing the first alphabetical
-  # option ("Comments"), so those fall back to :observations
-  # (#4969).
+  # `session[:search_type]` can hold a type the select has no option
+  # for (e.g. `:rss_logs` from the Activity Log) -- falls back to
+  # :observations rather than showing the first alphabetical option.
   def default_search_type
     type = controller.session[:search_type]&.to_sym
     return type if Components::Form::PatternSearch::TYPE_VALUES.include?(type)

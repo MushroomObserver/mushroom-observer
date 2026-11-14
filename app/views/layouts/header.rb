@@ -9,7 +9,11 @@
 # The project banner (`:project_banner` content_for slot) renders
 # separately, in `Views::Layouts::Application#render_nav_chrome`,
 # ahead of the flash row -- a project's banner image/tabs always
-# span the full page width.
+# span the full page width. The project observation-buttons row that
+# used to render here, fed from a `content_for(:observation_buttons)`
+# slot, is part of that banner now too -- see
+# `Tab::Project::ObservationSubtabs`/`Projects::ObservationSubtabs`,
+# rendered via `ProjectNavs`.
 #
 # The index filter/pager bar (`Header::IndexBar`) and the rss-log
 # type-filter row no longer render here -- `Header::IndexBar` moved

@@ -25,9 +25,10 @@ module Views::Layouts
     prop :show_delete, _Boolean, default: true
 
     def view_template
-      div(class: "h4 my-0 d-flex align-items-center object_edit") do
+      div(class: "h5 my-1 d-flex align-items-center object_edit") do
         InlineLinkBlock(items: [reflection_item, edit_item,
-                                delete_item].compact)
+                                delete_item].compact,
+                        margin_class: "ml-3")
       end
     end
 

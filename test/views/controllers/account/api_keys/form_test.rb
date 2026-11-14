@@ -28,7 +28,7 @@ module Views::Controllers::Account::APIKeys
       html = render_form_with_cancel
 
       assert_html(html, ".input-group")
-      assert_html(html, ".input-group-btn")
+      assert_html(html, ".input-group-append")
       assert_html(html, "#api_key_notes")
       assert_html(html, "a[data-toggle='collapse']")
       assert_html(html, "a span[aria-label='#{:cancel.ti}']")
@@ -46,7 +46,6 @@ module Views::Controllers::Account::APIKeys
                   "a[href='#test_target']" \
                   "[aria-controls='test_target']" \
                   "[aria-expanded='true']")
-      assert_html(html, "a[data-parent='#test_parent']")
     end
 
     def test_cancel_button_not_rendered_when_nil
@@ -131,15 +130,14 @@ module Views::Controllers::Account::APIKeys
       key = api_keys(:rolfs_api_key)
       html = render_inline_edit_form(key)
 
-      assert_html(html, ".input-group .input-group-btn")
+      assert_html(html, ".input-group .input-group-append")
       # Cancel button (button, not submit) with the per-row collapse
       # data attributes to swap back to the view pane.
       assert_html(html,
                   ".input-group a[data-toggle='collapse']" \
                   "[href='#view_notes_#{key.id}_container']" \
                   "[aria-controls='view_notes_#{key.id}_container']" \
-                  "[aria-expanded='true']" \
-                  "[data-parent='#notes_#{key.id}']")
+                  "[aria-expanded='true']")
       # Save submit (not Update — that's the standalone-edit layout).
       assert_html(html,
                   "button[type='submit']", text: :save.ti)
@@ -183,8 +181,7 @@ module Views::Controllers::Account::APIKeys
         @api_key,
         action: "/test_api_keys_path",
         id: "new_api_key_form",
-        cancel_target: "test_target",
-        cancel_parent: "test_parent"
+        cancel_target: "test_target"
       )
       render(form)
     end
@@ -203,8 +200,7 @@ module Views::Controllers::Account::APIKeys
         key,
         action: "/account/api_keys/#{key.id}",
         id: "edit_api_key_#{key.id}_form",
-        cancel_target: "view_notes_#{key.id}_container",
-        cancel_parent: "notes_#{key.id}"
+        cancel_target: "view_notes_#{key.id}_container"
       )
       render(form)
     end
