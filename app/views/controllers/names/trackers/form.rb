@@ -41,10 +41,8 @@ module Views::Controllers::Names::Trackers
                target_id: "note_template_fields",
                label: :email_tracking_note,
                expanded: note_template_enabled?,
-               attributes: {
-                 wrap_class: "form-group",
-                 help: :email_tracking_note_help.t
-               }
+               wrap_class: "form-group",
+               help: :email_tracking_note_help.t
              ))
     end
 

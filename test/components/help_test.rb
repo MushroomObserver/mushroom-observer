@@ -36,6 +36,14 @@ class HelpTest < ComponentTestCase
                 text: "Help")
   end
 
+  def test_well_passes_through_extra_class_and_attrs
+    html = render_help(content: "Help", well: true,
+                       class: "extra-thing", data: { x: "v" })
+
+    assert_html(html, ".well.extra-thing", text: "Help")
+    assert_html(html, "[data-x='v']")
+  end
+
   # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
   # always a well, with an `arrow-up`/`arrow-down` sibling matching
   # the direction passed in.
