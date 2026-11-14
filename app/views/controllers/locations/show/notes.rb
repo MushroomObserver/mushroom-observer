@@ -9,7 +9,7 @@ module Views::Controllers::Locations
       def view_template
         return if @location.notes.blank?
 
-        Panel(panel_id: "location_notes") do |panel|
+        Panel(id: "location_notes") do |panel|
           panel.with_heading { :notes.ti }
           panel.with_body { trusted_html(@location.notes.to_s.tpl) }
         end

@@ -140,7 +140,7 @@ module Views::Controllers::Names
     end
 
     def render_name_footer_panel
-      Panel(panel_id: "name_footer") do |panel|
+      Panel(id: "name_footer") do |panel|
         panel.with_body { render_footer_body }
         panel.with_footer { render_footer_meta }
       end

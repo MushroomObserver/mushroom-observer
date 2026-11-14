@@ -11,7 +11,7 @@ module Views::Controllers::Descriptions
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      Panel(panel_id: "other_descriptions") do |panel|
+      Panel(id: "other_descriptions") do |panel|
         panel.with_heading { panel_title }
         panel.with_heading_links { render_create_link }
         panel.with_body { render_body }

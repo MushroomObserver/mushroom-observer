@@ -33,7 +33,7 @@ module Views::Controllers::Images::FieldSlipExtracts
     # the observation-scoped scan page's job (linked below), since
     # which photo shows the slip is a decision about the observation.
     def render_unscanned
-      Panel(panel_id: "field_slip_extract_none") do |p|
+      Panel(id: "field_slip_extract_none") do |p|
         p.with_body do
           plain(:field_slip_extract_none_yet.l)
         end
@@ -55,7 +55,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     def render_pending
       div(data: { controller: "reload-poll" }) do
-        Panel(panel_id: "field_slip_extract_pending") do |p|
+        Panel(id: "field_slip_extract_pending") do |p|
           p.with_body do
             # `.spinner-right` only animates; the visible glyph is the
             # icon (a bare span shows nothing since the SVG-sprite

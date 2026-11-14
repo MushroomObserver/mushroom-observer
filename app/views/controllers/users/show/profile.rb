@@ -10,7 +10,7 @@ module Views::Controllers::Users
       prop :life_list, ::Checklist::ForUser
 
       def view_template
-        Panel(panel_id: "user_profile") do |panel|
+        Panel(id: "user_profile") do |panel|
           panel.with_heading { render_heading }
           links = capture { render_heading_links }
           panel.with_heading_links { trusted_html(links) } if links.present?

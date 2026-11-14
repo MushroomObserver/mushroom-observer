@@ -39,7 +39,7 @@ module Views::Controllers::Support
         PRESET_AMOUNTS.each do |amount|
           Column(xs: 3) do
             render(Components::Form::RadioCollapse.new(
-                     form: self, field: :amount, value: amount,
+                     form: self, field: :amount, option_value: amount,
                      label: "$#{amount.to_i}"
                    ))
           end
@@ -49,9 +49,9 @@ module Views::Controllers::Support
 
     def render_other_amount_inputs
       render(Components::Form::RadioCollapse.new(
-               form: self, field: :amount, value: "other",
+               form: self, field: :amount, option_value: "other",
                label: append_colon(:donate_other.l),
-               attributes: { data: { donate_target: "otherCheck" } }
+               data: { donate_target: "otherCheck" }
              ))
       Collapsible(expanded: other_amount_selected?,
                   data: { collapse_switch_target: "panel",

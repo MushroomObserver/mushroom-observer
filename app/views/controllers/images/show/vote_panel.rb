@@ -11,7 +11,7 @@ module Views::Controllers::Images
 
       def view_template
         Panel(
-          panel_id: "image_vote_content"
+          id: "image_vote_content"
         ) do |panel|
           panel.with_heading { render_current_vote_heading }
           render_user_vote_body(panel) if current_user

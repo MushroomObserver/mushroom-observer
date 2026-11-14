@@ -20,7 +20,7 @@ module Views::Controllers::Versions
 
     def view_template
       Panel(
-        panel_id: "#{@obj.type_tag}_versions"
+        id: "#{@obj.type_tag}_versions"
       ) do |panel|
         panel.with_heading { :versions.ti }
         panel.with_body(wrapper: false) { render_table }

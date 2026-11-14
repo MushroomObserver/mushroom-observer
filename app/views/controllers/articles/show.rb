@@ -32,8 +32,8 @@ module Views::Controllers::Articles
     end
 
     def render_body_panel
-      Panel(panel_class: "mt-3",
-            panel_id: "article_body") do |panel|
+      Panel(class: "mt-3",
+            id: "article_body") do |panel|
         panel.with_body { trusted_html(@article.body.tpl) }
       end
     end

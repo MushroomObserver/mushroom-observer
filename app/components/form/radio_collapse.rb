@@ -12,18 +12,23 @@
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param field [Symbol, String] the field name
-# @param value [String, Integer, Float] this option's value
+# @param option_value [String, Integer, Float] this option's value --
+#   not named `value:`, since that's reserved (per MO's
+#   FieldProxy/radio_field convention) for the field's currently
+#   selected value, forwarded through to radio_field via
+#   `attributes:`/any other keyword, not a named prop here.
 # @param label [String, Symbol] the label text, or a translation key
-# @param attributes [Hash] extra options forwarded to radio_field
+# Any other keyword (including `value:`, the selected value) is
+# forwarded to radio_field.
 class Components::Form::RadioCollapse < Components::Base
   prop :form, ::Components::ApplicationForm
   prop :field, _Union(Symbol, String)
-  prop :value, _Union(String, Integer, Float)
+  prop :option_value, _Union(String, Integer, Float)
   prop :label, _Union(String, Symbol)
-  prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any), :**
 
   def view_template
-    @form.radio_field(@field, [@value, @label], **merged_attrs)
+    @form.radio_field(@field, [@option_value, @label], **merged_attrs)
   end
 
   private
