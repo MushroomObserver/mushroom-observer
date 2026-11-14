@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-11-14 (deploy-2026-11-14-11-13)
+
+- Fix `ArgumentError` on a leading-zero 4-digit year in date search ([PR5707](https://github.com/MushroomObserver/mushroom-observer/pull/5707), @nimmolo)
+- Standardize Phlex components on flat attribute kwargs, not nested `attributes: { }` ([PR5706](https://github.com/MushroomObserver/mushroom-observer/pull/5706), @nimmolo)
+- Harden admin switch-user session handling ([PR5708](https://github.com/MushroomObserver/mushroom-observer/pull/5708), @mo-nathan)
+- Stop a flagged account's password from verifying an API key ([PR5709](https://github.com/MushroomObserver/mushroom-observer/pull/5709), @mo-nathan)
+- Fix N+1 in `script/purge_blank_descriptions.rb` ([PR5711](https://github.com/MushroomObserver/mushroom-observer/pull/5711), @nimmolo)
+
 ## 2026-11-13 (deploy-2026-11-13-14-30)
 
 - Users and Visual Models/Groups page-review fixes ([PR5670](https://github.com/MushroomObserver/mushroom-observer/pull/5670), @nimmolo)
