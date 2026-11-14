@@ -16,7 +16,7 @@ module Views::Controllers::Names::Descriptions
       add_show_title(@description)
       add_edit_icons(@description, @user)
       container_class(:wide)
-      column_classes(:six_even)
+      column_classes(:six)
 
       Row { render_columns }
       render(Views::Layouts::ObjectFooter.new(

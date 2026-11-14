@@ -21,7 +21,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
 
     # Open the top-nav search bar collapse (starts hidden).
     find("[aria-controls='search_nav']").click
-    assert_selector("#search_nav.in", wait: 5)
+    assert_selector("#search_nav.#{EXPANDED}", wait: 5)
 
     # Wait for the search-type Stimulus controller to connect and
     # fire the initial async form fetch into #search_nav_form.
@@ -43,7 +43,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
 
     # Expand the "detail" collapsible panel.
     find("a[aria-controls='observations_detail']").click
-    assert_selector("#observations_detail.in", wait: 5)
+    assert_selector("#observations_detail.#{EXPANDED}", wait: 5)
 
     # Collapse the panel. Before the fix this caused Bootstrap to skip
     # preventDefault (because data-target was set), Turbo then followed
@@ -58,6 +58,6 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
       text: :search_term_group_detail.t.as_displayed
     )
     # Collapsed pane is closed.
-    assert_no_selector("#observations_detail.in")
+    assert_no_selector("#observations_detail.#{EXPANDED}")
   end
 end

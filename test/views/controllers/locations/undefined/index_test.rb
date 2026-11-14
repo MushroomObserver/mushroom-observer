@@ -16,8 +16,6 @@ module Views::Controllers::Locations::Undefined
 
       assert_html(html, "#undefined_locations_help",
                   text: :list_place_names_undef_help.l.as_displayed)
-      assert_html(html, "#undefined_locations_help",
-                  text: :list_place_names_parenthetical.l.as_displayed)
     end
 
     def test_renders_none_when_no_undefined_locations

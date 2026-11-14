@@ -40,7 +40,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_by_users.l}: Rolf Singer")
     # In results, expect 1 row per collection_number.
-    assert_select("#results tr", query.num_results)
+    assert_select("#results tbody tr", query.num_results)
   end
 
   def test_index_with_id_and_sorted
@@ -339,6 +339,26 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_difference("CollectionNumber.count", 1) do
       post(:create, params: params, format: :turbo_stream)
     end
+  end
+
+  def test_create_collection_number_with_modal
+    obs = observations(:strobilurus_diminutivus_obs)
+    user = obs.user
+    params = {
+      observation_id: obs.id,
+      collection_number: {
+        name: user.login,
+        number: "1234",
+        modal: "true"
+      }
+    }
+    login(user.login)
+    assert_difference("CollectionNumber.count", 1) do
+      post(:create, params: params, format: :turbo_stream)
+    end
+    assert_select(
+      "turbo-stream[action='replace'][target='observation_collection_numbers']"
+    )
   end
 
   def test_create_collection_number_turbo_validation_error

@@ -43,35 +43,32 @@ module Views::Controllers::Locations
       def render_help
         ContentPadded(id: "undefined_locations_help") do
           plain(:list_place_names_undef_help.l)
-          div(class: "text-right mt-3") do
-            plain(:list_place_names_parenthetical.l)
-          end
         end
       end
 
       def render_list
-        ListGroup do |list|
-          @undef_data.each { |obs, count| render_item(list, obs, count) }
+        Table(@undef_data) do |t|
+          t.column(:list_place_names_header.t) do |obs, _count|
+            Link(type: :location, where: obs[:where])
+          end
+          t.column(:actions.ti) do |obs, _count|
+            render_actions(obs[:where])
+          end
+          t.column(:sort_by_observations.t, align: :right) do |_obs, count|
+            CountBadge(count: count)
+          end
         end
       end
 
-      def render_item(list, obs, count)
-        location_name = obs[:where]
-        list.item(class: "d-flex align-items-start") do
-          div(class: "flex-grow-1") do
-            Link(type: :location, where: location_name)
-            whitespace
-            render_merge_link(location_name)
-            whitespace
-            render_define_link(location_name)
-          end
-          div(class: "obs-count-col") { CountBadge(count: count) }
-        end
+      def render_actions(location_name)
+        render_merge_link(location_name)
+        whitespace
+        render_define_link(location_name)
       end
 
       def render_merge_link(location_name)
         Link(type: :get, class: "icon-text-gap",
-             name: :list_place_names_merge.l,
+             name: :merge.ti,
              target: matching_locations_for_observations_path(
                where: location_name
              ),
@@ -82,7 +79,7 @@ module Views::Controllers::Locations
 
       def render_define_link(location_name)
         Link(type: :get, class: "icon-text-gap",
-             name: :list_observations_location_define.t,
+             name: :list_observations_location_define.ti,
              target: new_location_path(where: location_name),
              icon: :map, show_label: :hidden,
              title: :list_place_names_undef_define_tooltip.t,

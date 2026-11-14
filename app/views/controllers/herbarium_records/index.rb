@@ -39,10 +39,19 @@ module Views::Controllers::HerbariumRecords
     end
 
     def build_table_columns(table)
-      table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      unless single_herbarium_filter?
+        table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      end
       table.column(:label.ti) { |rec| render_record_link(rec) }
       table.column(:observations.ti) { |rec| render_observation_links(rec) }
       build_trailing_columns(table)
+    end
+
+    # Every row shares one fungarium when the index is filtered down
+    # to a single one -- the column would just repeat it.
+    def single_herbarium_filter?
+      herbaria = @query&.params&.dig(:herbaria)
+      herbaria.is_a?(Array) && herbaria.size == 1
     end
 
     def build_trailing_columns(table)

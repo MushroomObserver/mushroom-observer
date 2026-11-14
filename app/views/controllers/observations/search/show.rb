@@ -7,6 +7,7 @@
 # wrapper for the html path.
 class Views::Controllers::Observations::Search::Show < Views::FullPageBase
   def view_template
+    content_padding(:no_panels)
     render(Views::Controllers::Observations::Search::Help.new)
   end
 end

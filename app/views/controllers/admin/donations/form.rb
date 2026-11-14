@@ -10,7 +10,8 @@ module Views::Controllers::Admin::Donations
         text_field(:amount, size: 7, label: :confirm_amount,
                             inline: true)
         text_field(:who, size: 50, label: :who.ti, inline: true)
-        checkbox_field(:anonymous, label: :donate_anonymous)
+        checkbox_field(:anonymous, label: :donate_anonymous,
+                                   wrap_class: "form-group")
         text_field(:email, size: 50, label: :email.ti, inline: true,
                            type: "email")
         submit(:add.ti, center: true)

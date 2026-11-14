@@ -44,6 +44,18 @@ class Views::Controllers::Descriptions::ListTest < ComponentTestCase
     end
   end
 
+  def test_current_description_shows_annotation_not_link
+    name = names_with_descriptions
+    current = name.descriptions.find { |d| d.is_reader?(@user) } ||
+              flunk("Need a readable description for this test")
+
+    html = render_list(object: name, type: :name, current: current)
+
+    assert_no_html(html, "a.description_link_#{current.id}")
+    assert_html(html, "div",
+                text: "- #{:show_description_list_current.t}".as_displayed)
+  end
+
   def test_renders_nothing_for_object_with_no_descriptions
     name = Name.left_joins(:descriptions).
            where(name_descriptions: { id: nil }).first

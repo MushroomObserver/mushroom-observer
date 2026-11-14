@@ -8,7 +8,9 @@
 #   - flash + optional `:needs_description` help blurb
 #   - alt-spellings alert when the query returned no results AND
 #     the controller fed back a list of suggested respellings
-#   - paginated list of Name rows
+#   - paginated table of Names: MO ID / Name (with a copy-to-
+#     clipboard icon) / Observations, plus Authors / Notes / Status
+#     columns when the active query filters on `has_descriptions`
 #
 # `NamesController#render_index_view` overrides the ApplicationController
 # default to render this Phlex class directly with explicit props.
@@ -22,7 +24,7 @@ module Views::Controllers::Names
     # `needs_description`; nil otherwise.
     prop :help, _Nilable(Symbol), default: nil
     # True when the active query filters on `has_descriptions`;
-    # per-row descriptions columns render only then.
+    # per-row Authors/Notes/Status columns render only then.
     prop :has_descriptions, _Boolean, default: false
     # Pattern-search-with-zero-results path: the controller fills
     # this with alternate spellings to suggest.
@@ -57,7 +59,7 @@ module Views::Controllers::Names
       render_suggestions_alert if suggest_alternates?
       render_help_blurb if @help
 
-      PaginatedResults { render_name_rows }
+      PaginatedResults { render_name_table }
     end
 
     def suggest_alternates?
@@ -74,20 +76,71 @@ module Views::Controllers::Names
       trusted_html(@help.tp)
     end
 
-    def render_name_rows
+    def render_name_table
       return unless @objects.any?
 
       counts = Name.count_observations(@objects)
-      ListGroup(class: "name-index mb-3") do |list|
-        @objects.each do |name|
-          list.item do
-            render(Row.new(
-                     name: name, user: @user, counts: counts,
-                     has_descriptions: @has_descriptions
-                   ))
+      Table(@objects, identifier: "name-index") do |t|
+        t.column(:mo_id.ti) { |name| IDBadge(object: name, size: :md) }
+        t.column(:name.ti) { |name| render_name_cell(name) }
+        t.column(:sort_by_observations.t, align: :right) do |name|
+          CountBadge(count: counts[name.id].to_i)
+        end
+        render_description_columns(t) if @has_descriptions
+      end
+    end
+
+    def render_name_cell(name)
+      span(
+        data: { controller: "clipboard",
+                clipboard_copied_value: :copied.ti }
+      ) do
+        a(href: name_path(name.id)) do
+          span(class: "display-name",
+               data: { clipboard_target: "source" }) do
+            trusted_html(name.display_name(@user).t)
           end
         end
+        render_copy_button
       end
+    end
+
+    def render_copy_button
+      Button(
+        variant: :link,
+        class: "py-0 link-normal opacity-75",
+        role: "button",
+        data: { tooltip_target: "tip", placement: "bottom",
+                title: :copy_this_name.ti,
+                action: "clipboard#copy" }
+      ) { Icon(type: :copy) }
+    end
+
+    # `has_descriptions` subaction columns: when a default description
+    # exists, show its authors / note status / review status; when it
+    # doesn't, the Authors cell carries the placeholder text.
+    def render_description_columns(table)
+      table.column(:authors.ti) { |name| description_authors(name) }
+      table.column(:notes.ti) { |name| description_note_status(name) }
+      table.column(:status.ti) { |name| description_review_status(name) }
+    end
+
+    def description_authors(name)
+      desc = name.description
+      return "--- not the default ---" unless desc
+
+      desc.authors.map(&:login).join(", ")
+    end
+
+    def description_note_status(name)
+      name.description&.note_status&.join("/")
+    end
+
+    def description_review_status(name)
+      desc = name.description
+      return unless desc
+
+      :"review_#{desc.review_status}".l
     end
   end
 end

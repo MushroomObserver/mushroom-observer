@@ -44,9 +44,9 @@ module Views::Controllers::Descriptions::Permissions
         class: "w-100 table-description-permissions"
       ) do |t|
         t.column(:adjust_permissions_user_header.l, style: "mr-4")
-        t.column(:adjust_permissions_reader_header.l, width: "50")
-        t.column(:adjust_permissions_writer_header.l, width: "50")
-        t.column(:adjust_permissions_admin_header.l, width: "50")
+        t.column(:adjust_permissions_reader_header.l, align: :center)
+        t.column(:adjust_permissions_writer_header.l, align: :center)
+        t.column(:adjust_permissions_admin_header.l, align: :center)
         t.body { render_table_body }
       end
     end

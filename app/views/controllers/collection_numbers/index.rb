@@ -29,15 +29,18 @@ module Views::Controllers::CollectionNumbers
 
     private
 
-    # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
-      Table(@objects, variant: :striped, class: "mt-3",
-                      show_headers: false) do |t|
-        t.column("") { |cn| render_edit_link(cn) }
-        t.column("") { |cn| render_format_name_link(cn) }
-        t.column("") { |cn| render_observation_links(cn) }
-        t.column("") { |cn| render_delete_button(cn) }
+      Table(@objects, variant: :striped) do |t|
+        t.column(:mo_id.ti) { |cn| render_id_badge(cn) }
+        t.column(nil) { |cn| render_edit_link(cn) }
+        t.column(:collection_number.ti) { |cn| render_format_name_link(cn) }
+        t.column(:observation.ti) { |cn| render_observation_links(cn) }
+        t.column(nil) { |cn| render_delete_button(cn) }
       end
+    end
+
+    def render_id_badge(collection_number)
+      IDBadge(object: collection_number, size: :lg, extra_class: nil)
     end
 
     def render_edit_link(collection_number)
@@ -48,10 +51,8 @@ module Views::Controllers::CollectionNumbers
     end
 
     def render_format_name_link(collection_number)
-      i do
-        a(href: collection_number_path(collection_number)) do
-          trusted_html(collection_number.format_name.t)
-        end
+      a(href: collection_number_path(collection_number)) do
+        trusted_html(collection_number.format_name.t)
       end
     end
 

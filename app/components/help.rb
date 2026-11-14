@@ -19,14 +19,12 @@
 # default) as separate classes; merged into this one dispatcher since
 # the DOM shape only ever differed by element tag + CSS class, both of
 # which `element:` + `render_plain`'s class choice cover directly.
-# `element: :span` renders `.help-note` (color only, genuinely
-# inline); anything else renders `.help-block` (Bootstrap's own class
-# — hardcodes `display: block`, so it must stay off `:span` content or
-# the block display forces it onto its own line regardless of tag).
+# `element: :span` renders `.help-note` (inline); anything else
+# renders `.help-block form-text`.
 #
 # `:tooltip`, `:collapse_block`, and `:collapse_info_trigger` are
-# genuinely different DOM shapes (not just a class/tag variation) and
-# stay as separate dispatched subclasses (`Components::Help::Tooltip`,
+# different DOM shapes (not just a class/tag variation) and stay as
+# separate dispatched subclasses (`Components::Help::Tooltip`,
 # etc).
 #
 # Pure kwargs — no positional-arg shorthand. The old
@@ -95,17 +93,17 @@ class Components::Help < Components::Base
   end
 
   def render_plain(&block)
-    base_class = @element == :span ? "help-note" : "help-block"
+    base_class = @element == :span ? "help-note" : "help-block form-text"
     send(@element, id: @id, **mix({ class: base_class }, @attributes)) do
       emit_content(&block)
     end
   end
 
   def render_well(&block)
-    classes = ["well well-sm mb-3 help-block position-relative"]
+    classes = ["help-block position-relative"]
     classes << "mt-3" if @arrow.to_s == "up"
 
-    div(**mix({ class: classes.join(" ") }, @attributes), id: @id) do
+    Well(**mix({ class: classes.join(" ") }, @attributes), id: @id) do
       emit_content(&block)
       # Hidden at xs keeps the arrow desktop-only.
       if @arrow

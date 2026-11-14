@@ -11,7 +11,8 @@ module Views::Controllers::Admin::Users
       super do
         Help(content: :change_user_bonuses_help.tp)
         textarea_field(:val, value: model.formatted_bonuses, rows: 5,
-                             class: "mt-3")
+                             label: :change_user_bonuses_label,
+                             wrap_class: "mt-3")
         submit(:save_edits.ti, center: true)
       end
     end

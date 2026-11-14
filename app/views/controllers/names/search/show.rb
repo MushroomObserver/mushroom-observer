@@ -4,6 +4,7 @@
 # the search-help block — the result list lives elsewhere.
 class Views::Controllers::Names::Search::Show < Views::FullPageBase
   def view_template
+    content_padding(:no_panels)
     render(Views::Controllers::Names::Search::Help.new)
   end
 end

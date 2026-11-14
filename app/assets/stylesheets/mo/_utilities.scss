@@ -27,6 +27,15 @@
   max-height: 100% !important;
 }
 
+// A fixed-width gap between flex items, for a flex-wrap row where a
+// margin on either sibling would travel with it onto a wrapped
+// line and indent it -- the spacer itself stays small enough to
+// remain on the first line instead.
+.spacer {
+  display: inline-block;
+  width: 1rem;
+}
+
 .object-fit-cover {
   @extend .w-100, .h-100;
   object-fit: cover;
@@ -56,6 +65,31 @@
 // Custom, non-Bootstrap class.
 .indent {
   padding-left: 1rem !important;
+}
+
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- see .px-card below for the full explanation.
+.p-card {
+  padding: $card-spacer-x !important;
+}
+
+// Matches cutover's $card-spacer-x (BS4's named spacer key, not a
+// numbered step) -- the padding a card's body uses, applied here to
+// non-card chrome (nav bars, page-title strip) that wants to sit
+// flush with card content elsewhere on the page. See #5527.
+.px-card {
+  padding-left: $card-spacer-x !important;
+  padding-right: $card-spacer-x !important;
+}
+
+// See .px-card above.
+.pl-card {
+  padding-left: $card-spacer-x !important;
+}
+
+// See .px-card above.
+.pr-card {
+  padding-right: $card-spacer-x !important;
 }
 
 .overflow-ellipsis {

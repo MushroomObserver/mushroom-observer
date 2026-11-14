@@ -63,7 +63,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_html(html, "img.image_#{image.id}")
     # format_name, not unique_format_name -- the IDBadge beside it
     # already shows the id.
-    assert_html(html, ".rss-name", text: image.format_name.t.as_displayed)
+    assert_html(html, ".log-name", text: image.format_name.t.as_displayed)
   end
 
   def test_renders_image_object_without_subjects
@@ -71,7 +71,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: image)
     html = render(component)
 
-    assert_html(html, ".rss-name", text: :image.ti)
+    assert_html(html, ".log-name", text: :image.ti)
   end
 
   def test_renders_user_object
@@ -96,8 +96,8 @@ class MatrixBoxTest < ComponentTestCase
                                           collector_user_id: nil)
     html = render(Components::Matrix::Box.new(user: @user, object: rss_log))
 
-    assert_html(html, ".rss-who", text: "Jane Forager")
-    assert_no_html(html, ".rss-who a")
+    assert_html(html, ".log-who", text: "Jane Forager")
+    assert_no_html(html, ".log-who a")
   end
 
   def test_renders_with_custom_columns
@@ -193,11 +193,11 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Details section should have rss-box-details class
+    # Details section should have log-details class
     assert_nested(
       html,
-      parent_selector: "div.panel-body.rss-box-details",
-      child_selector: "div.rss-what"
+      parent_selector: "div.panel-body.log-details",
+      child_selector: "div.log-what"
     )
   end
 
@@ -209,18 +209,18 @@ class MatrixBoxTest < ComponentTestCase
     # Should have what section in panel-body
     assert_nested(
       html,
-      parent_selector: "div.panel-body.rss-box-details",
-      child_selector: "div.rss-what"
+      parent_selector: "div.panel-body.log-details",
+      child_selector: "div.log-what"
     )
     # Should have where section in panel-body
     assert_nested(
       html,
-      parent_selector: "div.panel-body.rss-box-details",
-      child_selector: "div.rss-where"
+      parent_selector: "div.panel-body.log-details",
+      child_selector: "li.log-where"
     )
-    # Should have when/who info (rendered with rss-when and rss-who classes)
-    assert_html(html, ".rss-when")
-    assert_html(html, ".rss-who")
+    # Should have when/who info (rendered with log-when and log-who classes)
+    assert_html(html, ".log-when")
+    assert_html(html, ".log-who")
   end
 
   def test_observation_title_includes_name
@@ -232,7 +232,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_text_in_nested_selector(
       html,
       text: obs.name.text_name,
-      parent: "div.rss-what",
+      parent: "div.log-what",
       child: "h5"
     )
   end
@@ -243,7 +243,7 @@ class MatrixBoxTest < ComponentTestCase
     html = render(component)
 
     # Should include location in where section
-    assert_html(html, ".rss-where", text: obs.where)
+    assert_html(html, ".log-where", text: obs.where)
   end
 
   def test_rss_log_renders_footer
@@ -278,7 +278,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: log)
     html = render(component)
 
-    assert_html(html, ".rss-detail",
+    assert_html(html, ".log-detail",
                 text: :log_location_merged.t(that: loc2.display_name,
                                              user: "mary").as_displayed)
   end
@@ -320,7 +320,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_nested(
       html,
       parent_selector: "div.panel-body",
-      child_selector: "div.rss-what"
+      child_selector: "div.log-what"
     )
   end
 
@@ -366,7 +366,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_html(html, ".source-credit", text: "Imported from iNaturalist")
+    assert_html(html, ".log-source-credit", text: "Imported from iNaturalist")
     # link_url is the rendered href (stored override or derived); import
     # links may have a NULL url column, so assert against link_url.
     expected_url = obs.import_link.link_url
@@ -386,7 +386,7 @@ class MatrixBoxTest < ComponentTestCase
     component = Components::Matrix::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_html(html, ".source-credit", text: "#{:via.l} MO API")
+    assert_html(html, ".log-source-credit", text: "#{:via.l} MO API")
   end
 
   private

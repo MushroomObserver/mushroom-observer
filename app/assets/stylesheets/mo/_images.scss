@@ -117,6 +117,10 @@ svg.placeholder {
 .vote-btn-group {
   @include btn-group-dividers(".image-vote", rgba($white, 0.5));
 
+  // Overrides the mixin's 1.1rem -- 12px at the 16px root, see issue
+  // #5527.
+  font-size: 0.75rem;
+
   // Padding/color/hover live on the inner <button>, not the
   // <form.button_to> wrapper.
   form.button_to button[type=submit].image-vote-link {
@@ -171,14 +175,14 @@ svg.placeholder {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  max-width: 200px;
-  height: 7px;
+  max-width: 12.5rem;
+  height: 0.4375rem;
   margin-bottom: 0;
   background-color: rgba($white, 0.5);
 
   .progress-bar {
-    font-size: 12px;
-    line-height: 5px;
+    font-size: 0.75rem;
+    line-height: 0.3125rem;
     color: $white;
     background-color: $white;
   }

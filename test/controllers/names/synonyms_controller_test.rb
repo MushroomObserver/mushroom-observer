@@ -11,6 +11,24 @@ module Names
       assert_form_action(action: :update, approved_synonyms: [], id: name.id)
     end
 
+    # Existing-synonym checkboxes and "deprecate all" load checked --
+    # unchecking either is the user's way to opt an item out.
+    def test_edit_loads_existing_synonyms_and_deprecate_all_checked
+      name = names(:chlorophyllum_rachodes)
+      other_ids = name.synonyms.map(&:id) - [name.id]
+      assert_not_empty(other_ids, "Fixture needs an existing synonym")
+
+      login
+      get(:edit, params: { id: name.id })
+
+      other_ids.each do |id|
+        assert_select(
+          "input[name='edit_synonym[existing_synonyms][#{id}]'][checked]"
+        )
+      end
+      assert_select("input[name='edit_synonym[deprecate_all]'][checked]")
+    end
+
     # ----------------------------
     #  Synonyms.
     # ----------------------------

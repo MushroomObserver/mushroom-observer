@@ -45,6 +45,12 @@ module GeneralExtensions
 
   GPS_CLOSE_ENOUGH = 0.001
 
+  # The class Bootstrap adds to an initially-open collapse pane.
+  # Shared here (not redeclared per test file) since component,
+  # controller, and system tests alike assert against it instead of
+  # a literal string.
+  EXPANDED = Components::Collapsible::EXPANDED_CLASS
+
   # These used to be automatically instantiated fixtures, e.g., @dick, etc.
   # Now we dynamically provide helper methods for all user fixtures.
   # This allows tests to write `rolf` instead of `users(:rolf)`.

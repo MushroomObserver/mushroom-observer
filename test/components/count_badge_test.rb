@@ -36,9 +36,22 @@ class Components::CountBadgeTest < ComponentTestCase
     assert_html(html, ".count-badge[title='#{tooltip}']")
   end
 
+  def test_default_variant_is_solid
+    html = render_badge(count: 5)
+
+    assert_no_html(html, ".badge-outline")
+  end
+
+  def test_variant_outline
+    html = render_badge(count: 5, variant: :outline)
+
+    assert_html(html, ".count-badge.badge-outline", text: "5")
+  end
+
   private
 
-  def render_badge(count:, type: :observation)
-    render(Components::CountBadge.new(count: count, type: type))
+  def render_badge(count:, type: :observation, variant: :solid)
+    render(Components::CountBadge.new(count: count, type: type,
+                                      variant: variant))
   end
 end

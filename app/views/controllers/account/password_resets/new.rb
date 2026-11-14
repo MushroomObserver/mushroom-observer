@@ -9,14 +9,23 @@ module Views::Controllers::Account::PasswordResets
 
     def view_template
       add_page_title(:email_new_password_title.t)
-      Help(
-        content: :email_new_password_help.tp + :email_spam_notice.tp
-      )
+
+      Help(content: help_text)
       render(Form.new(
                @new_user || ::User.new,
                action: account_password_reset_path,
                id: "account_password_reset_form"
              ))
+    end
+
+    private
+
+    def help_text
+      capture do
+        trusted_html(:email_new_password_help.tp)
+        br
+        trusted_html(:email_spam_notice.tp)
+      end
     end
   end
 end

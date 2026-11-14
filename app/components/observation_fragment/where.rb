@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# The "Seen at:" / "Collected from:" line for an observation, plus the
-# vague-location notice when applicable. Owns its own `li.obs-where`
-# wrapper (see Components::ObservationFragment::Who for why).
+# The "Seen at:" / "Collected from:" line, plus the vague-location
+# notice. Both render as sibling `li`s -- callers wrap this in a
+# `ul`, so the notice must be a sibling `li`, not a nested `p`.
 class Components::ObservationFragment::Where < Components::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -11,8 +11,8 @@ class Components::ObservationFragment::Where < Components::Base
     li(class: "obs-where hanging-indent") do
       trusted_html(append_colon(where_label))
       render_location
-      render_vague_notice
     end
+    render_vague_notice
   end
 
   private
@@ -39,6 +39,6 @@ class Components::ObservationFragment::Where < Components::Base
 
     title = :show_observation_vague_location.l.dup
     title << " #{:show_observation_improve_location.l}" if @user == @obs.user
-    p(class: "vague-location-notice ml-3") { em { plain(title) } }
+    li(class: "vague-location-notice ml-3") { em { plain(title) } }
   end
 end

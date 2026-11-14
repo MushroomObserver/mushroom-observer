@@ -27,6 +27,7 @@ class CollectionNumbersController < ApplicationController
   # view. Each key must resolve to `CollectionNumber.order_by_<key>`.
   def index_sort_options
     [
+      ["name_and_number", :sort_by_name_and_number.l],
       ["name",       :sort_by_name.l],
       ["number",     :sort_by_number.l],
       ["created_at", :sort_by_created_at.l],
