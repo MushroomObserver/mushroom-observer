@@ -105,7 +105,7 @@ class Components::Help < Components::Base
     classes = ["well well-sm mb-3 help-block position-relative"]
     classes << "mt-3" if @arrow.to_s == "up"
 
-    div(class: classes.join(" "), id: @id) do
+    div(**mix({ class: classes.join(" ") }, @attributes), id: @id) do
       emit_content(&block)
       # Hidden at xs keeps the arrow desktop-only.
       if @arrow

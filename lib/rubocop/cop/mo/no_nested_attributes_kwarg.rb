@@ -108,8 +108,22 @@ module RuboCop
           return "Link" if node.method_name == :Link && link_double_splat?(node)
           return nil unless node.method_name == :new && node.receiver
 
-          receiver_source = node.receiver.source
-          NEW_ONLY_CLASSES.find { |klass| receiver_source == klass }
+          offending_new_name(node.receiver.source.delete_prefix("::"))
+        end
+
+        def offending_new_name(receiver_source)
+          NEW_ONLY_CLASSES.find { |klass| receiver_source == klass } ||
+            kit_new_name(receiver_source)
+        end
+
+        # `Components::Table.new(...)` / `::Components::Table.new(...)` --
+        # the full-path form a view class uses to reach a Kit-sugar
+        # component when the view shares the component's name, which
+        # would make bare `Table(...)` recurse (see `api_keys/table.rb`).
+        def kit_new_name(receiver_source)
+          KIT_NAMES.find do |name|
+            receiver_source == "Components::#{name}"
+          end&.to_s
         end
 
         def link_double_splat?(node)
