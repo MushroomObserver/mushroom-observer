@@ -10,7 +10,7 @@ module Account
     # POST /account/logout — clear session and redirect to show.
     def create
       real_user = sudo_real_user
-      if real_user&.admin
+      if real_user
         switch_to_user(real_user)
         redirect_back_or_to("/")
       else

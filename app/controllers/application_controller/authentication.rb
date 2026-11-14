@@ -277,12 +277,14 @@ module ApplicationController::Authentication
 
   # The admin behind a switch-user session, for the two actions that
   # act on `session[:real_user_id]`. Nil unless the session can produce
-  # the credential stored at switch time.
+  # the credential stored at switch time and the account it names is
+  # still an admin -- losing admin has to end a switch already under
+  # way, not just the next one.
   def sudo_real_user
     return if session[:real_user_id].blank?
 
     user = User.safe_find(session[:real_user_id])
-    user if user && sudo_auth_valid?(user)
+    user if user&.admin && sudo_auth_valid?(user)
   end
 
   def sudo_auth_valid?(user)

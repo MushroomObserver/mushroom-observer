@@ -207,6 +207,7 @@ module Admin
     # the credential stored at switch time. An id by itself is a copy of
     # a switched session, which reaches any account from here.
     def test_update_refuses_a_sudo_session_with_no_credential
+      rolf.update!(admin: true)
       login(:mary)
       session[:real_user_id] = rolf.id
 
@@ -217,12 +218,27 @@ module Admin
     end
 
     def test_edit_refuses_a_sudo_session_with_no_credential
+      rolf.update!(admin: true)
       login(:mary)
       session[:real_user_id] = rolf.id
 
       get(:edit)
 
       assert_response(:redirect)
+    end
+
+    # Admin mode is checked on every request, so a switch already under
+    # way has to answer for it too: the account behind the switch no
+    # longer being an admin ends the switch, credential or not.
+    def test_update_refuses_a_sudo_session_whose_admin_was_demoted
+      login(:mary)
+      session[:real_user_id] = rolf.id
+      session[:real_auth] = rolf.auth_code
+
+      put(:update, params: { admin_session: { user_id: dick.id } })
+
+      assert_response(:redirect)
+      assert_users_equal(mary, logged_in_user)
     end
 
     # `find_user_by_id_login_or_email("")` returns `nil` for a blank
