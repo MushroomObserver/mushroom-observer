@@ -50,6 +50,10 @@ end
 # LocationDescription rows with no claimed authorship.
 class BlankDescriptionPurge
   MODELS = [NameDescription, LocationDescription].freeze
+  # `desc.parent` dispatches to this association at runtime (see
+  # Description#parent); `includes` needs the association name itself.
+  PARENT_ASSOCIATION = { NameDescription => :name,
+                         LocationDescription => :location }.freeze
 
   def initialize(apply:)
     @apply = apply
@@ -64,7 +68,8 @@ class BlankDescriptionPurge
   private
 
   def process(model)
-    model.find_each do |desc|
+    model.includes(PARENT_ASSOCIATION.fetch(model), :authors, :editors).
+      find_each do |desc|
       next if desc.notes?
 
       handle(desc)
