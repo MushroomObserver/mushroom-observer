@@ -12,13 +12,12 @@
 class Components::Help::Tooltip < Components::Base
   prop :label, String
   prop :title, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: nil
-  prop :data, Hash, default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    span(class: class_names("context-help", @extra_class),
-         title: @title,
-         data: { tooltip_target: "tip" }.merge(@data)) do
+    span(title: @title,
+         **mix({ class: "context-help",
+                 data: { tooltip_target: "tip" } }, @attributes)) do
       plain(@label)
     end
   end

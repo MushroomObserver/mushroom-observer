@@ -51,8 +51,7 @@ class UserLinkTest < ComponentTestCase
 
   def test_attributes_passed_through_with_class_merged
     rolf = users(:rolf)
-    html = render_link(user: rolf,
-                       attributes: { id: "my_link", class: "extra" })
+    html = render_link(user: rolf, id: "my_link", class: "extra")
 
     # Caller's class merges with the auto `user_link_<id>`; the
     # caller's `id:` flows through unchanged.

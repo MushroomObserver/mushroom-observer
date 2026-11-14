@@ -4,10 +4,9 @@
 # Puts `data-toggle="collapse"` and `data-target` on the `<label>`
 # (not the `<input>`), matching the naming-reasons trigger pattern.
 #
-# Extra `checkbox_field` options (help:, wrap_class:, data:, etc.) go in
-# `attributes:` and are forwarded verbatim. Any `label_data:` or
-# `label_aria:` in `attributes:` are merged with the collapse trigger
-# attrs.
+# Extra `checkbox_field` options (help:, wrap_class:, data:, etc.) are
+# forwarded verbatim as keyword args. A `label_data:` or `label_aria:`
+# keyword is merged with the collapse trigger attrs instead.
 #
 # @param form [Components::ApplicationForm] the parent form
 # @param field [Symbol] the field name
@@ -16,14 +15,14 @@
 #   passed straight through to checkbox_field, which resolves a Symbol
 #   via `.t` itself (see FieldLabelRow#resolved_label_text).
 # @param expanded [Boolean] initial expanded state (default: false)
-# @param attributes [Hash] extra options forwarded to checkbox_field
+# Any other keyword is forwarded to checkbox_field.
 class Components::Form::CheckboxCollapse < Components::Base
   prop :form, ::Components::ApplicationForm
   prop :field, Symbol
   prop :target_id, String
   prop :label, _Union(String, Symbol)
   prop :expanded, _Boolean, default: false
-  prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any), :**
 
   def view_template
     @form.checkbox_field(
