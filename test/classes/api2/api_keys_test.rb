@@ -129,6 +129,8 @@ class API2::APIKeysTest < UnitTestCase
       api = API2.execute(params)
       assert_no_errors(api, "Errors while posting api key")
       assert_last_api_key_correct
+      assert_obj_arrays_equal([APIKey.find_by(notes: @app, user: katrina)],
+                              api.results)
     end
   end
 
