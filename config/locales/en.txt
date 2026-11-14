@@ -2052,7 +2052,8 @@
   show_description_adjust_permissions: Adjust Permissions
   show_description_read_permissions: View
   show_description_write_permissions: Edit
-  show_description_list_title: Descriptions of this [type]
+  show_description_list_title: All descriptions of this [type]
+  show_description_list_current: this [:description]
   show_description_new_draft_toggle: Is this for a Project?
   show_description_new_draft_submit: Create Draft
   show_description_clone_help: Create your own description based on this description.

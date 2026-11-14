@@ -59,19 +59,22 @@ module Views::Controllers::Descriptions
     end
 
     def render_item(desc)
-      if desc == @current || !reader?(desc)
-        # Render plain text (no `<a>`) when:
-        # - We're already on `desc`'s show page (no self-link).
-        # - The user isn't a reader of `desc` — they'd just bounce
-        #   off the show controller's read check with a flash
-        #   error, so don't offer a misleading clickable link.
-        #   The pre-Phlex `description_link` helper *tried* to do
-        #   the non-reader half with
-        #   `result.match?("(#{:private.t})$")`, but the title
-        #   was always wrapped in a `translation_missing` span
-        #   (see `description_title`) so the literal "(private)"
-        #   suffix never matched and the guard never fired. We're
-        #   honoring the original intent here.
+      if desc == @current
+        # We're already on `desc`'s show page -- no self-link, and
+        # flag it as the one being viewed.
+        trusted_html(description_title(desc))
+        whitespace
+        plain("- #{:show_description_list_current.t}")
+      elsif !reader?(desc)
+        # The user isn't a reader of `desc` — they'd just bounce
+        # off the show controller's read check with a flash
+        # error, so don't offer a misleading clickable link.
+        # The pre-Phlex `description_link` helper tried to do this
+        # with `result.match?("(#{:private.t})$")`, but the title
+        # was always wrapped in a `translation_missing` span (see
+        # `description_title`) so the literal "(private)" suffix
+        # didn't match and the guard didn't fire. Honoring the
+        # original intent here.
         trusted_html(description_title(desc))
       else
         render_link(desc)
