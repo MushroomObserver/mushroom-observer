@@ -49,17 +49,18 @@ class Language < AbstractModel
   end
 
   # Lookup a Language record by its locale string, memoized per
-  # process. Languages don't change at runtime, so callers (e.g.
-  # `Views::Layouts::TranslatorsCredit` on every page render) avoid a
-  # per-request `find_by(locale: …)` query. Uses `Hash#fetch` so a
-  # nil result (unknown locale) is cached too, instead of re-querying
-  # every call.
+  # process -- languages don't change at runtime. Only successful
+  # lookups are memoized, not nil: a lookup this early (e.g. a test
+  # worker's fixtures not loaded yet) could cache a nil that outlasts
+  # the row's creation.
   def self.for_locale(locale)
     @for_locale_cache ||= {}
     key = locale.to_s
-    @for_locale_cache.fetch(key) do
-      @for_locale_cache[key] = find_by(locale: locale)
-    end
+    return @for_locale_cache[key] if @for_locale_cache.key?(key)
+
+    result = find_by(locale: locale)
+    @for_locale_cache[key] = result if result
+    result
   end
 
   # Returns an Array of pairs containing language name and locale.
