@@ -73,6 +73,7 @@ module RuboCop
         NEW_ONLY_CLASSES = %w[
           Components::Navbar::Text
           Components::Form::CheckboxCollapse
+          Components::Form::RadioCollapse
           Components::Link::Active
           Components::Link::Get
           Components::Link::CollapseToggle
