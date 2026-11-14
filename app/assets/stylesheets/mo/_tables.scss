@@ -91,10 +91,15 @@ thead tr {
     }
   }
 
-  // Override Bootstrap 3 absolute-positioned checkbox layout
-  // so checkboxes center naturally in table cells.
+  // checkbox_field's `.d-flex` row ignores the td's `text-align:
+  // center` above -- flexbox positions its item via justify-content,
+  // not text-align.
   .checkbox {
     margin: 0;
+
+    .d-flex {
+      justify-content: center;
+    }
 
     label {
       padding-left: 0;
