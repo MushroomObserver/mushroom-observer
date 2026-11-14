@@ -27,12 +27,10 @@ module Views::Controllers::Descriptions::Merges
     end
 
     def view_template
-      h4 { append_colon(:merge_descriptions_merge_header.t) }
       Help(element: :p,
            content: :merge_descriptions_merge_help.t)
 
-      div(class: "form-group") { render_merge_options }
-
+      render_merge_options
       render_delete_checkbox if merges.any?
       render_submit if merges.any?
     end
@@ -45,7 +43,7 @@ module Views::Controllers::Descriptions::Merges
     # general description on selection.
     def render_merge_options
       if merges.any?
-        div(data: { controller: "collapse-switch" }) do
+        div(class: "form-group", data: { controller: "collapse-switch" }) do
           merges.each do |desc|
             render_merge_radio(desc)
             render_merge_preview(desc)
@@ -105,7 +103,10 @@ module Views::Controllers::Descriptions::Merges
                end
       result += " (#{permit})" unless /(^| )#{permit}( |$)/i.match?(result)
 
-      result
+      # Several options can read identically ("Public Description")
+      # when none is the parent's default -- the id is the only
+      # thing that tells them apart without expanding each one.
+      desc.string_with_id(result)
     end
 
     def user_reader?(user, desc)

@@ -3131,7 +3131,6 @@
   # description/merge_descriptions
   merge_descriptions_title: Merge [object]
   move_descriptions_title: Move [object]
-  merge_descriptions_merge_header: Merge with another description
   merge_descriptions_move_header: Move / copy to a synonym
   merge_descriptions_move_location_header: Move / copy to another location
   merge_descriptions_no_others: "(there are no other descriptions)"
