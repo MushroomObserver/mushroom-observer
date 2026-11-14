@@ -60,6 +60,29 @@ module Views::FullPageBase::Title
     add_page_title(:"#{string}".t(type: type_tag))
   end
 
+  # `label_key`'s template reads "Verb words [name]" or
+  # "Verb words [object]" (e.g. :ask_observation_question_title,
+  # :move_descriptions_title) -- pass whichever placeholder the
+  # template uses as `name:` or `object:`. Puts the name, with a
+  # leading id badge, on a line apart from the label and any trailing
+  # text -- see `title_with_name` below for why. Returns the HTML
+  # rather than installing it, so a caller needing different wrapping
+  # can feed it to `add_page_title` itself; `add_title_with_name`
+  # below is the common case.
+  def render_title_with_name(label_key, object: nil, name: nil,
+                             user: default_viewer)
+    target, placeholder = title_with_name_target(object, name)
+    capture { title_with_name(label_key, target, placeholder, user) }
+  end
+
+  def add_title_with_name(label_key, object: nil, name: nil,
+                          user: default_viewer)
+    add_page_title(
+      render_title_with_name(label_key, object: object, name: name,
+                                        user: user)
+    )
+  end
+
   # Index pages: the page heading is empty (the top nav's rubric
   # already shows the model name); the doc title is the model name;
   # the result-set caption explains any filters.
@@ -92,6 +115,68 @@ module Views::FullPageBase::Title
   end
 
   private
+
+  # Splits the raw (untranslated) template on its placeholder, rather
+  # than hunting for HTML tags in the rendered title, so the split
+  # lands correctly regardless of what markup the name renders as --
+  # and regardless of word order: some locales (ja, zh, ru) put the
+  # placeholder before the label text, or embed trailing text after
+  # it, rather than trailing the label. Label, name, and trailing
+  # text each get a separate block, so none of them shares a line
+  # with the name, whichever locale puts what where.
+  def title_with_name(label_key, object, placeholder, user)
+    return inline_title_with_name(label_key, object, placeholder, user) unless
+      text_container?
+
+    label, _, trailing = label_key.l.partition("[#{placeholder}]")
+    div do
+      div { trusted_html(label.t) } if label.present?
+      div(class: "title-name-line") { render_name_line(object, user) }
+      div { trusted_html(trailing.t) } if trailing.present?
+    end
+  end
+
+  # `title-name-line`'s padding-left (not .hanging-indent) indents
+  # every line this wraps to, the first included -- no shared-line
+  # label text is left for only the continuation lines to align
+  # under. The name, and its leading space, are one flex item, not
+  # several -- flexbox collapses whitespace between sibling flex
+  # items, which otherwise eats the space before "group" and glues
+  # the badge's digits onto the name in plain-text extraction.
+  def render_name_line(object, user)
+    render(::Components::IDBadge.new(object: object, size: :sm))
+    span do
+      whitespace
+      trusted_html(viewer_aware_format_name(object, user).t.small_author)
+    end
+  end
+
+  # Wide/full containers have room for the label and name on one
+  # line -- plain interpolated title, no id badge, no line splits.
+  def inline_title_with_name(label_key, object, placeholder, user)
+    label_key.t(placeholder.to_sym => viewer_aware_format_name(object, user)).
+      small_author
+  end
+
+  # The id-badge/line-split treatment only reads well in a narrow
+  # container: :text column -- a wide/full container has room for
+  # the label and name on one line. `container_class` may not have
+  # been called yet when this runs (most actions rely on its :text
+  # default), so unset means :text, not "unknown".
+  def text_container?
+    return true unless content_for?(:container_class)
+
+    content_for(:container_class) == Components::Container.class_for(:text)
+  end
+
+  # One of object:/name: is required, not both -- whichever is given
+  # says which placeholder the title's template uses.
+  def title_with_name_target(object, name)
+    raise(ArgumentError.new("pass one of object: or name:, not both")) if
+      object.nil? == name.nil?
+
+    object ? [object, "object"] : [name, "name"]
+  end
 
   # `Header::PageTitle` places this HTML twice -- next to the object
   # name on desktop, and again in the mobile-only top row. No

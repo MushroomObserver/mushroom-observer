@@ -15,9 +15,8 @@ class Views::Controllers::Names::Synonyms::Deprecate::New < Views::FullPageBase
   prop :parent_deprecated, _Nilable(::Name), default: nil
 
   def view_template
-    add_page_title(
-      :name_deprecate_title.t(name: @name.display_name(current_user))
-    )
+    add_title_with_name(:name_deprecate_title, name: @name,
+                                               user: current_user)
     add_context_nav(Tab::Name::FormsReturn.new(name: @name))
 
     render(Views::Controllers::Names::Synonyms::Deprecate::Form.new(

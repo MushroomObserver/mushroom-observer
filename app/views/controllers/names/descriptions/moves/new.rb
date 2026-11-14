@@ -8,9 +8,8 @@ module Views::Controllers::Names::Descriptions::Moves
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      add_page_title(:move_descriptions_title.t(
-        object: @description.format_name
-      ).small_author)
+      add_title_with_name(:move_descriptions_title, object: @description,
+                                                    user: @user)
       add_context_nav(::Tab::NameDescription::FormPermissions.new(
                         description: @description
                       ))
