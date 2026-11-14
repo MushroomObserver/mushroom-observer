@@ -613,6 +613,11 @@ class String
     insert(ind + offset, "<br/>".html_safe)
   end
 
+  # A rank qualifier right after the name ("group", "clade",
+  # "complex", "gr.", "gp." -- see Name::Parse::GROUP_ABBR) reads at
+  # full size, not shrunk with the author that follows it.
+  GROUP_WORD_PATTERN = /\A\s*(group|gr\.?|gp\.?|clade|complex)\b/i
+
   # Wrap the author name in <small> HTML tag, with or without break
   # (for styling taxonomic names legibly)
   def small_author
@@ -626,8 +631,13 @@ class String
     ind = rindex(tag)
     return self if !ind || !offset || (length <= (ind + offset))
 
+    insert_at = ind + offset
+    if (group_match = GROUP_WORD_PATTERN.match(self[insert_at..]))
+      insert_at += group_match.end(0)
+    end
+
     insert(length, "</small>".html_safe)
-    insert(ind + offset, '<small class="text-nowrap">'.html_safe)
+    insert(insert_at, '<small class="text-nowrap">'.html_safe)
   end
 
   # rubocop:disable MO/NoLongCommentBlock
