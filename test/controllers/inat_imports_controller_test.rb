@@ -37,6 +37,29 @@ class InatImportsControllerTest < FunctionalTestCase
     assert_select("td", text: other_import.state.to_s, count: 0)
   end
 
+  # `force_own_imports_only_param` must overwrite, not merely default,
+  # the `by_user` param -- a non-admin can't see another user's
+  # imports by passing a `by_user` in the URL.
+  def test_index_user_cannot_override_by_user_param
+    other_import = inat_imports(:katrina_inat_import)
+
+    login(users(:rolf).login)
+    get(:index, params: { by_user: other_import.user_id })
+
+    assert_select("td", text: other_import.state.to_s, count: 0)
+  end
+
+  # Same as above, but passing `by_users` -- the query_attr `by_user`
+  # aliases to -- directly, instead of through the alias.
+  def test_index_user_cannot_override_by_users_param
+    other_import = inat_imports(:katrina_inat_import)
+
+    login(users(:rolf).login)
+    get(:index, params: { by_users: other_import.user_id })
+
+    assert_select("td", text: other_import.state.to_s, count: 0)
+  end
+
   def test_index_admin_sees_all_imports
     make_admin
 

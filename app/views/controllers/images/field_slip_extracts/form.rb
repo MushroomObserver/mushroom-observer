@@ -172,7 +172,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       row = model.location_row
       return if row.nil? || row.blank?
 
-      panel = Components::Panel.new(panel_id: "field_slip_extract_location")
+      panel = Components::Panel.new(id: "field_slip_extract_location")
       render(panel) { |p| p.with_body { render_location_fields(row) } }
     end
 
@@ -206,7 +206,7 @@ module Views::Controllers::Images::FieldSlipExtracts
 
       # `with_body`, not a bare block: Panel is slot-based, and content
       # passed straight to it is discarded rather than rendered.
-      Panel(panel_id: "field_slip_extract_name") do |p|
+      Panel(id: "field_slip_extract_name") do |p|
         p.with_body do
           render_name_field(row)
           render_name_feedback if @name_feedback.present?

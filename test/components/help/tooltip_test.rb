@@ -16,7 +16,7 @@ class HelpTooltipTest < ComponentTestCase
   end
 
   def test_extra_class_appends_to_context_help
-    html = render_tooltip(label: "(?)", extra_class: "filter-help")
+    html = render_tooltip(label: "(?)", class: "filter-help")
 
     assert_html(html, ".context-help.filter-help")
   end

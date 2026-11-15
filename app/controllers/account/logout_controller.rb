@@ -9,9 +9,8 @@ module Account
 
     # POST /account/logout — clear session and redirect to show.
     def create
-      real_user = User.safe_find(session[:real_user_id]) if
-        session[:real_user_id].present?
-      if real_user&.admin
+      real_user = sudo_real_user
+      if real_user
         switch_to_user(real_user)
         redirect_back_or_to("/")
       else
@@ -24,8 +23,6 @@ module Account
     def clear_session_and_logout
       @user = nil
       session_user_set(nil)
-      session[:admin] = false
-      session[:real_user_id] = nil
       clear_autologin_cookie
       redirect_to(account_logout_path)
     end

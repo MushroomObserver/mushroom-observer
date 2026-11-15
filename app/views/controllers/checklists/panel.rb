@@ -28,7 +28,7 @@ module Views::Controllers::Checklists
         # `Panel`, so Kit's constant lookup would recurse into itself
         # instead of resolving `Components::Panel` (see commit
         # 33fdc952e5 for the same bug with a view class named `Table`).
-        render(::Components::Panel.new(panel_class: "checklist")) do |panel|
+        render(::Components::Panel.new(class: "checklist")) do |panel|
           panel.with_body do
             ul(class: "list-unstyled") do
               @taxa.each { |taxon| render_taxon(taxon) }

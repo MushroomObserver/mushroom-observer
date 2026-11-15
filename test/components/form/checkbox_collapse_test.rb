@@ -47,27 +47,21 @@ class FormCheckboxCollapseTest < ComponentTestCase
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_attributes_forwarded_to_checkbox_field
-    html = render_collapse(
-      attributes: { wrap_class: "mt-0", help: "Some help text" }
-    )
+    html = render_collapse(wrap_class: "mt-0", help: "Some help text")
 
     assert_html(html, ".mt-0 input[type='checkbox']")
     assert_html(html, ".help-block", text: "Some help text")
   end
 
   def test_input_data_in_attributes_goes_to_input_not_label
-    html = render_collapse(
-      attributes: { data: { "form-exif-target": "collapseCheck" } }
-    )
+    html = render_collapse(data: { "form-exif-target": "collapseCheck" })
 
     assert_html(html, "input[data-form-exif-target='collapseCheck']")
     assert_no_html(html, "label[data-form-exif-target='collapseCheck']")
   end
 
   def test_extra_label_data_merged_with_collapse_trigger
-    html = render_collapse(
-      attributes: { label_data: { extra: "val" } }
-    )
+    html = render_collapse(label_data: { extra: "val" })
 
     assert_html(html,
                 "label[data-toggle='collapse']" \
@@ -100,15 +94,14 @@ class FormCheckboxCollapseTest < ComponentTestCase
   end
 
   def test_checked_can_be_overridden_by_the_caller
-    html = render_collapse(expanded: true, attributes: { checked: false })
+    html = render_collapse(expanded: true, checked: false)
 
     assert_no_html(html, "input[type='checkbox'][checked]")
   end
 
   private
 
-  def render_collapse(expanded: false, attributes: {},
-                      label: "Specimen")
+  def render_collapse(expanded: false, label: "Specimen", **attributes)
     form = TestForm.new(@obs, action: "/observations")
     the_form = form
     form.render_block = proc do
@@ -118,7 +111,7 @@ class FormCheckboxCollapseTest < ComponentTestCase
                target_id: "specimen_fields",
                label: label,
                expanded: expanded,
-               attributes: attributes
+               **attributes
              ))
     end
     render(form)

@@ -58,7 +58,7 @@ module Views::Controllers::Descriptions::Merges
 
     def render_merge_radio(desc)
       render(Components::Form::RadioCollapse.new(
-               form: self, field: :target_id, value: desc.id,
+               form: self, field: :target_id, option_value: desc.id,
                label: description_title(@user, desc)
              ))
     end

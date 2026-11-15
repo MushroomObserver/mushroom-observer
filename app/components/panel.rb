@@ -34,9 +34,15 @@
 #
 # @example Panel with custom class and ID
 #   Panel(
-#     panel_class: "custom-panel",
-#     panel_id: "my_panel"
+#     class: "custom-panel",
+#     id: "my_panel"
 #   ) do |panel|
+#     panel.with_body { "Content" }
+#   end
+#
+# @example Panel in a Bootstrap contextual color (default is :default)
+#   Panel(variant: :danger) do |panel|
+#     panel.with_heading { "Danger Zone" }
 #     panel.with_body { "Content" }
 #   end
 #
@@ -53,9 +59,13 @@
 class Components::Panel < Components::Base
   include Phlex::Slotable
 
-  prop :panel_class, _Nilable(String), default: nil
-  prop :panel_id, _Nilable(String), default: nil
-  prop :attributes, _Hash(Symbol, _Any), default: -> { {} }
+  prop :attributes, _Hash(Symbol, _Any?), :**
+  # Bootstrap contextual color -- keeps the panel-* variant class out
+  # of the generic class: catch-all.
+  prop :variant,
+       _Nilable(_Union(:default, :primary, :success, :info, :warning,
+                       :danger)),
+       default: nil
   # Set collapsible: :true on component, plus panel.with_body(collapse: true)
   prop :collapsible, _Nilable(_Boolean), default: nil
   # Normally :collapse_target should be an id selector, like "#collapse_target".
@@ -84,13 +94,9 @@ class Components::Panel < Components::Base
   }, collection: true
 
   def view_template
-    classes = class_names("panel panel-default", @panel_class)
     define_collapse_target
-    div(
-      class: classes,
-      id: @panel_id,
-      **@attributes
-    ) do
+    div(**mix({ class: "panel panel-#{@variant || :default}" },
+              @attributes)) do
       render(heading_slot) if heading_slot?
       render_thumbnail_and_body
       footer_slots.each { |slot| render(slot) } if footer_slots?

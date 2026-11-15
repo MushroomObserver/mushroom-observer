@@ -5,19 +5,17 @@ module Views::Controllers::Publications
   # publications with peer-review and MO-mentioned flags + admin
   # edit/destroy links.
   class Index < Views::FullPageBase
-    prop :query, _Nilable(::Query), default: nil
-    prop :publications, _Array(::Publication)
+    prop :query, ::Query
+    prop :pagination_data, ::PaginationData
+    prop :objects, _Array(::Publication)
+    # Counts are over the full query result set, not just the
+    # current page's `@objects` -- computed by the controller; views
+    # don't run queries.
+    prop :peer_count, ::Integer
+    prop :mo_count, ::Integer
 
     def full_count
-      @full_count ||= @publications.length
-    end
-
-    def peer_count
-      @peer_count ||= @publications.count(&:peer_reviewed)
-    end
-
-    def mo_count
-      @mo_count ||= @publications.count(&:mo_mentioned)
+      @full_count ||= @query.num_results
     end
 
     INTRO_CITATION_URL =
@@ -29,10 +27,13 @@ module Views::Controllers::Publications
     def view_template
       add_index_title(@query)
       add_context_nav(::Tab::Publication::IndexActions.new)
+      add_sorter(@query, controller.index_sort_options)
+      add_pagination(@pagination_data)
       container_class(:wide)
 
       Container(width: :text) { render_intro }
-      render_publications_table
+      ContentPadded { render_filter_form }
+      PaginatedResults { render_publications_table }
       ContentPadded do
         trusted_html(:publication_legend.tp)
       end
@@ -48,16 +49,37 @@ module Views::Controllers::Publications
       end
     end
 
+    # The visible input carries the submitted `full_has` param
+    # directly -- no autocompleter, no id, just a plain substring
+    # filter against `full`.
+    def render_filter_form
+      field = Components::ApplicationForm::FieldProxy.new(
+        nil, :full_has, filter_text
+      )
+      IndexFilter(to: publications_path, submit_text: :filter.ti) do
+        render(Components::ApplicationForm::TextField.new(
+                 field,
+                 wrapper_options: { label: :publication_filter_by,
+                                    inline: true },
+                 size: 60, class: "mb-0"
+               ))
+      end
+    end
+
+    def filter_text
+      @query&.params&.dig(:full_has).to_s
+    end
+
     def render_publications_table
-      Table(@publications,
+      Table(@objects,
             variant: :striped, identifier: "publications",
             class: "mb-3 mt-3") do |tbl|
         add_full_link_column(tbl)
         tbl.column(:publication_link.l) { |pub| link_cell(pub) }
-        tbl.column("(#{peer_count})", align: :center) do |pub|
+        tbl.column("(#{@peer_count})", align: :center) do |pub|
           pub.peer_reviewed ? "P" : ""
         end
-        tbl.column("(#{mo_count})", align: :center) do |pub|
+        tbl.column("(#{@mo_count})", align: :center) do |pub|
           pub.mo_mentioned ? "M" : ""
         end
         tbl.column("", align: :center) { |pub| admin_cell(pub) }

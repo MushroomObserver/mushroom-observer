@@ -9,8 +9,8 @@ module Views::Controllers::Account::Profile
     prop :purge, _Nilable(::ContentPurge)
 
     def view_template
-      Panel(panel_class: "panel-danger mt-4",
-            panel_id: "profile_danger_zone") do |panel|
+      Panel(variant: :danger, class: "mt-4",
+            id: "profile_danger_zone") do |panel|
         panel.with_heading { strong { plain(:profile_danger_zone.l) } }
         panel.with_body do
           p { plain(:profile_danger_zone_intro.l) }

@@ -22,8 +22,8 @@ module Views::Controllers::Projects::ExternalSites
     private
 
     def render_site_panel(site)
-      Panel(panel_class: "panel-default mt-3",
-            panel_id: "project_site_#{site.id}") do |panel|
+      Panel(class: "mt-3",
+            id: "project_site_#{site.id}") do |panel|
         panel.with_heading { strong { plain(site.name) } }
         panel.with_body do
           render_holdings(site)

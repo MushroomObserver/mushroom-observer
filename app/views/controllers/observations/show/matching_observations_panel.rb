@@ -14,7 +14,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    Panel(panel_id: "matching_observations") do |panel|
+    Panel(id: "matching_observations") do |panel|
       if siblings?
         panel.with_heading { plain(:show_observation_matching_observations.ti) }
         panel.with_heading_links { matching_observations_link }

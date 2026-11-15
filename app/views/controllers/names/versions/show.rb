@@ -78,7 +78,7 @@ module Views::Controllers::Names::Versions
     end
 
     def render_classification_panel
-      Panel(panel_id: "name_classification") do |panel|
+      Panel(id: "name_classification") do |panel|
         panel.with_heading { plain(:show_name_classification.l) }
         panel.with_body { render_classification_body }
       end

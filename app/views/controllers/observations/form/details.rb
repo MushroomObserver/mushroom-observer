@@ -166,14 +166,12 @@ class Views::Controllers::Observations::Form::Details < Views::Base
              target_id: "observation_geolocation",
              label: :geolocation.ti,
              expanded: @observation.lat.present?,
-             attributes: {
-               help: :form_observations_lat_long_help.t,
-               help_collapse: true,
-               data: {
-                 form_exif_target: "collapseCheck",
-                 map_target: "geolocationCheck",
-                 action: "map#geolocationToggled"
-               }
+             help: :form_observations_lat_long_help.t,
+             help_collapse: true,
+             data: {
+               form_exif_target: "collapseCheck",
+               map_target: "geolocationCheck",
+               action: "map#geolocationToggled"
              }
            ))
   end

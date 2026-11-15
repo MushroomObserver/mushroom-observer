@@ -17,7 +17,7 @@ module Views::Controllers::VisualModels
     prop :visual_groups, _Array(VisualGroup)
 
     def view_template
-      Panel(panel_id: "visual_groups") do |panel|
+      Panel(id: "visual_groups") do |panel|
         panel.with_heading { plain(:visual_groups.ti) }
         panel.with_heading_links { render_add_link }
         panel.with_body(wrapper: false) { render_table }

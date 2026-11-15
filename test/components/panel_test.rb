@@ -70,7 +70,7 @@ class PanelTest < ComponentTestCase
   end
 
   def test_panel_with_custom_class
-    html = render_panel(panel_class: "custom-class") do |panel|
+    html = render_panel(class: "custom-class") do |panel|
       panel.with_heading { "Test" }
       panel.with_body { "Content" }
     end

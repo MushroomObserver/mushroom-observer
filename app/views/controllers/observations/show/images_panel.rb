@@ -7,7 +7,7 @@
 # `observations/show.rb`).
 #
 # Each image gets an `InteractiveImage` plus the copyright notice
-# (when the photographer ≠ obs owner) and the image's own notes
+# (when the photographer ≠ obs owner) and the image's notes
 # (textilized + truncated to 300 chars).
 class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   prop :obs, ::Observation
@@ -15,10 +15,10 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    Panel(panel_class: "show_images list-group text-center m-0") do |panel|
+    Panel(class: "show_images m-0") do |panel|
       panel.with_heading { :images.ti }
       panel.with_heading_links { heading_links }
-      panel.with_body { render_body }
+      panel.with_body(wrapper: false) { render_body }
     end
   end
 
@@ -36,23 +36,23 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   def render_body
     return if @images.none?
 
-    @images.each { |image| render_image_row(image) }
+    ListGroup(flush: true, class: "text-center") do |list|
+      @images.each { |image| list.item { render_image_content(image) } }
+    end
   end
 
   # Pre-Phlex this was sorted with the thumbnail first; the
   # caller now does the sort (or supplies `images_sorted`).
-  def render_image_row(image)
-    render(Components::ListGroup::Item.new) do
-      InteractiveImage(
-        user: @user,
-        image: image,
-        image_link: image.show_link_args.merge(obs: @obs.id),
-        original: true,
-        is_set: true,
-        votes: true
-      )
-      render_image_notes(image)
-    end
+  def render_image_content(image)
+    InteractiveImage(
+      user: @user,
+      image: image,
+      image_link: image.show_link_args.merge(obs: @obs.id),
+      original: true,
+      is_set: true,
+      votes: true
+    )
+    render_image_notes(image)
   end
 
   def render_image_notes(image)

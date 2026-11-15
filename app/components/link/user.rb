@@ -13,7 +13,7 @@ class Components::Link::User < Components::Link::Object
   prop :user, _Nilable(_Union(::User, Integer)), default: nil
   # Pass-through HTML attributes — the caller-supplied `:class` is
   # merged with the identifier and any variant btn classes.
-  prop :attributes, _Hash(_Union(Symbol, String), _Any?), default: -> { {} }
+  prop :attributes, _Hash(_Union(Symbol, String), _Any?), :**
 
   def view_template
     if @user.nil?

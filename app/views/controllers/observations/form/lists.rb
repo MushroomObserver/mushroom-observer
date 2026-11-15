@@ -33,7 +33,7 @@ class Views::Controllers::Observations::Form::Lists < Views::Base
 
   def panel
     Components::Panel.new(
-      panel_id: panel_id,
+      id: panel_id,
       collapsible: true,
       collapse_target: "##{panel_id}_inner",
       expanded: checked_list_ids.any?

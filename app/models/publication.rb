@@ -34,6 +34,8 @@
 class Publication < AbstractModel
   belongs_to :user
 
+  scope :full_has, ->(phrase) { search_columns(Publication[:full], phrase) }
+
   validate :check_requirements
   def check_requirements # :nodoc:
     unless user

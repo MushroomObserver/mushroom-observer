@@ -43,7 +43,7 @@ module Views::Controllers::Users
       }.freeze
 
       def view_template
-        Panel(panel_id: "user_stats") do |panel|
+        Panel(id: "user_stats") do |panel|
           panel.with_heading { :show_user_title.t(user: @name) }
           panel.with_body(wrapper: false) { render_table }
         end

@@ -32,7 +32,7 @@ module Views::Controllers::Users
           @users,
           variant: :striped,
           identifier: "permissions",
-          attributes: { align: "center", cellspacing: "2" }
+          align: "center", cellspacing: "2"
         ) do |t|
           [:users_by_name_verified, :users_by_name_groups,
            :users_by_name_last_login, :users_by_name_id,

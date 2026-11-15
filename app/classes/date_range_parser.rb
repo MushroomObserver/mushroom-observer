@@ -102,8 +102,8 @@ class DateRangeParser
     to_month = to.second.to_i
     return nil unless valid_month?(from_month) && valid_month?(to_month)
 
-    [yyyymmdd_string(from.first, from_month, from.third.to_i),
-     yyyymmdd_string(to.first, to_month, clamped_day(to, to_month))]
+    [yyyymmdd_string(from.first.to_i, from_month, from.third.to_i),
+     yyyymmdd_string(to.first.to_i, to_month, clamped_day(to, to_month))]
   end
 
   def clamped_day(to, to_month)

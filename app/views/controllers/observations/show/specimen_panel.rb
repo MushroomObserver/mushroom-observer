@@ -18,7 +18,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
     # since the iNat obs may have specimen info.
     return if @obs.placeholder? && !specimen_records?
 
-    Panel(panel_id: "observation_specimen",
+    Panel(id: "observation_specimen",
           collapsible: true,
           collapse_target: "#observation_specimen_body",
           expanded: specimen_records?) do |panel|

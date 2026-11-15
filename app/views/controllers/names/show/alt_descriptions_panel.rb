@@ -9,7 +9,7 @@ class Views::Controllers::Names::Show::AltDescriptionsPanel < Views::Base
   prop :name, ::Name
 
   def view_template
-    Panel(panel_id: "name_descriptions") do |panel|
+    Panel(id: "name_descriptions") do |panel|
       panel.with_heading { :show_name_descriptions.l }
       panel.with_heading_links { heading_links } if @user
       panel.with_body { render_descriptions_list }

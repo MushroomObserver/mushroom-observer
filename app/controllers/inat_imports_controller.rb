@@ -39,18 +39,8 @@ class InatImportsController < ApplicationController
   before_action :apply_project_scope, only: [:new, :create]
 
   def index
-    admin = in_admin_mode? == true
-    @query = find_or_create_query(:InatImport, **index_query_args(admin))
-    update_stored_query(@query)
-    @pagination_data = index_pagination_data
-    imports = @query.paginate(@pagination_data)
-    render(Views::Controllers::InatImports::Index.new(
-             imports: imports,
-             admin: admin,
-             result_import_ids: import_ids_with_results(imports),
-             query: @query,
-             pagination_data: @pagination_data
-           ))
+    force_own_imports_only_param unless in_admin_mode?
+    build_index_with_query
   end
 
   def results

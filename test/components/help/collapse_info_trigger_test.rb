@@ -13,7 +13,7 @@ class Components::Help::CollapseInfoTriggerTest < ComponentTestCase
 
   def test_renders_with_extra_class
     html = render_trigger(target_id: "help_text_2",
-                          extra_class: "custom-trigger")
+                          class: "custom-trigger")
 
     assert_html(html, "a.info-collapse-trigger.custom-trigger")
   end

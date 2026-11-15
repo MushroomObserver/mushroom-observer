@@ -13,8 +13,8 @@ module Views::Controllers::Admin::BlockedIps
       prop :api_keys_by_str, ::Hash, default: -> { {} }
 
       def view_template
-        Panel(panel_class: "my-3",
-              panel_id: "ip_stats") do |panel|
+        Panel(class: "my-3",
+              id: "ip_stats") do |panel|
           panel.with_heading { trusted_html(append_colon("Stats for #{@ip}")) }
           panel.with_heading_links { render_close_link }
           panel.with_body { render_body }

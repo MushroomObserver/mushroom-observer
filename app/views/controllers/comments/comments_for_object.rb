@@ -37,7 +37,7 @@ module Views::Controllers::Comments
     def view_template
       turbo_stream_from(@object, :comments)
       Panel(
-        panel_id: "comments_for_object"
+        id: "comments_for_object"
       ) do |panel|
         panel.with_heading { plain(:comments.ti) }
         panel.with_heading_links { render_add_comment_link } if @editable

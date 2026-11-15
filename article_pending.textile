@@ -1,1 +1,0 @@
-|{white-space:nowrap}. 2026-11-10 | Fix password resets reaching the wrong account | "PR#5669":https://github.com/MushroomObserver/mushroom-observer/pull/5669 |

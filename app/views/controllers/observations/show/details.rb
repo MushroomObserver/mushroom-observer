@@ -17,7 +17,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
   prop :siblings, _Array(::Observation), default: -> { [] }
 
   def view_template
-    Panel(panel_id: "observation_details") do |panel|
+    Panel(id: "observation_details") do |panel|
       panel.with_heading { :show_observation_details.l }
       panel.with_heading_links { print_labels_button } if @user
       with_external_links_body(panel) if show_external_links? && links?

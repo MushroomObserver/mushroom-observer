@@ -13,7 +13,7 @@ module Views::Controllers::Observations::FieldSlipScans
     def view_template
       add_page_title(:field_slip_scan_title.t(id: @observation.id))
 
-      Panel(panel_id: "field_slip_scan_photos") do |p|
+      Panel(id: "field_slip_scan_photos") do |p|
         p.with_body do
           plain(:field_slip_scan_help.l)
           div(class: "d-flex flex-wrap mt-3") do
