@@ -616,7 +616,12 @@ class String
   # A rank qualifier right after the name ("group", "clade",
   # "complex", "gr.", "gp." -- see Name::Parse::GROUP_ABBR) reads at
   # full size, not shrunk with the author that follows it.
-  GROUP_WORD_PATTERN = /\A\s*(group|gr\.?|gp\.?|clade|complex)\b/i
+  # `(?!\w)` instead of `\b` -- `\b` after an *optional* trailing
+  # `.` backtracks the `.` away to find a word boundary (a period
+  # followed by whitespace has none), stranding the dot inside
+  # <small> for "gr."/"gp.". `(?!\w)` only checks what follows, so it
+  # doesn't care whether the match ended on a letter or a dot.
+  GROUP_WORD_PATTERN = /\A\s*(group|gr\.?|gp\.?|clade|complex)(?!\w)/i
 
   # Wrap the author name in <small> HTML tag, with or without break
   # (for styling taxonomic names legibly)

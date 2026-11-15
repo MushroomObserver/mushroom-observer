@@ -135,6 +135,38 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     assert_match(/\A#{:edit.ti} #{:observation.ti} #{obs.id}: /, title)
   end
 
+  # ----- add_index_title -------------------------------------------
+
+  def test_add_index_title_with_no_query_or_map_uses_empty_title
+    # title_tag_contents' action: falls back to action_name, which
+    # the bare render context below leaves unset.
+    controller.define_singleton_method(:action_name) { "index" }
+
+    # content_for stores a blank value as unset -- nil or "" both mean
+    # no title content, so assert blankness, not a literal "".
+    assert_empty(captured_slot(:title) { add_index_title(nil) }.to_s)
+  end
+
+  # ----- render_title_with_name --------------------------------------
+  #
+  # Every current `add_title_with_name` caller relies on the default
+  # `:text` container, so only `title_with_name`'s split-block path is
+  # exercised end-to-end (see the controller tests for those views).
+  # This covers the other branch directly: a wide/full container gets
+  # the plain inline-interpolated title, no id badge or line split.
+
+  def test_render_title_with_name_wide_container_renders_inline
+    name = names(:coprinus_comatus)
+    html = render_bare_page do
+      container_class(:wide)
+      render_title_with_name(:create_name_description_title, name: name)
+    end
+
+    assert_includes(html, "Create Description for")
+    assert_includes(html, "comatus")
+    assert_no_match(/title-name-line/, html)
+  end
+
   private
 
   # A one-off `Views::FullPageBase` subclass — these utility methods
@@ -144,6 +176,36 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
       def view_template
         # Intentionally empty; tests poke private methods via `send`.
       end
+    end
+  end
+
+  # Render a one-off `Views::FullPageBase` page whose `view_template`
+  # runs `block` (bound to the page instance) and returns its value.
+  # `around_template` is short-circuited to skip the full layout wrap
+  # -- not needed by these tests, and much slower.
+  def render_bare_page(&block)
+    result = nil
+    page_class = Class.new(Views::FullPageBase) do
+      define_method(:view_template) do
+        result = instance_exec(&block)
+      end
+
+      def around_template
+        yield
+      end
+    end
+    render(page_class.new)
+    result
+  end
+
+  # Render a one-off page that runs `block` in its `view_template`,
+  # then reads `content_for(slot)` from inside the same render
+  # context. Mirrors `Views::FullPageBase::LayoutClassesTest`'s
+  # helper of the same name.
+  def captured_slot(slot, &setup_block)
+    render_bare_page do
+      instance_exec(&setup_block)
+      content_for(slot)
     end
   end
 end
