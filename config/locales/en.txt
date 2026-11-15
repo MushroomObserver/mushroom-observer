@@ -1277,7 +1277,7 @@
   autocompleter_has_id: Match found
 
   # emails/ask_observation_question
-  ask_observation_question_title: Question about [name]
+  ask_observation_question_title: Question about observation [name]
   ask_observation_question_label: Enter your question below. When you hit "[:send.ti]" it will be emailed to [user]. The email will automatically include a link to this observation as well as your email address.
 
   # emails/ask_user_question

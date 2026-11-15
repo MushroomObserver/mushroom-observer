@@ -61,6 +61,17 @@
   text-indent: 1em hanging;
 }
 
+// Views::FullPageBase::Title#render_name_line's id-badge/name line.
+// padding-left, not text-indent: hanging -- every line this wraps to
+// needs the same indent, the first included, since the line has no
+// shared label text for only the continuation lines to align under.
+.title-name-line {
+  display: inline-flex;
+  align-items: center;
+  padding-left: 1em;
+  line-height: 1.3;
+}
+
 .obs-notes {
   // Keep a blank-line gap between paragraphs, trimming the trailing one.
   .textile p {
