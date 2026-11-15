@@ -58,13 +58,20 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     check_another_user(url, draft:, session: lurker_session)
   end
 
+  # The "Descriptions" panel (Names::Show::AltDescriptionsPanel) --
+  # every description-related assert_text/assert_no_text in this file
+  # scopes to it.
+  def descriptions_panel(session)
+    session.find_by_id("name_descriptions")
+  end
+
   def create_draft(name, gen_desc, project, session:)
     assert_nil(NameDescription.find_by(gen_desc: gen_desc))
     session.visit("/")
     session.click_link(class: "names_link")
     session.click_link(text: name.text_name)
     url = name_path(name.id)
-    session.assert_text("There are no descriptions")
+    descriptions_panel(session).assert_text("There are no descriptions")
     # The project picker is a JS-driven autocompleter
     # (`Components::Description::NewDraftForm`); `rack_test` can't
     # interact with it. Visit the URL its submission would produce.
@@ -74,11 +81,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     # line, with an id badge in between) -- see
     # Views::FullPageBase::Title#add_title_with_name. Scoped to #title
     # so a failure here doesn't dump the whole page's text.
-    # rubocop:disable Capybara/SpecificFinders -- find_by_id would hit
-    # Rails/DynamicFindBy's broken find_by(id:) autocorrect on this
-    # branch (no AllowedMethods entry here for it yet).
-    title = session.find("#title")
-    # rubocop:enable Capybara/SpecificFinders
+    title = session.find_by_id("title")
     title.assert_text(
       :create_name_description_title.l.partition("[name]").first.strip
     )
@@ -141,7 +144,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     assert(session.has_link?(href: name_description_path(draft.id),
                              text: /restricted/i))
     assert(session.has_link?(href: edit_name_description_path(draft.id)))
-    session.assert_no_text(/#{draft.gen_desc}/)
+    descriptions_panel(session).assert_no_text(/#{draft.gen_desc}/)
     assert(session.has_link?(
              href: new_name_description_path(draft.name.id)
            ))
@@ -191,7 +194,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     session.assert_no_selector(
       "a[href='#{name_description_path(draft.id)}']"
     )
-    session.assert_text(draft.source_name)
+    descriptions_panel(session).assert_text(draft.source_name)
     # Verify the show controller still enforces read perms when
     # they paste the URL directly.
     session.visit(name_description_path(draft.id))
@@ -591,7 +594,7 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     def check_edit_description_link_behavior
       click_link(href: edit_name_description_uri)
       if edit_description_requires_login?
-        assert_text(%r{account/login/new})
+        assert_current_path(%r{account/login/new})
       else
         check_name_description_fields
       end

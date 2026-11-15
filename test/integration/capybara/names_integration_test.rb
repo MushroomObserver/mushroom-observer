@@ -252,7 +252,7 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
                  "Both names should share the same synonym")
 
     # Verify flash does NOT show "No changes made"
-    page.assert_no_text("No changes made")
+    page.find_by_id("flash_notices").assert_no_text("No changes made")
   end
 
   def test_lifeform_propagate
