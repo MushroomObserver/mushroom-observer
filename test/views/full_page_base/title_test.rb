@@ -135,6 +135,40 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     assert_match(/\A#{:edit.ti} #{:observation.ti} #{obs.id}: /, title)
   end
 
+  # ----- add_index_title -------------------------------------------
+
+  def test_add_index_title_with_no_query_or_map_uses_empty_title
+    assert_equal("", captured_slot(:title) { add_index_title(nil) })
+  end
+
+  # ----- render_title_with_name --------------------------------------
+  #
+  # Every current `add_title_with_name` caller relies on the default
+  # `:text` container, so only `title_with_name`'s split-block path is
+  # exercised end-to-end (see the controller tests for those views).
+  # This covers the other branch directly: a wide/full container gets
+  # the plain inline-interpolated title, no id badge or line split.
+
+  def test_render_title_with_name_wide_container_renders_inline
+    name = names(:coprinus_comatus)
+    html = nil
+    page_class = Class.new(Views::FullPageBase) do
+      define_method(:view_template) do
+        container_class(:wide)
+        html = render_title_with_name(:create_name_description_title,
+                                      name: name)
+      end
+
+      def around_template
+        yield
+      end
+    end
+    render(page_class.new)
+
+    assert_includes(html, name.text_name)
+    assert_no_match(/title-name-line/, html)
+  end
+
   private
 
   # A one-off `Views::FullPageBase` subclass — these utility methods
@@ -145,5 +179,25 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
         # Intentionally empty; tests poke private methods via `send`.
       end
     end
+  end
+
+  # Render a one-off page that runs `block` in its `view_template`,
+  # then reads `content_for(slot)` from inside the same render
+  # context. Mirrors `Views::FullPageBase::LayoutClassesTest`'s
+  # helper of the same name.
+  def captured_slot(slot, &block)
+    captured = nil
+    page_class = Class.new(Views::FullPageBase) do
+      define_method(:view_template) do
+        instance_eval(&block)
+        captured = content_for(slot)
+      end
+
+      def around_template
+        yield
+      end
+    end
+    render(page_class.new)
+    captured
   end
 end
