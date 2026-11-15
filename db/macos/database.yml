@@ -61,7 +61,6 @@ development:
   cache_test_db = ENV["MO_TEST_DATABASE"] ? "#{test_db}_cache" : "cache_test"
 %>
 test:
-  <<: *credentials
   # Support worker-specific databases in parallel testing
   # Set MO_TEST_DATABASE env var to override (e.g., mo_test-0, mo_test-1, etc.)
   primary:
