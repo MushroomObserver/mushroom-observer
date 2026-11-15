@@ -713,7 +713,7 @@ Rails/DynamicFindBy:
   # finder -- without this, the two cops fight each other, since
   # autocorrecting it to find_by(id: ...) breaks the call (Capybara
   # nodes have no such method).
-  AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_title_with_wildcards, find_by_id
+  AllowedMethods: find_by_sql, find_by_code_with_wildcards, find_by_name_with_wildcards, find_by_name_or_reverse_name, find_by_scientific_name_with_wildcards, find_by_title_with_wildcards, find_by_id
   AutoCorrect: true
 Rails/RedundantPresenceValidationOnBelongsTo: # new in 2.13
   # Cop gives false positives

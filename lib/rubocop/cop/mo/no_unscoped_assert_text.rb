@@ -61,8 +61,19 @@ module RuboCop
           return true if receiver.send_type? && receiver.method?(:page) &&
                          !receiver.receiver
 
-          (receiver.send_type? || receiver.lvar_type?) &&
-            SESSION_LIKE.match?(receiver.children.first.to_s)
+          name = session_like_name(receiver)
+          name && SESSION_LIKE.match?(name.to_s)
+        end
+
+        # A `send` node's `children.first` is the receiver it's
+        # called on, not its method name -- `receiver.method_name`
+        # is the accessor for that. An `lvar` node has no method
+        # name; its single child is the variable name.
+        def session_like_name(receiver)
+          return receiver.method_name if receiver.send_type?
+          return receiver.children.first if receiver.lvar_type?
+
+          nil
         end
 
         def check_bare(node)
