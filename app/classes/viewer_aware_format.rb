@@ -19,6 +19,12 @@ module ViewerAwareFormat
     obj.unique_format_name(user)
   end
 
+  # Non-unique sibling of the above -- no disambiguating id suffix,
+  # for callers already showing the id some other way (e.g. a badge).
+  def viewer_aware_format_name(obj, user = default_viewer)
+    obj.format_name(user)
+  end
+
   # Location's display name is postal/scientific-order depending on
   # the viewer's preference. `Location#display_name` already takes an
   # explicit user - this just supplies the default when the caller

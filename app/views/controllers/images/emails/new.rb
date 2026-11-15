@@ -8,9 +8,7 @@ module Views::Controllers::Images
       prop :message, _Nilable(::String), default: nil
 
       def view_template
-        add_page_title(
-          :commercial_inquiry_title.t(name: @image.unique_format_name)
-        )
+        add_title_with_name(:commercial_inquiry_title, name: @image)
         render(Form.new(
                  image: @image,
                  user: current_user,

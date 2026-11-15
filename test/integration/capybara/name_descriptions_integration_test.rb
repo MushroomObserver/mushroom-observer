@@ -77,10 +77,16 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     # interact with it. Visit the URL its submission would produce.
     session.visit(new_name_description_path(name_id: name.id,
                                             project_id: project.id))
-    session.find_by_id("title").assert_text(
-      ActionController::Base.helpers.strip_tags(
-        :create_name_description_title.t(name: name.display_name)
-      )
+    # The title splits the label from the name (each on a separate
+    # line, with an id badge in between) -- see
+    # Views::FullPageBase::Title#add_title_with_name. Scoped to #title
+    # so a failure here doesn't dump the whole page's text.
+    title = session.find_by_id("title")
+    title.assert_text(
+      :create_name_description_title.l.partition("[name]").first.strip
+    )
+    title.assert_text(
+      ActionController::Base.helpers.strip_tags(name.display_name.t)
     )
 
     # Check that initial form is correct.

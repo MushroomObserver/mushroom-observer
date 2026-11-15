@@ -12,9 +12,8 @@ module Views::Controllers::Names::Descriptions
     prop :project_chosen, _Boolean, default: false
 
     def view_template
-      add_page_title(:create_name_description_title.t(
-        name: @name.display_name(@user)
-      ).small_author)
+      add_title_with_name(:create_name_description_title, name: @name,
+                                                          user: @user)
       add_context_nav(::Tab::NameDescription::FormNew.new(
                         description: @description
                       ))
