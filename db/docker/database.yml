@@ -24,6 +24,10 @@ development:
     <<: *connection
     database: cache_development
     migrations_paths: "db/cache/migrate"
+    # RAILS_MAX_THREADS (1) + Solid Cache's own async-write background
+    # thread -- see config/puma.rb's on_worker_boot comment. Bump this
+    # if RAILS_MAX_THREADS changes.
+    pool: 5
 
 # Multi-db (primary/cache) like development, not a flat db:, so Solid
 # Cache (#4807's I18n backend) has a real solid_cache_entries table in
@@ -50,6 +54,10 @@ test:
     <<: *connection
     database: "<%= cache_test_db %>"
     migrations_paths: "db/cache/migrate"
+    # RAILS_MAX_THREADS (1) + Solid Cache's own async-write background
+    # thread -- see config/puma.rb's on_worker_boot comment. Bump this
+    # if RAILS_MAX_THREADS changes.
+    pool: 5
 
 # Reached over the network either way -- host, a Kamal accessory
 # container, or a managed service (#5345's decision).
@@ -64,3 +72,7 @@ production:
     <<: *connection
     database: <%= ENV.fetch("CACHE_DATABASE_NAME", "cache_production") %>
     migrations_paths: "db/cache/migrate"
+    # RAILS_MAX_THREADS + Solid Cache's own async-write background
+    # thread -- see config/puma.rb's on_worker_boot comment. Bump via
+    # CACHE_DATABASE_POOL if RAILS_MAX_THREADS changes.
+    pool: <%= ENV.fetch("CACHE_DATABASE_POOL", 5) %>

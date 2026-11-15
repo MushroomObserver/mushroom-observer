@@ -44,6 +44,10 @@ development:
     database: cache_development
     host: localhost
     migrations_paths: "db/cache/migrate"
+    # RAILS_MAX_THREADS (1) + Solid Cache's own async-write background
+    # thread -- see config/puma.rb's on_worker_boot comment. Bump this
+    # if RAILS_MAX_THREADS changes.
+    pool: 5
 
 # Warning: The database defined as 'test' will be erased and
 # re-generated from your development database when you run 'rake'.
@@ -79,6 +83,10 @@ test:
     username: mo
     password: mo
     migrations_paths: "db/cache/migrate"
+    # RAILS_MAX_THREADS (1) + Solid Cache's own async-write background
+    # thread -- see config/puma.rb's on_worker_boot comment. Bump this
+    # if RAILS_MAX_THREADS changes.
+    pool: 5
 
 production:
   <<: *credentials
