@@ -66,23 +66,13 @@ ENV["RAILS_ENV"] ||= "test"
 require_relative("../config/environment")
 require("rails/test_help")
 
-# `en.yml` is gitignored, so a branch switch leaves it stale against
-# the new `en.txt` -- the same check `script/deploy.sh` runs before a
-# deploy. Only reload when it changed: an unconditional reload (before
-# parallelize forks) would force every child to re-parse locales from
-# scratch. Skipped on CI: the workflow already runs `rake lang:update`
+# Imports `config/locales/en.txt` into the DB/cache if it's changed
+# since the last run -- the same check `script/deploy.sh` runs before
+# a deploy. Skipped on CI: the workflow already runs `rake lang:update`
 # once, earlier in the job; a second run later crashes against CI's
 # fixture-only Language table (no row flagged official).
-if ENV["CI"] != "true"
-  en_yml = Rails.root.join("config/locales/en.yml")
-  mtime_before = File.mtime(en_yml) if File.exist?(en_yml)
-
-  unless system("script/lang_update_if_needed.sh")
-    raise("script/lang_update_if_needed.sh failed")
-  end
-
-  mtime_after = File.exist?(en_yml) ? File.mtime(en_yml) : nil
-  I18n.reload! if mtime_before != mtime_after
+if (ENV["CI"] != "true") && !system("script/lang_update_if_needed.sh")
+  raise("script/lang_update_if_needed.sh failed")
 end
 
 # MiniExiftool caches its tag list in a pstore file on first use,

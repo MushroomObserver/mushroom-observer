@@ -10,15 +10,17 @@
 #  === Localization files
 #
 #  YAML files: <tt>config/locales/en.yml</tt>
-#  These are written automatically and should never be edited by hand anymore.
+#  No longer part of the runtime pipeline -- translations resolve
+#  from the DB / Solid Cache instead (#4807). <tt>lang:update:LOCALE</tt>
+#  can still write one as a manual snapshot, but nothing reads it back.
 #
 #  === Export files
 #
-#  Text files: <tt>config/locales/en.yml</tt>
+#  Text files: <tt>config/locales/en.txt</tt>
 #  These are meant to be edited by hand.
 #  Note that one of the locales is chosen as the "official" locale.  All the
 #  other files are patterned after this one.  You can import changes from any
-#  of these files, and it will update the database and YAML files automatically.
+#  of these files, and it will update the database.
 #
 ################################################################################
 # rubocop:enable MO/NoLongCommentBlock
