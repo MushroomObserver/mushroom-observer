@@ -72,16 +72,19 @@ class SessionIntegrationTest < CapybaraIntegrationTestCase
     assert_equal(true, true) # Rails complains this test has no assertions
 
     rolf_session.visit("/info/intro")
-    rolf_session.assert_text("rolf")
-    rolf_session.assert_no_text("katrina")
+    rolf_nav = rolf_session.find_by_id("user_drop_down")
+    rolf_nav.assert_text("rolf")
+    rolf_nav.assert_no_text("katrina")
 
     mary_session.visit("/info/intro")
-    mary_session.assert_text("mary")
-    mary_session.assert_no_text("rolf")
+    mary_nav = mary_session.find_by_id("user_drop_down")
+    mary_nav.assert_text("mary")
+    mary_nav.assert_no_text("rolf")
 
     katrina_session.visit("/info/intro")
-    katrina_session.assert_text("katrina")
-    katrina_session.assert_no_text("rolf") # mary too general
+    katrina_nav = katrina_session.find_by_id("user_drop_down")
+    katrina_nav.assert_text("katrina")
+    katrina_nav.assert_no_text("rolf") # mary too general
   end
 
   # -------------------------------------------------------------------------

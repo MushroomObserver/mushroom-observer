@@ -57,7 +57,7 @@ class OccurrenceEditFormSystemTest < ApplicationSystemTestCase
     login!(rolf)
     visit("/occurrences/#{occ.id}/edit")
 
-    assert_text(:edit_occurrence_add_heading.l)
+    assert_selector("h4", text: :edit_occurrence_add_heading.l)
     assert_selector(
       "input[type='checkbox']" \
       "[name='occurrence[observation_ids][]']" \
