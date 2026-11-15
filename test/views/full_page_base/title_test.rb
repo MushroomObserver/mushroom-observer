@@ -142,7 +142,9 @@ class Views::FullPageBase::TitleTest < ComponentTestCase
     # the bare render context below leaves unset.
     controller.define_singleton_method(:action_name) { "index" }
 
-    assert_equal("", captured_slot(:title) { add_index_title(nil) })
+    # content_for stores a blank value as unset -- nil or "" both mean
+    # no title content, so assert blankness, not a literal "".
+    assert_empty(captured_slot(:title) { add_index_title(nil) }.to_s)
   end
 
   # ----- render_title_with_name --------------------------------------
