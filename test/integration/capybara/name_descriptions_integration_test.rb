@@ -74,7 +74,11 @@ class NameDescriptionsIntegrationTest < CapybaraIntegrationTestCase
     # line, with an id badge in between) -- see
     # Views::FullPageBase::Title#add_title_with_name. Scoped to #title
     # so a failure here doesn't dump the whole page's text.
-    title = session.find_by(id: "title")
+    # rubocop:disable Capybara/SpecificFinders -- find_by_id would hit
+    # Rails/DynamicFindBy's broken find_by(id:) autocorrect on this
+    # branch (no AllowedMethods entry here for it yet).
+    title = session.find("#title")
+    # rubocop:enable Capybara/SpecificFinders
     title.assert_text(
       :create_name_description_title.l.partition("[name]").first.strip
     )

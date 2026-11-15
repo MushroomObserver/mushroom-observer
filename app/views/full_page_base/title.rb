@@ -116,14 +116,15 @@ module Views::FullPageBase::Title
 
   private
 
-  # Splits the raw (untranslated) template on its placeholder, rather
-  # than hunting for HTML tags in the rendered title, so the split
-  # lands correctly regardless of what markup the name renders as --
-  # and regardless of word order: some locales (ja, zh, ru) put the
-  # placeholder before the label text, or embed trailing text after
-  # it, rather than trailing the label. Label, name, and trailing
-  # text each get a separate block, so none of them shares a line
-  # with the name, whichever locale puts what where.
+  # Splits the localized but uninterpolated template on its
+  # placeholder, rather than hunting for HTML tags in the rendered
+  # title, so the split lands correctly regardless of what markup the
+  # name renders as -- and regardless of word order: some locales
+  # (ja, zh, ru) put the placeholder before the label text, or embed
+  # trailing text after it, rather than trailing the label. Label,
+  # name, and trailing text each get a separate block, so none of
+  # them shares a line with the name, whichever locale puts what
+  # where.
   def title_with_name(label_key, object, placeholder, user)
     return inline_title_with_name(label_key, object, placeholder, user) unless
       text_container?
