@@ -16,7 +16,6 @@ module Views::Controllers::Images::FieldSlipExtracts
     def view_template
       add_page_title(:field_slip_extract_title.t(id: @observation.id))
       container_class(:full)
-      column_classes(:four_eight)
 
       render_flags
       render_main_row
@@ -90,8 +89,8 @@ module Views::Controllers::Images::FieldSlipExtracts
 
     def render_main_row
       Row do
-        div(class: content_for(:left_columns).to_s) { render_slip_photo }
-        div(class: content_for(:right_columns).to_s) { render_form }
+        div(class: left_column_class_for(:four_eight)) { render_slip_photo }
+        div(class: right_column_class_for(:four_eight)) { render_form }
       end
     end
 
