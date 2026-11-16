@@ -37,7 +37,7 @@ class Components::IDBadge < Components::Base
   prop :value, _Nilable(_Union(String, Integer)), default: nil
   prop :size, _Union(*SIZE_CLASSES.keys)
   prop :title, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: "mr-4"
+  prop :extra_class, _Nilable(String), default: "mr-3"
   prop :interactive, _Boolean, default: true
 
   def view_template
