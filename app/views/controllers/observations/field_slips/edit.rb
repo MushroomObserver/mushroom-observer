@@ -10,11 +10,7 @@ module Views::Controllers::Observations::FieldSlips
     prop :field_code, _Nilable(String), default: nil
 
     def view_template
-      add_page_title(
-        :field_slip_attach_title.t(
-          name: viewer_aware_unique_format_name(@observation)
-        ).small_author
-      )
+      add_title_with_name(:field_slip_attach_title, name: @observation)
       add_context_nav(
         Tab::Observation::ListActions.new(observation: @observation)
       )

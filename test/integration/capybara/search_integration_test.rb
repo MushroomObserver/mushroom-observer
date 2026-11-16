@@ -259,17 +259,18 @@ class SearchIntegrationTest < CapybaraIntegrationTestCase
     visit("/locations/search")
 
     # Verify the help partial is rendered
-    assert_selector("p", text: "Locations Searches")
+    help = find_by_id("locations_search_help")
+    help.assert_selector("p", text: "Locations Searches")
     # Verify that pattern search help intro is shown
-    assert_text("Your search string may contain terms")
-    assert_text("Recognized variables include:")
+    help.assert_text("Your search string may contain terms")
+    help.assert_text("Recognized variables include:")
     # Verify that pattern search terms are shown
-    assert_text("region")
-    assert_text("user")
-    assert_text("created")
-    assert_text("modified")
-    assert_text("has_notes")
-    assert_text("has_observations")
+    help.assert_text("region")
+    help.assert_text("user")
+    help.assert_text("created")
+    help.assert_text("modified")
+    help.assert_text("has_notes")
+    help.assert_text("has_observations")
   end
 
   # TODO: Test that selecting an MO location from region autocompleter

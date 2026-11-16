@@ -11,7 +11,11 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     visit("/info/textile_sandbox/new")
     fill_in("textile_sandbox_code", with: "Jabberwocky")
     click_button("Test")
-    page.assert_text("Jabberwocky", count: 2)
+    # One occurrence is the resubmitted code in the textarea, the
+    # other is the rendered Textile preview -- assert each in place
+    # rather than counting matches across the whole page.
+    find_by_id("textile_sandbox_code").assert_text("Jabberwocky")
+    find(".sandbox").assert_text("Jabberwocky")
   end
 
   # Covers ObservationController#map_observations.
@@ -214,11 +218,12 @@ class ObservationsIntegrationTest < CapybaraIntegrationTestCase
     login
     # on ShowObservation page
     visit("/names/#{names(:chlorophyllum_rachodes).id}")
-    assert_text(:obss_of_this_name.l)
-    assert_text(:taxon_obss_other_names.l)
-    assert_text(:obss_of_taxon.l)
-    assert_text(:obss_taxon_proposed.l)
-    assert_text(:obss_name_proposed.l)
+    menu = find_by_id("name_observations_menu")
+    menu.assert_text(:obss_of_this_name.l)
+    menu.assert_text(:taxon_obss_other_names.l)
+    menu.assert_text(:obss_of_taxon.l)
+    menu.assert_text(:obss_taxon_proposed.l)
+    menu.assert_text(:obss_name_proposed.l)
   end
 
   def test_observation_project_checkbox_state_persistence
