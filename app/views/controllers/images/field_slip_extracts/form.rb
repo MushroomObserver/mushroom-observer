@@ -19,21 +19,16 @@ module Views::Controllers::Images::FieldSlipExtracts
     # rendered outside the form, the choice is dropped on submit.
     prop :name_feedback, _Nilable(Hash), default: nil
 
-    # Superform wants the form's data object as the first positional
-    # arg; the review IS that object, so it goes to `super` rather than
-    # being held as a separate prop -- `model` reaches it everywhere
-    # below instead of a dedicated `@review` ivar.
+    # The review IS Superform's model object, so it goes to `super`
+    # rather than a separate prop -- `model` reaches it everywhere below.
     def initialize(image:, extract:, review:, approved_name: nil, **attrs)
-      # `method: :patch`, not a hand-rolled `_method` hidden: Superform
-      # emits its own `_method` field, and a second one turns a Turbo
-      # submission into a bare POST (see ApplicationForm#_method_field).
       super(review, image: image, extract: extract,
                     approved_name: approved_name, method: :patch, **attrs)
     end
 
     def view_template
       super do
-        div(class: "table-responsive") { render_table }
+        render_table
         render_location_section
         render_name_section
         submit(:field_slip_extract_save.l)
@@ -50,13 +45,28 @@ module Views::Controllers::Images::FieldSlipExtracts
     private
 
     def render_table
-      Table(model.rows_to_show) do |t|
+      return render_no_data_message if model.rows_to_show.empty?
+
+      render_data_table
+    end
+
+    def render_data_table
+      Table(model.rows_to_show, align_middle: true) do |t|
         t.column(:field_slip_extract_field.l)
         t.column(:field_slip_extract_read.l)
         t.column(:field_slip_extract_current.l)
         t.column(:field_slip_extract_use.l)
         t.row { |row| render_row(row) }
       end
+    end
+
+    # The template-mismatch case already gets a banner above the form
+    # (`Edit#render_template_mismatch`) -- this is for every other
+    # reason a reading came back blank (an illegible photo, say).
+    def render_no_data_message
+      return if @extract.template_mismatch?
+
+      Alert(level: :warning) { plain(:field_slip_extract_no_data.l) }
     end
 
     def render_row(row)
@@ -80,10 +90,8 @@ module Views::Controllers::Images::FieldSlipExtracts
       render_confidence(row)
     end
 
-    # A slip's Notes box is often several lines, and a single-line
-    # input silently drops the newlines from its value -- the browser
-    # strips them, gluing "Phenolic odor\nYellow staining" into
-    # "Phenolic odorYellow staining" on save. A textarea keeps them.
+    # A single-line input silently drops this value's newlines on
+    # save -- a textarea keeps them.
     def render_extracted_input(row)
       value = row.extracted.to_s
       unless value.include?("\n")
@@ -124,12 +132,21 @@ module Views::Controllers::Images::FieldSlipExtracts
         small { plain(:field_slip_extract_empty.l) }
       elsif row.conflict?
         div(class: "field-slip-extract-conflict") do
-          plain(current)
+          render_current_value(row, current)
           div { small { plain(:field_slip_extract_replacing.l) } }
         end
       else
-        plain(current)
+        render_current_value(row, current)
       end
+    end
+
+    # The iNat row's stored value is a Textile link
+    # (`FieldSlipNotesBuilder.inat_link`), not plain text -- every other
+    # row's `current` is a plain string or number.
+    def render_current_value(row, current)
+      return trusted_html(current.t) if row.inat_row?
+
+      plain(current)
     end
 
     # The code row's tick is an attach, not a field write, so it says
@@ -145,10 +162,8 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
-    # A non-attachable code row only renders when the observation
-    # already has its slip (blank rows are dropped, slip-less ones get
-    # the attach tick), so say what the check FOUND rather than the
-    # generic "cross-check only" that read as "nothing was read".
+    # This only renders when the observation already has its slip, so
+    # say what the check found rather than a generic "cross-check only".
     def render_code_check_state
       key = if @extract.code_mismatch
               :field_slip_extract_code_differs
@@ -163,11 +178,11 @@ module Views::Controllers::Images::FieldSlipExtracts
     end
 
     # Locality, like the ID, is corrected through an autocompleter and
-    # so needs a real label -- but unlike the ID it is an ordinary
+    # so needs a label -- but unlike the ID it is an ordinary
     # attribute write, so it keeps its tick box. The box is prefilled
     # with the suggested full name when the project already uses a
     # location the abbreviation obviously means; the flag above says
-    # what the slip actually read.
+    # what the slip read.
     def render_location_section
       row = model.location_row
       return if row.nil? || row.blank?
@@ -194,12 +209,12 @@ module Views::Controllers::Images::FieldSlipExtracts
       end
     end
 
-    # The ID gets its own section rather than a table cell. Two reasons,
-    # both load-bearing: a name autocompleter only renders its dropdown
-    # and hidden id field when it has a real label (`label: false`
-    # silently drops the append slot they live in), and unlike every
-    # other field this one creates a Naming and a Vote rather than
-    # writing an attribute.
+    # The ID gets a separate section rather than a table cell. Two
+    # reasons: a name autocompleter only renders its dropdown and
+    # hidden id field when it has a label (`label: false` silently
+    # drops the append slot they live in), and unlike every other
+    # field this one creates a Naming and a Vote rather than writing
+    # an attribute.
     def render_name_section
       row = model.name_row
       return if row.nil? || row.blank?

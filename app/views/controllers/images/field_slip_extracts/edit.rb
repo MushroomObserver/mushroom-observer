@@ -16,12 +16,10 @@ module Views::Controllers::Images::FieldSlipExtracts
     def view_template
       add_page_title(:field_slip_extract_title.t(id: @observation.id))
       container_class(:full)
+      column_classes(:four_eight)
 
       render_flags
-      Row do
-        Column(xs: 12, md: 5) { render_slip_photo }
-        Column(xs: 12, md: 7) { render_form }
-      end
+      render_main_row
       render_provenance
     end
 
@@ -90,6 +88,13 @@ module Views::Controllers::Images::FieldSlipExtracts
            target: new_project_alias_path(project_id: project.id))
     end
 
+    def render_main_row
+      Row do
+        div(class: content_for(:left_columns).to_s) { render_slip_photo }
+        div(class: content_for(:right_columns).to_s) { render_form }
+      end
+    end
+
     def render_slip_photo
       InteractiveImage(image: @extract.image, user: @user, votes: false)
     end
@@ -101,7 +106,8 @@ module Views::Controllers::Images::FieldSlipExtracts
                       review: FormObject::FieldSlipReview.build(
                         extract: @extract, observation: @observation,
                         user: @user
-                      )))
+                      ),
+                      class: "mb-3"))
     end
 
     # Which setup produced these values -- the part that stays useful
