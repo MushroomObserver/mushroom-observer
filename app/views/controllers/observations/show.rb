@@ -35,8 +35,7 @@ module Views::Controllers::Observations
     prop :sibling_observations, _Array(::Observation)
     # {observation id => footnote number} for the occurrence's
     # other members; see ObservationsController::Show.
-    prop :sibling_markers, _Hash(::Integer, ::Integer),
-         default: -> { {} }
+    prop :sibling_markers, _Hash(::Integer, ::Integer), default: -> { {} }
     prop :occurrence, _Nilable(::Occurrence), default: nil
     prop :owner_name, _Nilable(::Name), default: nil
 
