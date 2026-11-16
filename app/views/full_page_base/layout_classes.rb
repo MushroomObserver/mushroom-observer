@@ -80,6 +80,9 @@ module Views::FullPageBase::LayoutClasses
     when :eight_four
       [Components::Column.classes_for(xs: 12, md: 8, lg: 7),
        Components::Column.classes_for(xs: 12, md: 4, lg: 5)]
+    when :four_eight
+      [Components::Column.classes_for(xs: 12, md: 5, lg: 4),
+       Components::Column.classes_for(xs: 12, md: 7, lg: 8)]
     when :seven_five
       [Components::Column.classes_for(xs: 12, md: 7),
        Components::Column.classes_for(xs: 12, md: 5)]
