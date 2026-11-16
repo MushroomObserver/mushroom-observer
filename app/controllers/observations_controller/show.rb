@@ -42,8 +42,8 @@ module ObservationsController::Show
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
-    @comments = @observation.comments&.sort_by(&:created_at)&.reverse
     load_occurrence_data
+    @comments = occurrence_comments
     @images = occurrence_images
 
     render_show_view
@@ -79,10 +79,25 @@ module ObservationsController::Show
                               { herbarium_records: [
                                 { herbarium: :curators }, :user
                               ] },
+                              { comments: Comment.index_includes_tree },
                               { images: [:image_votes, :license, :user] },
                               :location, :name, :sequences,
                               :thumb_image, :user
                             ).to_a
+  end
+
+  # A comment is about the specimen, not the record of it, so every
+  # member's comments show on every member's page. Newest first, the
+  # order a single observation's comments already used (#5718).
+  def occurrence_comments
+    return own_comments unless @occurrence
+
+    (own_comments + @sibling_observations.flat_map(&:comments)).
+      sort_by(&:created_at).reverse
+  end
+
+  def own_comments
+    @observation.comments.to_a
   end
 
   # The thumbnail may be a sibling's image (any image in the occurrence
