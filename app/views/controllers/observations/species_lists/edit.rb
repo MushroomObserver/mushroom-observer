@@ -4,9 +4,9 @@
 # the "manage species lists for this observation" page. Mirrors
 # `Observations::Projects::Edit`, sharing
 # `Components::ObservationListManager` for the two-section layout.
-# Rows are `SpeciesLists::Listing`: lists the observation already
-# belongs to (REMOVE button on each) and lists it doesn't (ADD
-# button on each).
+# Each section renders as a `SpeciesLists::SpeciesListTable`: lists
+# the observation already belongs to (REMOVE button on each row) and
+# lists it doesn't (ADD button on each row).
 module Views::Controllers::Observations::SpeciesLists
   class Edit < Views::FullPageBase
     prop :observation, ::Observation
@@ -45,20 +45,17 @@ module Views::Controllers::Observations::SpeciesLists
         belongs_to_items: @obs_lists,
         not_contains_heading: :species_list_manage_doesnt_contain.l,
         not_contains_items: @other_lists
-      ) do |species_list, remove, add|
-        render_listing(species_list: species_list, remove: remove, add: add)
+      ) do |species_lists, remove, add|
+        render(Views::Controllers::SpeciesLists::SpeciesListTable.new(
+                 species_lists, observation: @observation,
+                                remove: remove, add: add,
+                                manageable_ids: manageable_ids(species_lists)
+               ))
       end
     end
 
-    def render_listing(species_list:, remove:, add:)
-      render(
-        Views::Controllers::SpeciesLists::Listing.new(
-          species_list: species_list,
-          observation: @observation,
-          remove: remove && permission?(species_list),
-          add: add && permission?(species_list)
-        )
-      )
+    def manageable_ids(species_lists)
+      species_lists.select { |sl| permission?(sl) }.map(&:id)
     end
   end
 end

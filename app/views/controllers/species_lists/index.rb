@@ -2,7 +2,7 @@
 
 # Action view for the species_list index page. Sets the project
 # banner when scoped to a project, page chrome (title, sort, pagination,
-# container width), then renders a list of `Listing` rows.
+# container width), then renders a `SpeciesListTable`.
 module Views::Controllers::SpeciesLists
   class Index < Views::FullPageBase
     prop :query, ::Query
@@ -27,23 +27,10 @@ module Views::Controllers::SpeciesLists
     def render_list
       return unless @objects.any?
 
-      # The d-flex / justify-content-between / align-items-start
-      # classes used to live on `Listing`'s outer wrapper. After
-      # moving the row wrapping into `Components::ListGroup#item`,
-      # those layout classes ride on the item itself.
-      ListGroup do |list|
-        @objects.each do |species_list|
-          list.item(
-            class: "d-flex justify-content-between align-items-start"
-          ) do
-            count = @observation_counts[species_list.id].to_i
-            render(Listing.new(
-                     species_list: species_list, project: @project,
-                     observation_count: count
-                   ))
-          end
-        end
-      end
+      render(SpeciesListTable.new(
+               @objects, project: @project,
+                         observation_counts: @observation_counts
+             ))
     end
   end
 end
