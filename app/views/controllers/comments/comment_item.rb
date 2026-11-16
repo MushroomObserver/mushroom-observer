@@ -72,18 +72,19 @@ module Views::Controllers::Comments
 
     def render_summary
       div(class: "comment-summary font-weight-bold") do
-        trusted_html(@comment.summary.tl)
         render_marker if @marker
+        trusted_html(@comment.summary.tl)
       end
     end
 
     # Which member the comment was made on. Without it a merged
     # thread reads as though every comment were made here, and a
-    # comment naming "this observation" names a different one.
+    # comment naming "this observation" names a different one. It
+    # leads the summary; after the text it reads as part of the
+    # subject.
     def render_marker
-      whitespace
-      SiblingMarker(number: @marker,
-                    observation_id: @comment.target_id)
+      SiblingMarker(number: @marker, observation_id: @comment.target_id,
+                    class: "mr-2")
     end
 
     def render_comment_body
