@@ -14,10 +14,10 @@ module Views::Controllers::Projects
       bolete = projects(:bolete_project)
       html = render_table([eol, bolete])
 
-      assert_html(html, "table tr", count: 2)
+      assert_html(html, "tbody tr", count: 2)
       assert_html(html, "a[href*='projects/#{eol.id}']")
       assert_html(html, "a[href*='projects/#{bolete.id}']")
-      assert_html(html, "small", text: eol.created_at.web_time)
+      assert_html(html, "small", text: eol.created_at.web_date)
       assert_html(html, ".badge-id", count: 2)
     end
 

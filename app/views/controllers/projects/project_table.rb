@@ -14,9 +14,11 @@ module Views::Controllers::Projects
     prop :observation_counts, _Hash(Integer, Integer), default: -> { {} }
 
     def view_template
-      Table(@objects, show_headers: false) do |t|
-        t.column(nil) { |project| render_info_cell(project) }
-        t.column(nil) { |project| render_action_cell(project) }
+      Table(@objects, variant: :lg) do |t|
+        t.column(:project.ti) { |project| render_info_cell(project) }
+        t.column(:observations.ti, align: :right) do |project|
+          render_action_cell(project)
+        end
       end
     end
 
@@ -52,7 +54,7 @@ module Views::Controllers::Projects
 
     def render_meta_row(project)
       div do
-        small { trusted_html(append_colon(project.created_at.web_time)) }
+        small { trusted_html(append_colon(project.created_at.web_date)) }
         Link(type: :user, user: project.user)
       end
     end
