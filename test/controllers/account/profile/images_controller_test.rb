@@ -25,6 +25,18 @@ module Account::Profile
       assert_form_action(action: :attach, id: rolf.id)
     end
 
+    # layout_count: 1 forces 2 pages out of mary's 2 image fixtures.
+    def test_reuse_image_page_shows_pagination_when_multiple_pages
+      mary.update!(layout_count: 1)
+
+      login("mary")
+      get(:reuse)
+
+      assert_select(".pagination_numbers a", { text: "Next" },
+                    "Page with multiple pages of images to reuse " \
+                    "should show a pagination nav")
+    end
+
     # This would happen if user clicked on image.
     def test_update_image_for_user_via_img_click
       image = images(:commercial_inquiry_image)

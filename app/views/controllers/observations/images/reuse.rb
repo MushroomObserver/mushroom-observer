@@ -21,6 +21,7 @@ module Views::Controllers::Observations::Images
         ::Tab::Observation::ImagesReuse.new(observation: @observation)
       )
       container_class(:full)
+      add_pagination(@pagination_data)
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
                target: @observation,
