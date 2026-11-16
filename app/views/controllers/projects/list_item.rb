@@ -29,26 +29,21 @@ module Views::Controllers::Projects
 
     private
 
-    # Badge + title/meta wrapped in one flex child -- keeps the outer
-    # row (in `Observations::Projects::Edit`'s add/remove context) to
-    # exactly two `justify-content-between` children (info, manage
-    # section); three top-level children would center this block
-    # between the badge and the button instead of hugging it left.
+    # Wrapped in one flex child -- keeps the outer row (in
+    # `Observations::Projects::Edit`'s add/remove context) to two
+    # `justify-content-between` children (info, manage section);
+    # three top-level children would center this block between the
+    # badge and the button instead of hugging it left.
     def render_info
-      div(class: "list_info d-flex align-items-start") do
-        div(class: "id-badge-col") do
-          IDBadge(object: @project, size: :xl)
-        end
-        div do
-          render_title_row
-          render_meta_row
-          render_violation_warning if @violation_kinds.any?
-        end
+      div(class: "list_info") do
+        render_title_row
+        render_meta_row
+        render_violation_warning if @violation_kinds.any?
       end
     end
 
     def render_title_row
-      div do
+      div(class: "d-flex align-items-center") do
         a(href: project_path(@project.id)) do
           span(class: "h4") { trusted_html(@project.title.t) }
         end
@@ -56,6 +51,7 @@ module Views::Controllers::Projects
           whitespace
           span(class: "ml-4") { plain("(#{:open.ti})") }
         end
+        IDBadge(object: @project, size: :xl, extra_class: "ml-3")
       end
     end
 

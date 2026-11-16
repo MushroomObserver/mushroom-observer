@@ -48,19 +48,14 @@ module Views::Controllers::SpeciesLists
     end
 
     def render_info
-      div(class: "list_info d-flex align-items-start") do
-        div(class: "id-badge-col") do
-          IDBadge(object: @species_list, size: :xl)
-        end
-        div do
-          render_title_row
-          render_place_user_row
-        end
+      div(class: "list_info") do
+        render_title_row
+        render_place_user_row
       end
     end
 
     def render_title_row
-      div do
+      div(class: "d-flex align-items-center") do
         Link(type: :get, name: @species_list.text_name.t,
              target: @species_list.show_link_with_project(@project)) do
           span(class: "list_what h4") do
@@ -69,6 +64,7 @@ module Views::Controllers::SpeciesLists
         end
         whitespace
         span(class: "list_when ml-4") { plain("(#{@species_list.when})") }
+        IDBadge(object: @species_list, size: :xl, extra_class: "ml-3")
       end
     end
 
