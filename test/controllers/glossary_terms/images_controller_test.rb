@@ -22,6 +22,19 @@ module GlossaryTerms
                     "Form should have a link to show only the user's images.")
     end
 
+    # layout_count: 1 forces 2 pages out of mary's 2 image fixtures.
+    def test_reuse_image_page_shows_pagination_when_multiple_pages
+      glossary_term = glossary_terms(:conic_glossary_term)
+      mary.update!(layout_count: 1)
+
+      login("mary")
+      get(:reuse, params: { id: glossary_term.id })
+
+      assert_select(".pagination_numbers a", { text: "Next" },
+                    "Page with multiple pages of images to reuse " \
+                    "should show a pagination nav")
+    end
+
     def test_reuse_image_for_glossary_term_post
       glossary_term = glossary_terms(:conic_glossary_term)
       image = images(:commercial_inquiry_image)

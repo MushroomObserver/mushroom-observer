@@ -13,6 +13,7 @@ module Views::Controllers::Account::Profile::Images
     def view_template
       container_class(:full)
       add_page_title(:image_reuse_title.t(name: @user.legal_name))
+      add_pagination(@pagination_data)
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
                target: @user,
