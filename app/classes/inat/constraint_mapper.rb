@@ -29,7 +29,7 @@ class Inat
 
     # iNat asks API users to stay <= 60 requests a minute.
     # It starts refusing at about 100. Elsewhere MO uses 60/minute
-    # by pacing itself at 1/sec. See rb:14
+    # by pacing itself at 1/sec. ObsFetcher#INTER_PAGE_SLEEP
     # Imports, syncs and the nightly alert job share the same iNat
     # per-minute allowance.
     # Stop lookups at 50 to leave some allowance free for other requests.
