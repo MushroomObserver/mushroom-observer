@@ -221,6 +221,24 @@ module Projects
                     text: /Target locations iNaturalist does not know/)
     end
 
+    def test_an_incomplete_lookup_says_so
+      project = projects(:rare_fungi_project)
+      ProjectExternalSite.create!(project: project, external_site: @inat,
+                                  use_constraints: true)
+      stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
+      make_admin("dick")
+      get(:index, params: { project_id: project.id })
+
+      assert_select("#project_site_#{@inat.id} p",
+                    text: :project_sites_lookups_incomplete.l(
+                      count: project.target_names.size +
+                             project.target_locations.size
+                    ))
+      assert_select("#project_site_#{@inat.id}",
+                    text: /Target names iNaturalist does not know/,
+                    count: 0)
+    end
+
     # --- saving ------------------------------------------------------
 
     def test_create_resolves_and_saves_the_inat_project

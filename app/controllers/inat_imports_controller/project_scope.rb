@@ -70,4 +70,14 @@ module InatImportsController::ProjectScope
     )
     false
   end
+
+  def project_targets_checked?
+    return true unless project_admin_import?
+    return true if project_search.complete?
+
+    flash_error(:inat_import_project_targets_unchecked.t(
+                  count: project_search.mapper.unchecked_count
+                ))
+    false
+  end
 end

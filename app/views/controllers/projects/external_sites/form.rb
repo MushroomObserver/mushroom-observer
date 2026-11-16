@@ -52,6 +52,7 @@ module Views::Controllers::Projects::ExternalSites
       text = candidates_text
       p(class: "mt-2") { text } if text
       render_over_limit
+      render_incomplete
       render_unresolved(:project_sites_unresolved_names,
                         @candidates.unresolved_names)
       render_unresolved(:project_sites_unresolved_locations,
@@ -70,6 +71,14 @@ module Views::Controllers::Projects::ExternalSites
 
       p(class: "mt-2") do
         :project_sites_over_limit.t(limit: model.import_limit)
+      end
+    end
+
+    def render_incomplete
+      return unless @candidates.unchecked.positive?
+
+      p(class: "mt-2") do
+        :project_sites_lookups_incomplete.t(count: @candidates.unchecked)
       end
     end
 

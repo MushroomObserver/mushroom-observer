@@ -241,6 +241,25 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     assert_empty(InatImport.where(user: @admin, project_id: @project.id))
   end
 
+  # An import of only the targets iNat answered for would cover less
+  # than the project means.
+  def test_an_import_whose_targets_were_not_all_checked_is_refused
+    site = project_site
+    stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
+
+    login(@admin.login)
+    post(:create, params: { project_site: site.id, consent: "1",
+                            inat_username: "rolf_on_inat",
+                            import_others: "1", confirmed: "1" })
+
+    assert_flash_error(:inat_import_project_targets_unchecked,
+                       count: @project.target_names.size +
+                              @project.target_locations.size)
+    assert_unprocessable
+    assert_empty(InatImport.where(user: @admin, project_id: @project.id),
+                 "An incomplete lookup should start no import")
+  end
+
   def stub_taxon_validation
     results = @project.target_names.each_with_index.map do |_name, i|
       { "id" => 9001 + i, "ancestor_ids" => [47_170, 9001 + i] }

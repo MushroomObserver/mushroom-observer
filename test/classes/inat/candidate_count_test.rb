@@ -117,6 +117,22 @@ class Inat::CandidateCountTest < UnitTestCase
                  candidates.unresolved_locations)
   end
 
+  # A count of only the targets iNat answered for would be a number for
+  # a different search.
+  def test_an_incomplete_lookup_has_no_number
+    project = projects(:rare_fungi_project)
+    stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
+    site = ProjectExternalSite.new(project: project, external_site: @site,
+                                   use_constraints: true)
+
+    candidates = Inat::CandidateCount.for(project_site: site)
+
+    assert(candidates.unchecked.positive?,
+           "A refused lookup should leave targets unchecked")
+    assert_nil(candidates.total, "An incomplete lookup should have no count")
+    assert_not_requested(:get, inat_api_matcher("observations"))
+  end
+
   def test_an_unconfigured_row_has_no_unresolved_targets
     candidates = candidates_for
 

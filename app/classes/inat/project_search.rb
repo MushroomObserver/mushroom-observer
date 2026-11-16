@@ -54,6 +54,13 @@ class Inat
       @mapper.target_taxon_ids.any?
     end
 
+    # False when iNat stopped answering before every target was looked
+    # up, so the search covers only part of what the project targets.
+    def complete?
+      params
+      @mapper.complete?
+    end
+
     def unresolved_names
       # Resolve first: the mapper fills @unresolved_names as a side
       # effect of target_taxon_ids, and reads empty until it runs.

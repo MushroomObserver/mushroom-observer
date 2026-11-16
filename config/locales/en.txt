@@ -2829,6 +2829,7 @@
   project_sites_over_limit: "That is more than this project's import limit of [limit]."
   project_sites_unresolved_names: "Target names iNaturalist does not know, left out of the search: [targets]"
   project_sites_unresolved_locations: "Target locations iNaturalist does not know, left out of the search: [targets]"
+  project_sites_lookups_incomplete: "[count] target names and locations have not been looked up on iNaturalist yet, so there is no count. Reload this page in a minute to look up more."
   project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
   project_sites_use_constraints: Follow this project's constraints
   project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
@@ -3013,6 +3014,7 @@
   inat_import_consent_project: "(Required) I consent to importing these iNaturalist observations into Mushroom Observer. My default Mushroom Observer license will be applied to any unlicensed images of mine. For other observers, only content carrying a license Mushroom Observer can accept is imported. Other content must be accessed on the iNaturalist website."
   inat_import_project_scope: "The iNaturalist observations matching [project], as its External Sites settings describe them."
   inat_import_project_targets_unresolved: "iNaturalist does not recognize [targets], so this import would cover every fungus in the project's area and dates instead. Correct the target names before importing."
+  inat_import_project_targets_unchecked: "[count] of this project's target names and locations have not been looked up on iNaturalist yet. Wait a minute, then try again."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace

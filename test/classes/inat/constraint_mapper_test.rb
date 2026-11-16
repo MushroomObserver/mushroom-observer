@@ -156,6 +156,111 @@ class Inat::ConstraintMapperTest < UnitTestCase
     assert_requested(:get, inat_api_matcher("taxa"), times: 2)
   end
 
+  # A miss iNat answered is remembered, so it is not asked for again.
+  def test_a_name_inat_does_not_know_is_not_looked_up_twice
+    stub_json("taxa", [])
+    stub_json("places", [])
+    second = nil
+
+    with_memory_cache do
+      Inat::ConstraintMapper.new(@project).params
+      second = Inat::ConstraintMapper.new(@project)
+      second.params
+    end
+
+    assert_requested(:get, inat_api_matcher("taxa"),
+                     times: miss_lookups)
+    assert_equal(@project.target_names.map(&:text_name),
+                 second.unresolved_names,
+                 "A remembered miss should still be reported as unknown")
+  end
+
+  # One search for each spelling of a name; its synonyms include it.
+  def miss_lookups
+    @project.target_names.sum do |name|
+      (name.synonyms.map(&:text_name) | [name.text_name]).size
+    end
+  end
+
+  # A refused request is not an answer: the name is neither reported
+  # as unknown nor remembered, so the next request looks it up again.
+  def test_a_failed_lookup_is_not_remembered_or_reported
+    stub_request(:get, inat_api_matcher("taxa")).
+      to_return({ status: 429 }, { status: 200, body: taxa_body })
+    stub_json("places", [])
+    first = second = nil
+
+    with_memory_cache do
+      first = Inat::ConstraintMapper.new(@project)
+      first.params
+      second = Inat::ConstraintMapper.new(@project)
+      second.params
+    end
+
+    assert_not(first.complete?, "A refused lookup should be incomplete")
+    assert_empty(first.unresolved_names,
+                 "A refused lookup should not be reported as unknown")
+    assert(second.complete?, "The next mapper should look the name up")
+    assert_includes(second.target_taxon_ids, 47_347,
+                    "The next mapper should resolve the name")
+  end
+
+  def taxa_body
+    { results: [{ id: 47_347, name: "Coprinus comatus" },
+                { id: 48_701, name: "Agaricus campestris" }] }.to_json
+  end
+
+  # Once iNat refuses one request, sending the rest would only be
+  # refused too.
+  def test_no_lookups_are_sent_after_one_fails
+    stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
+    stub_json("places", [])
+    mapper = Inat::ConstraintMapper.new(@project)
+    params = mapper.params
+
+    assert_requested(:get, inat_api_matcher("taxa"), times: 1)
+    assert_not_requested(:get, inat_api_matcher("places"))
+    assert_not(mapper.complete?, "A refused lookup should be incomplete")
+    assert_nil(params[:place_id], "Unchecked places should not be searched")
+    assert_empty(mapper.unresolved_locations,
+                 "Unchecked places should not be reported as unknown")
+    assert_equal(@project.target_names.size + @project.target_locations.size,
+                 mapper.unchecked_count,
+                 "Every target should count as unchecked")
+  end
+
+  # A mapper stops at the cap and leaves the rest for a later request.
+  def test_lookups_stop_at_the_cap
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_json("places", [])
+    mapper = Inat::ConstraintMapper.new(@project)
+
+    stub_const(Inat::ConstraintMapper, :LOOKUPS_PER_REQUEST, 1) do
+      mapper.params
+      mapper.params
+    end
+
+    assert_requested(:get, inat_api_matcher("taxa"), times: 1)
+    assert_not_requested(:get, inat_api_matcher("places"))
+    assert_equal(@project.target_names.size - 1 +
+                 @project.target_locations.size,
+                 mapper.unchecked_count,
+                 "Targets over the cap should count as unchecked, once each")
+  end
+
+  def test_a_failed_place_lookup_is_not_reported
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_request(:get, inat_api_matcher("places")).to_return(status: 500)
+    mapper = Inat::ConstraintMapper.new(@project)
+    mapper.params
+
+    assert_not(mapper.complete?, "A refused lookup should be incomplete")
+    assert_empty(mapper.unresolved_locations,
+                 "A refused lookup should not be reported as unknown")
+  end
+
   def with_memory_cache
     original = Rails.cache
     Rails.cache = ActiveSupport::Cache::MemoryStore.new
