@@ -1,32 +1,18 @@
 # frozen_string_literal: true
 
-# Page-title methods mixed into `Views::FullPageBase`.
-#
-# Each setter writes to `content_for(:title)` (visible page heading,
-# HTML-safe), `content_for(:document_title)` (browser-tab `<title>`,
-# plain text), or — for index titles — `content_for(:filters)` for
-# the result-set caption. The layout reads these slots when it renders.
-#
-# `add_show_title` / `add_edit_title` / `add_query_filters` wrap their
-# inner `render(...)` calls in `capture` because Phlex 2.x's `render`
-# emits to the buffer rather than returning a string; the slot needs
-# the HTML as a string to stash and later read with `trusted_html`.
+# Page-title methods mixed into `Views::FullPageBase`. Setters write
+# to content_for(:title)/(:document_title)/(:filters), read by the
+# layout on render. `capture` wraps inner `render` calls since
+# Phlex's `render` writes to the buffer, not a return value.
 module Views::FullPageBase::Title
-  # Most generic: caller supplies the heading + (optionally) a separate
-  # plain-text doc title. Show / edit / new / index versions below all
-  # ultimately route through this method.
+  # Every other add_*_title method routes through this one.
   def add_page_title(title, document_title = title)
     content_for(:title) { title }
     content_for(:document_title) { title_tag_contents(document_title) }
   end
 
-  # Show-mode object title: the rich heading is the
-  # `Views::Layouts::Header::ObjectTitle` view (with the user's naming
-  # prefs applied); the doc title is the model's plain `document_title`
-  # (or its type-tag label) prefixed with `Type id:`. Pass
-  # `owner_naming: true` on an observation's show page to add the
-  # observer's-preferred-naming line under the title (nothing renders
-  # if the viewer hasn't opted in or the owner agrees with consensus).
+  # owner_naming: true adds the observer's-preferred-naming line;
+  # renders nothing if the viewer opted out or agrees with consensus.
   def add_show_title(object, user: nil, owner_naming: false)
     add_id_badge(object)
     add_page_title(
@@ -40,8 +26,7 @@ module Views::FullPageBase::Title
     )
   end
 
-  # Edit-mode object title: heading flips to `mode: :edit`; doc title
-  # gets a leading `EDIT` label.
+  # Heading flips to mode: :edit; doc title gets a leading EDIT label.
   def add_edit_title(object, user: nil)
     add_id_badge(object)
     add_page_title(
@@ -60,15 +45,9 @@ module Views::FullPageBase::Title
     add_page_title(:"#{string}".t(type: type_tag))
   end
 
-  # `label_key`'s template reads "Verb words [name]" or
-  # "Verb words [object]" (e.g. :ask_observation_question_title,
-  # :move_descriptions_title) -- pass whichever placeholder the
-  # template uses as `name:` or `object:`. Puts the name, with a
-  # leading id badge, on a line apart from the label and any trailing
-  # text -- see `title_with_name` below for why. Returns the HTML
-  # rather than installing it, so a caller needing different wrapping
-  # can feed it to `add_page_title` itself; `add_title_with_name`
-  # below is the common case.
+  # Pass whichever placeholder label_key's template uses, name: or
+  # object:. Returns HTML rather than installing it, for a caller
+  # needing different wrapping.
   def render_title_with_name(label_key, object: nil, name: nil,
                              user: default_viewer)
     target, placeholder = title_with_name_target(object, name)
@@ -83,9 +62,7 @@ module Views::FullPageBase::Title
     )
   end
 
-  # Index pages: the page heading is empty (the top nav's rubric
-  # already shows the model name); the doc title is the model name;
-  # the result-set caption explains any filters.
+  # Heading stays empty -- the top nav's rubric already names the model.
   def add_index_title(query, map: false)
     title = if map
               :map_locations_title.l(
@@ -100,11 +77,7 @@ module Views::FullPageBase::Title
     add_query_filters(query)
   end
 
-  # Index-only caption explaining what filters the current Query
-  # applies. The caption HTML is built by
-  # `Views::Layouts::Header::IndexBar::FilterCaption`. Skips the wrap
-  # when there's no query, or the query has no filters to caption --
-  # an unfiltered index has nothing worth a caption row for.
+  # Skips the wrap when there's no query or nothing to caption.
   def add_query_filters(query)
     klass = ::Views::Layouts::Header::IndexBar::FilterCaption
     return unless query&.params && klass.filters_present?(query)
@@ -116,15 +89,8 @@ module Views::FullPageBase::Title
 
   private
 
-  # Splits the localized but uninterpolated template on its
-  # placeholder, rather than hunting for HTML tags in the rendered
-  # title, so the split lands correctly regardless of what markup the
-  # name renders as -- and regardless of word order: some locales
-  # (ja, zh, ru) put the placeholder before the label text, or embed
-  # trailing text after it, rather than trailing the label. Label,
-  # name, and trailing text each get a separate block, so none of
-  # them shares a line with the name, whichever locale puts what
-  # where.
+  # Splits the raw template, not the rendered title -- locale word
+  # order (ja, zh, ru put the placeholder before the label) varies.
   def title_with_name(label_key, object, placeholder, user)
     return inline_title_with_name(label_key, object, placeholder, user) unless
       text_container?
@@ -137,13 +103,8 @@ module Views::FullPageBase::Title
     end
   end
 
-  # `title-name-line`'s padding-left (not .hanging-indent) indents
-  # every line this wraps to, the first included -- no shared-line
-  # label text is left for only the continuation lines to align
-  # under. The name, and its leading space, are one flex item, not
-  # several -- flexbox collapses whitespace between sibling flex
-  # items, which otherwise eats the space before "group" and glues
-  # the badge's digits onto the name in plain-text extraction.
+  # Name + its leading space are one flex item -- flexbox collapses
+  # whitespace between siblings.
   def render_name_line(object, user)
     render(::Components::IDBadge.new(object: object, size: :sm))
     span do
@@ -152,18 +113,13 @@ module Views::FullPageBase::Title
     end
   end
 
-  # Wide/full containers have room for the label and name on one
-  # line -- plain interpolated title, no id badge, no line splits.
   def inline_title_with_name(label_key, object, placeholder, user)
     label_key.t(placeholder.to_sym => viewer_aware_format_name(object, user)).
       small_author
   end
 
-  # The id-badge/line-split treatment only reads well in a narrow
-  # container: :text column -- a wide/full container has room for
-  # the label and name on one line. `container_class` may not have
-  # been called yet when this runs (most actions rely on its :text
-  # default), so unset means :text, not "unknown".
+  # container_class may not have been called yet -- unset means :text,
+  # not "unknown".
   def text_container?
     return true unless content_for?(:container_class)
 
@@ -179,13 +135,9 @@ module Views::FullPageBase::Title
     object ? [object, "object"] : [name, "name"]
   end
 
-  # `Header::PageTitle` places this HTML twice -- next to the object
-  # name on desktop, and again in the mobile-only top row. No
-  # `extra_class:` here -- each placement site supplies the spacing
-  # that context needs. `size: :xl`: neither placement nests the
-  # badge inside a heading, so it can't ride on an ancestor's
-  # font-size the way `:sm`/`:md`/`:lg` are meant to; `:xl` is the
-  # one size in `Components::IDBadge::SIZE_CLASSES` not scaled down.
+  # Rendered twice by Header::PageTitle (desktop + mobile row), each
+  # placement supplying the spacing it needs -- extra_class: nil.
+  # size: :xl since neither placement scales off an ancestor heading.
   def add_id_badge(object)
     content_for(:id_badge) do
       capture do
@@ -195,25 +147,19 @@ module Views::FullPageBase::Title
     end
   end
 
-  # Captured HTML for `add_show_title`'s `owner_naming:` line, or nil
-  # when disabled or the line has nothing to show (the view decides
-  # via `visible_for?`).
+  # nil when disabled or OwnerNamingLine.visible_for? says no.
   def owner_naming_html(object, user, enabled)
     return nil unless enabled
 
-    # Aliased to a local because the `LocalizationFilesTest` regex
-    # picks up `:OwnerNamingLine` after a `::` namespace separator
-    # and flags it as an undefined translation tag.
+    # Local var, not inline -- LocalizationFilesTest's regex flags
+    # `::OwnerNamingLine` as an undefined translation tag otherwise.
     klass = ::Views::Controllers::Observations::OwnerNamingLine
     return nil unless klass.visible_for?(observation: object, user: user)
 
     capture { render(klass.new(observation: object, user: user)) }
   end
 
-  # Models with no `Title::` subclass (see app/classes/title.rb) fall
-  # back to their localized type tag (`observation`, `location`, etc.).
-  # The browser-tab text renders as plain text, so textile / HTML must
-  # NOT leak through.
+  # Plain text only -- no Title:: subclass falls back to the type tag.
   def document_title_for(object)
     Title.for(object).document_title
   end
@@ -231,18 +177,11 @@ module Views::FullPageBase::Title
     [:edit.ti, show_document_title(string, object)].safe_join(" ")
   end
 
-  # The actual content of `<title>` in `<head>`. Strips textile / HTML
-  # tags + entities (the visible heading may be marked-up; the tab text
-  # must be plain). Falls back to a titleized action name when nothing
-  # was set.
+  # Strips textile/HTML; falls back to the titleized action name.
   def title_tag_contents(title, action: action_name)
     if title.present?
-      # `unescape_html` first so `&lt;i&gt;…&lt;/i&gt;` (entity-encoded
-      # tags from translations) becomes `<i>…</i>` BEFORE `strip_html`
-      # removes the tags. Doing it in the other order leaves escaped
-      # entities untouched, then unescapes them into real tags after
-      # the strip — which the layout's `trusted_html(content_for(
-      # :document_title))` would then render literally.
+      # unescape_html first, or entity-encoded tags survive strip_html
+      # and render literally later.
       title.unescape_html.strip_html
     else
       action.tr("_", " ").titleize
