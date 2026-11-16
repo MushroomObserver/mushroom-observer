@@ -114,10 +114,18 @@ module Views::Controllers::Observations
         next unless number
 
         member.images.each do |image|
+          next if own_image_ids.include?(image.id)
+
           out[image.id] ||= { number: number,
                               observation_id: member.id }
         end
       end
+    end
+
+    # A photo attached to a sibling and to this observation is the
+    # page's photo, so it gets no marker.
+    def own_image_ids
+      @own_image_ids ||= @observation.images.map(&:id)
     end
 
     def carousel_links

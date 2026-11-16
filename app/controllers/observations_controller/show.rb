@@ -101,13 +101,12 @@ module ObservationsController::Show
   end
 
   # A comment is about the specimen, not the record of it, so every
-  # member's comments show on every member's page. Newest first, the
-  # order a single observation's comments already used (#5718).
+  # member's comments show on every member's page. Newest first,
+  # with or without siblings to merge in (#5718).
   def occurrence_comments
-    return own_comments unless @occurrence
-
-    (own_comments + @sibling_observations.flat_map(&:comments)).
-      sort_by(&:created_at).reverse
+    comments = own_comments
+    comments += @sibling_observations.flat_map(&:comments) if @occurrence
+    comments.sort_by(&:created_at).reverse
   end
 
   def own_comments
