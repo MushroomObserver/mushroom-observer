@@ -2190,19 +2190,21 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     new_obs = Observation.last
     new_loc = Location.last
     # new_img = Image.last
-    assert_text(new_obs.when.web_date)
-    assert_text(new_loc.name)
+    details = find_by_id("observation_details")
+    details.assert_text(new_obs.when.web_date)
+    details.assert_text(new_loc.name)
     if new_obs.is_collection_location
-      assert_text(:show_observation_collection_location.l)
+      details.assert_text(:show_observation_collection_location.l)
     else
-      assert_text(:show_observation_seen_at.l)
+      details.assert_text(:show_observation_seen_at.l)
     end
+    specimen = find_by_id("observation_specimen")
     if new_obs.specimen
-      assert_text(:herbarium_records.ti)
+      specimen.assert_text(:herbarium_records.ti)
     else
-      assert_text(:show_observation_specimen_not_available.l)
+      specimen.assert_text(:show_observation_specimen_not_available.l)
     end
-    assert_text(new_obs.notes_show_formatted)
+    find_by_id("observation_notes").assert_text(new_obs.notes_show_formatted)
     # assert_text(new_img.notes) # nope, in the caption on carousel
     # assert_no_link(href: "observations?where")
     assert_link(href: /#{location_path(new_loc.id)}/)

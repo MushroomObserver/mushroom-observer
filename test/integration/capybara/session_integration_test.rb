@@ -71,17 +71,23 @@ class SessionIntegrationTest < CapybaraIntegrationTestCase
     login(katrina, session: katrina_session)
     assert_equal(true, true) # Rails complains this test has no assertions
 
+    # Scoped to the toggle, not the menu (`#user_drop_down`) -- the
+    # username renders in the toggle's label span; the menu only has
+    # generic action labels, no username.
     rolf_session.visit("/info/intro")
-    rolf_session.assert_text("rolf")
-    rolf_session.assert_no_text("katrina")
+    rolf_nav = rolf_session.find_by_id("user_nav_toggle")
+    rolf_nav.assert_text("rolf")
+    rolf_nav.assert_no_text("katrina")
 
     mary_session.visit("/info/intro")
-    mary_session.assert_text("mary")
-    mary_session.assert_no_text("rolf")
+    mary_nav = mary_session.find_by_id("user_nav_toggle")
+    mary_nav.assert_text("mary")
+    mary_nav.assert_no_text("rolf")
 
     katrina_session.visit("/info/intro")
-    katrina_session.assert_text("katrina")
-    katrina_session.assert_no_text("rolf") # mary too general
+    katrina_nav = katrina_session.find_by_id("user_nav_toggle")
+    katrina_nav.assert_text("katrina")
+    katrina_nav.assert_no_text("rolf") # mary too general
   end
 
   # -------------------------------------------------------------------------

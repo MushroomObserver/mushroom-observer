@@ -28,7 +28,7 @@ module Admin
 
     # Form for admins to switch users
     def edit
-      if !@user&.admin && session[:real_user_id].blank?
+      if !@user&.admin && sudo_real_user.blank?
         redirect_back_or_default("/") and return
       end
 
@@ -52,7 +52,7 @@ module Admin
       # another user. This is a weird case which only comes up if you switch to
       # another admin user.  But if you do so the Switch User mechanism should
       # behave in a reasonable way, and this seems the most appropriate way.
-      elsif !@user&.admin && session[:real_user_id].blank?
+      elsif !@user&.admin && sudo_real_user.blank?
         redirect_back_or_default("/")
       elsif new_user.present?
         switch_to_user_if_verified(new_user)

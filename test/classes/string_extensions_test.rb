@@ -145,6 +145,29 @@ class StringExtensionsTest < UnitTestCase
     assert_equal(str, str.dup.small_author)
   end
 
+  # "group" (and "clade"/"complex"/"gr."/"gp.") reads at full size,
+  # outside <small>, since it isn't part of the author citation.
+  def test_small_author_with_group_word
+    str = "<b><i>Xylaria polymorpha</i></b> group Pers."
+    expected = "<b><i>Xylaria polymorpha</i></b> group " \
+               '<small class="text-nowrap">Pers.</small>'
+    assert_equal(expected, str.dup.small_author)
+  end
+
+  # "gr."/"gp." have an optional trailing "." -- confirms the dot
+  # stays with the qualifier, not stranded inside <small>.
+  def test_small_author_with_dotted_group_abbreviation
+    str = "<b><i>Xylaria polymorpha</i></b> gr. Pers."
+    expected = "<b><i>Xylaria polymorpha</i></b> gr. " \
+               '<small class="text-nowrap">Pers.</small>'
+    assert_equal(expected, str.dup.small_author)
+
+    str = "<b><i>Xylaria polymorpha</i></b> gp. Pers."
+    expected = "<b><i>Xylaria polymorpha</i></b> gp. " \
+               '<small class="text-nowrap">Pers.</small>'
+    assert_equal(expected, str.dup.small_author)
+  end
+
   def test_strip_html
     assert_equal("plain text", "<b>plain</b> <i>text</i>".strip_html)
     assert_equal("text", "<!-- a comment -->text".strip_html)

@@ -613,6 +613,16 @@ class String
     insert(ind + offset, "<br/>".html_safe)
   end
 
+  # A rank qualifier right after the name ("group", "clade",
+  # "complex", "gr.", "gp." -- see Name::Parse::GROUP_ABBR) reads at
+  # full size, not shrunk with the author that follows it.
+  # `(?!\w)` instead of `\b` -- `\b` after an *optional* trailing
+  # `.` backtracks the `.` away to find a word boundary (a period
+  # followed by whitespace has none), stranding the dot inside
+  # <small> for "gr."/"gp.". `(?!\w)` only checks what follows, so it
+  # doesn't care whether the match ended on a letter or a dot.
+  GROUP_WORD_PATTERN = /\A\s*(group|gr\.?|gp\.?|clade|complex)(?!\w)/i
+
   # Wrap the author name in <small> HTML tag, with or without break
   # (for styling taxonomic names legibly)
   def small_author
@@ -626,18 +636,16 @@ class String
     ind = rindex(tag)
     return self if !ind || !offset || (length <= (ind + offset))
 
-    # Skip the space between the name and the author before opening
-    # the tag, so that space stays a normal wrap point instead of
-    # becoming the first character of the author span (unbreakable,
-    # since the span is `white-space: nowrap`). Without this, the
-    # binomial's genus/epithet space is the only wrap point left in
-    # the whole name+author run, so a narrow viewport breaks the
-    # binomial itself instead of wrapping before the author.
-    start = ind + offset
-    start += 1 while self[start] == " "
+    insert_at = ind + offset
+    if (group_match = GROUP_WORD_PATTERN.match(self[insert_at..]))
+      insert_at += group_match.end(0)
+    end
+    # Skip the space so it stays a breakable wrap point, not the
+    # unbreakable span's first character.
+    insert_at += 1 while self[insert_at] == " "
 
     insert(length, "</small>".html_safe)
-    insert(start, '<small class="text-nowrap">'.html_safe)
+    insert(insert_at, '<small class="text-nowrap">'.html_safe)
   end
 
   # rubocop:disable MO/NoLongCommentBlock
