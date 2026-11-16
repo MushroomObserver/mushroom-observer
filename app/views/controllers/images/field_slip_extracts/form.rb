@@ -227,7 +227,6 @@ module Views::Controllers::Images::FieldSlipExtracts
           render_name_feedback if @name_feedback.present?
           render_name_use(row)
           render_vote_field
-          Help(content: :field_slip_extract_id_help.l)
         end
       end
     end
@@ -249,7 +248,8 @@ module Views::Controllers::Images::FieldSlipExtracts
     def render_name_field(row)
       autocompleter_field("value[#{row.field}]",
                           type: :name, value: row.extracted,
-                          label: :field_slip_extract_id.l)
+                          label: :field_slip_extract_id.l,
+                          help: :field_slip_extract_id_help.l)
     end
 
     # Ticked by default only when the ID already resolves to a name MO

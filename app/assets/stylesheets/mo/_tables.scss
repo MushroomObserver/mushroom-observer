@@ -2,32 +2,19 @@
 // tables
 // --------------------------------------------------
 
-// Wraps every Components::Table (table.rb). `overflow-y: hidden`,
-// not the `overflow` shorthand, so horizontal scroll still works.
-.table-wrap {
-  overflow-x: auto;
-  overflow-y: hidden;
-  border: 1px solid $list-group-border;
-  border-radius: $list-group-border-radius;
-}
-
-// No double border when a Panel already supplies one.
-.panel .table-wrap {
-  border-color: transparent;
-}
-
 // Cell padding matching a `.list-group-item` row. Pair with
 // Components::Table's variant: :lg.
 .table-lg {
   > thead > tr > th,
   > tbody > tr > td {
     padding: $card-spacer-x !important;
+    border-color: $list-group-border;
   }
-}
 
-// variant: :lg lands on the wrapper too (table.rb).
-.table-wrap.table-lg {
-  border-color: $panel-default-border;
+  > thead > tr > th {
+    padding-top: $table-cell-padding !important;
+    padding-bottom: $table-cell-padding !important;
+  }
 }
 
 thead tr {

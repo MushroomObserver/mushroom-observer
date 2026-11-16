@@ -14,10 +14,10 @@ module Views::Controllers::SpeciesLists
       other = species_lists(:first_species_list)
       html = render_table([@species_list, other])
 
-      assert_html(html, "table tr", count: 2)
+      assert_html(html, "tbody tr", count: 2)
       assert_html(html, ".badge-id", count: 2)
       assert_html(html, ".list_what")
-      assert_html(html, ".list_when")
+      assert_html(html, "div", text: @species_list.when.to_s)
     end
 
     def test_does_not_render_manage_section_by_default

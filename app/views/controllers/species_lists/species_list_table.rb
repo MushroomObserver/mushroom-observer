@@ -19,9 +19,11 @@ module Views::Controllers::SpeciesLists
     prop :manageable_ids, _Nilable(_Array(Integer)), default: nil
 
     def view_template
-      Table(@objects, show_headers: false) do |t|
-        t.column(nil) { |species_list| render_info_cell(species_list) }
-        t.column(nil) { |species_list| render_action_cell(species_list) }
+      Table(@objects, variant: :lg) do |t|
+        t.column(:species_list.ti) { |list| render_info_cell(list) }
+        t.column(:observations.ti, align: :right) do |list|
+          render_action_cell(list)
+        end
       end
     end
 
@@ -40,8 +42,6 @@ module Views::Controllers::SpeciesLists
             trusted_html(species_list.text_name.t)
           end
         end
-        whitespace
-        span(class: "list_when ml-4") { plain("(#{species_list.when})") }
         IDBadge(object: species_list, size: :xl, extra_class: "ml-3")
       end
     end
@@ -51,6 +51,8 @@ module Views::Controllers::SpeciesLists
         span { trusted_html(place_for(species_list)) }
         whitespace
         plain("|")
+        whitespace
+        trusted_html(append_colon(species_list.when))
         whitespace
         Link(type: :user, user: species_list.user)
       end

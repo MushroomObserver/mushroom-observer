@@ -17,7 +17,7 @@ module Views::Controllers::SpeciesLists
       # Sort table lives on the controller — single source of truth.
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-      container_class(:wide)
+      container_class(:full)
 
       PaginatedResults { render_list }
     end
