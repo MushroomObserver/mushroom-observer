@@ -118,10 +118,15 @@ class Components::Table < Components::Base
     # https://www.phlex.fun/components/yielding.html#vanishing-the-yield
     vanish(&block)
 
-    table(**table_attributes) do
-      render_thead if @show_headers
-      render_tbody
-      render_tfoot if @footer_block
+    # `.table-wrap` (mo/_tables.scss) carries the border/radius and
+    # the horizontal scroll. Variant classes land here too, for
+    # selectors like `.table-wrap.table-lg`.
+    div(class: class_names("table-wrap", variant_classes)) do
+      table(**table_attributes) do
+        render_thead if @show_headers
+        render_tbody
+        render_tfoot if @footer_block
+      end
     end
   end
 
