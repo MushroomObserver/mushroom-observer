@@ -57,6 +57,38 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                 text: "(#{:show_observation_this_observation.l})")
   end
 
+  # The panel is the key a reader uses to decode a number on a
+  # comment or photo, so a numbered sibling shows the same one,
+  # and the current observation shows none (#5718).
+  def test_markers_label_siblings_only
+    occurrence = occurrences(:occ_field_slip_one)
+    current = occurrence.primary_observation
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(obs: current, siblings: [sibling],
+                             occurrence: occurrence,
+                             markers: { sibling.id => 1 }))
+
+    path = routes.permanent_observation_path(sibling.id)
+    assert_html(html, "a[href='#{path}'] .sibling-marker", text: "1")
+    assert_no_html(html, "#current_observation_row .sibling-marker",
+                   "The observation being shown carries no number")
+    assert_html(html, "#current_observation_row .sibling-marker-spacer")
+  end
+
+  def test_no_markers_renders_no_numbers
+    occurrence = occurrences(:occ_field_slip_one)
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(siblings: [sibling],
+                             occurrence: occurrence))
+
+    assert_no_html(html, ".sibling-marker",
+                   "No numbers without a marker map")
+    assert_no_html(html, ".sibling-marker-spacer",
+                   "No legend means no room reserved for one")
+  end
+
   def test_every_row_leads_with_id_badge
     occurrence = occurrences(:occ_field_slip_one)
     current = occurrence.primary_observation
@@ -151,9 +183,10 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                         occurrence: occurrence)
   end
 
-  def panel_with(siblings:, occurrence:, obs: @obs)
+  def panel_with(siblings:, occurrence:, obs: @obs, markers: {})
     Views::Controllers::Observations::Show::MatchingObservationsPanel.new(
-      obs: obs, occurrence: occurrence, siblings: siblings
+      obs: obs, occurrence: occurrence, siblings: siblings,
+      markers: markers
     )
   end
 end

@@ -33,6 +33,10 @@ module Views::Controllers::Comments
     # `@user.present?` or a hardcoded false.
     prop :editable, _Boolean, default: false
     prop :limit, _Nilable(Integer), default: nil
+    # {observation id => footnote number}, for an occurrence
+    # whose members' comments are shown together (#5718). Empty
+    # on every other commentable, which has no siblings.
+    prop :markers, _Hash(Integer, Integer), default: -> { {} }
 
     def view_template
       turbo_stream_from(@object, :comments)
@@ -55,7 +59,8 @@ module Views::Controllers::Comments
         visible_comments.each do |comment|
           list.item(class: "comment", id: dom_id(comment)) do
             render(CommentItem.new(comment: comment, user: @user,
-                                   editable: @editable))
+                                   editable: @editable,
+                                   marker: @markers[comment.target_id]))
           end
         end
         list.empty { plain(:show_comments_no_comments_yet.t) }

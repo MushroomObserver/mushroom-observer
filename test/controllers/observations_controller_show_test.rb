@@ -97,6 +97,30 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href*='occurrences/#{occ.id}']")
   end
 
+  # The numbers tying a comment or photo back to the member it came
+  # from have to survive the whole render chain -- the panel, the
+  # comments and the carousel each get them from the controller, and a
+  # panel built directly in a view test cannot show a missing one
+  # (#5718).
+  def test_show_observation_marks_items_from_siblings
+    login("rolf")
+    primary = observations(:minimal_unknown_obs)
+    sibling = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    Comment.create!(user: rolf, target: sibling, summary: "On the sibling",
+                    comment: "Said elsewhere in this occurrence.")
+
+    get(:show, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#matching_observations .sibling-marker", text: "1")
+    assert_select("#current_observation_row .sibling-marker-spacer")
+    assert_select(".comment-summary .sibling-marker", text: "1")
+    assert_select(".comment-summary a[href*='#{sibling.id}'] .sibling-marker")
+  end
+
   # Any image in the occurrence can be the thumbnail; when it belongs
   # to a sibling it still leads the carousel (issue #5160).
   def test_show_observation_sibling_image_as_thumbnail

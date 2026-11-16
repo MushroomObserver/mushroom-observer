@@ -29,6 +29,12 @@ class Components::ImageGallery < Components::Base
   prop :thumbnails, _Boolean, default: true
   prop :carousel_id, _Nilable(::String), default: nil
   prop :panel_id, _Nilable(::String), default: nil
+  # {image id => {number:, observation_id:}} when the photos come
+  # from several members of one occurrence (#5718). The id is
+  # there so the badge can link to the member the photo hangs
+  # on, the way the one on a comment does. Empty elsewhere.
+  prop :markers, _Hash(::Integer, _Hash(Symbol, ::Integer)),
+       default: -> { {} }
 
   def view_template
     @carousel_id ||= generate_carousel_id
@@ -96,8 +102,17 @@ class Components::ImageGallery < Components::Base
         render(Components::ImageGallery::Thumbnail.new(
                  user: @user, image: image
                ))
+        render_thumbnail_marker(image)
       end
     end
+  end
+
+  def render_thumbnail_marker(image)
+    marker = @markers[image.id]
+    return unless marker
+
+    SiblingMarker(**marker, variant: :solid, isolate_click: true,
+                            class: "carousel-thumbnail-marker")
   end
 
   def render_no_images_message(panel)
