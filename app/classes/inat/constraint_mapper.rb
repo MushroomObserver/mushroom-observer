@@ -31,7 +31,7 @@ class Inat
     # It starts refusing at about 100. Elsewhere MO uses 60/minute
     # by pacing itself at 1/sec. ObsFetcher#INTER_PAGE_SLEEP
     # Imports, syncs and the nightly alert job share the same iNat
-    # per-minute allowance.
+    # per-minute allowance. See ObsFetcher#INTER_PAGE_SLEEP.
     # Stop lookups at 50 to leave some allowance free for other requests.
     LOOKUPS_PER_REQUEST = 50
 
