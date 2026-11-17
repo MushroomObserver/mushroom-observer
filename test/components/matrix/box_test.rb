@@ -61,7 +61,7 @@ class MatrixBoxTest < ComponentTestCase
 
     assert_html(html, "#box_#{image.id}.matrix-box")
     assert_html(html, "img.image_#{image.id}")
-    # format_name, not unique_format_name -- the IDBadge beside it
+    # format_name, not unique_format_name -- the id badge beside it
     # already shows the id.
     assert_html(html, ".rss-name", text: image.format_name.t.as_displayed)
   end

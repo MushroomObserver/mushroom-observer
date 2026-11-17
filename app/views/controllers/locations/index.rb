@@ -45,12 +45,15 @@ module Views::Controllers::Locations
       ListGroup do |list|
         @locations.each do |location|
           list.item(class: "d-flex align-items-start") do
-            div(class: "id-badge-col") { IDBadge(object: location, size: :lg) }
+            div(class: "id-badge-col") do
+              Badge(variant: :id, object: location, size: :lg)
+            end
             div(class: "flex-grow-1") do
               Link(type: :location, where: location.name.t, location: location)
             end
             div(class: "obs-count-col") do
-              CountBadge(count: @observation_counts[location.id].to_i)
+              Badge(variant: :count,
+                    count: @observation_counts[location.id].to_i)
             end
           end
         end

@@ -158,7 +158,8 @@ module Views::Controllers::Admin::BlockedIps
             show_headers: false,
             align_middle: true,
             class: "ips border-top",
-            style: "order: 3") do |t|
+            style: "order: 3",
+            panel_wrap: false) do |t|
         t.column("ip", &:t)
         t.column("actions", align: :right) do |ip|
           render_remove_button(ip)

@@ -24,7 +24,7 @@ module Views::Controllers::Images
       def render_table
         Table(history_rows,
               variant: :striped, identifier: "license-history",
-              class: "table-responsive small") do |t|
+              class: "table-responsive small", panel_wrap: false) do |t|
           t.column(:dates.ti) { |row| row[:dates] }
           t.column(:license.ti) { |row| trusted_html(row[:license_link]) }
           t.column(:copyright_holder.ti) { |row| trusted_html(row[:holder]) }

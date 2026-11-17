@@ -3,9 +3,10 @@
 # Single entry-point dispatcher for Bootstrap `.badge` components.
 # Pass `variant:` to route to the matching subclass.
 #
-#   Badge(variant: :sibling_marker, number: 2, observation_id: 663635)
+#   Badge(variant: :id, object: @project, size: :sm)
 class Components::Badge < Components::Base
-  DISPATCH = { sibling_marker: :SiblingMarker }.freeze
+  DISPATCH = { count: :Count, id: :ID,
+               sibling_marker: :SiblingMarker }.freeze
 
   def self.new(**kwargs, &block)
     variant_sym = kwargs[:variant]&.to_sym

@@ -99,7 +99,8 @@ module Views::Controllers::Occurrences::Projects
       ul(class: "list-unstyled mt-2") do
         projects.each do |project|
           li(class: "d-flex align-items-center mb-1") do
-            IDBadge(object: project, size: :md, extra_class: "mr-3")
+            Badge(variant: :id, object: project, size: :md,
+                  extra_class: "mr-3")
             a(href: project_path(project)) { plain(project.title) }
           end
         end

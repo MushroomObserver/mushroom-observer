@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# "Matching Observations" panel. Lists every occurrence member: an
-# IDBadge, a status icon (occurrence primary / read-only reflection),
-# then the name -- current observation as plain text tagged "(this
-# observation)"; siblings as links. No occurrence yet: just an "Add
-# Matching Observations" link, no body.
+# "Matching Observations" panel. Lists every occurrence member: a
+# Badge(variant: :id), a status icon (occurrence primary / read-only
+# reflection), then the name -- current observation as plain text
+# tagged "(this observation)"; siblings as links. No occurrence yet:
+# just an "Add Matching Observations" link, no body.
 #
 class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views::Base
   include Views::Controllers::Observations::Show::OccurrenceStatusIcons
@@ -67,7 +67,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   # clicking an icon also hovers/clicks the link.
   def render_member_row(member, link:)
     render_marker(member)
-    IDBadge(object: member, size: :lg, interactive: link, extra_class: "mr-3")
+    Badge(variant: :id, object: member, size: :lg, interactive: link,
+          extra_class: "mr-3")
     icon_types = member_status_icon_types(member, @occurrence)
     gap_class = "icon-text-gap" if icon_types.any?
     if link

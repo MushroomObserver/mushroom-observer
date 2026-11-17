@@ -48,7 +48,8 @@ module Views::Controllers::Observations::Locations
       div(class: "d-flex align-items-center") do
         Link(type: :location, where: location.name.t, location: location)
         div(class: "ml-3") do
-          CountBadge(count: @observation_counts[location.id].to_i)
+          Badge(variant: :count,
+                count: @observation_counts[location.id].to_i)
         end
       end
     end

@@ -3,6 +3,18 @@
 require("test_helper")
 
 class Components::BadgeTest < ComponentTestCase
+  def test_count_variant_returns_count_instance
+    result = Components::Badge.new(variant: :count, count: 1)
+
+    assert_instance_of(Components::Badge::Count, result)
+  end
+
+  def test_id_variant_returns_id_instance
+    result = Components::Badge.new(variant: :id, size: :sm)
+
+    assert_instance_of(Components::Badge::ID, result)
+  end
+
   def test_sibling_marker_variant_returns_sibling_marker_instance
     result = Components::Badge.new(variant: :sibling_marker, number: 1)
 

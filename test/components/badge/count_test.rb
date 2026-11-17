@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Components::CountBadgeTest < ComponentTestCase
+class Components::Badge::CountTest < ComponentTestCase
   def test_renders_count
     html = render_badge(count: 3)
 
@@ -39,6 +39,6 @@ class Components::CountBadgeTest < ComponentTestCase
   private
 
   def render_badge(count:, type: :observation)
-    render(Components::CountBadge.new(count: count, type: type))
+    render(Components::Badge.new(variant: :count, count: count, type: type))
   end
 end

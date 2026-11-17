@@ -145,7 +145,7 @@ module Views::FullPageBase::Title
   # items, which otherwise eats the space before "group" and glues
   # the badge's digits onto the name in plain-text extraction.
   def render_name_line(object, user)
-    render(::Components::IDBadge.new(object: object, size: :sm))
+    render(::Components::Badge.new(variant: :id, object: object, size: :sm))
     span do
       whitespace
       trusted_html(viewer_aware_format_name(object, user).t.small_author)
@@ -185,12 +185,12 @@ module Views::FullPageBase::Title
   # that context needs. `size: :xl`: neither placement nests the
   # badge inside a heading, so it can't ride on an ancestor's
   # font-size the way `:sm`/`:md`/`:lg` are meant to; `:xl` is the
-  # one size in `Components::IDBadge::SIZE_CLASSES` not scaled down.
+  # one size in `Components::Badge::ID::SIZE_CLASSES` not scaled down.
   def add_id_badge(object)
     content_for(:id_badge) do
       capture do
-        render(::Components::IDBadge.new(object: object, size: :xl,
-                                         extra_class: nil))
+        render(::Components::Badge.new(variant: :id, object: object,
+                                       size: :xl, extra_class: nil))
       end
     end
   end
