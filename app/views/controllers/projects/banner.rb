@@ -60,7 +60,7 @@ module Views::Controllers::Projects
             render_banner_title(with_overlay_styling: false)
           end
           if project_subtitle?
-            div(class: "pl-3 mb-3") do
+            div(class: "pl-3 mb-2") do
               render_project_location(with_overlay_styling: false)
               render_project_date_range(with_overlay_styling: false)
             end
@@ -73,7 +73,7 @@ module Views::Controllers::Projects
       title_classes = if with_overlay_styling
                         "h3 banner-image-text"
                       else
-                        "h3 page-title mb-4"
+                        "h3 page-title mb-2"
                       end
 
       h1(class: title_classes, id: title_id) do
