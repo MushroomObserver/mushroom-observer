@@ -94,8 +94,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     marker = @markers[member.id]
     return span(class: "sibling-marker-spacer mr-2") unless marker
 
-    SiblingMarker(number: marker, observation_id: member.id,
-                  class: "mr-2")
+    Badge(variant: :sibling_marker, number: marker,
+          observation_id: member.id, class: "mr-2")
   end
 
   # format_name, not unique_format_name -- the badge already shows the id.

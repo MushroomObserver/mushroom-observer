@@ -2,9 +2,9 @@
 
 require("test_helper")
 
-# `Components::SiblingMarker` — the footnote number saying which
-# occurrence member a comment or photo came from (#5718).
-class Components::SiblingMarkerTest < ComponentTestCase
+# `Components::Badge::SiblingMarker` — the footnote number saying
+# which occurrence member a comment or photo came from (#5718).
+class Components::Badge::SiblingMarkerTest < ComponentTestCase
   def test_linked_marker_points_at_its_observation
     obs = observations(:detailed_unknown_obs)
 
@@ -12,10 +12,8 @@ class Components::SiblingMarkerTest < ComponentTestCase
 
     path = routes.permanent_observation_path(obs.id)
     assert_html(html, "a[href='#{path}'] .sibling-marker", text: "2")
-    assert_html(
-      html,
-      "[title='#{:show_observation_sibling_marker.l(id: obs.id)}']"
-    )
+    title = :show_observation_sibling_marker.l(id: obs.id)
+    assert_html(html, "[data-tooltip-target='tip'][data-title='#{title}']")
   end
 
   def test_plain_marker_has_no_link
@@ -48,9 +46,9 @@ class Components::SiblingMarkerTest < ComponentTestCase
 
   # An outlined badge vanishes into a photograph, so the carousel
   # overlay fills instead.
-  def test_solid_variant_swaps_the_outline
+  def test_solid_fill_swaps_the_outline
     solid = render_marker(number: 1, observation_id: nil,
-                          variant: :solid)
+                          fill: :solid)
     outlined = render_marker(number: 1, observation_id: nil)
 
     assert_html(solid, ".sibling-marker-solid", text: "1")
@@ -69,7 +67,8 @@ class Components::SiblingMarkerTest < ComponentTestCase
     plain = render_marker(number: 1, observation_id: obs.id)
 
     assert_html(isolated,
-                "a[data-controller='links'][data-action='click->links#follow']")
+                "a[data-controller='links']" \
+                "[data-action='click->links#follow:stop']")
     assert_no_html(plain, "a[data-action]",
                    "Only a badge inside a carousel needs the action")
   end
@@ -77,7 +76,8 @@ class Components::SiblingMarkerTest < ComponentTestCase
   private
 
   def render_marker(number:, observation_id:, **attrs)
-    render(Components::SiblingMarker.new(
+    render(Components::Badge.new(
+             variant: :sibling_marker,
              number: number, observation_id: observation_id, **attrs
            ))
   end

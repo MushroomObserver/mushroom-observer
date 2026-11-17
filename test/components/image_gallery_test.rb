@@ -267,7 +267,7 @@ class ImageGalleryTest < ComponentTestCase
                       ".carousel-thumbnail-marker", text: "2")
     assert_html(html, ".carousel-thumbnail-marker.sibling-marker-solid")
     assert_html(html, ".carousel-indicators " \
-                      "a[data-action='click->links#follow']")
+                      "a[data-action='click->links#follow:stop']")
   end
 
   def test_no_thumbnail_markers_without_a_marker_map

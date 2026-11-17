@@ -9,12 +9,12 @@ export default class extends Controller {
   // A link inside a Bootstrap carousel indicator. The carousel's
   // click handler is delegated on the document for
   // [data-slide-to] and ends in preventDefault, so a click that
-  // reaches it cancels the link. Keeping the click here lets the
-  // link navigate; the slide does not change, which is right --
-  // the reader asked for the observation, not the photo.
-  follow(e) {
-    e.stopPropagation();
-  }
+  // reaches it cancels the link. The `:stop` action-descriptor
+  // modifier in the data-action string stops propagation before
+  // this runs, so the link navigates; the slide does not change,
+  // which is right -- the reader asked for the observation, not
+  // the photo.
+  follow() {}
 
   disable(e) {
     e.preventDefault();
