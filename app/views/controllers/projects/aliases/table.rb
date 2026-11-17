@@ -50,7 +50,12 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_actions_cell(alias_)
-      Button(
+      InlineLinkBlock(items: [edit_button(alias_), destroy_button(alias_)],
+                      margin_class: "")
+    end
+
+    def edit_button(alias_)
+      Components::Button.new(
         type: :modal,
         target: edit_project_alias_path(
           project_id: alias_.project_id, id: alias_.id
@@ -59,8 +64,10 @@ module Views::Controllers::Projects::Aliases
         name: :edit_object.t(type: :project_alias),
         icon: :edit, variant: :strip
       )
-      span(class: "mx-2")
-      Button(
+    end
+
+    def destroy_button(alias_)
+      Components::Button.new(
         type: :delete,
         target: project_alias_path(
           project_id: alias_.project_id, id: alias_.id
