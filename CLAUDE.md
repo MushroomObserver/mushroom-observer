@@ -207,8 +207,9 @@ importmap, GitHub Actions CI (4 parallel workers)
 
 **Key patterns**:
 - `observation_views` table for view stats
-- Custom i18n system: `en.txt` -> `en.yml` translation files.
-  **NEVER edit `config/locales/en.yml` directly.** Edit `en.txt` then
-  run `rails lang:update`.
+- Custom i18n system: `en.txt` is the source of truth. Edit it, then
+  run `rails lang:update` to import the change into the DB.
+  Translations resolve through Solid Cache / `DbFallback` at runtime;
+  `config/locales/en.yml` is no longer read by the app.
 - Avoid over-engineering — implement only requested changes
 - Prefer editing existing files over creating new ones

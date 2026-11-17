@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # Claude Code PreToolUse hook. Fires before a `rails test` Bash call.
-# Regenerates en.yml from en.txt first if stale, so a Symbol.missing_tags
-# teardown failure doesn't cost the assistant a turn diagnosing it.
+# Imports en.txt into the DB/cache first if stale, so a
+# Symbol.missing_tags teardown failure doesn't cost the assistant a
+# turn diagnosing it.
 # Cache key is en.txt's git blob hash + branch name (see
 # script/lang_update_if_needed.sh for why branch is part of the key).
 # Non-blocking: never blocks the test command itself, just reports.
@@ -43,7 +44,7 @@ echo "" >&2
 echo "🌐 en.txt changed since last sync — running bin/rails lang:update" >&2
 if bin/rails lang:update >/tmp/pre_test_lang_update.log 2>&1; then
   echo "$CURRENT_HASH" > "$CACHE_FILE"
-  echo "   ✅ lang:update complete (en.yml regenerated)" >&2
+  echo "   ✅ lang:update complete (DB/cache updated)" >&2
 else
   echo "   ⚠️  lang:update failed; see /tmp/pre_test_lang_update.log" >&2
 fi
