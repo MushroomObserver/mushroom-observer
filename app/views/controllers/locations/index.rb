@@ -43,12 +43,14 @@ module Views::Controllers::Locations
 
     def render_location_table
       Table(@locations) do |t|
-        t.column(:mo_id.ti) { |loc| IDBadge(object: loc, size: :lg) }
+        t.column(:mo_id.ti) do |loc|
+          Badge(variant: :id, object: loc, size: :lg)
+        end
         t.column(:location.ti) do |loc|
           Link(type: :location, where: loc.name.t, location: loc)
         end
         t.column(:sort_by_observations.t, align: :right) do |loc|
-          CountBadge(count: @observation_counts[loc.id].to_i)
+          Badge(variant: :count, count: @observation_counts[loc.id].to_i)
         end
       end
     end

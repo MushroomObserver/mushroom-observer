@@ -100,7 +100,7 @@ module Views::Controllers::Admin::BlockedIps
       def render_activity_table
         Table(
           ip_stats[:activity].last(50).reverse,
-          class: "ips ips-lined"
+          class: "ips ips-lined", panel_wrap: false
         ) { |t| render_activity_columns(t) }
       end
 

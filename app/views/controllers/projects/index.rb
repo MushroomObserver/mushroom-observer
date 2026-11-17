@@ -17,24 +17,16 @@ module Views::Controllers::Projects
       add_context_nav(Tab::Project::IndexNav.new)
       add_sorter(@query, controller.index_sort_options)
       add_pagination(@pagination_data)
-      container_class(:wide)
+      container_class(:full)
 
-      PaginatedResults { render_list_group }
+      PaginatedResults { render_table }
     end
 
     private
 
-    def render_list_group
-      ListGroup do |list|
-        @objects.each do |project|
-          list.item(
-            class: "d-flex justify-content-between align-items-start"
-          ) do
-            count = @observation_counts[project.id].to_i
-            render(ListItem.new(project: project, observation_count: count))
-          end
-        end
-      end
+    def render_table
+      render(ProjectTable.new(@objects,
+                              observation_counts: @observation_counts))
     end
   end
 end

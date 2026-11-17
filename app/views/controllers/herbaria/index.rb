@@ -59,13 +59,14 @@ module Views::Controllers::Herbaria
       table.column(:herbarium_code.t) { |h| plain(h.code.to_s) }
       table.column(:herbarium.ti) { |h| render_name_cell(h) }
       table.column(:herbarium_index_records.t) do |h|
-        CountBadge(count: h.herbarium_records.length, type: :herbarium_record)
+        Badge(variant: :count, count: h.herbarium_records.length,
+              type: :herbarium_record)
       end
       table.column(user_header) { |h| render_user_cell(h) }
     end
 
     def render_id_badge(herbarium)
-      IDBadge(object: herbarium, size: :lg, extra_class: nil)
+      Badge(variant: :id, object: herbarium, size: :lg, extra_class: nil)
     end
 
     def user_header

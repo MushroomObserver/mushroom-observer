@@ -48,11 +48,11 @@ module Views::Controllers::Names::Descriptions::Moves
       desc = name_descriptions(:coprinus_comatus_desc)
       html = render_form(desc)
 
-      # Form renders but is minimal (no move targets)
+      # Form renders, but with no header/help/form-group -- there's
+      # nothing to move to, so none of that applies.
       assert_html(html, "form#move_descriptions_form")
-
-      # Header still shows
-      assert_includes(html, :merge_descriptions_move_header.t)
+      assert_html(html, "p", text: :merge_descriptions_no_synonyms.t)
+      assert_no_html(html, "p", text: :merge_descriptions_move_help.t)
 
       # No radio buttons when no synonyms
       assert_no_html(html, "input[type='radio']")

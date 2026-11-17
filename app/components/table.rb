@@ -93,6 +93,13 @@ class Components::Table < Components::Base
   # table. Per-column valign: (on #column) still applies for a
   # single column that needs to differ from the rest.
   prop :align_middle, _Boolean, default: false
+  # Self-wraps in a `Panel` for its native border/radius/margin
+  # handling -- pass `false` when the caller supplies the outer Panel.
+  prop :panel_wrap, _Boolean, default: true
+  # Class(es) for the wrapping Panel -- only meaningful with
+  # `panel_wrap: true` (the default). Ignored, not an error, when
+  # `panel_wrap: false`, matching the field helpers' `wrap_class:`.
+  prop :wrap_class, _Nilable(String), default: nil
   # Catch-all for class:, data:, cols:, ARIA attrs, and any other
   # HTML attrs forwarded to the `<table>` element -- matches
   # Icon/Collapsible's pattern.
@@ -118,10 +125,22 @@ class Components::Table < Components::Base
     # https://www.phlex.fun/components/yielding.html#vanishing-the-yield
     vanish(&block)
 
-    table(**table_attributes) do
-      render_thead if @show_headers
-      render_tbody
-      render_tfoot if @footer_block
+    if @panel_wrap
+      Panel(class: @wrap_class) do |p|
+        p.with_body(wrapper: false) { render_table_responsive }
+      end
+    else
+      render_table_responsive
+    end
+  end
+
+  def render_table_responsive
+    div(class: "table-responsive") do
+      table(**table_attributes) do
+        render_thead if @show_headers
+        render_tbody
+        render_tfoot if @footer_block
+      end
     end
   end
 

@@ -159,7 +159,7 @@ class Components::Grid::Box < Components::Base
                target: @data[:what].show_link_args) { render_title }
         end
         whitespace
-        IDBadge(object: @data[:what], size: :lg, extra_class: nil)
+        Badge(variant: :id, object: @data[:what], size: :lg, extra_class: nil)
       end
 
       render_identify_ui if @identify

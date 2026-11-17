@@ -20,8 +20,7 @@ module Views::Controllers::Descriptions::Merges
       assert_html(html, "form[action*='/names/descriptions/']")
       assert_html(html, "form[action*='/merges']")
 
-      # Header and help text
-      assert_includes(html, :merge_descriptions_merge_header.t)
+      # Help text
       assert_includes(html, :merge_descriptions_merge_help.t)
 
       # Radio buttons for merge targets
@@ -119,6 +118,18 @@ module Views::Controllers::Descriptions::Merges
 
       assert_includes(html, "(#{:default.l})")
       assert_includes(html, "(#{:restricted.l})")
+    end
+
+    # Merge targets can all have the same title ("Public Description")
+    # when none is the default -- the id in parens is what tells them
+    # apart without expanding each one's preview.
+    def test_description_title_includes_id
+      alt = name_descriptions(:peltigera_alt_desc)
+      restricted = name_descriptions(:peltigera_user_desc)
+      html = render_form(@description)
+
+      assert_html(html, "label", text: "(#{alt.id})")
+      assert_html(html, "label", text: "(#{restricted.id})")
     end
 
     def test_location_description_form_action

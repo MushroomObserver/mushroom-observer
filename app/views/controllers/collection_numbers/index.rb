@@ -40,7 +40,8 @@ module Views::Controllers::CollectionNumbers
     end
 
     def render_id_badge(collection_number)
-      IDBadge(object: collection_number, size: :lg, extra_class: nil)
+      Badge(variant: :id, object: collection_number, size: :lg,
+            extra_class: nil)
     end
 
     def render_edit_link(collection_number)

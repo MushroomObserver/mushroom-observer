@@ -11,7 +11,7 @@ require("test_helper")
 # Populates the `content_for` slots directly with marker strings
 # rather than going through `add_show_title`/`add_id_badge`/etc. or
 # the components they render (`Header::ObjectTitle`,
-# `Components::IDBadge`, `Header::InterestIcons`, ...) -- those have
+# `Components::Badge::ID`, `Header::InterestIcons`, ...) -- those have
 # their tests already. This file tests PageTitle's job: where it
 # places each already-rendered fragment, and which
 # responsive-visibility classes gate each copy.

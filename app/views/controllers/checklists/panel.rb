@@ -66,8 +66,9 @@ module Views::Controllers::Checklists
     end
 
     def taxon_marker_items(name, deprecated, synonym_id)
-      items = [Components::CountBadge.new(count: @data.counts[name],
-                                          class: "badge-outline ml-2")]
+      items = [Components::Badge.new(variant: :count,
+                                     count: @data.counts[name],
+                                     class: "badge-outline ml-2")]
       if deprecated
         # :approve, not :deprecate -- Tab::Name::Approve's icon is the
         # "currently deprecated" state indicator (see its comment);

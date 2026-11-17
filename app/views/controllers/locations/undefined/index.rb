@@ -55,7 +55,7 @@ module Views::Controllers::Locations
             render_actions(obs[:where])
           end
           t.column(:sort_by_observations.t, align: :right) do |_obs, count|
-            CountBadge(count: count)
+            Badge(variant: :count, count: count)
           end
         end
       end

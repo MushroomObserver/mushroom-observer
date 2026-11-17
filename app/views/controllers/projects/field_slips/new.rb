@@ -11,7 +11,6 @@ module Views::Controllers::Projects::FieldSlips
     def view_template
       render_page_chrome
 
-      render_max_info
       render_form
       render_tracker_table if member?
     end
@@ -55,6 +54,7 @@ module Views::Controllers::Projects::FieldSlips
 
     def render_form
       ContentPadded do
+        render_max_info
         render(Views::Controllers::Projects::FieldSlips::Form.new(
                  FormObject::ProjectFieldSlip.new(
                    field_slips: default_count
@@ -64,18 +64,15 @@ module Views::Controllers::Projects::FieldSlips
       end
     end
 
-    # Each `<tr>` is a Stimulus root rendered by `TrackerRow` --
-    # `data-controller="field-slip-job"` + per-tracker data attrs the
-    # JS uses to mutate cells as job state changes.
-    # `tbody#field_slip_job_trackers` is also a Turbo Stream target
-    # (`field_slips_controller#create` prepends a newly-created
-    # tracker there). Uses `Components::Table`'s row mode:
-    # `column(header, …)` defines the `<th>` chrome; `row { |tracker|
-    # … }` renders each `<tr>` via `TrackerRow`.
+    # Always renders, even with zero trackers -- `tbody#
+    # field_slip_job_trackers` is the Turbo Stream prepend target for
+    # a newly created tracker. CSS hides the empty table instead
+    # (see .table-field-slip-trackers in _tables.scss).
     def render_tracker_table
       Table(@trackers,
             identifier: "field-slip-trackers",
-            class: "mt-3", tbody_id: "field_slip_job_trackers") do |table|
+            wrap_class: "mt-3",
+            tbody_id: "field_slip_job_trackers") do |table|
         define_tracker_columns(table)
         table.row do |tracker|
           render(TrackerRow.new(tracker: tracker, user: @user))

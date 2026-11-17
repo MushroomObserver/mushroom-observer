@@ -64,7 +64,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_includes(html, "grid-box")
     assert_includes(html, "box_#{image.id}")
     assert_includes(html, "image_#{image.id}")
-    # format_name, not unique_format_name -- the IDBadge beside it
+    # format_name, not unique_format_name -- the id badge beside it
     # already shows the id.
     assert_html(html, ".log-name", text: image.format_name.t.as_displayed)
   end

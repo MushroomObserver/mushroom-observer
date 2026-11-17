@@ -2,6 +2,25 @@
 // tables
 // --------------------------------------------------
 
+// Cell padding matching a `.list-group-item` row. Pair with
+// Components::Table's variant: :lg.
+.table-lg {
+  > thead > tr > th,
+  > tbody > tr > td {
+    padding: $card-spacer-x !important;
+    border-color: $list-group-border;
+  }
+
+  > thead > tr > th {
+    padding-top: $table-cell-padding !important;
+    padding-bottom: $table-cell-padding !important;
+    // Bootstrap's header-specific border-bottom (2px) stacks with
+    // the next row's border-top (1px) -- drop it so every row
+    // boundary, including thead -> tbody, gets just the 1px border.
+    border-bottom: 0;
+  }
+}
+
 thead tr {
   color: $list-group-disabled-color; // like navbar-inverse
   background-color: $list-group-disabled-bg;
@@ -100,10 +119,15 @@ thead tr {
     }
   }
 
-  // Override the absolute-positioned checkbox layout so checkboxes
-  // center naturally in table cells.
+  // checkbox_field's `.d-flex` row ignores the td's `text-align:
+  // center` above -- flexbox positions its item via justify-content,
+  // not text-align.
   .checkbox {
     margin: 0;
+
+    .d-flex {
+      justify-content: center;
+    }
 
     label {
       padding-left: 0;
@@ -204,6 +228,14 @@ table.ips {
   tr th {
     padding: 0 0.5em;
   }
+}
+
+// Hides the field slip tracker table while it has no rows, rather
+// than an empty table with headers and nothing under them. `:has()`
+// re-evaluates live, so a Turbo Stream prepend into the (always
+// rendered) tbody reveals the table automatically.
+.table-field-slip-trackers:not(:has(tbody tr)) {
+  display: none;
 }
 
 // Interior borders only (between cells, not on outer edges)
