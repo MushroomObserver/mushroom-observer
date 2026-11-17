@@ -221,6 +221,14 @@ table.ips {
   }
 }
 
+// Hides the field slip tracker table while it has no rows, rather
+// than an empty table with headers and nothing under them. `:has()`
+// re-evaluates live, so a Turbo Stream prepend into the (always
+// rendered) tbody reveals the table automatically.
+.table-field-slip-trackers:not(:has(tbody tr)) {
+  display: none;
+}
+
 // Interior borders only (between cells, not on outer edges)
 table.ips-lined {
   border-collapse: collapse;
