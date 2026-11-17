@@ -17,8 +17,8 @@ module Views::Controllers::Projects
     # cleanup_failed_project_creation.
     prop :raw_place_name, _Nilable(String), default: nil
     # Set on the Admin tab, where an admin can say whether to be
-    # emailed about this project's iNaturalist alerts. Absent on the
-    # new-project form, which has no project to subscribe to yet.
+    # emailed this project's alerts. Absent on the new-project form,
+    # which has no project to subscribe to yet.
     prop :user, _Nilable(::User), default: nil
 
     # Adds the dirty-form Stimulus controller to the rendered <form>
@@ -65,7 +65,6 @@ module Views::Controllers::Projects
       return unless offer_alerts?
 
       div(class: "mt-4") do
-        h5 { strong { plain(:project_alerts_enabled.l) } }
         checkbox_field("alert_subscription",
                        label: :project_alerts_subscribe.l,
                        checked: model.alerts?(@user))
