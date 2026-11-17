@@ -3,7 +3,7 @@
 # A single row in the Names index list.
 #
 # Each row carries:
-#   - `Components::IDBadge` with the Name's id
+#   - `Badge(variant: :id)` with the Name's id
 #   - the localized display-name link (with a Stimulus
 #     `clipboard` controller wrapped around the name + a
 #     copy-button so users can clipboard the name string)
@@ -31,7 +31,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
 
   def render_id_badge
     span do
-      IDBadge(object: @name, size: :md)
+      Badge(variant: :id, object: @name, size: :md)
     end
   end
 
@@ -69,7 +69,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
     count = @counts[@name.id]
     return unless count
 
-    CountBadge(count: count)
+    Badge(variant: :count, count: count)
   end
 
   # `has_descriptions` subaction columns: when a description

@@ -14,7 +14,7 @@
 #   # "<date>: <relationship>" (e.g. "2025-05-04: Imported from
 #   # iNaturalist"). For sites with an id accessor on ExternalLink
 #   # (iNaturalist, MyCoPortal), that id follows as a sibling
-#   # copy-to-clipboard IDBadge, not part of the link text -- a
+#   # copy-to-clipboard Badge(variant: :id), not part of the link text -- a
 #   # <button> nested inside the <a> would be invalid HTML and would
 #   # double-fire the link's own navigation on a badge click.
 #
@@ -57,8 +57,8 @@ class Components::Link::External < Components::Base
     return unless @site_record_id
 
     whitespace
-    IDBadge(value: @site_record_id, size: :lg,
-            title: :copy_this_site_id.ti(site: @site_name))
+    Badge(variant: :id, value: @site_record_id, size: :lg,
+          title: :copy_this_site_id.ti(site: @site_name))
   end
 
   private
