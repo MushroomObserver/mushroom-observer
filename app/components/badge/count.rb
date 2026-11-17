@@ -13,8 +13,9 @@ class Components::Badge::Count < Components::Badge
   prop :type, Symbol, default: :observation
   # :outline -- lighter-weight `.badge-outline` styling (see
   # _links_buttons_alerts.scss) for a count that shouldn't read as
-  # loudly as the solid default.
-  prop :variant, _Union(:solid, :outline), default: :solid
+  # loudly as the solid default. Named `fill:`, not `variant:` --
+  # `variant:` is the dispatcher's kwarg (see Components::Badge).
+  prop :fill, _Union(:solid, :outline), default: :solid
   # Catch-all for class:, data:, and any other HTML attrs -- matches
   # Components::ContentPadded/Table's pattern.
   prop :attributes, _Hash(Symbol, _Any?), :**
@@ -29,7 +30,7 @@ class Components::Badge::Count < Components::Badge
   private
 
   def badge_class
-    return "badge count-badge" unless @variant == :outline
+    return "badge count-badge" unless @fill == :outline
 
     "badge count-badge badge-outline"
   end
