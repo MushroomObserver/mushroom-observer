@@ -33,7 +33,7 @@ module Views::Controllers::Versions
       Table(
         @versions.reverse,
         variant: :hover, identifier: "versions",
-        show_headers: false, class: "mb-0"
+        show_headers: false, class: "mb-0", panel_wrap: false
       ) do |t|
         t.column("") { |ver| render_date_cell(ver) }
         t.column("") { |ver| render_user_cell(ver) }
