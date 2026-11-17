@@ -81,10 +81,12 @@ module Views::Controllers::Names
 
       counts = Name.count_observations(@objects)
       Table(@objects, identifier: "name-index") do |t|
-        t.column(:mo_id.ti) { |name| IDBadge(object: name, size: :md) }
+        t.column(:mo_id.ti) do |name|
+          Badge(variant: :id, object: name, size: :md)
+        end
         t.column(:name.ti) { |name| render_name_cell(name) }
         t.column(:sort_by_observations.t, align: :right) do |name|
-          CountBadge(count: counts[name.id].to_i)
+          Badge(variant: :count, count: counts[name.id].to_i)
         end
         render_description_columns(t) if @has_descriptions
       end

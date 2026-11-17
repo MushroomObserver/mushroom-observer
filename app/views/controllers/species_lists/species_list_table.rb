@@ -42,7 +42,8 @@ module Views::Controllers::SpeciesLists
             trusted_html(species_list.text_name.t)
           end
         end
-        IDBadge(object: species_list, size: :xl, extra_class: "ml-3")
+        Badge(variant: :id, object: species_list, size: :xl,
+              extra_class: "ml-3")
       end
     end
 
@@ -70,7 +71,8 @@ module Views::Controllers::SpeciesLists
       if @remove || @add
         render_manage_section(species_list) if manageable?(species_list)
       else
-        CountBadge(count: @observation_counts[species_list.id].to_i)
+        Badge(variant: :count,
+              count: @observation_counts[species_list.id].to_i)
       end
     end
 

@@ -398,7 +398,7 @@ MO/NoRawLinkOrButtonTo:
     # not an action button -- Components::Button's whole abstraction
     # is .btn-family styling/variants, which doesn't fit a badge.
     # Genuinely a different primitive, not a bypass of Button.
-    - "app/components/id_badge.rb"
+    - "app/components/badge/id.rb"
 
 MO/NoRegexpEscape:
   Description: >-

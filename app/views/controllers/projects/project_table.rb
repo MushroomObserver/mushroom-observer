@@ -48,7 +48,7 @@ module Views::Controllers::Projects
           whitespace
           span(class: "ml-3") { plain("(#{:open.ti})") }
         end
-        IDBadge(object: project, size: :xl, extra_class: "ml-3")
+        Badge(variant: :id, object: project, size: :xl, extra_class: "ml-3")
       end
     end
 
@@ -78,7 +78,8 @@ module Views::Controllers::Projects
       if @remove || @add
         render_manage_section(project)
       else
-        CountBadge(count: @observation_counts[project.id].to_i)
+        Badge(variant: :count,
+              count: @observation_counts[project.id].to_i)
       end
     end
 

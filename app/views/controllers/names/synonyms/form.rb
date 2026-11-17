@@ -105,7 +105,7 @@ module Views::Controllers::Names::Synonyms
         end
       end
       badge = capture do
-        IDBadge(object: name_obj, size: :sm, extra_class: "")
+        Badge(variant: :id, object: name_obj, size: :sm, extra_class: "")
       end
       [link, badge].safe_join(" ")
     end

@@ -36,7 +36,8 @@ module Views::Controllers::Observations::Locations
           render_location_info(location)
         end
         t.column(:observations.ti, align: :right) do |location|
-          CountBadge(count: @observation_counts[location.id].to_i)
+          Badge(variant: :count,
+                count: @observation_counts[location.id].to_i)
         end
         t.column("#{:merge.ti}?", align: :right) do |location|
           render_merge_button(location)
