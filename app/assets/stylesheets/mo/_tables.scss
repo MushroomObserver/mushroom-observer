@@ -14,6 +14,10 @@
   > thead > tr > th {
     padding-top: $table-cell-padding !important;
     padding-bottom: $table-cell-padding !important;
+    // Bootstrap's header-specific border-bottom (2px) stacks with
+    // the next row's border-top (1px) -- drop it so every row
+    // boundary, including thead -> tbody, gets just the 1px border.
+    border-bottom: 0;
   }
 }
 
