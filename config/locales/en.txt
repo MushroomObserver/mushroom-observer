@@ -2995,7 +2995,7 @@
 
   # location/list_merge_options
   list_merge_are_you_sure: Assign location? This cannot be undone.
-  list_merge_options_near_matches: Near Matches
+  list_merge_options_mapped_locations: Mapped Locations
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports

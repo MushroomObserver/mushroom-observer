@@ -27,46 +27,37 @@ module Views::Controllers::Observations::Locations
     private
 
     def render_matches
-      ContentPadded(class: "py-0") do
-        h4 { plain(:list_merge_options_near_matches.t) }
-      end
-      PaginatedResults do
-        ListGroup do |list|
-          @matches.each { |location| render_match(list, location) }
-        end
-      end
+      PaginatedResults { render_table }
     end
 
-    def render_match(list, location)
-      list.item(class: "d-flex align-items-center justify-content-between") do
-        render_location_info(location)
-        render_merge_button(location)
+    def render_table
+      Table(@matches, align_middle: true) do |t|
+        t.column(:list_merge_options_mapped_locations.t) do |location|
+          render_location_info(location)
+        end
+        t.column(:observations.ti, align: :right) do |location|
+          CountBadge(count: @observation_counts[location.id].to_i)
+        end
+        t.column("#{:merge.ti}?", align: :right) do |location|
+          render_merge_button(location)
+        end
       end
     end
 
     def render_location_info(location)
-      div(class: "d-flex align-items-center") do
-        Link(type: :location, where: location.name.t, location: location)
-        div(class: "ml-3") do
-          CountBadge(count: @observation_counts[location.id].to_i)
-        end
-      end
+      Link(type: :location, where: location.name.t, location: location)
     end
 
     def render_merge_button(location)
-      div(class: "ml-3") do
-        Button(
-          type: :patch,
-          variant: :outline,
-          icon: :merge,
-          name: :merge.ti,
-          show_label: :responsive,
-          target: assign_location_to_observations_path(
-            where: @where, location: location
-          ),
-          confirm: :list_merge_are_you_sure.l
-        )
-      end
+      Button(
+        type: :patch,
+        icon: :merge,
+        name: :merge.ti,
+        target: assign_location_to_observations_path(
+          where: @where, location: location
+        ),
+        confirm: :list_merge_are_you_sure.l
+      )
     end
   end
 end
