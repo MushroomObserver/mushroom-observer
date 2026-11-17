@@ -26,7 +26,7 @@ module Views::Controllers::Projects::Aliases
       render(::Components::Table.new(
                @project_aliases,
                variant: :striped, identifier: "project-members",
-               class: "mt-3", id: TABLE_ID
+               wrap_class: "mt-3", id: TABLE_ID
              )) do |t|
         t.column(:name.ti) { |a| plain(a.name) }
         t.column(:target_type.ti) { |a| plain(a.target_type) }

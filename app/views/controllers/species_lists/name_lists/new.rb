@@ -40,7 +40,8 @@ module Views::Controllers::SpeciesLists::NameLists
     # three scroller columns + the submit form below.
     def render_lister_table
       Table(
-        class: "name-lister mt-3 w-100",
+        class: "name-lister w-100",
+        wrap_class: "mt-3",
         cols: "3", data: lister_data
       ) do |t|
         t.column(:name_lister_genera.t, width: "20%")

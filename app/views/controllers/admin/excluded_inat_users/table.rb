@@ -13,7 +13,7 @@ module Views::Controllers::Admin::ExcludedInatUsers
     def view_template
       render(::Components::Table.new(
                @entries, variant: :striped, id: "excluded_inat_users",
-                         class: "mt-3"
+                         wrap_class: "mt-3"
              )) do |t|
         t.column(:excluded_inat_user_login.l) { |e| render_login(e) }
         t.column(:excluded_inat_user_added_by.l) { |e| render_added(e) }

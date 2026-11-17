@@ -11,7 +11,8 @@ module Views::Controllers::VisualModels
       Table(
         @visual_models,
         variant: :striped, align_middle: true,
-        class: "table-visual-model mb-3 mt-3"
+        class: "table-visual-model",
+        wrap_class: "mb-3 mt-3"
       ) do |t|
         t.column("Name") do |vm|
           Link(type: :get, name: vm.name, target: vm)

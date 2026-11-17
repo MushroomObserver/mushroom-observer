@@ -15,7 +15,7 @@ module Views::Controllers::Support
         Table(@donor_names,
               variant: :striped,
               identifier: "donors",
-              class: "mt-3 mb-3",
+              wrap_class: "mt-3 mb-3",
               show_headers: false) do |t|
           t.column(nil) { |name| plain(name) }
         end
