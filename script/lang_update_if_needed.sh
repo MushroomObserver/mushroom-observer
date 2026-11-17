@@ -1,24 +1,24 @@
 #!/usr/bin/env bash
-#
+
 # Runs `rake lang:update` only when config/locales/en.txt has changed
 # since the last time this script ran it successfully. lang:update's
-# import-into-DB + regenerate-every-locale pipeline costs several
-# seconds and is pure overhead on a deploy that doesn't touch
-# translations -- the common case. Safe specifically because this is a
+# check/import/strip/export pipeline costs several seconds and is
+# pure overhead on a deploy that doesn't touch translations -- the
+# common case. Safe specifically because this is a
 # skip-ON-NO-CHANGE optimization, not a switch to checked-in generated
 # locale files: production's translations DB (edited live via the
 # translations UI) is untouched either way, so there's no risk of an
 # unrelated deploy silently reverting a live translation edit. When
-# en.txt HAS changed, lang:update still runs exactly as before.
-#
+# en.txt HAS changed, lang:update still runs as before.
+
 # Cache file lives in tmp/ (not /tmp) so it survives alongside the
 # checkout it was computed for, the same way Rails' own tmp/ artifacts
 # do -- not committed (tmp/ is gitignored), not shared across checkouts.
-#
+
 # The cached value includes the branch name, not just en.txt's content
 # hash: two branches can independently converge to byte-identical
 # en.txt, and a cache write on one would otherwise "validate" a switch
-# to the other, whose en.yml was never actually regenerated for it.
+# to the other, whose DB/cache was never synced for it.
 set -euo pipefail
 
 # This script has two callers: deploy.sh (RAILS_ENV=production, the

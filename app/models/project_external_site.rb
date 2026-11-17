@@ -40,7 +40,7 @@ class ProjectExternalSite < AbstractModel
 
   validates :external_site_id,
             uniqueness: { scope: :project_id,
-                          message: :project_site_duplicate_site.t }
+                          message: ->(*) { :project_site_duplicate_site.t } }
   validates :import_limit,
             numericality: { only_integer: true, greater_than: 0 }
   validates :remote_project_id, length: { maximum: 100 }
