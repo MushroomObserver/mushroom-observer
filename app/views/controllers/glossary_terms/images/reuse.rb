@@ -17,6 +17,7 @@ module Views::Controllers::GlossaryTerms::Images
       )
       add_context_nav(::Tab::GlossaryTerm::ImageForm.new(term: @object))
       container_class(:full)
+      add_pagination(@pagination_data)
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
                target: @object,
