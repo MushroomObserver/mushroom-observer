@@ -4,9 +4,9 @@
 # "manage projects for this observation" page. Mirrors
 # `Observations::SpeciesLists::Edit`, sharing
 # `Components::ObservationListManager` for the two-section layout.
-# Rows are `Projects::ListItem`: projects the observation already
-# belongs to (REMOVE button on each) and the user's other projects
-# (ADD button on each).
+# Each section renders as a `Projects::ProjectTable`: projects the
+# observation already belongs to (REMOVE button on each row) and the
+# user's other projects (ADD button on each row).
 module Views::Controllers::Observations::Projects
   class Edit < Views::FullPageBase
     prop :observation, ::Observation
@@ -39,21 +39,12 @@ module Views::Controllers::Observations::Projects
         belongs_to_items: @obs_projects,
         not_contains_heading: :project_manage_doesnt_contain.l,
         not_contains_items: @other_projects
-      ) do |project, remove, add|
-        render_item(project: project, remove: remove, add: add)
+      ) do |projects, remove, add|
+        render(Views::Controllers::Projects::ProjectTable.new(
+                 projects, observation: @observation,
+                           remove: remove, add: add
+               ))
       end
-    end
-
-    def render_item(project:, remove:, add:)
-      render(
-        Views::Controllers::Projects::ListItem.new(
-          project: project,
-          observation: @observation,
-          remove: remove,
-          add: add,
-          violation_kinds: add ? project.violation_kinds_for(@observation) : []
-        )
-      )
     end
   end
 end

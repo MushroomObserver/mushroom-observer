@@ -55,7 +55,8 @@ module Views::Controllers::Users
         @total = 0
         Table(variant: :condensed,
               class: "bg-none mb-0",
-              show_headers: false) do |t|
+              show_headers: false,
+              panel_wrap: false) do |t|
           t.body do
             @rows.each { |row| render_row(row) }
             render_total_rows if @total.positive?
