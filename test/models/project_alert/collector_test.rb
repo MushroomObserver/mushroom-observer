@@ -107,6 +107,26 @@ class ProjectAlert::CollectorTest < UnitTestCase
     assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
   end
 
+  # An observation whose name has moved off the watched one is still
+  # worth hearing about: the project was told about it, and what
+  # happens next is its business.
+  def test_a_comment_after_the_name_moved_is_activity
+    obs = act { new_observation }
+    obs.update!(name: names(:peltigera), text_name: "Peltigera")
+
+    assert_difference("ProjectAlert.count", 1) do
+      act do
+        Comment.create!(target: obs, user: users(:rolf),
+                        summary: "Still worth it?", comment: "What was it?")
+      end
+    end
+
+    alert = ProjectAlert.where(observation: obs).order(:id).last
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(@target.text_name, alert.target_name)
+  end
+
   def test_a_comment_on_an_unreported_observation_alerts_nobody
     obs = act { new_observation(name: names(:peltigera)) }
 

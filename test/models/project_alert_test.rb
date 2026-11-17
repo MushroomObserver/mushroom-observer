@@ -181,6 +181,15 @@ class ProjectAlertTest < UnitTestCase
                  record_local(observation: obs).kind)
   end
 
+  # A message groups its rows by the observation they are about, which
+  # each source names its way.
+  def test_observation_key_names_the_source_copy
+    obs = observations(:coprinus_comatus_obs)
+
+    assert_equal([@site.id, "12345"], record.observation_key)
+    assert_equal(obs.id, record_local(observation: obs).observation_key)
+  end
+
   # A row says what it alerted on, whichever source it came from.
   def test_a_row_naming_no_source_is_rejected
     alert = record_local
