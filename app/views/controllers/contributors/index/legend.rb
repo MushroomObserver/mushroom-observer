@@ -64,7 +64,7 @@ module Views::Controllers::Contributors
         Table(
           ::UserStats.fields_with_weight.keys,
           show_headers: false,
-          class: "bg-none mx-lg-5"
+          class: "bg-none mx-lg-5", panel_wrap: false
         ) do |t|
           # `user_stats_*` values are `[:images]`-style cross-refs to
           # plain-text root keys ("Images", "Votes", …); needs `.t`
@@ -81,7 +81,7 @@ module Views::Controllers::Contributors
       def render_example_math_table
         Table(
           show_headers: false, variant: :condensed,
-          class: "bg-none w-auto mx-auto"
+          class: "bg-none w-auto mx-auto", panel_wrap: false
         ) do |t|
           t.body { render_example_math_rows }
         end

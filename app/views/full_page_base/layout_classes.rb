@@ -51,6 +51,17 @@ module Views::FullPageBase::LayoutClasses
     column_classes
   end
 
+  # Same left/right ratio `column_classes` uses, for a body-only grid
+  # split that shouldn't also narrow the title bar (`column_classes`
+  # sets `has_columns`, which does that).
+  def left_column_class_for(columns)
+    class_names(column_pair_for(columns)[0])
+  end
+
+  def right_column_class_for(columns)
+    class_names(column_pair_for(columns)[1])
+  end
+
   # ----- Horizontal padding inside the main container ---------------
 
   def content_padding(content_has = nil)
@@ -99,6 +110,9 @@ module Views::FullPageBase::LayoutClasses
     when :eight_four
       [Components::Column.classes_for(xs: 12, md: 8, lg: 7),
        Components::Column.classes_for(xs: 12, md: 4, lg: 5)]
+    when :four_eight
+      [Components::Column.classes_for(xs: 12, md: 5, lg: 4),
+       Components::Column.classes_for(xs: 12, md: 7, lg: 8)]
     when :seven_five
       [Components::Column.classes_for(xs: 12, md: 7),
        Components::Column.classes_for(xs: 12, md: 5)]
@@ -112,13 +126,5 @@ module Views::FullPageBase::LayoutClasses
       full = Components::Column.classes_for(xs: 12)
       [full, full]
     end
-  end
-
-  def left_column_class_for(columns)
-    class_names(column_pair_for(columns)[0])
-  end
-
-  def right_column_class_for(columns)
-    class_names(column_pair_for(columns)[1])
   end
 end

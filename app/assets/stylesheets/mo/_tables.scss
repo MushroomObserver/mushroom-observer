@@ -2,6 +2,25 @@
 // tables
 // --------------------------------------------------
 
+// Cell padding matching a `.list-group-item` row. Pair with
+// Components::Table's variant: :lg.
+.table-lg {
+  > thead > tr > th,
+  > tbody > tr > td {
+    padding: $card-spacer-x !important;
+    border-color: $list-group-border;
+  }
+
+  > thead > tr > th {
+    padding-top: $table-cell-padding !important;
+    padding-bottom: $table-cell-padding !important;
+    // Bootstrap's header-specific border-bottom (2px) stacks with
+    // the next row's border-top (1px) -- drop it so every row
+    // boundary, including thead -> tbody, gets just the 1px border.
+    border-bottom: 0;
+  }
+}
+
 thead tr {
   color: $list-group-disabled-color; // like navbar-inverse
   background-color: $list-group-disabled-bg;
