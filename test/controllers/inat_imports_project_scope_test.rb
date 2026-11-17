@@ -136,9 +136,9 @@ class InatImportsProjectScopeTest < FunctionalTestCase
   end
 
   # Importing is what a site admin turns on, and it is what permits
-  # this. An alerting-only row does not.
+  # this. A row that imports nothing does not.
   def test_a_project_not_set_up_for_importing_gets_the_ordinary_form
-    site = project_site(importing: false, alerting: true)
+    site = project_site(importing: false)
 
     login(@admin.login)
     get(:new, params: { project_site: site.id })

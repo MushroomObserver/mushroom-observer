@@ -102,6 +102,17 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :project_external_sites, dependent: :destroy
   has_many :project_external_site_alerts, dependent: :destroy
 
+  serialize :alert_recipient_ids, coder: JSON
+  after_initialize :ensure_alert_recipient_ids_initialized
+
+  # Projects whose alerts go to somebody. Both kinds of target are
+  # required, since the taxa are what an alert is about and the
+  # locations are what keep the net from covering the world (#5721).
+  scope :alerting, lambda {
+    joins(:project_target_names).joins(:project_target_locations).distinct.
+      where.not(alert_recipient_ids: [nil, "", "[]"])
+  }
+
   # What the project already holds from an external site (#5416): how
   # many of its observations carry a link to that site, and how many
   # of those MO imported from there rather than someone linking by
@@ -352,6 +363,39 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def constraints?
     start_date || end_date || location ||
       target_names_present? || target_locations_present?
+  end
+
+  # A project may be subscribed to when it watches particular taxa in
+  # particular places (#5721). A foray, whose constraint is a box and
+  # a week, is left out: everyone there knows things are happening.
+  def alertable?
+    target_names_present? && target_locations_present?
+  end
+
+  # Whether this project alerts anyone.
+  def alerting?
+    alert_recipient_ids.present? && alertable?
+  end
+
+  # Who hears about a candidate. Nobody until somebody asks: being an
+  # admin of a project is not a request to be told what turns up, so
+  # each admin subscribes for themselves.
+  def alert_recipients
+    return User.none if alert_recipient_ids.blank?
+
+    User.where(id: alert_recipient_ids)
+  end
+
+  def alerts?(user)
+    alert_recipient_ids.include?(user&.id)
+  end
+
+  # Idempotent, so a double submit or two tabs cannot subscribe twice
+  # or raise.
+  def alerts_for(user, wanted)
+    ids = alert_recipient_ids - [user.id]
+    ids += [user.id] if wanted
+    update!(alert_recipient_ids: ids)
   end
 
   # Memoized: violation_kinds_for calls violates_target_name?/
@@ -1146,5 +1190,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       transform_values do |aliases|
         aliases.map { |project_alias| [project_alias.name, project_alias.id] }
       end
+  end
+
+  # Guarded, since a `select` that leaves the column out gives an
+  # instance with no attribute to initialize.
+  def ensure_alert_recipient_ids_initialized
+    self.alert_recipient_ids ||= [] if has_attribute?(:alert_recipient_ids)
   end
 end

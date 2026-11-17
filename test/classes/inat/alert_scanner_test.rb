@@ -65,13 +65,13 @@ class Inat::AlertScannerTest < UnitTestCase
                 body: { results: results, total_results: results.size }.to_json)
   end
 
-  # Alerting goes to whoever opted in, so a row that alerts needs at
-  # least one recipient.
-  def alerting_row(**args)
-    args[:alert_recipient_ids] = [@recipient.id] unless
-      args.key?(:alert_recipient_ids)
+  # Alerting goes to whoever opted in, and whoever opted in is
+  # recorded on the project (#5721), so a row that alerts needs a
+  # subscriber there.
+  def alerting_row(recipients: [@recipient], **args)
+    @project.update!(alert_recipient_ids: recipients.map(&:id))
     ProjectExternalSite.create!(project: @project, external_site: @site,
-                                use_constraints: true, alerting: true, **args)
+                                use_constraints: true, **args)
   end
 
   def scan
@@ -83,14 +83,13 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_not_requested(:get, inat_api_matcher("observations"))
   end
 
-  # Alerting is opt-in. A row with nobody listed is a row nobody asked
-  # for, so a matching observation is recorded and sent to no one.
+  # Alerting is opt-in, so a project nobody subscribed to asks iNat
+  # nothing and mails no one.
   def test_a_project_with_no_recipients_sends_nothing
-    row = alerting_row
-    row.update_column(:alert_recipient_ids, [].to_json)
+    alerting_row(recipients: [])
     stub_observations([observation])
 
-    assert_empty(scan, "Alerting with nobody listed should mail no one")
+    assert_empty(scan, "A project with nobody listed should mail no one")
   end
 
   def test_a_new_target_identification_alerts_the_recipients
