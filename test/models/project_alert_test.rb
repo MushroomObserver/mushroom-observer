@@ -3,7 +3,7 @@
 require("test_helper")
 
 # What MO has told a project's admins about (#5416).
-class ProjectExternalSiteAlertTest < UnitTestCase
+class ProjectAlertTest < UnitTestCase
   def setup
     super
     @project = projects(:rare_fungi_project)
@@ -12,7 +12,7 @@ class ProjectExternalSiteAlertTest < UnitTestCase
 
   def record(id: 999, obs_id: 12_345, target_name: "Coprinus comatus",
              project: @project)
-    ProjectExternalSiteAlert.record(
+    ProjectAlert.record(
       project: project, external_site: @site,
       identification: { id: id, name: "Coprinus comatus" },
       observation: { id: obs_id, observed_on: Date.parse("2026-09-20") },
@@ -37,12 +37,12 @@ class ProjectExternalSiteAlertTest < UnitTestCase
     record
 
     assert_nil(record)
-    assert_equal(1, ProjectExternalSiteAlert.count)
+    assert_equal(1, ProjectAlert.count)
   end
 
   def test_another_project_is_told_about_the_same_identification
     record
-    other = ProjectExternalSiteAlert.record(
+    other = ProjectAlert.record(
       project: projects(:eol_project), external_site: @site,
       identification: { id: 999, name: "Coprinus comatus" },
       observation: { id: 12_345, observed_on: nil },
@@ -59,14 +59,14 @@ class ProjectExternalSiteAlertTest < UnitTestCase
 
     assert_equal("Coprinus", alert.target_name)
     assert_equal("Coprinus comatus", alert.name)
-    assert_equal([ProjectExternalSiteAlert::NEW_OBSERVATION, "Coprinus"],
+    assert_equal([ProjectAlert::NEW_OBSERVATION, "Coprinus"],
                  alert.message_key)
   end
 
   def test_the_first_alert_for_an_observation_is_a_find
     alert = record
 
-    assert_equal(ProjectExternalSiteAlert::NEW_OBSERVATION, alert.kind)
+    assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
     assert(alert.new_observation?)
   end
 
@@ -76,7 +76,7 @@ class ProjectExternalSiteAlertTest < UnitTestCase
     record
     alert = record(id: 1000)
 
-    assert_equal(ProjectExternalSiteAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
     assert_not(alert.new_observation?)
   end
 
@@ -86,14 +86,14 @@ class ProjectExternalSiteAlertTest < UnitTestCase
     record
     alert = record(id: 1000, project: projects(:eol_project))
 
-    assert_equal(ProjectExternalSiteAlert::NEW_OBSERVATION, alert.kind)
+    assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
   end
 
   def test_a_different_observation_is_a_find
     record
     alert = record(id: 1000, obs_id: 12_346)
 
-    assert_equal(ProjectExternalSiteAlert::NEW_OBSERVATION, alert.kind)
+    assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
   end
 
   def test_an_unknown_kind_is_rejected
@@ -121,6 +121,71 @@ class ProjectExternalSiteAlertTest < UnitTestCase
     alert = record
     @project.destroy
 
-    assert_not(ProjectExternalSiteAlert.exists?(alert.id))
+    assert_not(ProjectAlert.exists?(alert.id))
+  end
+
+  # --- rows from MO (#5721) --------------------------------------------
+
+  def record_local(observation: observations(:coprinus_comatus_obs),
+                   target: nil, project: @project)
+    ProjectAlert.record_local(
+      project: project, observation: observation,
+      target: target || observation, name: "Coprinus comatus",
+      target_name: "Coprinus comatus"
+    )
+  end
+
+  def test_recording_an_alert_from_mo
+    obs = observations(:coprinus_comatus_obs)
+    alert = record_local
+
+    assert_equal(obs, alert.observation)
+    assert_equal(obs, alert.target)
+    assert_nil(alert.external_site)
+    assert_equal(obs.when, alert.observed_on)
+    assert_equal("#{MO.http_domain}/obs/#{obs.id}", alert.url)
+    assert_equal(:app_title.l, alert.source_name)
+    assert(alert.new_observation?)
+  end
+
+  # The unique index on the target is what decides a project has been
+  # told, so a second pass over the same record sends nothing.
+  def test_the_same_trigger_records_once_per_project
+    record_local
+
+    assert_nil(record_local)
+    assert_equal(1, ProjectAlert.count)
+  end
+
+  # A project told about an observation hears about what happens next
+  # as activity.
+  def test_a_second_record_on_one_observation_is_activity
+    obs = observations(:coprinus_comatus_obs)
+    record_local(observation: obs)
+    comment = Comment.create!(target: obs, user: users(:rolf),
+                              summary: "Note", comment: "Looks right")
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY,
+                 record_local(observation: obs, target: comment).kind)
+  end
+
+  # An imported observation that iNaturalist already alerted on is not
+  # a find here, whatever happens to it next.
+  def test_an_observation_alerted_on_remotely_is_not_a_find_here
+    obs = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: users(:rolf), target: obs,
+                         external_site: @site, external_id: "12345")
+    record(obs_id: 12_345)
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY,
+                 record_local(observation: obs).kind)
+  end
+
+  # A row says what it alerted on, whichever source it came from.
+  def test_a_row_naming_no_source_is_rejected
+    alert = record_local
+    alert.observation = nil
+
+    assert_not(alert.valid?)
   end
 end

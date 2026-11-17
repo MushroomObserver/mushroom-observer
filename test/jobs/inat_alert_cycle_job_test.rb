@@ -16,7 +16,7 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
 
   def test_one_message_per_admin_for_the_cycle
     mary = users(:mary)
-    alerts = [project_external_site_alert]
+    alerts = [project_alert]
     scanner = fake_scanner({ mary => alerts })
 
     assert_enqueued_emails(1) do
@@ -30,14 +30,14 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
   def test_a_message_per_watched_name_and_kind
     mary = users(:mary)
     alerts = [
-      project_external_site_alert,
-      project_external_site_alert(remote_identification_id: "1000",
+      project_alert,
+      project_alert(remote_identification_id: "1000",
                                   name: "Coprinus comatus var. ovatus"),
-      project_external_site_alert(
+      project_alert(
         remote_identification_id: "1001",
-        kind: ProjectExternalSiteAlert::OTHER_ACTIVITY
+        kind: ProjectAlert::OTHER_ACTIVITY
       ),
-      project_external_site_alert(remote_identification_id: "1002",
+      project_alert(remote_identification_id: "1002",
                                   remote_observation_id: "12346",
                                   name: "Agaricus campestris",
                                   target_name: "Agaricus campestris")
@@ -70,13 +70,13 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
     assert_equal(["too many pages"], raised)
   end
 
-  def project_external_site_alert(**args)
-    ProjectExternalSiteAlert.create!(
+  def project_alert(**args)
+    ProjectAlert.create!(
       { project: projects(:rare_fungi_project),
         external_site: external_sites(:inaturalist),
         remote_identification_id: "999", remote_observation_id: "12345",
         name: "Coprinus comatus", target_name: "Coprinus comatus",
-        kind: ProjectExternalSiteAlert::NEW_OBSERVATION,
+        kind: ProjectAlert::NEW_OBSERVATION,
         alerted_at: Time.zone.now }.merge(args)
     )
   end
@@ -91,7 +91,7 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
 
   # One receiver's delivery failing cannot take the cycle down with it.
   def test_a_delivery_failure_is_logged_and_the_cycle_carries_on
-    scanner = fake_scanner({ users(:mary) => [project_external_site_alert] })
+    scanner = fake_scanner({ users(:mary) => [project_alert] })
     raiser = ->(**) { raise("no mail today") }
     logged = nil
 

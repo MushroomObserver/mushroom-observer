@@ -103,7 +103,7 @@ class Inat::AlertScannerTest < UnitTestCase
 
     assert_equal("Coprinus comatus", alert.name)
     assert_equal(@coprinus.text_name, alert.target_name)
-    assert_equal(ProjectExternalSiteAlert::NEW_OBSERVATION, alert.kind)
+    assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
     assert_equal(Date.parse("2026-09-20"), alert.observed_on)
     assert_equal("12345", alert.remote_observation_id)
   end
@@ -138,7 +138,7 @@ class Inat::AlertScannerTest < UnitTestCase
 
     alert = scan.values.first.first
 
-    assert_equal(ProjectExternalSiteAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
     assert_equal("12345", alert.remote_observation_id)
   end
 
@@ -150,7 +150,7 @@ class Inat::AlertScannerTest < UnitTestCase
     scan
 
     assert_empty(scan)
-    assert_equal(1, ProjectExternalSiteAlert.count)
+    assert_equal(1, ProjectAlert.count)
   end
 
   # A withdrawn identification comes back with `current` false. An
@@ -162,7 +162,7 @@ class Inat::AlertScannerTest < UnitTestCase
     )])
 
     assert_empty(scan)
-    assert_equal(0, ProjectExternalSiteAlert.count)
+    assert_equal(0, ProjectAlert.count)
   end
 
   def test_an_identification_of_an_untracked_taxon_does_not_alert

@@ -45,7 +45,7 @@ class Inat
       @fetch_failed = false
     end
 
-    # A Hash of User => Array of ProjectExternalSiteAlert, the digest
+    # A Hash of User => Array of ProjectAlert, the digest
     # each admin is owed this cycle. Empty when nothing matched, when
     # no project is alerting, or when this cycle only set the
     # watermark.
@@ -110,7 +110,7 @@ class Inat
       return nil unless identification
       return nil unless criterion.matches?(candidate)
 
-      ProjectExternalSiteAlert.record(
+      ProjectAlert.record(
         project: criterion.project, external_site: @site,
         identification: identification, observation: candidate.to_h,
         target_name: criterion.target_name_for(identification)

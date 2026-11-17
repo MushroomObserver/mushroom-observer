@@ -68,12 +68,19 @@ class Inat
       return failed_result(reflection) if failed
 
       raw = by_id[self.class.inat_id(reflection).to_s]
-      return apply(reflection, Inat::Obs.new(JSON.generate(raw))) if raw
+      return absent_result(reflection, absent) unless raw
 
-      absent == :deleted ? deleted(reflection) : unchanged(reflection)
+      # Quiet: iNaturalist alerted a watching project on this there.
+      ProjectAlert.suppress do
+        apply(reflection, Inat::Obs.new(JSON.generate(raw)))
+      end
     end
 
     private
+
+    def absent_result(reflection, absent)
+      absent == :deleted ? deleted(reflection) : unchanged(reflection)
+    end
 
     def failed_result(reflection)
       Result.new(status: :fetch_failed, observation: reflection, reasons: [])

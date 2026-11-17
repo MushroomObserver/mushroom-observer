@@ -2839,6 +2839,7 @@
   project_site_updated: External site settings saved.
   project_site_duplicate_site: This project already has settings for that site.
   project_site_needs_a_source: Give an iNaturalist project or use this project's constraints before turning importing on.
+  project_alert_incomplete: An alert must name the observation it is about.
   project_alerts_enabled: Enable email alerts
   project_alerts_subscribe: Email me when an observation matching this project appears
   project_import_start: "iNat Update"

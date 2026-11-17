@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# What an external site newly identified as a name one of the
-# receiver's projects watches (#5416). One watched name and one kind
-# per message (#5677); each row names the observation, the name
-# applied and the date it was seen -- which is what says whether a
-# voucher is still a possibility.
+# What was newly identified as a name one of the receiver's projects
+# watches, here or on an external site (#5416, #5721). One watched
+# name and one kind per message (#5677); each row names the
+# observation, the name applied and the date it was seen -- which is
+# what says whether a voucher is still a possibility.
 class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   prop :subject, ::String
   prop :receiver, ::User
@@ -37,10 +37,10 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   end
 
   INTRO_TAGS = {
-    ::ProjectExternalSiteAlert::NEW_OBSERVATION =>
+    ::ProjectAlert::NEW_OBSERVATION =>
       { one: :email_project_alert_find_intro_one,
         many: :email_project_alert_find_intro },
-    ::ProjectExternalSiteAlert::OTHER_ACTIVITY =>
+    ::ProjectAlert::OTHER_ACTIVITY =>
       { one: :email_project_alert_activity_intro_one,
         many: :email_project_alert_activity_intro }
   }.freeze
@@ -51,7 +51,7 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
     count = by_observation.size
     alert = @alerts.first
     intro_tag(count).l(count: count, name: alert.target_name.to_s,
-                       site: alert.external_site&.name.to_s)
+                       site: alert.source_name)
   end
 
   def intro_tag(count)
@@ -67,7 +67,7 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
   # iteration.
   def by_observation
     @by_observation ||=
-      @alerts.group_by(&:remote_observation_id).values.
+      @alerts.group_by(&:observation_key).values.
       sort_by { |alerts| recency(alerts) }
   end
 
@@ -98,9 +98,9 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
     plain(row_text(alert, project_names(alerts)))
     whitespace
     if html?
-      link_to(alert.remote_url, alert.remote_url)
+      link_to(alert.url, alert.url)
     else
-      plain(alert.remote_url.to_s)
+      plain(alert.url.to_s)
     end
   end
 
