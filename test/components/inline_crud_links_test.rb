@@ -123,6 +123,27 @@ class InlineCRUDLinksTest < ComponentTestCase
     assert_html(html, "form[action='#{expected_path}']")
   end
 
+  def test_project_alias_edit_and_destroy_links
+    alias_ = project_aliases(:one)
+
+    html = render_links(target: alias_, user: users(:rolf))
+
+    assert_html(html, "a[data-modal='modal_project_alias_#{alias_.id}']")
+    expected_path = routes.project_alias_path(
+      project_id: alias_.project_id, id: alias_.id
+    )
+    assert_html(html, "form[action='#{expected_path}']")
+  end
+
+  def test_project_alias_no_render_for_non_member
+    alias_ = project_aliases(:one)
+    stranger = users(:lone_wolf)
+
+    html = render_links(target: alias_, user: stranger)
+
+    assert_equal("", html.strip)
+  end
+
   def test_name_description_uses_icon_link_edit
     desc = name_descriptions(:peltigera_user_desc)
 

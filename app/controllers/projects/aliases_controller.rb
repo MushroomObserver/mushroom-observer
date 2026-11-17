@@ -4,6 +4,7 @@ module Projects
   class AliasesController < ApplicationController
     before_action :login_required
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
+    before_action :must_be_member!, only: [:edit, :update, :destroy]
 
     # NOTE: this loads every alias unpaginated. If a project's alias
     # list grows large enough to matter, give ProjectAlias a Query
@@ -231,6 +232,15 @@ module Projects
 
     def set_project_alias
       @project_alias = ProjectAlias.show_includes.find(params[:id])
+    end
+
+    def must_be_member!
+      return if @project_alias.project.member?(@user)
+
+      flash_error(:project_alias_must_be_member.t)
+      redirect_to(project_aliases_path(
+                    project_id: @project_alias.project_id
+                  ))
     end
 
     def project_alias_params
