@@ -60,6 +60,13 @@ module Projects
       assert_equal(@project_alias, assigns(:project_alias))
     end
 
+    def test_edit_denied_for_non_member
+      login("dick")
+      get(:edit, params: { project_id: @project.id, id: @project_alias.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_member)
+    end
+
     def test_edit_can_use_turbo_to_edit_project_alias
       get(:edit, params: { project_id: @project.id, id: @project_alias.id,
                            format: :turbo_stream })
@@ -181,6 +188,20 @@ module Projects
       assert_select("form[data-turbo='true']")
     end
 
+    def test_update_denied_for_non_member
+      login("dick")
+      project_id = @project.id
+      patch(:update, params: {
+              project_id:,
+              id: @project_alias.id,
+              project_alias: { name: "Hijacked", project_id: }
+            })
+
+      assert_redirected_to(project_aliases_path(project_id:))
+      assert_flash(:project_alias_must_be_member)
+      assert_not_equal("Hijacked", @project_alias.reload.name)
+    end
+
     def test_update_can_use_turbo_to_modify_project_alias
       project_id = @project.id
       patch(:update, params: {
@@ -207,6 +228,17 @@ module Projects
             }, format: :turbo_stream)
 
       assert_response(:success)
+    end
+
+    def test_destroy_denied_for_non_member
+      login("dick")
+      assert_no_difference("ProjectAlias.count") do
+        delete(:destroy,
+               params: { project_id: @project.id, id: @project_alias.id })
+      end
+
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_member)
     end
 
     def test_destroy_removes_the_project_alias

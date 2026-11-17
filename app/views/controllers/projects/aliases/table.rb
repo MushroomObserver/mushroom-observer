@@ -50,30 +50,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_actions_cell(alias_)
-      InlineLinkBlock(items: [edit_button(alias_), destroy_button(alias_)],
-                      margin_class: "")
-    end
-
-    def edit_button(alias_)
-      Components::Button.new(
-        type: :modal,
-        target: edit_project_alias_path(
-          project_id: alias_.project_id, id: alias_.id
-        ),
-        modal_id: "project_alias_#{alias_.id}",
-        name: :edit_object.t(type: :project_alias),
-        icon: :edit, variant: :strip
-      )
-    end
-
-    def destroy_button(alias_)
-      Components::Button.new(
-        type: :delete,
-        target: project_alias_path(
-          project_id: alias_.project_id, id: alias_.id
-        ),
-        variant: :strip
-      )
+      InlineCRUDLinks(target: alias_, user: current_user)
     end
   end
 end
