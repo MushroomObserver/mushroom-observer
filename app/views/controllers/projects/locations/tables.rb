@@ -56,7 +56,7 @@ module Views::Controllers::Projects::Locations
 
     def render_target_remove_footnote
       p(class: "mt-3") do
-        Icon(type: :x, class: "text-danger")
+        Icon(type: :remove, class: "text-danger")
         whitespace
         plain(:project_target_locations_remove_footnote.l)
       end
