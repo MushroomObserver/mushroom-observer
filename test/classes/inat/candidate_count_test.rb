@@ -106,31 +106,51 @@ class Inat::CandidateCountTest < UnitTestCase
       to_return(status: 200, body: { results: [] }.to_json)
     stub_count({ "taxon_id" =>
                  Inat::Constants::IMPORTABLE_TAXON_IDS_ARG }, 9_999)
+    save_inat_lookups(project)
     site = ProjectExternalSite.new(project: project, external_site: @site,
                                    use_constraints: true)
 
     candidates = Inat::CandidateCount.for(project_site: site)
 
+    assert_equal(9_999, candidates.total,
+                 "Lookups that all answered should give a count")
+    assert_not(candidates.incomplete?, "Every target is looked up")
     assert_equal(project.target_names.map(&:text_name),
                  candidates.unresolved_names)
     assert_equal(project.target_locations.map(&:name),
                  candidates.unresolved_locations)
   end
 
-  # A count of only the targets iNat answered for would be a number for
-  # a different search.
-  def test_an_incomplete_lookup_has_no_number
+  # A count of only the targets with a saved lookup would be a number
+  # for a different search. Nothing is looked up while the page waits.
+  def test_targets_with_no_saved_lookup_give_no_number
     project = projects(:rare_fungi_project)
-    stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
     site = ProjectExternalSite.new(project: project, external_site: @site,
                                    use_constraints: true)
 
     candidates = Inat::CandidateCount.for(project_site: site)
 
-    assert(candidates.unchecked.positive?,
-           "A refused lookup should leave targets unchecked")
+    assert(candidates.incomplete?, "No target has a saved lookup")
+    assert_equal(0, candidates.looked_up, "No target has a saved lookup")
+    assert_equal(project.target_names.size + project.target_locations.size,
+                 candidates.targets, "Every target should be counted")
     assert_nil(candidates.total, "An incomplete lookup should have no count")
     assert_not_requested(:get, inat_api_matcher("observations"))
+    assert_not_requested(:get, inat_api_matcher("taxa"))
+  end
+
+  # Without the constraints, no target lookup is needed for a count.
+  def test_unfollowed_constraints_need_no_lookups
+    project = projects(:rare_fungi_project)
+    stub_count({ "project_id" => "303327" }, 338)
+    site = ProjectExternalSite.new(project: project, external_site: @site,
+                                   remote_project_id: "303327")
+
+    candidates = Inat::CandidateCount.for(project_site: site)
+
+    assert_not(candidates.incomplete?,
+               "A search not following the constraints needs no lookups")
+    assert_equal(338, candidates.total, "The count should be shown")
   end
 
   def test_an_unconfigured_row_has_no_unresolved_targets

@@ -14,10 +14,10 @@ class Inat
   # the search, and an admin can be told what did not resolve.
   #
   # A project can have hundreds of target names, more than iNat's rate
-  # limit allows at once. So one mapper sends at most
-  # LOOKUPS_PER_REQUEST lookups, and none after iNat refuses one. A
-  # target left unchecked is neither cached nor reported as unknown,
-  # and is looked up on a later request.
+  # limit allows at once. So pages, imports and alerts read only saved
+  # lookups, and `InatTargetLookupJob` gets them (`look_up: true`),
+  # pacing itself and stopping when iNat refuses one. A target with no
+  # saved lookup is neither searched for nor reported as unknown.
   class ConstraintMapper
     include Inat::Constants
     include Inat::JsonFetch
@@ -26,14 +26,6 @@ class Inat
 
     # iNat's maximum for place autocomplete.
     PLACE_CANDIDATES = 20
-
-    # iNat asks API users to stay <= 60 requests a minute.
-    # It starts refusing at about 100. Elsewhere MO uses 60/minute
-    # by pacing itself at 1/sec. ObsFetcher#INTER_PAGE_SLEEP
-    # Imports, syncs and the nightly alert job share the same iNat
-    # per-minute allowance. See ObsFetcher#INTER_PAGE_SLEEP.
-    # Stop lookups at 50 to leave some allowance free for other requests.
-    LOOKUPS_PER_REQUEST = 50
 
     # Part of the cache keys: a miss is cached too, so changing how
     # targets match, or how a miss is stored, needs a new version to
@@ -54,23 +46,55 @@ class Inat
     # locations are written that way.
     COUNTY_ABBREVIATION = /\bCo\.\z/
 
-    def initialize(project)
+    # look_up: send iNat a lookup for each target with no saved one.
+    # pace: seconds to wait between lookups.
+    # The block is called after each lookup iNat answered.
+    def initialize(project, look_up: false, pace: 0, &on_answer)
       @project = project
+      @look_up = look_up
+      @pace = pace
+      @on_answer = on_answer
       @unresolved_names = []
       @unresolved_locations = []
       @inat_failed = false
       @lookups = 0
       @unchecked_count = 0
+      @new_answers = 0
     end
 
-    # unchecked_count is how many targets were not looked up: over the
-    # cap, or after iNat refused a lookup.
-    attr_reader :unresolved_names, :unresolved_locations, :unchecked_count
+    # new_answers is how many lookups iNat answered for this mapper.
+    attr_reader :unresolved_names, :unresolved_locations, :new_answers
 
-    # False when some targets were not looked up, so the taxa and places
-    # are only part of what the project targets.
+    # Resolves every target, so the counts below cover them all.
+    def look_up_targets
+      target_taxa
+      target_place_ids
+      self
+    end
+
+    # How many targets have no saved lookup.
+    def unchecked_count
+      look_up_targets
+      @unchecked_count
+    end
+
+    # False when some targets have no saved lookup, so the taxa and
+    # places are only part of what the project targets.
     def complete?
-      @unchecked_count.zero?
+      unchecked_count.zero?
+    end
+
+    # True when iNat refused a lookup, so the rest were not sent.
+    def refused?
+      @inat_failed
+    end
+
+    def target_count
+      @project.target_names.size + @project.target_locations.size
+    end
+
+    def looked_up_count
+      target_count - unchecked_count
     end
 
     # The iNat taxa the project's target names resolve to. Empty when
@@ -138,15 +162,31 @@ class Inat
     # iNat may know the taxon under a synonym MO does not prefer --
     # Caloboletus peckii is Butyriboletus peckii there -- so the whole
     # synonym group is tried before giving up.
-    #
-    # Cached as the taxon id, or false when iNat answered with no match.
     def taxon_id_for(name)
-      id = Rails.cache.fetch(["inat_taxon", TAXON_MATCHING_VERSION,
-                              name.id, name.updated_at],
-                             expires_in: CACHE_TTL, skip_nil: true) do
+      id = saved_answer(["inat_taxon", TAXON_MATCHING_VERSION,
+                         name.id, name.updated_at]) do
         first_answer(text_names_for(name)) { |text| search_taxon(text) }
       end
       record_outcome(id, @unresolved_names, name.text_name)
+    end
+
+    # Saved as the iNat id, or false when iNat answered with no match.
+    # nil when there is no saved answer and none was looked up.
+    def saved_answer(key)
+      return Rails.cache.read(key) unless @look_up
+
+      asked = false
+      id = Rails.cache.fetch(key, expires_in: CACHE_TTL, skip_nil: true) do
+        asked = true
+        yield
+      end
+      note_answer if asked && !id.nil?
+      id
+    end
+
+    def note_answer
+      @new_answers += 1
+      @on_answer&.call(self)
     end
 
     def record_outcome(id, unresolved, label)
@@ -185,8 +225,9 @@ class Inat
     # The results iNat sent, or nil when it was not asked or did not
     # answer.
     def inat_results(path)
-      return nil if @inat_failed || @lookups >= LOOKUPS_PER_REQUEST
+      return nil if @inat_failed
 
+      sleep(@pace) if @pace.positive? && @lookups.positive?
       @lookups += 1
       results = fetch_json(path)&.dig("results")
       @inat_failed = true unless results
@@ -196,11 +237,9 @@ class Inat
     # MO writes a location from the inside out, so its first segment is
     # what iNat calls the place: "Barnstable Co., Massachusetts, USA"
     # searches for "Barnstable Co.".
-    # Cached as the place id, or false when iNat answered with no match.
     def place_id_for(location)
-      id = Rails.cache.fetch(["inat_place", PLACE_MATCHING_VERSION,
-                              location.id, location.updated_at],
-                             expires_in: CACHE_TTL, skip_nil: true) do
+      id = saved_answer(["inat_place", PLACE_MATCHING_VERSION,
+                         location.id, location.updated_at]) do
         search_place(location)
       end
       record_outcome(id, @unresolved_locations, location.name)

@@ -154,6 +154,7 @@ module Projects
       return unless name
 
       @project.add_target_name(name)
+      InatTargetLookupJob.look_up_later(@project)
     end
 
     def handle_add_target_location
@@ -163,6 +164,7 @@ module Projects
       return unless location
 
       @project.add_target_location(location)
+      InatTargetLookupJob.look_up_later(@project)
     end
 
     # Back-compat: the old "Remove Selected" form sent

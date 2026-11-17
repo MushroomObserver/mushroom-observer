@@ -136,12 +136,14 @@ module Projects
         to_return(status: 200, body: { results: [] }.to_json)
       stub_request(:get, inat_api_matcher("places")).
         to_return(status: 200, body: { results: [] }.to_json)
+      save_inat_lookups(project)
       make_admin("dick")
       get(:index, params: { project_id: project.id })
 
       # `.t` curls the quotes, so match the part that has none.
       assert_select("#project_site_#{@inat.id}",
                     text: /238 not yet imported/)
+      assert_no_enqueued_jobs(only: InatTargetLookupJob)
     end
 
     # Neither shape set would search every fungus on iNat, which is no
@@ -210,6 +212,7 @@ module Projects
         to_return(status: 200, body: { results: [] }.to_json)
       stub_request(:get, inat_api_matcher("places")).
         to_return(status: 200, body: { results: [] }.to_json)
+      save_inat_lookups(project)
       make_admin("dick")
       get(:index, params: { project_id: project.id })
 
@@ -221,22 +224,26 @@ module Projects
                     text: /Target locations iNaturalist does not know/)
     end
 
-    def test_an_incomplete_lookup_says_so
+    # Targets with no saved lookup are looked up in the background, and
+    # the page says how far that has got rather than waiting on iNat.
+    def test_targets_with_no_saved_lookup_are_looked_up_in_the_background
       project = projects(:rare_fungi_project)
       ProjectExternalSite.create!(project: project, external_site: @inat,
                                   use_constraints: true)
-      stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
       make_admin("dick")
       get(:index, params: { project_id: project.id })
 
-      assert_select("#project_site_#{@inat.id} p",
+      assert_select("#inat_target_lookup_progress",
                     text: :project_sites_lookups_incomplete.l(
-                      count: project.target_names.size +
+                      looked_up: 0,
+                      total: project.target_names.size +
                              project.target_locations.size
                     ))
       assert_select("#project_site_#{@inat.id}",
                     text: /Target names iNaturalist does not know/,
                     count: 0)
+      assert_enqueued_with(job: InatTargetLookupJob, args: [project])
+      assert_not_requested(:get, inat_api_matcher("taxa"))
     end
 
     # --- saving ------------------------------------------------------

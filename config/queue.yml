@@ -42,6 +42,13 @@ default: &default
       threads: 1
       processes: 1
       polling_interval: 1
+    # InatTargetLookupJob paces itself against iNat's rate limit and
+    # holds its thread for minutes. One thread keeps the pace across
+    # projects and keeps it off the threads the jobs above need.
+    - queues: inat_lookups
+      threads: 1
+      processes: 1
+      polling_interval: 1
 
 development:
   <<: *default

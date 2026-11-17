@@ -19,6 +19,22 @@ module Projects
       assert_includes(project.target_names.reload, name)
     end
 
+    # A project reading iNat lookups gets the new name looked up before
+    # anyone opens its External Sites page.
+    def test_create_queues_inat_lookups
+      project = projects(:rare_fungi_project)
+      ProjectExternalSite.create!(project: project, use_constraints: true,
+                                  external_site: external_sites(:inaturalist))
+      login("rolf")
+
+      post(:create, params: { project_id: project.id,
+                              project_target_names_add: {
+                                names: names(:peltigera).text_name
+                              } })
+
+      assert_enqueued_with(job: InatTargetLookupJob, args: [project])
+    end
+
     def test_create_multiple_names
       project = projects(:rare_fungi_project)
       login("rolf")

@@ -132,9 +132,13 @@ module Projects
     end
 
     # What the saved configuration would bring in, asked of iNat rather
-    # than guessed at.
+    # than guessed at. Targets with no saved lookup are looked up in the
+    # background, and the page shows the progress.
     def candidates
-      Inat::CandidateCount.for(project_site: project_sites[inat_site.id])
+      found =
+        Inat::CandidateCount.for(project_site: project_sites[inat_site.id])
+      InatTargetLookupJob.perform_later(@project) if found.incomplete?
+      found
     end
 
     def find_project!

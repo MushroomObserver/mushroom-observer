@@ -4,6 +4,7 @@ require("test_helper")
 
 # The alert half of the iNaturalist cycle (#5416).
 class Inat::AlertScannerTest < UnitTestCase
+  include ActiveJob::TestHelper
   include InatStubHelpers
 
   # The rare-fungi fixture is the shape alerting is for: target names
@@ -18,6 +19,7 @@ class Inat::AlertScannerTest < UnitTestCase
     @burbank = locations(:burbank)
     stub_taxon_lookups
     stub_place_lookups
+    save_inat_lookups(@project)
   end
 
   def stub_taxon_lookups
@@ -81,6 +83,27 @@ class Inat::AlertScannerTest < UnitTestCase
   def test_no_alerting_project_asks_inat_nothing
     assert_empty(scan)
     assert_not_requested(:get, inat_api_matcher("observations"))
+  end
+
+  # A cycle watches the targets with a saved lookup and queues the
+  # lookups for the rest, rather than asking iNat itself.
+  def test_targets_with_no_saved_lookup_are_queued_for_lookup
+    Rails.cache.clear
+    alerting_row
+    WebMock.reset_executed_requests!
+
+    assert_empty(scan, "With no saved lookup there is nothing to watch")
+    assert_enqueued_with(job: InatTargetLookupJob, args: [@project])
+    assert_not_requested(:get, inat_api_matcher("taxa"))
+  end
+
+  def test_a_cycle_with_every_lookup_saved_queues_none
+    alerting_row
+    stub_observations([])
+
+    scan
+
+    assert_no_enqueued_jobs(only: InatTargetLookupJob)
   end
 
   # Alerting is opt-in. A row with nobody listed is a row nobody asked
