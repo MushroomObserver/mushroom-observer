@@ -143,7 +143,7 @@ class Components::Matrix::Box < Components::Base
         Link(type: :get, name: @data[:name],
              target: @data[:what].show_link_args) { render_title }
         whitespace
-        IDBadge(object: @data[:what], size: :md, extra_class: nil)
+        Badge(variant: :id, object: @data[:what], size: :md, extra_class: nil)
       end
 
       render_identify_ui if @identify

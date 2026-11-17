@@ -8,7 +8,7 @@
 # attribute, so it can't pick up accidental DOM-adjacency coupling
 # the way the clipboard controller's `nextElementSibling` fallback
 # does.
-class Components::CountBadge < Components::Base
+class Components::Badge::Count < Components::Badge
   prop :count, ::Integer
   prop :type, Symbol, default: :observation
   # Catch-all for class:, data:, and any other HTML attrs -- matches

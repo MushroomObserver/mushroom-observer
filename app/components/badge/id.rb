@@ -29,7 +29,10 @@
 # described above. Pass `false` for a plain, non-clickable `<span>` --
 # e.g. next to an object that isn't itself a link either (Matching
 # Observations' current-observation row).
-class Components::IDBadge < Components::Base
+#
+# @example
+#   Badge(variant: :id, object: @project, size: :sm)
+class Components::Badge::ID < Components::Badge
   SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",
                    md: "badge-md", sm: "badge-sm" }.freeze
 
