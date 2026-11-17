@@ -73,7 +73,7 @@ module Views::Controllers::Publications
     def render_publications_table
       Table(@objects,
             variant: :striped, identifier: "publications",
-            class: "mb-3 mt-3") do |tbl|
+            wrap_class: "mb-3 mt-3") do |tbl|
         add_full_link_column(tbl)
         tbl.column(:publication_link.l) { |pub| link_cell(pub) }
         tbl.column("(#{@peer_count})", align: :center) do |pub|

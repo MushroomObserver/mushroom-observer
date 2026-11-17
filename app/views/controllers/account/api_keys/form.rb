@@ -111,7 +111,7 @@ module Views::Controllers::Account::APIKeys
     end
 
     def render_metadata_table
-      Table(show_headers: false, class: "mt-3") do |t|
+      Table(show_headers: false, wrap_class: "mt-3") do |t|
         t.body { render_metadata_rows }
       end
     end

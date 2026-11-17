@@ -12,7 +12,7 @@ module Views::Controllers::Projects::Members
       div(id: "project_members_table") do
         Table(@users.sort_by(&:login),
               variant: :striped, identifier: "project-members",
-              class: "mt-3") do |table|
+              wrap_class: "mt-3") do |table|
           define_columns(table)
         end
       end

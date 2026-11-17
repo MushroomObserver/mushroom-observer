@@ -140,7 +140,7 @@ module Views::Controllers::Projects::Locations
     def render_locations_table(rows = nil, &block)
       Table(rows,
             variant: :striped, identifier: "project-members",
-            class: "mt-3") do |t|
+            wrap_class: "mt-3") do |t|
         t.column(:location.ti)
         t.column(:observations.ti)
         t.column(:project_aliases.ti)
