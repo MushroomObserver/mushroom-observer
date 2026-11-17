@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class IDBadgeTest < ComponentTestCase
+class Components::Badge::IDTest < ComponentTestCase
   def test_renders_object_id_in_clipboard_button
     obs = observations(:minimal_unknown_obs)
     html = render_badge(object: obs, size: :md)
@@ -67,7 +67,9 @@ class IDBadgeTest < ComponentTestCase
   def test_requires_size
     obs = observations(:minimal_unknown_obs)
 
-    assert_raises(ArgumentError) { Components::IDBadge.new(object: obs) }
+    assert_raises(ArgumentError) do
+      Components::Badge.new(variant: :id, object: obs)
+    end
   end
 
   def test_default_tooltip_title
@@ -88,6 +90,6 @@ class IDBadgeTest < ComponentTestCase
   private
 
   def render_badge(**)
-    render(Components::IDBadge.new(**))
+    render(Components::Badge.new(variant: :id, **))
   end
 end

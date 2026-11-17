@@ -33,7 +33,8 @@ module Views::Controllers::VisualModels
 
     def render_table
       Table(
-        groups, variant: :striped, class: "table-visual-model"
+        groups, variant: :striped, class: "table-visual-model",
+                panel_wrap: false
       ) do |t|
         define_columns(t)
       end

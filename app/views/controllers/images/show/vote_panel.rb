@@ -15,7 +15,7 @@ module Views::Controllers::Images
         ) do |panel|
           panel.with_heading { render_current_vote_heading }
           render_user_vote_body(panel) if current_user
-          panel.with_body(classes: "p-0") { render_vote_table_container }
+          panel.with_body(wrapper: false) { render_vote_table_container }
         end
       end
 
@@ -128,7 +128,7 @@ module Views::Controllers::Images
       def render_vote_table
         Table(sorted_votes,
               variant: :striped, identifier: "show-votes",
-              class: "mt-3 mb-0") do |t|
+              class: "mt-3", panel_wrap: false) do |t|
           t.column(:user.ti) { |vote| render_vote_user_cell(vote) }
           t.column(:vote.ti) { |vote| image_vote_as_short_string(vote.value) }
         end

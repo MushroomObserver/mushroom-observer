@@ -126,6 +126,15 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     assert_equal("col-xs-12 col-md-6 col-lg-4", right)
   end
 
+  def test_column_classes_four_eight_writes_split_left_right
+    left, right = captured_slots(:left_columns, :right_columns) do
+      column_classes(:four_eight)
+    end
+
+    assert_equal("col-xs-12 col-md-5 col-lg-4", left)
+    assert_equal("col-xs-12 col-md-7 col-lg-8", right)
+  end
+
   def test_column_classes_explicit_then_default_does_not_aggregate
     left, right = captured_slots(:left_columns, :right_columns) do
       column_classes(:nine_three)
@@ -134,6 +143,27 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
 
     assert_equal("col-xs-12 col-md-9 col-lg-8", left)
     assert_equal("col-xs-12 col-md-3 col-lg-4", right)
+  end
+
+  # ----- left/right_column_class_for readers ----------------------
+  # Give a body-only grid split the same ratio without touching
+  # :left_columns/:right_columns -- those drive the title bar split
+  # via :has_columns, which a body-only split shouldn't trigger.
+
+  def test_left_column_class_for_four_eight
+    result = captured_slot(:test_value) do
+      content_for(:test_value) { left_column_class_for(:four_eight) }
+    end
+
+    assert_equal("col-xs-12 col-md-5 col-lg-4", result)
+  end
+
+  def test_right_column_class_for_four_eight
+    result = captured_slot(:test_value) do
+      content_for(:test_value) { right_column_class_for(:four_eight) }
+    end
+
+    assert_equal("col-xs-12 col-md-7 col-lg-8", result)
   end
 
   # ----- content_padding setter ----------------------------------

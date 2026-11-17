@@ -260,6 +260,20 @@ module Observations
                     "Form should have a link to show only the user's images.")
     end
 
+    # layout_count: 1 forces 2 pages out of mary's 2 image fixtures.
+    def test_reuse_image_page_shows_pagination_when_multiple_pages
+      obs = observations(:minimal_unknown_obs)
+      assert_equal("mary", obs.user.login)
+      mary.update!(layout_count: 1)
+
+      login("mary")
+      get(:reuse, params: { id: obs.id })
+
+      assert_select(".pagination_numbers a", { text: "Next" },
+                    "Page with multiple pages of images to reuse " \
+                    "should show a pagination nav")
+    end
+
     # Test reusing an image by id number. Not sure how differs from next test
     def test_add_image_to_obs_by_id
       obs = observations(:coprinus_comatus_obs)
