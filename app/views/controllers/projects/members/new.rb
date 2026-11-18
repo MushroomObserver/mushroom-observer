@@ -14,6 +14,7 @@ module Views::Controllers::Projects::Members
       )
       add_context_nav(Tab::Project::Members::FormNew.new(project: @project))
       container_class(:wide)
+      content_padding(:panels)
 
       render_users_table
     end
@@ -22,8 +23,7 @@ module Views::Controllers::Projects::Members
 
     def render_users_table
       Table(@users.sort_by(&:login),
-            variant: :striped, identifier: "project-members",
-            wrap_class: "mt-3") do |t|
+            variant: :striped, identifier: "project-members") do |t|
         t.column(:login_name.ti) do |u|
           Link(type: :user, user: u, name: u.login)
         end

@@ -21,7 +21,7 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
   end
 
   def view_template
-    div(class: "mt-3") do
+    ContentPadded do
       super do
         autocompleter_field(
           field_name,
