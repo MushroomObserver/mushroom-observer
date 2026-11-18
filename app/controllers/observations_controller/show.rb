@@ -42,8 +42,9 @@ module ObservationsController::Show
     @consensus     = Observation::NamingConsensus.new(@observation)
     @owner_name    = @consensus.owner_preference
     register_namings_for_textile_in_notes
-    @comments = @observation.comments&.sort_by(&:created_at)&.reverse
     load_occurrence_data
+    @sibling_markers = sibling_markers
+    @comments = occurrence_comments
     @images = occurrence_images
 
     render_show_view
@@ -55,6 +56,7 @@ module ObservationsController::Show
              consensus: @consensus, comments: @comments.to_a,
              images: @images || [], other_sites: @other_sites,
              sibling_observations: @sibling_observations,
+             sibling_markers: @sibling_markers || {},
              occurrence: @occurrence, owner_name: @owner_name
            ))
   end
@@ -79,10 +81,36 @@ module ObservationsController::Show
                               { herbarium_records: [
                                 { herbarium: :curators }, :user
                               ] },
+                              { comments: Comment.index_includes_tree },
                               { images: [:image_votes, :license, :user] },
                               :location, :name, :sequences,
                               :thumb_image, :user
                             ).to_a
+  end
+
+  # Footnote numbers for the occurrence's other members, counting from
+  # 1 in observation-id order. The observation being shown gets none,
+  # so an unmarked comment or photo is its own. Comments, photos and
+  # the Matching Observations panel all read this one map, so their
+  # numbering cannot disagree (#5718).
+  def sibling_markers
+    return {} unless @occurrence
+
+    @sibling_observations.sort_by(&:id).each_with_index.
+      to_h { |member, index| [member.id, index + 1] }
+  end
+
+  # A comment is about the specimen, not the record of it, so every
+  # member's comments show on every member's page. Newest first,
+  # with or without siblings to merge in (#5718).
+  def occurrence_comments
+    comments = own_comments
+    comments += @sibling_observations.flat_map(&:comments) if @occurrence
+    comments.sort_by(&:created_at).reverse
+  end
+
+  def own_comments
+    @observation.comments.to_a
   end
 
   # The thumbnail may be a sibling's image (any image in the occurrence

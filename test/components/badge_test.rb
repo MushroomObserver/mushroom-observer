@@ -15,6 +15,12 @@ class Components::BadgeTest < ComponentTestCase
     assert_instance_of(Components::Badge::ID, result)
   end
 
+  def test_sibling_marker_variant_returns_sibling_marker_instance
+    result = Components::Badge.new(variant: :sibling_marker, number: 1)
+
+    assert_instance_of(Components::Badge::SiblingMarker, result)
+  end
+
   # When no `variant:` key is passed, `self.new` falls through to
   # `super` and returns a plain `Components::Badge` instance (not a
   # subclass) -- matches `Components::Link`'s dispatcher.

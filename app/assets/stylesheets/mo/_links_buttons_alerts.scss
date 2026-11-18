@@ -394,3 +394,44 @@ button:disabled {
   color: $alert-warning-text;
   border-color: #ffc107 #ffc107 #fff;
 }
+
+// The number saying which occurrence member a comment or photo came
+// from (#5718). Shares .badge-outline's shape in prose and in the
+// Matching Observations panel, where the column of numbers is the
+// legend for the markers elsewhere on the page.
+.sibling-marker {
+  font-size: 75%;
+}
+
+// Over a photograph an outline disappears into the image, so the
+// carousel badge fills with the page background instead -- readable
+// on a dark photo or a light one, and theme-aware either way.
+// A fixed size, not the 75% above: the badge sits on a 6vw
+// thumbnail, where a relative size shrinks it past legibility.
+.sibling-marker-solid {
+  font-size: 11px;
+  font-weight: normal;
+  padding: 2px 6px;
+  // .carousel-indicators sets line-height: 0 to collapse the
+  // whitespace between thumbnails; the badge inherits it, so
+  // without this the digit has no height and the bubble reads
+  // as empty.
+  line-height: 1.4;
+  color: $text-color;
+  background-color: $body-bg;
+  border: 1px solid $text-color;
+}
+
+// A link around a badge should not underline or recolor it.
+.sibling-marker-link,
+.sibling-marker-link:hover,
+.sibling-marker-link:focus {
+  text-decoration: none;
+}
+
+// Holds a badge's width on an unnumbered row, so every row's id badge
+// in the Matching Observations panel starts at the same place.
+.sibling-marker-spacer {
+  display: inline-block;
+  width: 1.6em;
+}
