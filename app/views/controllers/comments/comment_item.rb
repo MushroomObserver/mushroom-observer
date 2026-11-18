@@ -26,6 +26,10 @@ module Views::Controllers::Comments
     # mod-links wrapper is emitted.
     prop :editable, _Boolean, default: false
     prop :show_name, _Boolean, default: false
+    # Set when this comment was made on another member of the
+    # observation's occurrence; nil for the page's own comments
+    # and for every non-occurrence commentable (#5718).
+    prop :marker, _Nilable(Integer), default: nil
 
     # rubocop:disable MO/NoLongCommentBlock
     # Renders the inner content of a `.list-group-item.comment`
@@ -68,8 +72,19 @@ module Views::Controllers::Comments
 
     def render_summary
       div(class: "comment-summary font-weight-bold") do
+        render_marker if @marker
         trusted_html(@comment.summary.tl)
       end
+    end
+
+    # Which member the comment was made on. Without it a merged
+    # thread reads as though every comment were made here, and a
+    # comment naming "this observation" names a different one. It
+    # leads the summary; after the text it reads as part of the
+    # subject.
+    def render_marker
+      Badge(variant: :sibling_marker, number: @marker,
+            observation_id: @comment.target_id, class: "mr-2")
     end
 
     def render_comment_body
