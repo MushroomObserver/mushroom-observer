@@ -88,32 +88,57 @@ class ProjectAlert
       end
     end
 
-    # A watched name applied here, or a comment on something the
-    # project was told about already. Anything else is somebody else's
-    # observation.
+    # What this project hears about an action on this observation. A
+    # watched name arriving is a find the first time and activity after
+    # that; a comment is activity on an observation the project already
+    # has. Anything else is somebody else's observation.
     def alert_for(project, observation, target)
+      return nil if left_out?(project, observation)
+
+      told = ProjectAlert.last_alert_for(project, observation)
+      return comment_alert(project, observation, target, told) if
+        target.is_a?(Comment)
+
+      name_alert(project, observation, target, told)
+    end
+
+    # Excluding an observation is how a project says it reviewed one and
+    # left it out, so it hears no more about it. An iNaturalist
+    # observation nobody imported has no row to exclude: the way to
+    # leave one out is to import it and exclude it here.
+    def left_out?(project, observation)
+      project.excluded_observations.include?(observation)
+    end
+
+    # A watched name arriving, whether on a new observation or proposed
+    # on an older one. A name arriving on an observation the project has
+    # been told about is activity on it, whatever the name says.
+    def name_alert(project, observation, target, told)
       name = watched_name(project, observation)
-      return follow_up(project, observation, target) unless name
+      return activity(project, observation, target, told.target_name) if
+        name.nil? && told
+      return nil unless name
 
       ProjectAlert.record_local(project: project, observation: observation,
                                 target: target, name: name.text_name,
                                 target_name: name.text_name)
     end
 
-    # Later activity on an observation this project has been told
-    # about, which is worth hearing whatever its name says now. The
-    # project may have heard it from a site rather than from here, so
-    # the watched name comes from whichever row said so.
-    def follow_up(project, observation, target)
-      return nil unless target.is_a?(Comment)
+    # A comment is no find: an observation becomes the project's business
+    # by being added to it or reported to it, not by being talked about.
+    def comment_alert(project, observation, target, told)
+      return activity(project, observation, target, told.target_name) if told
+      return nil unless project.observations.exists?(observation.id)
 
-      told = ProjectAlert.last_alert_for(project, observation)
-      return nil unless told
+      activity(project, observation, target,
+               watched_name(project, observation)&.text_name.presence ||
+               observation.name&.text_name.to_s)
+    end
 
+    def activity(project, observation, target, target_name)
       ProjectAlert.record_local(
         project: project, observation: observation, target: target,
-        name: observation.name&.text_name.to_s,
-        target_name: told.target_name
+        name: observation.name&.text_name.to_s, target_name: target_name
       )
     end
 

@@ -154,6 +154,74 @@ class ProjectAlert::CollectorTest < UnitTestCase
     assert_equal(@target.text_name, alert.target_name)
   end
 
+  # An observation the project holds is its business, so a comment on
+  # it is activity even when nothing has been reported about it yet.
+  def test_a_comment_on_a_project_observation_is_activity
+    obs = act { new_observation }
+    ProjectAlert.delete_all
+    @project.add_observation(obs)
+
+    assert_difference("ProjectAlert.count", 1) do
+      act do
+        Comment.create!(target: obs, user: users(:rolf),
+                        summary: "Seen this?", comment: "Worth a look")
+      end
+    end
+
+    alert = ProjectAlert.where(observation: obs).order(:id).last
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(@target.text_name, alert.target_name)
+  end
+
+  # Joining the project is part of posting it, so the observation is
+  # still news.
+  def test_an_observation_added_to_the_project_as_it_is_posted_is_a_find
+    obs = nil
+
+    act do
+      obs = new_observation
+      @project.add_observation(obs)
+    end
+
+    alert = ProjectAlert.where(observation: obs).order(:id).last
+
+    assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
+  end
+
+  # A project that reviewed an observation and left it out hears no
+  # more about it -- the DNA came back and it was not what they
+  # thought.
+  def test_an_excluded_observation_alerts_nobody
+    obs = act { new_observation }
+    @project.exclude_observation(obs)
+
+    assert_no_difference("ProjectAlert.count") do
+      act do
+        Comment.create!(target: obs, user: users(:rolf),
+                        summary: "Still?", comment: "What came back?")
+      end
+    end
+  end
+
+  # A name proposed on an observation the project was told about is
+  # activity on it, whichever name it is.
+  def test_a_naming_of_another_name_on_a_reported_observation_is_activity
+    obs = act { new_observation }
+
+    assert_difference("ProjectAlert.count", 1) do
+      act do
+        Naming.create!(observation: obs, name: names(:peltigera),
+                       user: users(:rolf))
+      end
+    end
+
+    alert = ProjectAlert.where(observation: obs).order(:id).last
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(@target.text_name, alert.target_name)
+  end
+
   def test_a_comment_on_an_unreported_observation_alerts_nobody
     obs = act { new_observation(name: names(:peltigera)) }
 

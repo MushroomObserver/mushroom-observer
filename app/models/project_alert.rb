@@ -74,7 +74,7 @@ class ProjectAlert < AbstractModel
                         target_name:)
     create!(project: project, observation: observation, target: target,
             name: name, target_name: target_name,
-            kind: local_kind_for(project, observation),
+            kind: local_kind_for(project, observation, target),
             observed_on: observation.when,
             alerted_at: Time.zone.now)
   rescue ActiveRecord::RecordNotUnique
@@ -139,7 +139,13 @@ class ProjectAlert < AbstractModel
   # An observation imported from a site carries that site's id for it,
   # so a project told about it there does not hear about it again as a
   # find here.
-  def self.local_kind_for(project, observation)
+  #
+  # A comment is no find either: what makes an observation the
+  # project's business is a watched name arriving on it, not somebody
+  # talking about it.
+  def self.local_kind_for(project, observation, target = nil)
+    return OTHER_ACTIVITY if target.is_a?(Comment)
+
     told_about(project, observation).exists? ? OTHER_ACTIVITY : NEW_OBSERVATION
   end
 
@@ -161,8 +167,12 @@ class ProjectAlert < AbstractModel
   # A remote id means something only with the site that issued it, so
   # each link is matched against its site. No link, no clause: a row
   # carrying no remote id is not about this observation.
+  #
+  # Queried rather than read off the observation, whose association
+  # may have been loaded before the link it needs existed.
   def self.remote_rows(project, observation)
-    observation.external_links.filter_map { |link| remote_row(project, link) }.
+    ExternalLink.where(target: observation).includes(:external_site).
+      filter_map { |link| remote_row(project, link) }.
       reduce { |rows, clause| rows.or(clause) }
   end
 
