@@ -142,14 +142,17 @@ bin/rails test
 
 **Always add text strings to `config/locales/en.txt`, never to `.yml` files.**
 
-The `.yml` locale files are generated from `.txt` files and should never be edited or committed directly.
+Translations resolve at runtime through Solid Cache / `DbFallback`
+(#4807), reading from the `translation_strings` DB table. Nothing
+reads `config/locales/*.yml` anymore — `lang:update` no longer
+generates them.
 
 **Workflow for adding/updating text strings:**
 
 1. Edit `config/locales/en.txt` to add or modify text strings
-2. Run `rails lang:update` to regenerate all `.yml` files
-3. Verify the change appears correctly in `config/locales/en.yml`
-4. **Never commit the `.yml` files** - they are ignored by git
+2. Run `rails lang:update` to import the change into the DB and cache
+3. Verify, e.g. `:tag.t` in a `rails console`, or reload the page
+4. Commit only `config/locales/en.txt`
 
 ```bash
 # Good workflow
@@ -157,17 +160,15 @@ vim config/locales/en.txt
 rails lang:update
 git add config/locales/en.txt
 git commit -m "Update help text"
-
-# Bad - never do this
-vim config/locales/en.yml  # Wrong file
-git add config/locales/en.yml  # Never commit .yml files
 ```
 
 **Why this matters:**
 - `.txt` files are the single source of truth for translations
-- The `lang:update` rake task propagates changes to all language `.yml` files
-- Editing `.yml` files directly causes changes to be lost on next update
-- All `.yml` files are in `.gitignore` and should remain uncommitted
+- The `lang:update` rake task imports changes into the DB, which
+  `DbFallback` reads directly — no file regeneration step
+- `lang:update:<locale>` (not run by `lang:update` itself) can still
+  write a manual `.yml` snapshot per locale if ever wanted, but
+  nothing in the app reads it back
 
 ### Prefer `.l` over `.t` for plain-text labels
 

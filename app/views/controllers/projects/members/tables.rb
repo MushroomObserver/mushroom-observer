@@ -11,8 +11,7 @@ module Views::Controllers::Projects::Members
     def view_template
       div(id: "project_members_table") do
         Table(@users.sort_by(&:login),
-              variant: :striped, identifier: "project-members",
-              class: "mt-3") do |table|
+              variant: :striped, identifier: "project-members") do |table|
           define_columns(table)
         end
       end

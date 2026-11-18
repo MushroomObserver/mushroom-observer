@@ -11,6 +11,7 @@ module Views::Controllers::Projects::Members
     def view_template
       add_project_banner(@project)
       container_class(:wide)
+      content_padding(:panels)
       add_pagination(@pagination)
 
       render(AddForm.new(project: @project))
