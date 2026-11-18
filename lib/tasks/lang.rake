@@ -95,13 +95,13 @@ namespace :lang do
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
-    "strip:all"          # strip out any strings we no longer need
-    # Neither update:all (regenerate every locale's YAML) nor
-    # export:unofficial (regenerate every locale's .txt) runs here --
-    # translations are DB/Solid-Cache-backed at runtime (#4807), and
-    # nothing at runtime or in the test suite reads either output.
-    # The lang:export:*/lang:update:* tasks below still exist for a
-    # manual/backup snapshot if wanted.
+    "strip:all",         # strip out any strings we no longer need
+    # export:unofficial is needed: TranslationsController#build_index
+    # reads each locale's export_file straight off disk to build the
+    # Translations UI sidebar. update:all (regenerate every locale's
+    # YAML) is the dead one -- translations resolve from DB/
+    # Solid-Cache at runtime (#4807), and nothing reads the YAML.
+    "export:unofficial"
   ]
 
   desc "Find en.txt tags with no remaining reference anywhere " \
