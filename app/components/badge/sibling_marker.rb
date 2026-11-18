@@ -14,8 +14,8 @@
 class Components::Badge::SiblingMarker < Components::Badge
   prop :number, ::Integer
   prop :observation_id, _Nilable(::Integer), default: nil
-  # The Matching Observations panel row already links to the member,
-  # so its badge is plain; a comment or thumbnail links to the source.
+  # Linked wherever the id is known -- see the Matching Observations
+  # panel's `render_marker` for why its row links the number too.
   prop :link, _Boolean, default: true
   # An outlined badge vanishes into a photograph, so the one laid over
   # a carousel thumbnail fills instead of outlining.
