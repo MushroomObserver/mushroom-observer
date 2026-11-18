@@ -372,6 +372,8 @@
   admins: admins
   admin_group: admin group
   admin_groups: admin groups
+  alias: alias
+  aliases: aliases
   annotations: annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   author: author
