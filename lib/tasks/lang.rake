@@ -90,18 +90,13 @@ end
 
 namespace :lang do
   desc "Check syntax of official export file, " \
-       "integrate changes into database, " \
-       "refresh export files."
+       "integrate changes into database."
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
-    "strip:all",         # strip out any strings we no longer need
-    # export:unofficial is needed: TranslationsController#build_index
-    # reads each locale's export_file straight off disk to build the
-    # Translations UI sidebar. update:all (regenerate every locale's
-    # YAML) is the dead one -- translations resolve from DB/
-    # Solid-Cache at runtime (#4807), and nothing reads the YAML.
-    "export:unofficial"
+    "strip:all"          # strip out any strings we no longer need
+    # update:all/export:unofficial: nothing reads an unofficial
+    # locale's generated file (translations_controller.rb).
   ]
 
   desc "Find en.txt tags with no remaining reference anywhere " \
