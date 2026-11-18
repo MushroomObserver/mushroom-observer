@@ -1994,6 +1994,7 @@
   # admin/excluded_inat_users
   excluded_inat_users_title: Excluded iNat Users
   excluded_inat_users_help: "iNaturalist users without an MO account who have opted out of having their data included on MO. Imports bring in only the facts of observations they posted: no images and no notes. Someone with an MO account opts out on their profile instead."
+  excluded_inat_users_none_yet: No excluded iNaturalist users yet.
   excluded_inat_user_login: iNaturalist login
   excluded_inat_user_reason: Reason (optional)
   excluded_inat_user_added_by: Added
