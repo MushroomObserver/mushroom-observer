@@ -99,6 +99,38 @@ class InlineCRUDLinksTest < ComponentTestCase
     )
   end
 
+  # No `observation:` -- the standalone index page, not an obs-show
+  # sub-panel. Edit goes back to the index, destroy is a plain
+  # destroy (not detach), with the generic confirm/class/label.
+  def test_collection_number_from_index
+    cn = collection_numbers(:detailed_unknown_coll_num_one)
+
+    html = render_links(target: cn, user: cn.user)
+
+    assert_html(html,
+                "a.inline-icon-link" \
+                "[data-modal='modal_collection_number_#{cn.id}']")
+    assert_html(html, "form[action='#{routes.collection_number_path(cn)}']")
+    assert_html(html, "button.destroy_collection_number_link_#{cn.id}")
+    # Generic confirm, not `path_detach_from_obs`'s remove-from-observation
+    # wording -- there's no observation here to detach from.
+    assert_html(html, "form[data-turbo-confirm='#{:are_you_sure.l}']")
+  end
+
+  def test_herbarium_record_from_index
+    record = herbarium_records(:coprinus_comatus_rolf_spec)
+
+    html = render_links(target: record, user: record.user)
+
+    assert_html(html,
+                "a.inline-icon-link" \
+                "[data-modal='modal_herbarium_record_#{record.id}']")
+    assert_html(html,
+                "form[action='#{routes.herbarium_record_path(record)}']")
+    assert_html(html, "button.destroy_herbarium_record_link_#{record.id}")
+    assert_html(html, "form[data-turbo-confirm='#{:are_you_sure.l}']")
+  end
+
   def test_naming_edit_and_destroy_links
     naming = namings(:detailed_unknown_naming)
 
@@ -142,6 +174,34 @@ class InlineCRUDLinksTest < ComponentTestCase
     html = render_links(target: alias_, user: stranger)
 
     assert_equal("", html.strip)
+  end
+
+  def test_visual_model_edit_and_destroy_links
+    vm = visual_models(:visual_model_one)
+
+    # No permission restriction -- any signed-in user, including a
+    # stranger with no special relationship to this record.
+    html = render_links(target: vm, user: users(:lone_wolf))
+
+    edit_path = routes.edit_visual_model_path(vm.id)
+    assert_html(html, "a.inline-icon-link[href='#{edit_path}']")
+    expected_path = routes.visual_model_path(vm.id)
+    assert_html(html, "form[action='#{expected_path}']")
+    assert_html(html, "form input[name='_method'][value='delete']",
+                visible: :all)
+  end
+
+  def test_visual_group_edit_and_destroy_links
+    group = visual_groups(:visual_group_one)
+
+    html = render_links(target: group, user: users(:lone_wolf))
+
+    edit_path = routes.edit_visual_group_path(group.id)
+    assert_html(html, "a.inline-icon-link[href='#{edit_path}']")
+    expected_path = routes.visual_group_path(group.id)
+    assert_html(html, "form[action='#{expected_path}']")
+    assert_html(html, "form input[name='_method'][value='delete']",
+                visible: :all)
   end
 
   def test_name_description_uses_icon_link_edit

@@ -522,6 +522,30 @@ class CollectionNumbersControllerTest < FunctionalTestCase
                   "replace", "observation_collection_numbers")
   end
 
+  # Modal edit from the collection_numbers index page has no
+  # observation to update a sub-panel for -- `back: "show"` forces
+  # `@back_object` to the record itself, so the turbo_stream submit
+  # falls through to a plain redirect.
+  def test_update_collection_number_turbo_from_index
+    collection_number = collection_numbers(:coprinus_comatus_coll_num)
+    login("rolf")
+
+    params = {
+      id: collection_number.id,
+      back: "show",
+      collection_number: {
+        name: collection_number.name,
+        number: "updated-number",
+        modal: "true"
+      }
+    }
+
+    patch(:update, params: params, format: :turbo_stream)
+
+    assert_equal("updated-number", collection_number.reload.number)
+    assert_redirected_to(collection_number_path(collection_number.id))
+  end
+
   def test_update_collection_number_merge
     collection_number_count = CollectionNumber.count
     obs1 = observations(:agaricus_campestris_obs)

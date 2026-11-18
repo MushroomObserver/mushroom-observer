@@ -20,13 +20,14 @@ module Views::Controllers::VisualModels
           Badge(variant: :count, count: vm.visual_groups.size,
                 type: :visual_group)
         end
-        t.column(nil, align: :center) do |vm|
-          Button(type: :edit, target: vm, variant: :strip)
-        end
-        t.column(nil, align: :center) do |vm|
-          Button(type: :delete, target: vm, variant: :strip)
-        end
+        t.column(nil, align: :center) { |vm| render_actions(vm) }
       end
+    end
+
+    private
+
+    def render_actions(visual_model)
+      InlineCRUDLinks(target: visual_model, user: current_user)
     end
   end
 end

@@ -70,6 +70,19 @@ module Tab::CollectionNumber
       )
     end
 
+    def test_edit_back_to_index
+      tab = Tab::CollectionNumber::Edit.new(
+        collection_number: @collection_number, from_index: true
+      )
+
+      assert_equal(
+        routes.edit_collection_number_path(
+          id: @collection_number.id, back: :index
+        ),
+        tab.path
+      )
+    end
+
     def test_destroy
       tab = Tab::CollectionNumber::Destroy.new(
         collection_number: @collection_number

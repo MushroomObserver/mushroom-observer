@@ -10,15 +10,22 @@ module Components::InlineCRUDLinks::TargetHandlers
 
   # ---- :tab handlers ----------------------------------------
 
+  # No `@observation` only happens from the standalone
+  # collection_numbers/herbarium_records index pages (the
+  # observation-show sub-panel always passes one) -- `from_index:`
+  # tells the Tab to route the post-edit redirect back to the index
+  # instead of the record's show page.
   def tab_collection_number_edit
     ::Tab::CollectionNumber::Edit.new(
-      collection_number: @target, observation: @observation
+      collection_number: @target, observation: @observation,
+      from_index: @observation.nil?
     )
   end
 
   def tab_herbarium_record_edit
     ::Tab::HerbariumRecord::Edit.new(
-      herbarium_record: @target, observation: @observation
+      herbarium_record: @target, observation: @observation,
+      from_index: @observation.nil?
     )
   end
 
@@ -59,6 +66,16 @@ module Components::InlineCRUDLinks::TargetHandlers
     )
   end
 
+  # Plain page-navigation edit button -- VisualModel/VisualGroup have
+  # no modal edit form, unlike every other target above.
+  # `Button::Edit` already defaults `icon: :edit`.
+  def crud_edit_button
+    ::Components::Button.new(
+      type: :edit, target: @target, variant: :strip,
+      class: ::Components::InlineLinkBlock.item_class
+    )
+  end
+
   # ---- :destroy_path handlers -------------------------------
 
   # Default -- pass the model and let `Button::Delete` build
@@ -68,8 +85,12 @@ module Components::InlineCRUDLinks::TargetHandlers
   # "Detach from obs" -- record-path with `observation_id:` query so
   # the controller detaches rather than destroys the record.
   # `CollectionNumber` / `HerbariumRecord` can be attached to
-  # multiple obs.
+  # multiple obs. No `@observation` (the CollectionNumbers/
+  # HerbariumRecords indexes, not an observation-show sub-panel) --
+  # plain record destroy, same as `path_target`.
   def path_detach_from_obs
+    return path_target unless @observation
+
     send(:"#{@target.type_tag}_path",
          @target.id, observation_id: @observation.id)
   end
@@ -96,16 +117,28 @@ module Components::InlineCRUDLinks::TargetHandlers
 
   # ---- :destroy_name handlers -------------------------------
 
-  def name_remove = :remove.ti
+  # No `@observation` (the CollectionNumbers/HerbariumRecords
+  # indexes) -- plain destroy, not a detach, so the label reads
+  # "Destroy", matching `path_detach_from_obs`'s fallback.
+  def name_remove
+    return name_destroy_object unless @observation
+
+    :remove.ti
+  end
+
   def name_destroy_object = :destroy_object.t(type: @target.type_tag)
 
   # ---- :destroy_class handlers ------------------------------
 
   def class_remove_collection_number
+    return "destroy_collection_number_link_#{@target.id}" unless @observation
+
     "remove_collection_number_link_#{@target.id}"
   end
 
   def class_remove_herbarium_record
+    return "destroy_herbarium_record_link_#{@target.id}" unless @observation
+
     "remove_herbarium_record_link_#{@target.id}"
   end
 
@@ -127,17 +160,26 @@ module Components::InlineCRUDLinks::TargetHandlers
 
   # ---- :destroy_confirm handlers ----------------------------
 
+  # No `@observation` (the CollectionNumbers/HerbariumRecords
+  # indexes) -- plain destroy, not a detach, so fall back to
+  # `Button::Delete`'s generic confirm instead of the
+  # remove-from-observation wording.
   def confirm_remove_object
+    return nil unless @observation
+
     :remove_object_confirm.t(type: @target.type_tag, association: :observation)
   end
 
   # ---- :can_edit handlers -----------------------------------
 
   # CollectionNumber: edit gated by the OBS's edit permission,
-  # rechecked per-record.
+  # rechecked per-record. No `@observation` (the CollectionNumbers/
+  # HerbariumRecords indexes, not an observation-show sub-panel) --
+  # falls back to the record's edit permission.
   def can_edit_via_observation?
-    @observation &&
-      (@observation.can_edit?(@user) || in_admin_mode?)
+    return @target.can_edit?(@user) || in_admin_mode? unless @observation
+
+    @observation.can_edit?(@user) || in_admin_mode?
   end
 
   # HerbariumRecord / Sequence / ExternalLink: per-record edit
@@ -165,6 +207,13 @@ module Components::InlineCRUDLinks::TargetHandlers
   # per-user / per-group writer membership.
   def can_edit_via_writer?
     @target.writer?(@user) || in_admin_mode?
+  end
+
+  # VisualModel/VisualGroup: no permission restriction beyond being
+  # logged in -- matches the pre-InlineCRUDLinks pages, which showed
+  # these links to any signed-in user.
+  def can_edit_unrestricted?
+    true
   end
 
   # ---- :can_destroy handlers (override only when distinct) --
