@@ -28,8 +28,7 @@ module Views::Controllers::Observations::Downloads
     end
 
     def view_template
-      render_format_section
-      render_encoding_section
+      render_download_choices
       render_submit_buttons
       hr
       render_print_labels_section
@@ -39,6 +38,19 @@ module Views::Controllers::Observations::Downloads
 
     def form_action
       observations_downloads_path(q: q_param(@query))
+    end
+
+    def render_download_choices
+      Container do
+        Row do
+          Column(xs: 12, md: 6) do
+            render_format_section
+          end
+          Column(xs: 12, md: 6) do
+            render_encoding_section
+          end
+        end
+      end
     end
 
     def render_format_section
