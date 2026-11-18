@@ -54,6 +54,37 @@ module Projects
       assert_not_nil(assigns(:project_alias))
     end
 
+    def test_new_denied_for_non_member
+      login("dick")
+      get(:new, params: { project_id: @project.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_member)
+    end
+
+    def test_create_denied_for_non_member
+      login("dick")
+      assert_no_difference("ProjectAlias.count") do
+        post(:create, params: {
+               project_id: @project.id,
+               project_alias: {
+                 name: "Hijacked",
+                 project_id: @project.id,
+                 target_type: "User",
+                 target_id: users(:rolf).id
+               }
+             })
+      end
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_member)
+    end
+
+    def test_edit_allowed_in_admin_mode_for_non_member
+      make_admin("dick")
+      get(:edit, params: { project_id: @project.id, id: @project_alias.id })
+      assert_response(:success)
+      assert_equal(@project_alias, assigns(:project_alias))
+    end
+
     def test_edit_displays_form_to_edit_project_alias
       get(:edit, params: { project_id: @project.id, id: @project_alias.id })
       assert_response(:success)

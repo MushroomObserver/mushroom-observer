@@ -5,6 +5,7 @@ module Projects
     before_action :login_required
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
     before_action :must_be_member!, only: [:edit, :update, :destroy]
+    before_action :must_be_member_to_create!, only: [:new, :create]
 
     # NOTE: this loads every alias unpaginated. If a project's alias
     # list grows large enough to matter, give ProjectAlias a Query
@@ -235,12 +236,20 @@ module Projects
     end
 
     def must_be_member!
-      return if @project_alias.project.member?(@user)
+      deny_unless_member!(@project_alias.project)
+    end
+
+    # `new`/`create` have no `@project_alias` yet (it's being built
+    # from `params[:project_id]`) -- resolve the Project directly.
+    def must_be_member_to_create!
+      deny_unless_member!(Project.find(params[:project_id]))
+    end
+
+    def deny_unless_member!(project)
+      return if project.member?(@user) || in_admin_mode?
 
       flash_error(:project_alias_must_be_member.t)
-      redirect_to(project_aliases_path(
-                    project_id: @project_alias.project_id
-                  ))
+      redirect_to(project_aliases_path(project_id: project.id))
     end
 
     def project_alias_params
