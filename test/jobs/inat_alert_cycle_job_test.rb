@@ -32,15 +32,15 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
     alerts = [
       project_alert,
       project_alert(remote_identification_id: "1000",
-                                  name: "Coprinus comatus var. ovatus"),
+                    name: "Coprinus comatus var. ovatus"),
       project_alert(
         remote_identification_id: "1001",
         kind: ProjectAlert::OTHER_ACTIVITY
       ),
       project_alert(remote_identification_id: "1002",
-                                  remote_observation_id: "12346",
-                                  name: "Agaricus campestris",
-                                  target_name: "Agaricus campestris")
+                    remote_observation_id: "12346",
+                    name: "Agaricus campestris",
+                    target_name: "Agaricus campestris")
     ]
     scanner = fake_scanner({ mary => alerts })
 

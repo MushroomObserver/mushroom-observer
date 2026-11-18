@@ -59,7 +59,7 @@ class ProjectAlert
 
       @namings[observation.id] << target if target.is_a?(Naming)
       @touched[observation.id] = [observation, better_target(observation,
-                                                              target)]
+                                                             target)]
     end
 
     def deliver
