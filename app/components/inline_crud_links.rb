@@ -123,7 +123,7 @@ class Components::InlineCRUDLinks < Components::Base
       edit: :modal_link_edit,
       tab: :tab_project_alias_edit,
       destroy_path: :path_project_alias,
-      can_edit: :can_edit_via_member?
+      can_edit: :can_edit_via_project_admin?
     },
     # Both `NameDescription` and `LocationDescription` inherit from
     # `Description`. Keyed on the parent so the ancestor walk in

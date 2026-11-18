@@ -167,11 +167,20 @@ class InlineCRUDLinksTest < ComponentTestCase
     assert_html(html, "form[action='#{expected_path}']")
   end
 
-  def test_project_alias_no_render_for_non_member
+  def test_project_alias_no_render_for_non_admin
     alias_ = project_aliases(:one)
     stranger = users(:lone_wolf)
 
     html = render_links(target: alias_, user: stranger)
+
+    assert_equal("", html.strip)
+  end
+
+  def test_project_alias_no_render_for_member_who_is_not_admin
+    alias_ = project_aliases(:one)
+    member = users(:katrina)
+
+    html = render_links(target: alias_, user: member)
 
     assert_equal("", html.strip)
   end

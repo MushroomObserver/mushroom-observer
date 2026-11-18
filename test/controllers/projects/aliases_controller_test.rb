@@ -54,14 +54,21 @@ module Projects
       assert_not_nil(assigns(:project_alias))
     end
 
-    def test_new_denied_for_non_member
+    def test_new_denied_for_non_admin
       login("dick")
       get(:new, params: { project_id: @project.id })
       assert_redirected_to(project_aliases_path(project_id: @project.id))
-      assert_flash(:project_alias_must_be_member)
+      assert_flash(:project_alias_must_be_admin)
     end
 
-    def test_create_denied_for_non_member
+    def test_new_denied_for_member_who_is_not_admin
+      login("katrina")
+      get(:new, params: { project_id: @project.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_create_denied_for_non_admin
       login("dick")
       assert_no_difference("ProjectAlias.count") do
         post(:create, params: {
@@ -75,10 +82,10 @@ module Projects
              })
       end
       assert_redirected_to(project_aliases_path(project_id: @project.id))
-      assert_flash(:project_alias_must_be_member)
+      assert_flash(:project_alias_must_be_admin)
     end
 
-    def test_edit_allowed_in_admin_mode_for_non_member
+    def test_edit_allowed_in_admin_mode_for_non_admin
       make_admin("dick")
       get(:edit, params: { project_id: @project.id, id: @project_alias.id })
       assert_response(:success)
@@ -91,11 +98,18 @@ module Projects
       assert_equal(@project_alias, assigns(:project_alias))
     end
 
-    def test_edit_denied_for_non_member
+    def test_edit_denied_for_non_admin
       login("dick")
       get(:edit, params: { project_id: @project.id, id: @project_alias.id })
       assert_redirected_to(project_aliases_path(project_id: @project.id))
-      assert_flash(:project_alias_must_be_member)
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_edit_denied_for_member_who_is_not_admin
+      login("katrina")
+      get(:edit, params: { project_id: @project.id, id: @project_alias.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
     end
 
     def test_edit_can_use_turbo_to_edit_project_alias
@@ -219,7 +233,7 @@ module Projects
       assert_select("form[data-turbo='true']")
     end
 
-    def test_update_denied_for_non_member
+    def test_update_denied_for_non_admin
       login("dick")
       project_id = @project.id
       patch(:update, params: {
@@ -229,7 +243,21 @@ module Projects
             })
 
       assert_redirected_to(project_aliases_path(project_id:))
-      assert_flash(:project_alias_must_be_member)
+      assert_flash(:project_alias_must_be_admin)
+      assert_not_equal("Hijacked", @project_alias.reload.name)
+    end
+
+    def test_update_denied_for_member_who_is_not_admin
+      login("katrina")
+      project_id = @project.id
+      patch(:update, params: {
+              project_id:,
+              id: @project_alias.id,
+              project_alias: { name: "Hijacked", project_id: }
+            })
+
+      assert_redirected_to(project_aliases_path(project_id:))
+      assert_flash(:project_alias_must_be_admin)
       assert_not_equal("Hijacked", @project_alias.reload.name)
     end
 
@@ -261,7 +289,7 @@ module Projects
       assert_response(:success)
     end
 
-    def test_destroy_denied_for_non_member
+    def test_destroy_denied_for_non_admin
       login("dick")
       assert_no_difference("ProjectAlias.count") do
         delete(:destroy,
@@ -269,7 +297,18 @@ module Projects
       end
 
       assert_redirected_to(project_aliases_path(project_id: @project.id))
-      assert_flash(:project_alias_must_be_member)
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_destroy_denied_for_member_who_is_not_admin
+      login("katrina")
+      assert_no_difference("ProjectAlias.count") do
+        delete(:destroy,
+               params: { project_id: @project.id, id: @project_alias.id })
+      end
+
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
     end
 
     def test_destroy_removes_the_project_alias

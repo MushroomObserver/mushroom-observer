@@ -196,11 +196,10 @@ module Components::InlineCRUDLinks::TargetHandlers
     @target.user == @user || in_admin_mode?
   end
 
-  # ProjectAlias: any project member can edit/destroy aliases, not
-  # just project admins -- matches Projects::AliasesController's
-  # must_be_member! gate.
-  def can_edit_via_member?
-    @target.project.member?(@user) || in_admin_mode?
+  # ProjectAlias: only project admins can edit/destroy aliases --
+  # matches Projects::AliasesController's must_be_admin! gate.
+  def can_edit_via_project_admin?
+    @target.project.is_admin?(@user) || in_admin_mode?
   end
 
   # NameDescription writer permission -- `desc.writer?(user)` covers

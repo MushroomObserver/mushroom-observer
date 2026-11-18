@@ -4,8 +4,8 @@ module Projects
   class AliasesController < ApplicationController
     before_action :login_required
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
-    before_action :must_be_member!, only: [:edit, :update, :destroy]
-    before_action :must_be_member_to_create!, only: [:new, :create]
+    before_action :must_be_admin!, only: [:edit, :update, :destroy]
+    before_action :must_be_admin_to_create!, only: [:new, :create]
 
     # NOTE: this loads every alias unpaginated. If a project's alias
     # list grows large enough to matter, give ProjectAlias a Query
@@ -235,20 +235,20 @@ module Projects
       @project_alias = ProjectAlias.show_includes.find(params[:id])
     end
 
-    def must_be_member!
-      deny_unless_member!(@project_alias.project)
+    def must_be_admin!
+      deny_unless_admin!(@project_alias.project)
     end
 
     # `new`/`create` have no `@project_alias` yet (it's being built
     # from `params[:project_id]`) -- resolve the Project directly.
-    def must_be_member_to_create!
-      deny_unless_member!(Project.find(params[:project_id]))
+    def must_be_admin_to_create!
+      deny_unless_admin!(Project.find(params[:project_id]))
     end
 
-    def deny_unless_member!(project)
-      return if project.member?(@user) || in_admin_mode?
+    def deny_unless_admin!(project)
+      return if project.is_admin?(@user) || in_admin_mode?
 
-      flash_error(:project_alias_must_be_member.t)
+      flash_error(:project_alias_must_be_admin.t)
       redirect_to(project_aliases_path(project_id: project.id))
     end
 
