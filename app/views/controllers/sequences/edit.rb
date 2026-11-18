@@ -34,7 +34,7 @@ module Views::Controllers::Sequences
         Link(type: :user, user: @sequence.user)
       end
       render(::Views::Layouts::ObjectFooter.new(
-               user: current_user, obj: @sequence
+               user: current_user, obj: @sequence, no_wrap: true
              ))
     end
 
