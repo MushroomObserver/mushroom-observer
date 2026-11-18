@@ -24,8 +24,7 @@ class Components::Badge::SiblingMarkerTest < ComponentTestCase
                    "A marker with no observation has nothing to link")
   end
 
-  # The Matching Observations panel row already links to the member,
-  # so its marker is deliberately plain even though the id is known.
+  # Nothing passes `link: false` today, so this pins the prop.
   def test_link_false_suppresses_the_link
     obs = observations(:detailed_unknown_obs)
 
