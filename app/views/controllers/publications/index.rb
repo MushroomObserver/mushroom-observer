@@ -60,8 +60,8 @@ module Views::Controllers::Publications
         render(Components::ApplicationForm::TextField.new(
                  field,
                  wrapper_options: { label: :publication_filter_by,
-                                    inline: true },
-                 size: 60, class: "mb-0"
+                                    inline: true, wrap_class: "mb-0" },
+                 size: 60
                ))
       end
     end
