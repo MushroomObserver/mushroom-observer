@@ -2811,7 +2811,7 @@
   project_alias_created: Project Alias was successfully created.
   project_alias_destroyed: Project Alias was successfully deleted.
   project_alias_edit: Edit Project Alias [name]
-  project_alias_must_be_member: You must be a project member to edit or delete project aliases.
+  project_alias_must_be_member: You must be a project member to create, edit, or delete project aliases.
   project_alias_new: New Project Alias
   project_alias_type: Alias Type
   project_alias_updated: Project Alias was successfully updated.
