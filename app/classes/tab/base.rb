@@ -184,12 +184,11 @@ class Tab::Base
   end
 
   def model_class_slug
-    raw = if alt_title
-            alt_title
-          elsif title.underscore.tr(" ", "_").include?(model_name_for_class)
-            title
+    base = alt_title || title
+    raw = if base.underscore.tr(" ", "_").include?(model_name_for_class)
+            base
           else
-            "#{title}_#{model_name_for_class}"
+            "#{base}_#{model_name_for_class}"
           end
     "#{raw.parameterize(separator: "_")}_link"
   end
