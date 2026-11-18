@@ -11,15 +11,14 @@ module Views::Controllers::HerbariumRecords
       controller.define_singleton_method(:index_sort_options) { [] }
     end
 
-    # The edit link renders as a GET <a> with the identifier class
-    # `edit_herbarium_record_link_{id}` used for JS/Turbo targeting.
+    # The edit link opens the edit form in a modal via InlineCRUDLinks.
     def test_edit_link_navigates_to_edit_path
       rec = herbarium_records(:coprinus_comatus_nybg_spec) # owned by rolf
       html = render_index(objects: [rec])
 
       assert_html(html,
                   "a[href*='/herbarium_records/#{rec.id}/edit']" \
-                  ".edit_herbarium_record_link_#{rec.id}")
+                  "[data-modal='modal_herbarium_record_#{rec.id}']")
     end
 
     def test_no_edit_link_when_user_cannot_edit

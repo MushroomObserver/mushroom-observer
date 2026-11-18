@@ -10,15 +10,22 @@ module Components::InlineCRUDLinks::TargetHandlers
 
   # ---- :tab handlers ----------------------------------------
 
+  # No `@observation` only happens from the standalone
+  # collection_numbers/herbarium_records index pages (the
+  # observation-show sub-panel always passes one) -- `from_index:`
+  # tells the Tab to route the post-edit redirect back to the index
+  # instead of the record's show page.
   def tab_collection_number_edit
     ::Tab::CollectionNumber::Edit.new(
-      collection_number: @target, observation: @observation
+      collection_number: @target, observation: @observation,
+      from_index: @observation.nil?
     )
   end
 
   def tab_herbarium_record_edit
     ::Tab::HerbariumRecord::Edit.new(
-      herbarium_record: @target, observation: @observation
+      herbarium_record: @target, observation: @observation,
+      from_index: @observation.nil?
     )
   end
 
@@ -110,16 +117,28 @@ module Components::InlineCRUDLinks::TargetHandlers
 
   # ---- :destroy_name handlers -------------------------------
 
-  def name_remove = :remove.ti
+  # No `@observation` (the CollectionNumbers/HerbariumRecords
+  # indexes) -- plain destroy, not a detach, so the label reads
+  # "Destroy", matching `path_detach_from_obs`'s fallback.
+  def name_remove
+    return name_destroy_object unless @observation
+
+    :remove.ti
+  end
+
   def name_destroy_object = :destroy_object.t(type: @target.type_tag)
 
   # ---- :destroy_class handlers ------------------------------
 
   def class_remove_collection_number
+    return "destroy_collection_number_link_#{@target.id}" unless @observation
+
     "remove_collection_number_link_#{@target.id}"
   end
 
   def class_remove_herbarium_record
+    return "destroy_herbarium_record_link_#{@target.id}" unless @observation
+
     "remove_herbarium_record_link_#{@target.id}"
   end
 
@@ -141,7 +160,13 @@ module Components::InlineCRUDLinks::TargetHandlers
 
   # ---- :destroy_confirm handlers ----------------------------
 
+  # No `@observation` (the CollectionNumbers/HerbariumRecords
+  # indexes) -- plain destroy, not a detach, so fall back to
+  # `Button::Delete`'s generic confirm instead of the
+  # remove-from-observation wording.
   def confirm_remove_object
+    return nil unless @observation
+
     :remove_object_confirm.t(type: @target.type_tag, association: :observation)
   end
 
