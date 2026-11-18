@@ -46,7 +46,7 @@ module Views::Controllers::Sequences
 
     def render_obs_line
       obs = @sequence.observation
-      p do
+      div(class: "form-group") do
         strong { append_colon(:observation.ti) }
         obs_name = obs.name.display_name(current_user).t
         Link(type: :get, name: obs_name, target: obs.show_link_args) do
