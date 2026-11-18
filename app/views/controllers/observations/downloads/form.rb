@@ -43,12 +43,8 @@ module Views::Controllers::Observations::Downloads
     def render_download_choices
       Container do
         Row do
-          Column(xs: 12, md: 6) do
-            render_format_section
-          end
-          Column(xs: 12, md: 6) do
-            render_encoding_section
-          end
+          Column(sm: 6) { render_format_section }
+          Column(sm: 6) { render_encoding_section }
         end
       end
     end
