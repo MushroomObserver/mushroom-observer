@@ -122,6 +122,36 @@ class API2ControllerTest < FunctionalTestCase
     do_basic_get_request_for_model(Name)
   end
 
+  def test_get_name_icn_id
+    name = names(:coprinus_comatus)
+
+    get(:names, params: { id: name.id, detail: :low, format: :json })
+    assert_no_api_errors("Get Name #{name.id} JSON")
+    result = response.parsed_body["results"][0]
+    assert_equal(name.icn_id, result["icn_id"],
+                 "JSON should include the Name's icn_id")
+
+    get(:names, params: { id: name.id, detail: :low, format: :xml })
+    assert_no_api_errors("Get Name #{name.id} XML")
+    assert_select("results > result > icn_id", { text: name.icn_id.to_s },
+                  "XML should include the Name's icn_id")
+  end
+
+  def test_get_name_without_icn_id
+    name = names(:agaricus)
+    assert_nil(name.icn_id, "Fixture should lack an icn_id")
+
+    get(:names, params: { id: name.id, detail: :low, format: :json })
+    assert_no_api_errors("Get Name #{name.id} JSON")
+    assert_not(response.parsed_body["results"][0].key?("icn_id"),
+               "JSON should omit a nil icn_id")
+
+    get(:names, params: { id: name.id, detail: :low, format: :xml })
+    assert_no_api_errors("Get Name #{name.id} XML")
+    assert_select("results > result > icn_id", { count: 0 },
+                  "XML should omit a nil icn_id")
+  end
+
   def test_basic_name_description_get_request
     do_basic_get_request_for_model(NameDescription, public: true)
   end

@@ -3,6 +3,8 @@
 class API2
   # API for Name
   class NameAPI < ModelAPI
+    include EditPermissions
+
     def model
       Name
     end
@@ -54,6 +56,7 @@ class API2
         citation: parse(:string, :citation, default: ""),
         classification: parse(:string, :classification, default: ""),
         notes: parse(:string, :notes, default: ""),
+        icn_id: parse(:integer, :icn_id, limit: 1.., help: 1),
         user: @user
       }
     end
@@ -64,7 +67,8 @@ class API2
       {
         notes: parse(:string, :set_notes),
         citation: parse(:string, :set_citation),
-        classification: parse(:string, :set_classification)
+        classification: parse(:string, :set_classification),
+        icn_id: parse_set_icn_id
       }
     end
 
@@ -90,13 +94,15 @@ class API2
     def build_setter(params)
       lambda do |name|
         must_have_edit_permission!(name)
+        must_be_unlocked_to_set_icn_id!(name, params)
         # Must re-check classification for each name, ranks may differ.
         validate_classification!(params)
         name.current_user = @user
-        name.update(params)
+        # Assign without saving so save_name! validates the final name.
+        name.assign_attributes(params)
         change_name(name)
         change_deprecated(name)
-        name.save!
+        save_name!(name)
         add_synonym(name)
         clear_synonymy(name)
         change_correct_spelling(name)
@@ -122,18 +128,6 @@ class API2
 
     def delete
       raise(NoMethodForAction.new("DELETE", action))
-    end
-
-    # Our restrictions on edit permissions for the API are much more strict
-    # than on the website.  Revoke permission if anyone other than the creator
-    # owns any attached objects: name versions, descriptions, observations
-    # or name proposals.
-    def must_have_edit_permission!(name)
-      must_be_creator!(name)
-      must_be_only_editor!(name)
-      must_own_all_descriptions!(name)
-      must_own_all_observations!(name)
-      must_own_all_namings!(name)
     end
 
     ############################################################################
@@ -209,36 +203,10 @@ class API2
       end
     end
 
-    # ----------------------------------------
-
-    def must_be_creator!(name)
-      return if name.user == @user
-
-      raise(MustBeCreator.new(:name))
-    end
-
-    def must_be_only_editor!(name)
-      return unless name.versions.any? { |x| x.user_id != @user.id }
-
-      raise(MustBeOnlyEditor.new(:name))
-    end
-
-    def must_own_all_descriptions!(name)
-      return unless name.descriptions.any? { |x| x.user != @user }
-
-      raise(MustOwnAllDescriptions.new(:name))
-    end
-
-    def must_own_all_observations!(name)
-      return unless name.observations.any? { |x| x.user != @user }
-
-      raise(MustOwnAllObservations.new(:name))
-    end
-
-    def must_own_all_namings!(name)
-      return unless name.namings.any? { |x| x.user != @user }
-
-      raise(MustOwnAllNamings.new(:name))
+    def save_name!(name)
+      name.save!
+    rescue ActiveRecord::RecordInvalid
+      raise(UpdateFailed.new(name))
     end
 
     def parse_set_name!
@@ -247,6 +215,14 @@ class API2
       @rank   = parse(:enum, :set_rank, limit: Name.all_ranks)
       return unless @name || @author || @rank
       return if query.num_results < 2
+
+      raise(TryingToSetMultipleNamesAtOnce.new)
+    end
+
+    # icn_id is unique, so it can go on only one name per request.
+    def parse_set_icn_id
+      icn_id = parse(:integer, :set_icn_id, limit: 1.., help: 1)
+      return icn_id if icn_id.nil? || query.num_results < 2
 
       raise(TryingToSetMultipleNamesAtOnce.new)
     end
