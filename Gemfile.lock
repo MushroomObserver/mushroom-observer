@@ -118,7 +118,7 @@ GEM
       base64
       ssrf_filter (~> 1.5)
     csv (3.3.7)
-    cuprite (0.20)
+    cuprite (0.20.1)
       capybara (~> 3.0)
       ferrum (~> 0.20.1)
     dartsass-sprockets (3.2.1)
@@ -163,6 +163,7 @@ GEM
       base64 (~> 0.2)
       concurrent-ruby (~> 1.1)
       websocket-driver (~> 0.7)
+    ffi (1.17.4)
     ffi (1.17.4-aarch64-linux-gnu)
     ffi (1.17.4-aarch64-linux-musl)
     ffi (1.17.4-arm-linux-gnu)
@@ -298,6 +299,7 @@ GEM
     mini_magick (5.4.0)
       logger
     mini_mime (1.1.5)
+    mini_portile2 (2.8.9)
     mini_racer (0.22.2)
       libv8-node (~> 24.12.0.1)
     minitest (5.27.0)
@@ -333,6 +335,9 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.7.5)
+    nokogiri (1.19.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-musl)
@@ -442,7 +447,7 @@ GEM
     refract (1.1.0)
       prism
       zeitwerk
-    regexp_parser (2.13.3)
+    regexp_parser (2.13.4)
     reline (0.7.0)
       io-console (~> 0.5)
     representable (3.3.1)
@@ -501,6 +506,9 @@ GEM
       rubocop-ast (>= 1.44.0, < 2.0)
     ruby-progressbar (1.13.0)
     rubyzip (3.7.0)
+    sass-embedded (1.103.1)
+      google-protobuf (~> 4.31)
+      rake (>= 13)
     sass-embedded (1.103.1-aarch64-linux-gnu)
       google-protobuf (~> 4.31)
     sass-embedded (1.103.1-aarch64-linux-musl)
@@ -598,10 +606,10 @@ GEM
       crack (>= 0.3.2)
       hashdiff (>= 0.4.0, < 2.0.0)
     webrick (1.9.2)
-    websocket-driver (0.8.2)
+    websocket-driver (0.9.0)
       base64
-      websocket-extensions (>= 0.1.0)
-    websocket-extensions (0.1.5)
+      websocket-extensions (>= 0.2.0)
+    websocket-extensions (0.2.0)
     xmlrpc (0.3.4)
       rexml
       webrick
