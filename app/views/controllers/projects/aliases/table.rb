@@ -31,7 +31,7 @@ module Views::Controllers::Projects::Aliases
         t.column(:name.ti) { |a| plain(a.name) }
         t.column(:target_type.ti) { |a| plain(a.target_type) }
         t.column(:target.ti) { |a| render_target_cell(a) }
-        t.column(:actions.ti) { |a| render_actions_cell(a) }
+        t.column(:actions.ti, align: :center) { |a| render_actions_cell(a) }
       end
     end
 
