@@ -57,7 +57,9 @@ module Projects
     end
 
     def create
-      @project_alias = ProjectAlias.new(project_alias_params)
+      @project_alias = ProjectAlias.new(
+        project_alias_params.merge(project_id: params[:project_id])
+      )
       @project = @project_alias.project
       err = resolve_verify_target_error(
         @project_alias.verify_target(params[:project_alias][:term])
@@ -252,8 +254,15 @@ module Projects
       redirect_to(project_aliases_path(project_id: project.id))
     end
 
+    # `project_id` is deliberately not permitted here: `update` must
+    # not let a request reassign an alias to a different project --
+    # `must_be_admin!` only authorizes against the alias's current
+    # project, so a permitted `project_id` would let an admin of
+    # project A move an alias into project B without being an admin
+    # there. `create` gets its `project_id` from the already-
+    # authorized top-level route param instead (see `#create`).
     def project_alias_params
-      result = params.require(:project_alias).permit(:name, :project_id,
+      result = params.require(:project_alias).permit(:name,
                                                      :target_type, :target_id,
                                                      :location_id, :user_id)
       # Autocompleter automatically uses location_id and user_id, but

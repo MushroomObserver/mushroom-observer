@@ -192,6 +192,31 @@ module Projects
       assert_flash(:project_alias_no_match, target_type: "User", term:)
     end
 
+    # Regression: project_id must come from the authorized top-level
+    # route param, not the nested project_alias[project_id] -- a
+    # mismatched nested value used to let the alias get created under
+    # a project the user isn't an admin of.
+    def test_create_ignores_mismatched_nested_project_id
+      other_project = projects(:bolete_project)
+      assert_not(other_project.is_admin?(@user))
+
+      assert_difference("ProjectAlias.count") do
+        post(:create, params: {
+               project_id: @project.id,
+               project_alias: {
+                 name: "RS3",
+                 project_id: other_project.id,
+                 target_type: "User",
+                 target_id: users(:rolf).id
+               }
+             })
+      end
+
+      created = ProjectAlias.find_by(name: "RS3")
+      assert_not_nil(created, "Cannot find ProjectAlias")
+      assert_equal(@project.id, created.project_id)
+    end
+
     def test_create_renders_new_template_with_invalid_params
       project_id = @project.id
       post(:create, params: {
@@ -215,6 +240,26 @@ module Projects
                              project_id: @project_alias.project_id
                            ))
       assert_equal("Updated Name", @project_alias.reload.name)
+    end
+
+    # Regression: project_id isn't a permitted update param, so a
+    # request can't reassign an alias to a different project --
+    # must_be_admin! only authorizes against the alias's current
+    # project, not whatever project_id the request submits.
+    def test_update_ignores_project_id_reassignment_attempt
+      other_project = projects(:bolete_project)
+      project_id = @project.id
+      patch(:update, params: {
+              project_id:,
+              id: @project_alias.id,
+              project_alias: { name: "Updated Name",
+                               project_id: other_project.id }
+            })
+
+      assert_redirected_to(project_aliases_path(project_id:))
+      @project_alias.reload
+      assert_equal("Updated Name", @project_alias.name)
+      assert_equal(@project.id, @project_alias.project_id)
     end
 
     def test_update_renders_edit_template_with_invalid_params
