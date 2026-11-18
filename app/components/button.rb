@@ -49,7 +49,8 @@ class Components::Button < Components::Base
     post: :Post, put: :Put, patch: :Patch,
     delete: :Delete, get: :Get,
     # Semantic GET shortcuts (icon + action presets)
-    edit: :Edit, new: :New, download: :Download, project: :Project,
+    edit: :Edit, new: :New, add: :Add, download: :Download,
+    project: :Project,
     # Behavioral subclasses
     submit: :Submit, external: :External,
     modal: :ModalToggle, collapse_toggle: :CollapseToggle
@@ -66,6 +67,9 @@ class Components::Button < Components::Base
   #   Components::Button.new(type: :edit,     target: @herbarium)
   #   Components::Button.new(type: :new,      target: path,
   #                          name: :new_object.t(type: :herbarium))
+  #   Components::Button.new(type: :add,      target: path)
+  #   Components::Button.new(type: :add,      target: path,
+  #                          modal_id: "trust_settings")
   #   Components::Button.new(type: :download, target: path)
   #   Components::Button.new(type: :project,  name: ..., target: ...)
   #   Components::Button.new(type: :submit,   name: "Go")

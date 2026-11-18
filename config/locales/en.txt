@@ -372,6 +372,8 @@
   admins: admins
   admin_group: admin group
   admin_groups: admin groups
+  alias: alias
+  aliases: aliases
   annotations: annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   author: author
@@ -2813,6 +2815,7 @@
   project_alias_created: Project Alias was successfully created.
   project_alias_destroyed: Project Alias was successfully deleted.
   project_alias_edit: Edit Project Alias [name]
+  project_alias_must_be_admin: You must be a project admin to create, edit, or delete project aliases.
   project_alias_new: New Project Alias
   project_alias_type: Alias Type
   project_alias_updated: Project Alias was successfully updated.

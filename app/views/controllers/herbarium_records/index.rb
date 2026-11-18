@@ -46,27 +46,18 @@ module Views::Controllers::HerbariumRecords
     end
 
     def build_trailing_columns(table)
-      table.column(nil) { |rec| render_edit_link(rec) }
-      table.column(nil) { |rec| render_delete_button(rec) }
+      table.column(nil, align: :center) { |rec| render_actions(rec) }
       table.column(:mo_id.ti, align: :right) do |rec|
         render_id_badge(rec)
       end
     end
 
-    def render_id_badge(rec)
-      Badge(variant: :id, object: rec, size: :lg, extra_class: nil)
+    def render_actions(rec)
+      InlineCRUDLinks(target: rec, observation: @observation, user: @user)
     end
 
-    def render_edit_link(rec)
-      return unless can_edit?(rec)
-
-      Button(
-        type: :edit,
-        target: edit_herbarium_record_path(id: rec.id, back: :index,
-                                           q: q_param),
-        size: :sm,
-        class: "edit_herbarium_record_link_#{rec.id}"
-      )
+    def render_id_badge(rec)
+      Badge(variant: :id, object: rec, size: :lg, extra_class: nil)
     end
 
     def render_herbarium_link(rec)
@@ -91,22 +82,6 @@ module Views::Controllers::HerbariumRecords
           trusted_html(viewer_aware_unique_format_name(obs).t)
         end
       end
-    end
-
-    def render_delete_button(rec)
-      return unless can_edit?(rec)
-
-      Button(
-        type: :delete,
-        target: herbarium_record_path(rec.id, back: :index),
-        name: :destroy_object.t(type: :herbarium_record),
-        variant: :outline, size: :sm,
-        class: "destroy_herbarium_record_link_#{rec.id}"
-      )
-    end
-
-    def can_edit?(rec)
-      in_admin_mode? || rec.can_edit?(@user)
     end
   end
 end

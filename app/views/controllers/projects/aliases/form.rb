@@ -28,10 +28,7 @@ module Views::Controllers::Projects::Aliases
 
     def render_name_and_type_row
       Row do
-        Column(xs: 12, sm: 6) do
-          render_name_field
-          hidden_field(:project_id)
-        end
+        Column(xs: 12, sm: 6) { render_name_field }
         Column(xs: 12, sm: 6) { render_target_type_select }
       end
     end
