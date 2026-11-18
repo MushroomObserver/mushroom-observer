@@ -4,7 +4,8 @@ module Projects
   class AliasesController < ApplicationController
     before_action :login_required
     before_action :set_project_alias, only: [:show, :edit, :update, :destroy]
-    before_action :must_be_member!, only: [:edit, :update, :destroy]
+    before_action :must_be_admin!, only: [:edit, :update, :destroy]
+    before_action :must_be_admin_to_create!, only: [:new, :create]
 
     # NOTE: this loads every alias unpaginated. If a project's alias
     # list grows large enough to matter, give ProjectAlias a Query
@@ -56,7 +57,9 @@ module Projects
     end
 
     def create
-      @project_alias = ProjectAlias.new(project_alias_params)
+      @project_alias = ProjectAlias.new(
+        project_alias_params.merge(project_id: params[:project_id])
+      )
       @project = @project_alias.project
       err = resolve_verify_target_error(
         @project_alias.verify_target(params[:project_alias][:term])
@@ -234,17 +237,32 @@ module Projects
       @project_alias = ProjectAlias.show_includes.find(params[:id])
     end
 
-    def must_be_member!
-      return if @project_alias.project.member?(@user)
-
-      flash_error(:project_alias_must_be_member.t)
-      redirect_to(project_aliases_path(
-                    project_id: @project_alias.project_id
-                  ))
+    def must_be_admin!
+      deny_unless_admin!(@project_alias.project)
     end
 
+    # `new`/`create` have no `@project_alias` yet (it's being built
+    # from `params[:project_id]`) -- resolve the Project directly.
+    def must_be_admin_to_create!
+      deny_unless_admin!(Project.find(params[:project_id]))
+    end
+
+    def deny_unless_admin!(project)
+      return if project.is_admin?(@user) || in_admin_mode?
+
+      flash_error(:project_alias_must_be_admin.t)
+      redirect_to(project_aliases_path(project_id: project.id))
+    end
+
+    # `project_id` is deliberately not permitted here: `update` must
+    # not let a request reassign an alias to a different project --
+    # `must_be_admin!` only authorizes against the alias's current
+    # project, so a permitted `project_id` would let an admin of
+    # project A move an alias into project B without being an admin
+    # there. `create` gets its `project_id` from the already-
+    # authorized top-level route param instead (see `#create`).
     def project_alias_params
-      result = params.require(:project_alias).permit(:name, :project_id,
+      result = params.require(:project_alias).permit(:name,
                                                      :target_type, :target_id,
                                                      :location_id, :user_id)
       # Autocompleter automatically uses location_id and user_id, but

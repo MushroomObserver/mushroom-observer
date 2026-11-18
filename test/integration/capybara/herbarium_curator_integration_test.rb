@@ -114,8 +114,11 @@ class HerbariumCuratorIntegrationTest < CapybaraIntegrationTestCase
     first(class: "herbarium_records_for_herbarium_link").click
 
     assert_selector("body", class: "herbarium_records__index")
-    assert_selector("a[href*='#{edit_herbarium_record_path(id: rec.id)}']")
-    click_on(class: "edit_herbarium_record_link_#{rec.id}")
+    edit_path = edit_herbarium_record_path(id: rec.id)
+    assert_selector("a[href*='#{edit_path}']")
+    # The edit link opens a modal via Stimulus, but this driver runs
+    # no JS -- clicking it just follows its href like a plain GET.
+    find(:css, "a[href*='#{edit_path}']").click
 
     assert_selector("body.herbarium_records__edit")
     within("#herbarium_record_form") do

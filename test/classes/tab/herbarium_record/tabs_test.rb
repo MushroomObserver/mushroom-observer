@@ -66,6 +66,17 @@ module Tab::HerbariumRecord
       )
     end
 
+    def test_edit_back_to_index
+      tab = Tab::HerbariumRecord::Edit.new(
+        herbarium_record: @herbarium_record, from_index: true
+      )
+
+      assert_equal(
+        routes.edit_herbarium_record_path(@herbarium_record.id, back: :index),
+        tab.path
+      )
+    end
+
     def test_back_to_index_without_index_filter
       tab = Tab::HerbariumRecord::BackToIndex.new
 

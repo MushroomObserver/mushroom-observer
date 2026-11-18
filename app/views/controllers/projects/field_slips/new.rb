@@ -71,7 +71,6 @@ module Views::Controllers::Projects::FieldSlips
     def render_tracker_table
       Table(@trackers,
             identifier: "field-slip-trackers",
-            wrap_class: "mt-3",
             tbody_id: "field_slip_job_trackers") do |table|
         define_tracker_columns(table)
         table.row do |tracker|

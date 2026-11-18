@@ -252,8 +252,12 @@ class HerbariumRecordsController < ApplicationController
       @herbarium_record.herbarium != old_herbarium
     flash_notice(:runtime_updated_at.t(type: :herbarium_record))
 
-    if modal_submission?(:herbarium_record)
-      @observation = @back_object # if we're here, we're on an obs page
+    # `@back_object` is only an Observation when the edit modal was
+    # opened from the obs show page (sub-panel) -- the index page's
+    # own modal edit has no obs to update, so it falls through to the
+    # redirect, same as destroy's turbo_stream fallback.
+    if modal_submission?(:herbarium_record) && @back_object.is_a?(Observation)
+      @observation = @back_object
       render_herbarium_records_section_update
     else
       redirect_to_back_object_or_object(@back_object, @herbarium_record)

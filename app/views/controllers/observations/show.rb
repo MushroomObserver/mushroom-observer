@@ -33,6 +33,9 @@ module Views::Controllers::Observations
     prop :images, _Array(::Image), default: -> { [] }
     prop :other_sites, _Nilable(_Array(::ExternalSite)), default: nil
     prop :sibling_observations, _Array(::Observation)
+    # {observation id => footnote number} for the occurrence's
+    # other members; see ObservationsController::Show.
+    prop :sibling_markers, _Hash(::Integer, ::Integer), default: -> { {} }
     prop :occurrence, _Nilable(::Occurrence), default: nil
     prop :owner_name, _Nilable(::Name), default: nil
 
@@ -95,8 +98,34 @@ module Views::Controllers::Observations
       ImageGallery(
         object: @observation, images: @images,
         carousel_id: "observation_images", user: @user,
-        title: :images.ti, links: carousel_links
+        title: :images.ti, links: carousel_links,
+        markers: image_markers
       )
+    end
+
+    # The marker belongs to the member the photo hangs on, so the
+    # map is re-keyed by image id and carries that member's id
+    # for the badge to link to. A photo on two members takes the
+    # lower-numbered member's marker.
+    def image_markers
+      ordered = @sibling_observations.sort_by(&:id)
+      ordered.each_with_object({}) do |member, out|
+        number = @sibling_markers[member.id]
+        next unless number
+
+        member.images.each do |image|
+          next if own_image_ids.include?(image.id)
+
+          out[image.id] ||= { number: number,
+                              observation_id: member.id }
+        end
+      end
+    end
+
+    # A photo attached to a sibling and to this observation is the
+    # page's photo, so it gets no marker.
+    def own_image_ids
+      @own_image_ids ||= @observation.images.map(&:id)
     end
 
     def carousel_links
@@ -118,7 +147,8 @@ module Views::Controllers::Observations
     def render_comments
       render(::Views::Controllers::Comments::CommentsForObject.new(
                object: @observation, comments: @comments.to_a, user: @user,
-               editable: @user.present?, limit: nil
+               editable: @user.present?, limit: nil,
+               markers: @sibling_markers
              ))
     end
 
@@ -149,7 +179,8 @@ module Views::Controllers::Observations
       render(ProjectsPanel.new(obs: @observation, user: @user))
       render(MatchingObservationsPanel.new(
                obs: @observation, occurrence: @occurrence,
-               siblings: @sibling_observations
+               siblings: @sibling_observations,
+               markers: @sibling_markers
              ))
     end
 

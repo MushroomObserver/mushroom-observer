@@ -79,6 +79,27 @@ module Views::Controllers::Comments
                   "#comments .list-group-item.comment##{dom_id(first)}")
     end
 
+    # A merged occurrence thread shows a comment made on another member,
+    # so each row says which one it came from; the page's own comments
+    # carry no number (#5718).
+    def test_markers_label_only_comments_from_other_members
+      sibling_comment = @comments.first
+      markers = { sibling_comment.target_id => 2 }
+
+      html = render_panel(markers: markers)
+
+      path = routes.permanent_observation_path(sibling_comment.target_id)
+      assert_html(html, ".comment-summary a[href='#{path}'] .sibling-marker",
+                  text: "2")
+    end
+
+    def test_no_markers_renders_no_numbers
+      html = render_panel
+
+      assert_no_html(html, ".comment-summary .sibling-marker",
+                     "No numbers when every comment is this page's")
+    end
+
     def test_empty_state_placeholder_when_no_comments
       # The placeholder is always rendered inside `#comments`; the
       # `.list-group-item.none-yet:only-child` CSS rule hides it
@@ -133,12 +154,13 @@ module Views::Controllers::Comments
       ::ActionView::RecordIdentifier.dom_id(record)
     end
 
-    def render_panel(object: @observation, comments: @comments,
-                     user: @user, editable: true, limit: nil)
-      render(CommentsForObject.new(
-               object: object, comments: comments, user: user,
-               editable: editable, limit: limit
-             ))
+    def render_panel(**)
+      render(CommentsForObject.new(**panel_defaults, **))
+    end
+
+    def panel_defaults
+      { object: @observation, comments: @comments, user: @user,
+        editable: true, limit: nil, markers: {} }
     end
   end
 end
