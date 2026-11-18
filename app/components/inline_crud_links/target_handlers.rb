@@ -59,6 +59,16 @@ module Components::InlineCRUDLinks::TargetHandlers
     )
   end
 
+  # Plain page-navigation edit button -- VisualModel/VisualGroup have
+  # no modal edit form, unlike every other target above.
+  # `Button::Edit` already defaults `icon: :edit`.
+  def crud_edit_button
+    ::Components::Button.new(
+      type: :edit, target: @target, variant: :strip,
+      class: ::Components::InlineLinkBlock.item_class
+    )
+  end
+
   # ---- :destroy_path handlers -------------------------------
 
   # Default -- pass the model and let `Button::Delete` build
@@ -68,8 +78,12 @@ module Components::InlineCRUDLinks::TargetHandlers
   # "Detach from obs" -- record-path with `observation_id:` query so
   # the controller detaches rather than destroys the record.
   # `CollectionNumber` / `HerbariumRecord` can be attached to
-  # multiple obs.
+  # multiple obs. No `@observation` (the CollectionNumbers/
+  # HerbariumRecords indexes, not an observation-show sub-panel) --
+  # plain record destroy, same as `path_target`.
   def path_detach_from_obs
+    return path_target unless @observation
+
     send(:"#{@target.type_tag}_path",
          @target.id, observation_id: @observation.id)
   end
@@ -134,10 +148,13 @@ module Components::InlineCRUDLinks::TargetHandlers
   # ---- :can_edit handlers -----------------------------------
 
   # CollectionNumber: edit gated by the OBS's edit permission,
-  # rechecked per-record.
+  # rechecked per-record. No `@observation` (the CollectionNumbers/
+  # HerbariumRecords indexes, not an observation-show sub-panel) --
+  # falls back to the record's edit permission.
   def can_edit_via_observation?
-    @observation &&
-      (@observation.can_edit?(@user) || in_admin_mode?)
+    return @target.can_edit?(@user) || in_admin_mode? unless @observation
+
+    @observation.can_edit?(@user) || in_admin_mode?
   end
 
   # HerbariumRecord / Sequence / ExternalLink: per-record edit
@@ -165,6 +182,13 @@ module Components::InlineCRUDLinks::TargetHandlers
   # per-user / per-group writer membership.
   def can_edit_via_writer?
     @target.writer?(@user) || in_admin_mode?
+  end
+
+  # VisualModel/VisualGroup: no permission restriction beyond being
+  # logged in -- matches the pre-InlineCRUDLinks pages, which showed
+  # these links to any signed-in user.
+  def can_edit_unrestricted?
+    true
   end
 
   # ---- :can_destroy handlers (override only when distinct) --

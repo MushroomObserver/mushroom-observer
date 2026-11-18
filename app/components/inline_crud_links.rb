@@ -4,7 +4,8 @@
 # over the observation-show sub-panels (`_collection_numbers`,
 # `_herbarium_records`, `_sequences`, `_external_links`, the
 # descriptions alt-list, the namings table, the comments-for-object
-# list), plus the project aliases table. Keyed on presence/absence of
+# list), plus the project aliases table and the visual models/groups
+# tables. Keyed on presence/absence of
 # `target:` -- both shapes are
 # ultimately "one or two links derived from an object": `target:`
 # present dispatches the edit/destroy pair (polymorphic on the
@@ -46,7 +47,8 @@ class Components::InlineCRUDLinks < Components::Base
   prop :target, _Nilable(_Union(::CollectionNumber, ::HerbariumRecord,
                                 ::Sequence, ::ExternalLink,
                                 ::Naming, ::Comment, ::Description,
-                                ::Publication, ::ProjectAlias)),
+                                ::Publication, ::ProjectAlias,
+                                ::VisualModel, ::VisualGroup)),
        default: nil
   # CollectionNumber / HerbariumRecord: required -- permission and/or
   # the detach path need the observation. Every other target derives
@@ -136,6 +138,14 @@ class Components::InlineCRUDLinks < Components::Base
       edit: :icon_link_edit,
       tab: :tab_publication_edit,
       can_edit: :can_edit_via_target?
+    },
+    ::VisualModel => {
+      edit: :crud_edit_button,
+      can_edit: :can_edit_unrestricted?
+    },
+    ::VisualGroup => {
+      edit: :crud_edit_button,
+      can_edit: :can_edit_unrestricted?
     }
   }.freeze
 

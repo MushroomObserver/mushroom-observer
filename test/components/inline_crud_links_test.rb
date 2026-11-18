@@ -144,6 +144,34 @@ class InlineCRUDLinksTest < ComponentTestCase
     assert_equal("", html.strip)
   end
 
+  def test_visual_model_edit_and_destroy_links
+    vm = visual_models(:visual_model_one)
+
+    # No permission restriction -- any signed-in user, including a
+    # stranger with no special relationship to this record.
+    html = render_links(target: vm, user: users(:lone_wolf))
+
+    edit_path = routes.edit_visual_model_path(vm.id)
+    assert_html(html, "a.inline-icon-link[href='#{edit_path}']")
+    expected_path = routes.visual_model_path(vm.id)
+    assert_html(html, "form[action='#{expected_path}']")
+    assert_html(html, "form input[name='_method'][value='delete']",
+                visible: :all)
+  end
+
+  def test_visual_group_edit_and_destroy_links
+    group = visual_groups(:visual_group_one)
+
+    html = render_links(target: group, user: users(:lone_wolf))
+
+    edit_path = routes.edit_visual_group_path(group.id)
+    assert_html(html, "a.inline-icon-link[href='#{edit_path}']")
+    expected_path = routes.visual_group_path(group.id)
+    assert_html(html, "form[action='#{expected_path}']")
+    assert_html(html, "form input[name='_method'][value='delete']",
+                visible: :all)
+  end
+
   def test_name_description_uses_icon_link_edit
     desc = name_descriptions(:peltigera_user_desc)
 
