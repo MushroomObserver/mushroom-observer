@@ -13,3 +13,8 @@ production: &production
   store_options:
     <<: *default_store_options
     max_entries: <%= 256.gigabytes %>
+
+# No `test:` block -- it inherits `default:`'s store_options (max_age,
+# no size cap) via Rails' config_for merge. An entry that ages out or
+# gets evicted resolves through DbFallback on the next lookup (#4807),
+# so an unbounded test cache is fine.
