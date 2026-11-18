@@ -95,13 +95,13 @@ namespace :lang do
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
-    "strip:all",         # strip out any strings we no longer need
-    "export:unofficial"  # (still needed by some tests)
-    # update:all (regenerate every locale's YAML) deliberately NOT run
-    # here anymore -- translations are DB/Solid-Cache-backed at runtime
-    # (#4807), nothing reads config/locales/*.yml anymore. The
-    # lang:update:* tasks below still exist for a manual/backup
-    # snapshot if ever wanted.
+    "strip:all"          # strip out any strings we no longer need
+    # Neither update:all (regenerate every locale's YAML) nor
+    # export:unofficial (regenerate every locale's .txt) runs here --
+    # translations are DB/Solid-Cache-backed at runtime (#4807), and
+    # nothing at runtime or in the test suite reads either output.
+    # The lang:export:*/lang:update:* tasks below still exist for a
+    # manual/backup snapshot if wanted.
   ]
 
   desc "Find en.txt tags with no remaining reference anywhere " \
