@@ -97,7 +97,7 @@ class Components::Form::GeolocationFields < Components::Base
     Column(xs: 4) do
       @form.text_field(
         field,
-        value: @field_value[abbr_key],
+        **value_attr(abbr_key),
         label: coordinate_label(abbr_key, full_key),
         label_colon: false,
         wrap_class: "mb-0",
@@ -105,6 +105,16 @@ class Components::Form::GeolocationFields < Components::Base
         data: @field_data[abbr_key] || {}
       )
     end
+  end
+
+  # Only pass `value:` when the caller supplies one (write-in form's
+  # String-bound fields). A Symbol-bound field resolves its value from
+  # the model; passing `value: nil` here would override that
+  # resolution and blank the field.
+  def value_attr(abbr_key)
+    return {} unless @field_value.key?(abbr_key)
+
+    { value: @field_value[abbr_key] }
   end
 
   # Label with responsive show/hide variants: full word from sm+,
