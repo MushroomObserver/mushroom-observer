@@ -20,13 +20,14 @@ module Views::Controllers::SpeciesLists
     prop :project, _Nilable(::Project), default: nil
 
     def view_template
-      add_chrome
+      render_page_chrome
+
       render_content
     end
 
     private
 
-    def add_chrome
+    def render_page_chrome
       add_project_banner(@project) if @project
       add_show_title(@species_list)
       add_interest_icons(@user, @species_list)

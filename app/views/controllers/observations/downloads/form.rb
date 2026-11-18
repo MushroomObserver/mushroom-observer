@@ -31,6 +31,7 @@ module Views::Controllers::Observations::Downloads
       render_format_section
       render_encoding_section
       render_submit_buttons
+      hr
       render_print_labels_section
     end
 
@@ -61,9 +62,7 @@ module Views::Controllers::Observations::Downloads
     end
 
     def render_print_labels_section
-      p(class: "mt-5") do
-        append_colon(:download_observations_print_labels_header.l)
-      end
+      h4 { :download_observations_print_labels_header.l }
       submit(:download_observations_print_labels.l)
     end
 
