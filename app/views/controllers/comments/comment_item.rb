@@ -83,8 +83,8 @@ module Views::Controllers::Comments
     # leads the summary; after the text it reads as part of the
     # subject.
     def render_marker
-      SiblingMarker(number: @marker, observation_id: @comment.target_id,
-                    class: "mr-2")
+      Badge(variant: :sibling_marker, number: @marker,
+            observation_id: @comment.target_id, class: "mr-2")
     end
 
     def render_comment_body
