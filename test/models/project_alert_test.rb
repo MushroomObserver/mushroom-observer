@@ -169,6 +169,30 @@ class ProjectAlertTest < UnitTestCase
                  record_local(observation: obs, target: comment).kind)
   end
 
+  # Each observation is its own find: a project that heard about one
+  # hears about the next as news, not as activity on the first.
+  def test_a_second_observation_from_mo_is_a_find
+    record_local(observation: observations(:coprinus_comatus_obs))
+
+    other = observations(:agaricus_campestris_obs)
+
+    assert_equal(ProjectAlert::NEW_OBSERVATION,
+                 record_local(observation: other).kind)
+  end
+
+  # Sites number their records independently, so the same number from
+  # another site is a different observation.
+  def test_a_remote_id_from_another_site_is_a_find
+    obs = observations(:agaricus_campestris_obs)
+    ExternalLink.create!(user: users(:rolf), target: obs,
+                         external_site: external_sites(:mycoportal),
+                         external_id: "12345")
+    record(obs_id: 12_345)
+
+    assert_equal(ProjectAlert::NEW_OBSERVATION,
+                 record_local(observation: obs).kind)
+  end
+
   # An imported observation that iNaturalist already alerted on is not
   # a find here, whatever happens to it next.
   def test_an_observation_alerted_on_remotely_is_not_a_find_here

@@ -6,8 +6,12 @@ class ProjectAlert
   # A person adding an observation, naming it and commenting on it
   # does one thing, so the projects watching for it hear once. Each
   # model callback hands the observation here instead of mailing, and
-  # the action's end decides who hears what: a request ends with its
-  # response, a job with its perform.
+  # the request's end decides who hears what: ApplicationController
+  # wraps every action, the API included.
+  #
+  # A record created outside a request raises nothing, which is what
+  # an import and a resync want. A job that means to alert wraps its
+  # perform in `around`.
   #
   # Nested blocks belong to the outer action, so a job that wraps its
   # work and a model that wraps a save do not each flush.
@@ -97,18 +101,19 @@ class ProjectAlert
     end
 
     # Later activity on an observation this project has been told
-    # about, which is worth hearing whatever its name says now.
+    # about, which is worth hearing whatever its name says now. The
+    # project may have heard it from a site rather than from here, so
+    # the watched name comes from whichever row said so.
     def follow_up(project, observation, target)
       return nil unless target.is_a?(Comment)
-      return nil unless ProjectAlert.exists?(project: project,
-                                             observation: observation)
+
+      told = ProjectAlert.last_alert_for(project, observation)
+      return nil unless told
 
       ProjectAlert.record_local(
         project: project, observation: observation, target: target,
         name: observation.name&.text_name.to_s,
-        target_name: ProjectAlert.where(project: project,
-                                        observation: observation).
-                     order(:id).last.target_name
+        target_name: told.target_name
       )
     end
 

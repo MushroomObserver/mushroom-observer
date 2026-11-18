@@ -140,17 +140,38 @@ class ProjectAlert < AbstractModel
   # so a project told about it there does not hear about it again as a
   # find here.
   def self.local_kind_for(project, observation)
-    told = where(project: project).
-           where(observation: observation).
-           or(where(project: project,
-                    remote_observation_id: remote_ids_for(observation))).
-           exists?
-    told ? OTHER_ACTIVITY : NEW_OBSERVATION
+    told_about(project, observation).exists? ? OTHER_ACTIVITY : NEW_OBSERVATION
   end
 
-  def self.remote_ids_for(observation)
-    ids = observation.external_links.map(&:site_record_id).compact_blank
-    ids.presence || [nil]
+  # What this project has been told about this observation, whichever
+  # source said so.
+  def self.told_about(project, observation)
+    local = where(project: project, observation: observation)
+    remote = remote_rows(project, observation)
+    remote ? local.or(remote) : local
+  end
+
+  # The last thing it was told, which is where the watched name comes
+  # from when later activity is reported. Nil when it has heard
+  # nothing.
+  def self.last_alert_for(project, observation)
+    told_about(project, observation).order(:id).last
+  end
+
+  # A remote id means something only with the site that issued it, so
+  # each link is matched against its site. No link, no clause: a row
+  # carrying no remote id is not about this observation.
+  def self.remote_rows(project, observation)
+    observation.external_links.filter_map { |link| remote_row(project, link) }.
+      reduce { |rows, clause| rows.or(clause) }
+  end
+
+  def self.remote_row(project, link)
+    id = link.site_record_id
+    return nil if id.blank?
+
+    where(project: project, external_site_id: link.external_site_id,
+          remote_observation_id: id)
   end
 
   # Whichever source this came from, this is where to read it.

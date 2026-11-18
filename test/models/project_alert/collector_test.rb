@@ -127,6 +127,33 @@ class ProjectAlert::CollectorTest < UnitTestCase
     assert_equal(@target.text_name, alert.target_name)
   end
 
+  # The project may have heard about it from iNaturalist rather than
+  # from here, which a comment on it is activity on just the same.
+  def test_a_comment_on_an_imported_observation_is_activity
+    obs = act { new_observation(name: names(:peltigera)) }
+    ExternalLink.create!(user: users(:rolf), target: obs,
+                         external_site: external_sites(:inaturalist),
+                         external_id: "12345")
+    ProjectAlert.record(
+      project: @project, external_site: external_sites(:inaturalist),
+      identification: { id: 777, name: @target.text_name },
+      observation: { id: 12_345, observed_on: obs.when },
+      target_name: @target.text_name
+    )
+
+    assert_difference("ProjectAlert.count", 1) do
+      act do
+        Comment.create!(target: obs, user: users(:rolf),
+                        summary: "Seen this?", comment: "Worth a look")
+      end
+    end
+
+    alert = ProjectAlert.where(observation: obs).order(:id).last
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(@target.text_name, alert.target_name)
+  end
+
   def test_a_comment_on_an_unreported_observation_alerts_nobody
     obs = act { new_observation(name: names(:peltigera)) }
 
