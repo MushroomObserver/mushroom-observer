@@ -18,11 +18,14 @@ class ProjectAlias < AbstractModel
     [{ project: Project.banner_includes_tree }, :target]
   end
 
-  # The aliases index table only reads `alias.target` (+ column
-  # reads). The controller fetches `@project` separately for the
-  # page banner, so the project-banner subtree isn't needed per row.
+  # The aliases index table reads `alias.target` (+ column reads)
+  # plus `alias.project.user_group.users` -- `InlineCRUDLinks`'
+  # `can_edit_via_member?` checks membership per row, and strict
+  # loading cascades onto the eager-loaded `project`. The controller
+  # fetches `@project` separately for the page banner, so the rest of
+  # `Project.banner_includes_tree` isn't needed per row.
   def self.index_includes_tree
-    [:target]
+    [:target, { project: { user_group: :users } }]
   end
 
   # `.strict_loading` on the read scopes (not on the model itself)
