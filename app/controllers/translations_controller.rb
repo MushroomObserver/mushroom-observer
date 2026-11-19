@@ -11,7 +11,7 @@ class TranslationsController < ApplicationController
     @edit_tags = tags_to_edit(@tag, @strings)
     @show_tags = tags_to_show(@for_page, @strings)
     build_record_maps(@lang)
-    @index = build_index(@lang, @show_tags)
+    @index = build_index(@show_tags)
     render(Views::Controllers::Translations::Index.new(
              lang: @lang, tag: @tag, for_page: @for_page,
              index: @index, strings: @strings, edit_tags: @edit_tags,
@@ -179,10 +179,8 @@ class TranslationsController < ApplicationController
     end
     return unless any_changes
 
-    # update_localization_file (.yml) is gone (#4807) -- nothing reads it
-    # at runtime anymore, translations are DB/Solid-Cache-backed. Keep
-    # update_export_file (.txt): build_index still parses it directly
-    # for this UI's own sidebar, unrelated to I18n lookup.
+    # Keeps the locale's export file in sync so a later manual
+    # file-based import isn't working from stale content.
     @lang.update_export_file
   end
 
@@ -252,12 +250,15 @@ class TranslationsController < ApplicationController
   #  Giant helper method
   # ----------------------------
 
-  def build_index(lang, tags, file_handle = nil)
+  def build_index(tags, file_handle = nil)
     @index = []
     @tags = tags
     @tags_used = {}
-    # Caller may pass an existing handle; method closes it at line 223
-    file_handle ||= File.open(lang.export_file, "r:utf-8")
+    # Caller may pass an existing handle to control its lifecycle;
+    # this method closes whichever handle it ends up using. Defaults
+    # to the official file -- process_template_line reads tag
+    # names/comments (the structure), not a value.
+    file_handle ||= File.open(Language.official.export_file, "r:utf-8")
     reset_everything
     file_handle.each_line do |line|
       line.force_encoding("utf-8")
