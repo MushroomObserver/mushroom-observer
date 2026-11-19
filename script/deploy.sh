@@ -283,7 +283,7 @@ if [ "$EXPECTED_RUBY" != "$CURRENT_RUBY" ]; then
     echo "  Running:  $CURRENT_RUBY"
     echo "  Expected: $EXPECTED_RUBY (from origin/main)"
     echo "Please install and activate Ruby $EXPECTED_RUBY before deploying."
-    echo "See README_RUBY_34_UPGRADE.md for instructions."
+    echo "See README_RUBY_UPGRADE.md for instructions."
     exit 1
 fi
 

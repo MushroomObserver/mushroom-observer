@@ -61,7 +61,7 @@ class Inat::ConfirmURLBuilder
   # importable taxon (#4706) — signals the caller to show a plain count
   def expected_obs_args(query_str)
     args = Rack::Utils.parse_query(query_str.to_s)
-    unless args.key?("taxon_id")
+    unless args.key?("taxon_id") || args.key?("taxon_ids")
       iconic_taxa = importable_iconic_taxa(args["iconic_taxa"])
       return nil unless iconic_taxa
 
@@ -103,13 +103,25 @@ class Inat::ConfirmURLBuilder
     @model.inat_ids.present? || @model.recheck_all == "1"
   end
 
+  # The API takes one id in `taxon_id`; the UI reads a comma list from
+  # plural `taxon_ids`, so a project targeting several taxa passes
+  # them through under that name. The importable fungi pair is the
+  # exception: the UI states it with the iconic-taxa boxes, which a
+  # reader of the page can see and change.
   def translate_api_to_ui_params(query_str)
     args = Rack::Utils.parse_query(query_str.to_s)
     args["verifiable"] = "any" unless args.key?("verifiable")
-    return args.to_query unless args["taxon_id"]&.include?(",")
+    taxon_id = args["taxon_id"]
+    return args.to_query unless taxon_id&.include?(",")
 
-    args.except("taxon_id").
-      merge("iconic_taxa" => IMPORTABLE_ICONIC_TAXA_ARG).to_query
+    args.except("taxon_id").merge(ui_taxon_filter(taxon_id)).to_query
+  end
+
+  def ui_taxon_filter(taxon_id)
+    return { "iconic_taxa" => IMPORTABLE_ICONIC_TAXA_ARG } if
+      taxon_id == IMPORTABLE_TAXON_IDS_ARG
+
+    { "taxon_ids" => taxon_id }
   end
 
   # map host and params to the iNat UI

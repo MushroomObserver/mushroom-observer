@@ -440,26 +440,27 @@ Hopefully this is not necessary on a fresh clean system, but
 
 ## Ruby upgrade with chruby
 
-- Install the selected version.
+`.ruby-version` holds the version MO runs. To move to a new one:
 
 ```sh
-  ruby-install ruby 3.4.9
+  ruby-install ruby $(cat .ruby-version)
 ```
 
-- Once that succeeds, update Ruby versions in `.ruby-version` and `Gemfile.lock`.
-- In a new shell run:
+- In a new shell, with the project directory current so chruby's
+  auto-switcher picks the version up:
 
 ```sh
-  chruby ruby-3.4.9
   bundle install
-  gem pristine --all
 ```
 
-- In another new shell now run:
+- In another new shell:
 
 ```sh
-  rails t
+  bin/rails test
 ```
+
+See `README_RUBY_UPGRADE.md` for the full procedure, including the
+production side and what to do when the build or the switch misbehaves.
 
 ## Fragment caching in development
 
