@@ -25,6 +25,7 @@ class Components::Link::Object < Components::Link
   private
 
   def link_attrs
+    validate_no_btn_classes!(@attributes[:class])
     @attributes.except(:class).merge(class: identifier_class)
   end
 
