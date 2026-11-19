@@ -47,7 +47,7 @@ module Views::Controllers::Projects
     def render_banner_with_image
       Row do
         Column(xs: 12, id: "project_banner") do
-          div(class: "banner-image-wrap") do
+          div(class: "banner-image-wrap position-relative") do
             img(src: @project.image.large_url, class: "object-fit-cover")
             div(class: "bottom-left m-3") do
               render_banner_title(with_overlay_styling: true)
