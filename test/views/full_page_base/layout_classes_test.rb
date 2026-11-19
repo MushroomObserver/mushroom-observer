@@ -131,8 +131,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:four_eight)
     end
 
-    assert_equal("col-xs-12 col-md-5 col-lg-4", left)
-    assert_equal("col-xs-12 col-md-7 col-lg-8", right)
+    assert_equal("col-12 col-md-5 col-lg-4", left)
+    assert_equal("col-12 col-md-7 col-lg-8", right)
   end
 
   def test_column_classes_explicit_then_default_does_not_aggregate
@@ -155,7 +155,7 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       content_for(:test_value) { left_column_class_for(:four_eight) }
     end
 
-    assert_equal("col-xs-12 col-md-5 col-lg-4", result)
+    assert_equal("col-12 col-md-5 col-lg-4", result)
   end
 
   def test_right_column_class_for_four_eight
@@ -163,7 +163,7 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       content_for(:test_value) { right_column_class_for(:four_eight) }
     end
 
-    assert_equal("col-xs-12 col-md-7 col-lg-8", result)
+    assert_equal("col-12 col-md-7 col-lg-8", result)
   end
 
   # ----- content_padding setter ----------------------------------
