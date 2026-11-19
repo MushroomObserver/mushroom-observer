@@ -8,6 +8,14 @@ module Views::Controllers::Projects::Members
     prop :user, ::User
 
     def view_template
+      render_page_chrome
+
+      render_users_table
+    end
+
+    private
+
+    def render_page_chrome
       add_project_banner(@project)
       add_page_title(
         :add_members_title.t(title: @project.title)
@@ -15,11 +23,7 @@ module Views::Controllers::Projects::Members
       add_context_nav(Tab::Project::Members::FormNew.new(project: @project))
       container_class(:wide)
       content_padding(:panels)
-
-      render_users_table
     end
-
-    private
 
     def render_users_table
       Table(@users.sort_by(&:login),

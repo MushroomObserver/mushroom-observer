@@ -16,7 +16,7 @@ module Views::Controllers::Admin::Banners
         textarea_field(
           :message,
           label: nil,
-          rows: 5
+          rows: 8
         )
         submit(:banner_update.l, center: true)
       end

@@ -15,7 +15,7 @@ class MatrixBoxWhoTest < ComponentTestCase
     html = render_who
 
     collector_path = routes.user_path(@obs.collector_user_id)
-    assert_html(html, ".rss-who a[href='#{collector_path}']")
+    assert_html(html, ".log-who a[href='#{collector_path}']")
     assert_no_html(html, "a[href='#{routes.user_path(@obs.user_id)}']")
   end
 
@@ -26,7 +26,7 @@ class MatrixBoxWhoTest < ComponentTestCase
     html = render_who
 
     assert_html(html,
-                ".rss-who a[href='#{Inat::Constants::SITE}" \
+                ".log-who a[href='#{Inat::Constants::SITE}" \
                 "/people/outdoor_dad'][target='_blank']",
                 text: "outdoor_dad")
   end
@@ -36,8 +36,8 @@ class MatrixBoxWhoTest < ComponentTestCase
 
     html = render_who
 
-    assert_html(html, ".rss-who", text: "Jane Forager")
-    assert_no_html(html, ".rss-who a")
+    assert_html(html, ".log-who", text: "Jane Forager")
+    assert_no_html(html, ".log-who a")
   end
 
   def test_no_collector_falls_back_to_entering_user
@@ -45,7 +45,7 @@ class MatrixBoxWhoTest < ComponentTestCase
 
     html = render_who
 
-    assert_html(html, ".rss-who a[href='#{routes.user_path(@obs.user_id)}']")
+    assert_html(html, ".log-who a[href='#{routes.user_path(@obs.user_id)}']")
   end
 
   private

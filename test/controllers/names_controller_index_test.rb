@@ -307,7 +307,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: 10, q: pagination_query_param })
 
-    name_links = css_select(".list-group.name-index a")
+    name_links = css_select(".table-name-index a")
     assert_equal(10, name_links.length)
     expected = Name.order(:sort_name, :author).limit(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
@@ -327,7 +327,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:test_index,
         params: { num_per_page: 10, page: 2, q: pagination_query_param })
 
-    name_links = css_select(".list-group.name-index a")
+    name_links = css_select(".table-name-index a")
     assert_equal(10, name_links.length)
     expected = Name.order(:sort_name).limit(10).offset(10).to_a
     assert_equal(expected.map(&:id), ids_from_links(name_links))
@@ -349,7 +349,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L", q: pagination_query_param })
     assert_select("#content")
-    name_links = css_select(".list-group.name-index a")
+    name_links = css_select(".table-name-index a")
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),
                  Set.new(ids_from_links(name_links)))
@@ -368,7 +368,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size,
                                letter: "L", q: pagination_query_param })
-    name_links = css_select(".list-group.name-index a")
+    name_links = css_select(".table-name-index a")
 
     assert_equal(l_names.size, name_links.length)
     assert_equal(Set.new(l_names.map(&:id)),
@@ -388,7 +388,7 @@ class NamesControllerIndexTest < FunctionalTestCase
     login
     get(:test_index, params: { num_per_page: l_names.size, letter: "L",
                                page: 2, q: pagination_query_param })
-    name_links = css_select(".list-group.name-index a")
+    name_links = css_select(".table-name-index a")
     assert_equal(1, name_links.length)
     assert_equal([last_name.id], ids_from_links(name_links))
 

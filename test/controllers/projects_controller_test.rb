@@ -120,7 +120,7 @@ class ProjectsControllerTest < FunctionalTestCase
                   "H1 title element should exist and contain content")
     assert_select("div#project_banner", true,
                   "Project banner div should exist")
-    assert_select("img.banner-image", false,
+    assert_select("div.banner-image-wrap", false,
                   "Banner image should be absent for projects without images")
   end
 

@@ -45,7 +45,9 @@ module Views::Controllers::Account::Profile
     def render_place_name_field
       autocompleter_field(:place_name, type: :location,
                                        label: :profile_location,
-                                       label_appends: "(33%)")
+                                       label_appends: "(33%)",
+                                       hidden_name: :location_id,
+                                       hidden_value: model.location_id)
     end
 
     def render_notes_field

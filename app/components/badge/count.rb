@@ -11,18 +11,29 @@
 class Components::Badge::Count < Components::Badge
   prop :count, ::Integer
   prop :type, Symbol, default: :observation
+  # :outline -- lighter-weight `.badge-outline` styling (see
+  # _links_buttons_alerts.scss) for a count that shouldn't read as
+  # loudly as the solid default. Named `fill:`, not `variant:` --
+  # `variant:` is the dispatcher's kwarg (see Components::Badge).
+  prop :fill, _Union(:solid, :outline), default: :solid
   # Catch-all for class:, data:, and any other HTML attrs -- matches
   # Components::ContentPadded/Table's pattern.
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    span(**mix({ class: "badge count-badge", title: tooltip_title,
+    span(**mix({ class: badge_class, title: tooltip_title,
                  data: { tooltip_target: "tip" } }, @attributes)) do
       @count.to_s
     end
   end
 
   private
+
+  def badge_class
+    return "badge count-badge" unless @fill == :outline
+
+    "badge count-badge badge-outline"
+  end
 
   def tooltip_title
     :count_badge_tooltip.t(type: @type.t.upcase_first)

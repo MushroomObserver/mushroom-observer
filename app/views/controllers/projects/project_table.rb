@@ -47,7 +47,7 @@ module Views::Controllers::Projects
         end
         if project.open_membership
           whitespace
-          span(class: "ml-4") { plain("(#{:open.ti})") }
+          span(class: "ml-3") { plain("(#{:open.ti})") }
         end
         Badge(variant: :id, object: project, size: :xl, extra_class: "ml-3")
       end

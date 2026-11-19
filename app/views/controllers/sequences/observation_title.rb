@@ -7,7 +7,7 @@ module Views::Controllers::Sequences
     prop :observation, ::Observation
 
     def view_template
-      div(class: "mt-3") do
+      div(class: "form-group") do
         strong { append_colon(:observation.ti) }
         trusted_html(@observation.name.display_name(current_user).t)
         whitespace

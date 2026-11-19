@@ -38,24 +38,19 @@ module Views::Controllers::Locations
     def render_locations
       return unless @locations.any?
 
-      PaginatedResults { render_location_rows }
+      PaginatedResults { render_location_table }
     end
 
-    def render_location_rows
-      ListGroup do |list|
-        @locations.each do |location|
-          list.item(class: "d-flex align-items-start") do
-            div(class: "id-badge-col") do
-              Badge(variant: :id, object: location, size: :lg)
-            end
-            div(class: "flex-grow-1") do
-              Link(type: :location, where: location.name.t, location: location)
-            end
-            div(class: "obs-count-col") do
-              Badge(variant: :count,
-                    count: @observation_counts[location.id].to_i)
-            end
-          end
+    def render_location_table
+      Table(@locations) do |t|
+        t.column(:mo_id.ti) do |loc|
+          Badge(variant: :id, object: loc, size: :lg)
+        end
+        t.column(:location.ti) do |loc|
+          Link(type: :location, where: loc.name.t, location: loc)
+        end
+        t.column(:sort_by_observations.t, align: :right) do |loc|
+          Badge(variant: :count, count: @observation_counts[loc.id].to_i)
         end
       end
     end

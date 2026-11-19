@@ -21,9 +21,7 @@ module Views::Controllers::Projects::Locations
     prop :user, _Nilable(::User), default: nil
 
     def view_template
-      container_class(:wide)
-      content_padding(:no_panels)
-      add_project_banner(@project)
+      render_page_chrome
 
       render_target_location_form if @project.is_admin?(@user)
       render_table
@@ -31,10 +29,18 @@ module Views::Controllers::Projects::Locations
 
     private
 
+    def render_page_chrome
+      container_class(:wide)
+      content_padding(:panels)
+      add_project_banner(@project)
+    end
+
     def render_target_location_form
-      render(Views::Controllers::Projects::TargetLocations::Form.new(
-               project: @project
-             ))
+      ContentPadded do
+        render(Views::Controllers::Projects::TargetLocations::Form.new(
+                 project: @project
+               ))
+      end
     end
 
     def render_table

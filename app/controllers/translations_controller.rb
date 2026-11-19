@@ -67,7 +67,7 @@ class TranslationsController < ApplicationController
     )
     versions_view = build_versions_view
     render(turbo_stream: turbo_stream.update(
-      "translation_ui",
+      "translation_ui_body",
       view_context.safe_join([
                                view_context.render(form_view),
                                view_context.render(versions_view)

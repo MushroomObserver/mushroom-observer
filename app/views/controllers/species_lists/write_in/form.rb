@@ -110,16 +110,15 @@ module Views::Controllers::SpeciesLists::WriteIn
       autocompleter_field(:place_name,
                           type: :location,
                           value: model.place_name(current_user),
-                          label: :where.ti)
+                          label: :where.ti,
+                          hidden_name: :location_id,
+                          hidden_value: model.location_id)
     end
 
     def render_member_fields_section
       render_vote_field
       render_notes_block
-      render_coord_fields
-      Help(
-        content: :form_observations_lat_long_help.t
-      )
+      render_geolocation_section
       render_is_collection_location_checkbox
       Help(
         content: :form_observations_is_collection_location_help.t
@@ -160,21 +159,18 @@ module Views::Controllers::SpeciesLists::WriteIn
                      label: strip_tags(part.tl))
     end
 
-    def render_coord_fields
-      div(class: "form-group form-inline") do
-        render_coord_field(:lat, @member_lat, :latitude.ti, 8, spaced: true)
-        render_coord_field(:lng, @member_lng, :longitude.ti, 8, spaced: true)
-        render_coord_field(:alt, @member_alt, :altitude.ti, 6)
-      end
-    end
-
-    def render_coord_field(field, value, label_text, size, spaced: false)
-      text_field("member[#{field}]",
-                 value: value,
-                 size: size,
-                 label: label_text,
-                 inline: true,
-                 wrap_class: spaced ? "mr-3" : nil)
+    def render_geolocation_section
+      render(Components::Form::GeolocationFields.new(
+               form: self,
+               toggle_field: "member[has_geolocation]",
+               lat_field: "member[lat]",
+               lng_field: "member[lng]",
+               alt_field: "member[alt]",
+               target_id: "member_geolocation",
+               expanded: @member_lat.present?,
+               field_value: { lat: @member_lat, lng: @member_lng,
+                              alt: @member_alt }
+             ))
     end
 
     def render_is_collection_location_checkbox

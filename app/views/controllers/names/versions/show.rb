@@ -23,7 +23,7 @@ module Views::Controllers::Names::Versions
     def view_template
       page_chrome_side_effects
 
-      Row(class: "mt-4") do
+      Row do
         render_left_column
         render_right_column
       end

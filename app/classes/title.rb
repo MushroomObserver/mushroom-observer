@@ -17,6 +17,11 @@
 # defaults, matching AbstractModel#type_tag's localized label -- the
 # same default the models themselves used to inherit.
 class Title
+  # Not Phlex-based, so `append_colon` isn't inherited the way it is
+  # for `Components::Base` descendants -- included directly, same as
+  # `Components::ApplicationForm`.
+  include Components::Localization
+
   # Walks up the class hierarchy (not just object.class itself) so
   # NameDescription/LocationDescription -- concrete subclasses of the
   # abstract Description, which is where the title logic actually

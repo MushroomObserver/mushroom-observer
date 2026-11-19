@@ -26,7 +26,7 @@ module Views::Controllers::Checklists
     end
 
     def render_summary
-      div(class: "my-4") do
+      ContentPadded do
         render_target_summary if project_with_targets?
         render_observed_summary
       end
@@ -37,7 +37,7 @@ module Views::Controllers::Checklists
     end
 
     def render_target_summary
-      div do
+      div(class: "checklist-summary") do
         plain(
           :checklist_target_summary.t(
             total: @data.num_targets,
@@ -52,7 +52,7 @@ module Views::Controllers::Checklists
       text = observed_summary_text
       return if text.nil?
 
-      div { plain(text) }
+      div(class: "checklist-summary") { plain(text) }
     end
 
     def observed_summary_text
@@ -71,7 +71,7 @@ module Views::Controllers::Checklists
     end
 
     def render_location_header
-      h4 do
+      h4(class: "pl-card") do
         plain(:checklist_for.t)
         whitespace
         Link(type: :location, location: @context.location)
@@ -97,7 +97,7 @@ module Views::Controllers::Checklists
                              link_to_name_page: false)
       return if taxa.empty?
 
-      h4 { plain(title_key.t) }
+      h4(class: "pl-card") { plain(title_key.t) }
       # `Panel` is the sibling class in this module.
       render(Panel.new(
                data: @data, context: @context,
@@ -114,7 +114,7 @@ module Views::Controllers::Checklists
       missing = @project_data.taxa_not_in(@data)
       return if missing.empty?
 
-      h4 { plain(:checklist_missing_taxa.t) }
+      h4(class: "pl-card") { plain(:checklist_missing_taxa.t) }
       render(Panel.new(
                data: @project_data,
                context: Context.new(project: @context.project,

@@ -89,13 +89,17 @@ svg.placeholder {
 // context -- a plain inline caller that isn't the lightbox, e.g. the
 // image show page) intentionally has no styling here yet.
 
-// Spacing/border skeleton for a row of text-label buttons
+// Spacing/border/color skeleton for a row of text-label buttons
 // (variant: :strip, no .btn framing) divided by vertical borders.
-// $current-selector marks the non-clickable "active" item;
-// $border-color is a param since it needs to read against different
-// backgrounds per caller.
-@mixin btn-group-dividers($current-selector, $border-color) {
-  font-size: 1.1rem;
+// $current-selector marks the non-clickable "active" item,
+// $link-selector the clickable ones. Border and hover fill are both
+// derived from $text-color, so a caller only supplies the one color
+// its theme assigns this group.
+@mixin btn-group-dividers($current-selector, $link-selector, $text-color) {
+  font-size: 0.75rem;
+
+  $border-color: rgba($text-color, 0.5);
+  $hover-text-color: if($text-color == $white, $black, $panel-bg);
 
   > form.button_to,
   > #{$current-selector} {
@@ -109,46 +113,44 @@ svg.placeholder {
 
   > #{$current-selector} {
     padding: 0.25rem 0.5rem;
+    color: $text-color;
     border-top: 1px solid $border-color;
     border-bottom: 1px solid $border-color;
+
+    // The shared divider rule above only gives a *left* border, and
+    // only between siblings -- close the box's outer edges when it's
+    // at either end of the row.
+    &:first-child {
+      border-left: 1px solid $border-color;
+    }
+
+    &:last-child {
+      border-right: 1px solid $border-color;
+    }
   }
-}
 
-.vote-btn-group {
-  @include btn-group-dividers(".image-vote", rgba($white, 0.5));
-
-  // Padding/color/hover live on the inner <button>, not the
-  // <form.button_to> wrapper.
-  form.button_to button[type=submit].image-vote-link {
+  form.button_to button[type=submit]#{$link-selector} {
     display: inline-block;
     padding: 0.25rem 0.5rem;
-    color: white !important;
+    color: $text-color !important;
     transition: color 0.3s ease, background-color 0.3s ease;
 
     &:hover,
     &:focus {
-      color: $black !important;
-      background-color: $white;
+      color: $hover-text-color !important;
+      background-color: $text-color;
       text-decoration: none;
     }
   }
 }
 
+.vote-btn-group {
+  @include btn-group-dividers(".image-vote", ".image-vote-link", $white);
+}
+
 .status-btn-group {
-  @include btn-group-dividers(".status-link-current", $list-group-border);
-
-  form.button_to button[type=submit].status-link {
-    display: inline-block;
-    padding: 0.25rem 0.5rem;
-    color: $link-color !important;
-    transition: color 0.3s ease;
-
-    &:hover,
-    &:focus {
-      color: $link-hover-color !important;
-      text-decoration: none;
-    }
-  }
+  @include btn-group-dividers(".status-link-current", ".status-link",
+                              $text-color);
 }
 
 .image-sizer:hover,
@@ -171,14 +173,14 @@ svg.placeholder {
   margin-left: auto;
   margin-right: auto;
   width: 100%;
-  max-width: 200px;
-  height: 7px;
+  max-width: 12.5rem;
+  height: 0.4375rem;
   margin-bottom: 0;
   background-color: rgba($white, 0.5);
 
   .progress-bar {
-    font-size: 12px;
-    line-height: 5px;
+    font-size: 0.75rem;
+    line-height: 0.3125rem;
     color: $white;
     background-color: $white;
   }
@@ -189,15 +191,7 @@ svg.placeholder {
 // project title image
 //
 
-.banner-image {
+.banner-image-wrap {
   height: 300px;
   width: 100%;
-  object-fit: cover;
-}
-
-.banner-image-text {
-  background: $body_bg;
-  color: $text_color;
-  padding: 0.5em;
-  margin-left: 18px;
 }

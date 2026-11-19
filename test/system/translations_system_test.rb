@@ -34,8 +34,6 @@ class TranslationsSystemTest < ApplicationSystemTestCase
             assert_selector("button[type=submit]", text: :save.ti, count: 1)
             assert_field("tag_two", type: :textarea, with: "two")
             assert_field("tag_twos", type: :textarea, with: "twos")
-            assert_field("tag_TWO", type: :textarea, with: "Two")
-            assert_field("tag_TWOS", type: :textarea, with: "Twos")
             click_button("Cancel")
           end
           assert_no_selector("#translation_official")
@@ -49,13 +47,9 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           within("#translation_form") do
             fill_in("tag_two", with: "three")
             fill_in("tag_twos", with: "threes")
-            fill_in("tag_TWO", with: "Three")
-            fill_in("tag_TWOS", with: "Threes")
             click_link("Reload")
             assert_field("tag_two", type: :textarea, with: "two")
             assert_field("tag_twos", type: :textarea, with: "twos")
-            assert_field("tag_TWO", type: :textarea, with: "Two")
-            assert_field("tag_TWOS", type: :textarea, with: "Twos")
           end
 
           within("#translations_index") { first("[data-tag='one']").click }
@@ -72,6 +66,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
           assert_field("tag_one", type: :textarea, with: "uno")
           fill_in("tag_one", with: old_one)
           within("#translation_form") { click_commit }
+          assert_selector("#str_one.translation-updated", text: old_one)
           assert_equal(old_one, :one.l)
 
           select("Ελληνικά", from: "locale")
@@ -88,6 +83,7 @@ class TranslationsSystemTest < ApplicationSystemTestCase
 
           fill_in("tag_one", with: greek_one)
           within("#translation_form") { click_commit }
+          assert_selector("#str_one.translation-updated", text: greek_one)
         end
         assert_equal(greek_one, :one.l)
       end

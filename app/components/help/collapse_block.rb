@@ -16,11 +16,11 @@ class Components::Help::CollapseBlock < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    div_class = "well well-sm mb-3 help-block position-relative"
+    div_class = "help-block position-relative"
     div_class += " mt-3" if @direction == "up"
 
     Collapsible(id: @target_id) do
-      div(**mix({ class: div_class }, @attributes)) do
+      Well(**mix({ class: div_class }, @attributes)) do
         yield if block
         if @direction
           arrow_class = class_names(

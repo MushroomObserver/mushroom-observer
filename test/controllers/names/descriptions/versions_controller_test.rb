@@ -23,6 +23,8 @@ module Names::Descriptions
       assert_select("html > head > title", count: 1)
       assert_select("body.versions__show")
       assert_select("#description_details")
+      assert_select(".panel-heading", text: :form_names_gen_desc.l)
+      assert_select("#name_description_versions ~ #description_details")
     end
   end
 end

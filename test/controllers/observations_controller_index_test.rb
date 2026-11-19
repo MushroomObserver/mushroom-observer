@@ -205,7 +205,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
     assert_page_title(:observations.ti)
     assert_select("body.observations__index", true)
     assert_select(
-      "#results .rss-heading a[href ^= '/obs/#{obs.id}'] .rss-name",
+      "#results .log-heading a[href ^= '/obs/#{obs.id}'] .log-name",
       { text: obs.format_name.t.strip_html },
       "Index should open at the page that includes #{obs.format_name}"
     )

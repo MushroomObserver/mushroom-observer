@@ -28,6 +28,7 @@ module Views::Controllers::Locations
         add_page_title(:list_countries_title.l)
         add_context_nav(::Tab::Location::CountriesActions.new)
         container_class(:wide)
+        content_padding(:no_panels)
       end
 
       def render_column(key)

@@ -7,8 +7,8 @@
 #     `desc_title` (the partial format name with a rough-permissions
 #     suffix).
 #   - Per-type `VersionActions` context-nav.
-#   - The same two-column layout the regular description show page
-#     uses: `DetailsPanel` on the left, the past-versions table and
+#   - Two columns: that version's notes content (`NotesPanels`) on
+#     the left; the past-versions table, `DetailsPanel`, and
 #     `OtherDescriptionsPanel` on the right.
 #
 # Subclasses provide:
@@ -30,7 +30,7 @@ module Views::Controllers::Descriptions::Versions
                                       name: desc_title))
       add_context_nav(version_actions)
       container_class(:wide)
-      column_classes(:six_even)
+      column_classes(:six)
       pre_render_setup
 
       Row { render_columns }
@@ -43,13 +43,16 @@ module Views::Controllers::Descriptions::Versions
 
     def render_columns
       div(class: content_for(:left_columns)) do
-        render(Views::Controllers::Descriptions::DetailsPanel.new(
-                 description: @description, user: @user
+        render(Views::Controllers::Descriptions::NotesPanels.new(
+                 description: @description
                ))
       end
       div(class: content_for(:right_columns)) do
         render(Views::Controllers::Versions::Previous.new(
                  obj: @description, versions: @versions
+               ))
+        render(Views::Controllers::Descriptions::DetailsPanel.new(
+                 description: @description, user: @user
                ))
         render(Views::Controllers::Descriptions::OtherDescriptionsPanel.new(
                  description: @description, user: @user

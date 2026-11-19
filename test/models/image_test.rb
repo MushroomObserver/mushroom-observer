@@ -139,7 +139,7 @@ class ImageTest < UnitTestCase
     img = images(:in_situ_image)
     assert_not_empty(img.all_subjects)
 
-    assert_equal("#{img.title_subjects} #{:image.l}", img.format_name)
+    assert_equal(img.title_subjects, img.format_name)
   end
 
   def test_format_name_without_subjects

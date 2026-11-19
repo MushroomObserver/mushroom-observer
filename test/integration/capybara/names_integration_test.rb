@@ -139,8 +139,11 @@ class NamesIntegrationTest < CapybaraIntegrationTestCase
     assert_not_nil(comment)
     assert_equal("my bad", comment.comment)
 
-    # But still need to undo the synonymy.
+    # But still need to undo the synonymy. Existing-synonym checkboxes
+    # load checked -- unchecking the other name's is how the user
+    # splits it back out of the synonym group.
     within("#nomenclature") { click_link(text: "Change Synonyms") }
+    page.uncheck("edit_synonym[existing_synonyms][#{good_name.id}]")
     click_on("Submit Changes")
 
     assert_not(bad_name.reload.deprecated)

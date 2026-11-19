@@ -9,7 +9,9 @@
 # keyword is merged with the collapse trigger attrs instead.
 #
 # @param form [Components::ApplicationForm] the parent form
-# @param field [Symbol] the field name
+# @param field [Symbol, String] the field name -- a String for an
+#   unbound, non-model field (see the field helpers' Symbol/String
+#   paths), same as `checkbox_field` itself accepts
 # @param target_id [String] id of the collapse target (no leading #)
 # @param label [String, Symbol] the label text, or a translation key --
 #   passed straight through to checkbox_field, which resolves a Symbol
@@ -18,7 +20,7 @@
 # Any other keyword is forwarded to checkbox_field.
 class Components::Form::CheckboxCollapse < Components::Base
   prop :form, ::Components::ApplicationForm
-  prop :field, Symbol
+  prop :field, _Union(Symbol, String)
   prop :target_id, String
   prop :label, _Union(String, Symbol)
   prop :expanded, _Boolean, default: false

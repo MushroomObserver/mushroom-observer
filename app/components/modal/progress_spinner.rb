@@ -19,7 +19,7 @@ class Components::Modal::ProgressSpinner < Components::Base
     Modal(
       id: MODAL_ID,
       header: false,
-      dialog_class: "modal-dialog modal-sm",
+      size: :sm,
       body_class: "text-center",
       body_id: BODY_ID,
       title_id: CAPTION_ID,
@@ -37,6 +37,6 @@ class Components::Modal::ProgressSpinner < Components::Base
 
   def render_caption_and_spinner
     span(id: CAPTION_ID)
-    Icon(type: :reuse, class: "spinner-right mx-2")
+    Icon(type: :spinner, class: "spinner-right mx-2")
   end
 end

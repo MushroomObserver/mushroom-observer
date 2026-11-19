@@ -25,7 +25,7 @@ module Views::Controllers::Contributors
     private
 
     def render_legend_row
-      Row(class: "my-3") do
+      Row do
         Column(md: 8, lg: 6) { render(Legend.new) }
       end
     end

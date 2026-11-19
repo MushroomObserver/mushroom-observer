@@ -13,5 +13,5 @@
 // variable-width sibling (the rss-log type-filter row) that can
 // otherwise shrink the input below a usable width.
 .page-input .form-control {
-  min-width: 4rem;
+  min-width: 2.5rem; // 40px at the 16px root -- see issue #5527
 }

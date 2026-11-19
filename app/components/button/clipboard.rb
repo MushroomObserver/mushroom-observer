@@ -2,12 +2,13 @@
 
 # Icon button that copies `text:` to the clipboard via the Stimulus
 # `clipboard` controller. `name:` becomes the tooltip label and sr-only
-# accessible name (the icon is the visual; the name is never shown
+# accessible name (the icon is the visual; the name doesn't show
 # inline). Defaults to the copy icon, xs size, and link styling (btn-link
-# resets native <button> chrome without adding visible framing); `.py-0`
-# is always added since .btn-xs's own vertical padding otherwise sits
-# the icon below the baseline of surrounding inline text — override any
-# of these with the usual `Components::Button` kwargs.
+# resets native <button> chrome without adding visible framing); `.p-0`
+# is always added since .btn-xs's padding otherwise sits the icon below
+# the baseline of surrounding inline text and adds an unwanted
+# horizontal gap — override any of these with the usual
+# `Components::Button` kwargs.
 #
 # Bases aren't always displayed near the button (e.g. the sequences
 # panel row shows only the locus), so copying from the model value
@@ -41,7 +42,7 @@ class Components::Button::Clipboard < Components::Button
   private
 
   def merged_class
-    class_names(super, "py-0")
+    class_names(super, "p-0")
   end
 
   def tooltip_data(name)

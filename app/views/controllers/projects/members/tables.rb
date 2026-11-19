@@ -9,11 +9,10 @@ module Views::Controllers::Projects::Members
     prop :user, ::User
 
     def view_template
-      div(id: "project_members_table") do
-        Table(@users.sort_by(&:login),
-              variant: :striped, identifier: "project-members") do |table|
-          define_columns(table)
-        end
+      Table(@users.sort_by(&:login),
+            wrap_id: "project_members_table", variant: :striped,
+            identifier: "project-members") do |table|
+        define_columns(table)
       end
     end
 
@@ -32,10 +31,7 @@ module Views::Controllers::Projects::Members
                    align: :center, valign: :middle) do |u|
         render_aliases(u)
       end
-      table.column(:status.ti, valign: :middle) do |u|
-        plain(member_status(u))
-      end
-      table.column(nil, valign: :middle) { |u| render_edit_link(u) }
+      table.column(:status.ti, valign: :middle) { |u| render_status_cell(u) }
     end
 
     # Was Project#member_status -- moved here (#4901) since its only
@@ -68,10 +64,15 @@ module Views::Controllers::Projects::Members
              ))
     end
 
+    def render_status_cell(user)
+      plain(member_status(user))
+      render_edit_link(user)
+    end
+
     def render_edit_link(user)
       return unless @project.is_admin?(@user)
 
-      Link(type: :get, name: :change_member_status_change_status.t,
+      Link(type: :edit, variant: :strip, class: "ml-2",
            target: edit_project_member_path(
              project_id: @project.id, candidate: user.id
            ))

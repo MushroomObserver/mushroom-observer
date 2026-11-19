@@ -11,6 +11,7 @@ module Views::Controllers::Comments
     prop :user, _Nilable(::User), default: nil
 
     def view_template
+      content_padding(:no_panels)
       register_target_names
       add_page_title(:comment_show_title.t(
                        name: @target.unique_format_name

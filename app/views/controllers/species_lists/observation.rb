@@ -91,12 +91,12 @@ module Views::Controllers::SpeciesLists
         type: :delete,
         variant: :strip,
         name: :remove.ti, icon: :remove,
-        show_label: :responsive,
         target: observation_species_list_path(
           id: @observation.id,
           species_list_id: @species_list.id
         ),
-        confirm: :are_you_sure.l
+        confirm: :are_you_sure.l,
+        class: "ml-3"
       )
     end
   end

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Page heading + browser tab title — both just `name`.
+# Page heading (textile applied) + browser tab title (plain `name`).
 class Title::VisualGroup < Title
   def page_title(_user = nil)
-    @object.name
+    @object.name.t
   end
 
   def document_title

@@ -29,16 +29,17 @@
 #     identify: true
 #   ))
 class Components::Matrix::Table < Components::Base
-  # Bump when the rendered MatrixBox HTML changes. The invalidation
-  # lever for cached `MatrixBox` fragments -- both the write site
-  # (`render_cached_boxes`) and the controller's pre-check
-  # (`ApplicationController::Indexes#uncached_object_ids`) read this
-  # through `cache_key_for`, since Phlex's automatic digest doesn't
-  # survive into the controller's check.
-  # v2: image URLs in the fragment carry a cache-busting
-  # ?<updated_at> token -- fragments cached under v1 are stale.
+  # Bump when the rendered MatrixBox HTML changes -- read via
+  # `cache_key_for` by both the write site (`render_cached_boxes`)
+  # and the controller's pre-check (`ApplicationController::Indexes#
+  # uncached_object_ids`), since Phlex's digest doesn't survive into
+  # the controller's check.
+  # v2: cache-busting ?<updated_at> image URL token.
   # v3: observation boxes name the collector, not the entering user.
-  CACHE_VERSION = "v3"
+  # v4: rss-* classes renamed to log-*, heading structure changed.
+  # v5: ID badge bumped from size: :md to :lg.
+  # v6: user-detail footer li drops hanging-indent.
+  CACHE_VERSION = "v6"
 
   # The cache key MatrixBox fragments are stored under, used by both
   # the write here and the controller's batched `read_multi`
@@ -85,7 +86,7 @@ class Components::Matrix::Table < Components::Base
   def view_template(&block)
     Row(
       element: :ul,
-      class: "list-unstyled mt-3",
+      class: "list-unstyled",
       data: {
         controller: "matrix-table",
         action: "resize@window->matrix-table#rearrange"

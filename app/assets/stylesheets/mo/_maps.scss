@@ -70,7 +70,7 @@
 }
 .gm-style-iw-d {
   overflow: auto !important;
-  padding: 12px 12px 8px;
+  padding: 0.75rem 0.75rem 0.5rem;
 }
 // The InfoWindow content has `overflow: auto`, which clips browser
 // focus rings on links/buttons that sit at the edge of the content
@@ -125,8 +125,8 @@
 
   .map-legend-swatch {
     display: inline-block;
-    width: 12px;
-    height: 12px;
+    width: 0.75rem;
+    height: 0.75rem;
     border: 1px solid #888;
     background: transparent;
     flex-shrink: 0;
@@ -203,7 +203,7 @@
   }
 
   .small {
-    font-size: 12px;
+    font-size: 0.75rem;
     line-height: 1.35;
   }
 
@@ -256,7 +256,7 @@
   }
   .map-popup-cluster-subtitle {
     color: #666;
-    font-size: 12px;
+    font-size: 0.75rem;
   }
   .map-popup-cluster-actions {
     margin-top: 6px;
@@ -276,8 +276,8 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      gap: 12px;
-      padding: 3px 0;
+      gap: 0.75rem;
+      padding: 0.1875rem 0;
       border-bottom: 1px solid #eee;
 
       &:last-child { border-bottom: 0; }

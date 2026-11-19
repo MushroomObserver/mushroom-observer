@@ -11,6 +11,7 @@ module Views::Controllers::Checklists
 
     def view_template
       render_page_chrome
+
       render_target_names_widget if @context.admin?
       # Sibling reference in the `Views::Controllers::Checklists`
       # module — resolves to `Checklists::Contents`.
@@ -22,7 +23,7 @@ module Views::Controllers::Checklists
 
     def render_page_chrome
       container_class(:full)
-      content_padding(:no_panels)
+      content_padding(:panels)
       add_project_banner(@context.project) if @context.project
       add_checklist_title
       return if @context.logged_out
@@ -66,9 +67,11 @@ module Views::Controllers::Checklists
     end
 
     def render_target_names_widget
-      render(Views::Controllers::Projects::TargetNames::Form.new(
-               project: @context.project
-             ))
+      ContentPadded do
+        render(Views::Controllers::Projects::TargetNames::Form.new(
+                 project: @context.project
+               ))
+      end
     end
   end
 end

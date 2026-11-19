@@ -9,11 +9,11 @@ module Views::Controllers::Images::Votes::Anonymity
     end
 
     def view_template
-      div(class: "mt-3") do
+      div(class: "my-3") do
         render_anonymous_count
         render_public_count
-        submit(:image_vote_anonymity_make_public.l, disabled: anon.zero?)
       end
+      submit(:image_vote_anonymity_make_public.l, disabled: anon.zero?)
     end
 
     private
