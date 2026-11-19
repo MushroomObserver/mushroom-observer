@@ -16,8 +16,7 @@ class Language::ExporterTest < UnitTestCase
 
   def teardown
     Language.reset_input_file_override
-    # test_import_official's writes to these tags survive the test's
-    # DB rollback, since the cache is process-persistent (MemoryStore).
+    # See CacheStoreSelector -- the cache isn't rolled back with the DB.
     cache_backend = I18n.backend.backends.first
     %w[two five unknown_locations].each do |tag|
       cache_backend.delete_translation(:en, tag)

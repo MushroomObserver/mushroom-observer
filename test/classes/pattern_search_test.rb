@@ -3,6 +3,12 @@
 require("test_helper")
 
 class PatternSearchTest < UnitTestCase
+  # See CacheStoreSelector -- the cache isn't rolled back with the DB.
+  def teardown
+    I18n.backend.backends.first.delete_translation(:fr, :search_term_user)
+    super
+  end
+
   def test_parse_next_term
     parser = PatternSearch::Parser.new("")
     # make str mutable because it is modified by parse_next_term
