@@ -38,6 +38,13 @@ module Views::Controllers::Projects
 
     FIELD_SLIPS_CONTROLLERS = ["field_slips", "projects/field_slips"].freeze
 
+    # Shared with AdminSubtabs/ObservationSubtabs -- both sub-tab
+    # strips use this indent.
+    SUBTAB_INDENT = "pl-3 pl-lg-5"
+    # The sub-tab strips' own vertical margins; also what the main tab
+    # bar gets when a sub-tab strip follows it (see #render_project_tabs).
+    SUBTAB_VERTICAL_MARGINS = "mt-2 mb-2"
+
     def view_template
       render_project_tabs
       render_subtabs
@@ -46,7 +53,8 @@ module Views::Controllers::Projects
     private
 
     def render_project_tabs
-      tab_margin_class = no_tab_bottom_margin? ? "mt-3" : "my-3"
+      tab_margin_class =
+        no_tab_bottom_margin? ? "mt-2" : SUBTAB_VERTICAL_MARGINS
 
       NavTabs(
         id: "project_tabs", class: tab_margin_class,

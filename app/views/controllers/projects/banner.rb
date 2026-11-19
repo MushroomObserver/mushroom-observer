@@ -44,7 +44,7 @@ module Views::Controllers::Projects
       Row do
         Column(xs: 12, id: "project_banner") do
           img(src: @project.image.large_url, class: "banner-image")
-          div(class: "bottom-left ml-3 mb-3 p-2") do
+          div(class: "bottom-left ml-3 mb-3") do
             render_banner_title(with_overlay_styling: true)
             render_project_location(with_overlay_styling: true)
             render_project_date_range(with_overlay_styling: true)

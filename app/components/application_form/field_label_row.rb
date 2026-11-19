@@ -5,6 +5,13 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Phlex::TrustedHtml
 
+    # The gap between adjacent elements in a label row (label, help
+    # icon, appends text) and between an inline row and its field.
+    # One spacing step, referenced everywhere instead of repeating the
+    # literal class string.
+    GAP_TRAILING = "mr-2"
+    GAP_LEADING = "ml-2"
+
     # rubocop:disable MO/NoLongCommentBlock
     # Three layouts depending on what the label row itself needs:
     #
@@ -135,13 +142,14 @@ class Components::ApplicationForm < Superform::Rails::Form
     # readers -- use when a panel heading already names the field.
     # `help_placement: :above` drops the label's bottom margin, since
     # the help block renders directly below it instead.
-    # `trailing_margin: false` (render_label_with_appends) drops the
-    # mr-3 too -- each append supplies a leading ml-3 instead.
+    # `trailing_margin: false` (render_label_with_appends) drops
+    # GAP_TRAILING too -- each append supplies a leading GAP_LEADING
+    # instead.
     def label_class(trailing_margin: true)
       base = if wrapper_options[:label_sr_only]
                "sr-only"
              else
-               trailing_margin ? "mr-3" : nil
+               trailing_margin ? GAP_TRAILING : nil
              end
       help_placement_above? ? class_names(base, "mb-0") : base
     end
@@ -182,7 +190,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return nil unless respond_to?(:help_slot) && help_slot &&
                         wrapper_options[:help_collapse]
 
-      class_names("mr-3", "inline-trailing-space")
+      class_names(GAP_TRAILING, "inline-trailing-space")
     end
 
     # d-flex align-items-center is needed since the label and appended
@@ -217,7 +225,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span, class: "ml-3") do
+      Help(element: :span, class: GAP_LEADING) do
         plain(label_appends_text(appends))
       end
     end
