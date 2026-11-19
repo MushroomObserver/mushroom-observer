@@ -49,9 +49,9 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
 
   def render_link
     if @identify
-      a(href: url_for(@obs.show_link_args),
-        class: "text-bold mr-3",
-        id: "caption_obs_link_#{@obs.id}") { @obs.id }
+      Link(type: :object, object: @obs, name: @obs.id.to_s,
+           class: "text-bold mr-3",
+           id: "caption_obs_link_#{@obs.id}")
     else
       Button(
         type: :get,

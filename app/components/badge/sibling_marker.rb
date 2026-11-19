@@ -37,12 +37,13 @@ class Components::Badge::SiblingMarker < Components::Badge
   end
 
   def render_link
-    a(**link_attributes) { render_badge }
+    Link(type: :get, name: title_text,
+         target: permanent_observation_path(@observation_id),
+         **link_attributes) { render_badge }
   end
 
   def link_attributes
-    attrs = { href: permanent_observation_path(@observation_id),
-              class: "sibling-marker-link" }
+    attrs = { class: "sibling-marker-link" }
     return attrs unless @isolate_click
 
     attrs.merge(data: { controller: "links",
