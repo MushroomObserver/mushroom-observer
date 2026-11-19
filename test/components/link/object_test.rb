@@ -34,6 +34,14 @@ class ObjectLinkTest < ComponentTestCase
                        "[data-tooltip-target='tip']")
   end
 
+  def test_btn_class_raises
+    project = projects(:bolete_project)
+
+    assert_raises(ArgumentError) do
+      render_object(object: project, class: "btn btn-primary")
+    end
+  end
+
   def test_block_content_overrides_default_label
     project = projects(:bolete_project)
     html = render(Components::Link::Object.new(object: project)) do
