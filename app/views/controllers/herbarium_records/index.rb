@@ -67,8 +67,7 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_record_link(rec)
-      Link(type: :object, object: rec, name: rec.herbarium_label.t,
-           class: "herbarium_record_link_#{rec.id}")
+      Link(type: :object, object: rec, name: rec.herbarium_label.t)
     end
 
     def render_observation_links(rec)

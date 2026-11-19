@@ -81,9 +81,7 @@ module Views::Controllers::Descriptions
 
     def render_link(desc)
       Link(type: :object, object: desc, name: description_title(desc),
-           class: "description_link_#{desc.id}") do
-        trusted_html(description_title(desc))
-      end
+           class: "description_link_#{desc.id}")
     end
 
     # Wraps `Description#partial_format_name` with a rough-permissions

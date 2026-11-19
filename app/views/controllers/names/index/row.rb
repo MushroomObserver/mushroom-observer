@@ -46,7 +46,7 @@ class Views::Controllers::Names::Index::Row < Views::Base
   end
 
   def render_display_name_link
-    a(href: name_path(@name.id)) do
+    Link(type: :object, object: @name) do
       span(class: "display-name",
            data: { clipboard_target: "source" }) do
         trusted_html(@name.display_name(@user).t)
