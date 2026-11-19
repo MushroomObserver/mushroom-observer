@@ -284,6 +284,18 @@ class Components::Table < Components::Base
     nil
   end
 
+  # Full-width section-label row — a single `<th colspan="N"
+  # scope="colgroup">` in a dedicated `<tbody>`. Use between `t.body`
+  # groups to label each section (e.g. "Target locations") without
+  # splitting into separate `<table>`s, which can drift out of
+  # column alignment. Styling: .legend-row in mo/_tables.scss.
+  #
+  # @yield block that renders the cell content (alternative to `text`)
+  def legend(text = nil, **attrs, &block)
+    @body_blocks << { legend: true, text: text, attrs: attrs, block: block }
+    nil
+  end
+
   private
 
   def table_attributes
@@ -332,13 +344,34 @@ class Components::Table < Components::Base
 
   def render_tbody
     if @body_blocks.any?
-      @body_blocks.each { |b| tbody(**b[:attrs]) { b[:block].call } }
+      @body_blocks.each_with_index do |b, idx|
+        render_body_entry(b, first: idx.zero?)
+      end
     elsif @row_block
       tbody(id: @tbody_id) do
         @rows.each.with_index { |row, idx| @row_block.call(row, idx) }
       end
     else
       tbody(id: @tbody_id) { @rows.each { |row| render_default_row(row) } }
+    end
+  end
+
+  def render_body_entry(entry, first:)
+    return render_legend_row(entry, first: first) if entry[:legend]
+
+    tbody(**entry[:attrs]) { entry[:block].call }
+  end
+
+  # `pt-4` separates a legend row from the previous section's rows --
+  # skipped on the table's first row, which has nothing above it.
+  def render_legend_row(entry, first:)
+    tbody(**entry[:attrs]) do
+      tr(class: "legend-row") do
+        th(colspan: @columns.length, scope: "colgroup",
+           class: (first ? nil : "pt-4")) do
+          entry[:block] ? entry[:block].call : plain(entry[:text])
+        end
+      end
     end
   end
 

@@ -14,7 +14,7 @@ require("test_helper")
 # state. See PR #4301 for the diagnosis.
 module Views::Controllers::Checklists
   class ContentsTest < ComponentTestCase
-    SUMMARY_SELECTOR = "#checklist_contents .my-4 > div"
+    SUMMARY_SELECTOR = "#checklist_contents .checklist-summary"
 
     # Both species and higher-level observed →
     # :checklist_observed_summary branch (lines 67-68 in contents.rb).
@@ -66,7 +66,7 @@ module Views::Controllers::Checklists
 
       assert_html(html, "#checklist_contents")
       # `for_project?` is false for our stub, so render_target_summary
-      # is also skipped — `.my-4` has no inner divs at all.
+      # is also skipped — no `.checklist-summary` divs render.
       assert_html(html, SUMMARY_SELECTOR, count: 0)
     end
 
