@@ -100,6 +100,12 @@ class Components::Table < Components::Base
   # `panel_wrap: true` (the default). Ignored, not an error, when
   # `panel_wrap: false`, matching the field helpers' `wrap_class:`.
   prop :wrap_class, _Nilable(String), default: nil
+  # HTML id for the wrapping Panel -- only meaningful with
+  # `panel_wrap: true`. Use this, not a caller-added wrapping div,
+  # when something (e.g. turbo_stream.replace) needs to target the
+  # table's outermost rendered element: `id:` itself lands on the
+  # inner `<table>` tag, nested inside the Panel.
+  prop :wrap_id, _Nilable(String), default: nil
   # Catch-all for class:, data:, cols:, ARIA attrs, and any other
   # HTML attrs forwarded to the `<table>` element -- matches
   # Icon/Collapsible's pattern.
@@ -126,7 +132,7 @@ class Components::Table < Components::Base
     vanish(&block)
 
     if @panel_wrap
-      Panel(class: @wrap_class) do |p|
+      Panel(class: @wrap_class, id: @wrap_id) do |p|
         p.with_body(wrapper: false) { render_table_responsive }
       end
     else

@@ -62,6 +62,12 @@ class Components::InlineCRUDLinks < Components::Base
   # only.
   prop :extras, _Array(_Nilable(_Union(Phlex::SGML, String))),
        default: -> { [] }
+  # Set false to suppress the dispatcher's edit button
+  # unconditionally (not just when the caller lacks permission) --
+  # for a caller whose edit control can't fit the icon-only
+  # convention (e.g. needs the record's name as visible link text)
+  # and supplies one via `extras:` instead. Destroy is unaffected.
+  prop :edit, _Boolean, default: true
   # Add-link mode (`target:` absent) needs these instead.
   prop :tab, _Nilable(::Tab::Base), default: nil
   prop :modal_id, _Nilable(String), default: nil
@@ -202,7 +208,7 @@ class Components::InlineCRUDLinks < Components::Base
   end
 
   def edit_component
-    return nil unless can_edit?
+    return nil unless @edit && can_edit?
 
     send(handler[:edit])
   end

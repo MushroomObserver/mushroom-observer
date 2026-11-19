@@ -82,12 +82,7 @@ module Views::Controllers::Projects
       assert_html(html, "a.nav-link.active[href='/projects/#{project.id}']")
     end
 
-    # On the Project show page, the banner sits directly above
-    # ProjectBanner's inline title (mt-3 only). Every other
-    # project-scoped page (locations, checklists, admin, ...) has a
-    # title/content below the tabs, which needs a bottom margin too
-    # (my-3). project_page? drives this choice, so the margin class
-    # is the contract under test here, not incidental styling.
+    # Margin class is the contract under test, not incidental styling.
     # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_project_tabs_margin_on_projects_show
       project = projects(:eol_project)
@@ -96,14 +91,10 @@ module Views::Controllers::Projects
 
       html = render_navs(project: project)
 
-      assert_html(html, "#project_tabs.mt-3")
-      assert_no_html(html, "#project_tabs.my-3")
+      assert_html(html, "#project_tabs.mt-2")
+      assert_no_html(html, "#project_tabs.mb-2")
     end
 
-    # Every controller that renders AdminSubtabs or ObservationSubtabs
-    # below the tabs -- their mt-2 already separates them from the
-    # tabs, so the tabs don't need a bottom margin either (same
-    # contract as test_project_tabs_margin_on_projects_show above).
     # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_project_tabs_margin_on_admin_subtab_pages
       project = projects(:eol_project)
@@ -117,7 +108,8 @@ module Views::Controllers::Projects
         controller.define_singleton_method(:controller_path) { path }
         html = render_navs(project: project)
 
-        assert_html(html, "#project_tabs.mt-3")
+        assert_html(html, "#project_tabs.mt-2")
+        assert_no_html(html, "#project_tabs.mb-2")
       end
     end
 
@@ -129,8 +121,7 @@ module Views::Controllers::Projects
 
       html = render_navs(project: project)
 
-      assert_html(html, "#project_tabs.my-3")
-      assert_no_html(html, "#project_tabs.mt-3")
+      assert_html(html, "#project_tabs.mt-2.mb-2")
     end
 
     # ADMIN_SUBTAB_CONTROLLERS maps each admin-subtab controller path

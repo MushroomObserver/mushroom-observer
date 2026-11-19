@@ -191,15 +191,7 @@ svg.placeholder {
 // project title image
 //
 
-.banner-image {
+.banner-image-wrap {
   height: 300px;
   width: 100%;
-  object-fit: cover;
-}
-
-.banner-image-text {
-  background: $body_bg;
-  color: $text_color;
-  padding: 0.5em;
-  margin-left: 18px;
 }

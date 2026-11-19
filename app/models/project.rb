@@ -1085,8 +1085,8 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   def alias_data(target)
-    @target_alias_details ||= target_alias_details(target.class)
-    @target_alias_details[target.id] || []
+    @target_aliases ||= target_aliases(target.class)
+    @target_aliases[target.id] || []
   end
 
   def check_for_alias(str, target_type)
@@ -1138,13 +1138,11 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
     slip.occurrence&.observations || []
   end
 
-  def target_alias_details(target_type)
+  def target_aliases(target_type)
     aliases.
       where(target_type:).
       order(:name).
-      group_by(&:target_id).
-      transform_values do |aliases|
-        aliases.map { |project_alias| [project_alias.name, project_alias.id] }
-      end
+      each { |project_alias| project_alias.project = self }.
+      group_by(&:target_id)
   end
 end
