@@ -125,35 +125,28 @@ back on the new one when the deploy restarts them.
 
 ## Retiring the Rubies an upgrade leaves behind
 
-An upgrade installs the new Ruby beside the old one and leaves the old
-one in place, which is what keeps a rollback available. Nothing removes
-it afterwards, so versions accumulate: by the 3.4.13 upgrade there were
-four under `/opt/rubies` and nine on one workstation.
-
-The gems are the bulk of it, and they do not sit inside the Ruby tree.
-chruby points `GEM_HOME` at a directory named for the version, so a
-version costs ~130MB for the Ruby and 2-3GB for its gems. Retiring one
-means removing both directories.
-
-### Confirm nothing is running under it
-
-puma and the Solid Queue workers hold the Ruby they started under, so a
-version stays in use until the next restart. `ps` reports the command
-rather than the interpreter, and Solid Queue rewrites its process
-titles, so `pgrep -f solid_queue` finds only the `bin/run` wrapper.
-Read the interpreter off the processes themselves:
+Before deleting a version of Ruby ensure that no tools are relying on
+it.  These are typically mentioned in the .ruby-version.  If found
+this useful for hunting down lingering directories that reference
+old versions of Ruby:
 
 ```sh
-ps -u mo -o pid= | xargs -I{} readlink -f /proc/{}/exe 2>/dev/null |
-  sort | uniq -c
+find ~ -maxdepth 4 -name .ruby-version -not -path "*/node_modules/*" \
+  -exec sh -c 'echo "$(tr -d "[:space:]" < "$1")  $1"' _ {} \;
 ```
 
-A version missing from that output is serving nothing.
+The gems are the bulk of the space used by a version of Ruby, and they
+normally do not sit inside the Ruby tree.  So removing a version of
+Rubyinvolves both deleting the directory containing the executable and
+the gems.
 
 ### Remove it
 
-Keep the pinned version, and the one before it as the rollback path
-until the new pin has served a few days. Older ones go:
+Keep the new version, and the one before it as the rollback path until
+there is confidence in the new version.  On production the ruby builds
+are stored in `/opt/rubies/ruby-<version>` and the gem are in
+`/home/mo/.gem/ruby/<version>`.  It requires root level permissions to
+fully delete a Ruby version.
 
 ```sh
 sudo rm -rf /opt/rubies/ruby-<version> /home/mo/.gem/ruby/<version>
@@ -164,14 +157,6 @@ on a workstation:
 
 ```sh
 rm -rf ~/.rubies/ruby-<version> ~/.gem/ruby/<version>
-```
-
-A version is safe to drop locally once no project pins it. This lists
-every pin, so anything not named is unreferenced:
-
-```sh
-find ~/src -maxdepth 3 -name .ruby-version -not -path "*/node_modules/*" \
-  -exec sh -c 'echo "$(tr -d "[:space:]" < "$1")  $1"' _ {} \;
 ```
 
 `ruby-install` also leaves the unpacked source and its tarball in
@@ -227,9 +212,3 @@ The `Gemfile` declares `ruby(File.read(".ruby-version").strip)`, so
 this says the active Ruby and the pin disagree. Activate the pinned
 version rather than editing the pin, unless moving the pin is the point
 of what you are doing.
-
-## Ruby 3.3 to 3.4
-
-The Xcode and trilogy compilation failure that drove that upgrade, and
-the language changes that came with 3.4, are in
-[issue #4072](https://github.com/MushroomObserver/mushroom-observer/issues/4072).
