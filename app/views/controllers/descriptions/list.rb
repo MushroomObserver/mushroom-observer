@@ -80,8 +80,8 @@ module Views::Controllers::Descriptions
     end
 
     def render_link(desc)
-      a(href: url_for(desc.show_link_args),
-        class: "description_link_#{desc.id}") do
+      Link(type: :object, object: desc, name: description_title(desc),
+           class: "description_link_#{desc.id}") do
         trusted_html(description_title(desc))
       end
     end
