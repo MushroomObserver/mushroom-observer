@@ -45,16 +45,16 @@ module Views::Controllers::CollectionNumbers
 
     def render_format_name_link(collection_number)
       i do
-        a(href: collection_number_path(collection_number)) do
-          trusted_html(collection_number.format_name.t)
-        end
+        Link(type: :object, object: collection_number,
+             name: collection_number.format_name.t)
       end
     end
 
     def render_observation_links(collection_number)
       collection_number.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: permanent_observation_path(obs)) do
+        Link(type: :get, name: obs.unique_format_name.t,
+             target: permanent_observation_path(obs)) do
           trusted_html(obs.unique_format_name.t)
         end
       end

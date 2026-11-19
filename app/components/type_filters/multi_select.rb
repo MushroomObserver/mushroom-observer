@@ -221,9 +221,8 @@ module Components::TypeFilters::MultiSelect
     return plain(label_text) if @types == ["all"]
 
     link = activity_logs_path(q: query_params_with_types(["all"]))
-    a(href: link, title: :rss_all_help.t, class: "filter-only") do
-      label_text
-    end
+    Link(type: :get, name: label_text, target: link,
+         title: :rss_all_help.t, class: "filter-only")
   end
 
   # Individual type filter - returns label or link
@@ -232,9 +231,8 @@ module Components::TypeFilters::MultiSelect
     return plain(label_text) if @types == [type]
 
     link = activity_logs_path(q: query_params_with_types([type]))
-    a(href: link,
-      title: :rss_one_help.t(type: type.to_sym),
-      class: "filter-only") { label_text }
+    Link(type: :get, name: label_text, target: link,
+         title: :rss_one_help.t(type: type.to_sym), class: "filter-only")
   end
 
   def type_checked?(type)

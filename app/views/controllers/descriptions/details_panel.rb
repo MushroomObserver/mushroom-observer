@@ -52,9 +52,7 @@ module Views::Controllers::Descriptions
     def render_parent_row
       parent = @description.parent
       trusted_html(append_colon(parent.type_tag.ti))
-      a(href: url_for(parent.show_link_args)) do
-        trusted_html(parent.format_name.t)
-      end
+      Link(type: :object, object: parent, name: parent.format_name.t)
     end
 
     # Else branch (`:private.l`) is unreachable — the controller

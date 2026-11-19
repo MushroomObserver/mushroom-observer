@@ -24,7 +24,8 @@ module Views::Controllers::Admin::ExcludedInatUsers
     private
 
     def render_login(entry)
-      a(href: "#{INAT_PEOPLE_URL}#{entry.inat_login}") { entry.inat_login }
+      Link(type: :get, name: entry.inat_login,
+           target: "#{INAT_PEOPLE_URL}#{entry.inat_login}")
       return unless entry.inat_user_id
 
       whitespace

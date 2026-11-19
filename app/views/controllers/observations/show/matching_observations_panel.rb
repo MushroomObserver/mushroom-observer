@@ -72,15 +72,20 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     icon_types = member_status_icon_types(member, @occurrence)
     gap_class = "icon-text-gap" if icon_types.any?
     if link
-      a(href: permanent_observation_path(member.id)) do
-        render_status_icons(icon_types)
-        span(class: gap_class) do
-          trusted_html(member.format_name(default_viewer).t)
-        end
-      end
+      render_member_link(member, icon_types, gap_class)
     else
       render_status_icons(icon_types)
       render_current_observation_name(member, gap_class)
+    end
+  end
+
+  def render_member_link(member, icon_types, gap_class)
+    Link(type: :get, name: member.format_name(default_viewer).t,
+         target: permanent_observation_path(member.id)) do
+      render_status_icons(icon_types)
+      span(class: gap_class) do
+        trusted_html(member.format_name(default_viewer).t)
+      end
     end
   end
 

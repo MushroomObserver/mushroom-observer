@@ -309,9 +309,8 @@ module Views::Controllers::FieldSlips
 
     def render_field_slip_link(field_slip)
       small do
-        a(href: field_slip_path(field_slip)) do
-          "Field Slip: #{field_slip.code}"
-        end
+        Link(type: :object, object: field_slip,
+             name: "Field Slip: #{field_slip.code}")
       end
     end
   end

@@ -63,9 +63,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
              has_sibling_records: sibling_has?(:collection_numbers)
            ))
     render_sibling_records(:collection_numbers) do |cn, sib|
-      a(href: collection_number_path(cn.id)) do
-        trusted_html(cn.format_name)
-      end
+      Link(type: :object, object: cn, name: cn.format_name)
       whitespace
       sibling_attribution(sib)
     end
@@ -87,7 +85,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel < Views::Base
              has_sibling_records: sibling_has?(:sequences)
            ))
     render_sibling_records(:sequences) do |seq, sib|
-      a(href: sequence_path(seq.id)) { trusted_html(seq.format_name) }
+      Link(type: :object, object: seq, name: seq.format_name)
       render_sibling_sequence_archive(seq) if seq.deposit?
       whitespace
       sibling_attribution(sib)

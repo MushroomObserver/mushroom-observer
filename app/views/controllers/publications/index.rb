@@ -45,7 +45,7 @@ module Views::Controllers::Publications
       ContentPadded do
         trusted_html(:publication_index_intro.tp)
         trusted_html(:publication_citation.tp)
-        a(href: INTRO_CITATION_URL) { plain(INTRO_CITATION_TEXT) }
+        Link(type: :get, name: INTRO_CITATION_TEXT, target: INTRO_CITATION_URL)
       end
     end
 

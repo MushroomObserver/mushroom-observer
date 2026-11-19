@@ -64,6 +64,9 @@ module Views::Layouts
     def mobile_header_html
       capture do
         div(class: class_names(Components::Column.mobile_only_classes)) do
+          # A disabled placeholder header row, not a navigational
+          # link -- href="#" is inert.
+          # rubocop:disable-next MO/NoRawLinkOrButtonTo
           a(href: "#", disabled: true, class: "opacity-75") do
             append_colon(:sort_by_header.l)
           end

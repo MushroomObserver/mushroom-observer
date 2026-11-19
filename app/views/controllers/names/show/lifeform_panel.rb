@@ -42,9 +42,8 @@ class Views::Controllers::Names::Show::LifeformPanel < Views::Base
 
   def render_propagate_link
     p do
-      a(
-        href: form_to_propagate_lifeform_of_name_path(@name.id)
-      ) { plain(:show_name_propagate_lifeform.t) }
+      Link(type: :get, name: :show_name_propagate_lifeform.t,
+           target: form_to_propagate_lifeform_of_name_path(@name.id))
     end
   end
 end

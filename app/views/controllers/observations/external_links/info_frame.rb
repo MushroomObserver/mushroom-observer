@@ -118,9 +118,8 @@ module Views::Controllers::Observations::ExternalLinks
     def sibling_attribution(sibling)
       small(class: "text-muted") do
         plain("(")
-        a(href: permanent_observation_path(sibling.id)) do
-          plain("MO #{sibling.id}")
-        end
+        Link(type: :get, name: "MO #{sibling.id}",
+             target: permanent_observation_path(sibling.id))
         plain(")")
       end
     end

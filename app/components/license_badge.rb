@@ -9,7 +9,8 @@ class Components::LicenseBadge < Components::Base
 
   def view_template
     div(id: "license") do
-      a(href: @license.url, rel: "license") do
+      Link(type: :get, name: @license.display_name,
+           target: @license.url, rel: "license") do
         img(src: @license.badge_url,
             alt: @license.display_name,
             class: "border-none")

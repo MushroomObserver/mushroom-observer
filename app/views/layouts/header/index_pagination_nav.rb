@@ -99,7 +99,7 @@ module Views::Layouts
         :of.l
       end
       render(Components::Navbar::Text.new(class: "mx-0")) do
-        a(href: max_url) { max_page.to_s }
+        Link(type: :get, name: max_page.to_s, target: max_url)
       end
     end
 

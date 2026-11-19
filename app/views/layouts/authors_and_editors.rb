@@ -59,7 +59,7 @@ module Views::Layouts
            :show_description_author_request]
         end
       whitespace
-      a(href: href) { plain("(#{label.t})") }
+      Link(type: :get, name: "(#{label.t})", target: href)
     end
 
     # Renders authors and editors for non-description objects.

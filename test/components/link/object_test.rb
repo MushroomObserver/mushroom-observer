@@ -25,6 +25,25 @@ class ObjectLinkTest < ComponentTestCase
     assert_equal("", render_object(object: nil))
   end
 
+  def test_pass_through_attributes_merge_with_identifier_class
+    project = projects(:bolete_project)
+    html = render_object(object: project, id: "custom_id",
+                         data: { tooltip_target: "tip" })
+
+    assert_html(html, "a.project_link_#{project.id}#custom_id" \
+                       "[data-tooltip-target='tip']")
+  end
+
+  def test_block_content_overrides_default_label
+    project = projects(:bolete_project)
+    html = render(Components::Link::Object.new(object: project)) do
+      view_context.tag.span("Custom", class: "custom-content")
+    end
+
+    assert_html(html, "a.project_link_#{project.id} .custom-content",
+                text: "Custom")
+  end
+
   private
 
   def render_object(**)

@@ -156,9 +156,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   end
 
   def render_name_link(naming)
-    a(href: url_for(name_path(id: naming.name))) do
-      trusted_html(naming.display_name_brief_authors(@user).t.small_author)
-    end
+    Link(type: :object, object: naming.name,
+         name: naming.display_name_brief_authors(@user).t.small_author)
   end
 
   def render_mod_links(naming)
@@ -305,9 +304,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
     div(class: "mt-2") do
       small(class: "text-muted") do
         plain("From ")
-        a(href: url_for(permanent_observation_path(obs.id))) do
-          plain("MO #{obs.id}")
-        end
+        Link(type: :get, name: "MO #{obs.id}",
+             target: permanent_observation_path(obs.id))
         plain(":")
       end
     end

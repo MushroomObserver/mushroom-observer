@@ -41,7 +41,8 @@ module Views::Controllers::Projects
 
     def render_title_row(project)
       div(class: "d-flex align-items-center") do
-        a(href: project_path(project.id)) do
+        Link(type: :get, name: project.title.t,
+             target: project_path(project.id)) do
           span(class: "h4") { trusted_html(project.title.t) }
         end
         if project.open_membership

@@ -70,7 +70,7 @@ class Views::Layouts::Sidebar < Views::Base
   end
 
   def render_logo
-    a(id: "logo_link", href: logo_href) do
+    Link(type: :get, name: "", target: logo_href, id: "logo_link") do
       img(
         class: "logo-trim img-responsive py-3",
         alt: "Mushroom Observer Logo",
