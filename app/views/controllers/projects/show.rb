@@ -66,9 +66,8 @@ module Views::Controllers::Projects
     def render_draft_list
       div(class: "ml-3") do
         @drafts.each do |draft|
-          a(href: name_description_path(draft.id)) do
-            trusted_html(draft.name&.display_name(current_user)&.t)
-          end
+          Link(type: :object, object: draft,
+               name: draft.name&.display_name(current_user)&.t)
           plain(" (")
           Link(type: :user, user: draft.user)
           plain(")")

@@ -126,9 +126,8 @@ module Views::Controllers::Projects
       div(class: location_classes) do
         b do
           if current_user
-            a(href: location_path(@project.location.id)) do
-              @project.place_name(current_user)
-            end
+            Link(type: :object, object: @project.location,
+                 name: @project.place_name(current_user))
           else
             plain(@project.place_name(nil))
           end
