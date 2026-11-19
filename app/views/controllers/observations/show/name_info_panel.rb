@@ -74,8 +74,8 @@ class Views::Controllers::Observations::Show::NameInfoPanel < Views::Base
         Link(type: :external, tab: tab)
       else
         content, path, opts = tab.to_a
-        a(href: url_for(path),
-          class: opts[:class]) { trusted_html(content) }
+        Link(type: :get, name: content, target: url_for(path),
+             class: opts[:class]) { trusted_html(content) }
       end
     end
   end
