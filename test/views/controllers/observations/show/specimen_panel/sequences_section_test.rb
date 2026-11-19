@@ -83,6 +83,19 @@ class Views::Controllers::Observations::Show::SpecimenPanel
                             "button[data-controller='clipboard']")
     end
 
+    def test_archive_link_opens_in_new_tab
+      obs = observations(:genbanked_obs)
+      sequence = sequences(:deposited_sequence)
+      html = render(panel_with(obs))
+
+      assert_html(
+        html,
+        "#sequence_#{sequence.id} " \
+        "a[href='#{sequence.accession_url}']" \
+        "[target='_blank'][rel='noopener noreferrer']"
+      )
+    end
+
     private
 
     def panel_with(obs, user = @user)
