@@ -1,0 +1,5 @@
+|{white-space:nowrap}. 2026-11-19 | Fix the iNaturalist links on the import confirmation page | "PR#5744":https://github.com/MushroomObserver/mushroom-observer/pull/5744 |
+|{white-space:nowrap}. 2026-11-18 | Only project admins can add or edit project aliases | "PR#5731":https://github.com/MushroomObserver/mushroom-observer/pull/5731 |
+|{white-space:nowrap}. 2026-11-18 | Show Comments from matching Observations | "PR#5719":https://github.com/MushroomObserver/mushroom-observer/pull/5719 |
+|{white-space:nowrap}. 2026-11-17 | Redesign Project and Species List listings as tables | "PR#5725":https://github.com/MushroomObserver/mushroom-observer/pull/5725 |
+|{white-space:nowrap}. 2026-11-16 | Fix missing pagination on image-reuse pages | "PR#5717":https://github.com/MushroomObserver/mushroom-observer/pull/5717 |

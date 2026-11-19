@@ -17,11 +17,7 @@ module Views::Controllers::FieldSlips
     prop :notice, _Nilable(String), default: nil
 
     def view_template
-      add_project_banner(@project) if @project
-      add_index_title(@query)
-      add_context_nav(Tab::FieldSlip::IndexActions.new)
-      add_pagination(@pagination_data)
-      container_class(:wide)
+      render_page_chrome
 
       render_notice
       render_project_or_filter_section
@@ -29,6 +25,14 @@ module Views::Controllers::FieldSlips
     end
 
     private
+
+    def render_page_chrome
+      add_project_banner(@project) if @project
+      add_index_title(@query)
+      add_context_nav(Tab::FieldSlip::IndexActions.new)
+      add_pagination(@pagination_data)
+      container_class(:wide)
+    end
 
     def render_notice
       return unless @notice
@@ -53,18 +57,22 @@ module Views::Controllers::FieldSlips
     end
 
     def render_existing_prefix_block
-      b { trusted_html(append_colon(:show_project_field_slip_prefix.t)) }
-      plain(@project.field_slip_prefix.to_s)
-      whitespace
-      return unless @project.member?(current_user)
+      div(class: "d-flex align-items-center") do
+        h5(class: "my-0 mr-4") do
+          b { trusted_html(append_colon(:show_project_field_slip_prefix.t)) }
+          plain(@project.field_slip_prefix.to_s)
+        end
+        render_pdf_button if @project.member?(current_user)
+      end
+    end
 
+    def render_pdf_button
       Button(
         type: :get,
         name: :show_project_field_slip_create.t,
         target: new_project_field_slip_path(
           project_id: @project.id
-        ),
-        class: "ml-3"
+        )
       )
     end
 

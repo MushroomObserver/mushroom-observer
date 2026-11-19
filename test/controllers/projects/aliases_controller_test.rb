@@ -54,10 +54,62 @@ module Projects
       assert_not_nil(assigns(:project_alias))
     end
 
+    def test_new_denied_for_non_admin
+      login("dick")
+      get(:new, params: { project_id: @project.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_new_denied_for_member_who_is_not_admin
+      login("katrina")
+      get(:new, params: { project_id: @project.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_create_denied_for_non_admin
+      login("dick")
+      assert_no_difference("ProjectAlias.count") do
+        post(:create, params: {
+               project_id: @project.id,
+               project_alias: {
+                 name: "Hijacked",
+                 project_id: @project.id,
+                 target_type: "User",
+                 target_id: users(:rolf).id
+               }
+             })
+      end
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_edit_allowed_in_admin_mode_for_non_admin
+      make_admin("dick")
+      get(:edit, params: { project_id: @project.id, id: @project_alias.id })
+      assert_response(:success)
+      assert_equal(@project_alias, assigns(:project_alias))
+    end
+
     def test_edit_displays_form_to_edit_project_alias
       get(:edit, params: { project_id: @project.id, id: @project_alias.id })
       assert_response(:success)
       assert_equal(@project_alias, assigns(:project_alias))
+    end
+
+    def test_edit_denied_for_non_admin
+      login("dick")
+      get(:edit, params: { project_id: @project.id, id: @project_alias.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_edit_denied_for_member_who_is_not_admin
+      login("katrina")
+      get(:edit, params: { project_id: @project.id, id: @project_alias.id })
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
     end
 
     def test_edit_can_use_turbo_to_edit_project_alias
@@ -140,6 +192,31 @@ module Projects
       assert_flash(:project_alias_no_match, target_type: "User", term:)
     end
 
+    # Regression: project_id must come from the authorized top-level
+    # route param, not the nested project_alias[project_id] -- a
+    # mismatched nested value used to let the alias get created under
+    # a project the user isn't an admin of.
+    def test_create_ignores_mismatched_nested_project_id
+      other_project = projects(:bolete_project)
+      assert_not(other_project.is_admin?(@user))
+
+      assert_difference("ProjectAlias.count") do
+        post(:create, params: {
+               project_id: @project.id,
+               project_alias: {
+                 name: "RS3",
+                 project_id: other_project.id,
+                 target_type: "User",
+                 target_id: users(:rolf).id
+               }
+             })
+      end
+
+      created = ProjectAlias.find_by(name: "RS3")
+      assert_not_nil(created, "Cannot find ProjectAlias")
+      assert_equal(@project.id, created.project_id)
+    end
+
     def test_create_renders_new_template_with_invalid_params
       project_id = @project.id
       post(:create, params: {
@@ -165,6 +242,26 @@ module Projects
       assert_equal("Updated Name", @project_alias.reload.name)
     end
 
+    # Regression: project_id isn't a permitted update param, so a
+    # request can't reassign an alias to a different project --
+    # must_be_admin! only authorizes against the alias's current
+    # project, not whatever project_id the request submits.
+    def test_update_ignores_project_id_reassignment_attempt
+      other_project = projects(:bolete_project)
+      project_id = @project.id
+      patch(:update, params: {
+              project_id:,
+              id: @project_alias.id,
+              project_alias: { name: "Updated Name",
+                               project_id: other_project.id }
+            })
+
+      assert_redirected_to(project_aliases_path(project_id:))
+      @project_alias.reload
+      assert_equal("Updated Name", @project_alias.name)
+      assert_equal(@project.id, @project_alias.project_id)
+    end
+
     def test_update_renders_edit_template_with_invalid_params
       project_id = @project.id
       patch(:update, params: {
@@ -179,6 +276,34 @@ module Projects
       # renders nothing at all without a project) silently disappeared.
       assert_select("#project_tabs")
       assert_select("form[data-turbo='true']")
+    end
+
+    def test_update_denied_for_non_admin
+      login("dick")
+      project_id = @project.id
+      patch(:update, params: {
+              project_id:,
+              id: @project_alias.id,
+              project_alias: { name: "Hijacked", project_id: }
+            })
+
+      assert_redirected_to(project_aliases_path(project_id:))
+      assert_flash(:project_alias_must_be_admin)
+      assert_not_equal("Hijacked", @project_alias.reload.name)
+    end
+
+    def test_update_denied_for_member_who_is_not_admin
+      login("katrina")
+      project_id = @project.id
+      patch(:update, params: {
+              project_id:,
+              id: @project_alias.id,
+              project_alias: { name: "Hijacked", project_id: }
+            })
+
+      assert_redirected_to(project_aliases_path(project_id:))
+      assert_flash(:project_alias_must_be_admin)
+      assert_not_equal("Hijacked", @project_alias.reload.name)
     end
 
     def test_update_can_use_turbo_to_modify_project_alias
@@ -207,6 +332,28 @@ module Projects
             }, format: :turbo_stream)
 
       assert_response(:success)
+    end
+
+    def test_destroy_denied_for_non_admin
+      login("dick")
+      assert_no_difference("ProjectAlias.count") do
+        delete(:destroy,
+               params: { project_id: @project.id, id: @project_alias.id })
+      end
+
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
+    end
+
+    def test_destroy_denied_for_member_who_is_not_admin
+      login("katrina")
+      assert_no_difference("ProjectAlias.count") do
+        delete(:destroy,
+               params: { project_id: @project.id, id: @project_alias.id })
+      end
+
+      assert_redirected_to(project_aliases_path(project_id: @project.id))
+      assert_flash(:project_alias_must_be_admin)
     end
 
     def test_destroy_removes_the_project_alias

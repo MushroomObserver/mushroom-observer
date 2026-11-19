@@ -541,6 +541,22 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
   end
 
+  # Modal edit from the herbarium_records index page (back: "index")
+  # has no observation to update a sub-panel for -- @back_object stays
+  # nil, so the turbo_stream submit falls through to a plain redirect
+  # back to the index, same as destroy's fallback.
+  def test_update_herbarium_record_turbo_from_index
+    herbarium_record_setup => { params:, nybg_rec:, nybg_user:, rolf_herb: }
+
+    post(:update,
+         params: params.deep_merge(herbarium_record: { modal: "true" },
+                                   back: "index"),
+         format: :turbo_stream)
+
+    assert_redirected_to(herbarium_records_path(id: nybg_rec.id))
+    assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
+  end
+
   def test_update_herbarium_record_no_specimen
     login("rolf")
     nybg = herbarium_records(:coprinus_comatus_nybg_spec)

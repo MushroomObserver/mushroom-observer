@@ -12,14 +12,23 @@ module Views::Controllers::Projects::Aliases
       container_class(:wide)
 
       ContentPadded do
-        Button(
-          type: :modal, name: :project_alias_new.t,
-          target: new_project_alias_path(project_id: @project.id),
-          modal_id: "project_alias"
-        )
+        render_rubric
         Help(content: :project_aliases_help.t, well: false)
       end
       render(Table.new(project_aliases: @project_aliases))
+    end
+
+    private
+
+    def render_rubric
+      div(class: "d-flex align-items-center mb-2") do
+        h4(class: "font-weight-bold mr-3 my-0") { plain(:aliases.ti) }
+        Button(
+          type: :add,
+          target: new_project_alias_path(project_id: @project.id),
+          modal_id: "project_alias"
+        )
+      end
     end
   end
 end
