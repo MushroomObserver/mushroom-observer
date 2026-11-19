@@ -53,7 +53,7 @@ This work establishes a foundation for future Bootstrap migration and ensures co
 ### Phase 5: Bootstrap 4 Theme Mapping
 **Issue**: [#3618](https://github.com/MushroomObserver/mushroom-observer/issues/3618)
 
-- ✅ Created `mo/_map_theme_to_bootstrap4.scss`
+- ✅ Created `mo/_map_theme_vars_to_bootstrap_vars.scss`
 - ✅ Complete mapping of 121 MO variables → BS4 variables
 - ✅ Zero hardcoded values
 - ✅ Full theme compatibility preserved
@@ -133,7 +133,7 @@ All themes valid: ✓
 
 ### Created
 - `script/validate_themes.rb` - Theme validation script
-- `app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss` - BS4 mapping (for future use)
+- `app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss` - BS4 mapping (for future use)
 - `doc/BOOTSTRAP4_THEME_MAPPING.md` - Mapping documentation
 - `doc/BOOTSTRAP4_BREAKING_CHANGES.md` - BS4 reference (for future use)
 - `doc/MO Theme System Analysis.md` - Analysis and strategy
@@ -165,7 +165,7 @@ Theme standardization is complete. The next phase of work focuses on:
 
 2. **Phase 3 (Weeks 8-11)**: Bootstrap 4 preparation
    - Create BS4 compatibility in Phlex components
-   - Use `mo/_map_theme_to_bootstrap4.scss` mapping
+   - Use `mo/_map_theme_vars_to_bootstrap_vars.scss` mapping
    - Begin BS4 testing
 
 See: [Bootstrap Upgrade Plan for MO](./Bootstrap%20Upgrade%20Plan%20for%20MO.md)

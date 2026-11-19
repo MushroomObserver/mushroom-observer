@@ -6,7 +6,7 @@ This document describes how Mushroom Observer's standardized theme variables map
 
 ## File Location
 
-`app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss`
+`app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss`
 
 ## Purpose
 
@@ -24,7 +24,7 @@ For the mapping to work correctly, imports must follow this order:
 // In theme files (e.g., Agaricus.scss)
 @import "variables/defaults";
 @import "variables/agaricus";
-@import "mo/map_theme_to_bootstrap4";  // Translation layer
+@import "mo/map_theme_vars_to_bootstrap_vars";  // Translation layer
 @import "bootstrap";                    // Bootstrap 4 framework
 @import "mo/elements";                  // MO custom styles
 ```
@@ -219,7 +219,7 @@ These are MO-specific components not part of Bootstrap:
 ### Phase 3: Bootstrap 4 Migration
 1. Update main stylesheet import order
 2. Replace `bootstrap-sprockets` with Bootstrap 4
-3. Replace `mo/map_theme_vars_to_bootstrap_vars` with `mo/map_theme_to_bootstrap4`
+3. Swap `mo/map_theme_vars_to_bootstrap_vars`'s BS3 content for the BS4 mapping
 4. Update component usage for BS4 (panels → cards, etc.)
 5. Test all themes
 

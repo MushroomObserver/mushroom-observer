@@ -55,7 +55,8 @@
 }
 
 // $success is too light for white text/icons on a solid button
-// background -- $btn-success-bg (mo/_map_theme_to_bootstrap4.scss)
+// background -- $btn-success-bg
+// (mo/_map_theme_vars_to_bootstrap_vars.scss)
 // is a darker green, keeping $success itself unchanged for alerts,
 // badges, and form-feedback text.
 .btn-success {
@@ -337,8 +338,8 @@ form:has(> .inline-icon-link) {
 // the four levels Components::Alert supports, instead of Bootstrap's
 // default bg/border/text mix -- a mix toward white/black doesn't
 // track a dark theme's page background, and at $alert-bg-level: 0
-// (mo/_map_theme_to_bootstrap4.scss) bg/border/text were all the
-// same color.
+// (mo/_map_theme_vars_to_bootstrap_vars.scss) bg/border/text were
+// all the same color.
 $alert-variant-colors: (
   success: $success,
   info:    $info,

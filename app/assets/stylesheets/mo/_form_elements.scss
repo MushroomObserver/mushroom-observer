@@ -80,7 +80,7 @@ $btn-active-variants: (
   secondary: ($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, $BUTTON_BORDER_COLOR),
   primary: (color-yiq($primary), $primary, darken($primary, 5%)),
   // .btn-success uses $btn-success-bg (a darker green), not $success
-  // -- see mo/_map_theme_to_bootstrap4.scss.
+  // -- see mo/_map_theme_vars_to_bootstrap_vars.scss.
   success: (color-yiq($btn-success-bg), $btn-success-bg,
             darken($btn-success-bg, 5%)),
   info: (color-yiq($info), $info, darken($info, 5%)),

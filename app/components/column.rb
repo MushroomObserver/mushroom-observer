@@ -47,7 +47,7 @@
 # and `show_at:`/`hide_at:` (visibility, via the `.d-*` bridge classes
 # in `_utilities.scss`) share the same breakpoint names and pixel
 # thresholds, both keyed off `$grid-breakpoints` in
-# `mo/map_theme_to_bootstrap4.scss` (sm=576px/md=768px/lg=992px, xl
+# `mo/map_theme_vars_to_bootstrap_vars.scss` (sm=576px/md=768px/lg=992px, xl
 # widened to 1320px). Keep both in sync with that map -- a mismatch
 # would make `sm:`/`show_at: :sm` mean two different widths in the
 # same `Column` call.
