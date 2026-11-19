@@ -107,7 +107,7 @@ module Views::Controllers::Observations::Namings
       return unless has_sibling_reasons
 
       p(class: "text-center text-muted mt-3") do
-        a(href: occurrence_path(occ)) do
+        Link(type: :object, object: occ) do
           plain(:naming_see_matching_observations_reasons.l)
         end
       end

@@ -56,17 +56,14 @@ module Views::Controllers::Versions
 
     def render_link_cell(ver)
       if ver == @versions.last
-        a(href: url_for(@obj.show_link_args),
-          class: "latest_version_link") do
-          emit_version_link_text(ver)
-        end
+        Link(type: :object, object: @obj,
+             class: "latest_version_link") { emit_version_link_text(ver) }
       else
-        a(href: url_for(controller: "#{@obj.show_controller}/versions",
-                        action: :show, id: @obj.id,
-                        version: ver.version),
-          class: "initial_version_link") do
-          emit_version_link_text(ver)
-        end
+        Link(type: :get, name: "#{:version.ti} #{ver.version}",
+             target: url_for(controller: "#{@obj.show_controller}/versions",
+                             action: :show, id: @obj.id,
+                             version: ver.version),
+             class: "initial_version_link") { emit_version_link_text(ver) }
       end
     end
 

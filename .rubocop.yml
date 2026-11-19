@@ -390,7 +390,7 @@ MO/NoRawLinkOrButtonTo:
   Description: >-
     Phlex views/components must use Components::Link/Components::Button
     (Link(...)/Button(...) Kit syntax) instead of calling link_to/
-    button_to directly -- see
+    button_to/a(...)/button(...) directly -- see
     lib/rubocop/cop/mo/no_raw_link_or_button_to.rb.
   Enabled: true
   Include:

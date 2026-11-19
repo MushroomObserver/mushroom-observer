@@ -63,22 +63,18 @@ module Views::Controllers::HerbariumRecords
     def render_herbarium_link(rec)
       # `herbarium_records.herbarium_id` is `NOT NULL` at the schema
       # level, so `rec.herbarium` is always present here.
-      a(href: herbarium_path(rec.herbarium.id)) do
-        trusted_html(rec.herbarium.name.t)
-      end
+      Link(type: :object, object: rec.herbarium, name: rec.herbarium.name.t)
     end
 
     def render_record_link(rec)
-      a(href: herbarium_record_path(id: rec.id),
-        class: "herbarium_record_link_#{rec.id}") do
-        trusted_html(rec.herbarium_label.t)
-      end
+      Link(type: :object, object: rec, name: rec.herbarium_label.t)
     end
 
     def render_observation_links(rec)
       rec.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: permanent_observation_path(obs.id)) do
+        Link(type: :get, name: viewer_aware_unique_format_name(obs).t,
+             target: permanent_observation_path(obs.id)) do
           trusted_html(viewer_aware_unique_format_name(obs).t)
         end
       end

@@ -71,12 +71,10 @@ module Views::Controllers::Projects::Members
     def render_edit_link(user)
       return unless @project.is_admin?(@user)
 
-      a(href: edit_project_member_path(
-        project_id: @project.id,
-        candidate: user.id
-      )) do
-        plain(:change_member_status_change_status.t)
-      end
+      Link(type: :get, name: :change_member_status_change_status.t,
+           target: edit_project_member_path(
+             project_id: @project.id, candidate: user.id
+           ))
     end
   end
 end

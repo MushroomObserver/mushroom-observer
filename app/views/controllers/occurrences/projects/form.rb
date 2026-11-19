@@ -101,7 +101,7 @@ module Views::Controllers::Occurrences::Projects
           li(class: "d-flex align-items-center mb-1") do
             Badge(variant: :id, object: project, size: :md,
                   extra_class: "mr-3")
-            a(href: project_path(project)) { plain(project.title) }
+            Link(type: :object, object: project, name: project.title)
           end
         end
       end

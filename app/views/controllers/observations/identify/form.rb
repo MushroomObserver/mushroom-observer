@@ -125,6 +125,10 @@ module Views::Controllers::Observations::Identify
 
     def render_dropdown_item(index)
       li(class: "dropdown-item") do
+        # A virtual-list row, not a navigational link -- href="#" is
+        # inert (the Stimulus click action calls :prevent), and the
+        # row is selected purely via the data-action wiring below.
+        # rubocop:disable-next MO/NoRawLinkOrButtonTo
         a(href: "#", data: {
             row: index, action: click_actions
           })

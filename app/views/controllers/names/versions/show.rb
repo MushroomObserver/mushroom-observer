@@ -114,12 +114,10 @@ module Views::Controllers::Names::Versions
       # returns the rendered Phlex tag as an
       # `ActiveSupport::SafeBuffer`, so the `<a>` markup survives
       # the i18n interpolation without any explicit html-safe
-      # annotation. `trusted_html` inside the block is the right
-      # marker for the translated link text.
+      # annotation.
       capture do
-        a(href: name_path(src[:name].id)) do
-          trusted_html(src[:name].display_name(@user).t)
-        end
+        Link(type: :object, object: src[:name],
+             name: src[:name].display_name(@user).t)
       end
     end
 
