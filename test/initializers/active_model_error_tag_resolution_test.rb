@@ -7,6 +7,14 @@ require("test_helper")
 # resolve through MO's mo.* i18n scope once a translation exists
 # there, and fall through to Rails' own resolution otherwise.
 class ActiveModelErrorTagResolutionTest < UnitTestCase
+  # See CacheStoreSelector -- the cache isn't rolled back with the DB.
+  def teardown
+    I18n.backend.backends.first.delete_translation(
+      :en, :active_model_error_tag_resolution_test_stub
+    )
+    super
+  end
+
   def test_symbol_raw_type_resolves_through_mo_translation_once_defined
     stub_tag = :active_model_error_tag_resolution_test_stub
     TranslationString.store_localizations(:en, { stub_tag => "Stubbed text" })
