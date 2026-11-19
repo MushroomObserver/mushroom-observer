@@ -1,5 +1,27 @@
 # Changelog
 
+## 2026-11-19 (deploy-2026-11-19-01-07)
+
+- Keep rank qualifiers like "group" outside `String#small_author`'s `<small>` ([PR5712](https://github.com/MushroomObserver/mushroom-observer/pull/5712), @nimmolo)
+- Add `add_title_with_name` for "Verb words [name]"-shaped page titles ([PR5713](https://github.com/MushroomObserver/mushroom-observer/pull/5713), @nimmolo)
+- Add `MO/NoUnscopedAssertText`; scope every `assert_text`/`assert_no_text` ([PR5714](https://github.com/MushroomObserver/mushroom-observer/pull/5714), @nimmolo)
+- Fix missing pagination on image-reuse pages (`add_pagination` not called) ([PR5717](https://github.com/MushroomObserver/mushroom-observer/pull/5717), @nimmolo)
+- Redesign Projects/SpeciesLists listings as tables, panel_wrap for `Components::Table` ([PR5725](https://github.com/MushroomObserver/mushroom-observer/pull/5725), @nimmolo)
+- Consolidate `CountBadge`/`IDBadge` into `Components::Badge` ([PR5727](https://github.com/MushroomObserver/mushroom-observer/pull/5727), @nimmolo)
+- Rubocop 1.92.3 ([PR5728](https://github.com/MushroomObserver/mushroom-observer/pull/5728), @JoeCohen)
+- Replace file-based I18n backend with Solid Cache + `DbFallback` (`#4807`) ([PR4811](https://github.com/MushroomObserver/mushroom-observer/pull/4811), @nimmolo)
+- Bump google-cloud-storage from 1.62.1 to 1.62.2 ([PR5732](https://github.com/MushroomObserver/mushroom-observer/pull/5732), @app/dependabot)
+- Bump cuprite from 0.20 to 0.20.1 ([PR5733](https://github.com/MushroomObserver/mushroom-observer/pull/5733), @app/dependabot)
+- Bump xmlrpc from 0.3.4 to 0.3.5 ([PR5735](https://github.com/MushroomObserver/mushroom-observer/pull/5735), @app/dependabot)
+- Bump puma from 8.0.2 to 8.1.0 ([PR5734](https://github.com/MushroomObserver/mushroom-observer/pull/5734), @app/dependabot)
+- `Components::Table#wrap_class` — add the prop, drop superfluous table margins ([PR5730](https://github.com/MushroomObserver/mushroom-observer/pull/5730), @nimmolo)
+- Consolidate `Components::Badge`, fold `Count`/`ID`/`SiblingMarker` into it ([PR5723](https://github.com/MushroomObserver/mushroom-observer/pull/5723), @nimmolo)
+- Show an occurrence's comments on every member, numbered by source ([PR5719](https://github.com/MushroomObserver/mushroom-observer/pull/5719), @mo-nathan)
+- Sweep remaining hand-rolled edit/destroy links to `InlineCRUDLinks` ([PR5731](https://github.com/MushroomObserver/mushroom-observer/pull/5731), @nimmolo)
+- Correct the `link` prop comments on `Components::Badge::SiblingMarker` ([PR5743](https://github.com/MushroomObserver/mushroom-observer/pull/5743), @mo-nathan)
+- Point the confirm page's links at a project's target taxa ([PR5744](https://github.com/MushroomObserver/mushroom-observer/pull/5744), @mo-nathan)
+- Upgrade to Ruby 3.4.13 ([PR5748](https://github.com/MushroomObserver/mushroom-observer/pull/5748), @mo-nathan)
+
 ## 2026-11-14 (deploy-2026-11-14-11-13)
 
 - Fix `ArgumentError` on a leading-zero 4-digit year in date search ([PR5707](https://github.com/MushroomObserver/mushroom-observer/pull/5707), @nimmolo)

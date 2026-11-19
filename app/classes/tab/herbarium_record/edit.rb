@@ -2,12 +2,15 @@
 
 # "Edit herbarium record" link. `back` controls the redirect target
 # after editing — `obs.id` to return to a specific observation,
-# `:show` to return to the herbarium_record show page (the default).
+# `:index` to return to the herbarium_records index (pass
+# `from_index: true`), `:show` to return to the herbarium_record
+# show page (the default when neither is given).
 class Tab::HerbariumRecord::Edit < Tab::Base
-  def initialize(herbarium_record:, observation: nil)
+  def initialize(herbarium_record:, observation: nil, from_index: false)
     super()
     @herbarium_record = herbarium_record
     @observation = observation
+    @from_index = from_index
   end
 
   def title
@@ -29,6 +32,9 @@ class Tab::HerbariumRecord::Edit < Tab::Base
   private
 
   def back
-    @observation&.id || :show
+    return @observation.id if @observation
+    return :index if @from_index
+
+    :show
   end
 end

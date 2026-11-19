@@ -5,7 +5,8 @@
 #
 #   Badge(variant: :id, object: @project, size: :sm)
 class Components::Badge < Components::Base
-  DISPATCH = { count: :Count, id: :ID }.freeze
+  DISPATCH = { count: :Count, id: :ID,
+               sibling_marker: :SiblingMarker }.freeze
 
   def self.new(**kwargs, &block)
     variant_sym = kwargs[:variant]&.to_sym

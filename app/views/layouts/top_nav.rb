@@ -175,21 +175,7 @@ class Views::Layouts::TopNav < Views::Base
   end
 
   def nav_create_button_options
-    full_label = nav_create_label
-    { type: :new,
-      target: url_for(controller: "/#{controller.controller_path}",
-                      action: :new),
-      name: :add.ti, show_label: :responsive,
-      variant: :success, size: :sm,
-      class: "mx-sm-3 top_nav_button new_object_button",
-      title: full_label,
-      aria: { label: full_label },
-      data: { tooltip_target: "tip", placement: :bottom } }
-  end
-
-  def nav_create_label
-    obj_name = controller.controller_model_name.underscore.to_sym.ti
-    [:new.ti, obj_name].safe_join(" ")
+    { type: :add, class: "top_nav_button" }
   end
 
   # RIGHT SIDE #############################################################

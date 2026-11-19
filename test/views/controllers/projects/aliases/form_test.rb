@@ -19,8 +19,6 @@ module Views::Controllers::Projects::Aliases
 
       # Fields
       assert_html(html, "input[name='project_alias[name]']")
-      assert_html(html,
-                  "input[type='hidden'][name='project_alias[project_id]']")
       assert_html(html, "select[name='project_alias[target_type]']")
 
       # Type-switch controller

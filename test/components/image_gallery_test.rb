@@ -246,6 +246,31 @@ class ImageGalleryTest < ComponentTestCase
     assert_no_html(html, ".carousel-caption .image-notes")
   end
 
+  # The badge on a thumbnail links to the member the photo hangs on,
+  # the way the one on a comment does, and fills so it reads over a
+  # photograph (#5718).
+  def test_thumbnail_markers_link_to_their_observation
+    image = @images.first
+    sibling_id = observations(:minimal_unknown_obs).id
+    markers = { image.id => { number: 2, observation_id: sibling_id } }
+
+    html = render_gallery(images: [image], markers: markers)
+
+    path = routes.permanent_observation_path(sibling_id)
+    assert_html(html, ".carousel-indicators a[href='#{path}'] " \
+                      ".carousel-thumbnail-marker", text: "2")
+    assert_html(html, ".carousel-thumbnail-marker.sibling-marker-solid")
+    assert_html(html, ".carousel-indicators " \
+                      "a[data-action='click->links#follow:stop']")
+  end
+
+  def test_no_thumbnail_markers_without_a_marker_map
+    html = render_gallery(images: [@images.first])
+
+    assert_no_html(html, ".carousel-thumbnail-marker",
+                   "One observation's photos need no numbers")
+  end
+
   private
 
   def render_gallery(images: @images, object: @obs, **)

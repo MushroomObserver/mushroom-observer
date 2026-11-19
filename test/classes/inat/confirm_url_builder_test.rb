@@ -34,17 +34,43 @@ class Inat
       assert_match(/user_id=testuser/, url)
     end
 
-    # Covers the comma-taxon_id branch in translate_api_to_ui_params (line 71):
-    # taxon_id with commas is replaced by iconic_taxa=Fungi,Protozoa.
-    def test_requested_obs_url_translates_comma_taxon_id
-      model = FormObject::InatImportConfirm.new(
-        inat_url: "#{SITE_URL}?taxon_id=47170,47686"
+    # MO asks the API for its two importable taxa by id; the UI says the
+    # same thing with the iconic-taxa boxes, which a reader of the page
+    # can see and change.
+    def test_requested_obs_url_translates_the_importable_pair
+      args = requested_link_args(
+        "taxon_id=#{Inat::Constants::IMPORTABLE_TAXON_IDS_ARG}"
       )
-      builder = build(model)
 
-      url = builder.requested_obs_url
-      assert_match(/iconic_taxa/, url)
-      assert_no_match(/taxon_id=47170/, url)
+      assert_equal(Inat::Constants::IMPORTABLE_ICONIC_TAXA_ARG,
+                   args["iconic_taxa"],
+                   "The importable pair reads as iconic taxa in the UI")
+      assert_nil(args["taxon_id"], "The API spelling means one id there")
+      assert_nil(args["taxon_ids"], "The pair needs no id list")
+    end
+
+    # A project searches for the taxa it tracks, which the UI reads from
+    # plural taxon_ids. Dropping the list for iconic_taxa searched every
+    # fungus in the project area and dates instead, so the links beside
+    # the counts disagreed with the counts (#5729).
+    def test_requested_obs_url_keeps_a_project_taxon_list
+      args = requested_link_args("taxon_id=48701,54134,118000&place_id=14")
+
+      assert_equal("48701,54134,118000", args["taxon_ids"],
+                   "The UI reads a taxon list from plural taxon_ids")
+      assert_nil(args["taxon_id"],
+                 "The API spelling means one id to the UI")
+      assert_nil(args["iconic_taxa"],
+                 "A project tracking named taxa does not want every fungus")
+    end
+
+    def test_expected_obs_url_keeps_a_project_taxon_list
+      args = expected_link_args("taxon_id=48701,54134,118000&place_id=14")
+
+      assert_equal("48701,54134,118000", args["taxon_ids"],
+                   "The expected-obs link keeps the project list too")
+      assert_nil(args["iconic_taxa"],
+                 "A taxon list is already a taxon filter")
     end
 
     # Regression (#4809): links on the confirm form must always point at
@@ -264,6 +290,16 @@ class Inat
 
     def build(model)
       Inat::ConfirmURLBuilder.new(model)
+    end
+
+    # The query args of the "requested" link for a URL import.
+    def requested_link_args(query, **)
+      model = FormObject::InatImportConfirm.new(
+        inat_url: "#{SITE_URL}?#{query}", **
+      )
+      url = build(model).requested_obs_url
+      assert_not_nil(url, "Requested link should be built")
+      Rack::Utils.parse_query(url.split("?", 2).last)
     end
 
     # The query args of the "expected" link for a URL import.

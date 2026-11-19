@@ -372,6 +372,8 @@
   admins: admins
   admin_group: admin group
   admin_groups: admin groups
+  alias: alias
+  aliases: aliases
   annotations: annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   author: author
@@ -1994,6 +1996,7 @@
   # admin/excluded_inat_users
   excluded_inat_users_title: Excluded iNat Users
   excluded_inat_users_help: "iNaturalist users without an MO account who have opted out of having their data included on MO. Imports bring in only the facts of observations they posted: no images and no notes. Someone with an MO account opts out on their profile instead."
+  excluded_inat_users_none_yet: No excluded iNaturalist users yet.
   excluded_inat_user_login: iNaturalist login
   excluded_inat_user_reason: Reason (optional)
   excluded_inat_user_added_by: Added
@@ -2780,6 +2783,7 @@
   show_observation_matching_observations: Matching Observations
   show_observation_occurrence_primary: Primary observation of this occurrence
   show_observation_reflection_read_only: Reflection of an imported source
+  show_observation_sibling_marker: From observation [id]
   show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   edit_occurrence_add_heading: Add Recently Viewed Observations
@@ -2811,6 +2815,7 @@
   project_alias_created: Project Alias was successfully created.
   project_alias_destroyed: Project Alias was successfully deleted.
   project_alias_edit: Edit Project Alias [name]
+  project_alias_must_be_admin: You must be a project admin to create, edit, or delete project aliases.
   project_alias_new: New Project Alias
   project_alias_type: Alias Type
   project_alias_updated: Project Alias was successfully updated.

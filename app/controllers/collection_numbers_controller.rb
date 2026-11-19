@@ -269,8 +269,12 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     flash_notice(:runtime_updated_at.t(type: :collection_number))
 
-    if modal_submission?(:collection_number)
-      # back_object should be the obs, sent via :back param from the link
+    # `@back_object` is only an Observation when the edit modal was
+    # opened from the obs show page (sub-panel) -- the index page's
+    # own modal edit has no obs to update, so it falls through to the
+    # redirect, same as destroy's turbo_stream fallback.
+    if modal_submission?(:collection_number) &&
+       @back_object.is_a?(Observation)
       @observation = @back_object
       render_collection_numbers_section_update
     else

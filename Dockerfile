@@ -8,7 +8,7 @@
 # RAILS_ENV=production and installs gems in deployment mode excluding
 # dev/test groups. Assets precompile at container start -- see
 # docker/entrypoint.production.sh.
-FROM ruby:3.4.9-bookworm AS base
+FROM ruby:3.4.13-bookworm AS base
 
 RUN apt-get update -qq && apt-get install -y --no-install-recommends \
       build-essential \

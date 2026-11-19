@@ -26,12 +26,12 @@ module Views::Controllers::Projects::Aliases
       render(::Components::Table.new(
                @project_aliases,
                variant: :striped, identifier: "project-members",
-               class: "mt-3", id: TABLE_ID
+               id: TABLE_ID
              )) do |t|
         t.column(:name.ti) { |a| plain(a.name) }
         t.column(:target_type.ti) { |a| plain(a.target_type) }
         t.column(:target.ti) { |a| render_target_cell(a) }
-        t.column(:actions.ti) { |a| render_actions_cell(a) }
+        t.column(:actions.ti, align: :center) { |a| render_actions_cell(a) }
       end
     end
 
@@ -50,23 +50,7 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_actions_cell(alias_)
-      Button(
-        type: :modal,
-        target: edit_project_alias_path(
-          project_id: alias_.project_id, id: alias_.id
-        ),
-        modal_id: "project_alias_#{alias_.id}",
-        name: :edit_object.t(type: :project_alias),
-        icon: :edit, variant: :strip
-      )
-      span(class: "mx-2")
-      Button(
-        type: :delete,
-        target: project_alias_path(
-          project_id: alias_.project_id, id: alias_.id
-        ),
-        variant: :strip
-      )
+      InlineCRUDLinks(target: alias_, user: current_user)
     end
   end
 end

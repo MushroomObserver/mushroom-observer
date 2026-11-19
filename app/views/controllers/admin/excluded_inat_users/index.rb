@@ -10,9 +10,22 @@ module Views::Controllers::Admin::ExcludedInatUsers
 
     def view_template
       add_page_title(:excluded_inat_users_title.l)
-      p { plain(:excluded_inat_users_help.l) }
-      render(Form.new(@excluded))
-      render(Table.new(entries: @entries, purges: @purges))
+      content_padding(:panels)
+      ContentPadded do
+        p { plain(:excluded_inat_users_help.l) }
+        render(Form.new(@excluded))
+      end
+      render_table
+    end
+
+    private
+
+    def render_table
+      if @entries.any?
+        render(Table.new(entries: @entries, purges: @purges))
+      else
+        ContentPadded { p { plain(:excluded_inat_users_none_yet.l) } }
+      end
     end
   end
 end
