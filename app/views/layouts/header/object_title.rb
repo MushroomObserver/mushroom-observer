@@ -60,9 +60,17 @@ module Views::Layouts
         render(::Views::Controllers::Observations::ConsensusNameLink.new(
                  observation: @object, user: @user
                ))
+      elsif @mode == :edit
+        render_object_show_link
       else
         trusted_html(model_page_title)
       end
+    end
+
+    # Edit mode only -- a show page linking to itself would be dead
+    # weight.
+    def render_object_show_link
+      Link(type: :object, object: @object, name: model_page_title)
     end
 
     def model_page_title

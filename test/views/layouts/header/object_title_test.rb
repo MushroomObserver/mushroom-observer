@@ -52,6 +52,17 @@ module Views::Layouts
       assert_html(html, "a[href='#{routes.name_path(id: obs.name.id)}']")
     end
 
+    def test_edit_mode_non_observation_links_to_show_page
+      herbarium = herbaria(:nybg_herbarium)
+
+      html = render_title(object: herbarium, mode: :edit)
+
+      assert_html(
+        html, "a[href='#{routes.herbarium_path(id: herbarium.id)}']",
+        text: Title.for(herbarium).page_title(@user)
+      )
+    end
+
     def test_owner_naming_renders_as_second_line_when_present
       obs = observations(:minimal_unknown_obs)
 
