@@ -90,7 +90,7 @@ end
 
 namespace :lang do
   desc "Check syntax of official export file, " \
-       "integrate changes into database."
+       "integrate changes into database, strip unused tags."
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file

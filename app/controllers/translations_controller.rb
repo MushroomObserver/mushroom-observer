@@ -254,8 +254,9 @@ class TranslationsController < ApplicationController
     @index = []
     @tags = tags
     @tags_used = {}
-    # Caller may pass an existing handle; method closes it at line 223.
-    # Always the official file -- process_template_line reads tag
+    # Caller may pass an existing handle to control its lifecycle;
+    # this method closes whichever handle it ends up using. Defaults
+    # to the official file -- process_template_line reads tag
     # names/comments (the structure), not a value.
     file_handle ||= File.open(Language.official.export_file, "r:utf-8")
     reset_everything
