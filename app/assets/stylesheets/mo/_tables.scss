@@ -26,6 +26,16 @@ thead tr {
   background-color: $list-group-disabled-bg;
 }
 
+// Components::Table#legend -- a full-width section-label row.
+// Bootstrap's `.table > tbody > tr > th` border rule has higher
+// specificity than a plain `.legend-row > th` -- match its selector
+// depth, adding the class, to win.
+.table > tbody > tr.legend-row > th {
+  border-top: none;
+  border-bottom: none;
+  background-color: $list-group-disabled-bg;
+}
+
 // Combine with `.table` on the same <table> element to cascade
 // vertical-align: middle onto every cell -- overrides Bootstrap 3's
 // `th, td { vertical-align: top }` default. `.align-middle`

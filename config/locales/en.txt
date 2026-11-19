@@ -2866,6 +2866,7 @@
   project_target_location_confirm_remove: Remove "[name]" from target locations?
   project_target_locations_summary: "Target locations: [total] total, [with_obs] with observations, [without_obs] with no observations."
   project_target_locations_remove_footnote: Remove this target location from the project
+  project_locations_not_targets: Locations not marked as targets
 
   # Project Updates Tab
   project_updates_title: Update

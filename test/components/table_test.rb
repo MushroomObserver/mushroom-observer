@@ -417,6 +417,45 @@ class TableTest < ComponentTestCase
     assert_html(html, "table tbody#collapse-2.collapse tr td", text: "C")
   end
 
+  # --- Section-label row (t.legend) ---------------------------------
+
+  def test_legend_renders_th_with_colspan_equal_column_count
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render_table(rows) do |t|
+      t.column("Name", &:name)
+      t.column("Age", &:age)
+      t.legend("Section label")
+    end
+
+    assert_html(html, "tbody tr.legend-row th[colspan='2']" \
+                       "[scope='colgroup']", text: "Section label")
+  end
+
+  def test_legend_block_form_renders_content
+    html = render(LegendBlockTestHost.new)
+
+    assert_html(html, "tr.legend-row th", text: "From a block")
+  end
+
+  def test_first_legend_has_no_top_padding_class
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render_table(rows) do |t|
+      t.column("Name", &:name)
+      t.legend("First section")
+    end
+
+    assert_html(html, "tr.legend-row th:not(.pt-4)", text: "First section")
+  end
+
+  def test_later_legend_gets_top_padding_class
+    html = render(MultiLegendTestHost.new)
+
+    assert_html(html, "tr.legend-row th:not(.pt-4)", text: "First section")
+    assert_html(html, "tr.legend-row th.pt-4", text: "Second section")
+  end
+
   private
 
   def render_table(rows, **, &block)
@@ -473,6 +512,26 @@ class MultibodyTestHost < Components::Base
       t.body { tr { td { plain("A") } } }
       t.body(id: "collapse-1", class: "collapse") { tr { td { plain("B") } } }
       t.body(id: "collapse-2", class: "collapse") { tr { td { plain("C") } } }
+    end
+  end
+end
+
+class LegendBlockTestHost < Components::Base
+  def view_template
+    render(Components::Table.new(show_headers: false)) do |t|
+      t.column("Name")
+      t.legend { plain("From a block") }
+    end
+  end
+end
+
+class MultiLegendTestHost < Components::Base
+  def view_template
+    render(Components::Table.new(show_headers: false)) do |t|
+      t.column("Name")
+      t.legend("First section")
+      t.body { tr { td { plain("row") } } }
+      t.legend("Second section")
     end
   end
 end
