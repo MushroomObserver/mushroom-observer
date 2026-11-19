@@ -2645,7 +2645,6 @@
   visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
-  visual_group_show: Show [:visual_group.ti]
   visual_group_create: Create [:visual_group.ti]
 
   # visual_groups/show
