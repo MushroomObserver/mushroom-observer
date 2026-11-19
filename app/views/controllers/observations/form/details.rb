@@ -155,79 +155,33 @@ class Views::Controllers::Observations::Form::Details < Views::Base
   end
 
   def render_geolocation_section
-    render_geolocation_toggle
-    render_geolocation_fields
-  end
-
-  def render_geolocation_toggle
-    render(Components::Form::CheckboxCollapse.new(
+    render(Components::Form::GeolocationFields.new(
              form: @form,
-             field: :has_geolocation,
+             toggle_field: :has_geolocation,
+             lat_field: :lat, lng_field: :lng, alt_field: :alt,
              target_id: "observation_geolocation",
-             label: :geolocation.ti,
              expanded: @observation.lat.present?,
-             help: :form_observations_lat_long_help.t,
-             help_collapse: true,
-             data: {
+             toggle_data: {
                form_exif_target: "collapseCheck",
                map_target: "geolocationCheck",
                action: "map#geolocationToggled"
-             }
-           ))
-  end
-
-  def render_geolocation_fields
-    Collapsible(
-      id: "observation_geolocation",
-      expanded: @observation.lat.present?,
-      data: { form_exif_target: "collapseFields",
-              map_target: "geolocationFields" }
-    ) do
-      p { :form_observations_click_point.l }
-      render_lat_lng_alt_row
-      render_gps_hidden_checkbox
-    end
-  end
-
-  def render_lat_lng_alt_row
-    Row(id: "observation_lat_lng_alt") do
-      render_coordinate_field(:lat, :lat, :latitude, "º")
-      render_coordinate_field(:lng, :lng, :longitude, "º")
-      render_coordinate_field(:alt, :alt, :altitude, "m")
-    end
-  end
-
-  def render_coordinate_field(field, abbr_key, full_key, addon)
-    Column(xs: 4) do
-      label_html = coordinate_label(abbr_key, full_key)
-      @form.text_field(
-        field,
-        label: label_html,
-        label_colon: false,
-        wrap_class: "mb-0",
-        addon: addon,
-        data: {
-          map_target: "#{field}Input",
-          action: coordinate_field_action(field)
-        }
-      )
-    end
+             },
+             fields_data: { form_exif_target: "collapseFields",
+                            map_target: "geolocationFields" },
+             field_data: geolocation_field_data,
+             before_fields: capture { p { :form_observations_click_point.l } }
+           )) { render_gps_hidden_checkbox }
   end
 
   # Lat/lng also split a pasted "lat, lng" pair (e.g. from iNat) across
   # both fields -- see GeocodeController#splitPastedCoordinates.
-  def coordinate_field_action(field)
-    return "map#bufferInputs" unless [:lat, :lng].include?(field)
-
-    "map#bufferInputs paste->map#splitPastedCoordinates"
-  end
-
-  # Label with responsive show/hide variants
-  def coordinate_label(abbr_key, full_key)
-    capture do
-      span(class: "d-none d-sm-inline") { append_colon(full_key.ti) }
-      span(class: "d-inline d-sm-none") { append_colon(abbr_key.ti) }
-    end
+  def geolocation_field_data
+    paste_action = "map#bufferInputs paste->map#splitPastedCoordinates"
+    {
+      lat: { map_target: "latInput", action: paste_action },
+      lng: { map_target: "lngInput", action: paste_action },
+      alt: { map_target: "altInput", action: "map#bufferInputs" }
+    }
   end
 
   def render_gps_hidden_checkbox

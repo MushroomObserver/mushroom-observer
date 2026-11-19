@@ -71,8 +71,8 @@ module SpeciesLists
     end
 
     # Read the report-format choice posted by
-    # `Views::Controllers::SpeciesLists::Downloads::ReportForm` under
-    # the `species_list_report[format]` namespace.
+    # `Views::Controllers::SpeciesLists::Downloads::SaveChecklistForm`
+    # under the `species_list_report[format]` namespace.
     def species_list_report_format
       params.dig(:species_list_report, :format)
     end

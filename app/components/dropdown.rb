@@ -116,6 +116,10 @@ class Components::Dropdown < Components::Base
   # `::after` pseudo-element on `.dropdown-toggle` itself
   # (`@include caret()`, bootstrap/_dropdown.scss).
   def render_toggle
+    # An ARIA dropdown toggle, not a navigational link (href="#", no
+    # target); already computes its btn_class/size_class styling
+    # below, which Link(...) would duplicate rather than replace.
+    # rubocop:disable-next MO/NoRawLinkOrButtonTo
     a(class: toggle_link_class,
       id: @id, role: "button", href: "#",
       data: { toggle: "dropdown" },

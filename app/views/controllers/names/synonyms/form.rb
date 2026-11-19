@@ -100,9 +100,8 @@ module Views::Controllers::Names::Synonyms
 
     def synonym_checkbox_label(name_obj)
       link = capture do
-        a(href: name_path(name_obj.id)) do
-          trusted_html(name_obj.display_name(@user).t)
-        end
+        Link(type: :object, object: name_obj,
+             name: name_obj.display_name(@user).t)
       end
       badge = capture do
         Badge(variant: :id, object: name_obj, size: :sm, extra_class: "")

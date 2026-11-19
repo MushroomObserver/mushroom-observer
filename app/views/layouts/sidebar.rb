@@ -68,7 +68,7 @@ class Views::Layouts::Sidebar < Views::Base
   end
 
   def render_logo
-    a(id: "logo_link", href: logo_href) do
+    Link(type: :get, name: "", target: logo_href, id: "logo_link") do
       img(
         # `img-fluid` sets max-width: 100%, height: auto. `w-100`
         # fills the sidebar's fixed width, since `img-fluid` alone

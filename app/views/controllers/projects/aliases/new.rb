@@ -15,9 +15,9 @@ module Views::Controllers::Projects::Aliases
       render(Views::Controllers::Projects::Aliases::Form.new(
                @project_alias, user: @user
              ))
-      a(href: project_aliases_path(
+      Link(type: :get, name: "Back", target: project_aliases_path(
         project_id: @project_alias.project_id
-      )) { plain("Back") }
+      ))
     end
   end
 end

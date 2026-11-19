@@ -73,7 +73,8 @@ module Views::Layouts
 
       html = footer_for(obj, user: users(:mary))
 
-      assert_includes(html, creator.unique_text_name)
+      assert_html(html, "a[href='#{routes.user_path(creator.id)}']",
+                  text: creator.unique_text_name)
       assert_includes(html, "2024-01-15")
     end
 

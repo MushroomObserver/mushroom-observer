@@ -39,11 +39,16 @@ class Components::ApplicationForm < Superform::Rails::Form
       span(class: between_class) { render(between_slot) }
     end
 
-    # An inline field row uses `mr-3` (since `form-between` is a
-    # block-level spacer that doesn't apply); a block-level field uses
-    # `form-between`, which already supplies that spacing.
+    # An inline field row uses the label row's trailing gap (since
+    # `form-between` is a block-level spacer that doesn't apply); a
+    # block-level field uses `form-between`, which already supplies
+    # that spacing.
     def between_class
-      wrapper_options[:inline] ? "mr-3" : "form-between inline-flex-center"
+      if wrapper_options[:inline]
+        FieldLabelRow::GAP_TRAILING
+      else
+        "form-between inline-flex-center"
+      end
     end
 
     private
@@ -59,7 +64,9 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_help_icon
       Link(type: :collapse_toggle,
            target_id: help_id,
-           class: "info-collapse-trigger ml-3 inline-flex-center") do
+           class: class_names("info-collapse-trigger",
+                              FieldLabelRow::GAP_LEADING,
+                              "inline-flex-center")) do
         Icon(type: :question, title: :help.ti, center_tooltip: true)
       end
     end

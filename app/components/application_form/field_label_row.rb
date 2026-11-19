@@ -5,9 +5,16 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Phlex::TrustedHtml
 
-    # Three layouts for the label row: bare <label> (no appends/end);
-    # `d-flex` label+appends with no end; or `d-flex
-    # justify-content-between` with label+appends left, label_end right.
+    # One spacing step between adjacent label-row elements, and
+    # between an inline row and its field.
+    GAP_TRAILING = "mr-2"
+    GAP_LEADING = "ml-2"
+
+    # Three layouts for the label row:
+    # - No appends/end: bare <label>.
+    # - Appends, no end: `d-flex` label+appends.
+    # - Has end: `d-flex justify-content-between`, appends left,
+    #   label_end right.
     # `between`/`help` blocks aren't part of this row -- see
     # FieldWrapperRendering/FieldWithHelp for those.
     def render_label_row(label_text, inline)
@@ -104,13 +111,13 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # `label_sr_only` hides the label visually but keeps the
     # `<label for="…">` association. `help_placement: :above` drops
-    # the bottom margin. `trailing_margin: false` drops the label's
-    # trailing margin too -- each append supplies a leading margin.
+    # the bottom margin. `trailing_margin: false` drops GAP_TRAILING
+    # too -- each append supplies a leading GAP_LEADING instead.
     def label_class(trailing_margin: true)
       base = if wrapper_options[:label_sr_only]
                "sr-only"
              else
-               trailing_margin ? "mr-3" : nil
+               trailing_margin ? GAP_TRAILING : nil
              end
       help_placement_above? ? class_names(base, "mb-0") : base
     end
@@ -147,7 +154,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       return nil unless respond_to?(:help_slot) && help_slot &&
                         wrapper_options[:help_collapse]
 
-      class_names("mr-3", "inline-trailing-space")
+      class_names(GAP_TRAILING, "inline-trailing-space")
     end
 
     # d-flex align-items-center is needed since the label and appended
@@ -181,7 +188,7 @@ class Components::ApplicationForm < Superform::Rails::Form
       appends = wrapper_options[:label_appends]
       return unless appends
 
-      Help(element: :span, class: "ml-3") do
+      Help(element: :span, class: GAP_LEADING) do
         plain(label_appends_text(appends))
       end
     end

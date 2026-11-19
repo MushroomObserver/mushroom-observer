@@ -34,9 +34,7 @@ module Views::Layouts
 
     def render_contributor_links(ids_and_names)
       ids_and_names.each_with_index do |(user_id, name), index|
-        a(href: user_path(user_id), class: "user_link_#{user_id}") do
-          plain(name)
-        end
+        Link(type: :user, user: user_id, name: name)
         plain(", ") if index < ids_and_names.length - 1
       end
     end
@@ -50,15 +48,12 @@ module Views::Layouts
 
     def render_translation_links
       file = Language.save_tags
-      a(
-        href: translations_path(for_page: file),
-        id: "translations_for_page_link"
-      ) { :app_edit_translations_on_page.t }
+      Link(type: :get, name: :app_edit_translations_on_page.t,
+           target: translations_path(for_page: file),
+           id: "translations_for_page_link")
       plain(" | ")
-      a(
-        href: translations_path,
-        id: "translations_index_link"
-      ) { :app_edit_translations.t }
+      Link(type: :get, name: :app_edit_translations.t,
+           target: translations_path, id: "translations_index_link")
     end
   end
 end

@@ -1368,7 +1368,7 @@
   download_observations_windows: WINDOWS-1252 (best for Excel)
   download_observations_utf8: UTF-8 (most universal)
   download_observations_utf16: UTF-16 (best for Windows 7 and up)
-  download_observations_print_labels_header: Or you can print labels for the selected observations
+  download_observations_print_labels_header: Print labels for the selected observations
   download_observations_print_labels: Print Labels
   download_observations_too_many_results: You are trying to download too many Observations. Please see <a href="https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files" target="_new">CSV Files</a> for an alternative.
 
@@ -2358,8 +2358,6 @@
 
   # species_list/download
   species_list_download_title: Observation List Reports and Downloads
-  species_list_labels_header: Print Labels for Observation
-  species_list_labels_button: Print Labels
   species_list_report_header: Save a Checklist of Names
   species_list_report_button: Save Names
   species_list_download_header: Download Observation Data
@@ -2647,7 +2645,6 @@
   visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
-  visual_group_show: Show [:visual_group.ti]
   visual_group_create: Create [:visual_group.ti]
 
   # visual_groups/show

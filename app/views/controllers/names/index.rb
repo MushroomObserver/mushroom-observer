@@ -97,7 +97,7 @@ module Views::Controllers::Names
         data: { controller: "clipboard",
                 clipboard_copied_value: :copied.ti }
       ) do
-        a(href: name_path(name.id)) do
+        Link(type: :object, object: name) do
           span(class: "display-name",
                data: { clipboard_target: "source" }) do
             trusted_html(name.display_name(@user).t)

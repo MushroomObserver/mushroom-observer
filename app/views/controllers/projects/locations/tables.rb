@@ -56,7 +56,7 @@ module Views::Controllers::Projects::Locations
 
     def render_target_remove_footnote
       p(class: "mt-3") do
-        Icon(type: :x, class: "text-danger")
+        Icon(type: :remove, class: "text-danger")
         whitespace
         plain(:project_target_locations_remove_footnote.l)
       end
@@ -141,8 +141,8 @@ module Views::Controllers::Projects::Locations
       Table(rows,
             variant: :striped, identifier: "project-members") do |t|
         t.column(:location.ti)
-        t.column(:observations.ti)
-        t.column(:project_aliases.ti)
+        t.column(:observations.ti, align: :center)
+        t.column(:project_aliases.ti, align: :center)
         if admin?
           t.column(:project_target_locations_title.l,
                    align: :center)

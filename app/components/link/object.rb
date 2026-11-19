@@ -10,19 +10,27 @@
 class Components::Link::Object < Components::Link
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :name, _Nilable(String), default: nil
+  # Pass-through HTML attributes -- the caller-supplied `:class` is
+  # merged with the identifier and any variant btn classes.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
-  def view_template
+  def view_template(&block)
     return unless @object
 
-    a(href: url_for(@object.show_link_args),
-      class: identifier_class) do
-      trusted_html(@name || @object.title.t)
+    a(href: url_for(@object.show_link_args), **link_attrs) do
+      block ? yield : trusted_html(@name || @object.title.t)
     end
   end
 
   private
 
+  def link_attrs
+    validate_no_btn_classes!(@attributes[:class])
+    @attributes.except(:class).merge(class: identifier_class)
+  end
+
   def identifier_class
-    class_names(btn_styling, "#{@object.type_tag}_link_#{@object.id}")
+    class_names(btn_styling, "#{@object.type_tag}_link_#{@object.id}",
+                @attributes[:class])
   end
 end

@@ -64,11 +64,7 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
   def render_classification_row(node, approved)
     li(class: "hanging-indent") do
       trusted_html(append_colon(rank_as_string(node.rank)))
-      i do
-        a(href: name_path(node.id)) do
-          trusted_html(node.text_name.t)
-        end
-      end
+      i { Link(type: :object, object: node, name: node.text_name.t) }
       render_alias_suffix if node == approved && approved != @name
     end
   end
@@ -97,9 +93,8 @@ class Views::Controllers::Names::Show::ClassificationPanel < Views::Base
           type: :put, variant: :strip, name: text, target: url
         )
       else
-        a(href: url, **opts.slice(:class, :data, :target, :rel)) do
-          plain(text)
-        end
+        Link(type: :get, name: text, target: url,
+             **opts.slice(:class, :data, :rel)) { plain(text) }
       end
     end
   end

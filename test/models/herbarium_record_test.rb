@@ -5,6 +5,14 @@ require("test_helper")
 class HerbariumRecordTest < UnitTestCase
   include ActiveJob::TestHelper
 
+  # See CacheStoreSelector -- the cache isn't rolled back with the DB.
+  def teardown
+    I18n.backend.backends.first.delete_translation(
+      :fr, :user_personal_herbarium
+    )
+    super
+  end
+
   def test_fields
     assert_not(herbarium_records(:interesting_unknown).observations.empty?)
     assert(herbarium_records(:interesting_unknown).herbarium)

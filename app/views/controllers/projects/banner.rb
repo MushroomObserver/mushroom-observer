@@ -15,6 +15,10 @@ module Views::Controllers::Projects
   class Banner < Views::Base
     prop :project, _Nilable(Project)
 
+    # Shared by title/location/date-range when rendered over the
+    # banner image, so the text stays legible against it.
+    OVERLAY_TEXT_CLASSES = "banner-image-text bg-body p-2"
+
     def view_template
       return unless @project
 
@@ -43,11 +47,13 @@ module Views::Controllers::Projects
     def render_banner_with_image
       Row do
         Column(xs: 12, id: "project_banner") do
-          img(src: @project.image.large_url, class: "banner-image")
-          div(class: "bottom-left ml-3 mb-3 p-2") do
-            render_banner_title(with_overlay_styling: true)
-            render_project_location(with_overlay_styling: true)
-            render_project_date_range(with_overlay_styling: true)
+          div(class: "banner-image-wrap") do
+            img(src: @project.image.large_url, class: "object-fit-cover")
+            div(class: "bottom-left m-3") do
+              render_banner_title(with_overlay_styling: true)
+              render_project_location(with_overlay_styling: true)
+              render_project_date_range(with_overlay_styling: true)
+            end
           end
         end
       end
@@ -71,12 +77,12 @@ module Views::Controllers::Projects
 
     def render_banner_title(with_overlay_styling:)
       title_classes = if with_overlay_styling
-                        "h3 banner-image-text"
+                        OVERLAY_TEXT_CLASSES
                       else
-                        "h3 page-title mb-2"
+                        "page-title mb-2"
                       end
 
-      h1(class: title_classes, id: title_id) do
+      h1(class: class_names("h3", title_classes), id: title_id) do
         div(class: "d-flex align-items-center") do
           Badge(variant: :id, object: @project, size: :sm)
           whitespace
@@ -118,7 +124,8 @@ module Views::Controllers::Projects
       return unless @project.location
 
       location_classes = if with_overlay_styling
-                           "project_location banner-image-text"
+                           class_names("project_location",
+                                       OVERLAY_TEXT_CLASSES)
                          else
                            "project_location"
                          end
@@ -126,9 +133,8 @@ module Views::Controllers::Projects
       div(class: location_classes) do
         b do
           if current_user
-            a(href: location_path(@project.location.id)) do
-              @project.place_name(current_user)
-            end
+            Link(type: :object, object: @project.location,
+                 name: @project.place_name(current_user))
           else
             plain(@project.place_name(nil))
           end
@@ -140,7 +146,8 @@ module Views::Controllers::Projects
       return unless @project.start_date && @project.end_date
 
       date_classes = if with_overlay_styling
-                       "project_date_range banner-image-text"
+                       class_names("project_date_range",
+                                   OVERLAY_TEXT_CLASSES)
                      else
                        "project_date_range"
                      end

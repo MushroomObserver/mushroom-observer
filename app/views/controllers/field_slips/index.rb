@@ -17,12 +17,7 @@ module Views::Controllers::FieldSlips
     prop :notice, _Nilable(String), default: nil
 
     def view_template
-      add_project_banner(@project) if @project
-      add_index_title(@query)
-      add_context_nav(Tab::FieldSlip::IndexActions.new)
-      add_filter_to_sorter_slot unless @project
-      add_pagination(@pagination_data)
-      container_class(:wide)
+      render_page_chrome
 
       render_notice
       render_project_or_filter_section
@@ -30,6 +25,15 @@ module Views::Controllers::FieldSlips
     end
 
     private
+
+    def render_page_chrome
+      add_project_banner(@project) if @project
+      add_index_title(@query)
+      add_context_nav(Tab::FieldSlip::IndexActions.new)
+      add_filter_to_sorter_slot unless @project
+      add_pagination(@pagination_data)
+      container_class(:wide)
+    end
 
     # No sort options on this index -- the filter form takes the
     # pagination row's sorter slot instead, so it sits beside the

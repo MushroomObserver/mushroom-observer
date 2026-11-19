@@ -143,9 +143,8 @@ class Components::NavTabs < Components::Base
 
   def render_tab(tab)
     li(class: "nav-item") do
-      a(href: resolved_path(tab[:path]), **anchor_attrs(tab)) do
-        trusted_or_plain(tab[:text])
-      end
+      Link(type: :get, name: tab[:text], target: resolved_path(tab[:path]),
+           **anchor_attrs(tab))
     end
   end
 
@@ -171,16 +170,5 @@ class Components::NavTabs < Components::Base
     parts << "active" if @current && tab[:key] == @current
     parts << extra_class if extra_class
     parts.join(" ")
-  end
-
-  # Tab text may be a textile-rendered html_safe string (e.g. a
-  # name's display_name); `plain` would re-escape, `trusted_html`
-  # emits as-is.
-  def trusted_or_plain(text)
-    if text.respond_to?(:html_safe?) && text.html_safe?
-      trusted_html(text)
-    else
-      plain(text)
-    end
   end
 end

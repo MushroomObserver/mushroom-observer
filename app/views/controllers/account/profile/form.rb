@@ -72,9 +72,8 @@ module Views::Controllers::Account::Profile
 
     def render_file_field_between
       Help(element: :span, content: "(33%)")
-      a(href: account_profile_select_image_path, class: "mx-2") do
-        plain(:profile_image_reuse.t)
-      end
+      Link(type: :get, name: :profile_image_reuse.t,
+           target: account_profile_select_image_path, class: "mx-2")
     end
 
     def image_file_label

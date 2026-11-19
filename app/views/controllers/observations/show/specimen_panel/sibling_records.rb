@@ -31,17 +31,15 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     def sibling_attribution(sibling)
       small(class: "text-muted") do
         plain("(")
-        a(href: permanent_observation_path(sibling.id)) do
-          plain("MO #{sibling.id}")
-        end
+        Link(type: :get, name: "MO #{sibling.id}",
+             target: permanent_observation_path(sibling.id))
         plain(")")
       end
     end
 
     def render_sibling_herbarium_record(record, sibling)
-      a(href: herbarium_record_path(record.id)) do
-        trusted_html(record.accession_at_herbarium.t)
-      end
+      Link(type: :object, object: record,
+           name: record.accession_at_herbarium.t)
       whitespace
       sibling_attribution(sibling)
       render_mcp_search_link(record) if record.herbarium.web_searchable?

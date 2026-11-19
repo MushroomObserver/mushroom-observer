@@ -84,6 +84,17 @@ class TableTest < ComponentTestCase
     assert_no_html(html, ".my-3")
   end
 
+  def test_wrap_id_lands_on_the_wrapping_panel
+    rows = [TestRow.new(name: "Test")]
+
+    html = render_table(rows, wrap_id: "my-wrap") do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, ".panel#my-wrap")
+    assert_no_html(html, "table#my-wrap")
+  end
+
   def test_variant_kwarg_adds_bootstrap_modifier_class
     rows = [TestRow.new(name: "Test")]
 

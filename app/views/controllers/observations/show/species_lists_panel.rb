@@ -65,7 +65,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
 
   def render_item(spl)
     li(id: "species_list_#{spl.id}") do
-      a(href: species_list_path(spl.id)) { trusted_html(spl.format_name.t) }
+      Link(type: :object, object: spl, name: spl.format_name.t)
       InlineLinkBlock(items: remove_button_items(spl))
     end
   end

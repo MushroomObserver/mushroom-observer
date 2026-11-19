@@ -14,7 +14,8 @@ class Components::Description::PreviousVersion < Components::Base
     br
     return unless previous_version && previous_version.version != @obj.version
 
-    a(href: previous_version_path, class: "previous_version_link") do
+    Link(type: :get, name: :show_name_previous_version.t,
+         target: previous_version_path, class: "previous_version_link") do
       plain("#{:show_name_previous_version.t} #{previous_version.version}")
     end
     br
