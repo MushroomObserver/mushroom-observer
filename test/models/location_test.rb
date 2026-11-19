@@ -5,6 +5,12 @@ require("test_helper")
 class LocationTest < UnitTestCase
   include ActiveJob::TestHelper
 
+  # See CacheStoreSelector -- the cache isn't rolled back with the DB.
+  def teardown
+    I18n.backend.backends.first.delete_translation(:es, :unknown_locations)
+    super
+  end
+
   def bad_location(str)
     assert_not_equal(Location.dubious_name?(str, true), [])
   end
