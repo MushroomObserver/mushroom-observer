@@ -237,7 +237,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     def render_label_end_slot
       return unless respond_to?(:label_end_slot) && label_end_slot
 
-      render(label_end_slot)
+      div(class: "d-flex align-items-center") { render(label_end_slot) }
     end
   end
 end
