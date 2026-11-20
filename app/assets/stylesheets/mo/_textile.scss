@@ -3,8 +3,16 @@
 // --------------------------------------------------
 
 .textile {
+  img {
+    max-width: 100%;
+    max-height: auto;
+  }
+
   th, td {
     padding: 0.3em;
+  }
+
+  td {
     vertical-align: top;
   }
 

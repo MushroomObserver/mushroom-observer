@@ -211,14 +211,6 @@
   }
 }
 
-.list-group-item.none-yet {
-  display: none;
-
-  &:only-child {
-    display: block;
-  }
-}
-
 .bg-none {
   background: none !important;
 }
@@ -237,13 +229,6 @@
 
 .bg-text {
   background-color: $body-color !important;
-}
-
-// Locks column widths to the first row's natural content. Use when
-// later rows can swap in wider content (e.g. an inline edit form)
-// and you don't want the columns to reflow on every state change.
-.table-layout-fixed {
-  table-layout: fixed;
 }
 
 .bg-visible {
@@ -267,30 +252,6 @@
   // transition-duration: 0.3s;
   transition: height 0s, opacity 0.3s;
   opacity: 0;
-}
-
-.violation-highlight {
-  background-color: orange;
-}
-
-// Project violations page (#4136) — `button_to` renders each per-row
-// action as its inline form, and the modal trigger is a plain
-// <button>. Adjacent elements touch by default; add a small gap on
-// both axes so the action buttons don't visually merge, including
-// when they wrap to a second line.
-.project-violations td .button_to,
-.project-violations td > button {
-  display: inline-block;
-  // `button_to` wraps its <button> in a <form>, while the modal
-  // trigger is a bare <button>. Without an explicit vertical-align
-  // their baselines differ and the last button sits half a line
-  // higher than its siblings.
-  vertical-align: top;
-  margin: 0 4px 4px 0;
-}
-.project-violations td .button_to:last-child,
-.project-violations td > button:last-child {
-  margin-right: 0;
 }
 
 // Bootstrap 5+ feature (not shipped by Bootstrap 4) -- stays
@@ -352,13 +313,5 @@
         --bs-gutter-y: #{$value};
       }
     }
-  }
-}
-
-// Not a utility class -- a plain element override, so it isn't a
-// Bootstrap-duplicate candidate.
-@media screen and (min-width: breakpoint-min(sm)) {
-  .table {
-    overflow-x: scroll;
   }
 }

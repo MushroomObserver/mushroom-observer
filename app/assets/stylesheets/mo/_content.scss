@@ -80,32 +80,10 @@ small,
   line-height: 1.3;
 }
 
-.obs-notes {
-  // Keep a blank-line gap between paragraphs, trimming the trailing one.
-  .textile p {
-    margin: 0 0 1em;
-  }
-
-  .textile p:last-child {
-    margin-bottom: 0;
-  }
-}
-
 ul.tight-list {
   list-style: none;
   margin-bottom: 0.5em;
   padding-left: 1em;
-}
-
-.textile {
-  img {
-    max-width: 100%;
-    max-height: auto;
-  }
-
-  p:last-child {
-    margin-bottom: 0;
-  }
 }
 
 .h3.page-title {
