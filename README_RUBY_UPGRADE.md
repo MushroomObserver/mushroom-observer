@@ -123,6 +123,46 @@ script/deploy.sh
 Solid Queue's workers hold the Ruby they started under, so they come
 back on the new one when the deploy restarts them.
 
+## Retiring the Rubies an upgrade leaves behind
+
+Before deleting a version of Ruby ensure that no tools are relying on
+it.  These are typically mentioned in the .ruby-version.  If found
+this useful for hunting down lingering directories that reference
+old versions of Ruby:
+
+```sh
+find ~ -maxdepth 4 -name .ruby-version -not -path "*/node_modules/*" \
+  -exec sh -c 'echo "$(tr -d "[:space:]" < "$1")  $1"' _ {} \;
+```
+
+The gems are the bulk of the space used by a version of Ruby, and they
+normally do not sit inside the Ruby tree.  So removing a version of
+Rubyinvolves both deleting the directory containing the executable and
+the gems.
+
+### Remove it
+
+Keep the new version, and the one before it as the rollback path until
+there is confidence in the new version.  On production the ruby builds
+are stored in `/opt/rubies/ruby-<version>` and the gem are in
+`/home/mo/.gem/ruby/<version>`.  It requires root level permissions to
+fully delete a Ruby version.
+
+```sh
+sudo rm -rf /opt/rubies/ruby-<version> /home/mo/.gem/ruby/<version>
+```
+
+Locally it is the same pair of directories under the paths chruby uses
+on a workstation:
+
+```sh
+rm -rf ~/.rubies/ruby-<version> ~/.gem/ruby/<version>
+```
+
+`ruby-install` also leaves the unpacked source and its tarball in
+`~/src/ruby-<version>` — ~330MB each, needed by nothing once the
+install has finished.
+
 ## Troubleshooting
 
 ### `configure: error: something wrong with LDFLAGS`
@@ -172,9 +212,3 @@ The `Gemfile` declares `ruby(File.read(".ruby-version").strip)`, so
 this says the active Ruby and the pin disagree. Activate the pinned
 version rather than editing the pin, unless moving the pin is the point
 of what you are doing.
-
-## Ruby 3.3 to 3.4
-
-The Xcode and trilogy compilation failure that drove that upgrade, and
-the language changes that came with 3.4, are in
-[issue #4072](https://github.com/MushroomObserver/mushroom-observer/issues/4072).
