@@ -53,8 +53,29 @@ module Tab::UserNav
       )
     end
 
-    def test_log_out_with_user
+    def test_log_out_with_non_admin_user
       tabs = Tab::UserNav::LogOut.new(user: @user).to_a
+
+      assert_not(@user.admin)
+      assert_equal([Tab::UserNav::Logout], tabs.map(&:class))
+    end
+
+    def test_log_out_with_admin_user
+      tabs = Tab::UserNav::LogOut.new(user: users(:admin)).to_a
+
+      assert_equal(
+        [Tab::UserNav::AdminMode, Tab::UserNav::Logout],
+        tabs.map(&:class)
+      )
+    end
+
+    # An admin who turns admin mode on and then switches to a
+    # non-admin user keeps session[:admin], so the toggle has to stay
+    # available to get back out.
+    def test_log_out_with_non_admin_user_in_admin_mode
+      tabs = Tab::UserNav::LogOut.new(
+        user: @user, in_admin_mode: true
+      ).to_a
 
       assert_equal(
         [Tab::UserNav::AdminMode, Tab::UserNav::Logout],
@@ -65,7 +86,7 @@ module Tab::UserNav
     def test_log_out_without_user
       tabs = Tab::UserNav::LogOut.new(user: nil).to_a
 
-      assert_equal([Tab::UserNav::AdminMode], tabs.map(&:class))
+      assert_empty(tabs)
     end
   end
 end

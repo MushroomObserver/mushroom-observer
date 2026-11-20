@@ -13,8 +13,19 @@ class Tab::UserNav::LogOut < Tab::Collection
 
   def tabs
     [
-      Tab::UserNav::AdminMode.new(in_admin_mode: @in_admin_mode),
+      (admin_mode_tab if show_admin_mode?),
       (Tab::UserNav::Logout.new if @user)
     ].compact
+  end
+
+  def admin_mode_tab
+    Tab::UserNav::AdminMode.new(in_admin_mode: @in_admin_mode)
+  end
+
+  # `in_admin_mode?` is session state alone, so an admin who turns it
+  # on and then switches to a non-admin user still needs the toggle to
+  # get back out.
+  def show_admin_mode?
+    @user&.admin || @in_admin_mode
   end
 end
