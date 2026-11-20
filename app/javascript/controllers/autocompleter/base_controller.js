@@ -1125,8 +1125,8 @@ export default class BaseAutocompleterController extends Controller {
       }
     }
     if (this.hasCreateBtnTarget && this.TYPE !== "location_google") {
+      clearTimeout(this.create_timer);
       if (matches.length === 0) {
-        clearTimeout(this.create_timer);
         this.create_timer = setTimeout(() => {
           this.createBtnTarget.classList.remove('d-none');
         }, 1000)
