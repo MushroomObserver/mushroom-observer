@@ -126,6 +126,14 @@
   }
 }
 
+// #search_nav shares .navbar-default with #top_nav, so the rule
+// above colors its plain links $navbar-default-color too -- right
+// for nav items, wrong for a form's help-collapse trigger
+// (e.g. .faceted-search-form), which needs $link-color.
+#search_nav .info-collapse-trigger {
+  color: $link-color;
+}
+
 // If sorter is on the right:
 // @media screen and (min-width: $screen-sm-min) {
 //   .sorter {
