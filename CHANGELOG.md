@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-20 (deploy-2026-11-20-13-00)
+
+- Drop dead `export:unofficial` step from `lang:update` ([PR5745](https://github.com/MushroomObserver/mushroom-observer/pull/5745), @nimmolo)
+- Use `MemoryStore` for i18n's test-env cache, not `SolidCache::Store` ([PR5750](https://github.com/MushroomObserver/mushroom-observer/pull/5750), @nimmolo)
+- Evict shared i18n cache writes in `teardown` across remaining tests ([PR5751](https://github.com/MushroomObserver/mushroom-observer/pull/5751), @nimmolo)
+- Convert raw Phlex `a(...)` calls to `Link(...)` repo-wide ([PR5753](https://github.com/MushroomObserver/mushroom-observer/pull/5753), @nimmolo)
+- Realign `main`'s rem basis to 16px to match `nimmo-5348-bs4-cutover` ([PR5537](https://github.com/MushroomObserver/mushroom-observer/pull/5537), @nimmolo)
+- Document retiring the Rubies an upgrade leaves behind in `README_RUBY_UPGRADE.md` ([PR5752](https://github.com/MushroomObserver/mushroom-observer/pull/5752), @mo-nathan)
+- Fix typo ([PR5754](https://github.com/MushroomObserver/mushroom-observer/pull/5754), @mo-nathan)
+- Access icn_id via the API ([PR5736](https://github.com/MushroomObserver/mushroom-observer/pull/5736), @JoeCohen)
+
 ## 2026-11-19 (deploy-2026-11-19-01-07)
 
 - Keep rank qualifiers like "group" outside `String#small_author`'s `<small>` ([PR5712](https://github.com/MushroomObserver/mushroom-observer/pull/5712), @nimmolo)
