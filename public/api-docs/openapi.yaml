@@ -3986,6 +3986,8 @@ paths:
                             type: string
                           rank:
                             type: string
+                          icn_id:
+                            type: integer
                           deprecated:
                             type: boolean
                           misspelled:
@@ -4033,6 +4035,10 @@ paths:
                   type: string
                 notes:
                   type: string
+                icn_id:
+                  type: integer
+                  description: ICN identifier, the Index Fungorum or MycoBank record
+                    number
                 name:
                   type: string
                 author:
@@ -4088,6 +4094,8 @@ paths:
                             type: string
                           rank:
                             type: string
+                          icn_id:
+                            type: integer
                           deprecated:
                             type: boolean
                           misspelled:
@@ -4324,6 +4332,9 @@ paths:
                   type: string
                 set_classification:
                   type: string
+                set_icn_id:
+                  type: integer
+                  description: change the ICN identifier (one unlocked name at a time)
       responses:
         '200':
           description: Matching names
@@ -4368,6 +4379,8 @@ paths:
                             type: string
                           rank:
                             type: string
+                          icn_id:
+                            type: integer
                           deprecated:
                             type: boolean
                           misspelled:

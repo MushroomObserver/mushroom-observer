@@ -512,9 +512,159 @@ class API2::NamesTest < UnitTestCase
     assert_api_fail(params)
   end
 
+  def test_creating_name_with_icn_id
+    text_name = "Anzia ornata"
+    icn_id = unused_icn_id
+    assert_api_pass(params_post(name: text_name, rank: "Species",
+                                icn_id: icn_id))
+    name = Name.find_by(text_name: text_name)
+    assert_not_nil(name, "Failed to create Name '#{text_name}'")
+    assert_equal(icn_id, name.icn_id,
+                 "POST should save the icn_id given for '#{text_name}'")
+  end
+
+  def test_creating_name_with_icn_id_in_use_fails
+    text_name = "Anzia ornata"
+    in_use = names(:coprinus_comatus).icn_id
+    assert_api_fail(params_post(name: text_name, rank: "Species",
+                                icn_id: in_use))
+    assert_instance_of(API2::CreateFailed, @api.errors.first,
+                       "Duplicate icn_id should raise CreateFailed")
+    assert_not(Name.exists?(text_name: text_name),
+               "Name with a duplicate icn_id should not be created")
+  end
+
+  def test_creating_code_name_with_icn_id_fails
+    text_name = code_name
+    assert_api_fail(params_post(name: text_name, rank: "Species",
+                                icn_id: unused_icn_id))
+    assert_instance_of(API2::CreateFailed, @api.errors.first,
+                       "icn_id on a code name should raise CreateFailed")
+    assert_not(Name.exists?(text_name: text_name),
+               "Code name with an icn_id should not be created")
+  end
+
+  def test_creating_group_with_icn_id_fails
+    text_name = "Anzia ornata group"
+    assert_api_fail(params_post(name: text_name, rank: "Group",
+                                icn_id: unused_icn_id))
+    assert_instance_of(API2::CreateFailed, @api.errors.first,
+                       "icn_id on a Group should raise CreateFailed")
+    assert_not(Name.exists?(text_name: text_name),
+               "Group with an icn_id should not be created")
+  end
+
+  def test_creating_name_with_bad_icn_id_fails
+    text_name = "Anzia ornata"
+    bad_icn_id_cases.each do |value, error_class|
+      assert_api_fail(params_post(name: text_name, rank: "Species",
+                                  icn_id: value))
+      assert_instance_of(error_class, @api.errors.first,
+                         "icn_id #{value.inspect} should raise #{error_class}")
+      assert_not(Name.exists?(text_name: text_name),
+                 "icn_id #{value.inspect} should not create a Name")
+    end
+  end
+
+  def test_patching_name_with_bad_icn_id_fails
+    agaricus = names(:agaricus)
+    bad_icn_id_cases.each do |value, error_class|
+      assert_api_fail(params_patch(id: agaricus.id, set_icn_id: value))
+      assert_instance_of(error_class, @api.errors.first,
+                         "set_icn_id #{value.inspect} should raise " \
+                         "#{error_class}")
+      assert_nil(agaricus.reload.icn_id,
+                 "set_icn_id #{value.inspect} should not change icn_id")
+    end
+  end
+
+  def test_patching_name_icn_id
+    agaricus = names(:agaricus)
+    icn_id = unused_icn_id
+    assert_api_pass(params_patch(id: agaricus.id, set_icn_id: icn_id))
+    assert_equal(icn_id, agaricus.reload.icn_id,
+                 "PATCH should save set_icn_id")
+  end
+
+  def test_patching_code_name_icn_id_fails
+    assert_api_pass(params_post(name: code_name, rank: "Species"))
+    name = Name.find_by(text_name: code_name)
+    assert_not_nil(name, "Failed to create Name '#{code_name}'")
+
+    assert_api_fail(params_patch(id: name.id, set_icn_id: unused_icn_id))
+    assert_instance_of(API2::UpdateFailed, @api.errors.first,
+                       "icn_id on a code name should raise UpdateFailed")
+    assert_nil(name.reload.icn_id,
+               "Code name should not get an icn_id")
+  end
+
+  def test_patching_name_icn_id_in_use_fails
+    agaricus = names(:agaricus)
+    in_use = names(:coprinus_comatus).icn_id
+    assert_api_fail(params_patch(id: agaricus.id, set_icn_id: in_use))
+    assert_instance_of(API2::UpdateFailed, @api.errors.first,
+                       "Duplicate icn_id should raise UpdateFailed")
+    assert_nil(agaricus.reload.icn_id,
+               "Name should not get an icn_id already in use")
+  end
+
+  def test_patching_icn_id_and_renaming_to_code_name_saves_nothing
+    agaricus = names(:agaricus)
+    old_text_name = agaricus.text_name
+    assert_api_fail(params_patch(id: agaricus.id, set_icn_id: unused_icn_id,
+                                 set_name: code_name, set_rank: "species"))
+    assert_instance_of(API2::UpdateFailed, @api.errors.first,
+                       "Renaming to a code name with an icn_id should " \
+                       "raise UpdateFailed")
+    agaricus.reload
+    assert_nil(agaricus.icn_id,
+               "Failed PATCH should not save the icn_id")
+    assert_equal(old_text_name, agaricus.text_name,
+                 "Failed PATCH should not save the new name")
+  end
+
+  def test_patching_icn_id_on_multiple_names_fails
+    name1 = names(:agaricus)
+    name2 = names(:lepiota)
+    assert_api_fail(params_patch(id: "#{name1.id},#{name2.id}",
+                                 set_icn_id: unused_icn_id))
+    assert_instance_of(API2::TryingToSetMultipleNamesAtOnce,
+                       @api.errors.first,
+                       "set_icn_id on several names should be refused")
+  end
+
+  def test_patching_locked_name_icn_id_fails
+    agaricus = names(:agaricus)
+    agaricus.update!(locked: true)
+    assert_api_fail(params_patch(id: agaricus.id, set_icn_id: unused_icn_id))
+    assert_instance_of(API2::NameLocked, @api.errors.first,
+                       "set_icn_id on a locked name should raise NameLocked")
+    assert_nil(agaricus.reload.icn_id,
+               "Locked name should not get an icn_id")
+  end
+
   def test_deleting_names
     name = rolf.names.sample
     # No DELETE requests should be allowed at all.
     assert_api_fail(params_delete(id: name.id))
+  end
+
+  private
+
+  # Parses as a Species but is unregistrable; its parent is a fixture.
+  def code_name
+    "Lepiota sp. 'foobar'"
+  end
+
+  def unused_icn_id
+    Name.maximum(:icn_id).to_i + 1
+  end
+
+  def bad_icn_id_cases
+    {
+      "" => API2::BadParameterValue,
+      "abc" => API2::BadParameterValue,
+      "0" => API2::BadLimitedParameterValue
+    }
   end
 end
