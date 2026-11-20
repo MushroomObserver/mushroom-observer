@@ -29,23 +29,33 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(form, "textarea")
   end
 
-  # Regression: AutocompleterField must not register an empty
-  # label_end slot when create_text: is absent -- otherwise
-  # FieldLabelRow forces the d-flex layout for nothing. The
-  # has-id-indicator (label_after content) still renders inline with
-  # the label -- a wrapping span, not a bare svg (padding on a
-  # replaced element like svg eats into its own rendered content
-  # instead of adding space around it).
-  def test_autocompleter_field_no_d_flex_when_no_create_text
+  # The has-id-indicator renders in label_end (not inline with the
+  # label) for any non-inline autocompleter, so label_end stays
+  # populated -- the d-flex layout applies even with no create_text.
+  def test_autocompleter_field_uses_d_flex_for_has_id_indicator_alone
     form = render_comment_form do
       render(field(:summary).autocompleter(
                type: :name, wrapper_options: { label: "Name" }
              ))
     end
 
+    assert_html(form, ".d-flex.justify-content-between")
+    assert_html(form, ".has-id-indicator svg")
+  end
+
+  # Inline autocompleters skip the has-id-indicator entirely (see
+  # render_label_after) -- with nothing else in label_end, the d-flex
+  # layout must not apply for nothing.
+  def test_autocompleter_field_no_d_flex_when_inline_with_no_buttons
+    form = render_comment_form do
+      render(field(:summary).autocompleter(
+               type: :name,
+               wrapper_options: { label: "Name", inline: true }
+             ))
+    end
+
     assert_no_match(/d-flex justify-content-between/, form,
                     "label row must not use d-flex when label_end is empty")
-    assert_html(form, ".has-id-indicator svg")
   end
 
   # `invisible`, not `d-none` -- its box stays in the label row's
@@ -60,8 +70,8 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_no_html(form, ".has-id-indicator.d-none")
   end
 
-  # Caller-supplied label_append content renders in the label row,
-  # after the built-in has-id-indicator.
+  # Caller-supplied label_append content renders in label_end, after
+  # the built-in has-id-indicator.
   def test_label_append_slot_renders_after_has_id_indicator
     form = render_comment_form do
       autocompleter_field(:summary, type: :name, label: "Name") do |f|
@@ -324,6 +334,18 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_html(html, "button[data-active-title='Edit area']")
   end
 
+  # label_end's order: has-id, then keep/edit, then create -- the
+  # create button is clickable like the others, so it goes last, not
+  # interleaved with the plain has-id indicator.
+  def test_label_end_order_has_id_then_keep_then_create
+    comment = Comment.new
+    form = TestKeepAndCreateTextAutocompleterForm.new(comment, action: "/test")
+    html = render(form)
+
+    assert_html(html,
+                ".has-id-indicator ~ .keep-edit-toggle ~ .create-button")
+  end
+
   def test_autocompleter_with_create_text_option
     comment = Comment.new
     form = TestCreateTextAutocompleterForm.new(comment, action: "/test")
@@ -426,6 +448,23 @@ class TestKeepTextAutocompleterForm < Components::ApplicationForm
           type: :location,
           keep_text: "Keep this area",
           edit_text: "Edit area",
+          wrapper_options: { label: "Location" }
+        )
+      )
+    end
+  end
+end
+
+# Test form class for keep_text and create_text together (order check)
+class TestKeepAndCreateTextAutocompleterForm < Components::ApplicationForm
+  def view_template
+    super do
+      render(
+        field(:notes).autocompleter(
+          type: :location,
+          keep_text: "Keep this area",
+          edit_text: "Edit area",
+          create_text: "Create new",
           wrapper_options: { label: "Location" }
         )
       )
