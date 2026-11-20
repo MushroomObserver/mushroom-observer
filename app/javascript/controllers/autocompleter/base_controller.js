@@ -883,6 +883,9 @@ export default class BaseAutocompleterController extends Controller {
     this.storeCurrentHiddenData();
     this.updateHiddenTargetValue(match);
     this.cssHasIdOrNo(parseInt(match['id']));
+    // Marks the selected name as already fetched, so a later refresh
+    // (e.g. a plain click) doesn't re-query and risk losing the match.
+    this.last_fetch_request = match['name'];
     this.hiddenIdChanged();
   }
 
