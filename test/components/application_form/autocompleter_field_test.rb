@@ -306,19 +306,6 @@ class AutocompleterFieldTest < ComponentTestCase
                     "Unknown autocompleter type: unknown_type")
   end
 
-  def test_autocompleter_with_find_text_option
-    # Test find_text option renders find button (lines 174, 176)
-    comment = Comment.new
-    form = TestFindTextAutocompleterForm.new(comment, action: "/test")
-    html = render(form)
-
-    # Should have find button with correct attributes -- a plain
-    # Button (not a Link), since it never had a real destination.
-    assert_html(html, "button.find-btn")
-    assert_html(html, "button[data-map-target='showBoxBtn']")
-    assert_html(html, "button[data-action='map#showBox']")
-  end
-
   def test_autocompleter_with_keep_text_option
     # One button, two swapped appearances (keep <-> edit) -- see
     # map_controller.js#toggleBoxLock.
@@ -424,21 +411,6 @@ class TestUnknownTypeAutocompleterForm < Components::ApplicationForm
         field(:notes).autocompleter(
           type: :unknown_type,
           wrapper_options: { label: "Notes" }
-        )
-      )
-    end
-  end
-end
-
-# Test form class for find_text option
-class TestFindTextAutocompleterForm < Components::ApplicationForm
-  def view_template
-    super do
-      render(
-        field(:notes).autocompleter(
-          type: :location,
-          find_text: "Find on map",
-          wrapper_options: { label: "Location" }
         )
       )
     end

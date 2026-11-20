@@ -14,7 +14,6 @@
 // _icons.scss being @import-ed after this file in
 // mushroom_observer.scss.
 .has-id-indicator .mo-icon,
-.find-btn .mo-icon,
 .keep-edit-toggle .mo-icon,
 .create-button .mo-icon,
 .info-collapse-trigger .mo-icon {
@@ -36,7 +35,7 @@
 
 // autocompleter state (do we have a match?) is no longer handled
 // here -- the autocompleter controller's cssHasIdOrNo toggles
-// `.has-id-indicator`'s visibility directly. Unlike find-btn/
+// `.has-id-indicator`'s visibility directly. Unlike
 // keep-edit-toggle/create-button (which toggle `d-none`),
 // has-id-indicator toggles `invisible` so its box stays in the
 // label row's layout, reserving space for whatever renders after it

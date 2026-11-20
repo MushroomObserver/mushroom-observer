@@ -24,7 +24,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     public :append_slot, :between_slot, :help_slot, :label_append_slot
 
     attr_reader :wrapper_options, :autocompleter_type, :textarea,
-                :find_text, :keep_text, :edit_text, :create_text,
+                :keep_text, :edit_text, :create_text,
                 :create, :create_path, :hidden_name, :hidden_value,
                 :hidden_data, :extra_controller_data, :extra_data,
                 :custom_controller_id, :map_outlet
@@ -52,7 +52,6 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def extract_button_options(options)
-      @find_text = options[:find_text]
       @keep_text = options[:keep_text]
       @edit_text = options[:edit_text]
       @create_text = options[:create_text]
@@ -191,10 +190,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     def label_end_content?
       return false if wrapper_options[:label] == false
 
-      !inline? || find_text || keep_text || label_append_slot || create_text
+      !inline? || keep_text || label_append_slot || create_text
     end
 
-    # has-id/find/keep/label_append come first, create button last.
+    # has-id/keep/label_append come first, create button last.
     def render_label_end
       render_label_after
       render_create_button if create_text && create.blank?
@@ -204,7 +203,6 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def render_label_after
       render_has_id_indicator unless inline?
-      render_find_button if find_text
       render_keep_edit_toggle if keep_text
       render(label_append_slot) if label_append_slot
     end
@@ -222,31 +220,13 @@ class Components::ApplicationForm < Superform::Rails::Form
       end
     end
 
-    # Plain Buttons, not Links -- client-side toggles with no
-    # destination, each building the tooltip data by hand.
-    def render_find_button
-      return unless find_text
-
-      Button(name: find_text,
-             icon: :find_on_map, show_label: :hidden,
-             icon_class: "text-primary",
-             variant: :link,
-             class: class_names(FieldLabelRow::GAP_LEADING,
-                                "find-btn d-none p-0"),
-             title: find_text,
-             data: { map_target: "showBoxBtn",
-                     action: "map#showBox",
-                     tooltip_target: "tip", placement: "top",
-                     title: find_text })
-    end
-
     # One button, two appearances -- CSS swaps icon/tooltip off the
     # `.active` class map#toggleBoxLock toggles (_icons.scss).
     def render_keep_edit_toggle
       return unless keep_text
 
       Button(name: keep_text,
-             icon: :apply, active_icon: :edit, active_content: edit_text,
+             icon: :find_on_map, active_icon: :edit, active_content: edit_text,
              show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
