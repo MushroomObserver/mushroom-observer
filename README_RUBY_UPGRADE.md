@@ -126,9 +126,9 @@ back on the new one when the deploy restarts them.
 ## Retiring the Rubies an upgrade leaves behind
 
 Before deleting a version of Ruby ensure that no tools are relying on
-it.  These are typically mentioned in the .ruby-version.  If found
-this useful for hunting down lingering directories that reference
-old versions of Ruby:
+it.  These are typically mentioned in the .ruby-version.  I have found
+this useful for hunting down lingering directories that reference old
+versions of Ruby:
 
 ```sh
 find ~ -maxdepth 4 -name .ruby-version -not -path "*/node_modules/*" \
