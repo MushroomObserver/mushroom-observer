@@ -256,7 +256,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     # shift position when the checkmark toggles.
     def render_has_id_indicator
       title = :autocompleter_has_id.l
-      span(class: "ml-3 has-id-indicator invisible inline-flex-center",
+      span(class: class_names(FieldLabelRow::GAP_LEADING,
+                              "has-id-indicator invisible inline-flex-center"),
            title: title,
            data: { target_attr_key => "hasIdIndicator",
                    tooltip_target: "tip", placement: "top" }) do
@@ -276,7 +277,8 @@ class Components::ApplicationForm < Superform::Rails::Form
              icon: :find_on_map, show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 find-btn d-none p-0",
+             class: class_names(FieldLabelRow::GAP_LEADING,
+                                "find-btn d-none p-0"),
              title: find_text,
              data: { map_target: "showBoxBtn",
                      action: "map#showBox",
@@ -302,7 +304,8 @@ class Components::ApplicationForm < Superform::Rails::Form
              show_label: :hidden,
              icon_class: "text-primary",
              variant: :link,
-             class: "ml-3 keep-edit-toggle d-none p-0",
+             class: class_names(FieldLabelRow::GAP_LEADING,
+                                "keep-edit-toggle d-none p-0"),
              title: keep_text,
              data: { target_attr_key => "keepOrEditBtn",
                      map_target: "boxLockToggle",
@@ -318,7 +321,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
       Button(name: create_text,
              id: "create_#{autocompleter_type}_btn",
-             class: "ml-3 create-button d-none p-0",
+             class: class_names(FieldLabelRow::GAP_LEADING,
+                                "create-button d-none p-0"),
              icon: :plus, show_label: :responsive,
              icon_class: "text-primary",
              variant: :link,
@@ -343,7 +347,7 @@ class Components::ApplicationForm < Superform::Rails::Form
            target: create_path,
            icon: :plus, show_label: :responsive,
            icon_class: "text-primary",
-           class: "ml-3 create-link",
+           class: class_names(FieldLabelRow::GAP_LEADING, "create-link"),
            data: { target_attr_key => "createLink" })
     end
 

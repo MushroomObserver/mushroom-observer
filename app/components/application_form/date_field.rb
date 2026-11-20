@@ -82,7 +82,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_month_select
-      select(name: date_param_name("2i"), class: "form-control mr-2",
+      select(name: date_param_name("2i"),
+             class: class_names("form-control", FieldLabelRow::GAP_TRAILING),
              id: "#{field_id}_2i") do
         month_options.each do |num, name|
           option(value: num, selected: num == current_month) { name }
@@ -91,7 +92,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_day_select
-      select(name: date_param_name("3i"), class: "form-control mr-2",
+      select(name: date_param_name("3i"),
+             class: class_names("form-control", FieldLabelRow::GAP_TRAILING),
              id: "#{field_id}_3i") do
         day_options.each do |day|
           option(value: day, selected: day == current_day) { day }
