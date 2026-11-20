@@ -131,11 +131,12 @@ class API2
         ),
         name: object_of(
           id: :integer, type: :string, name: :string, author: :string,
-          rank: :string, deprecated: :boolean, misspelled: :boolean,
-          citation: :string, notes: :string, created_at: :datetime,
-          updated_at: :datetime, number_of_views: :integer,
-          last_viewed: :datetime, ok_for_export: :boolean,
-          parents: :object_list, synonym_id: :integer
+          rank: :string, icn_id: :integer, deprecated: :boolean,
+          misspelled: :boolean, citation: :string, notes: :string,
+          created_at: :datetime, updated_at: :datetime,
+          number_of_views: :integer, last_viewed: :datetime,
+          ok_for_export: :boolean, parents: :object_list,
+          synonym_id: :integer
         ),
         name_description: object_of(
           id: :integer, type: :string, name_id: :integer,
