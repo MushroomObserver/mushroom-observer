@@ -91,7 +91,7 @@ class TableTest < ComponentTestCase
       t.column("Name", &:name)
     end
 
-    assert_html(html, ".panel#my-wrap")
+    assert_html(html, ".card#my-wrap")
     assert_no_html(html, "table#my-wrap")
   end
 
