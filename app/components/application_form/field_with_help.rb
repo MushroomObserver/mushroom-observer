@@ -18,13 +18,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     # don't inherit Components::Base.
     include Components::Localization
 
-    # help_icon_in_label_row: false moves the trigger elsewhere (used
-    # by AutocompleterField's label_end).
     def render_help_in_label_row
-      return unless help_slot && wrapper_options[:help_collapse]
-      return if wrapper_options[:help_icon_in_label_row] == false
-
-      render_help_icon
+      render_help_icon if help_slot && wrapper_options[:help_collapse]
     end
 
     def render_help_after_field

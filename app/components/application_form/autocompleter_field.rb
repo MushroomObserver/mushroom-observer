@@ -6,7 +6,6 @@ class Components::ApplicationForm < Superform::Rails::Form
   # rubocop:disable Metrics/ClassLength
   class AutocompleterField < ::Components::Form::Input
     include Phlex::Slotable
-    include FieldWithHelp # for render_help_icon
 
     # Types with dedicated Stimulus controllers
     SUPPORTED_TYPE_CONTROLLERS = [
@@ -169,7 +168,6 @@ class Components::ApplicationForm < Superform::Rails::Form
         wrap_data: { target_attr_key => "wrap" },
         wrap_class: class_names(wrapper_options[:wrap_class], "dropdown"),
         wrap_append_in_input_group: true,
-        help_icon_in_label_row: inline?,
         **addon_wrapper_options
       )
     end
@@ -183,24 +181,25 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def add_slots_to_field(field_component, &block)
-      add_label_appends_slot(field_component)
-
-      # Only wire up label_end when there's content -- an empty slot
-      # still forces the d-flex layout with an empty right side.
-      if create_text || help_icon_in_label_end?
-        field_component.with_label_end { render_label_end }
-      end
+      field_component.with_label_end { render_label_end } if label_end_content?
 
       field_component.with_between { render(between_slot) } if between_slot
       field_component.with_help { render(help_slot) } if help_slot
       field_component.with_append(&block) if block
     end
 
-    def add_label_appends_slot(field_component)
-      return if wrapper_options[:label] == false
-      return if inline? && !find_text && !keep_text
+    def label_end_content?
+      return false if wrapper_options[:label] == false
 
-      field_component.with_label_appends { render_label_after }
+      !inline? || find_text || keep_text || label_append_slot || create_text
+    end
+
+    # has-id/find/keep/label_append come first, create button last.
+    def render_label_end
+      render_label_after
+      render_create_button if create_text && create.blank?
+      render_modal_create_link if create_text && create.present? &&
+                                  create_path.present?
     end
 
     def render_label_after
@@ -208,18 +207,6 @@ class Components::ApplicationForm < Superform::Rails::Form
       render_find_button if find_text
       render_keep_edit_toggle if keep_text
       render(label_append_slot) if label_append_slot
-    end
-
-    # Help trigger comes last, after the create button.
-    def render_label_end
-      render_create_button if create_text && create.blank?
-      render_modal_create_link if create_text && create.present? &&
-                                  create_path.present?
-      render_help_icon if help_icon_in_label_end?
-    end
-
-    def help_icon_in_label_end?
-      !inline? && help_slot && wrapper_options[:help_collapse]
     end
 
     # `invisible`, not `d-none` -- keeps the box in layout so later
