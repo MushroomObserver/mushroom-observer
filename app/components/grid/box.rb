@@ -185,7 +185,7 @@ class Components::Grid::Box < Components::Base
                 end
     return unless obs_count > 1
 
-    li(class: "hanging-indent mt-3") do
+    li(class: "log-occurrence hanging-indent mt-3") do
       Link(type: :get, target: occurrence_path(occ),
            name: :matrix_box_occurrence.l, icon: :matrix,
            show_label: :responsive,
