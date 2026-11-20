@@ -22,9 +22,9 @@ class Tab::UserNav::LogOut < Tab::Collection
     Tab::UserNav::AdminMode.new(in_admin_mode: @in_admin_mode)
   end
 
-  # `in_admin_mode?` is session state alone, so an admin who turns it
-  # on and then switches to a non-admin user still needs the toggle to
-  # get back out.
+  # The second half keeps the "off" toggle on a page already in admin
+  # mode; `clear_admin_mode_for_nonadmins` keeps a non-admin out of
+  # that state, so it is defensive.
   def show_admin_mode?
     @user&.admin || @in_admin_mode
   end

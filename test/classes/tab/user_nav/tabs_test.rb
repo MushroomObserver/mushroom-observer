@@ -69,10 +69,11 @@ module Tab::UserNav
       )
     end
 
-    # An admin who turns admin mode on and then switches to a
-    # non-admin user keeps session[:admin], so the toggle has to stay
-    # available to get back out.
-    def test_log_out_with_non_admin_user_in_admin_mode
+    # The collection honours the flag it is handed, whoever the user
+    # is. Controller-side this pairing does not arise --
+    # `clear_admin_mode_for_nonadmins` drops `session[:admin]` for a
+    # non-admin, and `enter_sudo_session` drops it on Switch User.
+    def test_log_out_in_admin_mode_keeps_the_toggle
       tabs = Tab::UserNav::LogOut.new(
         user: @user, in_admin_mode: true
       ).to_a
