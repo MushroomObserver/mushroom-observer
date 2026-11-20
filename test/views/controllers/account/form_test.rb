@@ -19,7 +19,8 @@ module Views::Controllers::Account
 
       # Login field
       assert_html(html, "input[name='new_user[login]'][type='text']")
-      assert_includes(html, :signup_login.l)
+      assert_html(html, "label[for='new_user_login']", text: :signup_login.l)
+      assert_html(html, "#new_user_login_help", text: :signup_login_help.l)
 
       # Password fields
       assert_html(html,
@@ -45,7 +46,8 @@ module Views::Controllers::Account
 
       # Name field
       assert_html(html, "input[name='new_user[name]'][type='text']")
-      assert_includes(html, :signup_name.l)
+      assert_html(html, "label[for='new_user_name']", text: :signup_name.l)
+      assert_html(html, "#new_user_name_help", text: :signup_name_help.l)
 
       # Theme select
       assert_html(html, "select[name='new_user[theme]']")
