@@ -53,8 +53,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     )
     assert_html(html,
                 "a[href='#{routes.permanent_observation_path(sibling.id)}']")
-    assert_html(html, "#current_observation_row:first-child",
-                text: "(#{:show_observation_this_observation.l})")
+    assert_html(html,
+                "#current_observation_row .matching-observation-marker " \
+                ".mo-icon-chevron-right")
   end
 
   # The panel is the key a reader uses to decode a number on a
@@ -73,7 +74,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     assert_html(html, "a[href='#{path}'] .sibling-marker", text: "1")
     assert_no_html(html, "#current_observation_row .sibling-marker",
                    "The observation being shown carries no number")
-    assert_html(html, "#current_observation_row .sibling-marker-spacer")
+    assert_html(html, "#current_observation_row .mo-icon-chevron-right")
   end
 
   def test_no_markers_renders_no_numbers
@@ -85,11 +86,12 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
 
     assert_no_html(html, ".sibling-marker",
                    "No numbers without a marker map")
-    assert_no_html(html, ".sibling-marker-spacer",
-                   "No legend means no room reserved for one")
+    # The marker column still renders regardless -- the current
+    # observation's row always gets its chevron.
+    assert_html(html, "#current_observation_row .mo-icon-chevron-right")
   end
 
-  def test_every_row_leads_with_id_badge
+  def test_every_row_has_an_id_badge
     occurrence = occurrences(:occ_field_slip_one)
     current = occurrence.primary_observation
     sibling = add_sibling_to(occurrence)
@@ -99,6 +101,23 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
 
     assert_html(html, ".badge-id", text: current.id.to_s)
     assert_html(html, ".badge-id", text: sibling.id.to_s)
+  end
+
+  # Each row is a 3-column flex layout: marker, name, then id badge,
+  # in that column order -- so a long name wraps inside the name
+  # column instead of pushing the badge off the row (#5718 follow-up).
+  def test_row_columns_are_marker_then_name_then_id_badge
+    occurrence = occurrences(:occ_field_slip_one)
+    sibling = add_sibling_to(occurrence)
+
+    html = render(panel_with(siblings: [sibling], occurrence: occurrence,
+                             markers: { sibling.id => 1 }))
+
+    assert_html(
+      html,
+      ".matching-observation-marker ~ .matching-observation-name " \
+      "~ .badge-id"
+    )
   end
 
   # The current observation isn't a link, so its badge shouldn't be
@@ -157,8 +176,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
   end
 
   # Both icons apply when the occurrence primary is also a read-only
-  # reflection. The first icon follows the badge (whose margin is the
-  # gap); the second follows the first icon and needs a gap too.
+  # reflection. The first icon is the name column's first child (no
+  # gap needed there); the second follows the first icon and needs
+  # a gap.
   def test_primary_and_reflection_icons_both_render_with_second_gapped
     occurrence = occurrences(:occ_field_slip_one)
     primary = occurrence.primary_observation

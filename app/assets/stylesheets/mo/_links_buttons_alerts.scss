@@ -435,9 +435,21 @@ button:disabled {
   text-decoration: none;
 }
 
-// Holds a badge's width on an unnumbered row, so every row's id badge
-// in the Matching Observations panel starts at the same place.
-.sibling-marker-spacer {
-  display: inline-block;
-  width: 1.6em;
+// Matching Observations panel row: marker | name | id badge. The
+// name is the only column that grows -- min-width: 0 lets it wrap
+// instead of pushing the id badge out of the row. Mirrors Matrix::
+// Box's .log-heading row, with a leading marker column added.
+.matching-observation-row {
+  @extend .d-flex, .align-items-start, .gap-2;
+}
+
+// Fixed width whether or not this row has a marker, so every row's
+// name starts at the same place.
+.matching-observation-marker {
+  flex: 0 0 1.5rem;
+}
+
+.matching-observation-name {
+  flex: 1 1 auto;
+  min-width: 0;
 }
