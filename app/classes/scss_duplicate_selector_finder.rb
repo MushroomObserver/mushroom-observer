@@ -23,11 +23,8 @@ class ScssDuplicateSelectorFinder
 
   # One file's scan state: the open `{`/`}` frame stack, any selector
   # lines buffered ahead of their `{`, and the shared result index.
-  FileScan = Struct.new(:path, :frames, :pending_selector, :index) do
-    def initialize(path:, index:)
-      super(path, [], [], index)
-    end
-  end
+  FileScan = Struct.new(:path, :frames, :pending_selector, :index,
+                        keyword_init: true)
 
   def self.call(paths)
     new(paths).call
@@ -55,7 +52,10 @@ class ScssDuplicateSelectorFinder
   # key => { "property-name" => ["file:line", ...] }
   def properties_by_key
     index = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = [] } }
-    @paths.each { |path| scan_file(FileScan.new(path: path, index: index)) }
+    @paths.each do |path|
+      scan_file(FileScan.new(path: path, frames: [], pending_selector: [],
+                             index: index))
+    end
     index
   end
 

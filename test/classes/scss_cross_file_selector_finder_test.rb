@@ -5,8 +5,16 @@ require("test_helper")
 class ScssCrossFileSelectorFinderTest < UnitTestCase
   def test_flags_a_top_level_selector_opened_in_two_files
     findings = scan(
-      ".foo { color: red; }",
-      ".foo { background: blue; }"
+      <<~SCSS,
+        .foo {
+          color: red;
+        }
+      SCSS
+      <<~SCSS
+        .foo {
+          background: blue;
+        }
+      SCSS
     )
 
     assert_equal(1, findings.size)
@@ -15,8 +23,16 @@ class ScssCrossFileSelectorFinderTest < UnitTestCase
 
   def test_does_not_flag_a_selector_only_opened_in_one_file
     findings = scan(
-      ".foo { color: red; }",
-      ".bar { color: blue; }"
+      <<~SCSS,
+        .foo {
+          color: red;
+        }
+      SCSS
+      <<~SCSS
+        .bar {
+          color: blue;
+        }
+      SCSS
     )
 
     assert_empty(findings)
@@ -37,8 +53,20 @@ class ScssCrossFileSelectorFinderTest < UnitTestCase
 
   def test_does_not_flag_a_selector_only_nested_inside_another_in_one_file
     findings = scan(
-      ".foo { .shared { color: red; } }",
-      ".bar { .shared { color: blue; } }"
+      <<~SCSS,
+        .foo {
+          .shared {
+            color: red;
+          }
+        }
+      SCSS
+      <<~SCSS
+        .bar {
+          .shared {
+            color: blue;
+          }
+        }
+      SCSS
     )
 
     assert_empty(findings)
@@ -46,8 +74,16 @@ class ScssCrossFileSelectorFinderTest < UnitTestCase
 
   def test_splits_comma_separated_selectors_independently
     findings = scan(
-      ".a, .b { color: red; }",
-      ".a { color: blue; }"
+      <<~SCSS,
+        .a, .b {
+          color: red;
+        }
+      SCSS
+      <<~SCSS
+        .a {
+          color: blue;
+        }
+      SCSS
     )
 
     assert_equal(1, findings.size)
@@ -56,8 +92,16 @@ class ScssCrossFileSelectorFinderTest < UnitTestCase
 
   def test_does_not_split_commas_inside_parens
     findings = scan(
-      "a:not(.x, .y) { color: red; }",
-      "a:not(.x, .y) { background: blue; }"
+      <<~SCSS,
+        a:not(.x, .y) {
+          color: red;
+        }
+      SCSS
+      <<~SCSS
+        a:not(.x, .y) {
+          background: blue;
+        }
+      SCSS
     )
 
     assert_equal(1, findings.size)
@@ -72,7 +116,11 @@ class ScssCrossFileSelectorFinderTest < UnitTestCase
           color: red;
         }
       SCSS
-      ".parent .child { color: blue; }"
+      <<~SCSS
+        .parent .child {
+          color: blue;
+        }
+      SCSS
     )
 
     assert_equal(1, findings.size)

@@ -43,6 +43,7 @@ class Components::ApplicationForm < Superform::Rails::Form
   class RadioField < Phlex::HTML
     include Phlex::Slotable
     include Phlex::TrustedHtml
+    include Phlex::Rails::Helpers::ClassNames
 
     slot :between
     slot :append
