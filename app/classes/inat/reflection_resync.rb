@@ -79,7 +79,9 @@ class Inat
     private
 
     def absent_result(reflection, absent)
-      absent == :deleted ? deleted(reflection) : unchanged(reflection)
+      return deleted(reflection) if absent == :deleted
+
+      unchanged(reflection)
     end
 
     def failed_result(reflection)
