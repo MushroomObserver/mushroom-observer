@@ -78,25 +78,6 @@ ul.tight-list {
   padding-left: 1em;
 }
 
-.panel {
-  color: $panel-default-text;
-
-  .table-responsive {
-    border-color: transparent;
-  }
-  .border-top {
-    border-top: 1px solid $panel-inner-border;
-  }
-  .border-bottom {
-    border-bottom: 1px solid $panel-inner-border;
-  }
-}
-
-.panel-title {
-  font-size: $font-size-base;
-  font-weight: bold;
-}
-
 .h3.page-title {
   font-size: 18px;
 
