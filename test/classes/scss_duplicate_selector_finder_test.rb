@@ -17,6 +17,29 @@ class ScssDuplicateSelectorFinderTest < UnitTestCase
     assert_equal("color", findings.first.property)
   end
 
+  def test_flags_duplicate_property_in_single_line_rules
+    findings = scan(<<~SCSS)
+      .foo { color: red; }
+      .foo { color: blue; }
+    SCSS
+
+    assert_equal(1, findings.size)
+    assert_equal("color", findings.first.property)
+  end
+
+  def test_handles_sass_interpolation_in_the_selector
+    findings = scan(<<~SCSS)
+      .btn-\#{$variant} {
+        color: red;
+      }
+      .btn-\#{$variant} {
+        color: blue;
+      }
+    SCSS
+
+    assert_equal(1, findings.size)
+  end
+
   def test_does_not_flag_different_properties_on_reopened_selector
     findings = scan(<<~SCSS)
       .foo {

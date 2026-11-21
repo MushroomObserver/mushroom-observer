@@ -21,6 +21,26 @@ class ScssCrossFileSelectorFinderTest < UnitTestCase
     assert_equal(".foo", findings.first.selector)
   end
 
+  def test_flags_a_single_line_rule_opened_in_two_files
+    findings = scan(
+      ".foo { color: red; }",
+      ".foo { background: blue; }"
+    )
+
+    assert_equal(1, findings.size)
+    assert_equal(".foo", findings.first.selector)
+  end
+
+  def test_handles_sass_interpolation_in_the_selector
+    findings = scan(
+      ".btn-\#{$variant} { color: red; }",
+      ".btn-\#{$variant} { background: blue; }"
+    )
+
+    assert_equal(1, findings.size)
+    assert_equal(".btn-\#{$variant}", findings.first.selector)
+  end
+
   def test_does_not_flag_a_selector_only_opened_in_one_file
     findings = scan(
       <<~SCSS,
