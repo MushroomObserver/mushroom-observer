@@ -386,10 +386,6 @@ form {
     margin-bottom: 0.25rem;
   }
 
-  .faceted-search-form & .row:last-child .form-group {
-    margin-bottom: 0.15625rem; // 2.5px at the 16px root -- #5527
-  }
-
   + .card-collapse {
     .card-body {
       padding-top: 0 !important;
