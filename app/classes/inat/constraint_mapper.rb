@@ -23,7 +23,7 @@ class Inat
 
     # Part of the place cache key: a miss is cached too, so changing
     # how places match needs a new version to look them up again.
-    PLACE_MATCHING_VERSION = 2
+    PLACE_MATCHING_VERSION = 3
 
     # iNat writes an infraspecific name without the rank marker MO
     # uses: MO's "Hygrophorus nemoreus var. raphaneus" is its
@@ -163,9 +163,27 @@ class Inat
     def matching_place(query, spellings, location)
       place_candidates(query).find do |place|
         place_names(place).any? do |place_name|
-          spellings.any? { |name| place_name.casecmp?(name) }
+          spellings.any? { |name| same_place_name?(place_name, name) }
         end && overlaps?(place, location)
       end&.dig("id")
+    end
+
+    # iNat spells a place with its diacritics where MO's Location
+    # may not: its Quebec is "Québec". Both sides are folded so
+    # either spelling answers for the other. A name in a script
+    # transliteration cannot carry folds to "?", which would let
+    # two unrelated names match, so those compare unfolded.
+    def same_place_name?(one, other)
+      return true if one.casecmp?(other)
+
+      folded = [one, other].map { |name| fold_diacritics(name) }
+      return false if folded.any? { |name| name.include?("?") }
+
+      folded.first.casecmp?(folded.last)
+    end
+
+    def fold_diacritics(name)
+      ActiveSupport::Inflector.transliterate(name.to_s)
     end
 
     # iNat names a county by its bare name ("Adams") and spells it out
