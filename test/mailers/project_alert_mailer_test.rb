@@ -27,6 +27,17 @@ class ProjectAlertMailerTest < MailerTestCase
     )
   end
 
+  # A row MO recorded: no site, no remote ids, and the record whose
+  # arrival said so as the target.
+  def local_activity(obs, target)
+    ProjectAlert.create!(
+      project: @project, observation: obs, target: target,
+      name: obs.name.text_name, target_name: "Coprinus comatus",
+      kind: ProjectAlert::OTHER_ACTIVITY, observed_on: obs.when,
+      alerted_at: Time.zone.now
+    )
+  end
+
   def test_html_digest
     mary.update!(email_html: true)
 
@@ -67,6 +78,77 @@ class ProjectAlertMailerTest < MailerTestCase
     ).message
 
     assert_includes(mail.body.to_s, :unknown.l)
+  end
+
+  # An activity row says what happened, which the ledger holds and
+  # the message used to leave to the coordinator to find out.
+  def test_an_activity_row_names_a_comment
+    obs = observations(:coprinus_comatus_obs)
+    comment = comments(:detailed_unknown_obs_comment)
+
+    mail = ProjectAlertMailer.build(
+      receiver: mary, alerts: [local_activity(obs, comment)]
+    ).message
+
+    assert_includes(mail.body.to_s,
+                    :email_project_alert_what_comment.l)
+  end
+
+  def test_an_activity_row_names_the_proposed_name
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    row = local_activity(obs, naming)
+    row.update!(name: "Agaricus campestris")
+
+    mail = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: [row]).message
+
+    assert_includes(
+      mail.body.to_s,
+      :email_project_alert_what_naming.l(name: naming.name.text_name)
+    )
+  end
+
+  # A naming of the name the row already opens with says so without
+  # reading the name out twice.
+  def test_a_confirming_naming_does_not_repeat_the_name
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+
+    mail = ProjectAlertMailer.build(
+      receiver: mary, alerts: [local_activity(obs, naming)]
+    ).message
+
+    assert_includes(mail.body.to_s,
+                    :email_project_alert_what_naming_unnamed.l)
+  end
+
+  # A row from a site names the identification instead.
+  def test_an_activity_row_from_a_site_names_the_identification
+    mail = ProjectAlertMailer.build(
+      receiver: mary,
+      alerts: [alert(kind: ProjectAlert::OTHER_ACTIVITY)]
+    ).message
+
+    assert_includes(
+      mail.body.to_s,
+      :email_project_alert_what_identification.l(name: "Coprinus comatus")
+    )
+  end
+
+  # A find's message already says an observation arrived, so its row
+  # keeps the plain shape with nothing appended.
+  def test_a_find_row_says_nothing_about_what_happened
+    body = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: [alert]).message.body.to_s
+
+    assert_includes(
+      body,
+      :email_project_alert_row.l(name: "Coprinus comatus",
+                                 date: Date.parse("2026-09-20").web_date,
+                                 projects: @project.title)
+    )
+    assert_not_includes(body, :email_project_alert_what_comment.l)
   end
 
   def test_several_alerts_are_one_message

@@ -216,6 +216,21 @@ class ProjectAlert < AbstractModel
     kind == NEW_OBSERVATION
   end
 
+  # What happened, for a row of an activity message: the row holds
+  # the record whose arrival said so, and a coordinator told that
+  # something changed wants to know what. Nil for a find, whose
+  # message already says an observation arrived.
+  def activity_phrase
+    return nil unless kind == OTHER_ACTIVITY
+    return identification_phrase if external_site_id
+
+    case target_type
+    when "Comment" then :email_project_alert_what_comment.l
+    when "Naming" then naming_phrase
+    when "Observation" then :email_project_alert_what_observation.l
+    end
+  end
+
   # What groups alerts into messages: one message per watched name per
   # kind, so a subject line can name the taxon.
   def message_key
@@ -223,6 +238,24 @@ class ProjectAlert < AbstractModel
   end
 
   private
+
+  def identification_phrase
+    :email_project_alert_what_identification.l(name: name.to_s)
+  end
+
+  # The Naming's name, not the row's: the row carries the
+  # observation's name, and what the coordinator has not seen is
+  # what somebody proposed. The bare phrase covers a Naming since
+  # deleted, and a proposal of the name the row already opens with,
+  # which would otherwise read it out twice.
+  def naming_phrase
+    proposed = target&.name&.text_name
+    if proposed.blank? || proposed == name
+      return :email_project_alert_what_naming_unnamed.l
+    end
+
+    :email_project_alert_what_naming.l(name: proposed)
+  end
 
   # A row says what it alerted on, whichever source it came from.
   def names_what_it_alerted_on

@@ -221,4 +221,50 @@ class ProjectAlertTest < UnitTestCase
 
     assert_not(alert.valid?)
   end
+
+  # The phrase an activity row carries, per source and per record.
+  def test_activity_phrase_per_target
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+
+    comment = comments(:detailed_unknown_obs_comment)
+
+    assert_equal(:email_project_alert_what_comment.l,
+                 local_activity(obs, comment).activity_phrase)
+    # One row per project per record, by unique index, so the
+    # confirming case is the same row with the row's name restored.
+    proposal = local_activity(obs, naming)
+    proposal.update!(name: "Agaricus campestris")
+
+    assert_equal(
+      :email_project_alert_what_naming.l(name: naming.name.text_name),
+      proposal.activity_phrase
+    )
+
+    proposal.update!(name: naming.name.text_name)
+
+    assert_equal(:email_project_alert_what_naming_unnamed.l,
+                 proposal.activity_phrase)
+    assert_equal(:email_project_alert_what_observation.l,
+                 local_activity(obs, obs).activity_phrase)
+  end
+
+  # A find says an observation arrived; the row adds nothing.
+  def test_a_find_has_no_activity_phrase
+    obs = observations(:coprinus_comatus_obs)
+    find = local_activity(obs, obs)
+    find.update!(kind: ProjectAlert::NEW_OBSERVATION)
+
+    assert_nil(find.activity_phrase)
+  end
+
+  def local_activity(obs, target)
+    ProjectAlert.create!(
+      project: projects(:rare_fungi_project), observation: obs,
+      target: target, name: obs.name.text_name,
+      target_name: obs.name.text_name,
+      kind: ProjectAlert::OTHER_ACTIVITY, observed_on: obs.when,
+      alerted_at: Time.zone.now
+    )
+  end
 end
