@@ -18,6 +18,9 @@ module Views::Controllers::Account::Login
           )
         )
       end
+      Alert(level: :info, id: "login_security_notice") do
+        trusted_html(:login_security_notice.t)
+      end
       # An unsaved User, so Superform posts to #create rather than
       # picking PATCH off a persisted record.
       render(Views::Controllers::Account::Login::PasswordResetRequired::
