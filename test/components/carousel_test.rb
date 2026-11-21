@@ -43,7 +43,8 @@ class CarouselTest < ComponentTestCase
     )
 
     assert_html(html, ".carousel.slide[id='test_carousel']" \
-                      "[data-ride='false'][data-interval='false']")
+                      "[data-ride='false'][data-interval='false']" \
+                      "[data-wrap='false']")
     assert_html(html, ".carousel-inner[role='listbox'] " \
                       ".item.active[id='slide_1']", text: "SLIDE_ONE")
     assert_html(html, ".carousel-inner .item[id='slide_2']",
@@ -111,7 +112,8 @@ class CarouselTest < ComponentTestCase
   end
 
   # `extra_data` merges into the outer div's `data-*` attributes,
-  # alongside the always-emitted `data-ride` / `data-interval` pair.
+  # alongside the always-emitted `data-ride` / `data-interval` /
+  # `data-wrap` trio.
   def test_extra_data_merges_into_outer_data_attributes
     html = render_carousel(
       carousel_args: {

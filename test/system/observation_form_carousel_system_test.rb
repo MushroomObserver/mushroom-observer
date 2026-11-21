@@ -111,8 +111,25 @@ class ObservationFormCarouselSystemTest < ApplicationSystemTestCase
     assert_selector(".carousel-item[data-image-status='upload']",
                     count: 2, wait: 10, visible: :all)
 
-    assert_selector("#{carousel} .carousel-control", visible: :visible,
-                                                     count: 2)
+    # data-wrap="false" (Components::Carousel) stops the JS from
+    # cycling past either end -- a :has()-based CSS rule
+    # (_carousel.scss) hides the control that would do nothing there,
+    # keyed off which .item currently carries .active. The newly
+    # uploaded slide is not auto-activated, so slide 1 is still
+    # active here: prev stays hidden, next is the one JS revealed.
+    assert_no_selector("#{carousel} .carousel-control-prev",
+                       visible: :visible)
+    assert_selector("#{carousel} .carousel-control-next", visible: :visible)
+
+    find("#{carousel} .carousel-control-next").click
+    assert_selector("#{carousel} .carousel-control-prev", visible: :visible)
+    assert_no_selector("#{carousel} .carousel-control-next",
+                       visible: :visible)
+
+    # Back to slide 1 -- an inactive slide's remove button isn't
+    # visible, same as any other content inside it.
+    find("#{carousel} .carousel-control-prev").click
+    assert_selector("#{carousel} .carousel-control-next", visible: :visible)
 
     image_wrapper = first(".carousel-item[data-image-status='upload']",
                           visible: :all)
