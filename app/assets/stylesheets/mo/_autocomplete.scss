@@ -14,7 +14,6 @@
 // _icons.scss being @import-ed after this file in
 // mushroom_observer.scss.
 .has-id-indicator .mo-icon,
-.find-btn .mo-icon,
 .keep-edit-toggle .mo-icon,
 .create-button .mo-icon,
 .info-collapse-trigger .mo-icon {
@@ -40,7 +39,7 @@
 
 // autocompleter state (do we have a match?) is no longer handled
 // here -- the autocompleter controller's cssHasIdOrNo toggles
-// `.has-id-indicator`'s visibility directly. Unlike find-btn/
+// `.has-id-indicator`'s visibility directly. Unlike
 // keep-edit-toggle/create-button (which toggle `d-none`),
 // has-id-indicator toggles `invisible` so its box stays in the
 // label row's layout, reserving space for whatever renders after it
@@ -48,14 +47,10 @@
 // carries `.inline-flex-center` (see _icons.scss) directly for the
 // icon centering, rather than relying on an implicit selector.
 
-// An autocompleter used as one item in a `.flex-bar` row (field +
-// submit button on one line, e.g. Components::Description::
-// NewDraftForm) needs its box to grow and fill the row -- its label
-// row (if any) and visible input still stack normally inside it, so
-// `.form-group` itself stays a plain block, not a flex container.
-// Scoped under `.flex-bar` so it doesn't change the stacked
-// label-row layout every other autocompleter uses.
-.flex-bar {
+// The autocompleter grows to fill the row; its label row (if any)
+// and visible input still stack normally inside it, so `.form-group`
+// stays a plain block, not a flex container.
+.autocompleter-row {
   .autocompleter {
     display: flex;
     align-items: center;

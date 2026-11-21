@@ -12,10 +12,12 @@
 # that's additive, not competing.
 #
 # Does not parse Sass -- no compiler, no asset pipeline involvement.
-# Plain line-based brace tracking, same approach as a text-based
-# RuboCop cop. Comma-separated selectors are split so each one is
-# tracked independently, and a selector spanning multiple lines
-# before its `{` is joined into one string first.
+# Each line is split into "{"/"}"/";" -delimited segments rather than
+# assumed to carry one rule-open/declaration/close apiece, so a
+# single-line rule (".foo { color: red; }") is read the same way a
+# multi-line one would be. Comma-separated selectors are split so
+# each one is tracked independently, and a selector spanning
+# multiple lines before its `{` is joined into one string first.
 class ScssDuplicateSelectorFinder
   Finding = Struct.new(:key, :property, :locations, keyword_init: true)
 
@@ -23,11 +25,8 @@ class ScssDuplicateSelectorFinder
 
   # One file's scan state: the open `{`/`}` frame stack, any selector
   # lines buffered ahead of their `{`, and the shared result index.
-  FileScan = Struct.new(:path, :frames, :pending_selector, :index) do
-    def initialize(path:, index:)
-      super(path, [], [], index)
-    end
-  end
+  FileScan = Struct.new(:path, :frames, :pending_selector, :index,
+                        keyword_init: true)
 
   def self.call(paths)
     new(paths).call
@@ -55,7 +54,10 @@ class ScssDuplicateSelectorFinder
   # key => { "property-name" => ["file:line", ...] }
   def properties_by_key
     index = Hash.new { |h, k| h[k] = Hash.new { |h2, k2| h2[k2] = [] } }
-    @paths.each { |path| scan_file(FileScan.new(path: path, index: index)) }
+    @paths.each do |path|
+      scan_file(FileScan.new(path: path, frames: [], pending_selector: [],
+                             index: index))
+    end
     index
   end
 
@@ -64,33 +66,95 @@ class ScssDuplicateSelectorFinder
       line = raw.strip
       next if line.empty? || line.start_with?("//")
 
-      process_line(scan, line, idx + 1)
+      segments(line).each do |text, delim|
+        process_segment(scan, text, delim, idx + 1)
+      end
     end
   end
 
-  # A line ending in "," is a selector-list continuation (e.g.
-  # `th:first-child,`), not a property declaration -- its leading
-  # pseudo-class can otherwise look like one to PROPERTY_RE.
-  def process_line(scan, line, line_no)
-    if line.end_with?("{")
-      open_frame(scan, line)
-    elsif line == "}"
-      scan.frames.pop
-    elsif !line.end_with?(",") && (m = PROPERTY_RE.match(line))
+  def process_segment(scan, text, delim, line_no)
+    case delim
+    when "{" then open_frame(scan, text)
+    when "}" then close_frame(scan, text, line_no)
+    when ";" then record_or_buffer(scan, text, line_no)
+    else scan.pending_selector << text
+    end
+  end
+
+  # A ";"-terminated segment is always a declaration-like statement,
+  # not a selector-list fragment (a selector is followed by more
+  # selector text or "{", not ";") -- record it if it looks like a
+  # property, otherwise drop it (e.g. a bare `@include foo;`).
+  def record_or_buffer(scan, text, line_no)
+    if (m = PROPERTY_RE.match(text))
       record_property(scan, m[1], line_no)
-    else
-      scan.pending_selector << line
+    elsif !text.empty?
+      scan.pending_selector << text
     end
   end
 
-  def open_frame(scan, line)
-    text = (scan.pending_selector + [line[0..-2].strip]).join(" ").strip
+  # Leftover text before "}" with no trailing ";" (the semicolon
+  # before a rule's last declaration is optional) is still a
+  # declaration to record, not a selector fragment to buffer.
+  def close_frame(scan, text, line_no)
+    record_or_buffer(scan, text, line_no)
+    scan.frames.pop
+  end
+
+  def open_frame(scan, text_fragment)
+    text = (scan.pending_selector + [text_fragment]).join(" ").strip
     scan.pending_selector.clear
     if text.start_with?("@")
       scan.frames.push(media: text, selectors: nil)
     else
       scan.frames.push(media: nil, selectors: split_selector_list(text))
     end
+  end
+
+  # Splits +line+ into (text, delimiter) pairs at each "{"/"}"/";",
+  # so a single-line rule yields the same open/declare/close events a
+  # multi-line one would across several lines. Sass interpolation
+  # ("#{...}") is copied through as opaque text -- its braces aren't
+  # rule delimiters. A trailing pair with a nil delimiter means the
+  # line ended mid-selector or mid-declaration; it's carried to the
+  # next line via pending_selector.
+  def segments(line)
+    chars = line.each_char.to_a
+    parts = []
+    buffer = +""
+    i = 0
+    i = consume_char(chars, i, buffer, parts) while i < chars.length
+    parts << [buffer.strip, nil] unless buffer.strip.empty?
+    parts
+  end
+
+  def consume_char(chars, idx, buffer, parts)
+    char = chars[idx]
+    return copy_interpolation(chars, idx, buffer) if char == "#" &&
+                                                     chars[idx + 1] == "{"
+
+    if %w[{ } ;].include?(char)
+      parts << [buffer.strip, char]
+      buffer.clear
+    else
+      buffer << char
+    end
+    idx + 1
+  end
+
+  # Copies "#{...}" (tracking any braces nested inside it) verbatim
+  # into +buffer+ and returns the index just past its closing "}".
+  def copy_interpolation(chars, start, buffer)
+    buffer << '#{'
+    i = start + 2
+    depth = 1
+    while i < chars.length && depth.positive?
+      buffer << chars[i]
+      depth += 1 if chars[i] == "{"
+      depth -= 1 if chars[i] == "}"
+      i += 1
+    end
+    i
   end
 
   # A plain `text.split(",")` also splits inside `:not(.a, .b)`-style
@@ -125,25 +189,37 @@ class ScssDuplicateSelectorFinder
   # each selector on the innermost frame, combined with every
   # ancestor selector frame (so `.a .b { color: red }` keys on the
   # full `.a > .b` path, not bare `.b`) and every `@`-rule condition
-  # wrapping it.
+  # wrapping it. A comma-separated ancestor (`.a, .b { .c { ... } }`)
+  # keys on each ancestor selector separately -- joining them into
+  # one string would miss a duplicate against a rule that reopens
+  # `.c` under just `.a`.
   def record_property(scan, property, line_no)
     return unless innermost_selector_frame?(scan.frames)
 
-    key_prefix = selector_key_prefix(scan.frames)
-    scan.frames.last[:selectors].each do |selector|
-      key = "#{key_prefix} > #{selector}"
+    each_key(scan.frames) do |key|
       scan.index[key][property] << "#{scan.path}:#{line_no}"
     end
   end
 
-  def selector_key_prefix(frames)
-    media_conditions = frames.filter_map { |f| f[:media] }
-    ancestor_path = ancestor_selector_path(frames)
-    "#{media_conditions.join(" / ")} :: #{ancestor_path.join(" > ")}"
+  def each_key(frames, &block)
+    media_prefix = media_conditions_prefix(frames)
+    ancestor_combinations(frames).each do |ancestor_path|
+      frames.last[:selectors].each do |selector|
+        path = (ancestor_path + [selector]).join(" > ")
+        yield("#{media_prefix} :: #{path}")
+      end
+    end
   end
 
-  def ancestor_selector_path(frames)
+  def media_conditions_prefix(frames)
+    frames.filter_map { |f| f[:media] }.join(" / ")
+  end
+
+  def ancestor_combinations(frames)
     selector_frames = frames.reject { |f| f[:selectors].nil? }
-    selector_frames[0..-2].map { |f| f[:selectors].join(",") }
+    ancestor_lists = selector_frames[0..-2].pluck(:selectors)
+    return [[]] if ancestor_lists.empty?
+
+    ancestor_lists[0].product(*ancestor_lists[1..])
   end
 end

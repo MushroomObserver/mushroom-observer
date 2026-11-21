@@ -886,6 +886,9 @@ export default class BaseAutocompleterController extends Controller {
     this.storeCurrentHiddenData();
     this.updateHiddenTargetValue(match);
     this.cssHasIdOrNo(parseInt(match['id']));
+    // Marks the selected name as already fetched, so a later refresh
+    // (e.g. a plain click) doesn't re-query and risk losing the match.
+    this.last_fetch_request = match['name'];
     this.hiddenIdChanged();
   }
 
@@ -1125,8 +1128,8 @@ export default class BaseAutocompleterController extends Controller {
       }
     }
     if (this.hasCreateBtnTarget && this.TYPE !== "location_google") {
+      clearTimeout(this.create_timer);
       if (matches.length === 0) {
-        clearTimeout(this.create_timer);
         this.create_timer = setTimeout(() => {
           this.createBtnTarget.classList.remove('d-none');
         }, 1000)

@@ -162,13 +162,16 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # `between` content is rendered after the label text inside each
-    # option's `<label>`, wrapped in `<div class="d-inline-block ml-3">`.
-    # Applied uniformly to every option (one slot per RadioField call).
-    # For per-option metadata, supply different content per call site.
+    # option's `<label>`, wrapped in a `d-inline-block` div carrying
+    # `FieldLabelRow::GAP_LEADING`. Applied uniformly to every option
+    # (one slot per RadioField call). For per-option metadata, supply
+    # different content per call site.
     def render_between_slot
       return unless between_slot
 
-      div(class: "d-inline-block ml-3") { render(between_slot) }
+      div(class: class_names("d-inline-block", FieldLabelRow::GAP_LEADING)) do
+        render(between_slot)
+      end
     end
 
     def index_for(value_str)

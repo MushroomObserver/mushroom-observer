@@ -42,7 +42,8 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template
       div do
-        div(class: "d-inline-block mr-4") do
+        div(class: class_names("d-inline-block",
+                               FieldLabelRow::GAP_TRAILING)) do
           @form.select_field(@field_name, @options,
                              label: @label,
                              inline: true,
