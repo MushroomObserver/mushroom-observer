@@ -29,6 +29,12 @@ class Views::Controllers::Observations::Namings::Fields < Views::Base
   prop :add_namespace, _Boolean, default: true
 
   def view_template
+    # Hidden field tells controller where form was submitted from --
+    # rendered before the autocompleter so it stays :last-child of
+    # its container, which _form_elements.scss keys its trailing
+    # margin-bottom reduction on.
+    input(type: "hidden", name: "context", value: @context) if @context
+
     if @add_namespace
       @form.namespace(:naming) do |naming_ns|
         render_name_autocompleter(naming_ns)
@@ -36,8 +42,6 @@ class Views::Controllers::Observations::Namings::Fields < Views::Base
     else
       render_name_autocompleter(@form)
     end
-    # Hidden field tells controller where form was submitted from
-    input(type: "hidden", name: "context", value: @context) if @context
   end
 
   private
