@@ -44,6 +44,11 @@
 // Same $dropdown-link-* variables Bootstrap's `.dropdown-item`
 // rule uses, so button-shaped and link-shaped items match.
 .dropdown-menu {
+  // Same rem bump _elements.scss applies to body/.btn/.form-control.
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9375rem; // 15px at 16px root
+  }
+
   button.btn-link {
     padding: $dropdown-item-padding-y $dropdown-item-padding-x;
   }
