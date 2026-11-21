@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Login required &middot; Mushroom Observer</title>
+<style>
+  /* Amanita theme palette, hard-coded since static pages can't @import SCSS. */
+  :root {
+    --bg: #383138;
+    --text: #cdcec9;
+    --heading: #ebcc79;
+    --link: #aa9a83;
+    --link-hover: #ebe4de;
+    --muted: #aa9a83;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
+                 Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    min-height: 100vh;
+  }
+  body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem 1rem;
+  }
+  .container {
+    max-width: 720px;
+    width: 100%;
+    text-align: center;
+  }
+  .logo {
+    max-width: 320px;
+    width: 80%;
+    height: auto;
+    margin: 0 auto 2rem;
+    display: block;
+  }
+  h1 {
+    color: var(--heading);
+    font-size: 2rem;
+    margin: 0 0 1.5rem;
+    font-weight: 400;
+  }
+  p {
+    font-size: 1.125rem;
+    margin: 0 0 1rem;
+  }
+  p.muted {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.95em;
+    white-space: nowrap;
+  }
+  a {
+    color: var(--link);
+    text-decoration: underline;
+  }
+  a:hover { color: var(--link-hover); }
+  @media (min-width: 720px) {
+    h1 { font-size: 2.5rem; }
+    .logo { max-width: 400px; }
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <img class="logo" src="/MO-Full-Logo-Dark-400.png" alt="Mushroom Observer">
+    <h1>This page needs a login</h1>
+    <p>
+      Most of Mushroom Observer is open to people with a verified account.
+      Automated crawlers were requesting pages faster than our
+      volunteer-funded server could answer them, so the lists, the searches
+      and most other pages ask for a login first.
+    </p>
+    <p>
+      <a href="/account/login/new">Log in, or create a free account</a>.
+    </p>
+    <!-- Which addresses stay open, and why, is the linked article's
+         job; repeating it here is what made this page long. -->
+    <p class="muted">
+      <a href="/articles/46">Why so many pages now require a login</a>
+    </p>
+  </div>
+</body>
+</html>
