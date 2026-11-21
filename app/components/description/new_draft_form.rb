@@ -43,9 +43,8 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
     super do
       # .flex-bar's align-items-center would vertically center the
       # button against the label+input stack rather than the input
-      # row -- align-items-end overrides it, kept alongside .flex-bar
-      # so the .autocompleter flex-grow rules still apply.
-      div(class: "flex-bar align-items-end gap-2") do
+      # row -- align-items-end overrides it.
+      div(class: "flex-bar autocompleter-row align-items-end gap-2") do
         render_project_field
         submit(:show_description_new_draft_submit.ti,
                variant: :outline, size: :sm)

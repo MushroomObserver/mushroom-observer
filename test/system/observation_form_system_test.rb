@@ -1184,6 +1184,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     button = find("#observation_location_autocompleter #create_location_btn",
                   visible: :all)
     assert_includes(button[:class].split, "d-none")
+
+    # Clicking the field (no text change) used to re-reveal the
+    # button ~1s later -- a stale create_timer from before the
+    # refetch resolved fired after the corrected match was found.
+    find_by_id("observation_place_name").click
+    assert_no_selector("#create_location_btn", visible: :visible, wait: 1.5)
   end
 
   # Bug fix: After EXIF sets lat/lng and swaps to location_containing mode,

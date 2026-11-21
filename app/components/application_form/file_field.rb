@@ -68,7 +68,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     def render_label_row
-      label(for: field.dom.id, class: "mr-3") { label_text }
+      label(for: field.dom.id, class: FieldLabelRow::GAP_TRAILING) { label_text }
     end
 
     def render_file_input_button

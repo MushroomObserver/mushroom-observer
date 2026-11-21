@@ -162,8 +162,8 @@ class Components::Button < Components::Base
   end
 
   def merged_class
-    class_names(stateful_class, btn_styling, size_class(@size),
-                @attributes[:class])
+    class_names(stateful_class, icon_wrapper_class, btn_styling,
+                size_class(@size), @attributes[:class])
   end
 
   def extra_attrs

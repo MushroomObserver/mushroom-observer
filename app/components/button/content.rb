@@ -40,4 +40,10 @@ module Components::Button::Content
   def stateful_class
     "stateful-link" if @active_icon && @active_content
   end
+
+  # Skipped when `btn_styling` is present -- `.btn:has(.mo-icon)`
+  # already flex-centers those (`_icons.scss`).
+  def icon_wrapper_class
+    "inline-flex-center" if @icon && btn_styling.blank?
+  end
 end
