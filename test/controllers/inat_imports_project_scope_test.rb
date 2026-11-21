@@ -18,6 +18,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     @admin = users(:rolf)
     stub_resolved_targets
     stub_resolved_places
+    save_inat_lookups(@project)
   end
 
   # The project's target locations, which narrow the search alongside
@@ -230,6 +231,8 @@ class InatImportsProjectScopeTest < FunctionalTestCase
   def test_an_import_whose_targets_do_not_resolve_is_refused
     site = project_site
     stub_unresolved_targets
+    Rails.cache.clear
+    save_inat_lookups(@project)
 
     login(@admin.login)
     post(:create, params: { project_site: site.id, consent: "1",
@@ -239,6 +242,26 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     assert_flash_error
     assert_unprocessable
     assert_empty(InatImport.where(user: @admin, project_id: @project.id))
+  end
+
+  # An import of only the targets iNat answered for would cover less
+  # than the project means.
+  def test_an_import_whose_targets_were_not_all_checked_is_refused
+    site = project_site
+    Rails.cache.clear
+
+    login(@admin.login)
+    post(:create, params: { project_site: site.id, consent: "1",
+                            inat_username: "rolf_on_inat",
+                            import_others: "1", confirmed: "1" })
+
+    assert_flash_error(:inat_import_project_targets_unchecked,
+                       count: @project.target_names.size +
+                              @project.target_locations.size)
+    assert_unprocessable
+    assert_empty(InatImport.where(user: @admin, project_id: @project.id),
+                 "An incomplete lookup should start no import")
+    assert_enqueued_with(job: InatTargetLookupJob, args: [@project])
   end
 
   def stub_taxon_validation

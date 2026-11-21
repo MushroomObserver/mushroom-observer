@@ -70,4 +70,16 @@ module InatImportsController::ProjectScope
     )
     false
   end
+
+  def project_targets_checked?
+    return true unless project_admin_import?
+    return true if project_search.complete?
+
+    InatTargetLookupJob.perform_later(scoped_project_site.project)
+    flash_error(:inat_import_project_targets_unchecked.t(
+                  count: project_search.targets_to_look_up -
+                         project_search.targets_looked_up
+                ))
+    false
+  end
 end

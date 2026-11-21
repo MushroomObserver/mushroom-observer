@@ -15,6 +15,7 @@ module Views::Controllers::Projects::ExternalSites
       add_project_banner(@project)
       add_page_title(:project_sites_title.l)
       container_class(:wide)
+      turbo_stream_from(InatTargetLookupJob.stream(@project))
 
       @sites.each { |site| render_site_panel(site) }
     end

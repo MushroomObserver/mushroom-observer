@@ -45,4 +45,25 @@ module InatStubHelpers
     "(#{RbConfig::CONFIG["host_os"]} #{RbConfig::CONFIG["host_cpu"]}) " \
     "ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
   end
+
+  # Pages, imports and alerts read only saved iNat target lookups, and
+  # the test environment caches nothing. This saves a project's lookups
+  # in a memory store, as InatTargetLookupJob would, from whatever the
+  # test stubbed iNat to answer.
+  def save_inat_lookups(project)
+    use_memory_cache
+    Inat::ConstraintMapper.new(project, look_up: true).look_up_targets
+  end
+
+  def use_memory_cache
+    return if @cache_before_memory_store
+
+    @cache_before_memory_store = Rails.cache
+    Rails.cache = ActiveSupport::Cache::MemoryStore.new
+  end
+
+  def after_teardown
+    Rails.cache = @cache_before_memory_store if @cache_before_memory_store
+    super
+  end
 end

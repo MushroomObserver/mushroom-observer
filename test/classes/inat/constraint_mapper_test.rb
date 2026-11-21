@@ -48,7 +48,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
   end
 
   def test_a_project_with_no_constraints_has_no_params
-    assert_empty(Inat::ConstraintMapper.new(projects(:eol_project)).params)
+    assert_empty(lookup_mapper(projects(:eol_project)).params)
   end
 
   def test_target_names_become_taxon_ids
@@ -56,7 +56,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_taxon("Agaricus campestris", 48_701)
     stub_place("Burbank", 1, burbank_bounds)
 
-    params = Inat::ConstraintMapper.new(@project).params
+    params = lookup_mapper(@project).params
 
     assert_equal("47347,48701", params[:taxon_id])
   end
@@ -69,7 +69,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_taxon("Coprinus comatus", 47_347)
     stub_taxon("Agaricus campestris", 48_701)
 
-    taxa = Inat::ConstraintMapper.new(@project).target_taxa
+    taxa = lookup_mapper(@project).target_taxa
 
     assert_equal({ 47_347 => "Coprinus comatus",
                    48_701 => "Agaricus campestris" }, taxa)
@@ -78,7 +78,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
   def test_unresolved_names_fall_back_to_the_importable_taxa
     stub_json("taxa", [])
     stub_json("places", [])
-    mapper = Inat::ConstraintMapper.new(@project)
+    mapper = lookup_mapper(@project)
     params = mapper.params
 
     assert_equal(Inat::Constants::IMPORTABLE_TAXON_IDS_ARG, params[:taxon_id])
@@ -90,7 +90,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_json("taxa", [])
     stub_place("Burbank", 962, burbank_bounds)
 
-    params = Inat::ConstraintMapper.new(@project).params
+    params = lookup_mapper(@project).params
 
     assert_equal("962", params[:place_id])
   end
@@ -100,7 +100,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
   def test_a_place_elsewhere_is_rejected
     stub_json("taxa", [])
     stub_place("Burbank", 962, [[100.0, 10.0], [101.0, 11.0]])
-    mapper = Inat::ConstraintMapper.new(@project)
+    mapper = lookup_mapper(@project)
     params = mapper.params
 
     assert_nil(params[:place_id])
@@ -114,7 +114,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_place("Burbank", 962, [[100.0, 10.0], [101.0, 11.0]],
                type: "Polygon")
 
-    assert_nil(Inat::ConstraintMapper.new(@project).params[:place_id])
+    assert_nil(lookup_mapper(@project).params[:place_id])
   end
 
   def test_a_polygon_place_that_overlaps_is_accepted
@@ -122,7 +122,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_place("Burbank", 962, burbank_bounds, type: "Polygon")
 
     assert_equal("962",
-                 Inat::ConstraintMapper.new(@project).params[:place_id])
+                 lookup_mapper(@project).params[:place_id])
   end
 
   def test_the_project_box_and_dates
@@ -133,7 +133,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_json("taxa", [])
     stub_json("places", [])
 
-    params = Inat::ConstraintMapper.new(project).params
+    params = lookup_mapper(project).params
 
     assert_equal(locations(:burbank).south, params[:swlat])
     assert_equal(locations(:burbank).east, params[:nelng])
@@ -150,10 +150,157 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_place("Burbank", 1, burbank_bounds)
 
     with_memory_cache do
-      2.times { Inat::ConstraintMapper.new(@project).params }
+      2.times { lookup_mapper(@project).params }
     end
 
     assert_requested(:get, inat_api_matcher("taxa"), times: 2)
+  end
+
+  # A miss iNat answered is remembered, so it is not asked for again.
+  def test_a_name_inat_does_not_know_is_not_looked_up_twice
+    stub_json("taxa", [])
+    stub_json("places", [])
+    second = nil
+
+    with_memory_cache do
+      lookup_mapper(@project).params
+      second = lookup_mapper(@project)
+      second.params
+    end
+
+    assert_requested(:get, inat_api_matcher("taxa"),
+                     times: miss_lookups)
+    assert_equal(@project.target_names.map(&:text_name),
+                 second.unresolved_names,
+                 "A remembered miss should still be reported as unknown")
+  end
+
+  # One search for each spelling of a name; its synonyms include it.
+  def miss_lookups
+    @project.target_names.sum do |name|
+      (name.synonyms.map(&:text_name) | [name.text_name]).size
+    end
+  end
+
+  # A refused request is not an answer: the name is neither reported
+  # as unknown nor remembered, so the next request looks it up again.
+  def test_a_failed_lookup_is_not_remembered_or_reported
+    stub_request(:get, inat_api_matcher("taxa")).
+      to_return({ status: 429 }, { status: 200, body: taxa_body })
+    stub_json("places", [])
+    first = second = nil
+
+    with_memory_cache do
+      first = lookup_mapper(@project)
+      first.params
+      second = lookup_mapper(@project)
+      second.params
+    end
+
+    assert_not(first.complete?, "A refused lookup should be incomplete")
+    assert_empty(first.unresolved_names,
+                 "A refused lookup should not be reported as unknown")
+    assert(second.complete?, "The next mapper should look the name up")
+    assert_includes(second.target_taxon_ids, 47_347,
+                    "The next mapper should resolve the name")
+  end
+
+  def taxa_body
+    { results: [{ id: 47_347, name: "Coprinus comatus" },
+                { id: 48_701, name: "Agaricus campestris" }] }.to_json
+  end
+
+  # Once iNat refuses one request, sending the rest would only be
+  # refused too.
+  def test_no_lookups_are_sent_after_one_fails
+    stub_request(:get, inat_api_matcher("taxa")).to_return(status: 429)
+    stub_json("places", [])
+    mapper = lookup_mapper(@project)
+    params = mapper.params
+
+    assert_requested(:get, inat_api_matcher("taxa"), times: 1)
+    assert_not_requested(:get, inat_api_matcher("places"))
+    assert_not(mapper.complete?, "A refused lookup should be incomplete")
+    assert_nil(params[:place_id], "Unchecked places should not be searched")
+    assert_empty(mapper.unresolved_locations,
+                 "Unchecked places should not be reported as unknown")
+    assert_equal(@project.target_names.size + @project.target_locations.size,
+                 mapper.unchecked_count,
+                 "Every target should count as unchecked")
+  end
+
+  # Pages, imports and alerts read saved lookups and ask iNat nothing.
+  def test_without_look_up_only_saved_lookups_are_read
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_json("places", [])
+    mapper = Inat::ConstraintMapper.new(@project)
+
+    assert_equal(Inat::Constants::IMPORTABLE_TAXON_IDS_ARG,
+                 mapper.params[:taxon_id],
+                 "Targets with no saved lookup should not be searched")
+    assert_not_requested(:get, inat_api_matcher("taxa"))
+    assert_not_requested(:get, inat_api_matcher("places"))
+    assert_equal(mapper.target_count, mapper.unchecked_count,
+                 "Every target should count as unchecked, once each")
+    assert_equal(0, mapper.looked_up_count,
+                 "Nothing should count as looked up")
+    assert_empty(mapper.unresolved_names,
+                 "A target with no saved lookup is not unknown")
+  end
+
+  def test_without_look_up_saved_lookups_resolve
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_json("places", [])
+    save_inat_lookups(@project)
+    WebMock.reset_executed_requests!
+    mapper = Inat::ConstraintMapper.new(@project)
+
+    assert_equal("47347,48701", mapper.params[:taxon_id],
+                 "Saved lookups should be searched")
+    assert(mapper.complete?, "Every target has a saved lookup")
+    assert_equal(mapper.target_count, mapper.looked_up_count,
+                 "Every target should count as looked up")
+    assert_not_requested(:get, inat_api_matcher("taxa"))
+  end
+
+  # The job paces its lookups against iNat's rate limit, and is told
+  # about each answer so it can report progress.
+  def test_lookups_are_paced_and_reported
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_json("places", [])
+    answers = []
+    pauses = []
+    mapper = Inat::ConstraintMapper.new(@project, look_up: true, pace: 3) do |m|
+      answers << m.new_answers
+    end
+
+    mapper.stub(:sleep, ->(seconds) { pauses << seconds }) do
+      mapper.look_up_targets
+    end
+
+    expected = (1..mapper.target_count).to_a
+    assert_equal(expected, answers, "Each answer should be reported")
+    assert_equal([3] * (mapper.target_count - 1), pauses,
+                 "Every lookup after the first should wait")
+  end
+
+  def test_a_failed_place_lookup_is_not_reported
+    stub_taxon("Coprinus comatus", 47_347)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_request(:get, inat_api_matcher("places")).to_return(status: 500)
+    mapper = lookup_mapper(@project)
+    mapper.params
+
+    assert_not(mapper.complete?, "A refused lookup should be incomplete")
+    assert_empty(mapper.unresolved_locations,
+                 "A refused lookup should not be reported as unknown")
+  end
+
+  def lookup_mapper(project)
+    Inat::ConstraintMapper.new(project, look_up: true)
   end
 
   def with_memory_cache
@@ -172,7 +319,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_taxon_miss("Amanita boudieri var. beillei")
     stub_taxon("Amanita boudieri beillei", 352_461)
 
-    params = Inat::ConstraintMapper.new(project).params
+    params = lookup_mapper(project).params
 
     assert_equal("352461", params[:taxon_id])
   end
@@ -185,7 +332,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_place_miss("Elgin Co.")
     stub_place("Elgin County", 7_898, elgin_bounds)
 
-    params = Inat::ConstraintMapper.new(project).params
+    params = lookup_mapper(project).params
 
     assert_equal("7898", params[:place_id])
   end
@@ -200,7 +347,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
     stub_place("Elgin County", 7_898, elgin_bounds,
                name: "Elgin", display_name: "Elgin County, ON, CA")
 
-    params = Inat::ConstraintMapper.new(project).params
+    params = lookup_mapper(project).params
 
     assert_equal("7898", params[:place_id])
   end
