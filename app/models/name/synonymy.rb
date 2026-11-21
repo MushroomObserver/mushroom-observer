@@ -217,15 +217,17 @@ module Name::Synonymy
 
   private
 
-  # array of synonyms with the most observations, sorted by observation_count
+  # Approved synonyms tied for the most observations. One grouped
+  # count covers every candidate, where `observation_count` is a
+  # COUNT per Name. A Name with no observations is absent from the
+  # counts, so a set of candidates with none ties at zero.
   def preferred_synonyms_with_most_observations
-    betters = preferreds_by_observation_count_descending
-    max_observations = betters.first&.observation_count
-    betters.select { |name| name.observation_count == max_observations }
-  end
+    candidates = other_approved_synonyms
+    return candidates if candidates.empty?
 
-  def preferreds_by_observation_count_descending
-    other_approved_synonyms.sort_by { |name| -name.observation_count }
+    counts = ObservationCounter.counts_for(candidates)
+    most = counts.values.max || 0
+    candidates.select { |name| counts.fetch(name.id, 0) == most }
   end
 
   def most_recently_updated(names)
