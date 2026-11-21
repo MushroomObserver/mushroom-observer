@@ -42,7 +42,8 @@ class Components::Carousel < Components::Base
   prop :controls_hidden, _Boolean, default: false
   prop :show_indicators, _Boolean, default: true
   # Arbitrary `data-*` attributes merged onto the outer `<div>` (after
-  # the always-emitted `data-ride="false"` / `data-interval="false"`).
+  # the always-emitted `data-ride="false"` / `data-interval="false"` /
+  # `data-wrap="false"`).
   # Keys are symbols (Phlex/Rails dasherizes them — `:form_images_target`
   # → `data-form-images-target`); values may be strings or anything
   # else that responds to `#to_s` (Phlex stringifies on render).
@@ -89,7 +90,8 @@ class Components::Carousel < Components::Base
 
     div(id: @carousel_id,
         class: class_names("carousel slide", @wrapper_class),
-        data: { ride: "false", interval: "false", **@extra_data }) do
+        data: { ride: "false", interval: "false", wrap: "false",
+                **@extra_data }) do
       render_inner
       render_controls if @show_controls
       render_indicators if @show_indicators

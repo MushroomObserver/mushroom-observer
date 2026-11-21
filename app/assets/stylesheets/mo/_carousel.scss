@@ -151,6 +151,21 @@
   right: 0;
 }
 
+// data-wrap="false" (Components::Carousel) stops the JS from
+// cycling past either end, but Bootstrap 4 doesn't hide the control
+// that would do nothing there -- hide it ourselves.
+.carousel:has(> .carousel-inner > .item:first-child.active) {
+  .carousel-control-prev {
+    display: none;
+  }
+}
+
+.carousel:has(> .carousel-inner > .item:last-child.active) {
+  .carousel-control-next {
+    display: none;
+  }
+}
+
 // The indicator strip is a sibling of .carousel-inner, below it in
 // normal flow -- without this, the controls' bottom:0 spans the
 // photo + indicators combined, centering the icon over both instead
