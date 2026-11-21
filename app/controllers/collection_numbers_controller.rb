@@ -27,6 +27,7 @@ class CollectionNumbersController < ApplicationController
   # view. Each key must resolve to `CollectionNumber.order_by_<key>`.
   def index_sort_options
     [
+      ["name_and_number", :sort_by_name_and_number.l],
       ["name",       :sort_by_name.l],
       ["number",     :sort_by_number.l],
       ["created_at", :sort_by_created_at.l],
@@ -268,8 +269,12 @@ class CollectionNumbersController < ApplicationController
     @collection_number.change_corresponding_herbarium_records(old_format_name)
     flash_notice(:runtime_updated_at.t(type: :collection_number))
 
-    if modal_submission?(:collection_number)
-      # back_object should be the obs, sent via :back param from the link
+    # `@back_object` is only an Observation when the edit modal was
+    # opened from the obs show page (sub-panel) -- the index page's
+    # own modal edit has no obs to update, so it falls through to the
+    # redirect, same as destroy's turbo_stream fallback.
+    if modal_submission?(:collection_number) &&
+       @back_object.is_a?(Observation)
       @observation = @back_object
       render_collection_numbers_section_update
     else

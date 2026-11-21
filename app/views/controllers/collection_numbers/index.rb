@@ -31,50 +31,33 @@ module Views::Controllers::CollectionNumbers
 
     # Headerless `Components::Table` (`show_headers: false`).
     def render_rows_table
-      Table(@objects, variant: :striped, class: "mt-3",
-                      show_headers: false) do |t|
-        t.column("") { |cn| render_edit_link(cn) }
+      Table(@objects, variant: :striped, show_headers: false) do |t|
         t.column("") { |cn| render_format_name_link(cn) }
         t.column("") { |cn| render_observation_links(cn) }
-        t.column("") { |cn| render_delete_button(cn) }
+        t.column("") { |cn| render_actions(cn) }
       end
     end
 
-    def render_edit_link(collection_number)
-      return unless can_edit?(collection_number)
-
-      Button(type: :edit, target: collection_number,
-             size: :sm)
+    def render_actions(collection_number)
+      InlineCRUDLinks(target: collection_number, observation: @observation,
+                      user: @user)
     end
 
     def render_format_name_link(collection_number)
       i do
-        a(href: collection_number_path(collection_number)) do
-          trusted_html(collection_number.format_name.t)
-        end
+        Link(type: :object, object: collection_number,
+             name: collection_number.format_name.t)
       end
     end
 
     def render_observation_links(collection_number)
       collection_number.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: permanent_observation_path(obs)) do
+        Link(type: :get, name: obs.unique_format_name.t,
+             target: permanent_observation_path(obs)) do
           trusted_html(obs.unique_format_name.t)
         end
       end
-    end
-
-    def render_delete_button(collection_number)
-      return unless can_edit?(collection_number)
-
-      Button(
-        type: :delete,
-        target: collection_number, variant: :outline, size: :sm
-      )
-    end
-
-    def can_edit?(collection_number)
-      in_admin_mode? || collection_number.can_edit?(@user)
     end
   end
 end

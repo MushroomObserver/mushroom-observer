@@ -15,9 +15,8 @@ module Views::Controllers::Projects::Locations
 
     def view_template
       div(id: "locations_table") do
-        render_target_summary if @grouped_data.any?
-        render_target_groups if @grouped_data.any?
-        render_ungrouped if @ungrouped_locations.any?
+        render_locations_table if @grouped_data.any? ||
+                                  @ungrouped_locations.any?
         render_target_remove_footnote if show_target_remove_footnote?
       end
     end
@@ -30,24 +29,6 @@ module Views::Controllers::Projects::Locations
       @admin = @project.is_admin?(@user)
     end
 
-    # --- Summary line above the table ---
-
-    def render_target_summary
-      total = @grouped_data.size
-      with_obs = @grouped_data.count do |group|
-        target_obs_count(group[:target], group[:sub_locations]).positive?
-      end
-      without_obs = total - with_obs
-
-      div(class: "my-3") do
-        plain(
-          :project_target_locations_summary.t(
-            total: total, with_obs: with_obs, without_obs: without_obs
-          )
-        )
-      end
-    end
-
     # --- Footnote explaining the red X (admin-only) ---
 
     def show_target_remove_footnote?
@@ -56,18 +37,39 @@ module Views::Controllers::Projects::Locations
 
     def render_target_remove_footnote
       p(class: "mt-3") do
-        Icon(type: :x, class: "text-danger")
+        Icon(type: :remove, class: "text-danger")
         whitespace
         plain(:project_target_locations_remove_footnote.l)
       end
     end
 
+    def render_locations_table
+      Table(variant: :striped, identifier: "project-members") do |tab|
+        tab.column(:location.ti)
+        tab.column(:observations.ti, align: :center)
+        tab.column(:project_aliases.ti, align: :center)
+        tab.column(:project_target_locations_title.l, align: :center) if admin?
+        add_target_group_bodies(tab) if @grouped_data.any?
+        add_ungrouped_bodies(tab) if @ungrouped_locations.any?
+      end
+    end
+
     # --- Target location groups (collapsible) ---
 
-    def render_target_groups
-      render_locations_table do |t|
-        @grouped_data.each { |group| add_group_bodies(t, group) }
+    def add_target_group_bodies(tab)
+      tab.legend(target_summary_text)
+      @grouped_data.each { |group| add_group_bodies(tab, group) }
+    end
+
+    def target_summary_text
+      total = @grouped_data.size
+      with_obs = @grouped_data.count do |group|
+        target_obs_count(group[:target], group[:sub_locations]).positive?
       end
+      without_obs = total - with_obs
+      :project_target_locations_summary.t(
+        total: total, with_obs: with_obs, without_obs: without_obs
+      )
     end
 
     def add_group_bodies(tab, group)
@@ -87,11 +89,16 @@ module Views::Controllers::Projects::Locations
     def render_target_row(target, collapse_id, count, subs)
       tr do
         render_target_name_cell(target, collapse_id, subs)
-        td(class: Components::Table.valign_class(:middle)) do
-          plain(count.to_s)
-        end
+        render_count_cell(count)
         render_aliases_cell(target)
         render_target_column(target) if admin?
+      end
+    end
+
+    def render_count_cell(count)
+      td(class: class_names(Components::Table.valign_class(:middle),
+                            Components::Table.align_class(:center))) do
+        plain(count.to_s)
       end
     end
 
@@ -116,7 +123,7 @@ module Views::Controllers::Projects::Locations
       Link(type: :collapse_toggle,
            target_id: collapse_id,
            collapsed: true,
-           class: "panel-collapse-trigger") do
+           class: "panel-collapse-trigger inline-flex-center") do
         Icon(type: :chevron_down, title: :open.ti, class: "active-icon",
              center_tooltip: true)
         Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
@@ -129,26 +136,12 @@ module Views::Controllers::Projects::Locations
       count
     end
 
-    # --- Ungrouped locations (flat table) ---
+    # --- Ungrouped locations (flat body) ---
 
-    def render_ungrouped
-      render_locations_table(@ungrouped_locations) do |t|
-        t.row { |loc| render_location_row(loc) }
-      end
-    end
-
-    def render_locations_table(rows = nil, &block)
-      Table(rows,
-            variant: :striped, identifier: "project-members",
-            class: "mt-3") do |t|
-        t.column(:location.ti)
-        t.column(:observations.ti)
-        t.column(:project_aliases.ti)
-        if admin?
-          t.column(:project_target_locations_title.l,
-                   align: :center)
-        end
-        yield(t)
+    def add_ungrouped_bodies(tab)
+      tab.legend(:project_locations_not_targets.l)
+      tab.body do
+        @ungrouped_locations.each { |loc| render_location_row(loc) }
       end
     end
 
@@ -158,9 +151,7 @@ module Views::Controllers::Projects::Locations
       count = @obs_counts[loc.id] || 0
       tr do
         render_location_name_cell(loc, indent: indent)
-        td(class: Components::Table.valign_class(:middle)) do
-          plain(count.to_s)
-        end
+        render_count_cell(count)
         render_aliases_cell(loc)
         td { nil } if admin?
       end
@@ -178,7 +169,8 @@ module Views::Controllers::Projects::Locations
     end
 
     def render_aliases_cell(loc)
-      td(class: Components::Table.valign_class(:middle)) do
+      td(class: class_names(Components::Table.valign_class(:middle),
+                            Components::Table.align_class(:center))) do
         render(Views::Controllers::Projects::Aliases::Widget.new(
                  project: @project, target: loc
                ))

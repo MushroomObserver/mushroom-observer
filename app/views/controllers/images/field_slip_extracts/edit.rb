@@ -18,10 +18,7 @@ module Views::Controllers::Images::FieldSlipExtracts
       container_class(:full)
 
       render_flags
-      Row do
-        Column(xs: 12, md: 5) { render_slip_photo }
-        Column(xs: 12, md: 7) { render_form }
-      end
+      render_main_row
       render_provenance
     end
 
@@ -90,6 +87,13 @@ module Views::Controllers::Images::FieldSlipExtracts
            target: new_project_alias_path(project_id: project.id))
     end
 
+    def render_main_row
+      Row do
+        div(class: left_column_class_for(:four_eight)) { render_slip_photo }
+        div(class: right_column_class_for(:four_eight)) { render_form }
+      end
+    end
+
     def render_slip_photo
       InteractiveImage(image: @extract.image, user: @user, votes: false)
     end
@@ -101,7 +105,8 @@ module Views::Controllers::Images::FieldSlipExtracts
                       review: FormObject::FieldSlipReview.build(
                         extract: @extract, observation: @observation,
                         user: @user
-                      )))
+                      ),
+                      class: "mb-3"))
     end
 
     # Which setup produced these values -- the part that stays useful

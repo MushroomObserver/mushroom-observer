@@ -74,9 +74,8 @@ module SpeciesLists
       query = Query.lookup_and_save(:Observation, species_lists: spl)
       params = { q: @controller.q_param(query) }
       get(:new, params: { id: spl.id })
-      url = print_labels_for_observations_path(params:)
-      assert_select("form[action='#{url}'][data-turbo='false']")
-
+      # No standalone print-labels form -- the embedded "Print Labels"
+      # button in the observations-downloads form below covers it.
       url = download_species_list_path(spl.id, params:)
       assert_select("form[action='#{url}'][data-turbo='false']")
 

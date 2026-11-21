@@ -5,7 +5,7 @@
 # single user preference applies.
 class Title::Image < Title
   def page_title(_user = nil)
-    @object.format_name.t.small_author
+    [append_colon(:image.ti), @object.format_name.t.small_author].safe_join
   end
 
   # Plain-text title for the browser tab `<title>`. Mirrors

@@ -372,6 +372,8 @@
   admins: admins
   admin_group: admin group
   admin_groups: admin groups
+  alias: alias
+  aliases: aliases
   annotations: annotations
   # ("Author" is person(s) who wrote a book, description, or news Article.)
   author: author
@@ -1366,7 +1368,7 @@
   download_observations_windows: WINDOWS-1252 (best for Excel)
   download_observations_utf8: UTF-8 (most universal)
   download_observations_utf16: UTF-16 (best for Windows 7 and up)
-  download_observations_print_labels_header: Or you can print labels for the selected observations
+  download_observations_print_labels_header: Print labels for the selected observations
   download_observations_print_labels: Print Labels
   download_observations_too_many_results: You are trying to download too many Observations. Please see <a href="https://github.com/MushroomObserver/mushroom-observer/blob/main/README_API.md#csv-files" target="_new">CSV Files</a> for an alternative.
 
@@ -1625,8 +1627,6 @@
   form_synonyms_missing_names: The following names could not be found.
   form_synonyms_missing_names_help: Click [:name_change_synonyms_submit] to create these names. If you want to correct any names, do so in the area below and click [:name_change_synonyms_submit] to re-evaluate the list.
 
-  image_title_with_subject: "[subject] image"
-
   # images/new
   image_set_default: Set as default thumbnail
   image_add_default: Default thumbnail
@@ -1705,9 +1705,8 @@
   list_observations_download_as_csv: Download Observations
 
   # locations/list_place_names (list_locations)
+  list_place_names_header: Location Name
   list_place_names_map: Map Locations
-  list_place_names_merge: Merge
-  list_place_names_parenthetical: Number shows Observation count.
   list_place_names_undef: Unmapped Place Names
   list_place_names_undef_tooltip: Observations with this place name
   list_place_names_undef_merge_tooltip: Merge with a mapped location
@@ -1997,6 +1996,7 @@
   # admin/excluded_inat_users
   excluded_inat_users_title: Excluded iNat Users
   excluded_inat_users_help: "iNaturalist users without an MO account who have opted out of having their data included on MO. Imports bring in only the facts of observations they posted: no images and no notes. Someone with an MO account opts out on their profile instead."
+  excluded_inat_users_none_yet: No excluded iNaturalist users yet.
   excluded_inat_user_login: iNaturalist login
   excluded_inat_user_reason: Reason (optional)
   excluded_inat_user_added_by: Added
@@ -2007,7 +2007,7 @@
 
   # account/reverify
   reverify_link: Reverify
-  reverify_note: "Your account, [user], has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
+  reverify_note: "Your account, <b>[user]</b>, has not been verified yet.\n\nCheck your email for your verification URL or click the link below to have the verification email resent."
 
   # rss_logs/rss
   rss_description: List of changes to [:app_title] as they happen.
@@ -2055,7 +2055,8 @@
   show_description_adjust_permissions: Adjust Permissions
   show_description_read_permissions: View
   show_description_write_permissions: Edit
-  show_description_list_title: Descriptions of this [type]
+  show_description_list_title: All descriptions of this [type]
+  show_description_list_current: this [:description]
   show_description_new_draft_toggle: Is this for a Project?
   show_description_new_draft_submit: Create Draft
   show_description_clone_help: Create your own description based on this description.
@@ -2164,6 +2165,8 @@
   show_namings_suggest_names: Name Suggestions
   show_namings_cast: Cast Vote
   show_namings_user: "[:user.ti]"
+  show_namings_proposed_by: "Proposed by [user]."
+  show_namings_vote_on_names: Vote on Names
   show_namings_consensus_help: For each name listed above select your opinion of how well that name applies to this observation. Select '[:show_namings_propose_new_name]' if you want to suggest another option. See the "How to Use":/info/how_to_use#voting page for more details on how the votes are tallied.
   show_namings_lose_changes: You must click '[:show_namings_update_votes]' to save any changes you've made to your votes.
 
@@ -2275,8 +2278,10 @@
 
   # account/signup
   signup_title: Account signup
-  signup_name: Name (optional). Do not include your email unless you want to display it to all users
-  signup_login: Desired login. Do not include your email unless you want to display it to all users
+  signup_name: Name (optional)
+  signup_name_help: Do not include your email unless you want to display it to all users
+  signup_login: Desired login
+  signup_login_help: Do not include your email unless you want to display it to all users
   signup_email_address: Email address
   signup_email_confirmation: Confirm email
   signup_choose_password: Choose password
@@ -2355,8 +2360,6 @@
 
   # species_list/download
   species_list_download_title: Observation List Reports and Downloads
-  species_list_labels_header: Print Labels for Observation
-  species_list_labels_button: Print Labels
   species_list_report_header: Save a Checklist of Names
   species_list_report_button: Save Names
   species_list_download_header: Download Observation Data
@@ -2644,7 +2647,6 @@
   visual_group_includes_names: Includes images from these names (at most 10 listed here)
 
   # Links to CRUD pages
-  visual_group_show: Show [:visual_group.ti]
   visual_group_create: Create [:visual_group.ti]
 
   # visual_groups/show
@@ -2707,7 +2709,7 @@
   field_slip_extract_propose: Propose this as a name for the observation
   field_slip_extract_locality: Locality
   field_slip_extract_apply: Save this to the observation
-  field_slip_extract_inat: This is an iNaturalist observation id
+  field_slip_extract_inat: is an iNat ID
   field_slip_extract_currently: "Currently: [value]"
   field_slip_extract_location_guess: "The slip reads [written]. This project already uses [suggestion], which is filled in below — check it before saving."
   field_slip_extract_name_proposed: "Proposed [name] as a name for this observation."
@@ -2724,6 +2726,7 @@
   field_slip_extract_attach_code: attach this field slip
   field_slip_extract_code_matches: matches the attached field slip
   field_slip_extract_none_yet: This photo has not been scanned for field slip data yet.
+  field_slip_extract_no_data: No data was read from this photo.
   field_slip_scan_title: "Field Slip Scans for Observation [id]"
   field_slip_scan_help: Scan the photo that shows the field slip. Photos already scanned link to their results.
   field_slip_scan_review: Review Scan Results
@@ -2779,6 +2782,7 @@
   show_observation_matching_observations: Matching Observations
   show_observation_occurrence_primary: Primary observation of this occurrence
   show_observation_reflection_read_only: Reflection of an imported source
+  show_observation_sibling_marker: From observation [id]
   show_observation_this_observation: this observation
   show_occurrence_location_differs: Location information differs across observations in this occurrence.
   edit_occurrence_add_heading: Add Recently Viewed Observations
@@ -2810,6 +2814,7 @@
   project_alias_created: Project Alias was successfully created.
   project_alias_destroyed: Project Alias was successfully deleted.
   project_alias_edit: Edit Project Alias [name]
+  project_alias_must_be_admin: You must be a project admin to create, edit, or delete project aliases.
   project_alias_new: New Project Alias
   project_alias_type: Alias Type
   project_alias_updated: Project Alias was successfully updated.
@@ -2864,6 +2869,7 @@
   project_target_location_confirm_remove: Remove "[name]" from target locations?
   project_target_locations_summary: "Target locations: [total] total, [with_obs] with observations, [without_obs] with no observations."
   project_target_locations_remove_footnote: Remove this target location from the project
+  project_locations_not_targets: Locations not marked as targets
 
   # Project Updates Tab
   project_updates_title: Update
@@ -2995,7 +3001,7 @@
 
   # location/list_merge_options
   list_merge_are_you_sure: Assign location? This cannot be undone.
-  list_merge_options_near_matches: Near Matches
+  list_merge_options_mapped_locations: Mapped Locations
   list_merge_options_title: Location Matches for [where]
 
   # observation/inat_imports
@@ -3133,10 +3139,10 @@
   # description/merge_descriptions
   merge_descriptions_title: Merge [object]
   move_descriptions_title: Move [object]
-  merge_descriptions_merge_header: Merge with another description
   merge_descriptions_move_header: Move / copy to a synonym
   merge_descriptions_move_location_header: Move / copy to another location
   merge_descriptions_no_others: "(there are no other descriptions)"
+  merge_descriptions_no_synonyms: "(there are no synonyms to move to)"
   merge_descriptions_preview_restricted: "(you do not have permission to view this description)"
   merge_descriptions_delete_after: Delete old description after merge?
   merge_descriptions_merge_help: This will copy any non-blank sections from the source description into the description you select below. If the target description already has text in any of those fields, you will be given an editing form with the text from both descriptions. This will allow you to reconcile any conflicts by hand before saving the form and making the merger official.
@@ -3286,8 +3292,6 @@
   edit_translations_old_versions: Old Versions
   edit_translations_singular: singular form
   edit_translations_plural: plural form
-  edit_translations_lowercase: all lowercase as for end of sentence
-  edit_translations_uppercase: all uppercase as for title
   edit_translations_page_expired: The page you were working on has expired. Please go back and reload it, then click on "[:app_edit_translations_on_page]" again.
   edit_translations_help: On the left is a list of translation strings, arranged thematically according to how they appear in the main translation file. If you click on one of the underlined labels, it will allow you to edit the corresponding string in the panel on the right. Click "[:save.ti]" to save your changes.
 
@@ -3380,6 +3384,7 @@
   change_user_bonuses_title: Contribution Bonuses for [user]
   change_user_bonuses: Award Bonus
   change_user_bonuses_help: "List one bonus per line, each specifying a number of points and reason, like this:\n\n10000 German translations\n50000 Expert in hypogeous fungi\n\n\nThese will appear on the show_user page below the usual contribution scores. Keep the reasons short or it might mess up the formatting of the table on that page."
+  change_user_bonuses_label: Bonuses
 
   # observer/refresh_vote_cache
   refresh_vote_cache: Refreshed vote caches.
@@ -3709,7 +3714,7 @@
   how_describing_species: "*Describing Species* - Click any \"Name\":#name link you see throughout the site. For example, click on 'Names' under 'Indexes' on the left side of the page then click on any of the results, or search for a name in the search bar, or click the 'About &lt;&#110;ame&gt;...' link at the top of any \"Observation\":#observation page. These all take you to a page summarizing everything we know about this taxon. If you are familiar with this species and there is something you would like to add, click '[:show_name_edit_name]' and add your notes. You are encouraged to cite references including field guides and scientific papers. Short quotes from references are fine, but please don't make extensive quotes without obtaining permission from the original author."
   how_projects: "*Projects* - Projects are a way for a group of \"Users\":#user to work together to create a set of work that they want to keep out of the public eye until they are ready to publish it. The original purpose was to support university classes where there was a desire to keep a more controlled environment while the class was going.\n\nAnyone can create a new project by clicking on '\"[:app_list_projects]\":/projects' in the left-hand panel and then clicking on '[:list_projects_add_project]'. The person who creates the project is always a member and an administrator for that project. An administrator for a project can add new members by clicking the '[:show_project_add_members]' link at the top of a project's 'Show Project' page. Administrators can also make other users administrators for the project by going to one of the '[:add_members_change_status]' links available on the 'Show Project' or 'Add Members' pages. Any User can send requests to the admins for a project. These requests are emailed to the admins and contain a link for changing that user's status.\n\nCurrently the primary focus of projects is writing \"Descriptions\":#description for various species. Note, however, that anyone can now create new descriptions for a species (see \"Describing Species\":#describing_species) by clicking on '[:show_name_create_description]' at the top of the 'Show Name' page. Descriptions that are created for a project are visible only to members of that project until they are published, and editable only by the owner of the description and project administrators. When a description is published it will become the official description if no official description exists yet."
   how_maps: "*Working with Maps* - Currently there are three types of maps available on [:app_title]: Occurrence Maps (e.g., \"Occurrence map for **__Craterellus cornucopioides__**\":/names/284/map), Location Maps (e.g., \"Salt Point State Park\":/locations/4) and the \"[:map_locations_global_map]\":/locations/map.\n\nTo see an occurrence map for a particular \"Name\":#name, go to the page for that name (e.g., enter the name in the search bar, select '[:names.ti]'), and click '[:app_search]', then click '[:show_name_distribution_map]' at the top of the page.\n\nUsers are encouraged to add to the occurrence map for a name. The easiest way is to create a new \"Observation\":#observation using an already defined \"Location\":#location. Note, however, that auto-completion for the '[:where.ti]' field will list all matching locations whether they are defined or not.\n\nYou can also explicitly choose not to have an observation show up on the occurrence map. This allows you to record observations of mushrooms in places like mushroom fairs, old photos or other places where you may not know where the mushroom was actually collected. When creating or editing an observation there is a checkbox labeled '[:form_observations_is_collection_location]'. By default it is checked. If you uncheck it, that observation will not appear in any occurrence maps."
-  how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location. These observations will not appear in our \"occurrence maps\":#maps. An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'. Undefined location names will be followed by a link labeled '[:search.ti]'. If you click the link for an undefined location, it will show a list of observations reported for that location. The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'. Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location. Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined. Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all defined locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. From there, click '[:list_place_names_undef]' at the top of the page to see a list of unmapped place names, sorted by the number of observations reported from each one. In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park'). You can merge an undefined location with a defined location by clicking on '[:list_place_names_merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users). If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's. This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details. Merging defined locations is restricted since it can cause significant data loss."
+  how_defining_locations: "*Defining Undefined Locations* - Many \"Observations\":#observation have been reported from undefined \"Locations\":#location. These observations will not appear in our \"occurrence maps\":#maps. An excellent, easy way for \"Users\":#user to help out if they have a little spare time is to locate and define these undefined locations.\n\nWhen browsing through observations, defined location names will be followed by a link labeled '[:click_for_map]'. Undefined location names will be followed by a link labeled '[:search.ti]'. If you click the link for an undefined location, it will show a list of observations reported for that location. The resulting page will include two links at the top of the page: '[:list_observations_location_define]' and '[:list_observations_location_merge]'. Clicking on '[:list_observations_location_define]' will present a form which you can use to create that location. Clicking on 'Merge With a Defined Location' will present you with a list of similar locations which have already been defined. Clicking on any of these locations will perform the merge.\n\nYou can also see a list of all defined locations in use by clicking on '\"[:app_list_locations]\":/locations' in the left-hand panel. From there, click '[:list_place_names_undef]' at the top of the page to see a list of unmapped place names, sorted by the number of observations reported from each one. In some cases the same location has been given multiple names (e.g., 'Point Reyes National Seashore' and 'Pt Reyes Park'). You can merge an undefined location with a defined location by clicking on '[:merge]' next to the undefined location (see above).\n\nWhen defining a new location, the first thing to do is to review its name. Mushroom Observer tries to enforce a set of \"rules\":/locations/help.\n\nIn theory it is possible for the same location to be defined more than once (presumably by different users). If this happens, you can request a merge by editing one of the two locations and changing its name to be exactly the same as the other's. This will not have any immediate effect, but it will display a warning message, and an email will be sent to the site administrators with the details. Merging defined locations is restricted since it can cause significant data loss."
   how_creating_species_lists: "*Creating Observation Lists* - To create an \"Observation List\":#species_list, click '\"[:app_create_list]\":/species_lists/new' in the left-hand panel. Fill out the various fields.\n\nThere are several methods of collecting a set of existing observations into a new list. In the simplest method, first create an empty observation list, then go to each of the observations you want to add and select '[:show_observation_manage_species_lists]'. This will give you the opportunity to add that observation to any observation list you own. (Note, you can add anyone's observations to an observation list you own.)\n\nIn another method, you may select '[:app_create_list]' directly from any index of observations or names. For example, you may use the search bar at the top of the page (toggle the '[:search_bar_more_options]' button for the full search form) to request all observations from Michigan. When it shows you the first page of results, click '[:app_create_list]' (in the left-hand panel).\n\nLastly, when you are viewing an existing observation list, you may click '[:species_list_show_clone_list]' which will take you to a new observation list form, with all the information of the existing list already filled in."
   how_write_in: "*Write In New Observation* - Historically, the Create Observation List workflow allowed you to enter a set of 'Write-In-Species'. This feature was rarely used and added a lot of complication to the process of creating a new Observation List. The functionality is still available after you create a list by selecting '[:species_list_show_write_in]'. When you go to add the list, each line is checked to see if there is a match in the database. If there is no matching name, you will be asked if you want to add the unknown names to the database. This gives you a chance to catch and fix typos as well as giving you a simple way to add missing names. Each name given in the 'Write-In Species' field will be used to create a completely new \"Observation\":#observation. The other fields in this form are set for all these new observations."
 
@@ -4442,6 +4447,7 @@
   api_name_already_exists: The name "[new]" already exists.
   api_name_doesnt_parse: The name, "[name]", doesn't parse as a valid scientific name.
   api_name_wrong_for_rank: The name, "[name]", isn't valid for [rank].
+  api_name_locked: The [type] "[name]" is locked; only an admin can change its ICN identifier, on the website.
   api_naming_locked: The [type] "[name]" cannot be changed because another user has already voted on it.
   api_need_all_four_edges: "Need to supply all four edges of bounding box: north, south, east and west."
   api_no_method_for_action: Invalid request method "[method]" for "[action]".
@@ -4457,7 +4463,8 @@
   api_string_too_long: The string, "[val]", has more than [limit] characters.
   api_too_many_uploads: Only one upload allowed per request. You may send the file in the data of the HTTP request, or you may specify a URL using the "upload_url" parameter. But do not use both methods at the same time.
   api_trying_to_set_multiple_locations_to_same_name: You are attempting to update multiple locations to the same name.
-  api_trying_to_set_multiple_names_at_once: You can only change the name, author and rank of one name at a time.
+  api_trying_to_set_multiple_names_at_once: You can only change the name, author, rank and ICN identifier of one name at a time.
+  api_update_failed: "Failed to update [type] \"[name]\": [error]"
   api_unexpected_upload: Unexpected file attached.
   api_unused_parameters: "Unexpected parameters: [params]"
   api_user_already_exists: The user "[login]" already exists or is taken.
@@ -4492,6 +4499,7 @@
   api_help_has_notes_field: is given observation notes template field filled in?
   api_help_has_obs_notes: observation has notes?
   api_help_has_observation: is attached to an observation?
+  api_help_icn_id: ICN identifier, the Index Fungorum or MycoBank record number
   api_help_initial_det: initial determination
   api_help_initial_det_has: search within initial determination
   api_help_is_collection_location: is this location where mushroom was found?
@@ -4520,6 +4528,7 @@
   api_help_set_code: change the field slip code
   api_help_set_collector: change the collector name
   api_help_set_correct_spelling: mark this as misspelt and deprecated and synonymize with the correct spelling
+  api_help_set_icn_id: change the ICN identifier (one unlocked name at a time)
   api_help_set_is_collection_location: is this location where mushroom was found?
   api_help_set_gps_hidden: hide exact coordinates?
   api_help_set_initial_det: change the initial determination
@@ -4724,6 +4733,7 @@
   sort_by_location: "[:location.ti]"
   sort_by_login: "[:login_name.ti]"
   sort_by_name: "[:name.ti]"
+  sort_by_name_and_number: Name & Number
   sort_by_num_views: Popularity
   sort_by_number: Number
   sort_by_observations: "#Observations"

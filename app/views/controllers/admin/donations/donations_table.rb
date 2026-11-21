@@ -18,7 +18,7 @@ module Views::Controllers::Admin::Donations
       Table(
         @donations,
         variant: :striped, align_middle: true,
-        class: "table-review-donations my-3"
+        identifier: "review-donations"
       ) do |t|
         define_columns(t)
       end
@@ -26,7 +26,7 @@ module Views::Controllers::Admin::Donations
 
     def define_columns(tbl)
       tbl.column(:id.t) do |d|
-        IDBadge(value: d.id, size: :lg)
+        Badge(variant: :id, value: d.id, size: :lg)
       end
       tbl.column(:reviewed.ti) do |donation|
         render(ReviewToggle.new(donation: donation))

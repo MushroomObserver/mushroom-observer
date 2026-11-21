@@ -95,8 +95,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:six_even)
     end
 
-    assert_equal("col-xs-12 col-lg-6", left)
-    assert_equal("col-xs-12 col-lg-6", right)
+    assert_equal("col-xs-12 col-md-6", left)
+    assert_equal("col-xs-12 col-md-6", right)
   end
 
   def test_column_classes_eight_four_writes_split_left_right
@@ -126,6 +126,15 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     assert_equal("col-xs-12 col-md-6 col-lg-4", right)
   end
 
+  def test_column_classes_four_eight_writes_split_left_right
+    left, right = captured_slots(:left_columns, :right_columns) do
+      column_classes(:four_eight)
+    end
+
+    assert_equal("col-xs-12 col-md-5 col-lg-4", left)
+    assert_equal("col-xs-12 col-md-7 col-lg-8", right)
+  end
+
   def test_column_classes_explicit_then_default_does_not_aggregate
     left, right = captured_slots(:left_columns, :right_columns) do
       column_classes(:nine_three)
@@ -136,32 +145,55 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     assert_equal("col-xs-12 col-md-3 col-lg-4", right)
   end
 
+  # ----- left/right_column_class_for readers ----------------------
+  # Give a body-only grid split the same ratio without touching
+  # :left_columns/:right_columns -- those drive the title bar split
+  # via :has_columns, which a body-only split shouldn't trigger.
+
+  def test_left_column_class_for_four_eight
+    result = captured_slot(:test_value) do
+      content_for(:test_value) { left_column_class_for(:four_eight) }
+    end
+
+    assert_equal("col-xs-12 col-md-5 col-lg-4", result)
+  end
+
+  def test_right_column_class_for_four_eight
+    result = captured_slot(:test_value) do
+      content_for(:test_value) { right_column_class_for(:four_eight) }
+    end
+
+    assert_equal("col-xs-12 col-md-7 col-lg-8", result)
+  end
+
   # ----- content_padding setter ----------------------------------
 
-  def test_content_padding_no_panels_writes_px_3
-    assert_equal("px-3", captured_slot(:content_padding) do
+  def test_content_padding_no_panels_writes_px_card
+    assert_equal("px-card", captured_slot(:content_padding) do
       content_padding(:no_panels)
     end)
   end
 
-  def test_content_padding_panels_writes_p_0
-    assert_equal("p-0", captured_slot(:content_padding) do
+  # `content_for` with an empty-string block captures nothing --
+  # reading the slot back returns nil, not "".
+  def test_content_padding_panels_writes_empty_string
+    assert_nil(captured_slot(:content_padding) do
       content_padding(:panels)
     end)
   end
 
-  def test_content_padding_default_for_show_action_is_p_0
+  def test_content_padding_default_for_show_action_is_empty_string
     stub_action_name("show")
 
-    assert_equal("p-0", captured_slot(:content_padding) do
+    assert_nil(captured_slot(:content_padding) do
       content_padding
     end)
   end
 
-  def test_content_padding_default_for_new_action_is_px_3
+  def test_content_padding_default_for_new_action_is_px_card
     stub_action_name("new")
 
-    assert_equal("px-3", captured_slot(:content_padding) do
+    assert_equal("px-card", captured_slot(:content_padding) do
       content_padding
     end)
   end
@@ -169,7 +201,7 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
   def test_content_padding_explicit_then_default_does_not_aggregate
     stub_action_name("new")
 
-    assert_equal("p-0", captured_slot(:content_padding) do
+    assert_nil(captured_slot(:content_padding) do
       content_padding(:panels)
       default_content_padding
     end)

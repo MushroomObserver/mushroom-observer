@@ -38,13 +38,11 @@ module Views::Controllers::Projects::Aliases
 
     def render_links
       pid = @project_alias.project_id
-      a(href: edit_project_alias_path(
+      Link(type: :get, name: :edit.ti, target: edit_project_alias_path(
         project_id: pid, id: @project_alias.id
-      )) { plain(:edit.ti) }
+      ))
       plain(" | ")
-      a(href: project_aliases_path) do
-        plain(:back.ti)
-      end
+      Link(type: :get, name: :back.ti, target: project_aliases_path)
     end
   end
 end

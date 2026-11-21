@@ -33,8 +33,8 @@ module Views::Controllers::Observations::Namings
       # Bootstrap collapse structure
       assert_html(html, ".collapse textarea")
       assert_html(html, "label[data-toggle='collapse']")
-      # Unchecked reason should be collapsed (has "collapse" but NOT "in")
-      assert_html(html, "div#naming_reasons_1_notes.collapse:not(.in)")
+      # Unchecked reason should be collapsed, not expanded
+      assert_html(html, "div#naming_reasons_1_notes.collapse:not(.#{EXPANDED})")
     end
 
     def test_checked_reason_shows_expanded_textarea
@@ -47,8 +47,8 @@ module Views::Controllers::Observations::Namings
         html,
         "input[type='checkbox'][name='naming[reasons][1][check]'][checked]"
       )
-      # Container should have "collapse in" classes (Bootstrap 3 expanded)
-      assert_html(html, "div#naming_reasons_1_notes.collapse.in")
+      # Container should be expanded
+      assert_html(html, "div#naming_reasons_1_notes.collapse.#{EXPANDED}")
     end
 
     private

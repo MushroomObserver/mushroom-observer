@@ -60,9 +60,22 @@ module Views::Layouts
         render(::Views::Controllers::Observations::ConsensusNameLink.new(
                  observation: @object, user: @user
                ))
+      elsif @mode == :edit
+        render_object_show_link
       else
         trusted_html(model_page_title)
       end
+    end
+
+    # Edit mode only -- a show page linking to itself would be dead
+    # weight. Not every edited model has a show route (APIKey,
+    # ProjectAlias repurpose show_controller/show_action for
+    # index_link_args, not a show page) -- fall back to plain text
+    # when url_for raises, same as before this link existed.
+    def render_object_show_link
+      Link(type: :object, object: @object, name: model_page_title)
+    rescue ActionController::UrlGenerationError
+      trusted_html(model_page_title)
     end
 
     def model_page_title

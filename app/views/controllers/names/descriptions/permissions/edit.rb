@@ -11,6 +11,7 @@ module Views::Controllers::Names::Descriptions::Permissions
 
     def view_template
       add_page_title(@description.format_name.t)
+      container_class(:text_image)
       add_context_nav(::Tab::NameDescription::FormPermissions.new(
                         description: @description
                       ))

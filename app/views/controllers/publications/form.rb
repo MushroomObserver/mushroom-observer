@@ -36,7 +36,8 @@ module Views::Controllers::Publications
     end
 
     def render_peer_reviewed_field
-      checkbox_field(:peer_reviewed, label: :publication_peer_reviewed)
+      checkbox_field(:peer_reviewed, label: :publication_peer_reviewed,
+                                     wrap_class: "form-group")
     end
 
     def render_how_helped_field
@@ -45,7 +46,8 @@ module Views::Controllers::Publications
     end
 
     def render_mo_mentioned_field
-      checkbox_field(:mo_mentioned, label: :publication_mo_mentioned)
+      checkbox_field(:mo_mentioned, label: :publication_mo_mentioned,
+                                    wrap_class: "form-group")
     end
 
     def submit_text

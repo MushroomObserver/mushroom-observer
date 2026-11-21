@@ -33,11 +33,10 @@ module Views::Controllers::Projects::Members
       Link(type: :user, user: user)
       if show_edit
         plain(" | ")
-        a(
-          href: edit_project_member_path(
-            project_id: @project.id, candidate: user.id
-          )
-        ) { plain(:change_member_status_change_status.t) }
+        Link(type: :get, name: :change_member_status_change_status.t,
+             target: edit_project_member_path(
+               project_id: @project.id, candidate: user.id
+             ))
       end
       br
     end

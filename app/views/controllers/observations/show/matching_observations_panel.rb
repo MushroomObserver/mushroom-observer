@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-# "Matching Observations" panel. Lists every occurrence member: an
-# IDBadge, a status icon (occurrence primary / read-only reflection),
-# then the name -- current observation as plain text tagged "(this
-# observation)"; siblings as links. No occurrence yet: just an "Add
-# Matching Observations" link, no body.
+# "Matching Observations" panel. Lists every occurrence member: a
+# Badge(variant: :id), a status icon (occurrence primary / read-only
+# reflection), then the name -- current observation as plain text
+# tagged "(this observation)"; siblings as links. No occurrence yet:
+# just an "Add Matching Observations" link, no body.
 #
 class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views::Base
   include Views::Controllers::Observations::Show::OccurrenceStatusIcons
@@ -12,6 +12,10 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   prop :obs, ::Observation
   prop :occurrence, _Nilable(::Occurrence), default: nil
   prop :siblings, _Array(::Observation), default: -> { [] }
+  # {observation id => footnote number}. This panel is where a
+  # reader looks up what a number on a comment or photo means,
+  # so it has to show the same ones (#5718).
+  prop :markers, _Hash(::Integer, ::Integer), default: -> { {} }
 
   def view_template
     Panel(id: "matching_observations") do |panel|
@@ -62,20 +66,42 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   # Icons sit inside the <a> when the row is a link, so hovering or
   # clicking an icon also hovers/clicks the link.
   def render_member_row(member, link:)
-    IDBadge(object: member, size: :lg, interactive: link, extra_class: "mr-3")
+    render_marker(member)
+    Badge(variant: :id, object: member, size: :lg, interactive: link,
+          extra_class: "mr-3")
     icon_types = member_status_icon_types(member, @occurrence)
     gap_class = "icon-text-gap" if icon_types.any?
     if link
-      a(href: permanent_observation_path(member.id)) do
-        render_status_icons(icon_types)
-        span(class: gap_class) do
-          trusted_html(member.format_name(default_viewer).t)
-        end
-      end
+      render_member_link(member, icon_types, gap_class)
     else
       render_status_icons(icon_types)
       render_current_observation_name(member, gap_class)
     end
+  end
+
+  def render_member_link(member, icon_types, gap_class)
+    Link(type: :get, name: member.format_name(default_viewer).t,
+         target: permanent_observation_path(member.id)) do
+      render_status_icons(icon_types)
+      span(class: gap_class) do
+        trusted_html(member.format_name(default_viewer).t)
+      end
+    end
+  end
+
+  # Every marker on the page goes to its member, this one too, so
+  # a number behaves the same wherever it is read. The current
+  # observation gets an empty slot the width of a badge, so every
+  # row's id starts at the same place and the numbers line up as
+  # a legend.
+  def render_marker(member)
+    return if @markers.empty?
+
+    marker = @markers[member.id]
+    return span(class: "sibling-marker-spacer mr-2") unless marker
+
+    Badge(variant: :sibling_marker, number: marker,
+          observation_id: member.id, class: "mr-2")
   end
 
   # format_name, not unique_format_name -- the badge already shows the id.

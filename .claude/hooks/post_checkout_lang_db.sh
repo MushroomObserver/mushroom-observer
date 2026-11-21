@@ -1,21 +1,12 @@
 #!/usr/bin/env bash
-# Claude Code PostToolUse hook.
-# Fires after a successful `Bash` call. When the command was a branch
-# switch (`git checkout <branch>` or `git switch <branch>`), runs:
-#
+# Claude Code PostToolUse hook. After a branch switch that moves
+# HEAD (`git checkout`/`git switch`):
 #   1. `bin/rails lang:update` if `config/locales/en.txt` changed
-#      between the old and new branch tips. Regenerates `en.yml` so
-#      any translation changes on the new branch are picked up before
-#      the next test run.
-#
-#   2. `bin/rails db:migrate` (development and test) if any
-#      `db/migrate/*.rb` files changed between the two branch tips.
-#
-# Non-blocking: each step prints a one-line summary; failures print a
-# notice so the user can run manually.
-#
-# Reads JSON on stdin from Claude Code; only inspects
-# `tool_input.command`.
+#      (imports translations into the DB/cache).
+#   2. `bin/rails db:migrate` (dev + test) if any `db/migrate/*.rb`
+#      changed.
+# Non-blocking; prints failures with log paths. Reads JSON on stdin;
+# only inspects `tool_input.command`.
 set -uo pipefail
 
 INPUT="$(cat)"
@@ -51,7 +42,7 @@ if printf '%s\n' "$CHANGED" | grep -qxF "config/locales/en.txt"; then
   echo "" >&2
   echo "🌐 branch switch: en.txt changed — running bin/rails lang:update" >&2
   if bin/rails lang:update >/tmp/post_checkout_lang.log 2>&1; then
-    echo "   ✅ lang:update complete (en.yml regenerated)" >&2
+    echo "   ✅ lang:update complete (DB/cache updated)" >&2
     # Shared with check_lang_update_before_test.sh, so a `rails test`
     # right after this checkout doesn't redundantly re-run lang:update.
     git hash-object config/locales/en.txt \

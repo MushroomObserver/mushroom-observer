@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class Components::CountBadgeTest < ComponentTestCase
+class Components::Badge::CountTest < ComponentTestCase
   def test_renders_count
     html = render_badge(count: 3)
 
@@ -36,9 +36,22 @@ class Components::CountBadgeTest < ComponentTestCase
     assert_html(html, ".count-badge[title='#{tooltip}']")
   end
 
+  def test_default_fill_is_solid
+    html = render_badge(count: 5)
+
+    assert_no_html(html, ".badge-outline")
+  end
+
+  def test_fill_outline
+    html = render_badge(count: 5, fill: :outline)
+
+    assert_html(html, ".count-badge.badge-outline", text: "5")
+  end
+
   private
 
-  def render_badge(count:, type: :observation)
-    render(Components::CountBadge.new(count: count, type: type))
+  def render_badge(count:, type: :observation, fill: :solid)
+    render(Components::Badge.new(variant: :count, count: count, type: type,
+                                 fill: fill))
   end
 end

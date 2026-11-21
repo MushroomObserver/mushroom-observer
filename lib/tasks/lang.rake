@@ -90,14 +90,13 @@ end
 
 namespace :lang do
   desc "Check syntax of official export file, " \
-       "integrate changes into database, " \
-       "refresh YAML and export files."
+       "integrate changes into database, strip unused tags."
   task update: [
     "check:official",    # check syntax of official file
     "import:official",   # import any changes from official file
-    "strip:all",         # strip out any strings we no longer need
-    "update:all",        # update localization (YAML) files
-    "export:unofficial"  # (still needed by some tests)
+    "strip:all"          # strip out any strings we no longer need
+    # update:all/export:unofficial: nothing reads an unofficial
+    # locale's generated file (translations_controller.rb).
   ]
 
   desc "Find en.txt tags with no remaining reference anywhere " \

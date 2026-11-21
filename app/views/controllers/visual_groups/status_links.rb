@@ -17,7 +17,7 @@ module Views::Controllers::VisualGroups
     def view_template
       div(class: "status_buttons text-center small",
           id: "visual_group_status_links_#{@image_id}") do
-        ButtonGroup(class: "status-btn-group") { render_status_link_trio }
+        ButtonGroup(class: "status-btn-group mb-2") { render_status_link_trio }
         br
         render_image_id_line
         br

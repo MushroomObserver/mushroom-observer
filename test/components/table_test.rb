@@ -63,6 +63,38 @@ class TableTest < ComponentTestCase
     assert_html(html, "table.table.table-sm.w-100")
   end
 
+  def test_wrap_class_lands_on_the_wrapping_panel
+    rows = [TestRow.new(name: "Test")]
+
+    html = render_table(rows, wrap_class: "my-3") do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, ".panel.my-3")
+  end
+
+  def test_wrap_class_ignored_when_panel_wrap_false
+    rows = [TestRow.new(name: "Test")]
+
+    html = render_table(rows, panel_wrap: false, wrap_class: "my-3") do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_no_html(html, ".panel")
+    assert_no_html(html, ".my-3")
+  end
+
+  def test_wrap_id_lands_on_the_wrapping_panel
+    rows = [TestRow.new(name: "Test")]
+
+    html = render_table(rows, wrap_id: "my-wrap") do |t|
+      t.column("Name", &:name)
+    end
+
+    assert_html(html, ".panel#my-wrap")
+    assert_no_html(html, "table#my-wrap")
+  end
+
   def test_variant_kwarg_adds_bootstrap_modifier_class
     rows = [TestRow.new(name: "Test")]
 
@@ -385,6 +417,45 @@ class TableTest < ComponentTestCase
     assert_html(html, "table tbody#collapse-2.collapse tr td", text: "C")
   end
 
+  # --- Section-label row (t.legend) ---------------------------------
+
+  def test_legend_renders_th_with_colspan_equal_column_count
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render_table(rows) do |t|
+      t.column("Name", &:name)
+      t.column("Age", &:age)
+      t.legend("Section label")
+    end
+
+    assert_html(html, "tbody tr.legend-row th[colspan='2']" \
+                       "[scope='colgroup']", text: "Section label")
+  end
+
+  def test_legend_block_form_renders_content
+    html = render(LegendBlockTestHost.new)
+
+    assert_html(html, "tr.legend-row th", text: "From a block")
+  end
+
+  def test_first_legend_has_no_top_padding_class
+    rows = [TestRow.new(name: "Alice")]
+
+    html = render_table(rows) do |t|
+      t.column("Name", &:name)
+      t.legend("First section")
+    end
+
+    assert_html(html, "tr.legend-row th:not(.pt-4)", text: "First section")
+  end
+
+  def test_later_legend_gets_top_padding_class
+    html = render(MultiLegendTestHost.new)
+
+    assert_html(html, "tr.legend-row th:not(.pt-4)", text: "First section")
+    assert_html(html, "tr.legend-row th.pt-4", text: "Second section")
+  end
+
   private
 
   def render_table(rows, **, &block)
@@ -441,6 +512,26 @@ class MultibodyTestHost < Components::Base
       t.body { tr { td { plain("A") } } }
       t.body(id: "collapse-1", class: "collapse") { tr { td { plain("B") } } }
       t.body(id: "collapse-2", class: "collapse") { tr { td { plain("C") } } }
+    end
+  end
+end
+
+class LegendBlockTestHost < Components::Base
+  def view_template
+    render(Components::Table.new(show_headers: false)) do |t|
+      t.column("Name")
+      t.legend { plain("From a block") }
+    end
+  end
+end
+
+class MultiLegendTestHost < Components::Base
+  def view_template
+    render(Components::Table.new(show_headers: false)) do |t|
+      t.column("Name")
+      t.legend("First section")
+      t.body { tr { td { plain("row") } } }
+      t.legend("Second section")
     end
   end
 end

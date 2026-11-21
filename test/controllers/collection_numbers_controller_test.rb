@@ -40,7 +40,7 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_page_title(:collection_numbers.ti)
     assert_displayed_filters("#{:query_by_users.l}: Rolf Singer")
     # In results, expect 1 row per collection_number.
-    assert_select("#results tr", query.num_results)
+    assert_select("#results tbody tr", query.num_results)
   end
 
   def test_index_with_id_and_sorted
@@ -341,6 +341,26 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     end
   end
 
+  def test_create_collection_number_with_modal
+    obs = observations(:strobilurus_diminutivus_obs)
+    user = obs.user
+    params = {
+      observation_id: obs.id,
+      collection_number: {
+        name: user.login,
+        number: "1234",
+        modal: "true"
+      }
+    }
+    login(user.login)
+    assert_difference("CollectionNumber.count", 1) do
+      post(:create, params: params, format: :turbo_stream)
+    end
+    assert_select(
+      "turbo-stream[action='replace'][target='observation_collection_numbers']"
+    )
+  end
+
   def test_create_collection_number_turbo_validation_error
     obs = observations(:strobilurus_diminutivus_obs)
     login(obs.user.login)
@@ -520,6 +540,30 @@ class CollectionNumbersControllerTest < FunctionalTestCase
     assert_response(:success)
     assert_select("turbo-stream[action=?][target=?]",
                   "replace", "observation_collection_numbers")
+  end
+
+  # Modal edit from the collection_numbers index page (back: "index")
+  # has no observation to update a sub-panel for -- @back_object stays
+  # nil, so the turbo_stream submit falls through to a plain redirect
+  # back to the index, same as destroy's turbo_stream fallback.
+  def test_update_collection_number_turbo_from_index
+    collection_number = collection_numbers(:coprinus_comatus_coll_num)
+    login("rolf")
+
+    params = {
+      id: collection_number.id,
+      back: "index",
+      collection_number: {
+        name: collection_number.name,
+        number: "updated-number",
+        modal: "true"
+      }
+    }
+
+    patch(:update, params: params, format: :turbo_stream)
+
+    assert_equal("updated-number", collection_number.reload.number)
+    assert_redirected_to(collection_numbers_path(id: collection_number.id))
   end
 
   def test_update_collection_number_merge

@@ -32,7 +32,7 @@ module Views::Controllers::VisualGroups
               votes: false, full_width: true
             )
           end
-          panel.with_body do
+          panel.with_body(classes: "pt-0") do
             render(StatusLinks.new(
                      visual_group: @visual_group,
                      image_id: image.id,

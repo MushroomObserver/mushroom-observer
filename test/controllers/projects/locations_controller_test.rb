@@ -81,5 +81,33 @@ module Projects
       assert_select("a", { text: nybg.display_name, minimum: 1 },
                     "NYBG should appear ungrouped")
     end
+
+    # Target-location and ungrouped-location rows share one table
+    # (Components::Table#legend sections), not two separate tables
+    # with independently-computed column widths.
+    def test_index_renders_one_table_with_legend_rows_for_both_sections
+      project = projects(:rare_fungi_project)
+      california = locations(:california)
+      nybg = locations(:nybg_location) # not a sub of any target
+
+      project.add_target_location(california)
+      Observation.create!(
+        name: names(:fungi), user: users(:rolf),
+        location: nybg, when: Time.zone.now
+      ).tap { |obs| project.observations << obs }
+
+      login
+      get(:index, params: { project_id: project.id })
+      assert_response(:success)
+
+      assert_select("#locations_table table", count: 1)
+      assert_select_text_includes(
+        "#locations_table tr.legend-row", "Target locations:"
+      )
+      assert_select_text_includes(
+        "#locations_table tr.legend-row",
+        :project_locations_not_targets.l
+      )
+    end
   end
 end

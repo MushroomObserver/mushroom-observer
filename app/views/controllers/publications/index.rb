@@ -45,7 +45,7 @@ module Views::Controllers::Publications
       ContentPadded do
         trusted_html(:publication_index_intro.tp)
         trusted_html(:publication_citation.tp)
-        a(href: INTRO_CITATION_URL) { plain(INTRO_CITATION_TEXT) }
+        Link(type: :get, name: INTRO_CITATION_TEXT, target: INTRO_CITATION_URL)
       end
     end
 
@@ -60,8 +60,8 @@ module Views::Controllers::Publications
         render(Components::ApplicationForm::TextField.new(
                  field,
                  wrapper_options: { label: :publication_filter_by,
-                                    inline: true },
-                 size: 60, class: "mb-0"
+                                    inline: true, wrap_class: "mb-0" },
+                 size: 60
                ))
       end
     end
@@ -72,8 +72,7 @@ module Views::Controllers::Publications
 
     def render_publications_table
       Table(@objects,
-            variant: :striped, identifier: "publications",
-            class: "mb-3 mt-3") do |tbl|
+            variant: :striped, identifier: "publications") do |tbl|
         add_full_link_column(tbl)
         tbl.column(:publication_link.l) { |pub| link_cell(pub) }
         tbl.column("(#{@peer_count})", align: :center) do |pub|

@@ -53,60 +53,15 @@ class Components::Form::RegionWithBoxFields < Components::Base
 
   def render_in_box_fields
     @form_namespace.namespace(:in_box) do |in_box_ns|
-      render_compass_inputs(in_box_ns)
+      render(Components::Form::CompassFields.new(
+               field_source: in_box_ns, values: box_values
+             ))
       render_editable_map
     end
   end
 
-  def render_compass_inputs(in_box_ns)
-    render_compass_row(:north, in_box_ns)
-    render_compass_row([:west, :east], in_box_ns)
-    render_compass_row(:south, in_box_ns)
-  end
-
-  def render_compass_row(directions, in_box_ns)
-    row_class = directions == :north ? "row vcenter" : "row vcenter mt-3"
-
-    div(class: row_class) do
-      if directions.is_a?(Array)
-        render_east_west_row(directions, in_box_ns)
-      else
-        render_single_compass_input(directions, in_box_ns)
-      end
-    end
-  end
-
-  def render_east_west_row(directions, in_box_ns)
-    render_compass_input(directions[0], in_box_ns)
-    render_compass_help
-    render_compass_input(directions[1], in_box_ns)
-  end
-
-  def render_single_compass_input(direction, in_box_ns)
-    render_compass_input(direction, in_box_ns, centered: true)
-  end
-
-  def render_compass_input(direction, in_box_ns, centered: false)
-    Column(xs: 4, offset_xs: centered ? 4 : nil) do
-      field_component = in_box_ns.field(direction).text(
-        wrapper_options: {
-          label: direction.upcase.to_sym,
-          addon: "º"
-        },
-        value: box_value(direction),
-        data: {
-          map_target: "#{direction}Input",
-          action: "map#bufferInputs"
-        }
-      )
-      render(field_component)
-    end
-  end
-
-  def render_compass_help
-    Column(xs: 4, class: "small text-center p-0") do
-      plain(:form_locations_lat_long_help.l)
-    end
+  def box_values
+    [:north, :south, :east, :west].index_with { |dir| box_value(dir) }
   end
 
   def box_value(direction)

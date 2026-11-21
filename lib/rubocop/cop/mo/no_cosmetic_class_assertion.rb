@@ -5,6 +5,7 @@ module RuboCop
     module MO
       # A test assertion must not pin a cosmetic Bootstrap class:
       # button chrome (`.btn`, `.btn-outline-*`, `.btn-sm`/`-lg`),
+      # IDBadge size modifiers (`.badge-xl`/`-lg`/`-md`/`-sm`),
       # spacing (`.mt-3`, `.px-2`, `.m-0`, `.ml-auto`, `.mx-n2`),
       # color/paint (`.text-*` except `.text-nowrap`, which is layout
       # behavior; `.bg-*`; `.border-*` incl. bare `.border`;
@@ -50,9 +51,10 @@ module RuboCop
         # `float` token), so they're fair game. `.text-nowrap` is the
         # same kind of exception -- it's layout behavior (the element
         # can't wrap across a line break), not paint. `.badge-id` is
-        # also exempt (the negative lookahead excludes any hyphenated
-        # `badge-*` class) -- it's MO's IDBadge hook, not bare
-        # Bootstrap `.badge` chrome.
+        # also exempt -- it's MO's IDBadge hook, not paint. The size
+        # modifiers (`.badge-xl`/`-lg`/`-md`/`-sm`, IDBadge's
+        # `SIZE_CLASSES`) are paint just like `.btn-sm`/`-lg`, so they
+        # stay matched.
         CLASS_PATTERN = /
           \.btn(-[a-z]+)?\b
           | \.[mp][tblrxy]?-(n?\d+|auto)\b
@@ -68,6 +70,7 @@ module RuboCop
           | \.hanging-indent\b
           | \.tight-list\b
           | \.badge\b(?!-)
+          | \.badge-(xl|lg|md|sm)\b
         /x
 
         # Bare-tag tokens need checking against the CSS selector

@@ -95,7 +95,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_notes_block
-      div(class: "ml-5 mb-3") do
+      div(class: "ml-3 mb-2") do
         @field_slip.notes_fields.each do |field|
           next if field.value.blank?
 

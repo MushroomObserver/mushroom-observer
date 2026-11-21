@@ -29,12 +29,8 @@ module Views::Controllers::Sequences
       end
 
       render(Form.new(@sequence, back: @back))
-      div(class: "small") do
-        span(class: "font-weight-bold") { append_colon(:created_by.ti) }
-        Link(type: :user, user: @sequence.user)
-      end
       render(::Views::Layouts::ObjectFooter.new(
-               user: current_user, obj: @sequence
+               user: current_user, obj: @sequence, no_wrap: true
              ))
     end
 

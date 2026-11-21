@@ -9,6 +9,7 @@ class Components::Help::CollapseInfoTriggerTest < ComponentTestCase
     assert_html(html, "a[href='#help_text_1']")
     assert_html(html, "a.info-collapse-trigger")
     assert_html(html, "svg.mo-icon-question")
+    assert_html(html, "[data-tooltip-target='tip'][aria-label='#{:help.ti}']")
   end
 
   def test_renders_with_extra_class

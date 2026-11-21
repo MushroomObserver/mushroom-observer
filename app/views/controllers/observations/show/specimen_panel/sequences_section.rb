@@ -98,22 +98,22 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       content, path, opts = ::Tab::Sequence::Show.new(
         sequence: sequence, observation: @obs
       ).to_a
-      a(href: url_for(path), **opts) { trusted_html(content) }
+      Link(type: :get, name: content, target: url_for(path),
+           **opts) { trusted_html(content) }
     end
 
     def archive_link(sequence)
       return nil unless sequence.deposit?
 
-      content, path, opts = ::Tab::Sequence::Archive.new(
-        sequence: sequence
-      ).to_a
-      opts = opts.merge(
-        class: Components::InlineLinkBlock.item_class(opts[:class])
+      tab = ::Tab::Sequence::Archive.new(sequence: sequence)
+      class_name = Components::InlineLinkBlock.item_class(
+        tab.html_options[:class]
       )
-      # Wrap in a bare `<a>` and capture so it composes into
-      # InlineCRUDLinks' `extras:` slot list. `capture` returns a
-      # SafeBuffer in Phlex 2.x — no extra `.html_safe` needed.
-      capture { a(href: url_for(path), **opts) { trusted_html(content) } }
+      # Capture so it composes into InlineCRUDLinks' `extras:` slot
+      # list. `capture` returns a SafeBuffer in Phlex 2.x -- no extra
+      # `.html_safe` needed. type: :external (not :get) since the
+      # tab's html_options marks it external: true.
+      capture { Link(type: :external, tab: tab, class: class_name) }
     end
 
     # Bases aren't displayed in this row (only the truncated locus

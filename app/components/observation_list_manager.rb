@@ -1,11 +1,11 @@
 # frozen_string_literal: true
 
-# Two headed `Components::ListGroup` sections -- items an Observation
-# belongs to, and items it doesn't -- shared by
-# `Observations::Projects::Edit` and `Observations::SpeciesLists::Edit`.
-# Row content is caller-supplied: the block receives `|item, remove,
-# add|` for each row and renders whatever row component that caller
-# uses (`Projects::ListItem`, `SpeciesLists::Listing`).
+# Two headed sections -- items an Observation belongs to, and items it
+# doesn't -- shared by `Observations::Projects::Edit` and
+# `Observations::SpeciesLists::Edit`. Row/table content is
+# caller-supplied: the block receives `|items, remove, add|` once per
+# non-empty section and renders whatever table component that caller
+# uses (`Projects::ProjectTable`, `SpeciesLists::SpeciesListTable`).
 #
 # @example
 #   render(Components::ObservationListManager.new(
@@ -13,10 +13,9 @@
 #     belongs_to_items: @obs_projects,
 #     not_contains_heading: :project_manage_doesnt_contain.l,
 #     not_contains_items: @other_projects
-#   )) do |project, remove, add|
-#     render(Views::Controllers::Projects::ListItem.new(
-#       project: project, observation: @observation,
-#       remove: remove, add: add
+#   )) do |projects, remove, add|
+#     render(Views::Controllers::Projects::ProjectTable.new(
+#       projects, observation: @observation, remove: remove, add: add
 #     ))
 #   end
 class Components::ObservationListManager < Components::Base
@@ -39,14 +38,6 @@ class Components::ObservationListManager < Components::Base
     return if items.empty?
 
     h5(class: "mt-3 pl-3") { trusted_html(append_colon(heading)) }
-    ListGroup do |list|
-      items.each do |item|
-        list.item(
-          class: "d-flex justify-content-between align-items-start"
-        ) do
-          @row_block.call(item, remove, add)
-        end
-      end
-    end
+    @row_block.call(items, remove, add)
   end
 end

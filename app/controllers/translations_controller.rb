@@ -11,7 +11,7 @@ class TranslationsController < ApplicationController
     @edit_tags = tags_to_edit(@tag, @strings)
     @show_tags = tags_to_show(@for_page, @strings)
     build_record_maps(@lang)
-    @index = build_index(@lang, @show_tags)
+    @index = build_index(@show_tags)
     render(Views::Controllers::Translations::Index.new(
              lang: @lang, tag: @tag, for_page: @for_page,
              index: @index, strings: @strings, edit_tags: @edit_tags,
@@ -67,7 +67,7 @@ class TranslationsController < ApplicationController
     )
     versions_view = build_versions_view
     render(turbo_stream: turbo_stream.update(
-      "translation_ui",
+      "translation_ui_body",
       view_context.safe_join([
                                view_context.render(form_view),
                                view_context.render(versions_view)
@@ -179,7 +179,8 @@ class TranslationsController < ApplicationController
     end
     return unless any_changes
 
-    @lang.update_localization_file
+    # Keeps the locale's export file in sync so a later manual
+    # file-based import isn't working from stale content.
     @lang.update_export_file
   end
 
@@ -209,7 +210,7 @@ class TranslationsController < ApplicationController
   def tags_to_edit(ttag, strings)
     tag_list = []
     if ttag.present?
-      [ttag, "#{ttag}s", ttag.upcase, "#{ttag}s".upcase].each do |tt|
+      [ttag, "#{ttag}s"].each do |tt|
         tag_list << tt if strings.key?(tt)
       end
       tag_list = [ttag] if tag_list.empty?
@@ -238,16 +239,7 @@ class TranslationsController < ApplicationController
   def primary_tag(tag3, strings)
     tag2 = "#{tag3}s"
     tag1 = tag3.sub(/s$/i, "")
-    [
-      tag1.downcase,
-      tag2.downcase,
-      tag3.downcase,
-      tag1.upcase,
-      tag2.upcase,
-      tag3.upcase,
-      tag1,
-      tag2
-    ].each do |ttag|
+    [tag1, tag2].each do |ttag|
       return ttag if strings[ttag]
     end
     tag3
@@ -258,12 +250,15 @@ class TranslationsController < ApplicationController
   #  Giant helper method
   # ----------------------------
 
-  def build_index(lang, tags, file_handle = nil)
+  def build_index(tags, file_handle = nil)
     @index = []
     @tags = tags
     @tags_used = {}
-    # Caller may pass an existing handle; method closes it at line 223
-    file_handle ||= File.open(lang.export_file, "r:utf-8")
+    # Caller may pass an existing handle to control its lifecycle;
+    # this method closes whichever handle it ends up using. Defaults
+    # to the official file -- process_template_line reads tag
+    # names/comments (the structure), not a value.
+    file_handle ||= File.open(Language.official.export_file, "r:utf-8")
     reset_everything
     file_handle.each_line do |line|
       line.force_encoding("utf-8")

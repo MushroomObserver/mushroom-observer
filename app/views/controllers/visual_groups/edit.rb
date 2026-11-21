@@ -17,11 +17,9 @@ module Views::Controllers::VisualGroups
     prop :subset, _Array(_Tuple(::Image, _Nilable(_Boolean)))
 
     def view_template
-      add_edit_title(@visual_group)
-      container_class(:full)
+      render_page_chrome
 
       Container(width: :text) do
-        render_top_nav
         render(Form.new(@visual_group,
                         visual_model: @visual_group.visual_model))
         render_filter_section
@@ -32,22 +30,13 @@ module Views::Controllers::VisualGroups
                subset: @subset, status: @status,
                pagination_data: @pagination_data
              ))
-      render_bottom_nav
     end
 
     private
 
-    def render_top_nav
-      p { render_back_nav_links }
-    end
-
-    def render_bottom_nav
-      p { render_back_nav_links }
-    end
-
-    def render_back_nav_links
-      Link(type: :get, name: :visual_group_show.t,
-           target: visual_group_path(@visual_group))
+    def render_page_chrome
+      add_edit_title(@visual_group)
+      container_class(:full)
     end
 
     def render_filter_section

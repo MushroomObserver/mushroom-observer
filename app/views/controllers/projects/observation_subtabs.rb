@@ -9,7 +9,9 @@ module Views::Controllers::Projects
 
     def view_template
       NavTabs(
-        id: "project_observation_subtabs", class: "pl-3 pl-lg-5 mt-2 mb-3",
+        id: "project_observation_subtabs",
+        class: class_names(ProjectNavs::SUBTAB_INDENT,
+                           ProjectNavs::SUBTAB_VERTICAL_MARGINS),
         current: @current_subtab,
         tabs: ::Tab::Project::ObservationSubtabs.new(
           project: @project, query: current_query, controller: controller

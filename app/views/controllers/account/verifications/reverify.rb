@@ -11,19 +11,27 @@ module Views::Controllers::Account::Verifications
 
     def view_template
       add_page_title(:email_welcome.t(user: @unverified_user.legal_name))
-      trusted_html(
-        :reverify_note.tp(user: @unverified_user.login) +
-          :email_spam_notice.tp
-      )
+
+      Help(content: help_text)
       Button(
         type: :post,
         name: :reverify_link.t,
         target: account_resend_verification_email_path(
           id: @unverified_user.id
         ),
-        variant: :primary,
+        variant: :primary, class: "mt-2",
         id: "account_reverify_link"
       )
+    end
+
+    private
+
+    def help_text
+      capture do
+        trusted_html(:reverify_note.tp(user: @unverified_user.login))
+        br
+        trusted_html(:email_spam_notice.tp)
+      end
     end
   end
 end

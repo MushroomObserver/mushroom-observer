@@ -9,6 +9,7 @@ xml.tag!(
   xml_string(xml, :name, object.real_text_name(nil))
   xml_string(xml, :author, object.author)
   xml_string(xml, :rank, object.rank.to_s.downcase)
+  xml_integer(xml, :icn_id, object.icn_id)
   xml_boolean(xml, :deprecated, true) if object.deprecated
   xml_boolean(xml, :misspelled, true) if object.is_misspelling?
   xml_html_string(xml, :citation, object.citation.to_s.tl)

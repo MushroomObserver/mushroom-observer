@@ -39,74 +39,54 @@ module Views::Controllers::HerbariumRecords
     end
 
     def build_table_columns(table)
-      table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      unless single_herbarium_filter?
+        table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      end
       table.column(:label.ti) { |rec| render_record_link(rec) }
       table.column(:observations.ti) { |rec| render_observation_links(rec) }
       build_trailing_columns(table)
     end
 
+    # Every row shares one fungarium when the index is filtered down
+    # to a single one -- the column would just repeat it.
+    def single_herbarium_filter?
+      herbaria = @query&.params&.dig(:herbaria)
+      herbaria.is_a?(Array) && herbaria.size == 1
+    end
+
     def build_trailing_columns(table)
-      table.column(nil) { |rec| render_edit_link(rec) }
-      table.column(nil) { |rec| render_delete_button(rec) }
+      table.column(nil, align: :center) { |rec| render_actions(rec) }
       table.column(:mo_id.ti, align: :right) do |rec|
         render_id_badge(rec)
       end
     end
 
-    def render_id_badge(rec)
-      IDBadge(object: rec, size: :lg, extra_class: nil)
+    def render_actions(rec)
+      InlineCRUDLinks(target: rec, observation: @observation, user: @user)
     end
 
-    def render_edit_link(rec)
-      return unless can_edit?(rec)
-
-      Button(
-        type: :edit,
-        target: edit_herbarium_record_path(id: rec.id, back: :index,
-                                           q: q_param),
-        size: :sm,
-        class: "edit_herbarium_record_link_#{rec.id}"
-      )
+    def render_id_badge(rec)
+      Badge(variant: :id, object: rec, size: :lg, extra_class: nil)
     end
 
     def render_herbarium_link(rec)
       # `herbarium_records.herbarium_id` is `NOT NULL` at the schema
       # level, so `rec.herbarium` is always present here.
-      a(href: herbarium_path(rec.herbarium.id)) do
-        trusted_html(rec.herbarium.name.t)
-      end
+      Link(type: :object, object: rec.herbarium, name: rec.herbarium.name.t)
     end
 
     def render_record_link(rec)
-      a(href: herbarium_record_path(id: rec.id),
-        class: "herbarium_record_link_#{rec.id}") do
-        trusted_html(rec.herbarium_label.t)
-      end
+      Link(type: :object, object: rec, name: rec.herbarium_label.t)
     end
 
     def render_observation_links(rec)
       rec.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: permanent_observation_path(obs.id)) do
+        Link(type: :get, name: viewer_aware_unique_format_name(obs).t,
+             target: permanent_observation_path(obs.id)) do
           trusted_html(viewer_aware_unique_format_name(obs).t)
         end
       end
-    end
-
-    def render_delete_button(rec)
-      return unless can_edit?(rec)
-
-      Button(
-        type: :delete,
-        target: herbarium_record_path(rec.id, back: :index),
-        name: :destroy_object.t(type: :herbarium_record),
-        variant: :outline, size: :sm,
-        class: "destroy_herbarium_record_link_#{rec.id}"
-      )
-    end
-
-    def can_edit?(rec)
-      in_admin_mode? || rec.can_edit?(@user)
     end
   end
 end

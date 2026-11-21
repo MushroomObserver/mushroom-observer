@@ -2,44 +2,32 @@
 
 module Views::Layouts
   # Object-metadata footer rendered at the bottom of every `show`
-  # page. Polymorphic across every show-able model — each chunk is
-  # gated by `@obj.respond_to?` so the component renders only what
-  # the object actually exposes: creation/modification dates (with
-  # user attribution when present), a `Version N of M` header on
-  # the old-version views, view counts, "last viewed by you," and a
-  # link to the object's activity log.
+  # page: creation/modification dates + user, a `Version N of M`
+  # header on old-version views, view counts, "last viewed by you,"
+  # and a link to the activity log. Each chunk is gated by
+  # `@obj.respond_to?`, so it renders only what the object exposes.
   #
-  # `minimal: true` skips the user-attribution / view / version /
-  # rss chunks and renders the bare `Created at: <date> / Updated
-  # at: <date>` pair that `Timestamps` used to handle. Two callers
-  # opt in: `herbarium_records/show` and `collection_numbers/show`,
-  # whose pages don't want the richer footer.
+  # `minimal: true` renders the bare `Created at:`/`Updated at:`
+  # pair instead, for callers that don't want the richer footer.
   class ObjectFooter < Views::Base
     prop :user, _Nilable(::User), default: nil
-    # Polymorphic across many model classes (Article, Description,
-    # FieldSlip, GlossaryTerm, Image, Location, Name, Observation,
-    # Occurrence, Sequence) with branches gated by `@obj.respond_to?`.
-    # Duck-typed on `created_at` — the one accessor the component
-    # always reaches.
+    # Duck-typed on `created_at`, the one accessor always reached.
     prop :obj, _Interface(:created_at)
-    # Version log entries (`@versions.to_a` from the controller).
-    # Non-versioned objects (Article, FieldSlip, Image, Observation,
-    # Occurrence, Project, Sequence, SpeciesList) literally have no
-    # version history, so the prop defaults to an empty Array rather
-    # than forcing every non-versioned caller to spell out the same
-    # `versions: []` shape. Duck-typed via `_Interface(:user_id)`
-    # so test doubles work too.
+    # Non-versioned objects have no version history, so this
+    # defaults to empty rather than forcing every caller to spell
+    # out `versions: []`.
     prop :versions, _Array(_Interface(:user_id)), default: -> { [] }
     prop :minimal, _Boolean, default: false
+    # Skip the ContentPadded wrap for callers whose page already
+    # handles its padding, where it would double up.
+    prop :no_wrap, _Boolean, default: false
 
     def view_template
       return render_minimal if @minimal
 
       num_versions = @versions.length
 
-      ContentPadded(
-        class: "small footer-view-stats"
-      ) do
+      render_wrapper("small footer-view-stats") do
         if num_versions.positive? && @obj.version < num_versions
           render_old_version_metadata(num_versions)
         else
@@ -52,12 +40,16 @@ module Views::Layouts
 
     private
 
-    # The bare-bones footer that absorbed `Views::Layouts::Timestamps`.
-    # Date-only formatting (`.web_date`), no user attribution, none
-    # of the optional chunks. Renders for `herbarium_records/show`
-    # and `collection_numbers/show`.
+    def render_wrapper(wrapper_class, &block)
+      if @no_wrap
+        div(class: wrapper_class, &block)
+      else
+        ContentPadded(class: wrapper_class, &block)
+      end
+    end
+
     def render_minimal
-      ContentPadded(class: "small") do
+      render_wrapper("small") do
         p do
           plain("#{:created_at.ti}: #{@obj.created_at.web_date}")
           br
@@ -67,22 +59,27 @@ module Views::Layouts
       end
     end
 
-    # Three of the footer lines share the
-    # `:foo_by.t(user: <link>, date: <time>)` shape — the legacy
-    # `_by` translation strings interpolate the rendered `<a>` user
-    # link into the textile template. `capture` redirects
-    # `Components::Link::User`'s buffer write into a returnable
-    # SafeBuffer so the rendered HTML can be threaded through `.t`.
+    # An interpolated <a> tag gets stripped by Textile; use
+    # Textile's `"text":path` link syntax instead.
     def render_user_dated_line(key, user:, date:)
-      trusted_html(key.t(
-                     user: capture do
-                       Link(type: :user, user:)
-                     end,
-                     date: date.web_time
-                   ))
+      trusted_html(key.t(user: textile_user_link(user),
+                         date: date.web_time))
     end
 
-    # Renders metadata for old versions of versioned objects
+    def textile_user_link(user)
+      return :unknown_user_name.l if user.nil?
+
+      "\"#{textile_user_label(user)}\":#{user_path(user.id)}"
+    end
+
+    # Escaped parens, so RedCloth doesn't read the trailing
+    # "(login)" as a link title instead of visible text.
+    def textile_user_label(user)
+      return user.login if user.name.blank?
+
+      "#{user.name} &#40;#{user.login}&#41;"
+    end
+
     def render_old_version_metadata(num_versions)
       trusted_html(:footer_version_out_of.t(num: @obj.version,
                                             total: num_versions))
@@ -95,7 +92,6 @@ module Views::Layouts
                              date: @obj.updated_at)
     end
 
-    # Renders metadata for latest version or non-versioned objects
     def render_latest_or_non_versioned_metadata
       if @versions.length.positive?
         render_latest_version_metadata
@@ -110,7 +106,6 @@ module Views::Layouts
       render_last_viewed_by
     end
 
-    # Renders creation and last update info for latest version
     def render_latest_version_metadata
       render_created_by
 
@@ -133,7 +128,6 @@ module Views::Layouts
       trusted_html(:footer_last_updated_at.t(date: @obj.updated_at.web_time))
     end
 
-    # Renders creation info
     def render_created_by
       return unless @obj.created_at
 
@@ -142,15 +136,10 @@ module Views::Layouts
       render_source_credit if show_source_credit?
     end
 
-    # Observation-only: which client created it (API, mobile app, ...),
-    # when noteworthy (i.e. not the website) and not already covered by
-    # its own import-provenance UI (Observation#source_noteworthy?,
-    # #import_link). Duck-typed since most models ObjectFooter renders
-    # for have no concept of "source" at all.
-    #
-    # Checks import_link before source_noteworthy? (which also reads
-    # import_link internally) so an imported observation short-circuits
-    # on one import_link lookup instead of two.
+    # Observation-only: which client created it, when noteworthy and
+    # not already covered by the import-provenance UI. Checks
+    # import_link first since source_noteworthy? also reads it, so
+    # an imported observation short-circuits on one lookup.
     def show_source_credit?
       return false if @obj.respond_to?(:import_link) && @obj.import_link
 
@@ -166,7 +155,6 @@ module Views::Layouts
       end
     end
 
-    # Renders creation and update info for non-versioned objects
     def render_non_versioned_metadata
       if @obj.respond_to?(:user) && @obj.user
         render_created_by
@@ -180,7 +168,6 @@ module Views::Layouts
       trusted_html(:footer_last_updated_at.t(date: @obj.updated_at.web_time))
     end
 
-    # Renders view count statistics
     def render_view_counts
       times = if @obj.old_num_views == 1
                 :one_time.l
@@ -193,14 +180,12 @@ module Views::Layouts
       trusted_html(:footer_viewed.t(date: date, times: times))
     end
 
-    # Renders last viewed by current user (observations only)
     def render_last_viewed_by
       time = @obj.old_last_viewed_by(@user)&.web_time || :footer_never.l
       br
       trusted_html(:footer_last_you_viewed.t(date: time))
     end
 
-    # Renders link to RSS activity log if available
     def render_rss_log_link
       return unless @obj.respond_to?(:rss_log_id) && @obj.rss_log_id
 

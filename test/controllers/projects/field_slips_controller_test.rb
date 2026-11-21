@@ -37,6 +37,18 @@ module Projects
       login(katrina.login)
       post(:create, params:, as: :turbo_stream)
       assert_equal(job_start + 1, enqueued_jobs.size)
+
+      tracker = FieldSlipJobTracker.find_by(
+        prefix: project.field_slip_prefix, user: katrina, count: 0
+      )
+      assert_not_nil(tracker, "Cannot find the newly created tracker")
+      # Prepends just the new row into the existing tbody -- doesn't
+      # replace the whole table, so the field-slip-job Stimulus
+      # controller on every other row (each polling that row's job
+      # status every second) stays connected.
+      assert_select("turbo-stream[action='prepend']" \
+                    "[target='field_slip_job_trackers']")
+      assert_select("turbo-stream tr#field_slip_job_tracker_#{tracker.id}")
     end
 
     def test_create_bad_project

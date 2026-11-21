@@ -24,6 +24,10 @@ class Tab::Project::AliasEdit < Tab::Base
     :edit.ti
   end
 
+  def html_options
+    { icon: :edit }
+  end
+
   def model
     # Pass the actual alias instance when available so the auto-derived
     # selector includes the per-id flavour. The caller passed only

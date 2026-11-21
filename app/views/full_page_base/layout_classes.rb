@@ -51,22 +51,52 @@ module Views::FullPageBase::LayoutClasses
     column_classes
   end
 
-  # ----- Padding inside the main container --------------------------
+  # Same left/right ratio `column_classes` uses, for a body-only grid
+  # split that shouldn't also narrow the title bar (`column_classes`
+  # sets `has_columns`, which does that).
+  def left_column_class_for(columns)
+    class_names(column_pair_for(columns)[0])
+  end
+
+  def right_column_class_for(columns)
+    class_names(column_pair_for(columns)[1])
+  end
+
+  # ----- Horizontal padding inside the main container ---------------
 
   def content_padding(content_has = nil)
-    content_has ||= action_name.in?(%w[index show]) ? :panels : :no_panels
+    content_has ||= default_content_has
+    # `content_for?` treats a blank captured value as unset, so the
+    # :panels branch (an intentionally empty class string) can't rely
+    # on it to tell `default_content_padding` this slot was already
+    # explicitly set -- track that separately.
+    @content_padding_set = true
     content_for(:content_padding, flush: true) do
-      content_has == :no_panels ? "px-3" : "p-0"
+      content_has == :no_panels ? "px-card" : ""
     end
   end
 
   def default_content_padding
-    return if content_for?(:content_padding)
+    return if @content_padding_set
 
     content_padding
   end
 
   private
+
+  # `index`/`show` actions default to `:panels` since their content
+  # is conventionally wrapped in cards/panels already. Every
+  # `*::Search::New` view (`Herbaria::Search::New`,
+  # `Names::Search::New`, ...) is also always `Components::Form::
+  # Search`, entirely panel-wrapped, despite the `new` action name --
+  # recognized here so none of those views needs an explicit
+  # `content_padding(:panels)` call.
+  def default_content_has
+    return :panels if action_name.in?(%w[index show])
+    return :panels if self.class.name&.end_with?("::Search::New")
+
+    :no_panels
+  end
 
   # The single source of truth for these left/right column-class
   # pairs -- falls back to the `:twelve` (untouched, no-split) pair
@@ -80,6 +110,9 @@ module Views::FullPageBase::LayoutClasses
     when :eight_four
       [Components::Column.classes_for(xs: 12, md: 8, lg: 7),
        Components::Column.classes_for(xs: 12, md: 4, lg: 5)]
+    when :four_eight
+      [Components::Column.classes_for(xs: 12, md: 5, lg: 4),
+       Components::Column.classes_for(xs: 12, md: 7, lg: 8)]
     when :seven_five
       [Components::Column.classes_for(xs: 12, md: 7),
        Components::Column.classes_for(xs: 12, md: 5)]
@@ -87,19 +120,11 @@ module Views::FullPageBase::LayoutClasses
       [Components::Column.classes_for(xs: 12, md: 6, lg: 8),
        Components::Column.classes_for(xs: 12, md: 6, lg: 4)]
     when :six_even
-      [Components::Column.classes_for(xs: 12, lg: 6),
-       Components::Column.classes_for(xs: 12, lg: 6)]
+      [Components::Column.classes_for(xs: 12, md: 6),
+       Components::Column.classes_for(xs: 12, md: 6)]
     else
       full = Components::Column.classes_for(xs: 12)
       [full, full]
     end
-  end
-
-  def left_column_class_for(columns)
-    class_names(column_pair_for(columns)[0])
-  end
-
-  def right_column_class_for(columns)
-    class_names(column_pair_for(columns)[1])
   end
 end

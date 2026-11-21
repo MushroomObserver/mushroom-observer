@@ -47,6 +47,9 @@ $component-active-bg:                       $MENU_HOVER_BG_COLOR;
 
 $table-cell-padding:                        6px;
 $table-condensed-cell-padding:              4px;
+// Matches cutover's $card-spacer-x -- BS3 has no such variable, so
+// this is defined here rather than mapped from a BS4 default.
+$card-spacer-x:                             0.75rem;
 $table-bg:                                  $LIST_BG_COLOR;
 $table-bg-accent:                           $LIST_ODD_BG_COLOR;
 $table-bg-hover:                            $LIST_HOVER_BG_COLOR;
@@ -96,6 +99,9 @@ $screen-lg-min:                             1320px;
 $screen-md-max:                             1319px;
 
 $grid-gutter-width:                         24px;
+// Matches cutover's $card-spacer-x -- BS3 has no such variable, so
+// this is an addition, not a theme override.
+$card-spacer-x:                             0.75rem;
 $navbar-height:                             40px;
 $navbar-margin-bottom:                      13px;
 $navbar-border-radius:                      0;

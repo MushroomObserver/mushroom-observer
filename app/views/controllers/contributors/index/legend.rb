@@ -26,11 +26,11 @@ module Views::Controllers::Contributors
       ].freeze
 
       def view_template
-        Panel(class: "collapse",
-              id: "contribution_legend") do |panel|
+        Panel(id: "contribution_legend", class: "mb-2",
+              collapse_target: "#contribution_legend_body") do |panel|
           panel.with_heading { render_heading }
           panel.with_heading_links { render_toggle_button }
-          panel.with_body { render_body }
+          panel.with_body(collapse: true) { render_body }
         end
       end
 
@@ -42,7 +42,7 @@ module Views::Controllers::Contributors
 
       def render_toggle_button
         Link(type: :collapse_toggle,
-             target_id: "contribution_legend",
+             target_id: "contribution_legend_body",
              icon: :info_circle,
              button: :link,
              size: :xs)
@@ -64,7 +64,7 @@ module Views::Controllers::Contributors
         Table(
           ::UserStats.fields_with_weight.keys,
           show_headers: false,
-          class: "bg-none mx-lg-5"
+          class: "bg-none mx-lg-5", panel_wrap: false
         ) do |t|
           # `user_stats_*` values are `[:images]`-style cross-refs to
           # plain-text root keys ("Images", "Votes", …); needs `.t`
@@ -81,7 +81,7 @@ module Views::Controllers::Contributors
       def render_example_math_table
         Table(
           show_headers: false, variant: :condensed,
-          class: "bg-none w-auto mx-auto"
+          class: "bg-none w-auto mx-auto", panel_wrap: false
         ) do |t|
           t.body { render_example_math_rows }
         end

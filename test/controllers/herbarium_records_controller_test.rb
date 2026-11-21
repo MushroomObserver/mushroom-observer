@@ -32,6 +32,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # In results, expect 1 row per herbarium_record
     assert_select("#results tbody tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
+    # Unfiltered: records span multiple fungaria, so the column shows.
+    assert_select("th", text: :herbarium.ti)
   end
 
   # Unfiltered index sorts by Query::HerbariumRecords.default_order.
@@ -71,6 +73,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # In results, expect 1 row per herbarium_record
     assert_select("#results tbody tr",
                   HerbariumRecord.where(herbarium: herbarium).count)
+    # Filtered to one fungarium: every row shares it, so the column
+    # that would just repeat it is hidden.
+    assert_select("th", { text: :herbarium.ti, count: 0 })
   end
 
   def test_index_herbarium_id_no_matching_records
@@ -538,6 +543,22 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # page_flash update).
     assert_select("turbo-stream[target='observation_herbarium_records']")
     assert_select("turbo-stream[target='page_flash']")
+    assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
+  end
+
+  # Modal edit from the herbarium_records index page (back: "index")
+  # has no observation to update a sub-panel for -- @back_object stays
+  # nil, so the turbo_stream submit falls through to a plain redirect
+  # back to the index, same as destroy's fallback.
+  def test_update_herbarium_record_turbo_from_index
+    herbarium_record_setup => { params:, nybg_rec:, nybg_user:, rolf_herb: }
+
+    post(:update,
+         params: params.deep_merge(herbarium_record: { modal: "true" },
+                                   back: "index"),
+         format: :turbo_stream)
+
+    assert_redirected_to(herbarium_records_path(id: nybg_rec.id))
     assert_record_updated(params:, nybg_rec:, nybg_user:, rolf_herb:)
   end
 

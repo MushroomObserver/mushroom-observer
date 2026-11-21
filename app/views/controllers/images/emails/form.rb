@@ -29,7 +29,7 @@ module Views::Controllers::Images::Emails
     private
 
     def render_image_preview
-      div(class: "mb-4") do
+      div(class: "mb-3") do
         InteractiveImage(
           user: @user,
           image: @image,

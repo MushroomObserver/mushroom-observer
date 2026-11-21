@@ -93,6 +93,19 @@ class Components::Table < Components::Base
   # table. Per-column valign: (on #column) still applies for a
   # single column that needs to differ from the rest.
   prop :align_middle, _Boolean, default: false
+  # Self-wraps in a `Panel` for its native border/radius/margin
+  # handling -- pass `false` when the caller supplies the outer Panel.
+  prop :panel_wrap, _Boolean, default: true
+  # Class(es) for the wrapping Panel -- only meaningful with
+  # `panel_wrap: true` (the default). Ignored, not an error, when
+  # `panel_wrap: false`, matching the field helpers' `wrap_class:`.
+  prop :wrap_class, _Nilable(String), default: nil
+  # HTML id for the wrapping Panel -- only meaningful with
+  # `panel_wrap: true`. Use this, not a caller-added wrapping div,
+  # when something (e.g. turbo_stream.replace) needs to target the
+  # table's outermost rendered element: `id:` itself lands on the
+  # inner `<table>` tag, nested inside the Panel.
+  prop :wrap_id, _Nilable(String), default: nil
   # Catch-all for class:, data:, cols:, ARIA attrs, and any other
   # HTML attrs forwarded to the `<table>` element -- matches
   # Icon/Collapsible's pattern.
@@ -118,10 +131,22 @@ class Components::Table < Components::Base
     # https://www.phlex.fun/components/yielding.html#vanishing-the-yield
     vanish(&block)
 
-    table(**table_attributes) do
-      render_thead if @show_headers
-      render_tbody
-      render_tfoot if @footer_block
+    if @panel_wrap
+      Panel(class: @wrap_class, id: @wrap_id) do |p|
+        p.with_body(wrapper: false) { render_table_responsive }
+      end
+    else
+      render_table_responsive
+    end
+  end
+
+  def render_table_responsive
+    div(class: "table-responsive") do
+      table(**table_attributes) do
+        render_thead if @show_headers
+        render_tbody
+        render_tfoot if @footer_block
+      end
     end
   end
 
@@ -259,6 +284,18 @@ class Components::Table < Components::Base
     nil
   end
 
+  # Full-width section-label row — a single `<th colspan="N"
+  # scope="colgroup">` in a dedicated `<tbody>`. Use between `t.body`
+  # groups to label each section (e.g. "Target locations") without
+  # splitting into separate `<table>`s, which can drift out of
+  # column alignment. Styling: .legend-row in mo/_tables.scss.
+  #
+  # @yield block that renders the cell content (alternative to `text`)
+  def legend(text = nil, **attrs, &block)
+    @body_blocks << { legend: true, text: text, attrs: attrs, block: block }
+    nil
+  end
+
   private
 
   def table_attributes
@@ -307,13 +344,34 @@ class Components::Table < Components::Base
 
   def render_tbody
     if @body_blocks.any?
-      @body_blocks.each { |b| tbody(**b[:attrs]) { b[:block].call } }
+      @body_blocks.each_with_index do |b, idx|
+        render_body_entry(b, first: idx.zero?)
+      end
     elsif @row_block
       tbody(id: @tbody_id) do
         @rows.each.with_index { |row, idx| @row_block.call(row, idx) }
       end
     else
       tbody(id: @tbody_id) { @rows.each { |row| render_default_row(row) } }
+    end
+  end
+
+  def render_body_entry(entry, first:)
+    return render_legend_row(entry, first: first) if entry[:legend]
+
+    tbody(**entry[:attrs]) { entry[:block].call }
+  end
+
+  # `pt-4` separates a legend row from the previous section's rows --
+  # skipped on the table's first row, which has nothing above it.
+  def render_legend_row(entry, first:)
+    tbody(**entry[:attrs]) do
+      tr(class: "legend-row") do
+        th(colspan: @columns.length, scope: "colgroup",
+           class: (first ? nil : "pt-4")) do
+          entry[:block] ? entry[:block].call : plain(entry[:text])
+        end
+      end
     end
   end
 

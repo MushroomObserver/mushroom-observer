@@ -17,19 +17,22 @@
 # `size:` picks the badge's font-size modifier -- `.badge-id` itself
 # has no inherent font-size, so every caller states its size
 # explicitly rather than relying on an implicit default:
-#   :xl -- project/species-list listing row title badges
-#          (Projects::ListItem, SpeciesLists::Listing)
+#   :xl -- project/species-list table row title badges
+#          (Projects::ProjectTable, SpeciesLists::SpeciesListTable)
 #   :lg -- copy-to-clipboard external-site record id (Link::External),
 #          Matching Observations panel row ids
 #   :md -- matrix box title and other index-row id badges (Matrix::Box,
-#          Names::Index::Row, Occurrences::Projects::Form)
+#          Names::Index, Occurrences::Projects::Form)
 #   :sm -- sitting next to a large page-title heading
 #
 # `interactive:` (default true) is the copy-to-clipboard `<button>`
 # described above. Pass `false` for a plain, non-clickable `<span>` --
 # e.g. next to an object that isn't itself a link either (Matching
 # Observations' current-observation row).
-class Components::IDBadge < Components::Base
+#
+# @example
+#   Badge(variant: :id, object: @project, size: :sm)
+class Components::Badge::ID < Components::Badge
   SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",
                    md: "badge-md", sm: "badge-sm" }.freeze
 
@@ -37,7 +40,7 @@ class Components::IDBadge < Components::Base
   prop :value, _Nilable(_Union(String, Integer)), default: nil
   prop :size, _Union(*SIZE_CLASSES.keys)
   prop :title, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: "mr-4"
+  prop :extra_class, _Nilable(String), default: "mr-3"
   prop :interactive, _Boolean, default: true
 
   def view_template

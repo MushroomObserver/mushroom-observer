@@ -4,7 +4,9 @@
 # over the observation-show sub-panels (`_collection_numbers`,
 # `_herbarium_records`, `_sequences`, `_external_links`, the
 # descriptions alt-list, the namings table, the comments-for-object
-# list). Keyed on presence/absence of `target:` -- both shapes are
+# list), plus the project aliases table and the visual models/groups
+# tables. Keyed on presence/absence of
+# `target:` -- both shapes are
 # ultimately "one or two links derived from an object": `target:`
 # present dispatches the edit/destroy pair (polymorphic on the
 # target's class), `target:` absent dispatches the single add link
@@ -37,13 +39,16 @@
 # modal edit vs. plain link, detach-not-destroy paths, different
 # permission predicates -- which is what a Tab PORO carries.
 class Components::InlineCRUDLinks < Components::Base
-  # Target is polymorphic; the supported classes are exactly the
-  # keys of `TARGET_HANDLERS` below. `target:` present/absent is
-  # what selects edit/destroy mode vs. add mode.
+  include Components::InlineCRUDLinks::TargetHandlers
+
+  # Target is polymorphic; the supported classes are the keys of
+  # `TARGET_HANDLERS` below. `target:` present/absent is what
+  # selects edit/destroy mode vs. add mode.
   prop :target, _Nilable(_Union(::CollectionNumber, ::HerbariumRecord,
                                 ::Sequence, ::ExternalLink,
                                 ::Naming, ::Comment, ::Description,
-                                ::Publication)),
+                                ::Publication, ::ProjectAlias,
+                                ::VisualModel, ::VisualGroup)),
        default: nil
   # CollectionNumber / HerbariumRecord: required -- permission and/or
   # the detach path need the observation. Every other target derives
@@ -57,6 +62,12 @@ class Components::InlineCRUDLinks < Components::Base
   # only.
   prop :extras, _Array(_Nilable(_Union(Phlex::SGML, String))),
        default: -> { [] }
+  # Set false to suppress the dispatcher's edit button
+  # unconditionally (not just when the caller lacks permission) --
+  # for a caller whose edit control can't fit the icon-only
+  # convention (e.g. needs the record's name as visible link text)
+  # and supplies one via `extras:` instead. Destroy is unaffected.
+  prop :edit, _Boolean, default: true
   # Add-link mode (`target:` absent) needs these instead.
   prop :tab, _Nilable(::Tab::Base), default: nil
   prop :modal_id, _Nilable(String), default: nil
@@ -114,6 +125,12 @@ class Components::InlineCRUDLinks < Components::Base
       tab: :tab_comment_edit,
       can_edit: :can_edit_via_owner?
     },
+    ::ProjectAlias => {
+      edit: :modal_link_edit,
+      tab: :tab_project_alias_edit,
+      destroy_path: :path_project_alias,
+      can_edit: :can_edit_via_project_admin?
+    },
     # Both `NameDescription` and `LocationDescription` inherit from
     # `Description`. Keyed on the parent so the ancestor walk in
     # `#handler` resolves either subclass.
@@ -127,6 +144,14 @@ class Components::InlineCRUDLinks < Components::Base
       edit: :icon_link_edit,
       tab: :tab_publication_edit,
       can_edit: :can_edit_via_target?
+    },
+    ::VisualModel => {
+      edit: :crud_edit_button,
+      can_edit: :can_edit_unrestricted?
+    },
+    ::VisualGroup => {
+      edit: :crud_edit_button,
+      can_edit: :can_edit_unrestricted?
     }
   }.freeze
 
@@ -183,7 +208,7 @@ class Components::InlineCRUDLinks < Components::Base
   end
 
   def edit_component
-    return nil unless can_edit?
+    return nil unless @edit && can_edit?
 
     send(handler[:edit])
   end
@@ -261,153 +286,5 @@ class Components::InlineCRUDLinks < Components::Base
 
   def modal_id_naming
     "obs_#{@target.observation_id}_naming_#{@target.id}"
-  end
-
-  # ---- :tab handlers ----------------------------------------
-
-  def tab_collection_number_edit
-    ::Tab::CollectionNumber::Edit.new(
-      collection_number: @target, observation: @observation
-    )
-  end
-
-  def tab_herbarium_record_edit
-    ::Tab::HerbariumRecord::Edit.new(
-      herbarium_record: @target, observation: @observation
-    )
-  end
-
-  # Sequence belongs_to exactly one Observation -- `@target.observation`
-  # is always the right object, so callers no longer need to pass
-  # `observation:` for Sequence targets.
-  def tab_sequence_edit
-    ::Tab::Sequence::Edit.new(
-      sequence: @target, observation: @target.observation
-    )
-  end
-
-  def tab_external_link_edit
-    ::Tab::ExternalLink::Edit.new(link: @target)
-  end
-
-  def tab_naming_edit
-    ::Tab::Naming::Edit.new(naming: @target)
-  end
-
-  def tab_comment_edit
-    ::Tab::Comment::Edit.new(comment: @target)
-  end
-
-  def tab_description_edit
-    ::Tab::Description::Edit.new(description: @target)
-  end
-
-  def tab_publication_edit
-    ::Tab::Publication::Edit.new(publication: @target)
-  end
-
-  # ---- :destroy_path handlers -------------------------------
-
-  # Default -- pass the model and let `Button::Delete` build
-  # `record_path(id)`.
-  def path_target = @target
-
-  # "Detach from obs" -- record-path with `observation_id:` query so
-  # the controller detaches rather than destroys the record.
-  # `CollectionNumber` / `HerbariumRecord` can be attached to
-  # multiple obs.
-  def path_detach_from_obs
-    send(:"#{@target.type_tag}_path",
-         @target.id, observation_id: @observation.id)
-  end
-
-  # Sequence destroy keeps a `back: permanent_observation_path(obs)` query so
-  # the controller redirects to the obs after destroying.
-  def path_sequence_with_back
-    sequence_path(id: @target.id,
-                  back: permanent_observation_path(@target.observation))
-  end
-
-  # Namings are nested under observations in routing; no top-level
-  # `naming_path` helper exists.
-  def path_observation_naming
-    observation_naming_path(
-      observation_id: @target.observation_id, id: @target.id
-    )
-  end
-
-  # ---- :destroy_name handlers -------------------------------
-
-  def name_remove = :remove.ti
-  def name_destroy_object = :destroy_object.t(type: @target.type_tag)
-
-  # ---- :destroy_class handlers ------------------------------
-
-  def class_remove_collection_number
-    "remove_collection_number_link_#{@target.id}"
-  end
-
-  def class_remove_herbarium_record
-    "remove_herbarium_record_link_#{@target.id}"
-  end
-
-  def class_destroy_sequence
-    "destroy_sequence_link_#{@target.id}"
-  end
-
-  def class_destroy_external_link
-    "destroy_external_link_link_#{@target.id}"
-  end
-
-  # The pre-Phlex `naming_destroy_button` set this class explicitly
-  # so the namings integration tests could click it via
-  # `find_button(class: "destroy_naming_link_<id>")`. Keep the
-  # identifier hook.
-  def class_destroy_naming
-    "destroy_naming_link_#{@target.id}"
-  end
-
-  # ---- :destroy_confirm handlers ----------------------------
-
-  def confirm_remove_object
-    :remove_object_confirm.t(type: @target.type_tag, association: :observation)
-  end
-
-  # ---- :can_edit handlers -----------------------------------
-
-  # CollectionNumber: edit gated by the OBS's edit permission,
-  # rechecked per-record.
-  def can_edit_via_observation?
-    @observation &&
-      (@observation.can_edit?(@user) || in_admin_mode?)
-  end
-
-  # HerbariumRecord / Sequence / ExternalLink: per-record edit
-  # permission. Important for HRs and ELs: a user with edit
-  # permission on the OBS may not own every record attached.
-  def can_edit_via_target?
-    @target.can_edit?(@user) || in_admin_mode?
-  end
-
-  # Owner-or-admin. Gating at the render side hides misleading
-  # affordances rather than letting the controller reject the action
-  # server-side after a user sees a link they can't use.
-  def can_edit_via_owner?
-    @target.user == @user || in_admin_mode?
-  end
-
-  # NameDescription writer permission -- `desc.writer?(user)` covers
-  # per-user / per-group writer membership.
-  def can_edit_via_writer?
-    @target.writer?(@user) || in_admin_mode?
-  end
-
-  # ---- :can_destroy handlers (override only when distinct) --
-
-  # NameDescription destroy needs admin permission (stricter than
-  # writer): only the description's admin group / record owner /
-  # site-admin can delete.
-  def can_destroy_via_admin?
-    @target.is_admin?(@user) || in_admin_mode?
   end
 end

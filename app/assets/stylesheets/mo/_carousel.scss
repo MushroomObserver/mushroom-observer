@@ -95,7 +95,7 @@
   margin-top: 5rem; // to let overlays through
   margin-bottom: 5rem; // fullscreen and caption/voting
   background: none !important;
-  font-size: 2rem;
+  font-size: 1.25rem; // 20px at the 16px root -- see issue #5527
   color: $white;
   opacity: 0.75;
 
@@ -148,7 +148,7 @@
 // the icon the same way without a separate .mo-icon override.
 @media screen and (min-width: $screen-sm-min) {
   .carousel-control {
-    font-size: 3rem;
+    font-size: 1.875rem; // 30px at the 16px root -- see issue #5527
   }
 }
 
@@ -329,4 +329,22 @@
       display: inline;
     }
   }
+}
+
+// The number saying which occurrence member a thumbnail's photo
+// hangs on. The indicator li is position: relative, so the badge
+// sits in its corner; it stays inside the li, which is why the li's
+// overflow: hidden does not clip it.
+.carousel-indicators li .carousel-thumbnail-marker {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  z-index: 1;
+  // Bootstrap pushes an indicator's text 999px off to hide the
+  // default dot's label, and MO zeroes the line-height to
+  // collapse the gaps between thumbnails. The badge inherits
+  // both, which left the number invisible and the bubble
+  // looking empty.
+  text-indent: 0;
+  line-height: 1.4;
 }

@@ -9,8 +9,7 @@ module Views::Controllers::SpeciesLists
     prop :query, ::Query
 
     def view_template
-      Panel(id: "list_details",
-            class: "mt-3 mb-0") do |panel|
+      Panel(id: "list_details", class: "mb-0") do |panel|
         panel.with_body { render_body }
       end
     end

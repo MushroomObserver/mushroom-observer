@@ -80,7 +80,8 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       content, path, opts = show_tab_class.new(
         type_tag => record, observation: @obs
       ).to_a
-      a(href: url_for(path), **opts) { trusted_html(content) }
+      Link(type: :get, name: content, target: url_for(path),
+           **opts) { trusted_html(content) }
     end
 
     def render_new_link

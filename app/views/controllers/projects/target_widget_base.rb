@@ -21,18 +21,16 @@ class Views::Controllers::Projects::TargetWidgetBase < Components::ApplicationFo
   end
 
   def view_template
-    div(class: "mt-3") do
-      super do
-        autocompleter_field(
-          field_name,
-          type: autocompleter_type,
-          textarea: true,
-          label: label_key,
-          wrap_class: "d-inline-block align-middle",
-          cols: 60
-        )
-        submit(submit_key.l, class: "d-inline-block align-middle ml-3")
-      end
+    super do
+      autocompleter_field(
+        field_name,
+        type: autocompleter_type,
+        textarea: true,
+        label: label_key,
+        wrap_class: "d-inline-block align-middle",
+        cols: 60
+      )
+      submit(submit_key.l, class: "d-inline-block align-middle ml-3")
     end
   end
 

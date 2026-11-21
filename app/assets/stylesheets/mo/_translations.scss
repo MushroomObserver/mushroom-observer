@@ -2,17 +2,14 @@
 // edit translations
 // --------------------------------------------------
 
+#translations_index,
+#translation_ui {
+  height: 750px;
+  overflow-y: auto;
+}
+
 .translation_container {
   height: 750px;
-  padding-right: 0;
-
-  > div {
-    height: 750px;
-    overflow-y: auto;
-    height: 100%;
-    background-color: $table-bg;
-    border: 1px solid $table-border-color;
-  }
 
   .major_header {
     margin: 1em 0;

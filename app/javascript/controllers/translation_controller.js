@@ -33,7 +33,7 @@ export default class extends Controller {
 
   // clear the form
   clearForm() {
-    document.getElementById('translation_ui').innerHTML = '';
+    document.getElementById('translation_ui_body').innerHTML = '';
     this.LOADED = false;
     this.CHANGED = false;
   }

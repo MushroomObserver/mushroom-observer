@@ -41,6 +41,8 @@ module Views::Controllers::Account
       text_field(
         :login,
         label: :signup_login,
+        help: :signup_login_help.t,
+        help_placement: :above,
         data: { autofocus: true }
       )
     end
@@ -71,7 +73,9 @@ module Views::Controllers::Account
     end
 
     def render_name_field
-      text_field(:name, label: :signup_name)
+      text_field(:name, label: :signup_name,
+                        help: :signup_name_help.t,
+                        help_placement: :above)
     end
 
     def render_theme_field

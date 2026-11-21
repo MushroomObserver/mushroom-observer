@@ -9,14 +9,21 @@ module Views::Controllers::Projects::Members
     prop :user, ::User
 
     def view_template
-      add_project_banner(@project)
-      container_class(:wide)
-      add_pagination(@pagination)
+      render_page_chrome
 
-      render(AddForm.new(project: @project))
+      ContentPadded { render(AddForm.new(project: @project)) }
       PaginatedResults do
         render(Tables.new(project: @project, users: @users, user: @user))
       end
+    end
+
+    private
+
+    def render_page_chrome
+      add_project_banner(@project)
+      container_class(:wide)
+      content_padding(:panels)
+      add_pagination(@pagination)
     end
   end
 end

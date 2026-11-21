@@ -51,9 +51,7 @@ module Views::Controllers::HerbariumRecords
     def render_herbarium_field
       trusted_html(:herbarium.ti)
       plain(": ")
-      a(href: url_for(herbarium.show_link_args)) do
-        trusted_html(herbarium.name.t)
-      end
+      Link(type: :object, object: herbarium, name: herbarium.name.t)
       br
     end
 

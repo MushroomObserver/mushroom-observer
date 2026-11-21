@@ -98,8 +98,8 @@ class Components::Link::Get < Components::Link
   end
 
   def merged_class
-    class_names(identifier, stateful_class, btn_styling, size_class(@size),
-                @attributes[:class])
+    class_names(identifier, stateful_class, icon_wrapper_class, btn_styling,
+                size_class(@size), @attributes[:class])
   end
 
   def link_html_options

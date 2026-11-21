@@ -311,13 +311,6 @@ module Tab::Project
       assert_equal(routes.projects_path(member: user.id), tab.path)
     end
 
-    # Alias tabs set `model`, so the auto-derived selector class
-    # follows the model-aware flavour. Edit case: alt_title="EDIT"
-    # short-circuits the model-name segment → class = "edit_link"
-    # + per-id flavour "edit_link_<id>". Add case: no alt_title +
-    # title="ADD" doesn't contain the model name → composes as
-    # "add_project_alias_link" + Bootstrap button styling from
-    # html_options.
     def test_alias_edit_uses_model_derived_class
       tab = Tab::Project::AliasEdit.new(
         project_id: @project.id, name: "MO", id: 42
@@ -330,8 +323,8 @@ module Tab::Project
       assert_equal(:edit.ti, tab.alt_title)
 
       link_class = tab.html_options[:class]
-      assert_includes(link_class, "edit_link")
-      assert_includes(link_class, "edit_link_42")
+      assert_includes(link_class, "edit_project_alias_link")
+      assert_includes(link_class, "edit_project_alias_link_42")
     end
 
     def test_alias_new_uses_model_derived_class

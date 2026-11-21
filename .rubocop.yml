@@ -26,6 +26,7 @@ require:
   - ./lib/rubocop/cop/mo/no_hand_rolled_form_tag
   - ./lib/rubocop/cop/mo/no_hand_rolled_method_field
   - ./lib/rubocop/cop/mo/no_hand_rolled_whitespace
+  - ./lib/rubocop/cop/mo/no_load_time_translation_call
   - ./lib/rubocop/cop/mo/no_long_comment_block
   - ./lib/rubocop/cop/mo/no_nested_attributes_kwarg
   - ./lib/rubocop/cop/mo/no_query_subclass_mutation
@@ -215,6 +216,19 @@ MO/NoHandRolledWhitespace:
     # cop exists to keep everywhere else.
     - "app/components/base.rb"
 
+MO/NoLoadTimeTranslationCall:
+  Description: >-
+    A .t/.l/.tl/.tp/.tpl/.ti call (or direct I18n.t) outside a def/
+    block/lambda runs once at class-load time and bakes in whatever
+    the DB/Solid-Cache-backed backend resolves at that instant --
+    wrap it in a block/lambda instead -- see
+    lib/rubocop/cop/mo/no_load_time_translation_call.rb and #4807.
+  Enabled: true
+  Include:
+    - "app/**/*.rb"
+    - "lib/**/*.rb"
+    - "config/**/*.rb"
+
 MO/NoLongCommentBlock:
   Description: >-
     A run of more than Max consecutive full-line comments is
@@ -376,7 +390,7 @@ MO/NoRawLinkOrButtonTo:
   Description: >-
     Phlex views/components must use Components::Link/Components::Button
     (Link(...)/Button(...) Kit syntax) instead of calling link_to/
-    button_to directly -- see
+    button_to/a(...)/button(...) directly -- see
     lib/rubocop/cop/mo/no_raw_link_or_button_to.rb.
   Enabled: true
   Include:
@@ -398,7 +412,7 @@ MO/NoRawLinkOrButtonTo:
     # not an action button -- Components::Button's whole abstraction
     # is .btn-family styling/variants, which doesn't fit a badge.
     # Genuinely a different primitive, not a bypass of Button.
-    - "app/components/id_badge.rb"
+    - "app/components/badge/id.rb"
 
 MO/NoRegexpEscape:
   Description: >-

@@ -18,7 +18,7 @@ module Views::Controllers::SpeciesLists::NameLists
 
     def view_template
       super do
-        div(class: "text-center my-5") do
+        div(class: "text-center my-3") do
           submit(:name_lister_submit_spl.l, class: "mx-3", disabled: !@user)
           submit(:name_lister_submit_txt.l, class: "mx-3")
           submit(:name_lister_submit_rtf.l, class: "mx-3")

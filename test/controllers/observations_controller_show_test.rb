@@ -97,6 +97,69 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_select("a[href*='occurrences/#{occ.id}']")
   end
 
+  # The numbers tying a comment or photo back to the member it came
+  # from have to survive the whole render chain -- the panel, the
+  # comments and the carousel each get them from the controller, and a
+  # panel built directly in a view test cannot show a missing one
+  # (#5718).
+  def test_show_observation_marks_items_from_siblings
+    login("rolf")
+    primary = observations(:minimal_unknown_obs)
+    sibling = observations(:detailed_unknown_obs)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    Comment.create!(user: rolf, target: sibling, summary: "On the sibling",
+                    comment: "Said elsewhere in this occurrence.")
+
+    get(:show, params: { id: primary.id })
+
+    assert_response(:success)
+    assert_select("#matching_observations .sibling-marker", text: "1")
+    assert_select("#current_observation_row .sibling-marker-spacer")
+    assert_select(".comment-summary .sibling-marker", text: "1")
+    assert_select(".comment-summary a[href*='#{sibling.id}'] .sibling-marker")
+  end
+
+  # Newest first, with or without siblings to merge in -- the panel
+  # renders the array in the order it is handed (#5718).
+  def test_show_observation_comments_newest_first
+    login("rolf")
+    obs = observations(:detailed_unknown_obs)
+    older = comments(:detailed_unknown_obs_comment)
+    assert_nil(obs.occurrence)
+    newer = Comment.create!(user: rolf, target: obs, summary: "Later",
+                            comment: "Said after the first one.")
+
+    get(:show, params: { id: obs.id })
+
+    assert_equal(["comment_#{newer.id}", "comment_#{older.id}"],
+                 css_select("#comments .comment").pluck("id"))
+  end
+
+  # A photo hanging on this observation as well as on a sibling is the
+  # page's photo, so the sibling's number does not land on it (#5718).
+  def test_show_observation_shared_image_carries_no_marker
+    login("rolf")
+    primary = observations(:two_img_obs)
+    sibling = observations(:fungi_obs)
+    shared = primary.images.first
+    sibling_image = images(:plane_image_example)
+    assert_includes(sibling.images, sibling_image)
+    occ = Occurrence.create!(user: rolf, primary_observation: primary)
+    primary.update!(occurrence: occ)
+    sibling.update!(occurrence: occ)
+    sibling.images << shared
+
+    get(:show, params: { id: primary.id })
+
+    assert_select("#carousel_thumbnail_#{shared.id}")
+    assert_select("#carousel_thumbnail_#{shared.id} " \
+                  ".carousel-thumbnail-marker", count: 0)
+    assert_select("#carousel_thumbnail_#{sibling_image.id} " \
+                  ".carousel-thumbnail-marker", text: "1")
+  end
+
   # Any image in the occurrence can be the thumbnail; when it belongs
   # to a sibling it still leads the carousel (issue #5160).
   def test_show_observation_sibling_image_as_thumbnail
@@ -421,8 +484,10 @@ class ObservationsControllerShowTest < FunctionalTestCase
       assert_select(".comment-summary", /complicated/)
     end
     # Test that the panel title and new comment link appears.
-    assert_select("#comments_for_object .panel-heading",
-                  text: "#{:comments.ti} #{:show_comments_add_comment.l}")
+    assert_select("#comments_for_object .panel-title > span:first-child",
+                  text: :comments.ti)
+    assert_select("#comments_for_object .panel-heading-links",
+                  text: :show_comments_add_comment.l)
 
     # You must be logged in to get the show_obs naming table now.
     # Test it on obs with two namings (Rolf's and Mary's), with owner logged in.

@@ -7,7 +7,7 @@ class Components::Matrix::Box::Who < Components::Base
   prop :obs, ::Observation
 
   def view_template
-    span(class: "rss-who") do
+    span(class: "log-who") do
       if @obs.collector_user
         Link(type: :user, user: @obs.collector_user)
       elsif (login = @obs.inat_collector_login)

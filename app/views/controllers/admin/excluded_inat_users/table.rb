@@ -12,8 +12,7 @@ module Views::Controllers::Admin::ExcludedInatUsers
     # is itself named Table.
     def view_template
       render(::Components::Table.new(
-               @entries, variant: :striped, id: "excluded_inat_users",
-                         class: "mt-3"
+               @entries, variant: :striped, id: "excluded_inat_users"
              )) do |t|
         t.column(:excluded_inat_user_login.l) { |e| render_login(e) }
         t.column(:excluded_inat_user_added_by.l) { |e| render_added(e) }
@@ -25,7 +24,8 @@ module Views::Controllers::Admin::ExcludedInatUsers
     private
 
     def render_login(entry)
-      a(href: "#{INAT_PEOPLE_URL}#{entry.inat_login}") { entry.inat_login }
+      Link(type: :get, name: entry.inat_login,
+           target: "#{INAT_PEOPLE_URL}#{entry.inat_login}")
       return unless entry.inat_user_id
 
       whitespace

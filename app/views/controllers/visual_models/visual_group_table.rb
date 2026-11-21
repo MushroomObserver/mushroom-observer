@@ -33,7 +33,8 @@ module Views::Controllers::VisualModels
 
     def render_table
       Table(
-        groups, variant: :striped, class: "table-visual-model"
+        groups, variant: :striped, class: "table-visual-model",
+                panel_wrap: false
       ) do |t|
         define_columns(t)
       end
@@ -42,7 +43,7 @@ module Views::Controllers::VisualModels
     def define_columns(table)
       define_name_column(table)
       define_count_columns(table)
-      define_action_columns(table)
+      define_actions_column(table)
     end
 
     def define_name_column(table)
@@ -62,12 +63,9 @@ module Views::Controllers::VisualModels
       end
     end
 
-    def define_action_columns(table)
-      table.column(:edit.ti, align: :center, valign: :middle) do |g|
-        Button(type: :edit, target: g, variant: :strip)
-      end
-      table.column(:destroy.ti, align: :center, valign: :middle) do |g|
-        render_destroy_link(g)
+    def define_actions_column(table)
+      table.column(:actions.ti, align: :center, valign: :middle) do |g|
+        render_actions(g)
       end
     end
 
@@ -77,8 +75,8 @@ module Views::Controllers::VisualModels
              name: :visual_group_create.t, variant: :strip)
     end
 
-    def render_destroy_link(group)
-      Button(type: :delete, target: group, variant: :strip)
+    def render_actions(group)
+      InlineCRUDLinks(target: group, user: current_user)
     end
 
     def groups

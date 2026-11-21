@@ -39,27 +39,29 @@ module Views::Controllers::Translations
     def render_help_block
       Container(width: :text) do
         ContentPadded do
-          Help(element: :p, content: :edit_translations_help.t)
+          p { :edit_translations_help.t }
         end
       end
     end
 
     def render_index_panel
-      div(id: "translations_index", class: "p-2") do
-        @index.each { |item| render_item(item) }
+      Panel(id: "translations_index") do |panel|
+        panel.with_body { @index.each { |item| render_item(item) } }
       end
     end
 
     def render_ui_panel
-      div(id: "translation_ui", class: "p-2") do
-        if @edit_tags.any?
-          render(Form.new(lang: @lang, tag: @tag, edit_tags: @edit_tags,
-                          strings: @strings, for_page: @for_page,
-                          official_records: @official_records))
+      Panel(id: "translation_ui") do |panel|
+        panel.with_body(id: "translation_ui_body") do
+          if @edit_tags.any?
+            render(Form.new(lang: @lang, tag: @tag, edit_tags: @edit_tags,
+                            strings: @strings, for_page: @for_page,
+                            official_records: @official_records))
+          end
+          render(Versions.new(edit_tags: @edit_tags,
+                              translated_records: @translated_records,
+                              user: current_user))
         end
-        render(Versions.new(edit_tags: @edit_tags,
-                            translated_records: @translated_records,
-                            user: current_user))
       end
     end
 

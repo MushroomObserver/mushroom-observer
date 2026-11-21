@@ -7,6 +7,7 @@ module Views::Controllers::Projects::Aliases
     def setup
       super
       @user = users(:rolf)
+      controller.instance_variable_set(:@user, @user)
       @project = projects(:eol_project)
     end
 
@@ -36,6 +37,20 @@ module Views::Controllers::Projects::Aliases
       assert_html(html,
                   "form[action*='/projects/#{@project.id}/aliases/" \
                   "#{project_aliases(:one).id}']")
+    end
+
+    def test_non_member_does_not_see_edit_destroy_buttons
+      non_member = users(:dick)
+      controller.instance_variable_set(:@user, non_member)
+
+      html = render_table
+
+      assert_no_html(html,
+                     "a[href*='/projects/#{@project.id}/aliases/" \
+                     "#{project_aliases(:one).id}/edit']")
+      assert_no_html(html,
+                     "form[action*='/projects/#{@project.id}/aliases/" \
+                     "#{project_aliases(:one).id}']")
     end
 
     def test_empty_alias_list_renders_just_headers
