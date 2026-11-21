@@ -82,6 +82,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
     Rails.logger.warn(:runtime_spiders_begone.t)
     render_login_required_page
+    true
   end
 
   # nginx answers this for a request carrying no session cookie, so
@@ -92,6 +93,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     render(file: Rails.public_path.join(LOGIN_REQUIRED_PAGE),
            status: :forbidden, layout: false)
   end
+  private :render_login_required_page
 
   # `CollectionNumbersController` overrides this to `nil` -- passing no
   # explicit :by param there keeps the index titled "____ Index" rather
