@@ -173,9 +173,11 @@ module Projects
         # anchor so the browser paints it no button box.
         assert_select("a.text-danger[data-action='remote-project" \
                       "#clear:prevent']")
-        assert_select("[data-remote-project-target='display'] label",
-                      text: /iNaturalist project/)
       end
+      label = css_select("[data-remote-project-target='display'] label").
+              first&.text.to_s
+      assert_includes(label, :project_sites_remote_project.l,
+                      "The saved project should be labeled")
     end
 
     def test_an_unset_project_shows_the_field
@@ -216,16 +218,20 @@ module Projects
       make_admin("dick")
       get(:index, params: { project_id: project.id })
 
-      assert_select("#project_site_#{@inat.id}",
-                    text: /Target names iNaturalist does not know/)
-      assert_select("#project_site_#{@inat.id}",
-                    text: /#{project.target_names.first.text_name}/)
-      assert_select("#project_site_#{@inat.id}",
-                    text: /Target locations iNaturalist does not know/)
+      assert_select(
+        "#project_site_candidates p",
+        text: :project_sites_unresolved_names.l(
+          targets: project.target_names.map(&:text_name).join(", ")
+        )
+      )
+      assert_select(
+        "#project_site_candidates p",
+        text: :project_sites_unresolved_locations.l(
+          targets: project.target_locations.map(&:name).join(", ")
+        )
+      )
     end
 
-    # Targets with no saved lookup are looked up in the background, and
-    # the page says how far that has got rather than waiting on iNat.
     # The page reports the saved lookups and starts none: a site admin
     # starts them with the button.
     def test_targets_with_no_saved_lookup_are_reported_not_looked_up
@@ -241,9 +247,10 @@ module Projects
                       total: project.target_names.size +
                              project.target_locations.size
                     ))
-      assert_select("#project_site_#{@inat.id}",
-                    text: /Target names iNaturalist does not know/,
-                    count: 0)
+      unknown_names = :project_sites_unresolved_names.l(targets: "").strip
+      lines = css_select("#project_site_candidates p").map(&:text)
+      assert(lines.none? { |line| line.include?(unknown_names) },
+             "Targets with no saved lookup are not unknown to iNat")
       look_up = look_up_project_external_sites_path(project_id: project.id)
       assert_select("##{InatTargetLookupJob::LOOK_UP_BUTTON_ID} " \
                     "form[action='#{look_up}']")
