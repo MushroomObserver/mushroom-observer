@@ -4,6 +4,15 @@ require("test_helper")
 
 class ButtonDownloadTest < ComponentTestCase
   # rubocop:disable-next MO/NoCosmeticClassAssertion
+  def test_target_renders_btn_default_framing
+    sl = species_lists(:first_species_list)
+    path = routes.new_download_species_list_path(id: sl.id)
+    html = render_download(target: path)
+
+    assert_html(html, "a.btn.btn-secondary[href='#{path}']")
+  end
+
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_variant_overrides_default_framing
     sl = species_lists(:first_species_list)
     path = routes.new_download_species_list_path(id: sl.id)

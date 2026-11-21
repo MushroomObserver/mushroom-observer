@@ -18,7 +18,7 @@ module Views::Controllers::Users
         render_admin_table
       else
         PaginatedResults do
-          render(::Components::Matrix::Table.new(objects: @users))
+          Grid(objects: @users)
         end
       end
     end

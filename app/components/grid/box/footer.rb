@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-class Components::Matrix::Box
-  # Footer rendering methods for Components::Matrix::Box.
+class Components::Grid::Box
+  # Footer rendering methods for Components::Grid::Box.
   #
-  # Included by Box to keep the footer slot logic in its own file.
+  # Included by Box to keep the footer slot logic in a separate file.
   # Methods here call `panel.with_footer(classes:) { ... }` on the
   # Panel passed in from `render_object_layout`.
   module Footer
@@ -76,7 +76,7 @@ class Components::Matrix::Box
       return unless @observation_view
 
       panel.with_footer(
-        classes: "panel-active text-center position-relative"
+        classes: "card-active text-center position-relative"
       ) do
         ObservationFragment(
           type: :mark_as_reviewed_toggle,

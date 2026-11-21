@@ -118,8 +118,20 @@ class StringExtensionsTest < UnitTestCase
 
   def test_small_author
     str = "<b><i>Abeliella xanthoconium</i></b> Lehman-Haupt nom. prov."
-    expected = "<b><i>Abeliella xanthoconium</i></b>" \
-               '<small class="text-nowrap"> Lehman-Haupt nom. prov.</small>'
+    # The space between the name and the author stays outside the
+    # nowrap span -- a normal, breakable wrap point between the two,
+    # rather than an unbreakable leading space inside the span (see
+    # `small_author`'s comment for why that matters for line-wrapping
+    # on narrow viewports).
+    expected = "<b><i>Abeliella xanthoconium</i></b> " \
+               '<small class="text-nowrap">Lehman-Haupt nom. prov.</small>'
+    assert_equal(expected, str.dup.small_author)
+  end
+
+  def test_small_author_collapses_multiple_spaces_before_author
+    str = "<b><i>Abeliella xanthoconium</i></b>  Lehman-Haupt nom. prov."
+    expected = "<b><i>Abeliella xanthoconium</i></b>  " \
+               '<small class="text-nowrap">Lehman-Haupt nom. prov.</small>'
     assert_equal(expected, str.dup.small_author)
   end
 
@@ -137,8 +149,8 @@ class StringExtensionsTest < UnitTestCase
   # outside <small>, since it isn't part of the author citation.
   def test_small_author_with_group_word
     str = "<b><i>Xylaria polymorpha</i></b> group Pers."
-    expected = "<b><i>Xylaria polymorpha</i></b> group" \
-               '<small class="text-nowrap"> Pers.</small>'
+    expected = "<b><i>Xylaria polymorpha</i></b> group " \
+               '<small class="text-nowrap">Pers.</small>'
     assert_equal(expected, str.dup.small_author)
   end
 
@@ -146,13 +158,13 @@ class StringExtensionsTest < UnitTestCase
   # stays with the qualifier, not stranded inside <small>.
   def test_small_author_with_dotted_group_abbreviation
     str = "<b><i>Xylaria polymorpha</i></b> gr. Pers."
-    expected = "<b><i>Xylaria polymorpha</i></b> gr." \
-               '<small class="text-nowrap"> Pers.</small>'
+    expected = "<b><i>Xylaria polymorpha</i></b> gr. " \
+               '<small class="text-nowrap">Pers.</small>'
     assert_equal(expected, str.dup.small_author)
 
     str = "<b><i>Xylaria polymorpha</i></b> gp. Pers."
-    expected = "<b><i>Xylaria polymorpha</i></b> gp." \
-               '<small class="text-nowrap"> Pers.</small>'
+    expected = "<b><i>Xylaria polymorpha</i></b> gp. " \
+               '<small class="text-nowrap">Pers.</small>'
     assert_equal(expected, str.dup.small_author)
   end
 

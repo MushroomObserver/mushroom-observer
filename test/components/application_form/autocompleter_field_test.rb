@@ -209,7 +209,7 @@ class AutocompleterFieldTest < ComponentTestCase
                       "[data-autocompleter--herbarium-target='list']"
     )
 
-    # Should have 10 dropdown item links
+    # Should have 10 dropdown items
     assert_html(html, "a.dropdown-item", count: 10)
 
     # Should have has_id_indicator (green check icon) -- a wrapping
@@ -372,6 +372,18 @@ class AutocompleterFieldTest < ComponentTestCase
     assert_includes(html, "(Login Name)")
     # Has-id indicator should still be present after between content
     assert_html(html, ".has-id-indicator")
+  end
+
+  # Regression: a plain `help:` string (no block) must reach
+  # AutocompleterField's help slot the same way text_field/
+  # textarea_field/etc. already do via set_help_slot.
+  def test_autocompleter_field_help_string_renders_help_slot
+    form = render_comment_form do
+      autocompleter_field(:summary, type: :name, label: "Name",
+                                    help: "Pick a name")
+    end
+
+    assert_html(form, ".help-block", text: "Pick a name")
   end
 
   # Collapsible help nests inside .form-group, same as plain help --

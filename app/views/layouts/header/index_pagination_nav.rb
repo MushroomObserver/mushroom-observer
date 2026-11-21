@@ -173,8 +173,8 @@ module Views::Layouts
     end
 
     # goToLink target name is shared by the page and letter widgets --
-    # safe since each InputGroup carries a separate data-controller,
-    # so goToLinkTarget only sees the one link in its DOM scope.
+    # safe since each InputGroup carries its own data-controller, so
+    # goToLinkTarget only ever sees the one link in its own DOM scope.
     def render_goto_link(href:, tooltip:)
       render(Components::InputGroup::Addon.new) do
         Link(

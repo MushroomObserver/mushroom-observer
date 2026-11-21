@@ -2,9 +2,7 @@
 
 # Renders a Bootstrap collapse target `<div>`.
 #
-# Bootstrap 3 uses the class `"in"` for the initially-open state;
-# Bootstrap 4 uses `"show"`. Update `EXPANDED_CLASS` here when
-# upgrading.
+# Bootstrap 4 uses the class `"show"` for the initially-open state.
 #
 # @example Basic (initially closed)
 #   Collapsible(id: "my_section") do
@@ -16,7 +14,7 @@
 #     render_fields
 #   end
 #
-# @example Inside a Panel (adds panel-collapse class)
+# @example Inside a Panel (adds card-collapse class)
 #   Collapsible(id: "obs_body", expanded: @expanded,
 #               panel: true, class: "fade-not-slide") do
 #     render_body
@@ -48,7 +46,7 @@ class Components::Collapsible < Components::Base
   # The class Bootstrap adds to an initially-open collapse pane.
   # Tests assert against this constant instead of the literal string,
   # so a future Bootstrap version's rename only needs updating here.
-  EXPANDED_CLASS = "in"
+  EXPANDED_CLASS = "show"
 
   # `module_function`-style dual access, matching
   # `Components::Button::Styling`'s `btn_class`/`size_class`: callable
@@ -63,7 +61,7 @@ class Components::Collapsible < Components::Base
     [
       "collapse",
       (EXPANDED_CLASS if expanded),
-      ("panel-collapse" if panel),
+      ("card-collapse" if panel),
       html_class
     ].compact_blank.join(" ")
   end

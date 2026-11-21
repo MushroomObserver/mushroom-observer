@@ -2,13 +2,10 @@
 
 require("application_system_test_case")
 
-# Regression guard for the panel collapse-toggle bug introduced when
-# Panel#render_collapse_icons switched from `link_to("javascript:void(0)")`
-# to `Link::CollapseToggle`. Bootstrap 3 collapse.js skips e.preventDefault()
-# when `data-target` is set, letting Turbo follow the `href="#id"` — which
-# navigated the Turbo frame and made the search form disappear.
-# Fix: Panel now uses Button::CollapseToggle (<button>) so no navigation
-# can occur regardless of Bootstrap's preventDefault behavior.
+# Regression guard: collapse.js skipped e.preventDefault() when
+# data-target was set, so a `Link::CollapseToggle`'s href="#id" let
+# Turbo navigate and made the search form disappear. Panel uses
+# Button::CollapseToggle (<button>) instead, which can't navigate.
 class SearchBarCollapseSystemTest < ApplicationSystemTestCase
   # Test the full collapse-toggle lifecycle inside the top-nav turbo
   # search form:
@@ -28,7 +25,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
     assert_selector("[data-search-type='connected']", wait: 5)
 
     # Click the "more options" toggle to expand the advanced form --
-    # an icon-only link below md, a labeled button at md and up, both
+    # an icon-only link below lg, a labeled button at lg and up, both
     # inside a `[data-search-type-target='formToggle']` wrapper.
     # Capybara's `find` only considers the one currently visible.
     click_link(href: "#search_nav_form")
@@ -36,7 +33,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
     # The form content arrives via Turbo stream; wait for the detail
     # panel heading to confirm it is fully loaded.
     assert_selector(
-      "#search_nav_form .panel",
+      "#search_nav_form .card",
       text: :search_term_group_detail.t.as_displayed,
       wait: 10
     )
@@ -54,7 +51,7 @@ class SearchBarCollapseSystemTest < ApplicationSystemTestCase
     assert_selector("#search_nav_form")
     # Panel heading still there.
     assert_selector(
-      "#search_nav_form .panel",
+      "#search_nav_form .card",
       text: :search_term_group_detail.t.as_displayed
     )
     # Collapsed pane is closed.

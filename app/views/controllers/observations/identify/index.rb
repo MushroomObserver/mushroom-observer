@@ -4,10 +4,10 @@
 # index.
 #
 # Composes the page chrome (container width, index title, pagination
-# with a "How To Use" collapse trigger in its sorter slot), then
-# paginates a `Components::Matrix::Table` in `identify: true` mode
-# (each row carries the vote-select / footer-buttons identify
-# chrome).
+# with a "How To Use" collapse trigger in its sorter slot), renders
+# the intro blurb, then paginates a `Components::Grid` in
+# `identify: true` mode (each row carries the vote-select /
+# footer-buttons identify chrome).
 #
 # `Observations::IdentifyController#render_index_view` overrides
 # the `ApplicationController` default to render this class
@@ -58,12 +58,12 @@ module Views::Controllers::Observations::Identify
     end
 
     def render_matrix
-      render(Components::Matrix::Table.new(
-               objects: @objects,
-               user: @user,
-               identify: true,
-               cached: true
-             ))
+      Grid(
+        objects: @objects,
+        user: @user,
+        identify: true,
+        cached: true
+      )
     end
   end
 end

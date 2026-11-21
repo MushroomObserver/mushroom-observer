@@ -8,10 +8,10 @@ module Components
   # `ApplicationForm::InputGroupAddon` mixin (`text_field(..., button:
   # ...)` / `addon: ...`) that decorates a single Superform field.
   #
-  # BS4 renames `.input-group-btn` to `.input-group-append` (or
-  # `-prepend`) and BS5 drops the wrapping span entirely (addons
-  # become plain direct children) — `InputGroup`/`InputGroup::Addon`
-  # are the two places that swap happens.
+  # `InputGroup::Addon` emits the BS4-specific
+  # `.input-group-append`/`-prepend` wrapper (BS5 drops it and makes
+  # addons plain direct children) — `InputGroup`/`InputGroup::Addon`
+  # are the two places a future BS5 cutover would need to touch.
   #
   # @example
   #   InputGroup(class: "page-input mx-2") do

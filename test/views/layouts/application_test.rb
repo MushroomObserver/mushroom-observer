@@ -156,7 +156,6 @@ class Views::Layouts::ApplicationTest < ComponentTestCase
 
     assert_html(html, "#modal_progress_spinner")
     assert_html(html, "#mo_confirm")
-    assert_html(html, "#media_query_tests")
   end
 
   # ---- Flash notices flow through the layout --------------------------

@@ -37,9 +37,12 @@ module Views::Controllers::Account::Login
       assert_includes(remember_label, :login_remember_me.l)
     end
 
+    # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_renders_submit_button
       assert_html(@html,
                   "button[type='submit']", text: :login_login.l)
+      assert_html(@html, ".btn.btn-secondary")
+      assert_html(@html, ".center-block.my-2")
     end
 
     def test_renders_help_text

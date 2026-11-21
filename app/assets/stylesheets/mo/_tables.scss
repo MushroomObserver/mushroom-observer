@@ -8,7 +8,7 @@
   > thead > tr > th,
   > tbody > tr > td {
     padding: $card-spacer-x !important;
-    border-color: $list-group-border;
+    border-color: $list-group-border-color;
   }
 
   > thead > tr > th {
@@ -26,6 +26,13 @@ thead tr {
   background-color: $list-group-disabled-bg;
 }
 
+// Locks column widths to the first row's natural content. Use when
+// later rows can swap in wider content (e.g. an inline edit form)
+// and you don't want the columns to reflow on every state change.
+.table-layout-fixed {
+  table-layout: fixed;
+}
+
 // Components::Table#legend -- a full-width section-label row.
 // Bootstrap's `.table > tbody > tr > th` border rule has higher
 // specificity than a plain `.legend-row > th` -- match its selector
@@ -37,17 +44,20 @@ thead tr {
 }
 
 // Combine with `.table` on the same <table> element to cascade
-// vertical-align: middle onto every cell -- overrides Bootstrap 3's
-// `th, td { vertical-align: top }` default. `.align-middle`
-// (mo/_utilities.scss) already covers the plain per-cell case, so
-// this class is only for the table-wide cascade.
+// vertical-align: middle onto every cell -- overrides Bootstrap's
+// `th, td { vertical-align: top }` / `thead th { vertical-align:
+// bottom }` table defaults. Bootstrap's `.align-middle` utility
+// (vertical-align: middle on the element it's applied to directly)
+// already covers the plain per-cell case, so this class is only for
+// the table-wide cascade.
 .table-align-middle.table {
-  > thead > tr > th,
-  > thead > tr > td,
-  > tbody > tr > th,
-  > tbody > tr > td,
-  > tfoot > tr > th,
-  > tfoot > tr > td {
+
+  >thead>tr>th,
+  >thead>tr>td,
+  >tbody>tr>th,
+  >tbody>tr>td,
+  >tfoot>tr>th,
+  >tfoot>tr>td {
     vertical-align: middle !important;
   }
 }
@@ -107,13 +117,12 @@ thead tr {
 
       > th,
       > td {
-        // 2.5px at the 16px root -- see issue #5527
-        padding: 0.15625rem 0;
+        padding: 0.25rem 0;
         text-align: center;
         vertical-align: middle;
 
         &:first-child {
-          padding: 0.15625rem 0.5em;
+          padding: 0.25rem 0.5em;
           text-align: left;
         }
       }
@@ -153,7 +162,7 @@ thead tr {
   }
 
   tr {
-    border-top: 1px solid $list-group-border;
+    border-top: 1px solid $list-group-border-color;
   }
 
   tr:first-child {
@@ -167,7 +176,7 @@ thead tr {
   }
 
   td {
-    border-top: 1px solid $list-group-border;
+    border-top: 1px solid $list-group-border-color;
   }
 
   th:first-child,
@@ -196,7 +205,7 @@ thead tr {
 
 .table-review-donations {
   th, td {
-    border-right: 1px solid $list-group-border;
+    border-right: 1px solid $list-group-border-color;
   }
 
   th:last-child,
@@ -251,5 +260,15 @@ table.ips-lined {
     &:not(:first-child) {
       border-left: 2px solid #d0d;
     }
+  }
+}
+
+//
+// larger devices
+// --------------------------------------------------
+
+@media screen and (min-width: breakpoint-min(sm)) {
+  .table {
+    overflow-x: scroll;
   }
 }

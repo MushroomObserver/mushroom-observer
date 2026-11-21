@@ -17,7 +17,7 @@ module Views::Controllers::Locations
 
         assert_html(
           html,
-          "#alt_descriptions .panel-heading-links a[href='" \
+          "#alt_descriptions .card-header-links a[href='" \
           "#{routes.new_location_description_path(location_id: location.id)}']"
         )
       end

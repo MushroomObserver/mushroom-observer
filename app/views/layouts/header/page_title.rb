@@ -36,8 +36,7 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-start align-items-start " \
-      "px-card"
+      "show_title_nav d-flex justify-content-start align-items-start px-card"
 
     # Form pages (new/edit, plus a failed create/update redisplaying
     # the same form) need more breathing room below the title bar
@@ -102,7 +101,7 @@ module Views::Layouts
     def render_id_badge
       return unless content_for?(:id_badge)
 
-      div(class: "id_badge_wrap d-none d-sm-block mr-3 mt-sm-2") do
+      div(class: "id_badge_wrap d-none d-sm-block mr-3 mt-sm-1") do
         trusted_html(content_for(:id_badge))
       end
     end

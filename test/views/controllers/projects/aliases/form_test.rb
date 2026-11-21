@@ -43,8 +43,7 @@ module Views::Controllers::Projects::Aliases
       assert_html(html, "input[name='project_alias[name]'][value='RS']")
 
       # Location panel hidden when editing user target
-      assert_no_html(html,
-                     "[data-collapse-switch-type='location'].#{EXPANDED}")
+      assert_no_html(html, "[data-collapse-switch-type='location'].#{EXPANDED}")
     end
 
     def test_edit_form_with_location_target

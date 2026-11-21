@@ -14,7 +14,7 @@ module Views::Controllers::VisualGroups
 
     def view_template
       PaginatedResults do
-        render(Components::Matrix::Table.new) do
+        Grid() do
           @subset.each { |row| render_matrix_box(row) }
         end
       end
@@ -24,7 +24,7 @@ module Views::Controllers::VisualGroups
 
     def render_matrix_box(row)
       image, image_status = row
-      render(Components::Matrix::Box.new(id: image.id)) do
+      render(Components::Grid::Box.new(id: image.id)) do
         Panel do |panel|
           panel.with_thumbnail do
             InteractiveImage(

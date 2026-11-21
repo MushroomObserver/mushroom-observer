@@ -22,13 +22,9 @@ class LurkerIntegrationTest < CapybaraIntegrationTestCase
     # Search for "lurker issue: in the rss_log fixtures.
 
     # Click on first obs immediately after one that has images.
-    # NOTE: BS3 matrix-box are a bit harder to find siblings
-    # because the layout clearfix boxes interrupt the matrix boxes.
-    # This selects next matching peer, but you can do adjacent in bs4
-    # (do + instead of ~)
-    first(".image-link").ancestor(".matrix-box~.matrix-box").
+    first(".image-link").ancestor(".grid-box+.grid-box").
       first(".log-detail", text: "Observation Created").
-      ancestor(".panel").first(".log-details").first("a").click
+      ancestor(".card").first(".log-details").first("a").click
     assert_match(/#{:app_title.l}: Observation/, page.title, "Wrong page")
 
     # Click on next (catches a bug seen in the wild).

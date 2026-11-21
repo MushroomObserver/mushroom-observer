@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# Tests for Components::Matrix::Box::Footer, the mixin included by
-# Components::Matrix::Box that owns all footer slot rendering.
+# Tests for Components::Grid::Box::Footer, the mixin included by
+# Components::Grid::Box that owns all footer slot rendering.
 #
 # Content methods (render_footer_detail, render_footer_time,
 # render_user_detail) are tested by creating a minimal anonymous
@@ -13,7 +13,7 @@ require("test_helper")
 # Slot-level methods (render_log_footer, render_identify_footer,
 # render_project_admin_footer) are tested through a full Box render
 # so the Panel slot machinery is exercised.
-class MatrixBoxFooterTest < ComponentTestCase
+class Components::Grid::Box::FooterTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -45,6 +45,20 @@ class MatrixBoxFooterTest < ComponentTestCase
     assert_equal("", render_detail([nil, nil]))
   end
 
+  # resolve_rss_detail's rescue: outside production, a broken tag
+  # degrades to an empty detail instead of a 500. Symbol instances
+  # can't take a singleton method (`TypeError: can't define
+  # singleton`), so this duck-types a plain object in place of the
+  # tag Symbol -- resolve_rss_detail just calls `tag.t(...)`.
+  def test_footer_detail_array_with_broken_tag_is_rescued
+    tag = Object.new
+    tag.define_singleton_method(:t) { |*| raise(StandardError.new("broken")) }
+
+    html = render_detail([tag, {}])
+
+    assert_html(html, ".log-detail", text: "")
+  end
+
   def test_footer_detail_user_renders_user_info
     user = users(:rolf)
     html = render_detail(user)
@@ -63,7 +77,7 @@ class MatrixBoxFooterTest < ComponentTestCase
     assert_equal("", render_time(nil))
   end
 
-  def test_footer_time_renders_local_time_div
+  def test_footer_time_renders_local_time_indicator
     time = Time.zone.parse("2024-06-01 12:00:00 UTC")
     html = render_time(time)
 
@@ -109,13 +123,13 @@ class MatrixBoxFooterTest < ComponentTestCase
   private
 
   def render_box(**)
-    render(Components::Matrix::Box.new(**))
+    render(Components::Grid::Box.new(**))
   end
 
   # Renders render_footer_detail(detail) in a Phlex context.
   def render_detail(detail)
     render(Class.new(Components::Base) do
-      include Components::Matrix::Box::Footer
+      include Components::Grid::Box::Footer
 
       define_method(:view_template) { render_footer_detail(detail) }
     end.new)
@@ -124,7 +138,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   # Renders render_footer_time(time) in a Phlex context.
   def render_time(time)
     render(Class.new(Components::Base) do
-      include Components::Matrix::Box::Footer
+      include Components::Grid::Box::Footer
 
       define_method(:view_template) { render_footer_time(time) }
     end.new)

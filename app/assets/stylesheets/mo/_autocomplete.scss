@@ -21,14 +21,18 @@
   height: 1.3em;
 }
 
-// BS3 squares a .form-control's right corner whenever it's
+// Bootstrap squares a .form-control's right corner whenever it's
 // :first-child inside .input-group, assuming an addon/btn follows.
 // Usually not the case here (has-id-indicator is a bare, borderless
 // span), so restore the input's full radius -- except when a
 // `:button`/`:addon` sibling (e.g. the region field's "Find on Map")
-// does follow, which still needs the squared corner.
+// does follow, which still needs the squared corner. BS4 wraps every
+// addon/button in an outer `.input-group-append`/`-prepend`
+// (`Components::InputGroup::Addon`), so that's what the exception
+// targets, not the addon/button's inner class.
 .autocompleter .input-group >
-  .form-control:first-child:not(:has(~ .input-group-btn, ~ .input-group-addon)) {
+  .form-control:first-child:not(:has(~ .input-group-append,
+                                      ~ .input-group-prepend)) {
   border-top-right-radius: $input-border-radius;
   border-bottom-right-radius: $input-border-radius;
 }
@@ -68,7 +72,7 @@
   // color: $dropdown-link-color;
   // background-color: $dropdown-bg;
   margin: 0px;
-  // border: 1px solid $dropdown-border;
+  // border: 1px solid $dropdown-border-color;
   border-radius: 0;
   padding: 0px;
   overflow-x: hidden;
@@ -77,20 +81,10 @@
   // z-index: 100;
 }
 
-// BS3's native `.open > .dropdown-menu { display: block; }` is a
-// direct-child selector -- the autocompleter's .dropdown-menu sits
-// inside .input-group (for position:relative scoped to the field
-// alone, not the whole form-group+help-text), one level deeper than
-// that rule reaches. Same specificity, same display:block, just a
-// descendant combinator so it still matches at that depth.
-.dropdown.open .dropdown-menu.auto_complete {
-  display: block;
-}
-
 // Scroll-content wrapper for the autocompleter's virtualized row
 // pool -- see base_controller.js's ROW_HEIGHT/scroll math. Not a
-// list (flat dropdown markup puts .dropdown-item rows directly
-// here, no <li>), so no list-style reset needed.
+// list (BS4's flat dropdown markup puts .dropdown-item rows
+// directly here, no <li>), so no list-style reset needed.
 .virtual_list {
   margin: 0px;
   border: 0px;
@@ -98,6 +92,11 @@
   overflow-x: hidden;
 
   a.dropdown-item {
+    display: block;
+    padding: $dropdown-item-padding-y $dropdown-item-padding-x;
+    color: $dropdown-link-color;
+    text-decoration: none;
+    white-space: nowrap;
     cursor: pointer;
 
     &[data-deprecated="false"] {
@@ -118,8 +117,9 @@
 
     // Keyboard-navigation highlight (base_controller.js's HOT_CLASS).
     // Declared explicitly with the hover-* variables rather than
-    // relying on .dropdown-item.active's separate active-* variables,
-    // which would silently change this highlight's color.
+    // relying on Bootstrap's .dropdown-item.active rule, which
+    // would use the theme's separate active-* variables instead and
+    // silently change this highlight's color.
     &.active {
       color: $dropdown-link-color;
       background-color: $dropdown-link-hover-bg !important;

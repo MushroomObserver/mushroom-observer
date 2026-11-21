@@ -98,6 +98,9 @@ class Views::Controllers::Observations::Show::SpeciesListsPanelTest <
     assert_html(html, "#{form_selector} button .sr-only",
                 text: :remove.ti)
     assert_html(html, "#{form_selector} input[name='_method'][value='delete']")
+    # Must render inside InlineLinkBlock's wrapper -- that's what
+    # supplies the group's spacing from the list link beside it.
+    assert_html(html, ".inline-link-block #{form_selector}")
   end
 
   private

@@ -77,8 +77,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:nine_three)
     end
 
-    assert_equal("col-xs-12 col-md-9 col-lg-8", left)
-    assert_equal("col-xs-12 col-md-3 col-lg-4", right)
+    assert_equal("col-12 col-md-9 col-lg-8", left)
+    assert_equal("col-12 col-md-3 col-lg-4", right)
   end
 
   def test_column_classes_default_writes_full_width_both_sides
@@ -86,8 +86,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes
     end
 
-    assert_equal("col-xs-12", left)
-    assert_equal("col-xs-12", right)
+    assert_equal("col-12", left)
+    assert_equal("col-12", right)
   end
 
   def test_column_classes_six_even_writes_half_width_both_sides
@@ -95,8 +95,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:six_even)
     end
 
-    assert_equal("col-xs-12 col-md-6", left)
-    assert_equal("col-xs-12 col-md-6", right)
+    assert_equal("col-12 col-md-6", left)
+    assert_equal("col-12 col-md-6", right)
   end
 
   def test_column_classes_eight_four_writes_split_left_right
@@ -104,8 +104,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:eight_four)
     end
 
-    assert_equal("col-xs-12 col-md-8 col-lg-7", left)
-    assert_equal("col-xs-12 col-md-4 col-lg-5", right)
+    assert_equal("col-12 col-md-8 col-lg-7", left)
+    assert_equal("col-12 col-md-4 col-lg-5", right)
   end
 
   def test_column_classes_seven_five_writes_split_left_right
@@ -113,8 +113,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:seven_five)
     end
 
-    assert_equal("col-xs-12 col-md-7", left)
-    assert_equal("col-xs-12 col-md-5", right)
+    assert_equal("col-12 col-md-7", left)
+    assert_equal("col-12 col-md-5", right)
   end
 
   def test_column_classes_six_writes_split_left_right
@@ -122,8 +122,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:six)
     end
 
-    assert_equal("col-xs-12 col-md-6 col-lg-8", left)
-    assert_equal("col-xs-12 col-md-6 col-lg-4", right)
+    assert_equal("col-12 col-md-6 col-lg-8", left)
+    assert_equal("col-12 col-md-6 col-lg-4", right)
   end
 
   def test_column_classes_four_eight_writes_split_left_right
@@ -131,8 +131,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       column_classes(:four_eight)
     end
 
-    assert_equal("col-xs-12 col-md-5 col-lg-4", left)
-    assert_equal("col-xs-12 col-md-7 col-lg-8", right)
+    assert_equal("col-12 col-md-5 col-lg-4", left)
+    assert_equal("col-12 col-md-7 col-lg-8", right)
   end
 
   def test_column_classes_explicit_then_default_does_not_aggregate
@@ -141,8 +141,8 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       default_column_classes
     end
 
-    assert_equal("col-xs-12 col-md-9 col-lg-8", left)
-    assert_equal("col-xs-12 col-md-3 col-lg-4", right)
+    assert_equal("col-12 col-md-9 col-lg-8", left)
+    assert_equal("col-12 col-md-3 col-lg-4", right)
   end
 
   # ----- left/right_column_class_for readers ----------------------
@@ -155,7 +155,7 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       content_for(:test_value) { left_column_class_for(:four_eight) }
     end
 
-    assert_equal("col-xs-12 col-md-5 col-lg-4", result)
+    assert_equal("col-12 col-md-5 col-lg-4", result)
   end
 
   def test_right_column_class_for_four_eight
@@ -163,7 +163,7 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
       content_for(:test_value) { right_column_class_for(:four_eight) }
     end
 
-    assert_equal("col-xs-12 col-md-7 col-lg-8", result)
+    assert_equal("col-12 col-md-7 col-lg-8", result)
   end
 
   # ----- content_padding setter ----------------------------------
@@ -174,15 +174,13 @@ class Views::FullPageBase::LayoutClassesTest < ComponentTestCase
     end)
   end
 
-  # `content_for` with an empty-string block captures nothing --
-  # reading the slot back returns nil, not "".
-  def test_content_padding_panels_writes_empty_string
+  def test_content_padding_panels_writes_nothing
     assert_nil(captured_slot(:content_padding) do
       content_padding(:panels)
     end)
   end
 
-  def test_content_padding_default_for_show_action_is_empty_string
+  def test_content_padding_default_for_show_action_writes_nothing
     stub_action_name("show")
 
     assert_nil(captured_slot(:content_padding) do

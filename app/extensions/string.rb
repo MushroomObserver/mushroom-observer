@@ -640,6 +640,9 @@ class String
     if (group_match = GROUP_WORD_PATTERN.match(self[insert_at..]))
       insert_at += group_match.end(0)
     end
+    # Skip the space so it stays a breakable wrap point, not the
+    # unbreakable span's first character.
+    insert_at += 1 while self[insert_at] == " "
 
     insert(length, "</small>".html_safe)
     insert(insert_at, '<small class="text-nowrap">'.html_safe)

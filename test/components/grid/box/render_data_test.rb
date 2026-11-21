@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# Tests for Components::Matrix::Box::RenderData, the mixin included by
-# Components::Matrix::Box that builds the `@data` hash consumed by the
+# Tests for Components::Grid::Box::RenderData, the mixin included by
+# Components::Grid::Box that builds the `@data` hash consumed by the
 # box's rendering methods.
 #
 # Most branches are already exercised through a full Box render (see
@@ -15,7 +15,7 @@ require("test_helper")
 # directly. Those are tested by calling the (public) RenderData
 # methods directly on a Box instance — same technique used by
 # footer_test.rb for its content methods.
-class MatrixBoxRenderDataTest < ComponentTestCase
+class Components::Grid::Box::RenderDataTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -29,7 +29,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
   # into the `else` branch — a bare `{ id:, type: :unknown }` hash.
   def test_build_render_data_unknown_object_type
     location = locations(:albion)
-    component = Components::Matrix::Box.new(user: @user, object: location)
+    component = Components::Grid::Box.new(user: @user, object: location)
 
     assert_equal({ id: location.id, type: :unknown },
                  component.build_render_data)
@@ -45,7 +45,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
   def test_extract_image_data_when_nil_on_error
     image = images(:in_situ_image).dup
     image.when = nil
-    component = Components::Matrix::Box.new(user: @user, object: image)
+    component = Components::Grid::Box.new(user: @user, object: image)
 
     assert_nil(component.extract_image_data[:when])
   end
@@ -54,7 +54,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
   def test_observation_uses_thumb_image
     obs = observations(:coprinus_comatus_obs)
     assert(obs.thumb_image_id, "fixture should have a thumb_image")
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
 
     assert_equal(obs.thumb_image, component.build_render_data[:image])
   end
@@ -67,7 +67,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     obs = observations(:minimal_unknown_obs)
     obs.update_columns(thumb_image_id: nil)
     obs = Observation.find(obs.id)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
 
     assert_nil(component.build_render_data[:image])
   end
@@ -82,7 +82,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
   def test_extract_rss_log_name_image_target_type
     rss_log = rss_logs(:coprinus_comatus_obs_rss_log)
     image = images(:in_situ_image)
-    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
 
     name = rss_log.stub(:target_type, :image) do
       component.extract_rss_log_name(image)
@@ -95,7 +95,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
   # RssLog itself.
   def test_extract_rss_log_name_orphaned_log_uses_rss_log_itself
     rss_log = RssLog.new(notes: "orphaned title\n")
-    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
 
     name = component.extract_rss_log_name(nil)
 
@@ -116,7 +116,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
   # directly.
   def test_rss_log_detail_tag_degrades_gracefully_on_malformed_log
     rss_log = rss_logs(:coprinus_comatus_obs_rss_log)
-    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
 
     result = rss_log.stub(:parse_log, []) do
       rss_log.stub(:created_at, nil) do
@@ -131,7 +131,7 @@ class MatrixBoxRenderDataTest < ComponentTestCase
 
   def test_rss_log_detail_tag_raises_in_production
     rss_log = rss_logs(:coprinus_comatus_obs_rss_log)
-    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
 
     Rails.env.stub(:production?, true) do
       rss_log.stub(:parse_log, []) do

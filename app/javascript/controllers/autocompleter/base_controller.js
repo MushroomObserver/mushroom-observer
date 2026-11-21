@@ -815,7 +815,7 @@ export default class BaseAutocompleterController extends Controller {
 
       if (matches.length > 1 || this.getSearchToken() != matches[0]['name']) {
         this.clearHide();
-        this.wrapTarget?.classList?.add('open');
+        this.pulldownTarget?.classList?.add('show');
         this.menu_up = true;
       } else {
         this.hidePulldown();
@@ -825,8 +825,11 @@ export default class BaseAutocompleterController extends Controller {
     }
   }
 
+  // `show` toggles on pulldownTarget itself, not wrapTarget --
+  // `.dropdown-menu.show` is a compound selector on the menu element
+  // itself, not a parent-child selector.
   hidePulldown() {
-    this.wrapTarget?.classList?.remove('open');
+    this.pulldownTarget?.classList?.remove('show');
     this.menu_up = false;
   }
 

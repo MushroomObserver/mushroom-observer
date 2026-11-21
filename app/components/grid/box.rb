@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
-# Matrix box component for displaying objects in a responsive grid.
-# Essentially a wrapper for a Panel component
+# One item in a Grid -- a wrapper for a Panel component.
+#
+# The `<li>` and the Panel's `<div class="card h-100">` stay two
+# separate elements deliberately: `height: 100%` on the card needs a
+# distinct parent (the stretched `<li>`) to resolve against -- see
+# `Components::Panel#view_template`'s comment.
 #
 # This component can be used in two ways:
 # 1. With an object - calculates everything it needs from the @object and
@@ -9,10 +13,10 @@
 # 2. With a block - renders a simple <li> wrapper for custom content
 #
 # @example Standard object rendering
-#   render Components::Matrix::Box.new(user: @user, object: @observation)
+#   render Components::Grid::Box.new(user: @user, object: @observation)
 #
 # @example With custom options
-#   render Components::Matrix::Box.new(
+#   render Components::Grid::Box.new(
 #     user: @user,
 #     object: @observation,
 #     identify: true,
@@ -20,25 +24,33 @@
 #   )
 #
 # @example Custom block content
-#   render MatrixBox.new(id: 123, extra_class: "text-center") do
-#     tag.div(class: "panel panel-default") { "Custom content" }
+#   render Components::Grid::Box.new(id: 123, extra_class: "text-center") do
+#     Panel do |panel|
+#       panel.with_body { "Custom content" }
+#     end
 #   end
-class Components::Matrix::Box < Components::Base
-  include Components::Matrix::Box::RenderData
-  include Components::Matrix::Box::Footer
+class Components::Grid::Box < Components::Base
+  include Components::Grid::Box::RenderData
+  include Components::Grid::Box::Footer
 
   # Properties
   prop :user, _Nilable(User), default: nil
   prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
-  prop :columns, String,
-       default: -> { Components::Column.classes_for(xs: 12, sm: 6, md: 4, lg: 3) }
+  # Bare `.col` -- when rendered inside a `Components::Grid`
+  # (the common case), that grid's `row-cols-*` utilities size
+  # every box equally per breakpoint, so no per-breakpoint width class
+  # is needed here. Callers rendering a box (or several) outside a
+  # `Grid` -- a plain `Row(element: :ul)`, no `row-cols-*` --
+  # override this explicitly, typically to
+  # `Components::Column.classes_for(xs: 12)` for one-per-line stacking.
+  prop :columns, String, default: "col"
   prop :extra_class, String, default: ""
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
-  # Project context — when an observation matrix box is rendered inside a
-  # project-filtered observations index, a project admin sees an Exclude
+  # Project context — when an observation box is rendered inside a
+  # project-filtered observations grid, a project admin sees an Exclude
   # button that moves the observation to the project's excluded list.
   prop :project, _Nilable(Project), default: nil
   # The occurrence show page renders every member of one Occurrence --
@@ -64,17 +76,17 @@ class Components::Matrix::Box < Components::Base
 
     li(
       id: "box_#{@data[:id]}",
-      class: class_names("matrix-box", @columns, @extra_class)
+      class: class_names("grid-box", @columns, @extra_class)
     ) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
       # rotate/mirror only happens on the image-show page, so only
-      # that page (Views::Controllers::Images::Show::ImagePanel)
-      # live-updates. An index page
-      # with dozens of boxes would otherwise open a websocket
-      # subscription (plus a solid_cable MAX(id) query) per thumbnail
-      # for an event that can't happen from this page; it catches up
-      # on the next load via the #4808 cache-busting URL token.
-      Panel(sizing: true) do |panel|
+      # that page live-updates. A grid page with dozens of boxes
+      # would otherwise open a websocket subscription per thumbnail
+      # for an event that can't happen here; it catches up on the
+      # next load via the cache-busting URL token.
+      # `h-100` fills the row's stretched height (BS4's `.row`
+      # defaults to `align-items: stretch`).
+      Panel(panel_class: "h-100") do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)
         render_log_footer(panel)
@@ -101,7 +113,7 @@ class Components::Matrix::Box < Components::Base
   def render_custom_layout(&block)
     li(
       id: @id ? "box_#{@id}" : nil,
-      class: class_names("matrix-box", @columns, @extra_class),
+      class: class_names("grid-box", @columns, @extra_class),
       &block
     )
   end
@@ -147,9 +159,6 @@ class Components::Matrix::Box < Components::Base
                target: @data[:what].show_link_args) { render_title }
         end
         whitespace
-        # size: :lg is a BS3-only value, ported straight from
-        # cutover -- it may already be correct there; re-check
-        # against cutover's value when switching to BS4.
         Badge(variant: :id, object: @data[:what], size: :lg, extra_class: nil)
       end
 
@@ -158,7 +167,7 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_title
-    render(Components::Matrix::Box::Title.new(
+    render(Components::Grid::Box::Title.new(
              id: @data[:id],
              name: @data[:name],
              type: @data[:type]
@@ -197,7 +206,7 @@ class Components::Matrix::Box < Components::Base
       ) do
         render(Views::Controllers::Observations::Namings::Votes::Form.new(
                  naming: naming, user: @user, vote: nil,
-                 context: "matrix_box"
+                 context: "grid_box"
                ))
       end
     else
@@ -210,7 +219,7 @@ class Components::Matrix::Box < Components::Base
       type: :modal,
       name: :create_naming.t,
       target: new_observation_naming_path(
-        observation_id: obs.id, context: "matrix_box"
+        observation_id: obs.id, context: "grid_box"
       ),
       modal_id: "obs_#{obs.id}_naming",
       class: "d-inline-block mb-3 propose-naming-link"
@@ -241,7 +250,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_who
     if @data[:who_obs]
-      render(Components::Matrix::Box::Who.new(obs: @data[:who_obs]))
+      render(Components::Grid::Box::Who.new(obs: @data[:who_obs]))
     else
       span(class: "log-who") { Link(type: :user, user: @data[:who]) }
     end
@@ -263,7 +272,7 @@ class Components::Matrix::Box < Components::Base
   # wrapper -- needed to sit next to the bold "via" on one line).
   # `source_noteworthy?` (the caller's guard) guarantees `source` is
   # present whenever `import_link` isn't, so the enum branch is safe
-  # without its own presence check.
+  # with no presence check needed here.
   def render_source_credit_inner(target)
     if (link = target.import_link)
       render_external_credit_link(link)

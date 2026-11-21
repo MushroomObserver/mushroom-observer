@@ -18,20 +18,20 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("query_observations_names_lookup").click
     @browser.keyboard.type("agaricus camp")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete .dropdown-item",
+    assert_selector(".auto_complete a.dropdown-item",
                     text: "Agaricus campestras")
-    assert_selector(".auto_complete .dropdown-item",
+    assert_selector(".auto_complete a.dropdown-item",
                     text: "Agaricus campestris")
-    assert_selector(".auto_complete .dropdown-item",
+    assert_selector(".auto_complete a.dropdown-item",
                     text: "Agaricus campestros")
-    assert_selector(".auto_complete .dropdown-item",
+    assert_selector(".auto_complete a.dropdown-item",
                     text: "Agaricus campestrus")
-    assert_no_selector(".auto_complete .dropdown-item",
+    assert_no_selector(".auto_complete a.dropdown-item",
                        text: "Agaricus campestruss")
     @browser.keyboard.type(:down, :down, :down, :tab)
     assert_field("query_observations_names_lookup", with: "Agaricus campestros")
     @browser.keyboard.type(:delete, :delete)
-    assert_selector(".auto_complete .dropdown-item",
+    assert_selector(".auto_complete a.dropdown-item",
                     text: "Agaricus campestrus")
     @browser.keyboard.type(:down, :down, :down, :down, :tab)
     assert_field("query_observations_names_lookup", with: "Agaricus campestrus")
@@ -60,9 +60,9 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("query_observations_by_users").click
     @browser.keyboard.type("r")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete .dropdown-item", text: "Rolf Singer")
-    assert_selector(".auto_complete .dropdown-item", text: "Roy Halling")
-    assert_selector(".auto_complete .dropdown-item", text: "Roy Rogers")
+    assert_selector(".auto_complete a.dropdown-item", text: "Rolf Singer")
+    assert_selector(".auto_complete a.dropdown-item", text: "Roy Halling")
+    assert_selector(".auto_complete a.dropdown-item", text: "Roy Rogers")
     @browser.keyboard.type(:down, :down, :tab)
     sleep(1)
     assert_field("query_observations_by_users", with: "Roy Halling (roy)")
@@ -83,7 +83,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("query_observations_by_users").click
     @browser.keyboard.type("second")
     assert_selector(".auto_complete") # wait
-    assert_selector(".auto_complete .dropdown-item", text: "Roy Rogers")
+    assert_selector(".auto_complete a.dropdown-item", text: "Roy Rogers")
     @browser.keyboard.type(:down, :tab)
     assert_field("query_observations_by_users",
                  with: "Roy Rogers (second_roy)")
@@ -100,7 +100,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("query_observations_by_users").click
     @browser.keyboard.type("rolf")
     assert_selector(".auto_complete") # wait for autocomplete
-    assert_selector(".auto_complete .dropdown-item", text: "Rolf Singer")
+    assert_selector(".auto_complete a.dropdown-item", text: "Rolf Singer")
     @browser.keyboard.type(:down, :tab)
     # Capybara's assert_field waits for the value to appear
     assert_field("query_observations_by_users", with: "Rolf Singer (rolf)")
@@ -126,7 +126,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
   #   # Location: Roy's location pref is scientific
   #   @browser.keyboard.type("us")
   #   assert_selector(".auto_complete", wait: 5) # wait for autocomplete
-  #   assert_selector(".auto_complete .dropdown-item", minimum: 1) # results
+  #   # verify results
+  #   assert_selector(".auto_complete a.dropdown-item", minimum: 1)
   #   @browser.keyboard.type(:down, :tab) # select first result
   #   sleep(0.5)
   #   # Verify something was selected (starts with "USA, California")
@@ -144,7 +145,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Expand the Location panel to reveal the region field
     find("[aria-controls='observations_location']").click
     assert_selector(
-      "#observations_location.#{Components::Collapsible::EXPANDED_CLASS}",
+      "#observations_location.#{EXPANDED}",
       wait: 3
     )
 
@@ -153,8 +154,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("query_observations_region").click
     @browser.keyboard.type("calif")
     assert_selector(".auto_complete", wait: 5) # wait for autocomplete
-    assert_selector(".auto_complete .dropdown-item", text: /California/i,
-                                                     wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: /California/i,
+                                                      wait: 3)
     @browser.keyboard.type(:down, :tab)
     assert_field("query_observations_region", with: /California/i)
   end
@@ -174,7 +175,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Type first name and select
     @browser.keyboard.type("agaricus camp")
-    assert_selector(".auto_complete .dropdown-item",
+    assert_selector(".auto_complete a.dropdown-item",
                     text: "Agaricus campestris")
     @browser.keyboard.type(:down, :tab)
     # Should have selected a name
@@ -185,8 +186,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     sleep(0.6)
     @browser.keyboard.type(:enter)
     @browser.keyboard.type("coprinus")
-    assert_selector(".auto_complete .dropdown-item", text: "Coprinus comatus",
-                                                     wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: "Coprinus comatus",
+                                                      wait: 3)
     @browser.keyboard.type(:down, :tab)
 
     # Verify both names are in the textarea, separated by newline
@@ -206,7 +207,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Type first user and select
     @browser.keyboard.type("rolf")
-    assert_selector(".auto_complete .dropdown-item", text: "Rolf Singer")
+    assert_selector(".auto_complete a.dropdown-item", text: "Rolf Singer")
     @browser.keyboard.type(:down, :tab)
     value = field.value
     assert_match(/Rolf/, value)
@@ -215,8 +216,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     sleep(0.6)
     @browser.keyboard.type(:enter)
     @browser.keyboard.type("mary")
-    assert_selector(".auto_complete .dropdown-item", text: "Mary Newbie",
-                                                     wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: "Mary Newbie",
+                                                      wait: 3)
     @browser.keyboard.type(:down, :tab)
 
     # Verify both users are in the textarea
@@ -236,7 +237,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Type first project and select
     @browser.keyboard.type("bolete")
-    assert_selector(".auto_complete .dropdown-item", text: "Bolete Project")
+    assert_selector(".auto_complete a.dropdown-item", text: "Bolete Project")
     @browser.keyboard.type(:down, :tab)
     value = field.value
     assert_match(/Bolete/, value)
@@ -245,8 +246,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     sleep(0.6)
     @browser.keyboard.type(:enter)
     @browser.keyboard.type("eol")
-    assert_selector(".auto_complete .dropdown-item", text: "EOL Project",
-                                                     wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: "EOL Project",
+                                                      wait: 3)
     @browser.keyboard.type(:down, :tab)
 
     # Verify both projects are in the textarea
@@ -266,7 +267,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
 
     # Type first location and select (Roy's preference is scientific format)
     @browser.keyboard.type("burbank")
-    assert_selector(".auto_complete .dropdown-item", text: /Burbank/i, wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: /Burbank/i, wait: 3)
     @browser.keyboard.type(:down, :tab)
     value = field.value
     assert_match(/Burbank/i, value)
@@ -275,7 +276,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     sleep(0.6)
     @browser.keyboard.type(:enter)
     @browser.keyboard.type("albion")
-    assert_selector(".auto_complete .dropdown-item", text: /Albion/i, wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: /Albion/i, wait: 3)
     @browser.keyboard.type(:down, :tab)
 
     # Verify both locations are in the textarea
@@ -301,7 +302,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     find_field("naming_name").click
     browser.keyboard.type("Peltige")
     assert_selector(".auto_complete", wait: 3) # wait
-    assert_selector(".auto_complete .dropdown-item")
+    assert_selector(".auto_complete a.dropdown-item")
     browser.keyboard.type(:down, :down, :tab)
     assert_field("naming_name", with: "Peltigeraceae ")
     browser.keyboard.type(:tab)
@@ -346,8 +347,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     # Select first user
     field.click
     @browser.keyboard.type("rolf")
-    assert_selector(".auto_complete .dropdown-item", text: "Rolf Singer",
-                                                     wait: 5)
+    assert_selector(".auto_complete a.dropdown-item", text: "Rolf Singer",
+                                                      wait: 5)
     @browser.keyboard.type(:down, :tab)
     assert_field("query_observations_by_users", with: /Rolf/)
 
@@ -355,16 +356,16 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     sleep(0.6)
     @browser.keyboard.type(:enter)
     @browser.keyboard.type("mary")
-    assert_selector(".auto_complete .dropdown-item", text: "Mary Newbie",
-                                                     wait: 5)
+    assert_selector(".auto_complete a.dropdown-item", text: "Mary Newbie",
+                                                      wait: 5)
     @browser.keyboard.type(:down, :tab)
 
     # Wait for menu to close, then add third user
     sleep(0.6)
     @browser.keyboard.type(:enter)
     @browser.keyboard.type("dick")
-    assert_selector(".auto_complete .dropdown-item", text: "Tricky Dick",
-                                                     wait: 5)
+    assert_selector(".auto_complete a.dropdown-item", text: "Tricky Dick",
+                                                      wait: 5)
     @browser.keyboard.type(:down, :tab)
 
     # Verify all three users are in the field
@@ -498,7 +499,7 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
     field.click
     @browser.keyboard.type("query")
     assert_selector(".auto_complete", wait: 5)
-    assert_selector(".auto_complete .dropdown-item", text: /Query/i, wait: 3)
+    assert_selector(".auto_complete a.dropdown-item", text: /Query/i, wait: 3)
     @browser.keyboard.type(:down, :tab)
 
     # Should have selected a species list
@@ -518,8 +519,8 @@ class AutocompleterSystemTest < ApplicationSystemTestCase
       find_field("herbarium_place_name").click
       @browser.keyboard.type("burbank")
       assert_selector(".auto_complete", wait: 5)
-      assert_selector(".auto_complete .dropdown-item", text: /Burbank/i,
-                                                       wait: 5)
+      assert_selector(".auto_complete a.dropdown-item", text: /Burbank/i,
+                                                        wait: 5)
       @browser.keyboard.type(:down, :tab)
 
       # Verify location was selected (hidden field is location_id)
