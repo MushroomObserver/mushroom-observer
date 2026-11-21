@@ -24,29 +24,14 @@ class InatAlertCycleJob < ApplicationJob
   def perform
     scanner = Inat::AlertScanner.new
     digests = scanner.scan
-    digests.each { |receiver, alerts| deliver_messages(receiver, alerts) }
+    # Split per watched name and kind, and sent, the same way an
+    # action's alerts are (ProjectAlert.deliver_digests).
+    digests.each do |receiver, alerts|
+      alerts.group_by(&:message_key).
+        each_value { |message| ProjectAlert.deliver(receiver, message) }
+    end
     log("InatAlertCycleJob: #{scanner.alerts_sent} alerts, " \
         "#{digests.size} recipients")
     scanner.warnings.each { |message| alert(message) }
-  end
-
-  private
-
-  # A receiver's cycle is split by watched name and by kind (#5677), so
-  # a subject line can say what was found and whether it is a find or
-  # activity on something already reported.
-  def deliver_messages(receiver, alerts)
-    alerts.group_by(&:message_key).
-      each_value { |message_alerts| deliver(receiver, message_alerts) }
-  end
-
-  # Isolated per receiver so one failure cannot abort the rest of the
-  # cycle, the same shape as the import digest's delivery.
-  def deliver(receiver, alerts)
-    ProjectAlertMailer.build(receiver: receiver, alerts: alerts).
-      deliver_later
-  rescue StandardError => e
-    Rails.logger.error("ProjectAlertMailer enqueue failed for user " \
-                       "#{receiver.id}: #{e.class}: #{e.message}")
   end
 end

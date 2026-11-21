@@ -49,6 +49,9 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   around_action :catch_errors_and_log_request_stats
+  # A request is one action, so the project alerts everything in it
+  # raised are delivered together once it has succeeded (#5721).
+  around_action :collect_project_alerts
   before_action :kick_out_excessive_traffic
   before_action :kick_out_robots
   before_action :verify_authenticity_token
@@ -143,6 +146,9 @@ class ApplicationController < ActionController::Base
 
   # See ExternalSite.select_options.
   def reset_external_site_cache = ExternalSite.reset_request_cache
+
+  # See ProjectAlert::Collector: one set of digests per request.
+  def collect_project_alerts(&block) = ProjectAlert::Collector.around(&block)
 
   def change_theme_to(change)
     if MO.themes.member?(change)
