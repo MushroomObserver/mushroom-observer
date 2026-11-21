@@ -189,25 +189,37 @@ class ScssDuplicateSelectorFinder
   # each selector on the innermost frame, combined with every
   # ancestor selector frame (so `.a .b { color: red }` keys on the
   # full `.a > .b` path, not bare `.b`) and every `@`-rule condition
-  # wrapping it.
+  # wrapping it. A comma-separated ancestor (`.a, .b { .c { ... } }`)
+  # keys on each ancestor selector separately -- joining them into
+  # one string would miss a duplicate against a rule that reopens
+  # `.c` under just `.a`.
   def record_property(scan, property, line_no)
     return unless innermost_selector_frame?(scan.frames)
 
-    key_prefix = selector_key_prefix(scan.frames)
-    scan.frames.last[:selectors].each do |selector|
-      key = "#{key_prefix} > #{selector}"
+    each_key(scan.frames) do |key|
       scan.index[key][property] << "#{scan.path}:#{line_no}"
     end
   end
 
-  def selector_key_prefix(frames)
-    media_conditions = frames.filter_map { |f| f[:media] }
-    ancestor_path = ancestor_selector_path(frames)
-    "#{media_conditions.join(" / ")} :: #{ancestor_path.join(" > ")}"
+  def each_key(frames, &block)
+    media_prefix = media_conditions_prefix(frames)
+    ancestor_combinations(frames).each do |ancestor_path|
+      frames.last[:selectors].each do |selector|
+        path = (ancestor_path + [selector]).join(" > ")
+        yield("#{media_prefix} :: #{path}")
+      end
+    end
   end
 
-  def ancestor_selector_path(frames)
+  def media_conditions_prefix(frames)
+    frames.filter_map { |f| f[:media] }.join(" / ")
+  end
+
+  def ancestor_combinations(frames)
     selector_frames = frames.reject { |f| f[:selectors].nil? }
-    selector_frames[0..-2].map { |f| f[:selectors].join(",") }
+    ancestor_lists = selector_frames[0..-2].pluck(:selectors)
+    return [[]] if ancestor_lists.empty?
+
+    ancestor_lists[0].product(*ancestor_lists[1..])
   end
 end
