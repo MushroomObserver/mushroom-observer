@@ -123,18 +123,15 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # Content that sits inline WITH the label, inside the label row's
-    # flex container — the help-collapse trigger icon, a short
+    # flex container — the help-collapse trigger icon, and a short
     # `label_appends:` tag ("(required)"/"(optional)"/a custom
-    # string), and AutocompleterField's has-ID indicator + find/keep/
-    # edit buttons (forwarded via `with_label_appends`). Distinct from
-    # `between` (a block between the label row and the field) and
-    # `help` (the field's explanation block) — neither belongs here.
+    # string). Distinct from `between` (a block between the label row
+    # and the field) and `help` (the field's explanation block) —
+    # neither belongs here.
     def label_appends_present?
       has_help_icon = respond_to?(:help_slot) && help_slot &&
                       wrapper_options[:help_collapse]
-      has_appends_slot = respond_to?(:label_appends_slot) &&
-                         label_appends_slot
-      has_help_icon || has_appends_slot || wrapper_options[:label_appends]
+      has_help_icon || wrapper_options[:label_appends]
     end
 
     # `wrapper_options[:label_sr_only] == true` hides the label
@@ -210,15 +207,8 @@ class Components::ApplicationForm < Superform::Rails::Form
           render_label_content(label_text)
         end
         render_help_in_label_row
-        render_label_appends_content
+        render_label_appends_option
       end
-    end
-
-    def render_label_appends_content
-      render_label_appends_option
-      return unless respond_to?(:label_appends_slot) && label_appends_slot
-
-      render(label_appends_slot)
     end
 
     def render_label_appends_option
