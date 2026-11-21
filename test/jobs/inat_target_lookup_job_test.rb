@@ -88,20 +88,32 @@ class InatTargetLookupJobTest < ActiveJob::TestCase
 
     messages = broadcasts(stream)
     total = @project.target_names.size + @project.target_locations.size
-    assert_equal(total + 1, messages.size,
-                 "One progress message per lookup, then the count")
+    assert_equal(total + 2, messages.size,
+                 "1 progress msg/lookup, the count, then the button's removal")
     assert_includes(messages.first, "inat_target_lookup_progress",
                     "Progress should replace the progress line")
-    assert_includes(messages.last, "project_site_candidates",
+    count = messages[-2]
+    assert_includes(count, "project_site_candidates",
                     "The count should replace the candidates lines")
-    assert_includes(messages.last, "238",
-                    "The count should be the one iNat gave")
+    assert_includes(count, "238", "The count should be the one iNat gave")
+    assert_includes(messages.last, InatTargetLookupJob::LOOK_UP_BUTTON_ID,
+                    "The look-up button should be removed")
   end
 
   # ---- look_up_later -----------------------------------------------------
 
-  def test_look_up_later_for_a_site_following_the_constraints
+  # Following the constraints is on by default, so it is no sign the
+  # project wants anything looked up.
+  def test_no_look_up_later_for_constraints_with_nothing_turned_on
     project_site(use_constraints: true)
+
+    assert_no_enqueued_jobs(only: InatTargetLookupJob) do
+      InatTargetLookupJob.look_up_later(@project)
+    end
+  end
+
+  def test_look_up_later_for_a_site_with_imports_on
+    project_site(use_constraints: true, importing: true)
 
     assert_enqueued_with(job: InatTargetLookupJob, args: [@project]) do
       InatTargetLookupJob.look_up_later(@project)

@@ -19,19 +19,21 @@ class InatTargetLookupJob < ApplicationJob
   RETRY_WAIT = 1.minute
   PROGRESS_EVERY = 5
 
+  # External Sites page button that queues this job, removed once
+  # every target is looked up.
+  LOOK_UP_BUTTON_ID = "inat_target_lookup_button"
+
   # A run can outlast Solid Queue's default three-minute hold. A job
   # queued while one is running for the project is discarded: the
   # running one checks for new targets before it finishes.
   limits_concurrency(to: 1, key: ->(project) { "inat_lookup_#{project.id}" },
                      duration: 1.hour, on_conflict: :discard)
 
-  # Queues the job when something reads the project's lookups.
+  # Queues the job when the project has iNat alerts or imports on.
   def self.look_up_later(project)
     site = project.project_external_sites.
            find_by(external_site: ExternalSite.inaturalist)
-    return unless site
-    return unless site.alerting? ||
-                  (site.use_constraints? && project.constraints?)
+    return unless site&.acting?
 
     perform_later(project)
   end
@@ -86,6 +88,9 @@ class InatTargetLookupJob < ApplicationJob
         candidates: Inat::CandidateCount.for(project_site: site),
         import_limit: site.import_limit
       )
+    )
+    Turbo::StreamsChannel.broadcast_remove_to(
+      self.class.stream(@project), target: LOOK_UP_BUTTON_ID
     )
   end
 

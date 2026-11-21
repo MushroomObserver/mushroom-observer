@@ -226,7 +226,9 @@ module Projects
 
     # Targets with no saved lookup are looked up in the background, and
     # the page says how far that has got rather than waiting on iNat.
-    def test_targets_with_no_saved_lookup_are_looked_up_in_the_background
+    # The page reports the saved lookups and starts none: a site admin
+    # starts them with the button.
+    def test_targets_with_no_saved_lookup_are_reported_not_looked_up
       project = projects(:rare_fungi_project)
       ProjectExternalSite.create!(project: project, external_site: @inat,
                                   use_constraints: true)
@@ -242,8 +244,48 @@ module Projects
       assert_select("#project_site_#{@inat.id}",
                     text: /Target names iNaturalist does not know/,
                     count: 0)
-      assert_enqueued_with(job: InatTargetLookupJob, args: [project])
+      look_up = look_up_project_external_sites_path(project_id: project.id)
+      assert_select("##{InatTargetLookupJob::LOOK_UP_BUTTON_ID} " \
+                    "form[action='#{look_up}']")
+      assert_select("form form", count: 0)
+      assert_no_enqueued_jobs(only: InatTargetLookupJob)
       assert_not_requested(:get, inat_api_matcher("taxa"))
+    end
+
+    def test_no_look_up_button_once_every_target_is_looked_up
+      project = projects(:rare_fungi_project)
+      ProjectExternalSite.create!(project: project, external_site: @inat,
+                                  use_constraints: true)
+      stub_request(:get, inat_api_matcher("taxa")).
+        to_return(status: 200, body: { results: [] }.to_json)
+      stub_request(:get, inat_api_matcher("places")).
+        to_return(status: 200, body: { results: [] }.to_json)
+      save_inat_lookups(project)
+      make_admin("dick")
+      get(:index, params: { project_id: project.id })
+
+      assert_select("##{InatTargetLookupJob::LOOK_UP_BUTTON_ID}", count: 0)
+      assert_select("#inat_target_lookup_progress", count: 0)
+    end
+
+    # --- looking up targets ------------------------------------------
+
+    def test_look_up_queues_the_lookups
+      make_admin("dick")
+      post(:look_up, params: { project_id: @project.id })
+
+      assert_enqueued_with(job: InatTargetLookupJob, args: [@project])
+      assert_flash_success(:project_sites_looking_up_targets)
+      assert_redirected_to(project_external_sites_path(project_id: @project.id))
+    end
+
+    def test_look_up_is_not_for_a_project_admin
+      login("rolf")
+      post(:look_up, params: { project_id: @project.id })
+
+      assert_no_enqueued_jobs(only: InatTargetLookupJob)
+      assert_redirected_to(project_path(@project.id))
+      assert_flash_error
     end
 
     # --- saving ------------------------------------------------------
@@ -287,6 +329,32 @@ module Projects
       assert_flash_error
       assert_unprocessable
       assert_nil(project_site)
+    end
+
+    # Turning imports or alerts on is when the lookups are wanted.
+    def test_saving_with_imports_on_queues_the_lookups
+      existing = create_project_site(remote_project_id: "303327",
+                                     remote_project_name: "2026 NAMA Yoop")
+      make_admin("dick")
+      patch(:update,
+            params: { project_id: @project.id, id: existing.id,
+                      project_external_site: { importing: "1" } })
+
+      assert(existing.reload.importing?, "Imports should be saved as on")
+      assert_enqueued_with(job: InatTargetLookupJob, args: [@project])
+    end
+
+    def test_saving_with_imports_and_alerts_off_queues_nothing
+      existing = create_project_site(remote_project_id: "303327",
+                                     remote_project_name: "2026 NAMA Yoop")
+      make_admin("dick")
+      patch(:update,
+            params: { project_id: @project.id, id: existing.id,
+                      project_external_site: { importing: "0",
+                                               alerting: "0" } })
+
+      assert_redirected_to(project_external_sites_path(project_id: @project.id))
+      assert_no_enqueued_jobs(only: InatTargetLookupJob)
     end
 
     def test_update_keeps_a_resolved_project_without_asking_inat_again

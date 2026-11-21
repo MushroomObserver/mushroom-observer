@@ -2834,12 +2834,14 @@
   project_sites_over_limit: "That is more than this project's import limit of [limit]."
   project_sites_unresolved_names: "Target names iNaturalist does not know, left out of the search: [targets]"
   project_sites_unresolved_locations: "Target locations iNaturalist does not know, left out of the search: [targets]"
-  project_sites_lookups_incomplete: "[looked_up] of [total] target names and locations looked up on iNaturalist so far. The count appears when all are done."
+  project_sites_lookups_incomplete: "[looked_up] of [total] target Names and Locations looked up on iNat"
+  project_sites_look_up_targets: Look up targets on iNat
+  project_sites_looking_up_targets: Looking up target Names and Locations on iNat. This page updates as they are found.
   project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
   project_sites_use_constraints: Follow this project's constraints
   project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
   project_sites_alerting: Email an alert when a matching observation appears
-  project_sites_importing: Automatically import matching observations into this project
+  project_sites_importing: Enable imports
   project_sites_import_limit: Import limit
   project_sites_import_limit_help: The most observations Mushroom Observer will ever import into this project.
   project_site_updated: External site settings saved.

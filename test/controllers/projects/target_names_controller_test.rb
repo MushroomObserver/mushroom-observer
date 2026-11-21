@@ -24,6 +24,7 @@ module Projects
     def test_create_queues_inat_lookups
       project = projects(:rare_fungi_project)
       ProjectExternalSite.create!(project: project, use_constraints: true,
+                                  importing: true,
                                   external_site: external_sites(:inaturalist))
       login("rolf")
 
