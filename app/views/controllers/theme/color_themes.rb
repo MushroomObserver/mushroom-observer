@@ -7,12 +7,17 @@ module Views::Controllers::Theme
       add_page_title(:color_themes_title.l)
 
       trusted_html(:color_themes_text.tp)
-      p do
-        MO.themes.each do |name|
-          a(href: url_for(action: name)) { plain(name.underscore.to_sym.l) }
-          br
-        end
+      p { MO.themes.each { |name| render_theme_link(name) } }
+    end
+
+    private
+
+    def render_theme_link(name)
+      Link(type: :get, name: name.underscore.to_sym.l,
+           target: url_for(action: name)) do
+        plain(name.underscore.to_sym.l)
       end
+      br
     end
   end
 end

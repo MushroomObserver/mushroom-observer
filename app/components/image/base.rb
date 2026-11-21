@@ -262,7 +262,7 @@ class Components::Image::Base < Components::Base
 
     case @link_method
     when :get
-      a(href: path, class: stretched_link_classes)
+      Link(type: :get, name: "", target: path, class: stretched_link_classes)
     when :post, :put, :patch, :delete
       # These require a mutation Button, which generates a form with
       # CSRF protection (Button::CRUDBase defaults `form: { data:

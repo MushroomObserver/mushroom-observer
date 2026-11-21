@@ -28,7 +28,7 @@ module Views::Controllers::Account::Login
 
     def render_remember_me_field
       checkbox_field(:remember_me, label: :login_remember_me,
-                                   wrap_class: "mt-3")
+                                   wrap_class: "mt-3 mb-3")
     end
 
     def render_forgot_login_text

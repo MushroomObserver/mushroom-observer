@@ -72,14 +72,14 @@ module Views::Controllers::Sequences
       select_field(:archive, [nil] + sequence_archive_options,
                    label: :archive.ti,
                    inline: true,
-                   wrap_class: "ml-5")
+                   wrap_class: "ml-3")
     end
 
     def render_accession_field
       text_field(:accession,
                  label: :form_sequence_accession,
                  inline: true,
-                 wrap_class: "ml-5")
+                 wrap_class: "ml-3")
     end
 
     def render_accession_help

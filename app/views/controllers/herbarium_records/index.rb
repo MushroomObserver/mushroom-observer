@@ -39,10 +39,19 @@ module Views::Controllers::HerbariumRecords
     end
 
     def build_table_columns(table)
-      table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      unless single_herbarium_filter?
+        table.column(:herbarium.ti) { |rec| render_herbarium_link(rec) }
+      end
       table.column(:label.ti) { |rec| render_record_link(rec) }
       table.column(:observations.ti) { |rec| render_observation_links(rec) }
       build_trailing_columns(table)
+    end
+
+    # Every row shares one fungarium when the index is filtered down
+    # to a single one -- the column would just repeat it.
+    def single_herbarium_filter?
+      herbaria = @query&.params&.dig(:herbaria)
+      herbaria.is_a?(Array) && herbaria.size == 1
     end
 
     def build_trailing_columns(table)
@@ -63,22 +72,18 @@ module Views::Controllers::HerbariumRecords
     def render_herbarium_link(rec)
       # `herbarium_records.herbarium_id` is `NOT NULL` at the schema
       # level, so `rec.herbarium` is always present here.
-      a(href: herbarium_path(rec.herbarium.id)) do
-        trusted_html(rec.herbarium.name.t)
-      end
+      Link(type: :object, object: rec.herbarium, name: rec.herbarium.name.t)
     end
 
     def render_record_link(rec)
-      a(href: herbarium_record_path(id: rec.id),
-        class: "herbarium_record_link_#{rec.id}") do
-        trusted_html(rec.herbarium_label.t)
-      end
+      Link(type: :object, object: rec, name: rec.herbarium_label.t)
     end
 
     def render_observation_links(rec)
       rec.observations.each_with_index do |obs, idx|
         plain(", ") if idx.positive?
-        a(href: permanent_observation_path(obs.id)) do
+        Link(type: :get, name: viewer_aware_unique_format_name(obs).t,
+             target: permanent_observation_path(obs.id)) do
           trusted_html(viewer_aware_unique_format_name(obs).t)
         end
       end

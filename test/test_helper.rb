@@ -63,6 +63,11 @@ WebMock.disable_net_connect!(
 )
 
 ENV["RAILS_ENV"] ||= "test"
+
+# Avoid stale Sprockets cache from a prior/aborted run serving old SCSS.
+require("fileutils")
+FileUtils.rm_rf(File.expand_path("../tmp/cache/assets", __dir__))
+
 require_relative("../config/environment")
 require("rails/test_help")
 

@@ -16,6 +16,11 @@ class Language::ExporterTest < UnitTestCase
 
   def teardown
     Language.reset_input_file_override
+    # See CacheStoreSelector -- the cache isn't rolled back with the DB.
+    cache_backend = I18n.backend.backends.first
+    %w[two five unknown_locations].each do |tag|
+      cache_backend.delete_translation(:en, tag)
+    end
     super
   end
 

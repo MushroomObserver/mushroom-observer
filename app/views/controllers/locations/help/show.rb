@@ -86,6 +86,7 @@ module Views::Controllers::Locations
 
       def view_template
         add_page_title(page_title)
+        content_padding(:no_panels)
 
         trusted_html(:location_help_intro.tp)
         h2 { :location_help_example_title.l }

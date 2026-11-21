@@ -26,32 +26,27 @@ module Views::Controllers::Projects::Aliases
     end
 
     def render_existing_aliases
-      alias_data.each do |name, id|
-        render_edit_link(name, id)
-        span(class: "mx-2")
-        Button(
-          type: :delete,
-          target: project_alias_path(
-            project_id: @project.id, id: id
-          ),
-          variant: :strip
+      alias_data.each do |project_alias|
+        InlineCRUDLinks(
+          target: project_alias, user: current_user, edit: false,
+          extras: [edit_button(project_alias)]
         )
         br
       end
     end
 
-    def render_edit_link(name, id)
-      span(id: "project_alias_#{id}") do
-        Button(
-          type: :modal,
-          name: name,
-          target: edit_project_alias_path(
-            project_id: @project.id, id: id
-          ),
-          modal_id: "project_alias_#{id}",
-          variant: :strip
-        )
-      end
+    # Hand-rolled: the alias's name is this link's visible text,
+    # not InlineCRUDLinks' icon-only edit.
+    def edit_button(project_alias)
+      Components::Button.new(
+        type: :modal,
+        name: project_alias.name,
+        target: edit_project_alias_path(
+          project_id: @project.id, id: project_alias.id
+        ),
+        modal_id: "project_alias_#{project_alias.id}",
+        variant: :strip
+      )
     end
 
     def render_new_link

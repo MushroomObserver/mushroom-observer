@@ -8,6 +8,15 @@ class LanguageTrackingIntegrationTest < CapybaraIntegrationTestCase
   #  through redirects correctly.
   # -----------------------------------------------------------------------
 
+  # See CacheStoreSelector -- the cache isn't rolled back with the DB.
+  def teardown
+    cache_backend = I18n.backend.backends.first
+    [:test_tag1, :test_tag2, :test_flash_redirection_title].each do |tag|
+      cache_backend.delete_translation(:el, tag)
+    end
+    super
+  end
+
   def test_language_tracking
     lang_session = Capybara::Session.new(:rack_test, Rails.application)
     login(mary, session: lang_session)

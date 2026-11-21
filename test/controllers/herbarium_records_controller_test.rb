@@ -32,6 +32,8 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # In results, expect 1 row per herbarium_record
     assert_select("#results tbody tr", HerbariumRecord.count,
                   "Wrong number of Herbarium Records")
+    # Unfiltered: records span multiple fungaria, so the column shows.
+    assert_select("th", text: :herbarium.ti)
   end
 
   # Unfiltered index sorts by Query::HerbariumRecords.default_order.
@@ -71,6 +73,9 @@ class HerbariumRecordsControllerTest < FunctionalTestCase
     # In results, expect 1 row per herbarium_record
     assert_select("#results tbody tr",
                   HerbariumRecord.where(herbarium: herbarium).count)
+    # Filtered to one fungarium: every row shares it, so the column
+    # that would just repeat it is hidden.
+    assert_select("th", { text: :herbarium.ti, count: 0 })
   end
 
   def test_index_herbarium_id_no_matching_records

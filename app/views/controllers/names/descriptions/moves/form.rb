@@ -37,11 +37,11 @@ module Views::Controllers::Names::Descriptions::Moves
     end
 
     def view_template
+      return p { :merge_descriptions_no_synonyms.t } unless moves.any?
+
       h4 { append_colon(:merge_descriptions_move_header.t) }
       Help(element: :p,
            content: :merge_descriptions_move_help.t)
-
-      return unless moves.any?
 
       div(class: "form-group") { render_move_options }
       render_delete_checkbox

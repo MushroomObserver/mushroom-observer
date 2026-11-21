@@ -11,7 +11,7 @@ class LocalTimeSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__index")
 
     # Find a matrix box with a time footer
-    time_element = first(".rss-updated-at", wait: 5)
+    time_element = first(".log-updated-at", wait: 5)
 
     # Verify the Stimulus controller data attribute is present
     utc_value = time_element["data-local-time-utc-value"]
@@ -37,13 +37,13 @@ class LocalTimeSystemTest < ApplicationSystemTestCase
 
     visit("/")
     assert_selector("body.observations__index")
-    assert_selector(".rss-updated-at", wait: 5)
+    assert_selector(".log-updated-at", wait: 5)
 
     # Use JavaScript to verify the conversion is correct
     # We'll create a test element and verify the controller works
     result = evaluate_script(<<~JS)
       (function() {
-        const el = document.querySelector('.rss-updated-at');
+        const el = document.querySelector('.log-updated-at');
         if (!el) return { error: 'No element found' };
 
         const utcValue = el.dataset.localTimeUtcValue;

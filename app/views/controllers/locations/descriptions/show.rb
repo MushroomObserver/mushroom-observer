@@ -17,7 +17,7 @@ module Views::Controllers::Locations::Descriptions
       add_edit_icons(@description, @user)
       add_pager_for(@description)
       container_class(:wide)
-      column_classes(:six_even)
+      column_classes(:six)
 
       Row { render_columns }
       render(Views::Layouts::ObjectFooter.new(

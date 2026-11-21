@@ -11,8 +11,8 @@
 # IS the context nav; on mobile the sidebar holds it.
 #
 # Renders the same `[text, url, args]` tuples as the top-nav
-# variant, flattened into indented rows under a heading (no
-# dropdown). Dispatches each tuple through
+# variant, flattened into rows under a heading (no dropdown).
+# Dispatches each tuple through
 # `Components::LinkRendering#render_crud_button_or_link` so
 # `button: :destroy` / `:post` / `:put` / `:patch` render as their
 # respective forms — pre-Phlex `sidebar_nav_link` collapsed every
@@ -56,15 +56,15 @@ class Views::Layouts::Sidebar::ContextNav < Views::Base
   def render_sidebar_link(link)
     str, url, args = link
     args ||= {}
-    modifier = class_names(CSS_CLASSES[:indent], CSS_CLASSES[:mobile_only])
+    modifier = CSS_CLASSES[:mobile_only]
     render(Components::ListGroup::LinkItem.new(class: modifier)) do |css_class|
       kwargs = sidebar_link_kwargs(args, css_class)
       render_crud_button_or_link(str, url, args, kwargs)
     end
   end
 
-  # Builds the kwargs hash for one sidebar link: indent + mobile-only
-  # classes (composed by `LinkItem`), the nav-active Stimulus data
+  # Builds the kwargs hash for one sidebar link: mobile-only class
+  # (composed by `LinkItem`), the nav-active Stimulus data
   # attrs (only for plain anchor links — buttons / forms aren't
   # tracked by `nav-active`), and a button-specific d-block strip.
   def sidebar_link_kwargs(args, css_class)

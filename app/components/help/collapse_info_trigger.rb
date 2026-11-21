@@ -15,7 +15,8 @@ class Components::Help::CollapseInfoTrigger < Components::Base
 
   def view_template
     Link(type: :collapse_toggle, target_id: @target_id,
-         **mix({ class: "info-collapse-trigger" }, @attributes)) do
+         **mix({ class: "info-collapse-trigger inline-flex-center" },
+               @attributes)) do
       Icon(type: :question, title: :help.ti, center_tooltip: true)
     end
   end

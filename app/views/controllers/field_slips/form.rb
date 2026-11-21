@@ -60,7 +60,7 @@ module Views::Controllers::FieldSlips
 
     def render_code_only_form
       text_field(:code, label: :field_slip_code)
-      submit(:field_slip_create_obs.t, class: "mt-5")
+      submit(:field_slip_create_obs.t, class: "mt-2")
     end
 
     # --- Main form: full field-slip editing.
@@ -109,7 +109,8 @@ module Views::Controllers::FieldSlips
       text_field(:other_codes,
                  label: "#{:field_slip_other_codes.l} " \
                         "(#{:field_slip_other_example.l})")
-      checkbox_field(:inat, label: :field_slip_other_inat)
+      checkbox_field(:inat, label: :field_slip_other_inat,
+                            wrap_class: "form-group")
     end
 
     def render_project_select
@@ -187,7 +188,7 @@ module Views::Controllers::FieldSlips
     end
 
     def render_submit_add_images
-      submit(:field_slip_add_images.t, class: "mt-5")
+      submit(:field_slip_add_images.t, class: "mt-3")
     end
 
     def render_edit_action_submits
@@ -308,9 +309,8 @@ module Views::Controllers::FieldSlips
 
     def render_field_slip_link(field_slip)
       small do
-        a(href: field_slip_path(field_slip)) do
-          "Field Slip: #{field_slip.code}"
-        end
+        Link(type: :object, object: field_slip,
+             name: "Field Slip: #{field_slip.code}")
       end
     end
   end

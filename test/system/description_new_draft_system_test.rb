@@ -39,7 +39,7 @@ class DescriptionNewDraftSystemTest < ApplicationSystemTestCase
     find_field("project").click
     @browser.keyboard.type("EOL")
     assert_selector(".auto_complete") # wait for the dropdown
-    assert_selector(".auto_complete ul li a", text: project.title)
+    assert_selector(".auto_complete a.dropdown-item", text: project.title)
     @browser.keyboard.type(:down, :tab)
     assert_field("project", with: project.title)
 

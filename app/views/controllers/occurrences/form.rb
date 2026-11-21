@@ -252,9 +252,8 @@ module Views::Controllers::Occurrences
 
     def render_field_slip_link(field_slip)
       small(class: "d-block") do
-        a(href: field_slip_path(field_slip)) do
-          plain("Field Slip: #{field_slip.code}")
-        end
+        Link(type: :object, object: field_slip,
+             name: "Field Slip: #{field_slip.code}")
       end
     end
 

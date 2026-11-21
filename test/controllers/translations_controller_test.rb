@@ -93,19 +93,18 @@ class TranslationsControllerTest < FunctionalTestCase
   end
 
   def test_build_index
-    lang = languages(:english)
     file = mock_template
 
-    form = @controller.build_index(lang, hashify, file)
+    form = @controller.build_index(hashify, file)
     assert_equal([], form)
 
-    form = @controller.build_index(lang, hashify("name"), file)
+    form = @controller.build_index(hashify("name"), file)
     assert_major_header("IMPORTANT STUFF", form.shift)
     assert_minor_header("Main Objects:", form.shift)
     assert_tag_field("name", form.shift)
     assert_empty(form)
 
-    form = @controller.build_index(lang, hashify("index", "index_help"), file)
+    form = @controller.build_index(hashify("index", "index_help"), file)
     assert_major_header("IMPORTANT STUFF", form.shift)
     assert_minor_header("Actions:", form.shift)
     assert_tag_field("index", form.shift)
@@ -422,11 +421,10 @@ class TranslationsControllerTest < FunctionalTestCase
   end
 
   def test_include_unlisted_tags
-    lang = languages(:english)
     file = mock_template
     # "unknown_tag" is not in the template file
     tags = hashify("unknown_tag")
-    form = @controller.build_index(lang, tags, file)
+    form = @controller.build_index(tags, file)
     major_headers = form.grep(TranslationsController::TranslationsUIMajorHeader)
     unlisted_header = major_headers.find do |h|
       h.string.include?("UNLISTED")

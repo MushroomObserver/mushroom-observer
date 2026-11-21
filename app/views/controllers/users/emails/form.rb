@@ -21,7 +21,6 @@ module Views::Controllers::Users::Emails
     def view_template
       super do
         p { :ask_user_question_label.t(user: @target.legal_name) }
-        br
         render_subject_field
         render_message_field
         submit(:send.ti, center: true)

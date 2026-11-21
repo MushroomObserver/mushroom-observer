@@ -26,12 +26,11 @@ class Components::ListAddTest < ComponentTestCase
     html = render_list_add(object: project, project: project)
 
     assert_html(html, "label[for='name']", text: :search_status_label.ti)
-    # has-id-indicator, then the status light -- both inside the
-    # same label row as the "name" field's <label>.
+    # has-id-indicator, then the status light -- both render in
+    # label_end, a sibling of the label (not of each other's parent).
     assert_html(
       html,
-      "label[for='name'] ~ .has-id-indicator ~ " \
-      "[data-search-status-target='light']"
+      ".has-id-indicator ~ [data-search-status-target='light']"
     )
     assert_html(html, "[data-search-status-target='message']",
                 text: :search_status_all_names.l)

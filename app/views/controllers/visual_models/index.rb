@@ -20,7 +20,7 @@ module Views::Controllers::VisualModels
           Badge(variant: :count, count: vm.visual_groups.size,
                 type: :visual_group)
         end
-        t.column(nil, align: :center) { |vm| render_actions(vm) }
+        t.column(:actions.ti, align: :center) { |vm| render_actions(vm) }
       end
     end
 

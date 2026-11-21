@@ -20,12 +20,14 @@ module Views::Controllers::GlossaryTerms
         )
         container_class(:wide)
         column_classes(:six)
+        content_padding(:no_panels)
 
         render_main_row
         render(::Views::Layouts::ObjectFooter.new(
                  user: current_user,
                  obj: @glossary_term,
-                 versions: @versions.to_a
+                 versions: @versions.to_a,
+                 no_wrap: true
                ))
       end
 

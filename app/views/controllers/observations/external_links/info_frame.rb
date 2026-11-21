@@ -35,7 +35,7 @@ module Views::Controllers::Observations::ExternalLinks
     private
 
     def render_body
-      h5(class: "mt-0") do
+      h6(class: "mt-0") do
         strong do
           append_colon(:show_observation_on_site.l(site: @site_name))
         end
@@ -118,9 +118,8 @@ module Views::Controllers::Observations::ExternalLinks
     def sibling_attribution(sibling)
       small(class: "text-muted") do
         plain("(")
-        a(href: permanent_observation_path(sibling.id)) do
-          plain("MO #{sibling.id}")
-        end
+        Link(type: :get, name: "MO #{sibling.id}",
+             target: permanent_observation_path(sibling.id))
         plain(")")
       end
     end

@@ -38,11 +38,13 @@ module Views::Controllers::Comments
     end
 
     def render_object_panel
-      render(CommentsForObject.new(
-               object: @target,
-               comments: @comments.to_a,
-               user: @user, editable: false, limit: 10
-             ))
+      div(class: "mt-3") do
+        render(CommentsForObject.new(
+                 object: @target,
+                 comments: @comments.to_a,
+                 user: @user, editable: false, limit: 10
+               ))
+      end
     end
 
     def render_images_column

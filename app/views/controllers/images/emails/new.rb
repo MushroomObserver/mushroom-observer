@@ -10,9 +10,7 @@ module Views::Controllers::Images
       def view_template
         add_title_with_name(:commercial_inquiry_title, name: @image)
         render(Form.new(
-                 image: @image,
-                 user: current_user,
-                 message: @message
+                 image: @image, user: current_user, message: @message
                ))
       end
     end

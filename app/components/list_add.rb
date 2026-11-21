@@ -103,23 +103,21 @@ class Components::ListAdd < Components::ApplicationForm
 
   def render_field_slip_input
     div(class: "field-slip-container field-group") do
-      label(for: "field_slip", class: "text-nowrap") do
-        append_colon(:field_slip.ti)
-      end
-      Help(element: :span, content: "(#{:optional.l})", class: "ml-2")
-      Help(type: :collapse_info_trigger, target_id: "field_slip_help",
-           class: "ml-2")
-      div(class: "flex-bar") do
-        # `label: false` skips the form-group wrapper; the explicit
-        # `<label>` above plays that role here.
-        text_field("field_slip", label: false,
-                                 class: "form-control mr-3", size: 9)
+      # `label_appends: :optional` + `help_collapse: true` route the
+      # label row through FieldLabelRow#render_label_with_appends, the
+      # same `d-flex align-items-center` wrapper every other
+      # help-toggle field uses -- a hand-rolled label + two Help(...)
+      # siblings with no wrapper left them misaligned.
+      div(class: "flex-bar align-items-end") do
+        text_field("field_slip", label: :field_slip.ti,
+                                 label_appends: :optional,
+                                 help: :field_slip_help.l(
+                                   type: interpolation_type
+                                 ),
+                                 help_collapse: true,
+                                 wrap_class: "mb-0 flex-grow-1 mr-4",
+                                 class: "form-control")
         render_add_submit
-      end
-      Collapsible(id: "field_slip_help") do
-        Help(well: false) do
-          plain(:field_slip_help.l(type: interpolation_type))
-        end
       end
     end
   end

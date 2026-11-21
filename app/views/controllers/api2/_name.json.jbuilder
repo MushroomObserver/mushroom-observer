@@ -5,6 +5,7 @@ json.type("name")
 json.name(object.real_text_name(nil).to_s)
 json.author(object.author.to_s) if object.author.present?
 json.rank(object.rank.to_s.downcase)
+json.icn_id(object.icn_id) if object.icn_id.present?
 json.deprecated(object.deprecated ? true : false)
 json.misspelled(object.is_misspelling?)
 json.citation(object.citation.to_s.tl) if object.citation.present?

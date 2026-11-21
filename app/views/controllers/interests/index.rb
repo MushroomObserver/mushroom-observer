@@ -37,7 +37,7 @@ module Views::Controllers::Interests
     end
 
     def render_intro
-      ContentPadded { p(class: "mb-3") { plain(:list_interests_intro.l) } }
+      ContentPadded { plain(:list_interests_intro.l) }
     end
 
     def show_type_filter?

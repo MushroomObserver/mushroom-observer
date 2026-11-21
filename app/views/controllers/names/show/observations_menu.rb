@@ -55,9 +55,11 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   def render_observations_column
     Column(xs: 12, sm: 6) do
       p(class: "m-0") { plain(:show_observations_of.t) }
-      ul(class: "list-unstyled pl-3") { render_obs_link_rows }
-      div(class: "py-3") do
-        p(class: "m-0") { render_tab_link(Tab::Name::OccurrenceMap.new(name: @name)) }
+      ul(class: "list-unstyled pl-3 mb-0") { render_obs_link_rows }
+      div(class: "pt-3") do
+        p(class: "m-0") do
+          render_tab_link(Tab::Name::OccurrenceMap.new(name: @name))
+        end
       end
     end
   end
@@ -87,7 +89,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   def render_obs_link(tab)
     title, url, opts = tab.to_a
     label, count = split_title_and_count(title)
-    a(href: url, **link_attrs(opts)) { plain(label) }
+    Link(type: :get, name: label, target: url, **link_attrs(opts))
     whitespace
     plain(count.to_s)
   end
@@ -100,13 +102,13 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   end
 
   def link_attrs(opts)
-    opts.slice(:class, :data, :target, :rel)
+    opts.slice(:class, :data, :rel)
   end
 
   def render_research_links_column
     Column(xs: 12, sm: 6) do
       p(class: "m-0") { append_colon(:research_links.l) }
-      ul(class: "list-unstyled pl-3") { render_research_links }
+      ul(class: "list-unstyled pl-3 mb-0") { render_research_links }
     end
   end
 
@@ -123,6 +125,7 @@ class Views::Controllers::Names::Show::ObservationsMenu < Views::Base
   # `[text, url, html_options]`.
   def render_tab_link(tab)
     text, url, opts = tab.to_a
-    a(href: url, **link_attrs(opts)) { plain(text) }
+    Link(type: :get, name: text, target: url,
+         **link_attrs(opts)) { plain(text) }
   end
 end

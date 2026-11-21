@@ -116,19 +116,21 @@ module Views::Controllers::Observations::Identify
           data: dual_target("pulldown").merge(
             action: scroll_actions
           )) do
-        ul(class: "virtual_list",
-           data: dual_target("list")) do
+        div(class: "virtual_list",
+            data: dual_target("list")) do
           10.times { |i| render_dropdown_item(i) }
         end
       end
     end
 
     def render_dropdown_item(index)
-      li(class: "dropdown-item") do
-        a(href: "#", data: {
-            row: index, action: click_actions
-          })
-      end
+      # A virtual-list row, not a navigational link -- href="#" is
+      # inert (the Stimulus click action calls :prevent), and the
+      # row is selected purely via the data-action wiring below.
+      # rubocop:disable-next MO/NoRawLinkOrButtonTo
+      a(class: "dropdown-item", href: "#", data: {
+          row: index, action: click_actions
+        })
     end
 
     # --- Type select (in form-group to align in the navbar flex row) ---

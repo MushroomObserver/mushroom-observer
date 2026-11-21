@@ -41,12 +41,13 @@ module Views::Controllers::Projects
 
     def render_title_row(project)
       div(class: "d-flex align-items-center") do
-        a(href: project_path(project.id)) do
+        Link(type: :get, name: project.title.t,
+             target: project_path(project.id)) do
           span(class: "h4") { trusted_html(project.title.t) }
         end
         if project.open_membership
           whitespace
-          span(class: "ml-4") { plain("(#{:open.ti})") }
+          span(class: "ml-3") { plain("(#{:open.ti})") }
         end
         Badge(variant: :id, object: project, size: :xl, extra_class: "ml-3")
       end

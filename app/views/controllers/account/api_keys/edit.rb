@@ -9,9 +9,9 @@ module Views::Controllers::Account::APIKeys
     prop :key, ::APIKey
 
     def view_template
-      add_page_title(:account_api_keys_title.t)
+      add_edit_title(@key)
       add_context_nav(Tab::Account::APIActions.new)
-      trusted_html(:account_api_keys_help.tp)
+      Help { trusted_html(:account_api_keys_help.tp) }
       # Form's full_page_form hidden field makes #update redirect
       # here instead of responding turbo_stream -- see new.rb.
       render(Form.new(

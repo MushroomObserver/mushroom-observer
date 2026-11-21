@@ -7,7 +7,8 @@ module Views::Controllers::Contributors
     def test_renders_collapsible_panel_with_toggle
       html = render_legend
 
-      assert_html(html, "#contribution_legend.collapse")
+      assert_no_html(html, "#contribution_legend.collapse")
+      assert_html(html, "#contribution_legend_body.collapse")
       assert_html(html, "strong",
                   text: :users_by_contribution_legend.l.as_displayed)
     end
@@ -17,11 +18,12 @@ module Views::Controllers::Contributors
 
       assert_html(html,
                   "a[data-toggle='collapse']" \
-                  "[href='#contribution_legend']" \
-                  "[aria-controls='contribution_legend']" \
+                  "[href='#contribution_legend_body']" \
+                  "[aria-controls='contribution_legend_body']" \
                   "[aria-expanded='false']")
-      assert_html(html,
-                  "a[href='#contribution_legend'] svg.mo-icon-info-circle")
+      assert_html(
+        html, "a[href='#contribution_legend_body'] svg.mo-icon-info-circle"
+      )
     end
 
     def test_renders_weights_table

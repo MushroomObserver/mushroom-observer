@@ -5,7 +5,7 @@ module Views::Controllers::SpeciesLists::Downloads
   # format. Posts to `SpeciesLists::DownloadsController#create`.
   # Sibling to `Views::Controllers::SpeciesLists::Downloads::Form`
   # (the print-labels form, also on the downloads/new page).
-  class ReportForm < ::Components::ApplicationForm
+  class SaveChecklistForm < ::Components::ApplicationForm
     prop :list, ::SpeciesList
     prop :query, _Nilable(::Query), default: nil
 
@@ -21,7 +21,7 @@ module Views::Controllers::SpeciesLists::Downloads
       super do
         p { append_colon(:download_observations_format.t) }
         div(class: "form-group") { render_format_radios }
-        submit(:species_list_report_button.l, center: true)
+        submit(:species_list_report_button.l)
       end
     end
 

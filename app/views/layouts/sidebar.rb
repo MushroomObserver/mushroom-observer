@@ -23,8 +23,7 @@ class Views::Layouts::Sidebar < Views::Base
   # sidebar.
   CSS_CLASSES = {
     heading: "disabled font-weight-bold",
-    admin: "list-group-item-danger indent",
-    indent: "indent",
+    admin: "list-group-item-danger",
     mobile_only: Components::Column.mobile_only_classes.join(" ").freeze
   }.freeze
 
@@ -71,7 +70,7 @@ class Views::Layouts::Sidebar < Views::Base
   end
 
   def render_logo
-    a(id: "logo_link", href: logo_href) do
+    Link(type: :get, name: "", target: logo_href, id: "logo_link") do
       img(
         class: "logo-trim img-responsive py-3",
         alt: "Mushroom Observer Logo",

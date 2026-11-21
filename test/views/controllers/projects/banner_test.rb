@@ -91,7 +91,7 @@ module Views::Controllers::Projects
       project = projects(:albion_project)
       html = render_banner(project: project)
 
-      assert_html(html, "img.banner-image")
+      assert_html(html, ".banner-image-wrap img.object-fit-cover")
       assert_no_html(html, ".banner-background")
     end
 
@@ -100,7 +100,7 @@ module Views::Controllers::Projects
       html = render_banner(project: project)
 
       # No banner image or overlay styling
-      assert_no_html(html, "img.banner-image")
+      assert_no_html(html, ".banner-image-wrap")
       assert_no_html(html, ".bottom-left")
       assert_no_html(html, ".banner-image-text")
     end
@@ -159,7 +159,7 @@ module Views::Controllers::Projects
       assert_no_html(html, "#title a")
       assert_html(html, ".project_location", text: project.place_name)
       assert_no_html(html, ".project_location a")
-      assert_html(html, "img.banner-image")
+      assert_html(html, ".banner-image-wrap img.object-fit-cover")
       assert_html(html, "#project_login_prompt",
                   text: :project_banner_login_prompt.l.as_displayed)
       assert_no_html(html, "a")

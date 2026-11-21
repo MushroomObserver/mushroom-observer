@@ -30,7 +30,7 @@
 #
 # @example icon kwarg toggle (starts closed)
 #   render(Components::Link::CollapseToggle.new(
-#     target_id: "contribution_legend",
+#     target_id: "contribution_legend_body",
 #     icon: :info_circle,
 #     button: :link,
 #     size: :xs

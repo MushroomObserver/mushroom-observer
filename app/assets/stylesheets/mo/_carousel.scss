@@ -95,7 +95,7 @@
   margin-top: 5rem; // to let overlays through
   margin-bottom: 5rem; // fullscreen and caption/voting
   background: none !important;
-  font-size: 2rem;
+  font-size: 1.25rem; // 20px at the 16px root -- see issue #5527
   color: $white;
   opacity: 0.75;
 
@@ -148,7 +148,7 @@
 // the icon the same way without a separate .mo-icon override.
 @media screen and (min-width: $screen-sm-min) {
   .carousel-control {
-    font-size: 3rem;
+    font-size: 1.875rem; // 30px at the 16px root -- see issue #5527
   }
 }
 

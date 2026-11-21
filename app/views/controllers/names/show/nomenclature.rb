@@ -40,7 +40,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
   def render_left_column
     Column(xs: 12, sm: left_column_width) do
-      ul(class: "list-unstyled") do
+      ul(class: "list-unstyled mb-0") do
         render_rank_line
         render_status_line
         render_name_line
@@ -160,7 +160,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     return if @name.code_name?
 
     Column(xs: 12, sm: 6) do
-      ul(class: "list-unstyled") do
+      ul(class: "list-unstyled mb-0") do
         if @name.icn_id?
           render_icn_id_links
         elsif @name.registrable?
@@ -218,9 +218,8 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     p(class: "hanging-indent") do
       trusted_html(append_colon(:show_name_misspelling_correct.l))
       if @name.correct_spelling
-        a(href: name_path(@name.correct_spelling_id)) do
-          trusted_html(@name.correct_spelling.display_name(@user).t)
-        end
+        Link(type: :object, object: @name.correct_spelling,
+             name: @name.correct_spelling.display_name(@user).t)
       else
         plain(@name.correct_spelling_id.to_s)
       end
@@ -235,7 +234,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     deprecated.reject!(&:correct_spelling_id)
     return if approved.blank? && deprecated.blank? && misspellings.blank?
 
-    ul(id: "name_synonyms", class: "list-unstyled") do
+    ul(id: "name_synonyms", class: "list-unstyled mb-0") do
       render_synonym_group(label_for_approved, approved)
       render_synonym_group(:show_name_deprecated_synonyms.l, deprecated)
       render_synonym_group(:show_name_misspelled_synonyms.l, misspellings)
@@ -256,9 +255,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     li(class: "hanging-indent") do
       trusted_html(append_colon(label))
       names.each_with_index do |n, idx|
-        a(href: name_path(n.id)) do
-          trusted_html(n.display_name(@user).t)
-        end
+        Link(type: :object, object: n, name: n.display_name(@user).t)
         plain(", ") if idx < names.length - 1
       end
     end

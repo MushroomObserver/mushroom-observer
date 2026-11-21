@@ -5,8 +5,9 @@ require("test_helper")
 class Title::ImageTest < UnitTestCase
   def test_page_title
     img = images(:in_situ_image)
+    expect = ["#{:image.ti}: ", img.format_name.t.small_author].safe_join
 
-    assert_equal(img.format_name.t.small_author, Title.for(img).page_title)
+    assert_equal(expect, Title.for(img).page_title)
   end
 
   def test_document_title

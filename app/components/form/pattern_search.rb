@@ -39,7 +39,7 @@ class Components::Form::PatternSearch < Components::ApplicationForm
   TYPE_VALUES = SEARCH_TYPE_OPTIONS.map(&:last).freeze
 
   FORM_CLASS = "flex-bar flex-grow-1 #{Components::Navbar::FORM_CLASS} " \
-               "px-0 gap-2".freeze
+               "px-0 my-0 gap-2".freeze
 
   def initialize(model, **options)
     options[:id] ||= "pattern_search_form"
