@@ -31,6 +31,7 @@ module Account
       assert_head_title(:login_please_login.l)
       # The way to the security notice once the site banner drops it.
       assert_select("#login_security_notice a[href=?]", "/articles/62")
+      assert_select("h4 a[href=?]", "/articles/46")
     end
 
     def test_invalid_login
