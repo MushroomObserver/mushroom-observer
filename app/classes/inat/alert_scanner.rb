@@ -28,6 +28,13 @@ class Inat
     # Enough for a taxon swap landing on a watched name; past this the
     # cycle says so rather than walking iNat for a quarter of an hour.
     MAX_PAGES = 5
+    # Ids per request when re-reading observations that have left the
+    # taxon filter, which iNat answers by id list.
+    ID_CHUNK = 200
+    # How far back that id list reaches. Only the size of that one
+    # request depends on it, and a find nobody has touched in half a
+    # year is not what a coordinator is waiting on.
+    ALERT_LOOKBACK = 180.days
 
     attr_reader :alerts_sent, :warnings
 
@@ -60,6 +67,7 @@ class Inat
       return seed_watermark if @since.nil?
 
       candidates = fetch_candidates(criteria)
+      candidates += fetch_departed(criteria, candidates)
       digests = collect(criteria, candidates)
       advance_watermark(candidates)
       digests
@@ -106,15 +114,95 @@ class Inat
     end
 
     def alert_for(criterion, candidate)
+      return nil unless criterion.matches?(candidate)
+      return find_alert(criterion, candidate) unless
+        told?(criterion, candidate)
+
+      activity_alert(criterion, candidate)
+    end
+
+    # A project hears about a find only under a name it watches.
+    def find_alert(criterion, candidate)
       identification = criterion.alertable_identification(candidate)
       return nil unless identification
-      return nil unless criterion.matches?(candidate)
+
+      record(criterion, candidate, identification,
+             criterion.target_name_for(identification))
+    end
+
+    # Once a project has been told about an observation, the newest
+    # identification is news whatever it names: a temporary code
+    # applied to a find is what the coordinators confirm by hand, and
+    # it is reported whether or not the community taxon follows it.
+    # The message stays grouped under the watched name the project
+    # was told, which is where a coordinator looks for it.
+    def activity_alert(criterion, candidate)
+      identification = criterion.activity_identification(candidate)
+      return nil unless identification
+
+      record(criterion, candidate, identification,
+             told_target_name(criterion, candidate))
+    end
+
+    def record(criterion, candidate, identification, target_name)
+      return nil if target_name.blank?
 
       ProjectAlert.record(
         project: criterion.project, external_site: @site,
         identification: identification, observation: candidate.to_h,
-        target_name: criterion.target_name_for(identification)
+        target_name: target_name
       )
+    end
+
+    def told_rows(criterion, candidate)
+      ProjectAlert.where(project: criterion.project, external_site: @site,
+                         remote_observation_id: candidate.id)
+    end
+
+    def told?(criterion, candidate)
+      told_rows(criterion, candidate).exists?
+    end
+
+    def told_target_name(criterion, candidate)
+      told_rows(criterion, candidate).order(:id).last&.target_name
+    end
+
+    # An identification that moves the community taxon off a watched
+    # name takes its observation out of the poll's filter, so the
+    # naming the coordinators asked to hear about is invisible to it.
+    # The ids this site has alerted are a query rather than new
+    # state; whatever the poll already returned is dropped.
+    def fetch_departed(criteria, returned)
+      return [] if @fetch_failed
+
+      ids = departed_ids(criteria, returned)
+      return [] if ids.empty?
+
+      ids.each_slice(ID_CHUNK).flat_map { |chunk| fetch_chunk(chunk) }
+    end
+
+    def fetch_chunk(ids)
+      query = { id: ids.join(","), per_page: ids.size }.to_query
+      json = fetch_json("observations?#{query}")
+      return note_departed_failure if json.nil?
+
+      Array(json["results"]).map { |result| Inat::AlertCandidate.new(result) }
+    end
+
+    # A failure here costs nothing but a cycle: these ids are read
+    # again next time, and the watermark covers the poll, not this.
+    def note_departed_failure
+      @warnings << "iNat re-read of already-alerted observations " \
+                   "failed; they are read again next cycle."
+      []
+    end
+
+    def departed_ids(criteria, returned)
+      ProjectAlert.where(project: criteria.map(&:project),
+                         external_site: @site,
+                         alerted_at: ALERT_LOOKBACK.ago..).
+        distinct.pluck(:remote_observation_id).compact.uniq -
+        returned.map(&:id)
     end
 
     # Everything identified as one of the watched taxa and touched

@@ -60,6 +60,7 @@ class ProjectAlert < AbstractModel
             remote_identification_id: identification[:id].to_s,
             remote_observation_id: observation_id,
             name: identification[:name], target_name: target_name,
+            provisional: identification[:provisional] == true,
             kind: kind_for(project, external_site, observation_id),
             observed_on: observation[:observed_on],
             alerted_at: Time.zone.now)
@@ -224,10 +225,8 @@ class ProjectAlert < AbstractModel
   def activity_phrase
     return nil unless kind == OTHER_ACTIVITY
     return :email_project_alert_what_comment.l if target_type == "Comment"
-    return :email_project_alert_what_naming.l(name: proposed_name) if
-      proposal?
 
-    name_change_phrase
+    qualify(provisional ? provisional_phrase : named_activity_phrase)
   end
 
   # What groups alerts into messages: one message per watched name per
@@ -237,6 +236,33 @@ class ProjectAlert < AbstractModel
   end
 
   private
+
+  # A code waiting to be confirmed, which is what a rare-challenge
+  # coordinator acts on: iNaturalist marks the taxon provisional and
+  # the flag is stored with the row.
+  def provisional_phrase
+    :email_project_alert_what_provisional.l(name: name.to_s)
+  end
+
+  def named_activity_phrase
+    return :email_project_alert_what_naming.l(name: proposed_name) if
+      proposal?
+
+    name_change_phrase
+  end
+
+  # A name the project watches needs no decision. One it does not is
+  # what the coordinators asked to be told, so they can add it or
+  # leave it; MO says so rather than adding anything.
+  def qualify(phrase)
+    return phrase if phrase.blank? || tracked?
+
+    "#{phrase}, #{:email_project_alert_what_untracked.l}"
+  end
+
+  def tracked?
+    project.target_names.any? { |target| target.text_name == name }
+  end
 
   # A naming of something the observation does not carry: nothing
   # has moved yet, and what somebody proposed is the news. A Naming
