@@ -185,6 +185,14 @@ class Comment < AbstractModel
     broadcast_remove_to(comment.target, :comments)
   }
 
+  # A comment on an observation a project was told about is the
+  # later activity it hears about (#5721).
+  after_create_commit lambda { |comment|
+    next unless comment.target.is_a?(::Observation)
+
+    ProjectAlert::Collector.touch(comment.target, comment)
+  }
+
   after_create :notify_users
   after_create :oil_and_water
 

@@ -61,6 +61,10 @@ class Naming < AbstractModel
   before_save :enforce_default_reasons
   after_destroy :log_destruction
   after_save :create_emails
+  # A name proposed here may be one a project watches (#5721).
+  after_create_commit lambda { |naming|
+    ProjectAlert::Collector.touch(naming.observation, naming)
+  }
 
   # Eager-loads the Naming + its votes / name / user / observation,
   # for any code that fetches a Naming directly (rather than via

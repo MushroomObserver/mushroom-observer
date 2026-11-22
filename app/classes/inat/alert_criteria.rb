@@ -15,7 +15,8 @@ class Inat
   # rare challenge has; a foray wants importing, not alerts.
   class AlertCriteria
     def self.all_alerting(site)
-      ProjectExternalSite.alerting.where(external_site: site).
+      ProjectExternalSite.where(external_site: site,
+                                project: Project.alerting).
         includes(project: [:target_names, :target_locations, :location]).
         map { |row| new(row) }.select(&:qualified?)
     end
@@ -58,11 +59,11 @@ class Inat
       within_dates?(candidate.observed_on) && within_area?(candidate)
     end
 
-    # Whoever opted in, which is nobody until a site admin names them.
+    # Whoever opted in, which is nobody until an admin subscribes.
     # Being an admin of a project is not a request to be told what
     # iNaturalist identified overnight.
     def recipients
-      project_site.alert_recipients
+      project.alert_recipients
     end
 
     private
