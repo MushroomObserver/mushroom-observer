@@ -279,9 +279,9 @@ class Inat
 
     # The resync fetches iNat unauthenticated, so an obscured source's
     # coordinate is blurred and would overwrite the authenticated
-    # import's accurate one. The Location is still safe to re-resolve: Inat::Obs#location
-    # searches the public blurred box, so it reveals no more than iNat
-    # shows. With no Location (e.g. private geoprivacy hides the point),
+    # import's accurate one. The Location is still safe to re-resolve:
+    # Inat::Obs#location searches the public blurred box, revealing no more
+    # than iNat shows. With no Location (e.g. private geoprivacy hides the point),
     # keep what the import resolved rather than fall back to `where`.
     def obscured_location_attributes(location)
       location ? { location: location } : {}
