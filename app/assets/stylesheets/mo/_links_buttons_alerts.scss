@@ -248,13 +248,14 @@ button.badge-id:hover {
 
 // Wrapper for a group of inline mod/add links (Components::
 // InlineIconBlock). Flex + gap spaces items evenly, no trailing
-// margin after the last. vertical-align: middle, not a flat
-// margin-top (RESOLVED, don't reintroduce) -- a margin only patches
-// one font-size at a time.
+// margin after the last. vertical-align: middle aligns against
+// adjacent text; margin-bottom corrects middle's half-x-height
+// reference point sitting below an icon box's visual center.
 .inline-icon-block {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
+  margin-bottom: 0.25em;
   white-space: nowrap;
   // em, not rem -- scales with the surrounding context's font-size
   // (a title-bar heading vs. small body text), same reasoning as
@@ -282,10 +283,13 @@ button.badge-id:hover {
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual size is tuned for looser contexts -- shrunk here.
-// The alignment against adjacent text lives on the wrapping
-// `.inline-icon-block`'s vertical-align: middle, just above, not here.
+// Self-sufficient flex-centering, so this class doesn't rely on
+// Button::Content auto-injecting `.inline-flex-center`. Alignment
+// against adjacent text lives on the wrapping `.inline-icon-block`'s
+// vertical-align: middle, just above, not here.
 .inline-icon-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   text-indent: 0;
   line-height: 1;
   background-color: transparent;
