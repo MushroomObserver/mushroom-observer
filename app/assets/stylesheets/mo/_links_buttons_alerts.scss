@@ -54,11 +54,9 @@
   }
 }
 
-// $success is too light for white text/icons on a solid button
-// background -- $btn-success-bg
-// (mo/_map_theme_vars_to_bootstrap_vars.scss)
-// is a darker green, keeping $success itself unchanged for alerts,
-// badges, and form-feedback text.
+// $success is too light for white text/icons on a solid button --
+// $btn-success-bg is a darker green; $success stays unchanged for
+// alerts/badges/form-feedback text.
 .btn-success {
   color: $white;
   background-color: $btn-success-bg;
@@ -121,14 +119,9 @@ form.button_to {
   }
 }
 
-// A form-wrapped button (Components::Button::CRUDBase) gets none of
-// `.btn-group`'s border-radius squaring or margin collapse --
-// Bootstrap's CSS only reaches a `.btn` that's a direct child.
-// Reimplemented generically below for every `.btn-group`.
-//
-// `.vote-btn-group` (_images.scss) overrides this on its elements via
-// higher selector specificity and import order -- no extra override
-// needed here.
+// Bootstrap's `.btn-group` squaring/margin-collapse only reaches a
+// `.btn` direct child, missing form-wrapped buttons (Components::
+// Button::CRUDBase) -- reimplemented generically below.
 .btn-group {
   // BS4's fix: flex stretches every child (form-wrapped or not) to
   // the same height.
@@ -181,14 +174,8 @@ form.button_to {
   }
 }
 
-// BS4's .input-group/.input-group-append/.input-group-prepend
-// (bootstrap/_input-group.scss) handle flex + stretch already --
-// `Components::InputGroup::Addon` emits those classes directly, so no
-// supplement is needed here (unlike .btn-group above, which has no
-// BS4-native flex fix for a form-wrapped button).
-
-// Same fix as above, but inline-flex: plain flex is block-level and
-// breaks the line after it, defeating .form-inline.
+// Same fix as .btn-group above, but inline-flex: plain flex is
+// block-level and breaks the line after it, defeating .form-inline.
 .form-inline .input-group {
   display: inline-flex;
 }
@@ -261,13 +248,9 @@ button.badge-id:hover {
 
 // Wrapper for a group of inline mod/add links (Components::
 // InlineLinkBlock). Flex + gap spaces items evenly, no trailing
-// margin after the last item. vertical-align: middle aligns this
-// inline-flex box against adjacent inline text -- its default
-// vertical-align: baseline doesn't land near text's visual center,
-// which a flat margin-top (RESOLVED, don't reintroduce) can only
-// patch for one font-size at a time. .object_edit .inline-link-block
-// (_content.scss) sets a margin-top separately, for spacing against
-// the heading above it, not this.
+// margin after the last. vertical-align: middle, not a flat
+// margin-top (RESOLVED, don't reintroduce) -- a margin only patches
+// one font-size at a time.
 .inline-link-block {
   display: inline-flex;
   align-items: center;
@@ -307,10 +290,9 @@ button.badge-id:hover {
   }
 }
 
-// button_to's <form> wrapper around a destroy .inline-icon-link keeps
-// the browser's default line-height, taller than `line-height: 1` on
-// the button -- flex-centering collapses the form to its content
-// height so the icon doesn't float inside extra line-height.
+// A destroy .inline-icon-link's <form> wrapper keeps the browser's
+// default line-height -- flex-centering collapses it so the icon
+// doesn't float inside the extra height.
 form:has(> .inline-icon-link) {
   display: inline-flex;
   align-items: center;
@@ -334,12 +316,9 @@ form:has(> .inline-icon-link) {
   }
 }
 
-// Translucent backgrounds (matching .badge-warning's treatment) for
-// the four levels Components::Alert supports, instead of Bootstrap's
-// default bg/border/text mix -- a mix toward white/black doesn't
-// track a dark theme's page background, and at $alert-bg-level: 0
-// (mo/_map_theme_vars_to_bootstrap_vars.scss) bg/border/text were
-// all the same color.
+// Translucent backgrounds, not Bootstrap's default bg/border/text
+// mix toward white/black -- that mix doesn't track a dark theme's
+// page background.
 $alert-variant-colors: (
   success: $success,
   info:    $info,
@@ -416,18 +395,14 @@ button:disabled {
 }
 
 // The number saying which occurrence member a comment or photo came
-// from (#5718). Shares .badge-outline's shape in prose and in the
-// Matching Observations panel, where the column of numbers is the
-// legend for the markers elsewhere on the page.
+// from. Shares .badge-outline's shape.
 .sibling-marker {
   font-size: 75%;
 }
 
-// Over a photograph an outline disappears into the image, so the
-// carousel badge fills with the page background instead -- readable
-// on a dark photo or a light one, and theme-aware either way.
-// A fixed size, not the 75% above: the badge sits on a 6vw
-// thumbnail, where a relative size shrinks it past legibility.
+// Filled, not outlined -- an outline disappears into a photo.
+// Fixed size, not the 75% above: a relative size shrinks past
+// legibility on the carousel's 6vw thumbnail.
 .sibling-marker-solid {
   font-size: 11px;
   font-weight: normal;
@@ -449,10 +424,9 @@ button:disabled {
   text-decoration: none;
 }
 
-// Matching Observations panel row: marker | name | id badge. The
-// name is the only column that grows -- min-width: 0 lets it wrap
-// instead of pushing the id badge out of the row. Mirrors Matrix::
-// Box's .log-heading row, with a leading marker column added.
+// Matching Observations row: marker | name | id badge. Only the
+// name column grows -- min-width: 0 lets it wrap instead of pushing
+// the id badge out.
 .matching-observation-row {
   @extend .d-flex, .align-items-start, .gap-2;
 }

@@ -4,14 +4,9 @@ label {
   font-weight: $font-weight-bold;
 }
 
-// FieldLabelRow's row shape for a label with appended content (a
-// help-collapse question-mark icon, or an autocompleter's
-// has-id-indicator/find/keep/edit icons) -- see
-// render_label_flex_row/render_label_with_appends.
-//
-// Label's margin-bottom sits on one side only, throwing off
-// align-items-center against append content with no margin. Zero it
-// here and move the same spacing onto the row instead.
+// FieldLabelRow (label + appended icons). Label's margin-bottom
+// throws off align-items-center against unmarginned append content
+// -- zero it here, move the spacing to the row instead.
 .label-row-with-appends label {
   margin-bottom: 0;
 }
@@ -20,10 +15,8 @@ label {
   margin-bottom: $label-margin-bottom;
 }
 
-// Bootstrap 4 custom-control checkboxes/radios -- input and label are
-// DOM siblings (see Components::ApplicationForm::CheckboxField/
-// RadioField), so this is scoped to `.custom-control-label` rather
-// than a bare `label` selector.
+// Input and label are DOM siblings here, so scoped to
+// `.custom-control-label`, not a bare `label` selector.
 .custom-control {
   .custom-control-label {
     font-weight: $btn-font-weight;
@@ -33,20 +26,14 @@ label {
     }
   }
 
-  // A checkbox's help-collapse trigger (`.form-between`) renders as a
-  // label sibling, not nested inside it, so a click on it doesn't
-  // bubble into a `data-toggle="collapse"` the label itself carries.
-  // It doesn't inherit the label's margin from that position either.
+  // A sibling of the label, not nested in it -- doesn't inherit its margin.
   > .form-between {
     margin-left: 1rem;
   }
 
-  // When the row has a sibling button-link next to the label (e.g.
-  // a "Create" link on placeholder rows in the project-violations
-  // target-location modal), flex-layout the row so the label and
-  // the button stay on the same line regardless of label wrap.
-  // Default inline-block flow puts the button on a new line at
-  // x=0 when the label wraps — confusing visually.
+  // Flex-layout so a sibling button-link (e.g. a "Create" link) stays
+  // on the same line as the label even when the label wraps --
+  // default inline-block flow drops it to a new line at x=0.
   &:has(> a.btn) {
     display: flex;
     align-items: flex-start;
@@ -60,22 +47,11 @@ label {
   margin-bottom: $form-group-margin-bottom;
 }
 
-// Theme- AND variant-aware "pressed" styles for button-styled
-// radios/checkboxes that drive their active state via
-// `:has(input:checked)`.
-//
-// Each `.btn-{variant}` exposes its active-state colors as CSS
-// custom properties (base color/bg/border per variant, darkened the
-// same way BS4's `button-variant` mixin darkens `.active`). The
-// `button-active-state` mixin then references those custom
-// properties — variant-agnostic. Whichever `.btn-{variant}` class
-// the element has, the right colors apply automatically. Text color
-// per variant comes from `color-yiq()` against that variant's
-// background, not a hardcoded white, so a light variant background
-// (e.g. a pale warning color) still gets readable dark text.
-//
-// Sass `@extend .btn-secondary.active` won't work — compound
-// selectors are no longer extendable.
+// "Pressed" styles for button-styled radios/checkboxes, via
+// `:has(input:checked)`. Each `.btn-{variant}` exposes darkened
+// active-state colors as custom properties; `button-active-state`
+// below reads those, variant-agnostic (Sass can't `@extend` a
+// compound selector like `.btn-secondary.active`).
 $btn-active-variants: (
   secondary: ($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, $BUTTON_BORDER_COLOR),
   primary: (color-yiq($primary), $primary, darken($primary, 5%)),
@@ -115,11 +91,9 @@ $btn-active-variants: (
   }
 }
 
-// Button-styled filter checkboxes (rss-log type filters etc.):
-// CSS-only "pressed" state via `:has()` matching the inner checked
-// input — no JS to toggle `.active`. Same pattern as
-// `.thumb_img_btn` in `_carousel.scss`. Not for `.dropdown-item`
-// rows — those show state via the checked box alone, no background.
+// CSS-only "pressed" state via `:has()`, no JS toggle -- same
+// pattern as `.thumb_img_btn` in `_carousel.scss`. Not for
+// `.dropdown-item` rows, which show state via the checkbox alone.
 .filter-checkbox:not(.dropdown-item):has(input[type="checkbox"]:checked) {
   @include button-active-state;
 }
@@ -276,23 +250,15 @@ form {
   .collapse-toggle-closed { display: inline; }
 }
 
-// `::before`/`::after` are sticky, zero-height-in-flow overlays (negative
-// margin cancels the height so they don't push the checkboxes down) that
-// stay pinned to the scroll container's visible top/bottom edge, fading
-// into $PANEL_BG_COLOR to hint the list continues past the visible rows.
-// Uses the theme-level color constant, not the Bootstrap-mapped
-// $panel-bg/$card-bg, so this rule compiles unchanged on either
-// Bootstrap version.
+// Sticky, zero-height overlays (negative margin cancels their
+// height) fading into $PANEL_BG_COLOR -- the theme constant, not
+// $panel-bg/$card-bg, so this compiles on either Bootstrap version.
 .overflow-scroll-checklist {
   position: relative;
   max-height: 15rem;
   overflow-y: auto;
-  // Keep the thumb visible once a scrollbar exists, instead of only
-  // on hover. No scrollbar renders when the list fits without
-  // scrolling -- `overflow-y: auto` stays conditional on overflow.
-  // Full (not `thin`) width by default -- a thin scrollbar is hard to
-  // see; narrowed down to `thin` for touch devices below, where a
-  // full-width one would be oversized. Firefox + modern Chromium/Edge.
+  // Full width by default; narrowed to `thin` for touch devices
+  // below, where a full-width scrollbar is oversized.
   scrollbar-color: $PANEL_BORDER_COLOR transparent;
 
   // Safari / older Chromium -- same reasoning, WebKit-prefixed API.
@@ -315,10 +281,8 @@ form {
     }
   }
 
-  // Background-painted gradients sit behind the checkbox rows, not
-  // over them, so they can't dim content that's packed with no
-  // background gap to show through -- these need to be elements,
-  // painted above the rows via z-index.
+  // Painted above the rows via z-index, since a background gradient
+  // has no gap to show through packed content.
   &::before,
   &::after {
     content: "";
@@ -354,14 +318,10 @@ form {
   }
 }
 
-// The containing form uses `form-inline`, which turns .form-group into
-// inline-block/width:auto. Override so the autocompleter wrap and textarea
-// stretch to fill the form width (up to 40em), instead of collapsing to the
-// browser's default textarea size. We use ID selectors here (not the
-// shared `.project-target-widget` class) because Bootstrap's
-// `.form-inline .form-group` has class-class specificity (20) — a class
-// rule alone would tie and lose on source order, while id-class
-// specificity (110) reliably wins.
+// Overrides form-inline's .form-group inline-block/width:auto so the
+// autocompleter/textarea stretch to the form width. ID selectors,
+// not a class -- needs id-class specificity (110) to beat
+// `.form-inline .form-group`'s class-class specificity (20).
 #target_names_widget,
 #target_locations_widget {
   .form-group {
@@ -393,24 +353,18 @@ form {
   }
 }
 
-// Locks a form's remaining fields while a deferred submit is pending,
-// toggled via `form.inert = true/false` in form-images_controller.js.
-// `inert` blocks pointer/keyboard/focus interaction without excluding
-// fields from serialization the way `disabled` would, so this rule is
-// purely the visual signal. Kept light (issue #5238) -- the disabled
-// submit button and the per-image upload overlays already carry most
-// of the "in progress" signal; a heavy dim on the rest of the page
-// read as the page having frozen or broken.
+// Toggled via `form.inert` in form-images_controller.js. `inert`
+// blocks interaction without excluding fields from serialization the
+// way `disabled` would -- this is just the visual signal, kept light
+// since the submit button and upload overlays already carry most of
+// the "in progress" cue.
 form[inert] {
   opacity: 0.85;
   cursor: progress;
 }
 
-// Take Photo opens the camera via capture= on touch devices; desktop
-// browsers ignore capture, so there the button would only duplicate
-// the file picker. hover/pointer media is the standard touch-first
-// signal (phones and tablets match; laptops, including touchscreen
-// ones with a mouse, don't).
+// capture= opens the camera on touch devices only -- desktop browsers
+// ignore it, where the button would just duplicate the file picker.
 .take-photo-field {
   display: none;
 }

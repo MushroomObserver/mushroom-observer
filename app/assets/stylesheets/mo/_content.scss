@@ -38,13 +38,9 @@ small,
 // interest eyes
 // --------------------------------------------------
 
-// Same size for the state indicator and the two clickable icons --
-// matches #top_nav .top_nav_icon_button .mo-icon's 1.5em scale. These
-// use the shared .mo-icon class (see _icons.scss) rather than their
-// own sizing; .btn:not(.btn-link) .mo-icon doesn't apply here since
-// these buttons are .btn-link, so this needs its own explicit rule.
-// Visual weight is the wrapping Button's job now (variant/.disabled),
-// not a bigger raster image.
+// Matches #top_nav .top_nav_icon_button .mo-icon's 1.5em scale.
+// `.btn:not(.btn-link) .mo-icon` doesn't reach these -- they're
+// `.btn-link` -- hence this explicit rule.
 .interest-eyes .mo-icon {
   width: 1.5em;
   height: 1.5em;
@@ -54,25 +50,16 @@ small,
 // style tweaks
 // --------------------------------------------------
 
-// Indents every line of a paragraph EXCEPT the first -- e.g. a
-// wrapped "Kingdom: Fungi" classification row should have its
-// continuation line align under "Fungi", not restart at the margin.
-// The `hanging` keyword does this directly (indents all lines but
-// the first) -- opt this onto the specific `<p>` that wants it, not
-// an ancestor selector. The old approach (`.name-section p { padding-
-// left: 1em; text-indent: -1em; }`) applied to every `<p>` inside any
-// panel merely marked `panel_class: "name-section"` -- almost none of
-// which wanted a hanging indent -- and needed two separate resets
-// elsewhere (`.obs-notes .textile p`, `.glyphicon`) to undo the leak.
+// Indents every line of a paragraph except the first. Use directly
+// on the li, p, or div that needs it.
 .hanging-indent {
   margin: 0;
   text-indent: 1em hanging;
 }
 
 // Views::FullPageBase::Title#render_name_line's id-badge/name line.
-// padding-left, not text-indent: hanging -- every line this wraps to
-// needs the same indent, the first included, since the line has no
-// shared label text for only the continuation lines to align under.
+// padding-left, not text-indent: hanging -- every wrapped line here
+// needs the same indent, the first line included.
 .title-name-line {
   display: inline-flex;
   align-items: center;
@@ -100,12 +87,8 @@ ul.tight-list {
   }
 }
 
-// #title_bar's two column wrappers (.title_bar_left_col,
-// .title_bar_right_col) stack in source order below `md` -- left
-// column first, then right column. Between `sm` and `md` that
-// pairing reads awkwardly; reorder the right column above the left
-// column for just that range, leaving source order (and `md`+'s
-// side-by-side layout) untouched outside it.
+// #title_bar's columns stack left-then-right below `md`, which reads
+// awkwardly between `sm` and `md` -- reorder just for that range.
 @media screen and (min-width: breakpoint-min(sm)) and (max-width: breakpoint-max(sm)) {
   .title_bar_right_col {
     order: -1;
@@ -134,18 +117,13 @@ ul.tight-list {
   background-color: orange;
 }
 
-// Project violations page (#4136) — `button_to` renders each per-row
-// action as an inline form, and the modal trigger is a plain
-// <button>. Adjacent elements touch by default; add a small gap on
-// both axes so the action buttons don't visually merge, including
-// when they wrap to a second line.
+// Gap between the per-row action buttons (a mix of button_to forms
+// and plain buttons), which otherwise touch.
 .project-violations td .button_to,
 .project-violations td > button {
   display: inline-block;
-  // `button_to` wraps its <button> in a <form>, while the modal
-  // trigger is a bare <button>. Without an explicit vertical-align
-  // their baselines differ and the last button sits half a line
-  // higher than its siblings.
+  // Without this, the form-wrapped and bare buttons' baselines
+  // differ, so the last one sits half a line higher.
   vertical-align: top;
   margin: 0 4px 4px 0;
 }
