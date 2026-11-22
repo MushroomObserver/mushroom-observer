@@ -56,7 +56,8 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     assert_html(html, ".current-observation-row")
     assert_html(html,
                 ".current-observation-row .matching-observation-marker " \
-                ".mo-icon-chevron-right")
+                ".mo-icon-chevron-right" \
+                "[aria-label='#{:show_observation_this_observation.t}']")
   end
 
   # The panel is the key a reader uses to decode a number on a
