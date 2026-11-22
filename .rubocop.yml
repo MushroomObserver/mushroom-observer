@@ -633,6 +633,7 @@ Naming/PredicateMethod:
     - check_dest_permission!
     - check_external_link_permission!
     - check_for_qr_code
+    - check_for_spider_block
     - check_if_preference_filters_applied
     - check_last_obs
     - check_name

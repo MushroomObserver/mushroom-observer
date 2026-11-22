@@ -53,8 +53,30 @@ module Tab::UserNav
       )
     end
 
-    def test_log_out_with_user
+    def test_log_out_with_non_admin_user
       tabs = Tab::UserNav::LogOut.new(user: @user).to_a
+
+      assert_not(@user.admin)
+      assert_equal([Tab::UserNav::Logout], tabs.map(&:class))
+    end
+
+    def test_log_out_with_admin_user
+      tabs = Tab::UserNav::LogOut.new(user: users(:admin)).to_a
+
+      assert_equal(
+        [Tab::UserNav::AdminMode, Tab::UserNav::Logout],
+        tabs.map(&:class)
+      )
+    end
+
+    # The collection honours the flag it is handed, whoever the user
+    # is. Controller-side this pairing does not arise --
+    # `clear_admin_mode_for_nonadmins` drops `session[:admin]` for a
+    # non-admin, and `enter_sudo_session` drops it on Switch User.
+    def test_log_out_in_admin_mode_keeps_the_toggle
+      tabs = Tab::UserNav::LogOut.new(
+        user: @user, in_admin_mode: true
+      ).to_a
 
       assert_equal(
         [Tab::UserNav::AdminMode, Tab::UserNav::Logout],
@@ -65,7 +87,7 @@ module Tab::UserNav
     def test_log_out_without_user
       tabs = Tab::UserNav::LogOut.new(user: nil).to_a
 
-      assert_equal([Tab::UserNav::AdminMode], tabs.map(&:class))
+      assert_empty(tabs)
     end
   end
 end

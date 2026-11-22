@@ -729,14 +729,22 @@ module Observation::Scopes # rubocop:disable Metrics/ModuleLength
     # to decide visibility — without `name: { descriptions: :user }`
     # this is N+1 per description on the show page.
     scope :show_includes, -> { strict_loading.includes(show_includes_tree) }
+    # Leaner than `show_includes_tree`: the page a visitor without an
+    # account gets carries fewer links. It still covers what that
+    # page reads -- `external_links` for the badges, and
+    # `occurrence` with its observations, which
+    # `NamingConsensus#multi_observation_occurrence?` asks about for
+    # any observation belonging to one.
     scope :not_logged_in_show_includes, lambda {
       strict_loading.includes(
         { comments: Comment.index_includes_tree },
+        { external_links: { external_site: { project: :user_group } } },
         { images: [:image_votes, :license, :user] },
         :location,
         { name: [{ synonym: :names }, { descriptions: :user },
                  :interests, :description] },
         { namings: Naming.index_includes_tree },
+        { occurrence: :observations },
         { projects: :image },
         :thumb_image,
         :user
