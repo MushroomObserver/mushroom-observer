@@ -94,17 +94,11 @@ tbody.collapse.show {
   }
 }
 
-// Baseline correction for icon+text pairs that aren't framed as a
-// .btn and the sidebar heading icons. `.inline-icon-link` (plain or
-// form.button_to-wrapped) gets the matching +2px correction from its
-// wrapping `.inline-link-block`'s `margin-top` instead (see
-// _links_buttons_alerts.scss), so it's excluded here rather than
-// duplicated. `.inline-flex-center` triggers (e.g.
-// `.info-collapse-trigger`) are also excluded -- those are icon-only,
-// flex-centered against their row's siblings, not paired with
-// adjacent text, so this nudge only pushes them out of alignment.
-// The `> span >` variants cover Components::Icon's title: wrap
-// (moves tooltip attrs off the <svg> onto a wrapping <span>).
+// Baseline correction for icon+text pairs outside a .btn.
+// `.inline-icon-link` is aligned by `.inline-link-block`'s
+// vertical-align: middle; `.inline-flex-center` is icon-only,
+// flex-centered, not paired with text -- both excluded here.
+// The `> span >` variants cover Components::Icon's title: wrap.
 a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
   > .mo-icon,
 a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)

@@ -288,8 +288,8 @@ button.badge-id:hover {
 
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual size is tuned for looser contexts -- shrunk here.
-// The baseline correction against adjacent text lives on the
-// wrapping `.inline-link-block`'s margin-top, just above, not here.
+// The alignment against adjacent text lives on the wrapping
+// `.inline-link-block`'s vertical-align: middle, just above, not here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
