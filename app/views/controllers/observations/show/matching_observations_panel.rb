@@ -55,7 +55,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
   # render_status_icons) instead of it drifting elsewhere on the page.
   def render_body
     ul(class: "tight-list pl-0 mb-0") do
-      li(id: "current_observation_row", class: "position-relative") do
+      li(class: "current-observation-row position-relative") do
         render_member_row(@obs, link: false)
       end
       @siblings.each do |sibling|

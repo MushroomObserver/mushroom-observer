@@ -53,8 +53,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
     )
     assert_html(html,
                 "a[href='#{routes.permanent_observation_path(sibling.id)}']")
+    assert_html(html, ".current-observation-row")
     assert_html(html,
-                "#current_observation_row .matching-observation-marker " \
+                ".current-observation-row .matching-observation-marker " \
                 ".mo-icon-chevron-right")
   end
 
@@ -72,9 +73,9 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
 
     path = routes.permanent_observation_path(sibling.id)
     assert_html(html, "a[href='#{path}'] .sibling-marker", text: "1")
-    assert_no_html(html, "#current_observation_row .sibling-marker",
+    assert_no_html(html, ".current-observation-row .sibling-marker",
                    "The observation being shown carries no number")
-    assert_html(html, "#current_observation_row .mo-icon-chevron-right")
+    assert_html(html, ".current-observation-row .mo-icon-chevron-right")
   end
 
   def test_no_markers_renders_no_numbers
@@ -88,7 +89,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanelTest <
                    "No numbers without a marker map")
     # The marker column still renders regardless -- the current
     # observation's row always gets its chevron.
-    assert_html(html, "#current_observation_row .mo-icon-chevron-right")
+    assert_html(html, ".current-observation-row .mo-icon-chevron-right")
   end
 
   def test_every_row_has_an_id_badge
