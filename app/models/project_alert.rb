@@ -228,8 +228,10 @@ class ProjectAlert < AbstractModel
   def activity_phrase
     return nil unless kind == OTHER_ACTIVITY
     return :email_project_alert_what_comment.l if target_type == "Comment"
+    return qualify(provisional_phrase, name) if provisional
+    return qualify(proposal_phrase, proposed_name) if proposal?
 
-    qualify(provisional ? provisional_phrase : named_activity_phrase)
+    qualify(name_change_phrase, name)
   end
 
   # What groups alerts into messages: one message per watched name per
@@ -247,24 +249,23 @@ class ProjectAlert < AbstractModel
     :email_project_alert_what_provisional.l(name: name.to_s)
   end
 
-  def named_activity_phrase
-    return :email_project_alert_what_naming.l(name: proposed_name) if
-      proposal?
-
-    name_change_phrase
+  def proposal_phrase
+    :email_project_alert_what_naming.l(name: proposed_name)
   end
 
   # A name the project watches needs no decision. One it does not is
   # what the coordinators asked to be told, so they can add it or
-  # leave it; MO says so rather than adding anything.
-  def qualify(phrase)
-    return phrase if phrase.blank? || tracked?
+  # leave it; MO says so rather than adding anything. The clause
+  # names which name it is about, since the phrase it follows may
+  # name a different one, or none.
+  def qualify(phrase, subject)
+    return phrase if phrase.blank? || tracked?(subject)
 
-    "#{phrase}, #{:email_project_alert_what_untracked.l}"
+    "#{phrase}; #{:email_project_alert_what_untracked.l(name: subject)}"
   end
 
-  def tracked?
-    project.target_names.any? { |target| target.text_name == name }
+  def tracked?(text_name)
+    project.target_names.any? { |target| target.text_name == text_name }
   end
 
   # A naming of something the observation does not carry: nothing

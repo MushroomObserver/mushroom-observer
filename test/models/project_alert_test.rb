@@ -321,7 +321,7 @@ class ProjectAlertTest < UnitTestCase
     assert_equal(
       "#{:email_project_alert_what_changed_from.l(
         name: "Coprinus comatus"
-      )}, #{:email_project_alert_what_untracked.l}",
+      )}; #{:email_project_alert_what_untracked.l(name: "Helvella macropus")}",
       moved.activity_phrase
     )
   end
@@ -347,7 +347,7 @@ class ProjectAlertTest < UnitTestCase
     assert_equal(
       "#{:email_project_alert_what_provisional.l(
         name: "Russula sp-NY01"
-      )}, #{:email_project_alert_what_untracked.l}",
+      )}; #{:email_project_alert_what_untracked.l(name: "Russula sp-NY01")}",
       code.activity_phrase
     )
   end
