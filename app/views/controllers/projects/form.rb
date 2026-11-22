@@ -17,8 +17,8 @@ module Views::Controllers::Projects
     # cleanup_failed_project_creation.
     prop :raw_place_name, _Nilable(String), default: nil
     # Set on the Admin tab, where an admin can say whether to be
-    # emailed about this project's iNaturalist alerts. Absent on the
-    # new-project form, which has no project to subscribe to yet.
+    # emailed this project's alerts. Absent on the new-project form,
+    # which has no project to subscribe to yet.
     prop :user, _Nilable(::User), default: nil
 
     # Adds the dirty-form Stimulus controller to the rendered <form>
@@ -58,32 +58,25 @@ module Views::Controllers::Projects
 
     private
 
-    # A site admin says whether a project may be alerted on; each of its
-    # admins says whether to be one of the people alerted. The checkbox
-    # saves with the rest of the form, so the page keeps one Save.
+    # Each admin says whether to be one of the people alerted, for the
+    # project rather than per source (#5721). The checkbox saves with
+    # the rest of the form, so the page keeps one Save.
     def render_alert_subscriptions
-      return if alert_sites.empty?
+      return unless offer_alerts?
 
       div(class: "mt-4") do
-        alert_sites.each { |project_site| render_alert_site(project_site) }
+        checkbox_field("alert_subscription",
+                       label: :project_alerts_subscribe.l,
+                       checked: model.alerts?(@user))
       end
     end
 
-    def render_alert_site(project_site)
-      name = project_site.external_site.name
-      h5 { strong { plain(:project_alerts_enabled.l(site: name)) } }
-      checkbox_field("alert_subscriptions[#{project_site.id}]",
-                     label: :project_alerts_subscribe.l(site: name),
-                     checked: project_site.alerts?(@user))
-    end
+    # A project with no target taxa in no particular place has nothing
+    # to alert about, so it is not offered.
+    def offer_alerts?
+      return false if @user.nil? || model.nil? || !model.persisted?
 
-    # Only a site the project is alerting on: one it is not says nothing
-    # an admin can act on here.
-    def alert_sites
-      return [] if @user.nil? || model.nil? || !model.persisted?
-
-      @alert_sites ||= model.project_external_sites.alerting.
-                       includes(:external_site).to_a
+      model.alertable?
     end
 
     def form_action

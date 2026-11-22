@@ -167,7 +167,7 @@ module Projects
 
     def site_params
       params.require(:project_external_site).
-        permit(:remote_project_id, :use_constraints, :alerting, :importing,
+        permit(:remote_project_id, :use_constraints, :importing,
                :import_limit)
     end
   end

@@ -82,38 +82,28 @@ module Projects
       assert_redirected_to(new_account_login_path)
     end
 
-    # A site admin says a project may be alerted on; the checkbox is how
-    # each of its admins says whether to be emailed (#5416). It sits in
-    # the project form, so Save Edits carries it.
-    def test_an_alerting_project_offers_the_admin_a_checkbox
-      site = ProjectExternalSite.create!(
-        project: @project, external_site: external_sites(:inaturalist),
-        use_constraints: true, alerting: true
-      )
-      login(@project.admin_group.users.first.login)
+    # The checkbox is how each admin says whether to be emailed
+    # (#5416, #5721). It sits in the project form, so Save Edits
+    # carries it.
+    def test_an_alertable_project_offers_the_admin_a_checkbox
+      project = projects(:rare_fungi_project)
+      login(project.admin_group.users.first.login)
 
-      get(:show, params: { project_id: @project.id })
+      get(:show, params: { project_id: project.id })
 
-      assert_select("form[action=?]", project_path(@project.id)) do
-        assert_select("input[type=checkbox][name=?]",
-                      "alert_subscriptions[#{site.id}]")
+      assert_select("form[action=?]", project_path(project.id)) do
+        assert_select("input[type=checkbox][name=?]", "alert_subscription")
       end
     end
 
-    # A site the project is not alerting on has nothing for an admin to
-    # decide here, so it is left out.
-    def test_a_site_not_alerting_offers_nothing
-      site = ProjectExternalSite.create!(
-        project: @project, external_site: external_sites(:inaturalist),
-        use_constraints: true
-      )
+    # A project that watches no taxa in no particular place has nothing
+    # to alert about, so an admin is offered nothing to decide.
+    def test_a_project_without_targets_offers_nothing
       login(@project.admin_group.users.first.login)
 
       get(:show, params: { project_id: @project.id })
 
-      assert_select("input[name=?]", "alert_subscriptions[#{site.id}]",
-                    count: 0)
-      assert_select("#content", text: /alerts enabled/, count: 0)
+      assert_select("input[name=?]", "alert_subscription", count: 0)
     end
   end
 end

@@ -311,20 +311,14 @@ class ProjectsController < ApplicationController
   # has been resolved-or-confirmed-clean and still doesn't match an
   # existing one, send the user to build it rather than leaving the
   # project permanently location-less with no path to fix that.
-  # Whether this admin is one of the people the project's iNaturalist
-  # alerts go to (#5416). A checkbox on the Admin tab's form, so it
-  # saves with everything else there rather than behind a second Save.
+  # Whether this admin is one of the people the project's alerts go to
+  # (#5416, #5721). A checkbox on the Admin tab's form, so it saves
+  # with everything else there rather than behind a second Save.
   def update_alert_subscriptions
-    wanted = params.permit(alert_subscriptions: {})[:alert_subscriptions]
-    return if wanted.blank? || !@project.is_admin?(@user)
+    wanted = params.permit(:alert_subscription)[:alert_subscription]
+    return if wanted.nil? || !@project.is_admin?(@user)
 
-    @project.project_external_sites.alerting.find_each do |project_site|
-      value = wanted[project_site.id.to_s]
-      next if value.nil?
-
-      project_site.alerts_for(@user,
-                              ActiveModel::Type::Boolean.new.cast(value))
-    end
+    @project.alerts_for(@user, ActiveModel::Type::Boolean.new.cast(wanted))
   end
 
   def update_redirect_path

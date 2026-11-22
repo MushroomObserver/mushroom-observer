@@ -22,11 +22,16 @@ class InatImportJob < ApplicationJob
   # id_above: iNat observation ID cursor — 0 for the first job,
   #   last_import_id of the previous batch for continuations.
   # continuation: true skips auth + state init (already done by first job).
+  # What an import brings in happened on iNaturalist, which alerted a
+  # watching project there, so it raises no project alerts here
+  # (#5721).
   def perform(inat_import, id_above: 0, continuation: false)
     create_ivars(inat_import)
     prepare_first_job unless continuation
-    import_requested_observations(id_above: id_above,
-                                  continuation: continuation)
+    ProjectAlert.suppress do
+      import_requested_observations(id_above: id_above,
+                                    continuation: continuation)
+    end
   rescue StandardError => e
     log("Error occurred: #{e.message}")
     inat_import.add_response_error(e)

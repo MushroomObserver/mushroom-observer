@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_11_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_17_130000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -729,6 +729,28 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_11_120000) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "project_alerts", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
+    t.integer "project_id", null: false
+    t.integer "external_site_id"
+    t.string "remote_identification_id", limit: 100
+    t.string "remote_observation_id", limit: 100
+    t.string "name"
+    t.date "observed_on"
+    t.datetime "alerted_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string "kind", limit: 20, default: "new_observation", null: false
+    t.string "target_name"
+    t.integer "observation_id"
+    t.string "target_type", limit: 20
+    t.integer "target_id"
+    t.index ["external_site_id"], name: "index_project_alerts_on_external_site_id"
+    t.index ["project_id", "external_site_id", "remote_identification_id"], name: "index_project_site_alerts_on_project_site_and_ident", unique: true
+    t.index ["project_id", "external_site_id", "remote_observation_id"], name: "index_project_site_alerts_on_project_site_and_obs"
+    t.index ["project_id", "observation_id"], name: "index_project_alerts_on_project_and_observation"
+    t.index ["project_id", "target_type", "target_id"], name: "index_project_alerts_on_project_and_target", unique: true
+  end
+
   create_table "project_aliases", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "target_id", null: false
@@ -749,35 +771,16 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_11_120000) do
     t.index ["project_id"], name: "index_project_excluded_observations_on_project_id"
   end
 
-  create_table "project_external_site_alerts", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
-    t.integer "project_id", null: false
-    t.integer "external_site_id", null: false
-    t.string "remote_identification_id", limit: 100, null: false
-    t.string "remote_observation_id", limit: 100, null: false
-    t.string "name"
-    t.date "observed_on"
-    t.datetime "alerted_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string "kind", limit: 20, default: "new_observation", null: false
-    t.string "target_name"
-    t.index ["external_site_id"], name: "index_project_external_site_alerts_on_external_site_id"
-    t.index ["project_id", "external_site_id", "remote_identification_id"], name: "index_project_site_alerts_on_project_site_and_ident", unique: true
-    t.index ["project_id", "external_site_id", "remote_observation_id"], name: "index_project_site_alerts_on_project_site_and_obs"
-  end
-
   create_table "project_external_sites", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.integer "project_id", null: false
     t.integer "external_site_id", null: false
     t.string "remote_project_id", limit: 100
     t.string "remote_project_name"
     t.boolean "use_constraints", default: false, null: false
-    t.boolean "alerting", default: false, null: false
     t.boolean "importing", default: false, null: false
     t.integer "import_limit", default: 10000, null: false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.text "alert_recipient_ids"
     t.index ["external_site_id"], name: "index_project_external_sites_on_external_site_id"
     t.index ["project_id", "external_site_id"], name: "index_project_sites_on_project_and_site", unique: true
   end
@@ -841,6 +844,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_11_120000) do
     t.date "end_date"
     t.string "field_slip_prefix"
     t.integer "next_field_slip", default: 0, null: false
+    t.text "alert_recipient_ids"
     t.index ["field_slip_prefix"], name: "index_projects_on_field_slip_prefix", unique: true
   end
 

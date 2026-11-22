@@ -166,8 +166,9 @@ class CheckForBrokenReferencesJob
       [ProjectAlias,                 :project,              :alert],
       [ProjectExternalSite,          :external_site,        :alert],
       [ProjectExternalSite,          :project,              :delete],
-      [ProjectExternalSiteAlert,     :external_site,        :alert],
-      [ProjectExternalSiteAlert,     :project,              :delete],
+      [ProjectAlert,                 :external_site,        :alert],
+      [ProjectAlert,                 :observation,          :delete],
+      [ProjectAlert,                 :project,              :delete],
       [ProjectExcludedObservation,   :observation,          :delete],
       [ProjectExcludedObservation,   :project,              :delete],
       [ProjectImage,                 :image,                :delete],
@@ -236,6 +237,9 @@ class CheckForBrokenReferencesJob
       [Interest,        Project],
       [Interest,        SpeciesList],
       [Interest,        NameTracker],
+      [ProjectAlert,    Comment],
+      [ProjectAlert,    Naming],
+      [ProjectAlert,    Observation],
       [ProjectAlias,    Location],
       [ProjectAlias,    User]
     ].freeze

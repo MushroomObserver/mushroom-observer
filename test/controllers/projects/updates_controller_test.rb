@@ -220,7 +220,7 @@ module Projects
     def test_a_site_not_importing_offers_no_link
       site = ProjectExternalSite.create!(
         project: @project, external_site: external_sites(:inaturalist),
-        use_constraints: true, alerting: true
+        use_constraints: true
       )
 
       get(:index, params: { project_id: @project.id })
