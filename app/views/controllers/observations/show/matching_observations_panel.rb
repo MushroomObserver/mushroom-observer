@@ -100,19 +100,13 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     end
   end
 
-  # The chevron marks which row is the observation being viewed; its
-  # aria-label carries the same information to a screen reader, since
-  # the icon alone has no accessible name. A sibling's marker (or
-  # lack of one) comes from @markers -- every marker on the page goes
-  # to its member, this one too, so a number behaves the same
-  # wherever it is read. Either way the column always renders (even
-  # empty), so every row's name and id badge start at the same place.
-  # aria-label: the chevron has no accessible name.
+  # aria-label: the chevron has no accessible name. .l, not .t --
+  # an attribute value shouldn't carry textile markup.
   def render_marker(member, current:)
     div(class: "matching-observation-marker") do
       if current
         Icon(type: :chevron_right,
-             aria: { label: :show_observation_this_observation.t })
+             aria: { label: :show_observation_this_observation.l })
       else
         marker = @markers[member.id]
         if marker
