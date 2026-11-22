@@ -110,7 +110,8 @@ a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
 a:not(.btn):not(.inline-icon-link):not(.inline-flex-center)
   > span > .mo-icon,
 .list-group-item > .mo-icon,
-.list-group-item > span > .mo-icon {
+.list-group-item > span > .mo-icon,
+.matching-observation-marker > .mo-icon {
   top: 2px;
 }
 

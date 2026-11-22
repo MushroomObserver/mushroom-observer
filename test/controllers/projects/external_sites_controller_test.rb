@@ -253,11 +253,11 @@ module Projects
       assert_nil(project_site)
     end
 
-    def test_create_refuses_to_act_without_a_source
+    def test_create_refuses_to_import_without_a_source
       make_admin("dick")
       post(:create,
            params: { project_id: @project.id,
-                     project_external_site: { alerting: "1" } })
+                     project_external_site: { importing: "1" } })
 
       assert_flash_error
       assert_unprocessable
@@ -314,12 +314,12 @@ module Projects
       make_admin("dick")
       patch(:update,
             params: { project_id: @project.id, id: other.id,
-                      project_external_site: { alerting: "1" } })
+                      project_external_site: { importing: "1" } })
 
       # The row is what was not found here, not the project.
       assert_flash_error(:runtime_object_not_found,
                          type: :project_external_site, id: other.id)
-      assert_not(other.reload.alerting?)
+      assert_not(other.reload.importing?)
     end
   end
 end

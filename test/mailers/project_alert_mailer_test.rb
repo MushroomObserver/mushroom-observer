@@ -17,11 +17,11 @@ class ProjectAlertMailerTest < MailerTestCase
   end
 
   def alert(**args)
-    ProjectExternalSiteAlert.create!(
+    ProjectAlert.create!(
       { project: @project, external_site: @site,
         remote_identification_id: "999", remote_observation_id: "12345",
         name: "Coprinus comatus", target_name: "Coprinus comatus",
-        kind: ProjectExternalSiteAlert::NEW_OBSERVATION,
+        kind: ProjectAlert::NEW_OBSERVATION,
         observed_on: Date.parse("2026-09-20"),
         alerted_at: Time.zone.now }.merge(args)
     )
@@ -92,7 +92,7 @@ class ProjectAlertMailerTest < MailerTestCase
   # later activity, which is what says how soon to follow it up
   # (#5677). The count and the projects stay in the body.
   def test_an_activity_message_says_so
-    alerts = [alert(kind: ProjectExternalSiteAlert::OTHER_ACTIVITY)]
+    alerts = [alert(kind: ProjectAlert::OTHER_ACTIVITY)]
 
     mail = ProjectAlertMailer.build(receiver: mary, alerts: alerts).message
 
@@ -106,8 +106,8 @@ class ProjectAlertMailerTest < MailerTestCase
   end
 
   def test_activity_on_several_observations
-    alerts = [alert(kind: ProjectExternalSiteAlert::OTHER_ACTIVITY),
-              alert(kind: ProjectExternalSiteAlert::OTHER_ACTIVITY,
+    alerts = [alert(kind: ProjectAlert::OTHER_ACTIVITY),
+              alert(kind: ProjectAlert::OTHER_ACTIVITY,
                     remote_identification_id: "1000",
                     remote_observation_id: "12346")]
 

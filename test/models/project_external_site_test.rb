@@ -43,19 +43,28 @@ class ProjectExternalSiteTest < UnitTestCase
     assert(new_site(use_constraints: true).configured?)
   end
 
-  def test_acting_needs_a_source
-    site = new_site(alerting: true)
+  def test_importing_needs_a_source
+    site = new_site(importing: true)
 
     assert_not(site.valid?)
     assert(site.errors[:base].any?)
   end
 
   def test_a_configured_row_may_act
-    site = new_site(use_constraints: true, alerting: true,
-                    importing: true,
-                    alert_recipient_ids: [users(:mary).id])
+    site = new_site(use_constraints: true, importing: true)
 
     assert(site.valid?)
+    assert(site.acting?)
+  end
+
+  # Alerting belongs to the project (#5721), so a row that imports
+  # nothing still acts when one of the project's admins subscribed.
+  def test_a_row_of_an_alerting_project_acts
+    project = projects(:rare_fungi_project)
+    project.alerts_for(users(:mary), true)
+    site = ProjectExternalSite.new(project: project, external_site: @site,
+                                   use_constraints: true)
+
     assert(site.acting?)
   end
 
@@ -76,17 +85,24 @@ class ProjectExternalSiteTest < UnitTestCase
   end
 
   def test_scopes
-    acting = new_site(use_constraints: true, alerting: true,
-                      alert_recipient_ids: [users(:mary).id])
-    acting.save!
+    importing = new_site(use_constraints: true, importing: true)
+    importing.save!
     idle = ProjectExternalSite.create!(project: projects(:bolete_project),
                                        external_site: @site,
                                        use_constraints: true)
 
-    assert_includes(ProjectExternalSite.alerting, acting)
-    assert_not_includes(ProjectExternalSite.alerting, idle)
-    assert_empty(ProjectExternalSite.importing)
-    assert_equal([acting], ProjectExternalSite.acting.to_a)
+    assert_includes(ProjectExternalSite.importing, importing)
+    assert_not_includes(ProjectExternalSite.importing, idle)
+    assert_equal([importing], ProjectExternalSite.acting.to_a)
+
+    alerting = ProjectExternalSite.create!(
+      project: projects(:rare_fungi_project), external_site: @site,
+      use_constraints: true
+    )
+    projects(:rare_fungi_project).alerts_for(users(:mary), true)
+
+    assert_equal([importing, alerting].sort_by(&:id),
+                 ProjectExternalSite.acting.order(:id).to_a)
   end
 
   def test_project_destroy_takes_its_rows
@@ -96,52 +112,5 @@ class ProjectExternalSiteTest < UnitTestCase
     @project.destroy
 
     assert_not(ProjectExternalSite.exists?(site.id))
-  end
-
-  # --- who gets alerted ------------------------------------------------
-
-  def test_a_row_with_no_recipients_alerts_nobody
-    assert_empty(new_site.alert_recipients)
-    assert_not(new_site.alerts?(users(:mary)))
-  end
-
-  def test_an_admin_subscribes_and_unsubscribes_themselves
-    row = new_site(use_constraints: true, alerting: true)
-    row.save!
-
-    row.alerts_for(users(:mary), true)
-
-    assert(row.alerts?(users(:mary)))
-    assert_equal([users(:mary)], row.alert_recipients.to_a)
-
-    row.alerts_for(users(:mary), false)
-
-    assert_not(row.alerts?(users(:mary)))
-    assert_empty(row.alert_recipients)
-  end
-
-  # Two tabs, or a double submit, should not subscribe twice.
-  def test_subscribing_twice_leaves_one_recipient
-    row = new_site(use_constraints: true, alerting: true)
-    row.save!
-    2.times { row.alerts_for(users(:mary), true) }
-
-    assert_equal([users(:mary).id], row.alert_recipient_ids)
-  end
-
-  def test_unsubscribing_leaves_the_others_alone
-    row = new_site(use_constraints: true, alerting: true)
-    row.save!
-    row.alerts_for(users(:mary), true)
-    row.alerts_for(users(:rolf), true)
-    row.alerts_for(users(:mary), false)
-
-    assert_equal([users(:rolf)], row.alert_recipients.to_a)
-  end
-
-  # Alerting is a site admin saying the project may be alerted on, not
-  # a claim that anyone has asked to hear about it.
-  def test_alerting_saves_with_nobody_subscribed
-    assert(new_site(use_constraints: true, alerting: true).save)
   end
 end

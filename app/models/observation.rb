@@ -268,6 +268,11 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
   after_destroy :destroy_dependents
   after_destroy :cleanup_occurrence
   after_commit :flush_observation_change_emails, on: [:create, :update]
+  # A project watching this name in this place hears about it when the
+  # action that made it finishes (#5721).
+  after_create_commit lambda { |obs|
+    ProjectAlert::Collector.touch(obs, obs)
+  }
 
   # Automatically (but silently) log destruction.
   self.autolog_events = [:destroyed]
