@@ -262,6 +262,17 @@ button.badge-id:hover {
   gap: 0.75em;
 }
 
+// Show page title-bar edit/destroy links
+.object_edit {
+  @media screen and (max-width: breakpoint-max(md)) {
+    font-size: 1rem;
+  }
+
+  .inline-link-block {
+    margin-top: map-get($spacers, 1);
+  }
+}
+
 // Trailing observation-count column on the locations list-group --
 // a fixed width so counts line up row to row regardless of digit count.
 .obs-count-col {
