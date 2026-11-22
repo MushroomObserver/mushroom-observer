@@ -40,8 +40,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(Vote::NEXT_BEST_VOTE, importer_vote(new_naming).value,
                  "Research Grade leads at Promising")
     assert_equal(@site.id, importer_vote(new_naming).external_site_id)
-    assert_equal(Vote::MIN_POS_VOTE, importer_vote(old_naming).value,
-                 "the old lead stays as a naming at Could Be")
+    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value,
+                 "the old lead stays as a naming at Doubtful")
     assert_equal(@new, @obs.reload.name, "the consensus follows the source")
   end
 
@@ -104,8 +104,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     sync(fresh)
 
-    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
-                 "a name the source dropped falls to Could Be")
+    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Doubtful")
   end
 
   # The same guard must not freeze a vote the engine has written: it
@@ -115,8 +115,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     sync(fresh)
 
-    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
-                 "a name the source dropped falls to Could Be")
+    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Doubtful")
     assert_equal(@site.id, importer_vote(naming).external_site_id)
   end
 
@@ -189,11 +189,28 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
   end
 
   def test_demotion_never_raises_a_vote
-    old_naming = import_naming(@old, Vote::MIN_NEG_VOTE)
+    old_naming = import_naming(@old, Vote::MINIMUM_VOTE)
 
     sync(fresh)
 
+    assert_equal(Vote::MINIMUM_VOTE, importer_vote(old_naming).value)
+  end
+
+  # iNaturalist leads an observation it still needs an ID for at Could
+  # Be, which is where a demotion to Could Be would put the name it
+  # moved off: the consensus would stay on the old name.
+  def test_a_change_on_an_unconfirmed_observation_moves_the_consensus
+    old_naming = import_naming(@old, Vote::MIN_POS_VOTE)
+
+    sync(fresh(quality: "needs_id"))
+
+    assert_equal([@old, @new].sort_by(&:id),
+                 @obs.namings.reload.map(&:name).sort_by(&:id),
+                 "both names stay on the observation")
     assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value)
+    assert_equal(Vote::MIN_POS_VOTE,
+                 importer_vote(@obs.namings.find_by(name: @new)).value)
+    assert_equal(@new, @obs.reload.name, "the consensus follows the source")
   end
 
   def test_missing_mo_name_is_created_as_the_admin
