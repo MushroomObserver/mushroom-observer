@@ -71,7 +71,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     div(class: "obs-field-slips", id: "observation_field_slips") do
       span { trusted_html(append_colon(:field_slip.ti)) }
       Link(type: :object, object: @obs.field_slip) if @obs.field_slip
-      InlineLinkBlock(items: field_slip_action_items)
+      InlineIconBlock(items: field_slip_action_items)
     end
   end
 
@@ -95,7 +95,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     tab = tab_class.new(observation: @obs)
     Components::Link.new(
       type: :get, tab: tab,
-      class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
+      class: Components::InlineIconBlock.item_class(tab.html_options[:class])
     )
   end
 

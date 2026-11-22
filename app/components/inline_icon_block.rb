@@ -2,7 +2,7 @@
 
 # Renders a group of inline mod/add links -- the observation-show
 # sub-panel edit/destroy pairs, the send-question link, sibling
-# records, etc. Wraps items in `span.inline-link-block`, whose `gap`
+# records, etc. Wraps items in `span.inline-icon-block`, whose `gap`
 # spaces items apart without a trailing margin after the last one (a
 # margin baked into every item, including the last, could push a lone
 # icon wide enough to wrap when it would otherwise fit inline -- see
@@ -13,8 +13,8 @@
 # icons pass `ml-3` to match that row's wider spacing.
 #
 # @example
-#   InlineLinkBlock(items: [edit_button, destroy_button])
-class Components::InlineLinkBlock < Components::Base
+#   InlineIconBlock(items: [edit_button, destroy_button])
+class Components::InlineIconBlock < Components::Base
   ITEM_CLASS = "inline-icon-link"
 
   # A plain method, not `class_names` (needs a Phlex/ActionView
@@ -30,7 +30,7 @@ class Components::InlineLinkBlock < Components::Base
   def view_template
     return if @items.empty?
 
-    span(class: "inline-link-block #{@margin_class}") do
+    span(class: "inline-icon-block #{@margin_class}") do
       @items.each { |item| render_item(item) }
     end
   end

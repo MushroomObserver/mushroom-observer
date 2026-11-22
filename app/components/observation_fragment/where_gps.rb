@@ -28,7 +28,7 @@ class Components::ObservationFragment::WhereGps < Components::Base
   end
 
   def render_gps_map_link
-    InlineLinkBlock(items: [gps_map_icon])
+    InlineIconBlock(items: [gps_map_icon])
   end
 
   def gps_map_icon
@@ -36,7 +36,7 @@ class Components::ObservationFragment::WhereGps < Components::Base
       name: :click_for_map.l,
       target: map_observation_path(id: @obs.id),
       icon: :place,
-      class: Components::InlineLinkBlock.item_class
+      class: Components::InlineIconBlock.item_class
     )
   end
 end

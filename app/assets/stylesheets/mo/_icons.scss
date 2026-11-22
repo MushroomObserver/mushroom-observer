@@ -95,7 +95,7 @@ tbody.collapse.show {
 }
 
 // Baseline correction for icon+text pairs outside a .btn.
-// `.inline-icon-link` is aligned by `.inline-link-block`'s
+// `.inline-icon-link` is aligned by `.inline-icon-block`'s
 // vertical-align: middle; `.inline-flex-center` is icon-only,
 // flex-centered, not paired with text -- both excluded here.
 // The `> span >` variants cover Components::Icon's title: wrap.

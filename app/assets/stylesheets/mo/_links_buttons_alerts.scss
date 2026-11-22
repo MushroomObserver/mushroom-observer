@@ -247,11 +247,11 @@ button.badge-id:hover {
 }
 
 // Wrapper for a group of inline mod/add links (Components::
-// InlineLinkBlock). Flex + gap spaces items evenly, no trailing
+// InlineIconBlock). Flex + gap spaces items evenly, no trailing
 // margin after the last. vertical-align: middle, not a flat
 // margin-top (RESOLVED, don't reintroduce) -- a margin only patches
 // one font-size at a time.
-.inline-link-block {
+.inline-icon-block {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
@@ -268,7 +268,7 @@ button.badge-id:hover {
     font-size: 1rem;
   }
 
-  .inline-link-block {
+  .inline-icon-block {
     margin-top: map-get($spacers, 1);
   }
 }
@@ -283,7 +283,7 @@ button.badge-id:hover {
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual size is tuned for looser contexts -- shrunk here.
 // The alignment against adjacent text lives on the wrapping
-// `.inline-link-block`'s vertical-align: middle, just above, not here.
+// `.inline-icon-block`'s vertical-align: middle, just above, not here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;

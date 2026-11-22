@@ -106,7 +106,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       return nil unless sequence.deposit?
 
       tab = ::Tab::Sequence::Archive.new(sequence: sequence)
-      class_name = Components::InlineLinkBlock.item_class(
+      class_name = Components::InlineIconBlock.item_class(
         tab.html_options[:class]
       )
       # Capture so it composes into InlineCRUDLinks' `extras:` slot
@@ -124,7 +124,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
       Components::Button::Clipboard.new(
         text: sequence.bases, name: :copy_this_sequence.ti,
-        class: Components::InlineLinkBlock.item_class
+        class: Components::InlineIconBlock.item_class
       )
     end
   end

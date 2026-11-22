@@ -72,7 +72,7 @@ module Components::InlineCRUDLinks::TargetHandlers
   def crud_edit_button
     ::Components::Button.new(
       type: :edit, target: @target, variant: :strip,
-      class: ::Components::InlineLinkBlock.item_class
+      class: ::Components::InlineIconBlock.item_class
     )
   end
 

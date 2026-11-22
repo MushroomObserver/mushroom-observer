@@ -51,11 +51,11 @@ module Views::Controllers::Checklists
             render_taxon_name(name)
           end
         end
-        # One InlineLinkBlock for the count badge, markers, and the
+        # One InlineIconBlock for the count badge, markers, and the
         # remove button -- same gap-based spacing and
         # vertical-align: middle baseline alignment for all of them,
         # instead of separately-spaced groups.
-        InlineLinkBlock(items: taxon_marker_items(name, deprecated,
+        InlineIconBlock(items: taxon_marker_items(name, deprecated,
                                                   synonym_id) +
                                taxon_remove_button_items(name_id))
       end
@@ -129,7 +129,7 @@ module Views::Controllers::Checklists
         ),
         icon: :remove,
         variant: :strip,
-        class: Components::InlineLinkBlock.item_class
+        class: Components::InlineIconBlock.item_class
       )
     end
   end
