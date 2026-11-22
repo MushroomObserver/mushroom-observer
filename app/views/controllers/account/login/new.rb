@@ -21,12 +21,21 @@ module Views::Controllers::Account::Login
                action: account_login_path,
                id: "account_login_form"
              ))
+      render_security_notice
       render_create_account_section
       render_why_section
       render_data_without_login_section
     end
 
     private
+
+    # Reached by anyone the November 2026 password reset signed out, who
+    # has no other way to the notice once the site banner comes down.
+    def render_security_notice
+      Alert(level: :info, id: "login_security_notice") do
+        trusted_html(:login_security_notice.t)
+      end
+    end
 
     def render_create_account_section
       div(class: "mb-3") do
