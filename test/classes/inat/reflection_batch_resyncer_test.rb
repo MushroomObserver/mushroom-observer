@@ -196,14 +196,15 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
     assert(ProjectAlert.order(:id).last.provisional)
   end
 
-  # The first reconciliation of a reflection reports a move that may be
-  # years old, so it alerts nobody. The next move on it does.
-  def test_a_first_reconciliation_alerts_nobody
+  # The sync's own stamp is empty until it has run, so a reflection
+  # nothing has resynced is dated by its import instead -- the move
+  # it reports happened after MO knew the observation either way.
+  def test_an_unsynced_reflection_is_dated_by_its_import
     reconciled(nil)
     import_naming(names(:coprinus_comatus))
     told(subscribed_project, "Coprinus comatus")
 
-    assert_no_difference("ProjectAlert.count") do
+    assert_difference("ProjectAlert.count", 1) do
       collecting { run_batch(found: { @id => moved_to("Peltigera") }) }
     end
   end

@@ -22,13 +22,14 @@ class InatImportJob < ApplicationJob
   # id_above: iNat observation ID cursor — 0 for the first job,
   #   last_import_id of the previous batch for continuations.
   # continuation: true skips auth + state init (already done by first job).
-  # What an import brings in happened on iNaturalist, which alerted a
-  # watching project there, so it raises no project alerts here
-  # (#5721).
+  # An import mails nobody about what it brings in: whoever ran it
+  # knows, and iNaturalist told a watching project there (#5721). The
+  # rows are written all the same -- a watched name arriving is what a
+  # later move off it reads as activity on (#5705).
   def perform(inat_import, id_above: 0, continuation: false)
     create_ivars(inat_import)
     prepare_first_job unless continuation
-    ProjectAlert.suppress do
+    ProjectAlert::Collector.around(mail: false) do
       import_requested_observations(id_above: id_above,
                                     continuation: continuation)
     end

@@ -109,6 +109,48 @@ class InatImportJobTest < ActiveJob::TestCase
     )
   end
 
+  # A project watching the name an import brings in is told, so a
+  # later move off that name reads as activity on an observation it
+  # knows (#5705). The alert poll cannot be relied on for that row:
+  # it sees iNaturalist only as its filter stood when it last ran.
+  def test_import_tells_a_project_watching_the_name
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    project = project_watching("Calostoma lutescens",
+                               tennessee_location)
+    stub_inat_interactions
+
+    assert_difference("ProjectAlert.count", 1) do
+      InatImportJob.perform_now(@inat_import)
+    end
+
+    alert = ProjectAlert.order(:id).last
+
+    assert_equal(project, alert.project)
+    assert_equal(Observation.last, alert.observation)
+    assert_equal("Calostoma lutescens", alert.target_name)
+    assert(alert.new_observation?)
+  end
+
+  # The county the calostoma_lutescens fixture was observed in.
+  def tennessee_location
+    Location.create!(user: @user, name: "Sevier Co., Tennessee, USA",
+                     north: 36.043571, south: 35.561849,
+                     east: -83.253046, west: -83.794123)
+  end
+
+  def project_watching(text_name, location)
+    project = projects(:rare_fungi_project)
+    project.update!(start_date: nil, end_date: nil)
+    project.alerts_for(users(:mary), true)
+    ProjectTargetName.create!(
+      project: project,
+      name: Name.create_with_trusted_rank(@user, text_name, "Species")
+    )
+    ProjectTargetLocation.create!(project: project, location: location)
+    project
+  end
+
   # Regression: a first-time importer has no persisted inat_username when
   # the job starts. The job must persist it BEFORE building observations —
   # collector resolution (match_inat) matches User#inat_username, so a

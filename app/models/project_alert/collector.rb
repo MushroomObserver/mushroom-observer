@@ -30,15 +30,21 @@ class ProjectAlert
       Thread.current[KEY]
     end
 
-    # Collects whatever the block raises, then delivers it. Returns
-    # whatever the block returns.
-    def self.around
+    # Collects whatever the block raises, then writes the rows and
+    # mails them. Returns whatever the block returns.
+    #
+    # `mail: false` writes the rows and tells nobody, which is what an
+    # import wants: whoever ran it knows what they brought in, and
+    # iNaturalist told a watching project there. The rows still have
+    # to exist, since a watched name arriving is what a later move off
+    # it reads as activity on.
+    def self.around(mail: true)
       return yield if current
 
       Thread.current[KEY] = new
       begin
         result = yield
-        current.deliver
+        mail ? current.deliver : current.record_all
         result
       ensure
         Thread.current[KEY] = nil
@@ -71,9 +77,13 @@ class ProjectAlert
                                                              target)]
     end
 
+    # The rows this action calls for, written.
+    def record_all
+      @touched.values.flat_map { |obs, target| record(obs, target) }
+    end
+
     def deliver
-      rows = @touched.values.flat_map { |obs, target| record(obs, target) }
-      ProjectAlert.deliver_digests(rows)
+      ProjectAlert.deliver_digests(record_all)
     end
 
     private
