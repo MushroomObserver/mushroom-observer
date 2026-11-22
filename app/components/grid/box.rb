@@ -86,7 +86,7 @@ class Components::Grid::Box < Components::Base
       # next load via the cache-busting URL token.
       # `h-100` fills the row's stretched height (BS4's `.row`
       # defaults to `align-items: stretch`).
-      Panel(panel_class: "h-100") do |panel|
+      Panel(class: "h-100") do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)
         render_log_footer(panel)

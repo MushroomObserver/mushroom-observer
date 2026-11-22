@@ -19,6 +19,18 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
 
+  # Regression: Panel(panel_class: "h-100") stopped working after
+  # Panel dropped its panel_class: prop for a plain class: kwarg
+  # (#5702) -- the stale kwarg name fell into Panel's catch-all
+  # attributes instead of the card's class, silently dropping the
+  # stretch-to-fill-row-height behavior.
+  def test_card_stretches_to_fill_row_height
+    obs = observations(:coprinus_comatus_obs)
+    html = render_box(object: obs)
+
+    assert_html(html, ".grid-box > .card.h-100")
+  end
+
   def test_renders_occurrence_link_for_multi_observation_occurrence
     obs = multi_observation_occurrence_primary
     html = render_box(object: obs)
