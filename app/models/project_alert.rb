@@ -69,12 +69,15 @@ class ProjectAlert < AbstractModel
   end
 
   # The same for an observation here, where the target is the record
-  # whose arrival said so. Nil when this project has been told about
+  # whose arrival said so. `proposal` is the name that arrived and
+  # whether it is a provisional code, the way `identification` carries
+  # both for a site row. Nil when this project has been told about
   # that record already.
-  def self.record_local(project:, observation:, target:, name:,
+  def self.record_local(project:, observation:, target:, proposal:,
                         target_name:)
     create!(project: project, observation: observation, target: target,
-            name: name, target_name: target_name,
+            name: proposal[:name], target_name: target_name,
+            provisional: proposal[:provisional] == true,
             kind: local_kind_for(project, observation, target),
             observed_on: observation.when,
             alerted_at: Time.zone.now)

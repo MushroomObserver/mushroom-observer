@@ -47,21 +47,26 @@ class ProjectAlert
 
     # Outside an action -- a console, a test, a callback MO does not
     # wrap -- there is nobody to flush, so the change raises nothing.
-    def self.touch(observation, target)
+    def self.touch(observation, target, provisional: false)
       return if ProjectAlert.suppressed?
 
-      current&.touch(observation, target)
+      current&.touch(observation, target, provisional: provisional)
     end
 
     def initialize
       @touched = {}
       @namings = Hash.new { |hash, key| hash[key] = [] }
+      @provisional = {}
     end
 
-    def touch(observation, target)
+    # `provisional` says the name arriving is a code waiting to be
+    # confirmed, which only the resync knows: the flag lives on
+    # iNaturalist, not on the MO Name.
+    def touch(observation, target, provisional: false)
       return unless observation
 
       @namings[observation.id] << target if target.is_a?(Naming)
+      @provisional[observation.id] ||= provisional
       @touched[observation.id] = [observation, better_target(observation,
                                                              target)]
     end
@@ -120,8 +125,8 @@ class ProjectAlert
       return nil unless name
 
       ProjectAlert.record_local(project: project, observation: observation,
-                                target: target, name: name.text_name,
-                                target_name: name.text_name)
+                                target: target, target_name: name.text_name,
+                                proposal: { name: name.text_name })
     end
 
     # A comment is no find: an observation becomes the project's business
@@ -138,7 +143,9 @@ class ProjectAlert
     def activity(project, observation, target, target_name)
       ProjectAlert.record_local(
         project: project, observation: observation, target: target,
-        name: observation.name&.text_name.to_s, target_name: target_name
+        target_name: target_name,
+        proposal: { name: observation.name&.text_name.to_s,
+                    provisional: @provisional[observation.id] || false }
       )
     end
 

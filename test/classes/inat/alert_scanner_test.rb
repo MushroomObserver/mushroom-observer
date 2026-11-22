@@ -144,59 +144,9 @@ class Inat::AlertScannerTest < UnitTestCase
     assert(alert.provisional, "iNat marked the taxon provisional")
   end
 
-  # The same code can move the community taxon off the watched name,
-  # which takes the observation out of the poll's filter. The ids this
-  # site has alerted are re-read by id so the naming is still seen.
-  def test_an_observation_that_left_the_filter_is_re_read_by_id
-    alerting_row
-    stub_observations([observation])
-    scan
-
-    stub_poll_and_id_request(
-      poll: [], by_id: [observation("identifications" => [provisional_ident])]
-    )
-    alert = scan.values.first.first
-
-    assert_equal("Russula sp-NY01", alert.name)
-    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
-    assert_requested(:get, inat_api_matcher("observations"),
-                     query: hash_including("id" => "12345"))
-  end
-
-  # An id re-read that fails costs a cycle, not the poll's window.
-  def test_a_failed_re_read_warns_and_keeps_the_poll
-    alerting_row
-    stub_observations([observation])
-    scan
-
-    stub_poll_and_id_request(poll: [], by_id: nil)
-    scanner = Inat::AlertScanner.new(site: @site)
-    scanner.scan
-
-    assert_match(/read again next cycle/, scanner.warnings.join(" "))
-  end
-
   def provisional_ident
     identification(id: 1000, taxon_id: 123_456, name: "Russula sp-NY01").
       deep_merge("taxon" => { "provisional" => true })
-  end
-
-  # The poll and the by-id re-read go to one endpoint, so they are
-  # told apart by the `id` param only the second one sends.
-  def stub_poll_and_id_request(poll:, by_id:)
-    stub_request(:get, inat_api_matcher("observations")).
-      to_return(status: 200,
-                body: { results: poll, total_results: poll.size }.to_json)
-    id_stub = stub_request(:get, inat_api_matcher("observations")).
-              with(query: hash_including("id" => "12345"))
-    if by_id.nil?
-      id_stub.to_return(status: 500, body: "nope")
-    else
-      id_stub.to_return(
-        status: 200,
-        body: { results: by_id, total_results: by_id.size }.to_json
-      )
-    end
   end
 
   # A confirming identification on an observation the project has

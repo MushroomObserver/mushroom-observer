@@ -130,8 +130,8 @@ class ProjectAlertTest < UnitTestCase
                    target: nil, project: @project)
     ProjectAlert.record_local(
       project: project, observation: observation,
-      target: target || observation, name: "Coprinus comatus",
-      target_name: "Coprinus comatus"
+      target: target || observation, target_name: "Coprinus comatus",
+      proposal: { name: "Coprinus comatus" }
     )
   end
 
