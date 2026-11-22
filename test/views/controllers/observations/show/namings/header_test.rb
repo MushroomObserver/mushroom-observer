@@ -66,6 +66,17 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     assert_html(html, ".row.d-flex.align-items-end", count: 2)
   end
 
+  # naming-columns (mo/_namings.scss) sets this row's gutter --
+  # load-bearing, not incidental paint: without it, the label
+  # columns use Bootstrap's default gutter while Row's value
+  # columns below use the tighter naming-columns gutter, and the
+  # two no longer line up.
+  def test_label_row_shares_naming_columns_gutter_with_row
+    html = render_header
+
+    assert_html(html, ".row.naming-columns", count: 1)
+  end
+
   # `float-right` positions the button against the modal column's
   # other content -- the layout contract this test pins, not
   # incidental paint.

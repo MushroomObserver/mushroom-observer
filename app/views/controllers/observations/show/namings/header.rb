@@ -31,9 +31,12 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
 
   private
 
+  # naming-columns (mo/_namings.scss) gives this row the same tight
+  # gutter as Row's column row below it -- without it the labels
+  # don't line up with the values.
   def render_label_columns
     Column(xs: 10, sm: 11) do
-      Row(class: "d-flex align-items-end") do
+      Row(class: "d-flex align-items-end naming-columns") do
         render_label_column(sm_width: 5, extra: "d-block") do
           render_panel_title
         end
