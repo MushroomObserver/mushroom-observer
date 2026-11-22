@@ -259,6 +259,21 @@ class SequenceTest < UnitTestCase
                  sequence.accession_url)
   end
 
+  # Regression: log_update_sequence looked up observation.current_user
+  # for the "accessioned" log entry -- not set on a freshly-queried
+  # Observation, so it attributed the change to "Unknown" even though
+  # the sequence's user is known.
+  def test_log_accessioned_attributes_to_sequence_user
+    sequence = sequences(:missing_accession_sequence)
+    # bases: unique per observation -- other fixture sequences on
+    # this same observation already use the inherited default "ACGT".
+    sequence.update(accession: "KY366491.1", bases: "ACGTACGTACGT")
+
+    tag, args, = sequence.observation.rss_log.reload.parse_log.first
+    assert_equal(:log_sequence_accessioned, tag)
+    assert_equal(sequence.user.login, args[:user])
+  end
+
   def test_blastable
     # Blastable via accession (archive + blastable accession format).
     assert(sequences(:deposited_sequence).blastable?)
