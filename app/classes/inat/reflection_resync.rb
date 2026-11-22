@@ -217,20 +217,12 @@ class Inat
       obs.log(:log_observation_resynced, user: User.admin)
     end
 
-    # The source-owned scalar fields. `where` is excluded: a resolved
-    # Location drives `where` via a callback, so assigning it too
-    # would fight that callback. Date/notes/obscured always mirror
-    # the source; specimen is MO-owned and left alone. Coordinates
-    # sync only when iNat isn't obscuring the location -- the resync
-    # fetches iNat unauthenticated, so an obscured observation's
-    # public coordinate is blurred and would overwrite the
-    # authenticated import's accurate one (#4215 degraded 1,421
-    # reflections this way).
+    # The source-owned scalar fields. Date/notes/obscured always mirror
+    # the source; specimen is MO-owned and left alone.
     def scalar_attributes(obs, inat_obs)
-      attrs = { when: inat_obs.when, notes: notes(obs, inat_obs),
-                gps_hidden: inat_obs.obscured? }
-      attrs.merge!(location_attributes(inat_obs)) unless inat_obs.obscured?
-      attrs
+      { when: inat_obs.when, notes: notes(obs, inat_obs),
+        gps_hidden: inat_obs.obscured? }.
+        merge(location_attributes(inat_obs))
     end
 
     # Kept current, so the placeholder's panel reflects the source; cleared
@@ -273,14 +265,26 @@ class Inat
       end
     end
 
-    # A present Location drives `where` from its own name via a callback,
-    # so `where` is set only when no Location resolves (otherwise the two
-    # flip back and forth without converging).
     def location_attributes(inat_obs)
       location = inat_obs.location
+      return obscured_location_attributes(location) if inat_obs.obscured?
+
       attrs = { location: location, lat: inat_obs.lat, lng: inat_obs.lng }
+      # A present Location drives `where` from its name via a callback,
+      # so `where` is set only when no Location resolves (else the two
+      # flip back and forth without converging).
       attrs[:where] = inat_obs.where if location.nil?
       attrs
+    end
+
+    # The resync fetches iNat unauthenticated, so an obscured source's
+    # coordinate is blurred and would overwrite the authenticated
+    # import's accurate one. The Location is still safe to re-resolve: Inat::Obs#location
+    # searches the public blurred box, so it reveals no more than iNat
+    # shows. With no Location (e.g. private geoprivacy hides the point),
+    # keep what the import resolved rather than fall back to `where`.
+    def obscured_location_attributes(location)
+      location ? { location: location } : {}
     end
   end
 end

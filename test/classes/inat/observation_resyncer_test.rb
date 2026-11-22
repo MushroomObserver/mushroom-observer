@@ -47,21 +47,57 @@ class Inat::ObservationResyncerTest < UnitTestCase
 
   # An obscured source yields only iNat's blurred coordinate, so MO's
   # accurate imported one is left intact; gps_hidden mirrors the obscuring
-  # so MO hides the coordinate it keeps (#4215).
+  # so MO hides the coordinate it keeps.
   def test_an_obscured_source_hides_gps_but_keeps_the_coordinate
     @obs.update_columns(lat: 12.3456789, lng: -98.7654321, gps_hidden: false)
     @obs.reload
-    original = @obs.slice(:lat, :lng, :where)
-    original_location = @obs.location
+    original = @obs.slice(:lat, :lng)
 
     resync(found: { @id => obscured_raw })
 
     @obs.reload
     assert(@obs.gps_hidden, "gps_hidden mirrors the iNat obscuring")
-    assert_equal(original_location, @obs.location, "location left intact")
     assert_equal(original["lat"], @obs.lat, "lat left intact")
     assert_equal(original["lng"], @obs.lng, "lng left intact")
+  end
+
+  # Private geoprivacy publishes no point, so no Location resolves; the
+  # imported Location and `where` stay rather than fall back to iNat's
+  # place guess.
+  def test_an_obscured_source_without_a_point_keeps_the_location
+    original = @obs.slice(:where)
+    original_location = @obs.location
+
+    resync(found: { @id => obscured_raw.merge(location: nil) })
+
+    @obs.reload
+    assert_equal(original_location, @obs.location, "location left intact")
     assert_equal(original["where"], @obs.where, "where left intact")
+  end
+
+  # A corrected Location box reaches an obscured reflection on resync,
+  # while its accurate imported coordinate stays.
+  def test_an_obscured_source_re_resolves_the_location
+    stale = locations(:albion)
+    @obs.update_columns(location_id: stale.id, where: stale.name,
+                        lat: 12.3456789, lng: -98.7654321)
+    original = @obs.reload.slice(:lat, :lng)
+    raw = obscured_raw_inside(locations(:burbank))
+    expected = Inat::Obs.new(JSON.generate(raw)).location
+    assert_not_nil(expected,
+                   "Test needs a fixture Location containing the blurred box")
+    assert_not_equal(stale, expected,
+                     "Test needs the resolved Location to differ from " \
+                     "the stale one")
+
+    result = resync(found: { @id => raw }).first
+
+    assert_equal(:synced, result.status, "a Location change is a sync")
+    @obs.reload
+    assert_equal(expected, @obs.location,
+                 "Location re-resolves from the public blurred box")
+    assert_equal(original["lat"], @obs.lat, "lat left intact")
+    assert_equal(original["lng"], @obs.lng, "lng left intact")
   end
 
   # specimen is MO-side (herbarium records / collection numbers a user may
@@ -487,5 +523,11 @@ class Inat::ObservationResyncerTest < UnitTestCase
   # it blurs the public coordinate (user or taxon geoprivacy).
   def obscured_raw
     @raw.merge(obscured: true)
+  end
+
+  # obscured_raw with its public coordinate at the center of `location`.
+  def obscured_raw_inside(location)
+    point = "#{location.center_lat},#{location.center_lng}"
+    obscured_raw.merge(location: point)
   end
 end
