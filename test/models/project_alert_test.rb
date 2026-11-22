@@ -222,40 +222,144 @@ class ProjectAlertTest < UnitTestCase
     assert_not(alert.valid?)
   end
 
-  # The phrase an activity row carries, per source and per record.
-  def test_activity_phrase_per_target
+  # What an activity row says, per record and per source. An
+  # activity row always follows a find, since that is what makes it
+  # activity, so each case is set up with the row before it.
+  def test_a_comment_says_so
+    obs = observations(:coprinus_comatus_obs)
+    reported(obs)
+
+    row = local_activity(obs, comments(:detailed_unknown_obs_comment))
+
+    assert_equal(:email_project_alert_what_comment.l, row.activity_phrase)
+  end
+
+  def test_a_naming_of_another_name_says_what_was_proposed
     obs = observations(:coprinus_comatus_obs)
     naming = namings(:coprinus_comatus_naming)
-
-    comment = comments(:detailed_unknown_obs_comment)
-
-    assert_equal(:email_project_alert_what_comment.l,
-                 local_activity(obs, comment).activity_phrase)
-    # One row per project per record, by unique index, so the
-    # confirming case is the same row with the row's name restored.
-    proposal = local_activity(obs, naming)
-    proposal.update!(name: "Agaricus campestris")
+    reported(obs)
+    row = local_activity(obs, naming)
+    row.update!(name: "Agaricus campestris")
 
     assert_equal(
       :email_project_alert_what_naming.l(name: naming.name.text_name),
-      proposal.activity_phrase
+      row.activity_phrase
     )
+  end
 
-    proposal.update!(name: naming.name.text_name)
+  def test_a_naming_of_the_name_it_carries_confirms_it
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    reported(obs)
 
-    assert_equal(:email_project_alert_what_naming_unnamed.l,
-                 proposal.activity_phrase)
-    assert_equal(:email_project_alert_what_observation.l,
-                 local_activity(obs, obs).activity_phrase)
+    row = local_activity(obs, naming)
+
+    assert_equal(:email_project_alert_what_confirmed.l,
+                 row.activity_phrase)
+  end
+
+  # The name moved from the one the project was told: a naming of
+  # the name the observation carries now, where that is not the
+  # name the project heard.
+  def test_a_name_that_moved_says_what_it_moved_from
+    obs = observations(:coprinus_comatus_obs)
+    reported(obs, name: "Helvella palustris")
+
+    row = local_activity(obs, namings(:coprinus_comatus_naming))
+
+    assert_equal(
+      :email_project_alert_what_changed_from.l(name: "Helvella palustris"),
+      row.activity_phrase
+    )
+  end
+
+  def test_a_destroyed_naming_still_says_the_name_moved
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    reported(obs, name: "Helvella palustris")
+    row = local_activity(obs, naming)
+    naming.destroy!
+
+    assert_equal(
+      :email_project_alert_what_changed_from.l(name: "Helvella palustris"),
+      row.reload.activity_phrase
+    )
+  end
+
+  # Only a naming or an identification confirms a name. A row with
+  # neither has nothing to report and reads as it did before, which
+  # needs the Observation hook to stop being create-only: today a
+  # row targeting the Observation is always the find.
+  def test_an_unchanged_name_says_nothing
+    obs = observations(:coprinus_comatus_obs)
+    reported(obs, target: namings(:coprinus_comatus_naming))
+
+    assert_nil(local_activity(obs, obs).activity_phrase)
+  end
+
+  # A site row carries one name, so what the identification did
+  # comes from the row before it.
+  def test_a_site_row_reads_against_the_row_before_it
+    site = external_sites(:inaturalist)
+    remote_find(site, name: "Helvella palustris")
+
+    moved = remote_activity(site, name: "Helvella macropus")
+
+    assert_equal(
+      :email_project_alert_what_changed_from.l(name: "Helvella palustris"),
+      moved.activity_phrase
+    )
+  end
+
+  def test_an_agreeing_identification_confirms_the_name
+    site = external_sites(:inaturalist)
+    remote_find(site, name: "Helvella palustris")
+
+    agreed = remote_activity(site, name: "Helvella palustris")
+
+    assert_equal(:email_project_alert_what_confirmed.l,
+                 agreed.activity_phrase)
   end
 
   # A find says an observation arrived; the row adds nothing.
   def test_a_find_has_no_activity_phrase
     obs = observations(:coprinus_comatus_obs)
-    find = local_activity(obs, obs)
-    find.update!(kind: ProjectAlert::NEW_OBSERVATION)
 
-    assert_nil(find.activity_phrase)
+    assert_nil(reported(obs).activity_phrase)
+  end
+
+  # The find this project was told first, which later activity on
+  # the same observation reads against. Its target is given, since
+  # the unique index on (project, target) allows one row per record:
+  # an activity row with an Observation target exists only where the
+  # find was raised by a naming or a comment.
+  def reported(obs, target: obs, name: nil)
+    ProjectAlert.create!(
+      project: projects(:rare_fungi_project), observation: obs,
+      target: target, name: name || obs.name.text_name,
+      target_name: obs.name.text_name,
+      kind: ProjectAlert::NEW_OBSERVATION, observed_on: obs.when,
+      alerted_at: 1.hour.ago
+    )
+  end
+
+  def remote_find(site, name:)
+    remote_row(site, name: name, ident: "1",
+                     kind: ProjectAlert::NEW_OBSERVATION)
+  end
+
+  def remote_activity(site, name:)
+    remote_row(site, name: name, ident: "2",
+                     kind: ProjectAlert::OTHER_ACTIVITY)
+  end
+
+  def remote_row(site, name:, ident:, kind:)
+    ProjectAlert.create!(
+      project: projects(:rare_fungi_project), external_site: site,
+      remote_identification_id: ident, remote_observation_id: "12345",
+      name: name, target_name: "Helvella palustris", kind: kind,
+      observed_on: Date.parse("2026-09-20"), alerted_at: Time.zone.now
+    )
   end
 
   def local_activity(obs, target)

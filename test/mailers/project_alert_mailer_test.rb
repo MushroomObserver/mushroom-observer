@@ -31,6 +31,12 @@ class ProjectAlertMailerTest < MailerTestCase
   # arrival said so as the target.
   def local_activity(obs, target)
     ProjectAlert.create!(
+      project: @project, observation: obs, target: obs,
+      name: obs.name.text_name, target_name: "Coprinus comatus",
+      kind: ProjectAlert::NEW_OBSERVATION, observed_on: obs.when,
+      alerted_at: 1.hour.ago
+    )
+    ProjectAlert.create!(
       project: @project, observation: obs, target: target,
       name: obs.name.text_name, target_name: "Coprinus comatus",
       kind: ProjectAlert::OTHER_ACTIVITY, observed_on: obs.when,
@@ -109,9 +115,8 @@ class ProjectAlertMailerTest < MailerTestCase
     )
   end
 
-  # A naming of the name the row already opens with says so without
-  # reading the name out twice.
-  def test_a_confirming_naming_does_not_repeat_the_name
+  # Proposing the name the observation already carries confirms it.
+  def test_a_naming_of_the_same_name_says_it_confirmed
     obs = observations(:coprinus_comatus_obs)
     naming = namings(:coprinus_comatus_naming)
 
@@ -120,19 +125,22 @@ class ProjectAlertMailerTest < MailerTestCase
     ).message
 
     assert_includes(mail.body.to_s,
-                    :email_project_alert_what_naming_unnamed.l)
+                    :email_project_alert_what_confirmed.l)
   end
 
-  # A row from a site names the identification instead.
-  def test_an_activity_row_from_a_site_names_the_identification
-    mail = ProjectAlertMailer.build(
-      receiver: mary,
-      alerts: [alert(kind: ProjectAlert::OTHER_ACTIVITY)]
-    ).message
+  # A site row reads against the row before it: the project was told
+  # about this observation under another name.
+  def test_an_activity_row_from_a_site_says_the_name_moved
+    alert(name: "Helvella palustris")
+    moved = alert(kind: ProjectAlert::OTHER_ACTIVITY,
+                  remote_identification_id: "1000")
+
+    mail = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: [moved]).message
 
     assert_includes(
       mail.body.to_s,
-      :email_project_alert_what_identification.l(name: "Coprinus comatus")
+      :email_project_alert_what_changed_from.l(name: "Helvella palustris")
     )
   end
 

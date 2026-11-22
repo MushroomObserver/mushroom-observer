@@ -3646,11 +3646,10 @@
   email_project_alert_row_undated: "[name], date unknown, in [projects]:"
   email_project_alert_row_activity: "[name], observed [date], in [projects] - [what]:"
   email_project_alert_row_activity_undated: "[name], date unknown, in [projects] - [what]:"
+  email_project_alert_what_changed_from: "changed from [name]"
   email_project_alert_what_comment: a comment was added
-  email_project_alert_what_identification: "[name] was identified"
+  email_project_alert_what_confirmed: the current name was confirmed
   email_project_alert_what_naming: "[name] was proposed"
-  email_project_alert_what_naming_unnamed: a name was proposed
-  email_project_alert_what_observation: the observation was edited
   email_inat_import_digest_truncated: "This email shows the first [shown] of [count] matching [:observations]."
   email_name_merge_digest_intro: "h2. *Name Merge*\n\n[user] merged [old] into [new]."
   email_name_merge_digest_admin: An admin
