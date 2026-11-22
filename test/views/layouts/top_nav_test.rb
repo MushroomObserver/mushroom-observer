@@ -210,6 +210,20 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, "a.dropdown-toggle", text: @user.login)
   end
 
+  def test_user_nav_hides_admin_mode_toggle_from_non_admin
+    html = render(top_nav(user: @user))
+
+    assert_not(@user.admin)
+    assert_html(html, "a.dropdown-toggle", text: @user.login)
+    assert_no_html(html, "#user_drop_down .admin_mode_link")
+  end
+
+  def test_user_nav_shows_admin_mode_toggle_to_admin
+    html = render(top_nav(user: users(:admin)))
+
+    assert_html(html, "#user_drop_down .admin_mode_link")
+  end
+
   def test_right_nav_list_uses_navbar_constants
     html = render(top_nav(user: @user))
 
