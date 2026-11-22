@@ -141,10 +141,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   def render_name_cell
     name_for_link = local || primary
     ::Textile.register_name(name_for_link.name)
-    div(class: "d-flex align-items-start") do
-      render_name_link(name_for_link)
-      InlineCRUDLinks(target: local, user: @user) if local
-    end
+    render_name_link(name_for_link)
+    InlineCRUDLinks(target: local, user: @user) if local
   end
 
   def render_name_link(naming)
