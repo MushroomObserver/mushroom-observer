@@ -64,7 +64,6 @@ module Views::Controllers::Observations::ExternalLinks
           render_read_only_note
           render_placeholder_notes if placeholder_source?(link)
         else
-          whitespace
           InlineCRUDLinks(target: link, observation: @obs, user: @user)
         end
       end

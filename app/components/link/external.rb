@@ -56,9 +56,9 @@ class Components::Link::External < Components::Base
     end
     return unless @site_record_id
 
-    whitespace
     Badge(variant: :id, value: @site_record_id, size: :lg,
-          title: :copy_this_site_id.ti(site: @site_name))
+          title: :copy_this_site_id.ti(site: @site_name),
+          extra_class: "ml-2")
   end
 
   private
