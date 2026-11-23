@@ -130,8 +130,8 @@ class ProjectAlertTest < UnitTestCase
                    target: nil, project: @project)
     ProjectAlert.record_local(
       project: project, observation: observation,
-      target: target || observation, name: "Coprinus comatus",
-      target_name: "Coprinus comatus"
+      target: target || observation, target_name: "Coprinus comatus",
+      proposal: { name: "Coprinus comatus" }
     )
   end
 
@@ -298,15 +298,30 @@ class ProjectAlertTest < UnitTestCase
   end
 
   # A site row carries one name, so what the identification did
-  # comes from the row before it.
+  # comes from the row before it. A name the project does not watch
+  # is flagged, which is the decision the coordinators asked for.
   def test_a_site_row_reads_against_the_row_before_it
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Helvella palustris")
+    remote_find(site, name: "Coprinus comatus")
+
+    moved = remote_activity(site, name: "Agaricus campestris")
+
+    assert_equal(
+      :email_project_alert_what_changed_from.l(name: "Coprinus comatus"),
+      moved.activity_phrase
+    )
+  end
+
+  def test_a_name_the_project_does_not_watch_is_flagged
+    site = external_sites(:inaturalist)
+    remote_find(site, name: "Coprinus comatus")
 
     moved = remote_activity(site, name: "Helvella macropus")
 
     assert_equal(
-      :email_project_alert_what_changed_from.l(name: "Helvella palustris"),
+      "#{:email_project_alert_what_changed_from.l(
+        name: "Coprinus comatus"
+      )}; #{:email_project_alert_what_untracked.l(name: "Helvella macropus")}",
       moved.activity_phrase
     )
   end
@@ -326,14 +341,47 @@ class ProjectAlertTest < UnitTestCase
     )
   end
 
+  # A project watching a genus watches what sits under it, the way the
+  # collector decides what it watches, so a species below a target is
+  # not called untracked.
+  def test_a_name_under_a_target_is_not_flagged
+    site = external_sites(:inaturalist)
+    ProjectTargetName.create!(project: projects(:rare_fungi_project),
+                              name: names(:agaricus))
+    remote_find(site, name: "Coprinus comatus")
+
+    moved = remote_activity(site, name: "Agaricus campestrus")
+
+    assert_equal(
+      :email_project_alert_what_changed_from.l(name: "Coprinus comatus"),
+      moved.activity_phrase
+    )
+  end
+
   def test_an_agreeing_identification_confirms_the_name
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Helvella palustris")
+    remote_find(site, name: "Coprinus comatus")
 
-    agreed = remote_activity(site, name: "Helvella palustris")
+    agreed = remote_activity(site, name: "Coprinus comatus")
 
     assert_equal(:email_project_alert_what_confirmed.l,
                  agreed.activity_phrase)
+  end
+
+  # A provisional code reads as its own shape, and the project does
+  # not watch it yet, so the row says so.
+  def test_a_provisional_code_reads_as_one
+    site = external_sites(:inaturalist)
+    remote_find(site, name: "Coprinus comatus")
+    code = remote_activity(site, name: "Russula sp-NY01")
+    code.update!(provisional: true)
+
+    assert_equal(
+      "#{:email_project_alert_what_provisional.l(
+        name: "Russula sp-NY01"
+      )}; #{:email_project_alert_what_untracked.l(name: "Russula sp-NY01")}",
+      code.activity_phrase
+    )
   end
 
   # A find says an observation arrived; the row adds nothing.
@@ -372,7 +420,7 @@ class ProjectAlertTest < UnitTestCase
     ProjectAlert.create!(
       project: projects(:rare_fungi_project), external_site: site,
       remote_identification_id: ident, remote_observation_id: "12345",
-      name: name, target_name: "Helvella palustris", kind: kind,
+      name: name, target_name: "Coprinus comatus", kind: kind,
       observed_on: Date.parse("2026-09-20"), alerted_at: Time.zone.now
     )
   end
