@@ -835,13 +835,13 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     end
   end
 
-  # The GPS point; for a reflection, iNat's public point widened by its
-  # public margin of error.
+  # The GPS point; for a reflection, iNat's public point widened by half its
+  # public margin of error on each side, matching Inat::Obs#location.
   def gps_box(obs)
     gps = obs.public_gps ||
           { lat: obs.lat.to_f, lng: obs.lng.to_f, margin_m: 0 }
     gps => { lat:, lng:, margin_m: }
-    d_lat = margin_m / 1000 / KM_PER_DEGREE
+    d_lat = margin_m / 2 / 1000 / KM_PER_DEGREE
     d_lng = [d_lat / Math.cos(lat * Math::PI / 180), 180].min
     { north: [lat + d_lat, 90].min, south: [lat - d_lat, -90].max,
       east: wrap_lng(lng + d_lng), west: wrap_lng(lng - d_lng) }
