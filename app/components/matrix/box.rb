@@ -20,7 +20,7 @@
 #   )
 #
 # @example Custom block content
-#   render MatrixBox.new(id: 123, extra_class: "text-center") do
+#   render MatrixBox.new(id: 123, class: "text-center") do
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
 class Components::Matrix::Box < Components::Base
@@ -33,7 +33,7 @@ class Components::Matrix::Box < Components::Base
   prop :id, _Nilable(_Union(Integer, String)), default: nil
   prop :columns, String,
        default: -> { Components::Column.classes_for(xs: 12, sm: 6, md: 4, lg: 3) }
-  prop :extra_class, String, default: ""
+  prop :attributes, _Hash(Symbol, _Any?), :**
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
@@ -62,10 +62,8 @@ class Components::Matrix::Box < Components::Base
     # Get observation_view from eager-loaded association (nil if not loaded)
     @observation_view = observation_view_for_identify if @identify
 
-    li(
-      id: "box_#{@data[:id]}",
-      class: class_names("matrix-box", @columns, @extra_class)
-    ) do
+    li(**mix({ id: "box_#{@data[:id]}",
+               class: class_names("matrix-box", @columns) }, @attributes)) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
       # rotate/mirror only happens on the image-show page, so only
       # that page (Views::Controllers::Images::Show::ImagePanel)
@@ -99,11 +97,9 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_custom_layout(&block)
-    li(
-      id: @id ? "box_#{@id}" : nil,
-      class: class_names("matrix-box", @columns, @extra_class),
-      &block
-    )
+    li(**mix({ id: @id ? "box_#{@id}" : nil,
+               class: class_names("matrix-box", @columns) }, @attributes),
+       &block)
   end
 
   # Render image section
@@ -150,7 +146,7 @@ class Components::Matrix::Box < Components::Base
         # size: :lg is a BS3-only value, ported straight from
         # cutover -- it may already be correct there; re-check
         # against cutover's value when switching to BS4.
-        Badge(variant: :id, object: @data[:what], size: :lg, extra_class: nil)
+        Badge(variant: :id, object: @data[:what], size: :lg)
       end
 
       render_identify_ui if @identify

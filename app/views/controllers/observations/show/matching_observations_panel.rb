@@ -72,8 +72,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     div(class: "matching-observation-row mb-1") do
       render_marker(member, current: !link)
       render_member_name_cell(member, link: link)
-      Badge(variant: :id, object: member, size: :lg, interactive: link,
-            extra_class: "mb-0")
+      Badge(variant: :id, object: member, size: :lg, interactive: link)
     end
   end
 

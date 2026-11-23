@@ -26,9 +26,7 @@ module Views::Controllers::RssLogs
       capture do
         trusted_html(append_colon(:log.ti))
         whitespace
-        if target
-          Badge(variant: :id, object: target, size: :sm, extra_class: "mr-3")
-        end
+        Badge(variant: :id, object: target, size: :sm, class: "mr-3") if target
         trusted_html(@rss_log.format_name.t.small_author)
       end
     end

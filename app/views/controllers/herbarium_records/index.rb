@@ -66,7 +66,7 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_id_badge(rec)
-      Badge(variant: :id, object: rec, size: :lg, extra_class: nil)
+      Badge(variant: :id, object: rec, size: :lg)
     end
 
     def render_herbarium_link(rec)
