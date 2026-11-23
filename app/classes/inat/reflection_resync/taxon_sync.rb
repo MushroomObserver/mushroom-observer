@@ -137,12 +137,16 @@ class Inat
           where.not(votes: { source_value: nil }).distinct.to_a
       end
 
-      # A name the source no longer proposes keeps its naming; only the
-      # source's own vote on it drops, to Could Be.
+      # A name the source no longer proposes keeps its naming, so both
+      # names stay on the page; the source's vote on it drops to
+      # Doubtful. Below Could Be, which is where the source leads an
+      # observation iNaturalist still needs an ID for -- demoting to
+      # Could Be ties those two and leaves the consensus on the name the
+      # source has moved off.
       def demote_unplanned(voted, proposals)
         planned = proposals.map { |p| p.name.id }
         voted.reject { |n| planned.include?(n.name_id) }.
-          each { |n| set_vote(n, Vote::MIN_POS_VOTE, demote: true) }
+          each { |n| set_vote(n, Vote::MIN_NEG_VOTE, demote: true) }
       end
 
       # A naming for this name may already be on the observation, in which

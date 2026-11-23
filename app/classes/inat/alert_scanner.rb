@@ -20,6 +20,11 @@ class Inat
   # `without_field` is deliberately absent from the query the importer
   # and the preview both apply: a target name applied to an
   # observation MO already holds is still news.
+  #
+  # An identification that moves the community taxon off a watched
+  # name takes its observation out of this query, so the poll cannot
+  # report it. A project hears about that from the nightly resync of
+  # the observation it imported (#5705), which already fetches it.
   class AlertScanner
     include Inat::Constants
     include Inat::JsonFetch
@@ -106,15 +111,53 @@ class Inat
     end
 
     def alert_for(criterion, candidate)
+      return nil unless criterion.matches?(candidate)
+
+      told = told_target_name(criterion, candidate)
+      return find_alert(criterion, candidate) unless told
+
+      activity_alert(criterion, candidate, told)
+    end
+
+    # A project hears about a find only under a name it watches.
+    def find_alert(criterion, candidate)
       identification = criterion.alertable_identification(candidate)
       return nil unless identification
-      return nil unless criterion.matches?(candidate)
+
+      record(criterion, candidate, identification,
+             criterion.target_name_for(identification))
+    end
+
+    # Once a project has been told about an observation, the newest
+    # identification is news whatever it names: a temporary code
+    # applied to a find is what the coordinators confirm by hand, and
+    # it is reported whether or not the community taxon follows it.
+    # The message stays grouped under the watched name the project
+    # was told, which is where a coordinator looks for it.
+    def activity_alert(criterion, candidate, target_name)
+      identification = criterion.activity_identification(candidate)
+      return nil unless identification
+
+      record(criterion, candidate, identification, target_name)
+    end
+
+    def record(criterion, candidate, identification, target_name)
+      return nil if target_name.blank?
 
       ProjectAlert.record(
         project: criterion.project, external_site: @site,
         identification: identification, observation: candidate.to_h,
-        target_name: criterion.target_name_for(identification)
+        target_name: target_name
       )
+    end
+
+    # The name this project was told, and nil when it has not been told
+    # about this observation -- one lookup answers both, since a row
+    # carries no blank target_name.
+    def told_target_name(criterion, candidate)
+      ProjectAlert.where(project: criterion.project, external_site: @site,
+                         remote_observation_id: candidate.id).
+        order(:id).last&.target_name
     end
 
     # Everything identified as one of the watched taxa and touched
