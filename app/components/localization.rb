@@ -66,7 +66,7 @@ module Components::Localization
   # The one place to change the trailing ":" on label-style text
   # site-wide. Also included into `Components::ApplicationForm`
   # directly, since that class doesn't inherit `Components::Base`.
-  def append_colon(text)
-    [text, ": "].safe_join
+  def append_colon(text, space: true)
+    [text, space ? ": " : ":"].safe_join
   end
 end

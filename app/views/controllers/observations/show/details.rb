@@ -69,8 +69,10 @@ class Views::Controllers::Observations::Show::Details < Views::Base
                   can_scan_field_slip?
 
     div(class: "obs-field-slips", id: "observation_field_slips") do
-      span { trusted_html(append_colon(:field_slip.ti)) }
-      Link(type: :object, object: @obs.field_slip) if @obs.field_slip
+      span { trusted_html(append_colon(:field_slip.ti, space: false)) }
+      if @obs.field_slip
+        Link(type: :object, object: @obs.field_slip, class: "ml-2")
+      end
       InlineLinkBlock(items: field_slip_action_items)
     end
   end
