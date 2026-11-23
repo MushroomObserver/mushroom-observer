@@ -311,6 +311,21 @@ class ProjectAlertTest < UnitTestCase
     )
   end
 
+  # The phrase answers to the row before this one, so a row written
+  # after it cannot speak for it.
+  def test_a_row_reads_against_the_row_before_it_not_after
+    site = external_sites(:inaturalist)
+    remote_find(site, name: "Coprinus comatus")
+    moved = remote_activity(site, name: "Agaricus campestris")
+    remote_row(site, name: "Peltigera", ident: "3",
+                     kind: ProjectAlert::OTHER_ACTIVITY)
+
+    assert_equal(
+      :email_project_alert_what_changed_from.l(name: "Coprinus comatus"),
+      moved.activity_phrase
+    )
+  end
+
   def test_an_agreeing_identification_confirms_the_name
     site = external_sites(:inaturalist)
     remote_find(site, name: "Helvella palustris")

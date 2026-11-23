@@ -280,7 +280,7 @@ class ProjectAlert < AbstractModel
            else
              self.class.told_about(project, observation)
            end
-    id ? rows.where.not(id: id) : rows
+    id ? rows.where(self.class[:id].lt(id)) : rows
   end
 
   # A row says what it alerted on, whichever source it came from.
