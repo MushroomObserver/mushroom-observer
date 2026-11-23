@@ -25,8 +25,11 @@
 # icon-only treatment -- `content:` becomes the sr-only label and
 # hover tooltip instead of visible text, same as `Link::Get`.
 class Components::Link::External < Components::Link
-  # Keys from Tab::Base::ALLOWED_HTML_OPTION_KEYS that must not reach link_to.
-  NON_HTML_OPTS = [:external, :button, :back, :help].freeze
+  # Keys from Tab::Base::ALLOWED_HTML_OPTION_KEYS that must not reach
+  # link_to. `:icon` is consumed separately (see resolve_tab) --
+  # still listed here so it doesn't also ride along into opts and
+  # leak into link_to as a literal icon="..." attribute.
+  NON_HTML_OPTS = [:external, :button, :back, :help, :icon].freeze
 
   prop :content, _Nilable(String), default: nil
   prop :path, _Nilable(String), default: nil
@@ -42,6 +45,7 @@ class Components::Link::External < Components::Link
     elsif link
       content, path = resolve_link(link)
     end
+    validate_icon_has_label!(icon, content)
     super(content: content, path: path, icon: icon,
           site_record_id: link&.site_record_id, site_name: link&.site_name,
           **opts)
@@ -60,6 +64,19 @@ class Components::Link::External < Components::Link
   end
 
   private
+
+  # Icon-only rendering has no visible text, so content: is the only
+  # accessible label it gets (sr-only span + hover tooltip) -- an
+  # icon with no content would render with neither.
+  def validate_icon_has_label!(icon, content)
+    return unless icon && content.blank?
+
+    raise(ArgumentError.new(
+            "#{self.class} needs content: (or a tab with a title) " \
+            "when icon: is given -- it becomes the icon's only " \
+            "accessible label."
+          ))
+  end
 
   def resolve_tab(tab, icon, opts)
     [tab.title, tab.path, icon || tab.html_options[:icon],

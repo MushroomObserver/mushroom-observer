@@ -60,6 +60,12 @@ class ActiveLinkTest < ComponentTestCase
     assert_no_html(html, "a[data-tooltip-target]")
   end
 
+  def test_icon_with_blank_content_raises
+    assert_raises(ArgumentError) do
+      render_active(content: nil, path: "/", icon: :globe)
+    end
+  end
+
   private
 
   def render_active(**)

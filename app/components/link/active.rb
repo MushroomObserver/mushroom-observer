@@ -23,11 +23,28 @@ class Components::Link::Active < Components::Link
   prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
   prop :attributes, _Hash(Symbol, _Any?), :**
 
+  def initialize(content: nil, icon: nil, **)
+    validate_icon_has_label!(icon, content)
+    super
+  end
+
   def view_template
     link_to(@path, **link_args) { render_link_content }
   end
 
   private
+
+  # Icon-only rendering has no visible text, so content: is the only
+  # accessible label it gets (sr-only span + hover tooltip) -- an
+  # icon with no content would render with neither.
+  def validate_icon_has_label!(icon, content)
+    return unless icon && content.blank?
+
+    raise(ArgumentError.new(
+            "#{self.class} needs content: when icon: is given -- " \
+            "it becomes the icon's only accessible label."
+          ))
+  end
 
   def render_link_content
     if @icon

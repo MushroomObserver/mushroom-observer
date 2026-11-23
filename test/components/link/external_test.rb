@@ -68,6 +68,21 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_no_html(html, "a[data-tooltip-target]")
   end
 
+  def test_icon_with_blank_content_raises
+    assert_raises(ArgumentError) do
+      render_link(content: nil, path: "https://example.com",
+                  icon: :new_window)
+    end
+  end
+
+  def test_tab_icon_does_not_leak_into_link_attributes
+    tab = FakeTab.new
+    tab.html_options[:icon] = :new_window
+    html = render_link(tab: tab)
+
+    assert_no_html(html, "a[icon]")
+  end
+
   # ---- Tab PORO form ----
 
   def test_tab_form_uses_tab_title_path_and_html_options
