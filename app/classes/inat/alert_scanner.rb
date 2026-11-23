@@ -112,10 +112,11 @@ class Inat
 
     def alert_for(criterion, candidate)
       return nil unless criterion.matches?(candidate)
-      return find_alert(criterion, candidate) unless
-        told?(criterion, candidate)
 
-      activity_alert(criterion, candidate)
+      told = told_target_name(criterion, candidate)
+      return find_alert(criterion, candidate) unless told
+
+      activity_alert(criterion, candidate, told)
     end
 
     # A project hears about a find only under a name it watches.
@@ -133,12 +134,11 @@ class Inat
     # it is reported whether or not the community taxon follows it.
     # The message stays grouped under the watched name the project
     # was told, which is where a coordinator looks for it.
-    def activity_alert(criterion, candidate)
+    def activity_alert(criterion, candidate, target_name)
       identification = criterion.activity_identification(candidate)
       return nil unless identification
 
-      record(criterion, candidate, identification,
-             told_target_name(criterion, candidate))
+      record(criterion, candidate, identification, target_name)
     end
 
     def record(criterion, candidate, identification, target_name)
@@ -151,17 +151,13 @@ class Inat
       )
     end
 
-    def told_rows(criterion, candidate)
-      ProjectAlert.where(project: criterion.project, external_site: @site,
-                         remote_observation_id: candidate.id)
-    end
-
-    def told?(criterion, candidate)
-      told_rows(criterion, candidate).exists?
-    end
-
+    # The name this project was told, and nil when it has not been told
+    # about this observation -- one lookup answers both, since a row
+    # carries no blank target_name.
     def told_target_name(criterion, candidate)
-      told_rows(criterion, candidate).order(:id).last&.target_name
+      ProjectAlert.where(project: criterion.project, external_site: @site,
+                         remote_observation_id: candidate.id).
+        order(:id).last&.target_name
     end
 
     # Everything identified as one of the watched taxa and touched

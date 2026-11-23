@@ -264,8 +264,14 @@ class ProjectAlert < AbstractModel
     "#{phrase}; #{:email_project_alert_what_untracked.l(name: subject)}"
   end
 
+  # Decided the way the collector decides what a project watches:
+  # through the targets expanded by synonym and sub-taxon, not by the
+  # spelling of a target alone. A name MO does not hold is one no
+  # project can watch.
   def tracked?(text_name)
-    project.target_names.any? { |target| target.text_name == text_name }
+    Name.where(text_name: text_name).any? do |name|
+      project.alert_matches_name?(name)
+    end
   end
 
   # A naming of something the observation does not carry: nothing
