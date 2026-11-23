@@ -9,6 +9,10 @@
 #  number_pagination_data::       Paginate an Array normally.
 #
 module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
+  # Served to an anonymous visitor who asks for an observation by a URL
+  # form crawlers hold lists of. nginx serves the same file.
+  LOGIN_REQUIRED_PAGE = "403_login_required.html"
+
   def self.included(base)
     base.helper_method(:number_pagination_data)
   end
@@ -77,9 +81,19 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     end
 
     Rails.logger.warn(:runtime_spiders_begone.t)
-    render(json: :runtime_spiders_begone.t,
-           status: :forbidden)
+    render_login_required_page
+    true
   end
+
+  # nginx answers this for a request carrying no session cookie, so
+  # Rails only reaches here for a stale or forged one, and in
+  # development. Both serve the same file, so the wording lives in one
+  # place.
+  def render_login_required_page
+    render(file: Rails.public_path.join(LOGIN_REQUIRED_PAGE),
+           status: :forbidden, layout: false)
+  end
+  private :render_login_required_page
 
   # `CollectionNumbersController` overrides this to `nil` -- passing no
   # explicit :by param there keeps the index titled "____ Index" rather

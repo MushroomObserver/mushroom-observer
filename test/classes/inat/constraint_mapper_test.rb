@@ -42,6 +42,21 @@ class Inat::ConstraintMapperTest < UnitTestCase
     ).to_return(status: 200, body: { results: [place] }.to_json)
   end
 
+  # A second target Location, so a test can choose how iNat and MO
+  # each spell one place.
+  def add_target_location(name)
+    location = Location.create!(
+      user: users(:rolf), name: name,
+      north: 47.0, south: 45.0, east: -71.0, west: -74.0
+    )
+    ProjectTargetLocation.create!(project: @project, location: location)
+    location
+  end
+
+  def quebec_bounds
+    [[-74.0, 45.0], [-71.0, 47.0]]
+  end
+
   def burbank_bounds
     burbank = locations(:burbank)
     [[burbank.west, burbank.south], [burbank.east, burbank.north]]
@@ -93,6 +108,31 @@ class Inat::ConstraintMapperTest < UnitTestCase
     params = Inat::ConstraintMapper.new(@project).params
 
     assert_equal("962", params[:place_id])
+  end
+
+  # iNat spells the province "Québec" where an MO Location may not,
+  # so place names are compared with their diacritics folded. Both
+  # directions, since either side can carry the accent.
+  def test_a_place_inat_spells_with_a_diacritic
+    stub_json("taxa", [])
+    stub_json("places", [])
+    add_target_location("Quebec, Canada")
+    stub_place("Quebec", 13_336, quebec_bounds,
+               name: "Québec", display_name: "Québec, CA")
+
+    assert_equal("13336",
+                 Inat::ConstraintMapper.new(@project).params[:place_id])
+  end
+
+  def test_a_place_mo_spells_with_a_diacritic
+    stub_json("taxa", [])
+    stub_json("places", [])
+    add_target_location("Québec, Canada")
+    stub_place("Québec", 13_336, quebec_bounds,
+               name: "Quebec", display_name: "Quebec, CA")
+
+    assert_equal("13336",
+                 Inat::ConstraintMapper.new(@project).params[:place_id])
   end
 
   # Kingston, Rhode Island is not Kingston, Jamaica: a place whose box
