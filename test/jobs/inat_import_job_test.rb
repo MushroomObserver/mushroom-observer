@@ -8,6 +8,14 @@ class InatImportJobTest < ActiveJob::TestCase
   include InatImportJobTestDoubles
   include Inat::Constants
 
+  # Stands in for Inat::ObsFetcher in the batch resync: every id is
+  # asked for, and only the one in `batch` has changed.
+  FakeBatchFetcher = Struct.new(:batch) do
+    def fetch_batch(_ids, **)
+      [batch, false]
+    end
+  end
+
   def setup
     super
     @user = users(:inat_importer)
@@ -130,6 +138,77 @@ class InatImportJobTest < ActiveJob::TestCase
     assert_equal(Observation.last, alert.observation)
     assert_equal("Calostoma lutescens", alert.target_name)
     assert(alert.new_observation?)
+  end
+
+  # The whole chain, which no per-component test covers: an import
+  # under a name a project watches, iNaturalist moving that name, and
+  # the nightly resync reporting the move. Each piece was checked
+  # against a canned input and nothing joined them, which is how a
+  # missing told row, an unstamped reconcile time and a demotion that
+  # tied the two namings all survived to a live test (#5705).
+  def test_an_import_then_a_name_move_tells_the_project
+    create_ivars_from_filename("calostoma_lutescens")
+    @user.update(inat_username: @inat_import.inat_username)
+    project = project_watching("Calostoma lutescens", tennessee_location)
+    stub_inat_interactions
+    InatImportJob.perform_now(@inat_import)
+    obs = Observation.last
+
+    assert_difference("ProjectAlert.count", 1, "the move is reported") do
+      batch_resync_naming(obs, "Peltigera")
+    end
+
+    assert_equal("Peltigera", obs.reload.name.text_name,
+                 "the resync moves the consensus to the new taxon")
+    assert_equal(Vote::MIN_NEG_VOTE,
+                 importer_vote(obs, "Calostoma lutescens").value,
+                 "the name iNaturalist moved off drops to Doubtful")
+    assert_alert_reports_the_move(ProjectAlert.order(:id).last, project)
+  end
+
+  def assert_alert_reports_the_move(alert, project)
+    assert_equal(project, alert.project)
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal("Peltigera", alert.name)
+    assert_equal("Calostoma lutescens", alert.target_name,
+                 "the row stays under the name the project was told")
+    assert_equal(
+      "#{:email_project_alert_what_changed_from.l(
+        name: "Calostoma lutescens"
+      )}; #{:email_project_alert_what_untracked.l(name: "Peltigera")}",
+      alert.activity_phrase
+    )
+  end
+
+  # Runs the scheduled batch over a faked iNaturalist answer in which
+  # this observation now carries `text_name`, the way a resync hears
+  # about an identification that moved.
+  def batch_resync_naming(obs, text_name)
+    key = Inat::ReflectionResync.inat_id(obs).to_s
+    fetcher = FakeBatchFetcher.new({ key => moved_payload(obs, text_name) })
+    ProjectAlert::Collector.around do
+      Inat::ReflectionBatchResyncer.new(fetcher: fetcher).resync_all
+    end
+  end
+
+  # No photos: the image engine would otherwise re-import them. The
+  # back-link field is kept, since the batch checks it.
+  def moved_payload(obs, text_name)
+    raw = JSON.parse(@mock_inat_response, symbolize_names: true)[:results].
+          first
+    raw.merge(
+      quality_grade: "needs_id", identifications: [],
+      observation_photos: [],
+      taxon: raw[:taxon].merge(name: text_name, rank: "genus"),
+      ofvs: [{ field_id: MO_URL_OBSERVATION_FIELD_ID,
+               name: "Mushroom Observer URL",
+               value: "#{MO.http_domain}/#{obs.id}" }]
+    )
+  end
+
+  def importer_vote(obs, text_name)
+    naming = obs.namings.reload.find { |n| n.name.text_name == text_name }
+    naming.votes.find_by(user: obs.user)
   end
 
   # The county the calostoma_lutescens fixture was observed in.

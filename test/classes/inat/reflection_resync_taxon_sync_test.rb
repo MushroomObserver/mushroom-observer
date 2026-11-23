@@ -196,21 +196,33 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(Vote::MINIMUM_VOTE, importer_vote(old_naming).value)
   end
 
-  # iNaturalist leads an observation it still needs an ID for at Could
-  # Be, which is where a demotion to Could Be would put the name it
-  # moved off: the consensus would stay on the old name.
-  def test_a_change_on_an_unconfirmed_observation_moves_the_consensus
-    old_naming = import_naming(@old, Vote::MIN_POS_VOTE)
+  # The lead's weight is a function of iNaturalist's quality grade,
+  # and the rest of this file runs one grade. That is how a demotion
+  # to Could Be went unnoticed: at the two grades where the lead is
+  # itself Could Be it ties the two namings, leaving the consensus on
+  # the name the source moved off.
+  GRADE_LEAD_VOTES = { "research" => Vote::NEXT_BEST_VOTE,
+                       "needs_id" => Vote::MIN_POS_VOTE,
+                       "casual" => Vote::MIN_POS_VOTE }.freeze
 
-    sync(fresh(quality: "needs_id"))
+  def test_a_change_moves_the_consensus_at_every_quality_grade
+    GRADE_LEAD_VOTES.each do |grade, lead_vote|
+      clear_namings
+      old_naming = import_naming(@old, lead_vote)
 
-    assert_equal([@old, @new].sort_by(&:id),
-                 @obs.namings.reload.map(&:name).sort_by(&:id),
-                 "both names stay on the observation")
-    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value)
-    assert_equal(Vote::MIN_POS_VOTE,
-                 importer_vote(@obs.namings.find_by(name: @new)).value)
-    assert_equal(@new, @obs.reload.name, "the consensus follows the source")
+      sync(fresh(quality: grade))
+
+      assert_equal([@old, @new].sort_by(&:id),
+                   @obs.namings.reload.map(&:name).sort_by(&:id),
+                   "#{grade}: both names stay on the observation")
+      assert_equal(lead_vote,
+                   importer_vote(@obs.namings.find_by(name: @new)).value,
+                   "#{grade}: the lead's weight")
+      assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value,
+                   "#{grade}: the name the source moved off drops")
+      assert_equal(@new, @obs.reload.name,
+                   "#{grade}: the consensus follows the source")
+    end
   end
 
   def test_missing_mo_name_is_created_as_the_admin
@@ -373,6 +385,12 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
   def importer_vote(naming)
     naming.votes.reload.find_by(user: @importer)
+  end
+
+  def clear_namings
+    @obs.namings.destroy_all
+    @obs.reload
+    Observation::NamingConsensus.new(@obs).calc_consensus
   end
 
   # taxon: attributes overriding the mock's taxon (ancestor_ids, provisional).
