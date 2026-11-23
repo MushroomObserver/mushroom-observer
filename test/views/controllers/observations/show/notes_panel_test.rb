@@ -103,6 +103,39 @@ class Views::Controllers::Observations::Show::NotesPanelTest < ComponentTestCase
     assert_includes(notes, "on oak wood")  # inherited from the sibling
   end
 
+  def test_inat_snapshot_part_renders_as_collapsible_subsection
+    key = ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    @obs.notes = { Substrate: "wood", key => "long imported blob" }
+
+    html = render(panel_with(@obs))
+
+    assert_html(html, ".panel-title", text: :inat_snapshot_caption.ti)
+    assert_html(html, "a.panel-collapse-trigger[data-toggle='collapse']" \
+                      "[href='#obs_note_#{key}']")
+    assert_html(html, "#obs_note_#{key}.collapse", text: "long imported blob")
+  end
+
+  # The iNat value gets a sub-section, separate from the regular
+  # notes body -- "wood" shouldn't end up inside the collapsible pane.
+  def test_inat_snapshot_separate_from_regular_notes_body
+    key = ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    @obs.notes = { Substrate: "wood", key => "long imported blob" }
+
+    html = render(panel_with(@obs))
+    fragment = Nokogiri::HTML.fragment(html)
+
+    assert_includes(fragment.at_css(".obs-notes").text, "wood")
+    assert_not_includes(fragment.at_css(".obs-notes").text, "long imported")
+  end
+
+  def test_other_parts_do_not_render_as_collapsible
+    @obs.notes = { Substrate: "wood", Other: "field notes here" }
+
+    html = render(panel_with(@obs))
+
+    assert_no_html(html, "a.panel-collapse-trigger")
+  end
+
   private
 
   def panel_with(obs, user = @user)
