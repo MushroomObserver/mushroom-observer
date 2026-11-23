@@ -88,8 +88,8 @@ class Components::Modal::TurboForm < Components::Base
       title: @title,
       size: :lg,
       user: @user,
-      extra_class: "modal-form",
-      extra_data: turbo_modal_data,
+      class: "modal-form",
+      data: turbo_modal_data,
       # Preserve the pre-refactor DOM-id convention. External
       # CSS/JS and turbo-stream re-renders may target these by
       # name (`modal_<identifier>_header`, `_body`).

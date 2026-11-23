@@ -39,13 +39,13 @@ class Components::Form::CheckboxCollapse < Components::Base
   private
 
   def collapse_label_data
-    { toggle: "collapse", target: "##{@target_id}" }.
-      merge(@attributes[:label_data] || {})
+    mix({ toggle: "collapse", target: "##{@target_id}" },
+        @attributes[:label_data] || {})
   end
 
   def collapse_label_aria
-    { expanded: @expanded.to_s, controls: @target_id }.
-      merge(@attributes[:label_aria] || {})
+    mix({ expanded: @expanded.to_s, controls: @target_id },
+        @attributes[:label_aria] || {})
   end
 
   # The box and the section it controls are one state, so `expanded:`
@@ -56,7 +56,7 @@ class Components::Form::CheckboxCollapse < Components::Base
   # clicking it to "fix" that collapsed the section instead. A caller
   # that genuinely needs them to differ can still pass `checked:`.
   def passthrough_attrs
-    { checked: @expanded }.merge(@attributes.except(:label_data,
-                                                    :label_aria))
+    mix({ checked: @expanded },
+        @attributes.except(:label_data, :label_aria))
   end
 end

@@ -33,8 +33,7 @@ class Components::Modal::CloseButton < Components::Base
   private
 
   def button_attrs
-    attrs = @attributes.dup
-    attrs[:data] = (attrs[:data] || {}).merge(dismiss: "modal")
+    attrs = mix(@attributes, data: { dismiss: "modal" })
     attrs[:name] = @name
     if @target
       attrs[:type] = :get

@@ -78,10 +78,6 @@ class Components::Modal < Components::Base
   # backdrop, the `fade in` class, and the `display: block` style.
   prop :auto_open, _Boolean, default: false
   prop :user, _Nilable(User), default: nil
-  # Extra CSS class(es) appended to the modal root, e.g. `modal-form`
-  # (used by `ModalTurboForm` for turbo-stream form modals).
-  prop :extra_class, _Nilable(String), default: nil
-  prop :extra_data, _Hash(Symbol, _Any), default: -> { {} }
   # Override the auto-generated DOM ids for the title and body
   # elements. Defaults are `<id>_title` and `<id>_body`; pass
   # explicit values when external CSS/JS/turbo-stream targets rely
@@ -106,6 +102,10 @@ class Components::Modal < Components::Base
   # `"py-4"` for ModalConfirm or `"text-center"` for
   # ModalProgressSpinner. Joined with the base `"modal-body"`.
   prop :body_class, _Nilable(String), default: nil
+  # class:/data: merge into the modal root's computed values
+  # (modal_class/modal_data below); e.g. `class: "modal-form"` for
+  # ModalTurboForm, `data: {...}` for Stimulus wiring extras.
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   slot :title_content
   slot :body
@@ -145,10 +145,10 @@ class Components::Modal < Components::Base
   def view_template(&block)
     yield(self) if block
     render_backdrop if @auto_open
-    div(id: @id, class: modal_class, role: "dialog",
-        style: (@auto_open ? "display: block;" : nil),
-        aria: { labelledby: resolved_title_id },
-        data: modal_data) do
+    div(**mix({ id: @id, class: modal_class, role: "dialog",
+                style: (@auto_open ? "display: block;" : nil),
+                aria: { labelledby: resolved_title_id },
+                data: modal_data }, @attributes)) do
       div(class: dialog_class, role: "document") do
         div(class: "modal-content") do
           render_header if @header
@@ -165,11 +165,7 @@ class Components::Modal < Components::Base
   end
 
   def modal_class
-    classes = ["modal"]
-    classes << "fade #{SHOWN_CLASS}" if @auto_open
-    classes << "fade" unless @auto_open
-    classes << @extra_class if @extra_class.present?
-    classes.join(" ")
+    @auto_open ? "modal fade #{SHOWN_CLASS}" : "modal fade"
   end
 
   # No "-centered" modifier -- BS3 modals are centered unconditionally
@@ -181,7 +177,7 @@ class Components::Modal < Components::Base
   def modal_data
     data = { controller: @controller }
     data[:modal_user_value] = @user.id if @user
-    data.merge(@extra_data)
+    data
   end
 
   def resolved_title_id

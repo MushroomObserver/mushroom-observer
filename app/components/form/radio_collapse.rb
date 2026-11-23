@@ -34,8 +34,6 @@ class Components::Form::RadioCollapse < Components::Base
   private
 
   def merged_attrs
-    data = { action: "change->collapse-switch#switch" }.
-           merge(@attributes[:data] || {})
-    @attributes.merge(data: data)
+    mix({ data: { action: "change->collapse-switch#switch" } }, @attributes)
   end
 end

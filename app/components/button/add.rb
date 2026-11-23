@@ -36,15 +36,13 @@ class Components::Button::Add < Components::Base
 
   def button_opts
     full_label = new_object_label
-    {
-      name: :add.ti, show_label: :responsive,
-      variant: :success, size: :sm,
-      title: full_label, aria: { label: full_label },
-      data: { tooltip_target: "tip", placement: :bottom },
-      **@attributes,
-      class: class_names("new_object_button ml-1 mr-0 mx-sm-3",
-                         @attributes[:class])
-    }
+    mix({
+          name: :add.ti, show_label: :responsive,
+          variant: :success, size: :sm,
+          title: full_label, aria: { label: full_label },
+          data: { tooltip_target: "tip", placement: :bottom },
+          class: "new_object_button ml-1 mr-0 mx-sm-3"
+        }, @attributes)
   end
 
   def new_object_label

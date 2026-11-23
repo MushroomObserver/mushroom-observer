@@ -39,22 +39,18 @@ class Components::Link::Modal < Components::Link
   private
 
   def plain_link_args
-    { class: merged_class }.
-      merge(@attributes.except(:class)).
-      deep_merge(data: modal_data)
+    mix(mix({ class: merged_class }, @attributes), data: modal_data)
   end
 
   # Forwards `button:`/`size:` rather than a pre-built `class:` string,
   # so the nested `Link(type: :get, ...)` computes the btn styling.
   def icon_link_args
-    { icon: @icon, icon_class: @icon_class, show_label: @show_label,
-      button: @button, size: @size, class: @attributes[:class] }.
-      merge(@attributes.except(:class)).
-      deep_merge(data: modal_data)
+    mix(mix({ icon: @icon, icon_class: @icon_class, show_label: @show_label,
+              button: @button, size: @size }, @attributes), data: modal_data)
   end
 
   def merged_class
-    class_names(btn_styling, size_class(@size), @attributes[:class])
+    class_names(btn_styling, size_class(@size))
   end
 
   def modal_data

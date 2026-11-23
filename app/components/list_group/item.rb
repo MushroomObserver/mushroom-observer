@@ -33,9 +33,7 @@ class Components::ListGroup::Item < Components::Base
 
   def view_template(&block)
     send(@element,
-         class: class_names("list-group-item", @attributes[:class]),
-         id: @id,
-         **@attributes.except(:class),
+         **mix({ class: "list-group-item", id: @id }, @attributes),
          &block)
   end
 end

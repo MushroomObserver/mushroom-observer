@@ -79,20 +79,19 @@ class Components::Link::CollapseToggle < Components::Link
   end
 
   def view_template(&block)
-    a(
-      href: link_href,
-      role: "button",
-      class: class_names(btn_styling, size_class, @attributes[:class],
-                         { "collapsed" => @collapsed }),
+    a(href: link_href, role: "button",
+      **mix({ class: toggle_class }, @attributes.except(:data, :aria)),
       data: { toggle: "collapse", **collapse_data },
-      aria: collapse_aria,
-      **@attributes.except(:class, :data, :aria)
-    ) do
+      aria: collapse_aria) do
       block ? yield : collapse_content
     end
   end
 
   private
+
+  def toggle_class
+    class_names(btn_styling, size_class, "collapsed" => @collapsed)
+  end
 
   def size_class
     Components::Button::Styling.size_class(@size)
