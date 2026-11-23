@@ -136,6 +136,11 @@ svg.placeholder {
     display: inline-block;
     padding: 0.21rem 0.3rem;
     color: $text-color !important;
+    // Same width as the active item's border, transparent -- so
+    // voting (swapping which item is active) doesn't change the
+    // group's height.
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid transparent;
     transition: color 0.3s ease, background-color 0.3s ease;
 
     &:hover,
