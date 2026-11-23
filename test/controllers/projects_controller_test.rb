@@ -874,17 +874,13 @@ class ProjectsControllerTest < FunctionalTestCase
                     ["recent_observation", :sort_by_recent_observation.l])
   end
 
-  # --- iNaturalist alert subscriptions ---------------------------------
+  # --- alert subscriptions ---------------------------------------------
   #
-  # A site admin says a project may be alerted on; each of its admins
-  # says whether to be emailed, on the same form as everything else
-  # (#5416).
+  # Each admin of a project that watches taxa in places says whether
+  # to be emailed, on the same form as everything else (#5416, #5721).
 
-  def alerting_project_site(project)
-    ProjectExternalSite.create!(
-      project: project, external_site: external_sites(:inaturalist),
-      use_constraints: true, alerting: true
-    )
+  def alertable_project
+    projects(:rare_fungi_project)
   end
 
   def update_params_for(project, **extra)
@@ -894,47 +890,40 @@ class ProjectsControllerTest < FunctionalTestCase
   end
 
   def test_saving_the_project_subscribes_the_admin
-    project = projects(:eol_project)
-    site = alerting_project_site(project)
+    project = alertable_project
     admin = project.admin_group.users.first
     login(admin.login)
 
-    put(:update, params: update_params_for(
-      project, alert_subscriptions: { site.id.to_s => "1" }
-    ))
+    put(:update, params: update_params_for(project, alert_subscription: "1"))
 
-    assert(site.reload.alerts?(admin),
+    assert(project.reload.alerts?(admin),
            "Saving with the box ticked should subscribe the admin")
   end
 
   # An unticked box submits the hidden "0".
   def test_saving_the_project_unsubscribes_the_admin
-    project = projects(:eol_project)
-    site = alerting_project_site(project)
+    project = alertable_project
     admin = project.admin_group.users.first
-    site.alerts_for(admin, true)
+    project.alerts_for(admin, true)
     login(admin.login)
 
-    put(:update, params: update_params_for(
-      project, alert_subscriptions: { site.id.to_s => "0" }
-    ))
+    put(:update, params: update_params_for(project, alert_subscription: "0"))
 
-    assert_not(site.reload.alerts?(admin),
+    assert_not(project.reload.alerts?(admin),
                "Saving with the box unticked should unsubscribe the admin")
   end
 
   # Saving the form from a page that never showed the checkbox leaves
   # whoever is subscribed alone.
   def test_saving_without_the_checkbox_changes_nothing
-    project = projects(:eol_project)
-    site = alerting_project_site(project)
+    project = alertable_project
     admin = project.admin_group.users.first
-    site.alerts_for(admin, true)
+    project.alerts_for(admin, true)
     login(admin.login)
 
     put(:update, params: update_params_for(project))
 
-    assert(site.reload.alerts?(admin),
+    assert(project.reload.alerts?(admin),
            "A form with no subscription field should not unsubscribe")
   end
 

@@ -100,7 +100,20 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   has_many :aliases, class_name: "ProjectAlias", dependent: :destroy
 
   has_many :project_external_sites, dependent: :destroy
-  has_many :project_external_site_alerts, dependent: :destroy
+  has_many :project_alerts, dependent: :destroy
+
+  serialize :alert_recipient_ids, coder: JSON
+  after_initialize :ensure_alert_recipient_ids_initialized
+
+  # Projects whose alerts go to somebody. Both kinds of target are
+  # required, since the taxa are what an alert is about and the
+  # locations are what keep the net from covering the world (#5721).
+  # The empty list is written three ways, and each is compared as the
+  # serialized attribute rather than as a string.
+  scope :alerting, lambda {
+    joins(:project_target_names).joins(:project_target_locations).distinct.
+      where.not(alert_recipient_ids: [nil, [], ""])
+  }
 
   # What the project already holds from an external site (#5416): how
   # many of its observations carry a link to that site, and how many
@@ -352,6 +365,57 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   def constraints?
     start_date || end_date || location ||
       target_names_present? || target_locations_present?
+  end
+
+  # A project may be subscribed to when it watches particular taxa in
+  # particular places (#5721). A foray, whose constraint is a box and
+  # a week, is left out: everyone there knows things are happening.
+  def alertable?
+    target_names_present? && target_locations_present?
+  end
+
+  # Whether this project alerts anyone.
+  def alerting?
+    alert_recipient_ids.present? && alertable?
+  end
+
+  # Whether this project watches the given name: the targets expanded
+  # through synonyms and sub-taxa, the way the Updates tab expands
+  # them (#5721).
+  def alert_matches_name?(name)
+    return false unless name && target_names_present?
+
+    expanded_target_name_id_set.include?(name.id)
+  end
+
+  # Whether the observation sits in a place and a time this project
+  # watches. Matched on the location's name, as its candidate list is.
+  def alert_matches_place?(observation)
+    return false unless target_locations_present?
+
+    target_location_suffix_match?(observation) &&
+      alert_within_dates?(observation)
+  end
+
+  # Who hears about a candidate. Nobody until somebody asks: being an
+  # admin of a project is not a request to be told what turns up, so
+  # each admin subscribes for themselves.
+  def alert_recipients
+    return User.none if alert_recipient_ids.blank?
+
+    User.where(id: alert_recipient_ids)
+  end
+
+  def alerts?(user)
+    alert_recipient_ids.include?(user&.id)
+  end
+
+  # Idempotent, so a double submit or two tabs cannot subscribe twice
+  # or raise.
+  def alerts_for(user, wanted)
+    ids = alert_recipient_ids - [user.id]
+    ids += [user.id] if wanted
+    update!(alert_recipient_ids: ids)
   end
 
   # Memoized: violation_kinds_for calls violates_target_name?/
@@ -1144,5 +1208,22 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
       order(:name).
       each { |project_alias| project_alias.project = self }.
       group_by(&:target_id)
+  end
+
+  # An undated observation is inside any window: a project watching
+  # for a rare find wants to hear about one whose date nobody gave.
+  def alert_within_dates?(observation)
+    seen = observation.when
+    return true if seen.blank?
+    return false if start_date && seen < start_date
+    return false if end_date && seen > end_date
+
+    true
+  end
+
+  # Guarded, since a `select` that leaves the column out gives an
+  # instance with no attribute to initialize.
+  def ensure_alert_recipient_ids_initialized
+    self.alert_recipient_ids ||= [] if has_attribute?(:alert_recipient_ids)
   end
 end

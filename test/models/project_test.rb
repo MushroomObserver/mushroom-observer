@@ -1216,6 +1216,81 @@ class ProjectTest < UnitTestCase
     assert_equal([newer, older, inactive], ordered)
   end
 
+  # --- who gets alerted (#5721) ----------------------------------------
+
+  def test_a_project_with_no_recipients_alerts_nobody
+    project = projects(:rare_fungi_project)
+
+    assert_empty(project.alert_recipients)
+    assert_not(project.alerts?(users(:mary)))
+    assert_not(project.alerting?)
+  end
+
+  def test_an_admin_subscribes_and_unsubscribes_themselves
+    project = projects(:rare_fungi_project)
+
+    project.alerts_for(users(:mary), true)
+
+    assert(project.alerts?(users(:mary)))
+    assert(project.alerting?)
+    assert_equal([users(:mary)], project.alert_recipients.to_a)
+
+    project.alerts_for(users(:mary), false)
+
+    assert_not(project.alerts?(users(:mary)))
+    assert_not(project.alerting?)
+    assert_empty(project.alert_recipients)
+  end
+
+  # Two tabs, or a double submit, should not subscribe twice.
+  def test_subscribing_twice_leaves_one_recipient
+    project = projects(:rare_fungi_project)
+    2.times { project.alerts_for(users(:mary), true) }
+
+    assert_equal([users(:mary).id], project.alert_recipient_ids)
+  end
+
+  def test_unsubscribing_leaves_the_others_alone
+    project = projects(:rare_fungi_project)
+    project.alerts_for(users(:mary), true)
+    project.alerts_for(users(:rolf), true)
+    project.alerts_for(users(:mary), false)
+
+    assert_equal([users(:rolf)], project.alert_recipients.to_a)
+  end
+
+  # Target taxa say what an alert is about; target locations keep the
+  # net from covering the world. A foray has neither.
+  # Re-found rather than reloaded, since the two predicates memoize.
+  def test_alertable_needs_both_kinds_of_target
+    project = projects(:rare_fungi_project)
+
+    assert(project.alertable?)
+    assert_not(projects(:eol_project).alertable?)
+
+    project.project_target_locations.destroy_all
+
+    assert_not(Project.find(project.id).alertable?)
+  end
+
+  # A project that loses a kind of target stops alerting, subscribers
+  # or not -- the alert would have nothing to say, or too much.
+  def test_a_subscribed_project_without_targets_does_not_alert
+    project = projects(:rare_fungi_project)
+    project.alerts_for(users(:mary), true)
+    project.project_target_names.destroy_all
+
+    assert_not(Project.find(project.id).alerting?)
+  end
+
+  def test_alerting_scope
+    alerting = projects(:rare_fungi_project)
+    alerting.alerts_for(users(:mary), true)
+
+    assert_includes(Project.alerting, alerting)
+    assert_not_includes(Project.alerting, projects(:eol_project))
+  end
+
   private
 
   # An observation owned by an eol member (mary), added to eol_project

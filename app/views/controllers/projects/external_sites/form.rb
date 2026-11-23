@@ -96,9 +96,8 @@ module Views::Controllers::Projects::ExternalSites
     end
 
     def render_action_fields
-      checkbox_field(:alerting, label: :project_sites_alerting.l,
-                                wrap_class: "mt-3")
-      checkbox_field(:importing, label: :project_sites_importing.l)
+      checkbox_field(:importing, label: :project_sites_importing.l,
+                                 wrap_class: "mt-3")
     end
 
     def resolved?

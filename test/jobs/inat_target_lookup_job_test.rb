@@ -120,9 +120,9 @@ class InatTargetLookupJobTest < ActiveJob::TestCase
     end
   end
 
-  def test_look_up_later_for_an_alerting_site
-    project_site(alerting: true, remote_project_id: "303327",
-                 alert_recipient_ids: [users(:mary).id])
+  def test_look_up_later_for_an_alerting_project
+    project_site(remote_project_id: "303327")
+    @project.alerts_for(users(:mary), true)
 
     assert_enqueued_with(job: InatTargetLookupJob, args: [@project]) do
       InatTargetLookupJob.look_up_later(@project)

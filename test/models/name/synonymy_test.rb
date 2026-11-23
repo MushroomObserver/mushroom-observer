@@ -87,11 +87,6 @@ class Name::SynonymyTest < UnitTestCase
       name: revised_best_synonym,
       user: users(:rolf), when: Time.current, location: locations(:albion)
     )
-    # other_approved_synonyms.name.observations is cached by Rails, so
-    # it didn't change when we created the Observation above.
-    # So reload it
-    deprecated_name.other_approved_synonyms.
-      find { |n| n == revised_best_synonym }.observations.reload
     assert_equal(revised_best_synonym,
                  deprecated_name.best_preferred_synonym)
 
@@ -103,11 +98,6 @@ class Name::SynonymyTest < UnitTestCase
       name: revised_best_synonym,
       user: users(:rolf), when: Time.current, location: locations(:albion)
     )
-    # other_approved_synonyms.name.observations is cached by Rails, so
-    # it didn't change when we created the Observation above.
-    # So reload it
-    deprecated_name.other_approved_synonyms.
-      find { |n| n == revised_best_synonym }.observations.reload
     assert_equal(revised_best_synonym,
                  deprecated_name.best_preferred_synonym)
   end

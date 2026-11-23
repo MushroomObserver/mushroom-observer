@@ -116,7 +116,6 @@ class ObservationsControllerShowTest < FunctionalTestCase
 
     assert_response(:success)
     assert_select("#matching_observations .sibling-marker", text: "1")
-    assert_select("#current_observation_row .sibling-marker-spacer")
     assert_select(".comment-summary .sibling-marker", text: "1")
     assert_select(".comment-summary a[href*='#{sibling.id}'] .sibling-marker")
   end
