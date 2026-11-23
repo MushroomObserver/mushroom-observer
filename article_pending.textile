@@ -1,1 +1,8 @@
-|{white-space:nowrap}. 2026-11-20 | Read and write Name.icn_id via the API | "PR#5736":https://github.com/MushroomObserver/mushroom-observer/pull/5736 |
+|{white-space:nowrap}. 2026-11-23 | Say what happened in a Project activity email | "PR#5767":https://github.com/MushroomObserver/mushroom-observer/pull/5767 |
+|{white-space:nowrap}. 2026-11-23 | Alert Projects when a reported find's name moves off a target Name | "PR#5768":https://github.com/MushroomObserver/mushroom-observer/pull/5768 |
+|{white-space:nowrap}. 2026-11-22 | Fix Project imports missing accented Locations | "PR#5765":https://github.com/MushroomObserver/mushroom-observer/pull/5765 |
+|{white-space:nowrap}. 2026-11-22 | Speed up Observation pages, especially shared links | "PR#5764":https://github.com/MushroomObserver/mushroom-observer/pull/5764 |
+|{white-space:nowrap}. 2026-11-22 | Explain what to do when a page asks for a login | "PR#5761":https://github.com/MushroomObserver/mushroom-observer/pull/5761 |
+|{white-space:nowrap}. 2026-11-22 | Align Matching Observations rows and fix a log message | "PR#5763":https://github.com/MushroomObserver/mushroom-observer/pull/5763 |
+|{white-space:nowrap}. 2026-11-22 | Alert Projects about matching Observations posted on MO | "PR#5742":https://github.com/MushroomObserver/mushroom-observer/pull/5742 |
+|{white-space:nowrap}. 2026-11-21 | Fix a location autocompleter incorrectly offering to create an existing location | "PR#5757":https://github.com/MushroomObserver/mushroom-observer/pull/5757 |
