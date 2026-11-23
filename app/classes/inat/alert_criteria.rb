@@ -53,6 +53,16 @@ class Inat
         max_by { |ident| ident[:id].to_i }
     end
 
+    # What to report on an observation this project has already been
+    # told about: the newest current identification, whatever it
+    # names. A name a project does not watch is the case the
+    # coordinators asked to hear about -- a temporary code applied to
+    # a find, which they confirm by hand -- and a find still needs a
+    # watched name, which `alertable_identification` answers.
+    def activity_identification(candidate)
+      candidate.current_identifications.max_by { |ident| ident[:id].to_i }
+    end
+
     # The watched name the identification matched, which is what the
     # message names. iNat's search includes a taxon's descendants, so
     # a project watching Amanita hears about Amanita muscaria under

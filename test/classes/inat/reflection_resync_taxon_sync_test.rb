@@ -40,8 +40,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
     assert_equal(Vote::NEXT_BEST_VOTE, importer_vote(new_naming).value,
                  "Research Grade leads at Promising")
     assert_equal(@site.id, importer_vote(new_naming).external_site_id)
-    assert_equal(Vote::MIN_POS_VOTE, importer_vote(old_naming).value,
-                 "the old lead stays as a naming at Could Be")
+    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value,
+                 "the old lead stays as a naming at Doubtful")
     assert_equal(@new, @obs.reload.name, "the consensus follows the source")
   end
 
@@ -104,8 +104,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     sync(fresh)
 
-    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
-                 "a name the source dropped falls to Could Be")
+    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Doubtful")
   end
 
   # The same guard must not freeze a vote the engine has written: it
@@ -115,8 +115,8 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
     sync(fresh)
 
-    assert_equal(Vote::MIN_POS_VOTE, importer_vote(naming).value,
-                 "a name the source dropped falls to Could Be")
+    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(naming).value,
+                 "a name the source dropped falls to Doubtful")
     assert_equal(@site.id, importer_vote(naming).external_site_id)
   end
 
@@ -189,11 +189,40 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
   end
 
   def test_demotion_never_raises_a_vote
-    old_naming = import_naming(@old, Vote::MIN_NEG_VOTE)
+    old_naming = import_naming(@old, Vote::MINIMUM_VOTE)
 
     sync(fresh)
 
-    assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value)
+    assert_equal(Vote::MINIMUM_VOTE, importer_vote(old_naming).value)
+  end
+
+  # The lead's weight is a function of iNaturalist's quality grade,
+  # and the rest of this file runs one grade. That is how a demotion
+  # to Could Be went unnoticed: at the two grades where the lead is
+  # itself Could Be it ties the two namings, leaving the consensus on
+  # the name the source moved off.
+  GRADE_LEAD_VOTES = { "research" => Vote::NEXT_BEST_VOTE,
+                       "needs_id" => Vote::MIN_POS_VOTE,
+                       "casual" => Vote::MIN_POS_VOTE }.freeze
+
+  def test_a_change_moves_the_consensus_at_every_quality_grade
+    GRADE_LEAD_VOTES.each do |grade, lead_vote|
+      clear_namings
+      old_naming = import_naming(@old, lead_vote)
+
+      sync(fresh(quality: grade))
+
+      assert_equal([@old, @new].sort_by(&:id),
+                   @obs.namings.reload.map(&:name).sort_by(&:id),
+                   "#{grade}: both names stay on the observation")
+      assert_equal(lead_vote,
+                   importer_vote(@obs.namings.find_by(name: @new)).value,
+                   "#{grade}: the lead's weight")
+      assert_equal(Vote::MIN_NEG_VOTE, importer_vote(old_naming).value,
+                   "#{grade}: the name the source moved off drops")
+      assert_equal(@new, @obs.reload.name,
+                   "#{grade}: the consensus follows the source")
+    end
   end
 
   def test_missing_mo_name_is_created_as_the_admin
@@ -356,6 +385,12 @@ class Inat::ReflectionResyncTaxonSyncTest < UnitTestCase
 
   def importer_vote(naming)
     naming.votes.reload.find_by(user: @importer)
+  end
+
+  def clear_namings
+    @obs.namings.destroy_all
+    @obs.reload
+    Observation::NamingConsensus.new(@obs).calc_consensus
   end
 
   # taxon: attributes overriding the mock's taxon (ancestor_ids, provisional).

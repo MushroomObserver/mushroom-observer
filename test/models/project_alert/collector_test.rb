@@ -41,6 +41,23 @@ class ProjectAlert::CollectorTest < UnitTestCase
     assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob)
   end
 
+  # An import writes the rows and tells nobody: whoever ran it knows
+  # what it brought in, while the rows are what a later move off a
+  # watched name reads as activity on (#5705).
+  def test_recording_without_mailing_writes_the_row_and_mails_nobody
+    obs = nil
+    assert_difference("ProjectAlert.count", 1) do
+      assert_no_enqueued_jobs(only: ActionMailer::MailDeliveryJob) do
+        obs = ProjectAlert::Collector.around(mail: false) do
+          new_observation
+        end
+      end
+    end
+
+    assert_equal(@target.text_name,
+                 ProjectAlert.find_by(observation: obs).target_name)
+  end
+
   # Outside a watched place, or under a name nobody watches, there is
   # nothing to say.
   def test_an_observation_elsewhere_alerts_nobody

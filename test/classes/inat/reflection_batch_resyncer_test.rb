@@ -159,6 +159,68 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
     assert_equal({}, Inat::ReflectionBatchResyncer.new.resync_all)
   end
 
+  # A project told about an observation hears when the sync moves the
+  # name off the one it was told, which the alert poll cannot see: the
+  # move takes the observation out of its taxon filter (#5705).
+  def test_a_name_move_alerts_a_project_that_was_told
+    reconciled(2.days.ago)
+    import_naming(names(:coprinus_comatus))
+    project = subscribed_project
+    told(project, "Coprinus comatus")
+
+    assert_difference("ProjectAlert.count", 1) do
+      collecting { run_batch(found: { @id => moved_to("Peltigera") }) }
+    end
+
+    alert = ProjectAlert.order(:id).last
+
+    assert_equal(project, alert.project)
+    assert_equal("Peltigera", alert.name)
+    assert_equal("Coprinus comatus", alert.target_name,
+                 "the row stays under the name the project was told")
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_not(alert.provisional)
+  end
+
+  # iNaturalist marks a code waiting to be confirmed, which is the case
+  # a rare-challenge coordinator acts on, so the row says which it was.
+  def test_a_move_to_a_provisional_taxon_says_so
+    reconciled(2.days.ago)
+    import_naming(names(:coprinus_comatus))
+    told(subscribed_project, "Coprinus comatus")
+
+    collecting do
+      run_batch(found: { @id => moved_to("Peltigera", provisional: true) })
+    end
+
+    assert(ProjectAlert.order(:id).last.provisional)
+  end
+
+  # The sync's own stamp is empty until it has run, so a reflection
+  # nothing has resynced is dated by its import instead -- the move
+  # it reports happened after MO knew the observation either way.
+  def test_an_unsynced_reflection_is_dated_by_its_import
+    reconciled(nil)
+    import_naming(names(:coprinus_comatus))
+    told(subscribed_project, "Coprinus comatus")
+
+    assert_difference("ProjectAlert.count", 1) do
+      collecting { run_batch(found: { @id => moved_to("Peltigera") }) }
+    end
+  end
+
+  # A name that does not move raises nothing, however much else the
+  # sync brings in.
+  def test_an_unchanged_name_alerts_nobody
+    reconciled(2.days.ago)
+    import_naming(names(:coprinus_comatus))
+    told(subscribed_project, "Coprinus comatus")
+
+    assert_no_difference("ProjectAlert.count") do
+      collecting { run_batch(found: { @id => moved_to("Coprinus comatus") }) }
+    end
+  end
+
   private
 
   def run_batch(found:, failed: false)
@@ -175,5 +237,52 @@ class Inat::ReflectionBatchResyncerTest < UnitTestCase
     { field_id: Inat::Constants::MO_URL_OBSERVATION_FIELD_ID,
       name: "Mushroom Observer URL",
       value: "https://mushroomobserver.org/#{mo_id}" }
+  end
+
+  def collecting(&block)
+    ProjectAlert::Collector.around(&block)
+  end
+
+  # Whether MO has reconciled this reflection before, which is what
+  # tells a move apart from catching up.
+  def reconciled(time)
+    @link.update_column(:last_synced_at, time)
+    @site.update_column(:last_successful_sync_at, 3.days.ago)
+  end
+
+  def subscribed_project
+    project = projects(:rare_fungi_project)
+    project.update!(start_date: nil, end_date: nil)
+    project.alerts_for(users(:mary), true)
+    project
+  end
+
+  # What the project was told, which is where the message's name comes
+  # from when the consensus later moves.
+  def told(project, target_name)
+    ProjectAlert.record_local(project: project, observation: @obs,
+                              target: @obs, target_name: target_name,
+                              proposal: { name: target_name })
+  end
+
+  # The source-derived naming the reflection reads from before the sync.
+  def import_naming(name)
+    naming = Naming.create!(observation: @obs, user: @obs.user, name: name,
+                            external_site: @site, reasons: { 2 => "import" })
+    Vote.create!(naming: naming, user: @obs.user, observation: @obs,
+                 value: Vote::NEXT_BEST_VOTE, external_site: @site,
+                 source_value: Vote::NEXT_BEST_VOTE)
+    Observation::NamingConsensus.new(@obs).calc_consensus
+    naming
+  end
+
+  # The fetched observation, identified as `name`. No photos: the
+  # image engine would otherwise import them.
+  def moved_to(name, provisional: false)
+    rank = name.include?(" ") ? "species" : "genus"
+    taxon = @raw[:taxon].merge(name: name, rank: rank,
+                               provisional: provisional)
+    @raw.merge(quality_grade: "research", taxon: taxon,
+               identifications: [], observation_photos: [], ofvs: [])
   end
 end
