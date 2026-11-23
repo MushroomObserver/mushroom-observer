@@ -10,9 +10,9 @@
 # an external site's numeric id shown next to an ExternalLink.
 #
 # `title:` overrides the tooltip text (default "Copy this ID") -- e.g.
-# Link::External passes a site-specific "Copy iNaturalist ID" so
-# the badge reads unambiguously when an observation has several
-# external-site ids next to each other.
+# the external-links accordion pane passes a site-specific "Copy
+# iNaturalist ID" so the badge reads unambiguously when an observation
+# has several external-site ids next to each other.
 #
 # `size:` picks the badge's font-size modifier -- `.badge-id` itself
 # has no inherent font-size, so every caller states its size
@@ -28,30 +28,32 @@
 # `interactive:` (default true) is the copy-to-clipboard `<button>`
 # described above. Pass `false` for a plain, non-clickable `<span>` --
 # e.g. next to an object that isn't itself a link either (Matching
-# Observations' current-observation row).
+# Observations' current-observation row). Pass `link:` (a URL) instead
+# for a badge that navigates -- e.g. the observation lightbox caption's
+# id badge, which opens the observation on click.
 #
-# `extra_class:` has no default margin -- omit it when the badge
-# needs no spacing (e.g. a table/grid column), or pass `"mr-3"`/
-# `"ml-2"`/etc. when it does.
+# `class:` has no default margin -- omit it when the badge needs no
+# spacing (e.g. a table/grid column), or pass `"mr-3"`/`"ml-2"`/etc.
+# when it does.
 #
 # @example
-#   Badge(variant: :id, object: @project, size: :sm, extra_class: "mr-3")
+#   Badge(variant: :id, object: @project, size: :sm, class: "mr-3")
 class Components::Badge::ID < Components::Badge
-  SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",
-                   md: "badge-md", sm: "badge-sm" }.freeze
-
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :value, _Nilable(_Union(String, Integer)), default: nil
-  prop :size, _Union(*SIZE_CLASSES.keys)
+  prop :size, _Union(*Components::Badge::SIZES)
   prop :title, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: nil
   prop :interactive, _Boolean, default: true
+  prop :link, _Nilable(String), default: nil
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    if @interactive
+    if @link
+      a(**badge_attributes, href: @link) { plain(display_value) }
+    elsif @interactive
       render_interactive_badge
     else
-      span(class: badge_class) { plain(display_value) }
+      span(**badge_attributes) { plain(display_value) }
     end
   end
 
@@ -59,8 +61,8 @@ class Components::Badge::ID < Components::Badge
 
   def render_interactive_badge
     button(
+      **badge_attributes,
       type: "button",
-      class: badge_class,
       role: "button",
       data: {
         tooltip_target: "tip", placement: "bottom",
@@ -74,8 +76,10 @@ class Components::Badge::ID < Components::Badge
     end
   end
 
-  def badge_class
-    class_names("badge badge-id", SIZE_CLASSES[@size], @extra_class)
+  def badge_attributes
+    mix({ class: class_names("badge badge-id",
+                             Components::Badge.size_class(@size)) },
+        @attributes)
   end
 
   def display_value

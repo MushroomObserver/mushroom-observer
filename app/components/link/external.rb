@@ -13,10 +13,9 @@
 #   # The link text leads with the relationship date, then the relationship:
 #   # "<date>: <relationship>" (e.g. "2025-05-04: Imported from
 #   # iNaturalist"). For sites with an id accessor on ExternalLink
-#   # (iNaturalist, MyCoPortal), that id follows as a sibling
-#   # copy-to-clipboard Badge(variant: :id), not part of the link text -- a
-#   # <button> nested inside the <a> would be invalid HTML and would
-#   # double-fire the link's own navigation on a badge click.
+#   # (iNaturalist, MyCoPortal), the caller renders that id as a sibling
+#   # copy-to-clipboard Badge(variant: :id) -- this component only
+#   # renders the link itself.
 #
 # Via context-nav dispatcher:
 #   # Tab sets html_options: { external: true }; dispatcher routes here.
@@ -26,25 +25,18 @@ class Components::Link::External < Components::Base
 
   prop :content, _Nilable(String), default: nil
   prop :path, _Nilable(String), default: nil
-  prop :site_record_id, _Nilable(String), default: nil
-  prop :site_name, _Nilable(String), default: nil
   prop :opts, _Hash(Symbol, _Any?), :**
 
   def initialize(content: nil, path: nil, tab: nil, link: nil, **opts)
-    site_record_id = nil
-    site_name = nil
     if tab
       content = tab.title
       path = tab.path
       opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
     elsif link
       content = relationship_text(link)
-      site_record_id = link.site_record_id
-      site_name = link.site_name
       path = link.link_url
     end
-    super(content: content, path: path, site_record_id: site_record_id,
-          site_name: site_name, **opts)
+    super(content: content, path: path, **opts)
   end
 
   def view_template
@@ -54,11 +46,6 @@ class Components::Link::External < Components::Base
             **@opts) do
       plain(@content)
     end
-    return unless @site_record_id
-
-    Badge(variant: :id, value: @site_record_id, size: :lg,
-          title: :copy_this_site_id.ti(site: @site_name),
-          extra_class: "ml-2")
   end
 
   private

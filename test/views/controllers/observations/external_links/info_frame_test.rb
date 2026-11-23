@@ -39,6 +39,33 @@ module Views::Controllers::Observations::ExternalLinks
       )
     end
 
+    # The site-record-id copy-to-clipboard badge is InfoFrame's
+    # responsibility (not Link::External's) -- rendered for an own row
+    # when the site has a numeric id, with a site-specific tooltip so
+    # it reads unambiguously next to other badges.
+    def test_own_link_with_site_record_id_shows_copy_badge
+      link = external_links(:coprinus_comatus_obs_inaturalist_link)
+      obs = link.observation
+      user = users(:rolf)
+
+      html = render(frame_with(obs: obs, site_links: [link], user: user))
+
+      assert_html(html, "button.badge-id", text: "234723")
+      title = :copy_this_site_id.ti(site: "iNaturalist")
+      assert_html(html, "button.badge-id[data-title='#{title}']")
+    end
+
+    def test_own_link_without_site_record_id_shows_no_badge
+      site = external_sites(:mycoportal)
+      obs = observations(:coprinus_comatus_obs)
+      link = ExternalLink.new(external_site: site, target: obs)
+
+      html = render(frame_with(obs: obs, site_links: [link],
+                               user: users(:rolf)))
+
+      assert_no_html(html, "button.badge-id")
+    end
+
     def test_logged_out_viewer_shows_no_mod_links
       link = external_links(:coprinus_comatus_obs_inaturalist_link)
       obs = link.observation

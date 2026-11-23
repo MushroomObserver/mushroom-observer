@@ -47,8 +47,13 @@ class Components::Link::ExternalTest < ComponentTestCase
   end
 
   # ---- ExternalLink AR record (link:) form ----
+  #
+  # The site-record-id copy-to-clipboard badge is no longer rendered
+  # here -- Link::External only renders the link itself; the caller
+  # (Views::Controllers::Observations::ExternalLinks::InfoFrame) renders
+  # the badge directly. See info_frame_test.rb for that coverage.
 
-  def test_inat_link_renders_relationship_date_and_id_badge
+  def test_inat_link_renders_relationship_date
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     html = render_link(link: link)
 
@@ -57,16 +62,10 @@ class Components::Link::ExternalTest < ComponentTestCase
                 text: "Manual link to iNaturalist")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
-    # The id is a sibling copy-to-clipboard badge, not link text -- a
-    # <button> nested inside the <a> would be invalid HTML.
-    assert_html(html, "button.badge-id", text: "234723")
-    assert_no_html(html, "a button")
-    # Tooltip names the site so it's unambiguous next to other badges.
-    title = :copy_this_site_id.ti(site: "iNaturalist")
-    assert_html(html, "button.badge-id[data-title='#{title}']")
+    assert_no_html(html, "button.badge-id")
   end
 
-  def test_inat_import_link_renders_derived_id_badge
+  def test_inat_import_link_renders_relationship_text
     site = external_sites(:inaturalist)
     link = ExternalLink.new(external_site: site, relationship: :import,
                             external_id: "372490529")
@@ -76,10 +75,9 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
                 text: "Imported from iNaturalist")
-    assert_html(html, "button.badge-id", text: "372490529")
   end
 
-  def test_mycoportal_link_renders_relationship_date_and_id_badge
+  def test_mycoportal_link_renders_relationship_date
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     html = render_link(link: link)
 
@@ -89,18 +87,6 @@ class Components::Link::ExternalTest < ComponentTestCase
                 text: "Manual link to MyCoPortal")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
-    assert_html(html, "button.badge-id", text: "1950183")
-    title = :copy_this_site_id.ti(site: "MyCoPortal")
-    assert_html(html, "button.badge-id[data-title='#{title}']")
-  end
-
-  def test_site_with_no_id_accessor_renders_no_badge
-    site = ExternalSite.new(name: "GenBank",
-                            base_url: "https://genbank.example/")
-    link = ExternalLink.new(external_site: site, external_id: "123")
-
-    html = render_link(link: link)
-
     assert_no_html(html, "button.badge-id")
   end
 
