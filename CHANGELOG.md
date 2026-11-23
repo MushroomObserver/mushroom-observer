@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-23 (deploy-2026-11-23-13-00)
+
+- Various search form and autocompleter fixes, plus SCSS duplicate/cross-file selector finders ([PR5757](https://github.com/MushroomObserver/mushroom-observer/pull/5757), @nimmolo)
+- Alert a project about matching observations posted on MO, not only on iNaturalist ([PR5742](https://github.com/MushroomObserver/mushroom-observer/pull/5742), @mo-nathan)
+- Matching Observations row layout, sequence log fix, `.panel` relocation ([PR5763](https://github.com/MushroomObserver/mushroom-observer/pull/5763), @nimmolo)
+- Show the admin mode toggle only to admins in `Tab::UserNav::LogOut` ([PR5756](https://github.com/MushroomObserver/mushroom-observer/pull/5756), @mo-nathan)
+- Serve a readable page where a login is required, and link the security notice ([PR5761](https://github.com/MushroomObserver/mushroom-observer/pull/5761), @mo-nathan)
+- Stop the Observation show page loading `external_links`, `occurrence` and synonym counts lazily ([PR5764](https://github.com/MushroomObserver/mushroom-observer/pull/5764), @mo-nathan)
+- Match iNat place names with their diacritics folded, so accented target Locations resolve ([PR5765](https://github.com/MushroomObserver/mushroom-observer/pull/5765), @mo-nathan)
+- Alert a project when the name moves off a target name ([PR5768](https://github.com/MushroomObserver/mushroom-observer/pull/5768), @mo-nathan)
+- Say what happened in a project activity alert ([PR5767](https://github.com/MushroomObserver/mushroom-observer/pull/5767), @mo-nathan)
+
 ## 2026-11-20 (deploy-2026-11-20-13-00)
 
 - Drop dead `export:unofficial` step from `lang:update` ([PR5745](https://github.com/MushroomObserver/mushroom-observer/pull/5745), @nimmolo)
