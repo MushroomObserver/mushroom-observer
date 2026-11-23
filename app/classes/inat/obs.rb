@@ -144,9 +144,11 @@ class Inat
     end
     private :omitted_photo_count
 
-    # Observation form requires a "normalized" key (no spaces) for Notes parts
+    # Observation form requires a "normalized" key (no spaces) for Notes
+    # parts. See Observation.inat_snapshot_key for why this is pinned
+    # to MO.default_locale.
     def snapshot_key
-      Observation.notes_normalized_key(:inat_snapshot_caption.l)
+      Observation.inat_snapshot_key
     end
     private :snapshot_key
 

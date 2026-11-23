@@ -35,11 +35,8 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
     notes[inat_snapshot_key]
   end
 
-  # The key this part is stored under is derived from this same
-  # translation at import time (Inat::Obs#snapshot_key) -- comparing
-  # against it, rather than a hardcoded key, keeps the two in sync.
   def inat_snapshot_key
-    ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    ::Observation.inat_snapshot_key
   end
 
   def render_regular_notes_panel

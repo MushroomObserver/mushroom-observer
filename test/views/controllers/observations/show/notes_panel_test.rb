@@ -154,6 +154,23 @@ class Views::Controllers::Observations::Show::NotesPanelTest < ComponentTestCase
     assert_html(html, "#observation_inat_snapshot")
   end
 
+  # A viewer's locale is independent of whatever locale was active
+  # when the observation was imported -- the key this view looks for
+  # has to resolve the same way regardless.
+  def test_inat_snapshot_key_pinned_to_default_locale
+    seen_locale = nil
+    I18n.with_locale(:es) do
+      Observation.stub(:notes_normalized_key, lambda { |part|
+        seen_locale = I18n.locale
+        part.to_s.tr(" ", "_").to_sym
+      }) do
+        panel_with(@obs).send(:inat_snapshot_key)
+      end
+    end
+
+    assert_equal(MO.default_locale.to_sym, seen_locale)
+  end
+
   private
 
   def panel_with(obs, user = @user)
