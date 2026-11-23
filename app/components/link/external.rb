@@ -16,43 +16,41 @@
 #   # (iNaturalist, MyCoPortal), that id follows as a sibling
 #   # copy-to-clipboard Badge(variant: :id), not part of the link text -- a
 #   # <button> nested inside the <a> would be invalid HTML and would
-#   # double-fire the link's own navigation on a badge click.
+#   # double-fire the link's navigation on a badge click.
 #
 # Via context-nav dispatcher:
 #   # Tab sets html_options: { external: true }; dispatcher routes here.
-class Components::Link::External < Components::Base
+#
+# Pass `icon:` (or a Tab whose `html_options` sets one) for an
+# icon-only treatment -- `content:` becomes the sr-only label and
+# hover tooltip instead of visible text, same as `Link::Get`.
+class Components::Link::External < Components::Link
   # Keys from Tab::Base::ALLOWED_HTML_OPTION_KEYS that must not reach link_to.
-  NON_HTML_OPTS = [:external, :button, :back, :icon, :help].freeze
+  NON_HTML_OPTS = [:external, :button, :back, :help].freeze
 
   prop :content, _Nilable(String), default: nil
   prop :path, _Nilable(String), default: nil
   prop :site_record_id, _Nilable(String), default: nil
   prop :site_name, _Nilable(String), default: nil
+  prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
   prop :opts, _Hash(Symbol, _Any?), :**
 
   def initialize(content: nil, path: nil, tab: nil, link: nil, **opts)
-    site_record_id = nil
-    site_name = nil
+    icon = opts.delete(:icon)
     if tab
-      content = tab.title
-      path = tab.path
-      opts = tab.html_options.except(*NON_HTML_OPTS).merge(opts)
+      content, path, icon, opts = resolve_tab(tab, icon, opts)
     elsif link
-      content = relationship_text(link)
-      site_record_id = link.site_record_id
-      site_name = link.site_name
-      path = link.link_url
+      content, path = resolve_link(link)
     end
-    super(content: content, path: path, site_record_id: site_record_id,
-          site_name: site_name, **opts)
+    super(content: content, path: path, icon: icon,
+          site_record_id: link&.site_record_id, site_name: link&.site_name,
+          **opts)
   end
 
   def view_template
-    link_to(@path,
-            target: "_blank",
-            rel: "noopener noreferrer",
-            **@opts) do
-      plain(@content)
+    link_to(@path, target: "_blank", rel: "noopener noreferrer",
+                   **link_html_options) do
+      render_link_content
     end
     return unless @site_record_id
 
@@ -62,6 +60,33 @@ class Components::Link::External < Components::Base
   end
 
   private
+
+  def resolve_tab(tab, icon, opts)
+    [tab.title, tab.path, icon || tab.html_options[:icon],
+     tab.html_options.except(*NON_HTML_OPTS).merge(opts)]
+  end
+
+  def resolve_link(link)
+    [relationship_text(link), link.link_url]
+  end
+
+  def render_link_content
+    if @icon
+      render_icon_with_text(@icon, @content, show_label: @show_label)
+    else
+      plain(@content)
+    end
+  end
+
+  def link_html_options
+    base = { class: class_names(icon_wrapper_class, @opts[:class]) }
+    base = base.deep_merge(tooltip_data) if @icon
+    base.deep_merge(@opts.except(:class))
+  end
+
+  def tooltip_data
+    { title: @content, data: { tooltip_target: "tip", placement: "top" } }
+  end
 
   # "<date>: <relationship>" so rows read and sort by date.
   def relationship_text(link)

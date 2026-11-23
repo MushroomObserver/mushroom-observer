@@ -7,40 +7,48 @@
 # fragments to be cached and reused across pages.
 #
 # Caller-supplied `data:` is deep-merged onto the nav-active wiring,
-# so callers can add their own data attrs without overriding the
-# Stimulus target/action attrs.
+# so callers can add data attrs without overriding the Stimulus
+# target/action attrs.
+#
+# Pass `icon:` for an icon-only treatment -- `content:` becomes the
+# sr-only label and hover tooltip instead of visible text, same as
+# `Link::Get`/`Link::External`.
 #
 # @example
 #   render(Components::Link::Active.new(content: "Latest",
 #                                       path: observations_path))
-#   render(Components::Link::Active.new(content: nil,
-#                                       path: observations_path) { "Latest" })
-class Components::Link::Active < Components::Base
+class Components::Link::Active < Components::Link
   prop :content, _Nilable(String), default: nil
   prop :path, String
+  prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    link_to(@path, **link_args) { trusted_or_plain(@content) }
+    link_to(@path, **link_args) { render_link_content }
   end
 
   private
 
+  def render_link_content
+    if @icon
+      render_icon_with_text(@icon, @content, show_label: @show_label)
+    else
+      trusted_or_plain(@content)
+    end
+  end
+
   def link_args
-    @attributes.deep_merge(data: nav_active_data)
+    base = { class: class_names(icon_wrapper_class, @attributes[:class]) }
+    base = base.deep_merge(tooltip_data) if @icon
+    base.deep_merge(@attributes.except(:class)).
+      deep_merge(data: nav_active_data)
+  end
+
+  def tooltip_data
+    { title: @content, data: { tooltip_target: "tip", placement: "top" } }
   end
 
   def nav_active_data
     { nav_active_target: "link", action: "nav-active#navigate" }
-  end
-
-  # Content may be a textile-rendered html_safe string; `plain` would
-  # re-escape it, `trusted_html` emits it as-is.
-  def trusted_or_plain(text)
-    if text.respond_to?(:html_safe?) && text.html_safe?
-      trusted_html(text)
-    else
-      plain(text)
-    end
   end
 end

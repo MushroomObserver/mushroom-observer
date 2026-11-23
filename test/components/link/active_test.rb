@@ -33,6 +33,33 @@ class ActiveLinkTest < ComponentTestCase
     assert_html(html, "a b", text: "bold")
   end
 
+  def test_icon_renders_svg_and_hides_content_as_sr_only
+    html = render_active(content: "Home", path: "/", icon: :globe)
+
+    assert_html(html, "a svg.mo-icon-globe")
+    assert_html(html, "a .sr-only", text: "Home")
+  end
+
+  def test_icon_adds_hover_tooltip
+    html = render_active(content: "Home", path: "/", icon: :globe)
+
+    assert_html(html, "a[title='Home'][data-tooltip-target='tip']")
+  end
+
+  def test_icon_keeps_nav_active_stimulus_data_attrs
+    html = render_active(content: "Home", path: "/", icon: :globe)
+
+    assert_html(html, "a[data-nav-active-target='link']" \
+                      "[data-action='nav-active#navigate']")
+  end
+
+  def test_no_icon_renders_plain_text_with_no_tooltip
+    html = render_active(content: "Home", path: "/")
+
+    assert_no_html(html, "svg")
+    assert_no_html(html, "a[data-tooltip-target]")
+  end
+
   private
 
   def render_active(**)
