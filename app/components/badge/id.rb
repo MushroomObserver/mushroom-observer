@@ -30,8 +30,12 @@
 # e.g. next to an object that isn't itself a link either (Matching
 # Observations' current-observation row).
 #
+# `extra_class:` has no default margin -- like `size:` above, every
+# caller states what spacing it needs (`"mr-3"`, `"ml-2"`, `nil`, …)
+# rather than inheriting one from this component.
+#
 # @example
-#   Badge(variant: :id, object: @project, size: :sm)
+#   Badge(variant: :id, object: @project, size: :sm, extra_class: "mr-3")
 class Components::Badge::ID < Components::Badge
   SIZE_CLASSES = { xl: "badge-xl", lg: "badge-lg",
                    md: "badge-md", sm: "badge-sm" }.freeze
@@ -40,7 +44,7 @@ class Components::Badge::ID < Components::Badge
   prop :value, _Nilable(_Union(String, Integer)), default: nil
   prop :size, _Union(*SIZE_CLASSES.keys)
   prop :title, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: "mr-3"
+  prop :extra_class, _Nilable(String), default: nil
   prop :interactive, _Boolean, default: true
 
   def view_template

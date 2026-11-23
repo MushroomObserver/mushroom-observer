@@ -103,12 +103,10 @@ module Views::FullPageBase::Title
     end
   end
 
-  # Name + its leading space are one flex item -- flexbox collapses
-  # whitespace between siblings.
   def render_name_line(object, user)
-    render(::Components::Badge.new(variant: :id, object: object, size: :sm))
+    render(::Components::Badge.new(variant: :id, object: object, size: :sm,
+                                   extra_class: "mr-3"))
     span do
-      whitespace
       trusted_html(viewer_aware_format_name(object, user).t.small_author)
     end
   end
