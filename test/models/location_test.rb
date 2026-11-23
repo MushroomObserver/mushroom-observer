@@ -1080,6 +1080,16 @@ class LocationTest < UnitTestCase
                  "move its Observations")
   end
 
+  def test_growing_box_does_not_relocate_observations
+    _outer, inner = create_nested_locations
+    outside = place_obs(:minimal_unknown_obs, inner, -58, 108)
+
+    inner.update!(north: -53)
+
+    assert_equal(inner, outside.reload.location,
+                 "Growing a Location's box should not move its Observations")
+  end
+
   def albion
     locations(:albion)
   end

@@ -815,7 +815,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   # Change Observations whose GPS box falls outside this Location's new box to
   # smallest Location containing new box.
   def relocate_observations_outside_box
-    return unless saved_change_to_box?
+    return unless box_shrunk?
 
     observations.where.not(lat: nil).where.not(lng: nil).find_each do |obs|
       box = gps_box(obs)
@@ -854,9 +854,14 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
     ((lng + 180) % 360) - 180
   end
 
-  def saved_change_to_box?
-    saved_change_to_north? || saved_change_to_south? ||
-      saved_change_to_east? || saved_change_to_west?
+  # Does the new box not contain the old one?
+  def box_shrunk?
+    return false unless saved_change_to_north? || saved_change_to_south? ||
+                        saved_change_to_east? || saved_change_to_west?
+
+    old_box = { north: north_before_last_save, south: south_before_last_save,
+                east: east_before_last_save, west: west_before_last_save }
+    !Location.contains_box(**old_box).exists?(id)
   end
 
   def move_observations(old_loc)
