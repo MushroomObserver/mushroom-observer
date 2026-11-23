@@ -822,15 +822,12 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
       next if Location.contains_box(**box).exists?(id)
 
       container = Location.contains_box(**box).min_by(&:box_area)
+
       # Observation stays put if no Location contains the new box.
-      # In production, Earth's box 89, −89, 179, −179.
-      # So an obs could fall outside every existing Locations
-      # A GPS point closer to a pole or the internaional date line,
-      # unless some other Location happens to cover it.
-      # A reflection's margin box that crosses one of those lines.
-      # A point just inside Earth whose margin pokes out past 89° or 179°.
-      # And because Earth doesn't straddle 180°, a box that crosses the 180°
-      # fits only inside a Location that also crosses it..
+      # Possible in production, where Earth is 89, −89, 179, −179,
+      # so it's not a guaranteed fallback. Edge cases:
+      # GPS closer to a pole or 180;
+      # Location's margin box crosses pole or 180.
       next if container.blank?
 
       obs.location = container
