@@ -27,16 +27,16 @@ class PanelTest < ComponentTestCase
     assert_includes(html, "Collapsing content")
     assert_includes(html, "Footer content")
 
-    # Test that panel-collapse-trigger is nested in span.card-header-links
+    # Test that panel-collapse-trigger is nested in span.card-header-icons
     assert_nested(
       html,
-      parent_selector: "span.card-header-links",
+      parent_selector: "span.card-header-icons",
       child_selector: "a.panel-collapse-trigger"
     )
     # Test that other heading links are printed
     assert_nested(
       html,
-      parent_selector: "span.card-header-links",
+      parent_selector: "span.card-header-icons",
       child_selector: "a.btn",
       text: "Edit"
     )

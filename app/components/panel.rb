@@ -148,7 +148,7 @@ class Components::Panel < Components::Base
 
   # May contain passed-in links, a collapse trigger, or both
   def render_heading_links
-    span(class: "card-header-links inline-flex-center") do
+    span(class: "card-header-icons inline-flex-center") do
       render(heading_links_slot) if heading_links_slot?
       render_collapse_icons if @collapsible
     end

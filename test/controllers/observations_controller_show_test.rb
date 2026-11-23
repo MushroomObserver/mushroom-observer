@@ -485,7 +485,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # Test that the panel title and new comment link appears.
     assert_select_text_includes("#comments_for_object .card-header",
                                 :comments.ti)
-    assert_select("#comments_for_object .card-header-links",
+    assert_select("#comments_for_object .card-header-icons",
                   text: :show_comments_add_comment.l)
 
     # You must be logged in to get the show_obs naming table now.

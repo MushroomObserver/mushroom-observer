@@ -26,6 +26,13 @@
   padding-bottom: 0.5rem;
 }
 
+// Spaces multiple heading-link items (Components::Panel's
+// heading_links slot) apart -- without this, two icon links with no
+// margin between them touch.
+.card-header-icons {
+  gap: 0.75em;
+}
+
 // Bootstrap's .card-title default is margin-bottom: $card-spacer-y,
 // spacing a title from following card-body content. MO's .card-header
 // titles have nothing to space from within the header, so a heading

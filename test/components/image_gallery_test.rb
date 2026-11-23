@@ -143,7 +143,7 @@ class ImageGalleryTest < ComponentTestCase
     # Custom links in panel heading
     assert_includes(html, "Test Link")
     assert_includes(html, "/test")
-    assert_includes(html, "card-header-links")
+    assert_includes(html, "card-header-icons")
 
     # Custom panel ID
     assert_includes(html, "custom_panel_id")

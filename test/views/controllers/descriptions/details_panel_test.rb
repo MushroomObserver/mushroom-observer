@@ -47,7 +47,7 @@ class Views::Controllers::Descriptions::DetailsPanelTest < ComponentTestCase
     # `ModLinks` renders an icon-link with the edit class when the
     # viewer can write.
     assert_html(html,
-                ".card-header-links .edit_name_description_link_#{desc.id}")
+                ".card-header-icons .edit_name_description_link_#{desc.id}")
   end
 
   def test_omits_edit_icon_for_anonymous_viewer
@@ -57,7 +57,7 @@ class Views::Controllers::Descriptions::DetailsPanelTest < ComponentTestCase
 
     assert_no_html(
       html,
-      ".card-header-links .edit_name_description_link_#{desc.id}"
+      ".card-header-icons .edit_name_description_link_#{desc.id}"
     )
   end
 

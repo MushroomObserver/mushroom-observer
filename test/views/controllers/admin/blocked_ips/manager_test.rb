@@ -62,8 +62,8 @@ module Views::Controllers::Admin::BlockedIps
 
       # Shows pagination info in the panel heading, e.g.
       # "Showing 1 of 100 (page 2 of 5)".
-      assert_html(html, ".card-header-links", text: "Showing 1 of 100")
-      assert_html(html, ".card-header-links", text: "page 2 of 5")
+      assert_html(html, ".card-header-icons", text: "Showing 1 of 100")
+      assert_html(html, ".card-header-icons", text: "page 2 of 5")
 
       # Renders filter form
       assert_html(html, "#blocked-ips-list-filter-form")
@@ -77,8 +77,8 @@ module Views::Controllers::Admin::BlockedIps
       html = render_manager(type: :okay, ips: ["1.2.3.4"],
                             page: nil, total_pages: nil, total_count: nil)
 
-      heading = Nokogiri::HTML(html).at_css(".card-header-links")
-      assert(heading, "Expected .card-header-links element")
+      heading = Nokogiri::HTML(html).at_css(".card-header-icons")
+      assert(heading, "Expected .card-header-icons element")
       assert_includes(heading.text, "Showing 1")
       assert_not_includes(heading.text, "page")
       assert_no_html(html, "#okay-ips-list-filter-form")
