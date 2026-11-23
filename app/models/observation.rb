@@ -888,6 +888,19 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   delegate :notes_normalized_key, to: :Observation
 
+  # The key the iNat import snapshot part is stored under (Inat::Obs#
+  # notes) and looked up by (Views::Controllers::Observations::Show::
+  # NotesPanel). Pinned to MO.default_locale rather than the ambient
+  # I18n.locale -- an import job has no per-request locale, and a
+  # later viewer's locale is independent of whatever locale was
+  # active at import, so both ends need this to resolve the same way
+  # regardless of which locale happens to be active when each runs.
+  def self.inat_snapshot_key
+    I18n.with_locale(MO.default_locale) do
+      notes_normalized_key(:inat_snapshot_caption.l)
+    end
+  end
+
   # rubocop:disable MO/NoLongCommentBlock
   # Array of note parts (Strings) to display in create & edit form,
   # in following (display) order. Used by views.
