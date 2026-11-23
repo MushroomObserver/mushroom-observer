@@ -5,25 +5,8 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
   prop :user, _Nilable(::User), default: nil
 
   def view_template
-    return if @obs.display_notes == ::Observation.no_notes
-
-    Panel(**panel_attrs) do |panel|
-      panel.with_heading { :notes.ti }
-      panel.with_body { render_regular_notes } if regular_notes.present?
-      render_inat_section(panel) if inat_value
-    end
-  end
-
-  # Panel's per-body collapse: true always targets the panel's
-  # collapse_target:/expanded: props (Components::Panel#
-  # render_collapse_body reads @collapse_id, ignoring any id: passed
-  # to with_body) -- collapsible: is left unset so the top "Notes"
-  # heading doesn't also grow a toggle pointed at the same target.
-  def panel_attrs
-    attrs = { id: "observation_notes" }
-    return attrs unless inat_value
-
-    attrs.merge(collapse_target: "##{inat_collapse_id}", expanded: false)
+    render_regular_notes_panel
+    render_inat_panel
   end
 
   private
@@ -32,10 +15,20 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
     @notes ||= @obs.display_notes
   end
 
-  # Every part except the iNat import snapshot, which gets a
-  # collapsible sub-section below instead.
+  # Every part except the iNat import snapshot, which gets a separate
+  # panel below instead.
   def regular_notes
     @regular_notes ||= notes.except(inat_snapshot_key)
+  end
+
+  # A lone blank "Other" value isn't content -- without this check an
+  # iNat-only observation (regular_notes == { Other: "" }) would still
+  # render an empty Notes panel above the iNat one.
+  def regular_notes_present?
+    return false if regular_notes.blank?
+    return true unless regular_notes.keys == [:Other]
+
+    regular_notes[:Other].to_s.present?
   end
 
   def inat_value
@@ -49,20 +42,42 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
     ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
   end
 
-  def inat_collapse_id
-    "obs_note_#{inat_snapshot_key}"
+  def render_regular_notes_panel
+    return unless regular_notes_present?
+
+    Panel(id: "observation_notes") do |panel|
+      panel.with_heading { :notes.ti }
+      panel.with_body { render_notes_body(regular_notes) }
+    end
+  end
+
+  # A separate panel, collapsed by default -- the iNat snapshot can
+  # run long (an embedded DNA sequence line, for instance), and is
+  # conceptually distinct from the observer's notes even though both
+  # are stored in the same notes column.
+  def render_inat_panel
+    return if inat_value.blank?
+
+    Panel(id: "observation_inat_snapshot", collapsible: true,
+          collapse_target: "#observation_inat_snapshot_body",
+          expanded: false) do |panel|
+      panel.with_heading { plain(:inat_snapshot_caption.ti) }
+      panel.with_body(collapse: true) do
+        render_notes_body({ Other: inat_value })
+      end
+    end
   end
 
   # Passes each notes value to textile independently rather than
   # the whole block — a `+photo` value at the start of a line
   # would otherwise be interpreted as textile bold-emphasis across
   # subsequent lines.
-  def render_regular_notes
+  def render_notes_body(parts)
     div(class: "obs-notes textile") do
       # ApplicationController resets the per-request Textile cache
       # before every action; this only needs to prime it.
       ::Textile.register_name(@obs.name)
-      render_note_values(regular_notes)
+      render_note_values(parts)
     end
   end
 
@@ -84,38 +99,5 @@ class Views::Controllers::Observations::Show::NotesPanel < Views::Base
 
     trusted_html(append_colon("+#{key.to_s.tr("_", " ")}+").tl)
     div(class: "indent") { trusted_html(value.to_s.tpl) }
-  end
-
-  # A second panel-heading-styled section, collapsed by default --
-  # the iNat snapshot can run long (an embedded DNA sequence line, for
-  # instance). Mirrors Components::Panel's collapsible-heading shape
-  # (plain heading text, a caret-only trigger) rather than Panel's
-  # built-in collapsible: option, which supports only one collapsible
-  # body per panel.
-  def render_inat_section(panel)
-    panel.with_body(wrapper: false) { render_inat_heading }
-    panel.with_body(collapse: true) do
-      ::Textile.register_name(@obs.name)
-      div(class: "indent textile") { trusted_html(inat_value.to_s.tpl) }
-    end
-  end
-
-  def render_inat_heading
-    div(class: "panel-heading") do
-      div(class: "h4 panel-title d-flex justify-content-between " \
-                 "align-items-center") do
-        span { plain(:inat_snapshot_caption.ti) }
-        render_inat_collapse_trigger
-      end
-    end
-  end
-
-  def render_inat_collapse_trigger
-    Link(type: :collapse_toggle, target_id: inat_collapse_id,
-         class: "panel-collapse-trigger ml-3 inline-flex-center") do
-      Icon(type: :chevron_down, title: :open.ti, class: "active-icon",
-           center_tooltip: true)
-      Icon(type: :chevron_up, title: :close.ti, center_tooltip: true)
-    end
   end
 end

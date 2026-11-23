@@ -76,13 +76,6 @@
 .panel-collapse-trigger {
   text-decoration: none;
 
-  // Textile's +text+ syntax (used for note captions) renders <ins>,
-  // which carries an underline in the browser's default stylesheet --
-  // the trigger's text-decoration: none above doesn't reach it.
-  ins {
-    text-decoration: none;
-  }
-
   .active-icon, .active-label {
     display: none;
   }
