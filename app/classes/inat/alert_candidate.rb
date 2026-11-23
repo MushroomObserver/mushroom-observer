@@ -66,7 +66,8 @@ class Inat
       return nil if taxon["id"].blank?
 
       { id: ident["id"], taxon_id: taxon["id"], name: taxon["name"].to_s,
-        ancestor_ids: Array(taxon["ancestor_ids"]) }
+        ancestor_ids: Array(taxon["ancestor_ids"]),
+        provisional: taxon["provisional"] == true }
     end
 
     # iNat writes a point as "lat,lng" in `location`. An obscured

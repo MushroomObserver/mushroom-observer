@@ -126,6 +126,29 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_equal(@coprinus.text_name, alert.target_name)
   end
 
+  # A temporary code applied to a find is what the coordinators
+  # confirm by hand, so it alerts even though the project watches no
+  # such name -- the row says it is untracked rather than adding it
+  # (#5705).
+  def test_an_untracked_identification_alerts_as_activity
+    alerting_row
+    stub_observations([observation])
+    scan
+
+    stub_observations([observation("identifications" => [provisional_ident])])
+    alert = scan.values.first.first
+
+    assert_equal("Russula sp-NY01", alert.name)
+    assert_equal(@coprinus.text_name, alert.target_name)
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert(alert.provisional, "iNat marked the taxon provisional")
+  end
+
+  def provisional_ident
+    identification(id: 1000, taxon_id: 123_456, name: "Russula sp-NY01").
+      deep_merge("taxon" => { "provisional" => true })
+  end
+
   # A confirming identification on an observation the project has
   # already been told about is activity, not a find (#5677).
   def test_a_later_identification_is_other_activity

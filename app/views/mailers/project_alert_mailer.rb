@@ -45,6 +45,17 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
         many: :email_project_alert_activity_intro }
   }.freeze
 
+  # Keyed by whether the row has a date -- iNat does not always have
+  # one, and "observed unknown" is worse than saying so -- and by
+  # whether it says what happened, which a find's row leaves to its
+  # message.
+  ROW_TAGS = {
+    [true, true] => :email_project_alert_row_activity,
+    [true, false] => :email_project_alert_row,
+    [false, true] => :email_project_alert_row_activity_undated,
+    [false, false] => :email_project_alert_row_undated
+  }.freeze
+
   private
 
   def intro
@@ -104,19 +115,12 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
     end
   end
 
-  # iNat does not always have a date for an observation, and "observed
-  # unknown" is worse than saying so.
   def row_text(alert, projects)
-    return undated_row_text(alert, projects) if alert.observed_on.blank?
-
-    :email_project_alert_row.l(name: alert.name.to_s,
-                               date: alert.observed_on.web_date,
-                               projects: projects)
-  end
-
-  def undated_row_text(alert, projects)
-    :email_project_alert_row_undated.l(name: alert.name.to_s,
-                                       projects: projects)
+    args = { name: alert.name.to_s, projects: projects }
+    args[:date] = alert.observed_on.web_date if alert.observed_on.present?
+    what = alert.activity_phrase
+    args[:what] = what if what.present?
+    ROW_TAGS[[args.key?(:date), args.key?(:what)]].l(**args)
   end
 
   def project_names(alerts)

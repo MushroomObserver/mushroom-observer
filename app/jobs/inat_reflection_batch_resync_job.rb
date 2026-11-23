@@ -11,7 +11,9 @@ class InatReflectionBatchResyncJob < ApplicationJob
 
   def perform
     resyncer = Inat::ReflectionBatchResyncer.new
-    counts = resyncer.resync_all
+    # A name the sync moves off what a project was told is an alert
+    # (#5705); one set of digests covers the whole run.
+    counts = ProjectAlert::Collector.around { resyncer.resync_all }
     Rails.logger.info("InatReflectionBatchResyncJob: #{counts.inspect}")
     # A back-link pointing at the wrong MO obs is rare and needs a human
     # look, not an auto-repair (#5196 discussion) -- route each to #alerts.
