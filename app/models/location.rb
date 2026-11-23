@@ -152,6 +152,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
   after_update :notify_users
+  after_update :relocate_observations_outside_box
 
   SEARCHABLE_FIELDS = [
     :name, :notes
@@ -810,6 +811,53 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private
+
+  # Change Observations whose GPS box falls outside this Location's new box to
+  # smallest Location containing new box.
+  def relocate_observations_outside_box
+    return unless saved_change_to_box?
+
+    observations.where.not(lat: nil).where.not(lng: nil).find_each do |obs|
+      box = gps_box(obs)
+      next if Location.contains_box(**box).exists?(id)
+
+      container = Location.contains_box(**box).min_by(&:box_area)
+      # Observation stays put if no Location contains the new box.
+      # In production, Earth's box 89, −89, 179, −179.
+      # So an obs could fall outside every existing Locations
+      # A GPS point closer to a pole or the internaional date line,
+      # unless some other Location happens to cover it.
+      # A reflection's margin box that crosses one of those lines.
+      # A point just inside Earth whose margin pokes out past 89° or 179°.
+      # And because Earth doesn't straddle 180°, a box that crosses the 180°
+      # fits only inside a Location that also crosses it..
+      next if container.blank?
+
+      obs.location = container
+      obs.save
+    end
+  end
+
+  # The GPS point; for a reflection, iNat's public point widened by its
+  # public margin of error.
+  def gps_box(obs)
+    gps = obs.public_gps ||
+          { lat: obs.lat.to_f, lng: obs.lng.to_f, margin_m: 0 }
+    gps => { lat:, lng:, margin_m: }
+    d_lat = margin_m / 1000 / KM_PER_DEGREE
+    d_lng = [d_lat / Math.cos(lat * Math::PI / 180), 180].min
+    { north: [lat + d_lat, 90].min, south: [lat - d_lat, -90].max,
+      east: wrap_lng(lng + d_lng), west: wrap_lng(lng - d_lng) }
+  end
+
+  def wrap_lng(lng)
+    ((lng + 180) % 360) - 180
+  end
+
+  def saved_change_to_box?
+    saved_change_to_north? || saved_change_to_south? ||
+      saved_change_to_east? || saved_change_to_west?
+  end
 
   def move_observations(old_loc)
     old_loc.observations.each do |obs|
