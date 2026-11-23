@@ -30,9 +30,9 @@
 # e.g. next to an object that isn't itself a link either (Matching
 # Observations' current-observation row).
 #
-# `extra_class:` has no default margin -- like `size:` above, every
-# caller states what spacing it needs (`"mr-3"`, `"ml-2"`, `nil`, …)
-# rather than inheriting one from this component.
+# `extra_class:` has no default margin -- omit it when the badge
+# needs no spacing (e.g. a table/grid column), or pass `"mr-3"`/
+# `"ml-2"`/etc. when it does.
 #
 # @example
 #   Badge(variant: :id, object: @project, size: :sm, extra_class: "mr-3")
