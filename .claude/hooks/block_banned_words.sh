@@ -19,15 +19,14 @@
 # invented jargon for a word MO already has, and a term with several
 # everyday meanings. See .claude/rules/mo_terminology.md.
 #
-# Only that sense is the rule's business, so the match is deliberately
-# two-part: the word has to sit directly after an article, a
-# possessive or "of", AND the same line has to mention something from
-# the alert domain (observation, project, alert, iNat, naming, taxon,
-# coordinator). "The find command", "a find in the log" and "the verb
-# finds" are nobody's business here and pass, as do the verb
-# generally, "find_by" and "find out". The cost of that is a miss
-# when a line uses the noun with no domain word on it; the rule file
-# is what covers those, not this hook.
+# The rule covers the whole codebase, not one area of it. The match is
+# two-part only to keep the ordinary English senses out: the word has
+# to sit directly after an article, a possessive or "of", AND the same
+# line has to name something MO keeps records about (see
+# FIND_CONTEXT_RE). "The find command", "a find in the log" and "the
+# verb finds" pass, as do the verb generally, "find_by" and "find
+# out". The cost is a miss when a line uses the noun with no such word
+# on it; the rule file covers those, not this hook.
 #
 # Word list: real, genuine(ly), actual(ly), exactly, never, ever,
 # canonical, consume, "at all", own -- used as intensifiers/hedges,
@@ -62,7 +61,7 @@ OWN_RE="('s|its|their|his|her|your|my|our)[[:space:]]+own([^[:alnum:]_]|$)"
 # counts only on a line FIND_CONTEXT_RE also matches.
 FIND_RE="(^|[^[:alnum:]_])(a|the|of|these|those|new|rare|more)[[:space:]]+finds?([^[:alnum:]_-]|$)"
 FIND_POSS_RE="('s|its|their|his|her|your|my|our)[[:space:]]+finds?([^[:alnum:]_-]|$)"
-FIND_CONTEXT_RE="(observation|project|alert|inat|naming|taxon|coordinator)"
+FIND_CONTEXT_RE="(observation|project|alert|inat|naming|taxon|coordinator|herbarium|specimen|voucher|species list|field slip)"
 
 TEXT=""
 case "$TOOL" in

@@ -103,8 +103,8 @@ class Inat
     end
 
     # An observation iNat gives no point for still belongs: it
-    # withholds the point for a private observation, and a rare
-    # species is the case where an admin most wants to hear. The preview
+    # withholds the point for a private observation, and a rare one
+    # is the case where an admin most wants to hear. The preview
     # counts it too, for the same reason. An obscured observation
     # does carry a point and is matched on it.
     def within_area?(candidate)
