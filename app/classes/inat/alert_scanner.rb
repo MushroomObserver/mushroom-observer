@@ -154,9 +154,13 @@ class Inat
     # The name this project was told, and nil when it has not been told
     # about this observation -- one lookup answers both, since a row
     # carries no blank target_name.
+    #
+    # Asked of the whole ledger, not of the rows this poll wrote: an
+    # import records what a watching project would have been told, and
+    # a project already holding the observation hears about an edit on
+    # iNaturalist as activity on it.
     def told_target_name(criterion, candidate)
-      ProjectAlert.where(project: criterion.project, external_site: @site,
-                         remote_observation_id: candidate.id).
+      ProjectAlert.told_about_remote(criterion.project, @site, candidate.id).
         order(:id).last&.target_name
     end
 
