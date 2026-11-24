@@ -3,9 +3,11 @@
 # Bound form for "attach an existing image by ID" used on the image
 # reuse pages of `Observations::ImagesController#reuse`,
 # `Account::Profile::ImagesController#reuse`, and
-# `GlossaryTerms::ImagesController#reuse`. One `img_id` field plus
-# a "show all users' images / show only mine" toggle link beneath.
-# The surrounding image matrix lives outside this form and POSTs
+# `GlossaryTerms::ImagesController#reuse`. One `img_id` field. The
+# "include other users' images" toggle is a sibling, `ReuseToggle`,
+# rendered into the pagination row's sorter slot by each action
+# view -- see that class for why it isn't rendered from here. The
+# surrounding image matrix lives outside this form and POSTs
 # directly via per-thumbnail links (`Components::InteractiveImage`).
 #
 # The `target` is the domain object whose images are being chosen
@@ -40,7 +42,6 @@ class Components::ImageFragment::ReuseForm < Components::ApplicationForm
     Container(width: :text) do
       render_id_field_row
       Help(class: "form-group", content: :image_reuse_id_help.tp)
-      render_toggle_link
     end
   end
 
@@ -51,29 +52,12 @@ class Components::ImageFragment::ReuseForm < Components::ApplicationForm
   end
 
   def render_id_field_row
-    div(class: "form-group form-inline") do
+    div(class: "form-group form-inline mt-3") do
       text_field(:img_id, label: :image_reuse_id,
-                          inline: true, size: 8,
+                          inline: true, size: 8, wrap_class: "mb-0",
                           data: { autofocus: "true" })
       submit(:image_reuse_reuse.l, as: :button,
                                    name: "commit", class: "ml-3")
     end
-  end
-
-  def render_toggle_link
-    div(class: "form-group mt-3") do
-      Button(type: :get, target: toggle_url,
-             name: toggle_label)
-    end
-  end
-
-  def toggle_label
-    @all_users ? :image_reuse_just_yours.t : :image_reuse_all_users.t
-  end
-
-  def toggle_url
-    url_for(controller: target_controller, action: :reuse,
-            id: @target.id,
-            all_users: @all_users ? 0 : 1)
   end
 end

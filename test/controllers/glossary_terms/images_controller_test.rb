@@ -18,8 +18,9 @@ module GlossaryTerms
       requires_login(:reuse, params)
 
       assert_form_action(action: :attach, id: glossary_term.id)
-      assert_select("a", { text: :image_reuse_just_yours.l },
-                    "Form should have a link to show only the user's images.")
+      assert_select("option", { text: :image_reuse_just_yours.l },
+                    "Toggle should have an option to show only the " \
+                    "user's images.")
     end
 
     # layout_count: 1 forces 2 pages out of mary's 2 image fixtures.
