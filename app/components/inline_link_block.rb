@@ -8,9 +8,9 @@
 # icon wide enough to wrap when it would otherwise fit inline -- see
 # the GPS map link). Renders nothing when `items` is empty.
 #
-# `margin_class:` defaults to `ml-2` for in-text usage (the
-# observation-show sub-panels, etc.); the title-bar's edit/delete
-# icons pass `ml-3` to match that row's wider spacing.
+# `margin_class:` defaults to `ml-3` -- wider than the `gap` between
+# items, so the group reads as a distinct unit from whatever precedes
+# it, not just another item in the row.
 #
 # @example
 #   InlineLinkBlock(items: [edit_button, destroy_button])
@@ -25,7 +25,7 @@ class Components::InlineLinkBlock < Components::Base
   end
 
   prop :items, _Array(_Union(Phlex::SGML, String))
-  prop :margin_class, String, default: "ml-2"
+  prop :margin_class, String, default: "ml-3"
 
   def view_template
     return if @items.empty?

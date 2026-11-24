@@ -59,9 +59,9 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
     def header_label
       if sequences.any? || @has_sibling_records
-        append_colon(:sequences.ti)
+        append_colon(:sequences.ti, space: false)
       else
-        "#{:no_objects.t(type: :sequence)} "
+        :no_objects.t(type: :sequence)
       end
     end
 
@@ -73,7 +73,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     end
 
     def render_list
-      ul(class: "tight-list") do
+      ul(class: "tight-list mb-0") do
         sequence_rows.each { |seq, member| render_row(seq, member) }
       end
     end
@@ -89,7 +89,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
         end
         InlineCRUDLinks(
           target: sequence, user: @user,
-          extras: [archive_link(sequence), copy_link(sequence)].compact
+          extras: [copy_link(sequence), archive_link(sequence)].compact
         )
       end
     end
@@ -102,18 +102,16 @@ class Views::Controllers::Observations::Show::SpecimenPanel
            **opts) { trusted_html(content) }
     end
 
+    # Icon-only, alongside copy/edit/destroy in the same inline icon
+    # block, instead of a separate visible-text link.
     def archive_link(sequence)
       return nil unless sequence.deposit?
 
       tab = ::Tab::Sequence::Archive.new(sequence: sequence)
-      class_name = Components::InlineLinkBlock.item_class(
-        tab.html_options[:class]
+      Components::Link::External.new(
+        tab: tab, icon: :new_window,
+        class: Components::InlineLinkBlock.item_class
       )
-      # Capture so it composes into InlineCRUDLinks' `extras:` slot
-      # list. `capture` returns a SafeBuffer in Phlex 2.x -- no extra
-      # `.html_safe` needed. type: :external (not :get) since the
-      # tab's html_options marks it external: true.
-      capture { Link(type: :external, tab: tab, class: class_name) }
     end
 
     # Bases aren't displayed in this row (only the truncated locus

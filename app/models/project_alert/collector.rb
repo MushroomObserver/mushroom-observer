@@ -30,15 +30,21 @@ class ProjectAlert
       Thread.current[KEY]
     end
 
-    # Collects whatever the block raises, then delivers it. Returns
-    # whatever the block returns.
-    def self.around
+    # Collects whatever the block raises, then writes the rows and
+    # mails them. Returns whatever the block returns.
+    #
+    # `mail: false` writes the rows and tells nobody, which is what an
+    # import wants: whoever ran it knows what they brought in, and
+    # iNaturalist told a watching project there. The rows still have
+    # to exist, since a watched name arriving is what a later move off
+    # it reads as activity on.
+    def self.around(mail: true)
       return yield if current
 
       Thread.current[KEY] = new
       begin
         result = yield
-        current.deliver
+        mail ? current.deliver : current.record_all
         result
       ensure
         Thread.current[KEY] = nil
@@ -47,28 +53,37 @@ class ProjectAlert
 
     # Outside an action -- a console, a test, a callback MO does not
     # wrap -- there is nobody to flush, so the change raises nothing.
-    def self.touch(observation, target)
+    def self.touch(observation, target, provisional: false)
       return if ProjectAlert.suppressed?
 
-      current&.touch(observation, target)
+      current&.touch(observation, target, provisional: provisional)
     end
 
     def initialize
       @touched = {}
       @namings = Hash.new { |hash, key| hash[key] = [] }
+      @provisional = {}
     end
 
-    def touch(observation, target)
+    # `provisional` says the name arriving is a code waiting to be
+    # confirmed, which only the resync knows: the flag lives on
+    # iNaturalist, not on the MO Name.
+    def touch(observation, target, provisional: false)
       return unless observation
 
       @namings[observation.id] << target if target.is_a?(Naming)
+      @provisional[observation.id] ||= provisional
       @touched[observation.id] = [observation, better_target(observation,
                                                              target)]
     end
 
+    # The rows this action calls for, written.
+    def record_all
+      @touched.values.flat_map { |obs, target| record(obs, target) }
+    end
+
     def deliver
-      rows = @touched.values.flat_map { |obs, target| record(obs, target) }
-      ProjectAlert.deliver_digests(rows)
+      ProjectAlert.deliver_digests(record_all)
     end
 
     private
@@ -120,8 +135,8 @@ class ProjectAlert
       return nil unless name
 
       ProjectAlert.record_local(project: project, observation: observation,
-                                target: target, name: name.text_name,
-                                target_name: name.text_name)
+                                target: target, target_name: name.text_name,
+                                proposal: { name: name.text_name })
     end
 
     # A comment is no find: an observation becomes the project's business
@@ -138,7 +153,9 @@ class ProjectAlert
     def activity(project, observation, target, target_name)
       ProjectAlert.record_local(
         project: project, observation: observation, target: target,
-        name: observation.name&.text_name.to_s, target_name: target_name
+        target_name: target_name,
+        proposal: { name: observation.name&.text_name.to_s,
+                    provisional: @provisional[observation.id] || false }
       )
     end
 
