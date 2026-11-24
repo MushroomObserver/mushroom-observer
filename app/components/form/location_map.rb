@@ -49,7 +49,7 @@ class Components::Form::LocationMap < Components::Base
   end
 
   def render_button_group
-    ButtonGroup(class: "my-3", data: { map_target: "controlWrap" }) do
+    ButtonGroup(class: "my-2", data: { map_target: "controlWrap" }) do
       render_toggle_button
       render_clear_button
     end
