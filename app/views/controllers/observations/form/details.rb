@@ -39,7 +39,6 @@ class Views::Controllers::Observations::Form::Details < Views::Base
       render_bounds_hidden_fields
       render_is_collection_location
       render_geolocation_section
-      render_log_change if update?
     end
   end
 
@@ -189,14 +188,6 @@ class Views::Controllers::Observations::Form::Details < Views::Base
       :gps_hidden,
       label: :form_observations_gps_hidden,
       wrap_class: "mt-2 mb-3"
-    )
-  end
-
-  def render_log_change
-    @form.checkbox_field(
-      :log_change,
-      label: :form_observations_log_change,
-      checked: true
     )
   end
 
