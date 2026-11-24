@@ -81,8 +81,8 @@ class Inat
 
     # Only a clean poll moves the watermark. A fetch that failed leaves
     # its window unread, and stamping over it would drop whatever was
-    # identified during it -- the rare find this cycle exists to catch.
-    # The next cycle re-covers the window instead.
+    # identified during it -- the rare observation this cycle exists
+    # to catch. The next cycle re-covers the window instead.
     def advance_watermark(candidates)
       return if @fetch_failed
 
@@ -114,13 +114,14 @@ class Inat
       return nil unless criterion.matches?(candidate)
 
       told = told_target_name(criterion, candidate)
-      return find_alert(criterion, candidate) unless told
+      return new_observation_alert(criterion, candidate) unless told
 
       activity_alert(criterion, candidate, told)
     end
 
-    # A project hears about a find only under a name it watches.
-    def find_alert(criterion, candidate)
+    # A project hears about a new observation only under a name it
+    # watches.
+    def new_observation_alert(criterion, candidate)
       identification = criterion.alertable_identification(candidate)
       return nil unless identification
 
@@ -130,8 +131,9 @@ class Inat
 
     # Once a project has been told about an observation, the newest
     # identification is news whatever it names: a temporary code
-    # applied to a find is what the coordinators confirm by hand, and
-    # it is reported whether or not the community taxon follows it.
+    # applied to one it holds is what the coordinators confirm by
+    # hand, and it is reported whether or not the community taxon
+    # follows it.
     # The message stays grouped under the watched name the project
     # was told, which is where a coordinator looks for it.
     def activity_alert(criterion, candidate, target_name)

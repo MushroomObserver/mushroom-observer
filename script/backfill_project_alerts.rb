@@ -5,12 +5,12 @@
 # One-time backfill of the project alert ledger.
 #
 # A row says a project has been told about an observation, and the
-# first thing a project is told about one is that it was found. An
+# first thing a project is told about one is that it arrived. An
 # observation a project already holds was surfaced to it when it was
-# added, so a later change is activity on it rather than a find -- but
-# nothing wrote a row for the observations added before the import did,
-# so the next edit on iNaturalist, or the next naming here, reads as a
-# new find and mails one.
+# added, so a later change is activity on it rather than news -- but
+# nothing wrote a row for the observations added before the import
+# did, so the next edit on iNaturalist, or the next naming here, reads
+# as a new observation and mails one.
 #
 # This writes the rows the collector would have written: one per
 # observation a project holds that carries a name the project watches

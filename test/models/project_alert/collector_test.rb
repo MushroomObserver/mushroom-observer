@@ -93,7 +93,7 @@ class ProjectAlert::CollectorTest < UnitTestCase
     assert_enqueued_jobs(1, only: ActionMailer::MailDeliveryJob)
   end
 
-  # A name proposed on an observation posted earlier is a find, since
+  # A name proposed on an observation posted earlier is news, since
   # the project had not heard about it.
   def test_a_naming_on_an_older_observation_alerts
     obs = act { new_observation(name: names(:fungi)) }
@@ -193,7 +193,7 @@ class ProjectAlert::CollectorTest < UnitTestCase
 
   # Joining the project is part of posting it, so the observation is
   # still news.
-  def test_an_observation_added_to_the_project_as_it_is_posted_is_a_find
+  def test_an_observation_added_to_the_project_as_it_is_posted_is_new
     obs = nil
 
     act do

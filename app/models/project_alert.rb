@@ -13,8 +13,8 @@
 #
 #  It also holds what the message said: the name applied, the watched
 #  name it matched, the date the mushroom was seen, and which of the
-#  two messages it went in (#5677) -- a find, or activity on an
-#  observation already reported.
+#  two messages it went in (#5677) -- a new observation, or
+#  activity on one already reported.
 #
 #  == Class methods
 #
@@ -30,7 +30,7 @@
 #  url::               where to read the observation
 #  source_name::       the site it came from, or this one
 #  observation_key::   what groups rows about one observation
-#  new_observation?::  is this a find rather than later activity
+#  new_observation?::  is this new rather than later activity
 #  message_key::       which message this alert belongs in
 #
 class ProjectAlert < AbstractModel
@@ -131,7 +131,7 @@ class ProjectAlert < AbstractModel
     Thread.current[:project_alerts_suppressed] || false
   end
 
-  # A find the first time, activity after that: a project told about an
+  # New the first time, activity after that: a project told about an
   # observation hears about a confirming or disagreeing identification
   # on it as activity, not as something new.
   def self.kind_for(project, external_site, observation_id)
@@ -140,10 +140,10 @@ class ProjectAlert < AbstractModel
   end
 
   # An observation imported from a site carries that site's id for it,
-  # so a project told about it there does not hear about it again as a
-  # find here.
+  # so a project told about it there does not hear about it again as
+  # new here.
   #
-  # A comment is no find either: what makes an observation the
+  # A comment is nothing new either: what makes an observation the
   # project's business is a watched name arriving on it, not somebody
   # talking about it.
   def self.local_kind_for(project, observation, target = nil)
@@ -245,8 +245,8 @@ class ProjectAlert < AbstractModel
   # What happened, for a row of an activity message: a coordinator
   # told that something changed wants to know what. A proposal names
   # what was proposed; otherwise the answer is what the name did,
-  # against the name this project was last told. Nil for a find,
-  # whose message already says an observation arrived.
+  # against the name this project was last told. Nil for a new
+  # observation, whose message already says one arrived.
   def activity_phrase
     return nil unless kind == OTHER_ACTIVITY
     return :email_project_alert_what_comment.l if target_type == "Comment"

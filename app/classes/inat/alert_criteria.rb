@@ -51,8 +51,9 @@ class Inat
     # told about: the newest current identification, whatever it
     # names. A name a project does not watch is the case the
     # coordinators asked to hear about -- a temporary code applied to
-    # a find, which they confirm by hand -- and a find still needs a
-    # watched name, which `alertable_identification` answers.
+    # an observation it holds, which they confirm by hand -- and a new
+    # observation still needs a watched name, which
+    # `alertable_identification` answers.
     def activity_identification(candidate)
       candidate.current_identifications.max_by { |ident| ident[:id].to_i }
     end
@@ -102,8 +103,8 @@ class Inat
     end
 
     # An observation iNat gives no point for still belongs: it
-    # withholds the point for a private observation, and a rare find
-    # is the case where an admin most wants to hear. The preview
+    # withholds the point for a private observation, and a rare
+    # species is the case where an admin most wants to hear. The preview
     # counts it too, for the same reason. An obscured observation
     # does carry a point and is matched on it.
     def within_area?(candidate)
