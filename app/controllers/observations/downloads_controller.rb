@@ -6,9 +6,17 @@ module Observations
 
     before_action :login_required
 
+    # Base controller_model_name derives from controller_name
+    # ("downloads" -> "Download", which isn't a model) -- needed by
+    # other_filter_param_present?/create_query_from_url_params below.
+    def controller_model_name
+      "Observation"
+    end
+
     def new
-      @query = find_or_create_query(:Observation, order_by: params[:by])
-      return too_many_results if too_many_results?
+      @query = new_query
+      return if performed?
+      return too_many_results if @query.blank? || too_many_results?
 
       derive_ivar_from_query(:@project, @query, :projects, Project)
       update_stored_query(@query) # also stores query in session
@@ -40,6 +48,18 @@ module Observations
     end
 
     private
+
+    # A direct visit with filter params (e.g. `?date=...`) builds a
+    # fresh query from them; otherwise reuse the session/bookmarked
+    # query the caller already filtered on the observations index.
+    def new_query
+      if other_filter_param_present?
+        query, = create_query_from_url_params(:Observation, params)
+        query
+      else
+        find_or_create_query(:Observation, order_by: params[:by])
+      end
+    end
 
     def too_many_results
       flash_error(:download_observations_too_many_results.t)
