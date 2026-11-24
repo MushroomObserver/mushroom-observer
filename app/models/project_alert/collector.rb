@@ -104,7 +104,7 @@ class ProjectAlert
     end
 
     # What this project hears about an action on this observation. A
-    # watched name arriving is a find the first time and activity after
+    # watched name arriving is new the first time and activity after
     # that; a comment is activity on an observation the project already
     # has. Anything else is somebody else's observation.
     def alert_for(project, observation, target)
@@ -139,8 +139,9 @@ class ProjectAlert
                                 proposal: { name: name.text_name })
     end
 
-    # A comment is no find: an observation becomes the project's business
-    # by being added to it or reported to it, not by being talked about.
+    # A comment is nothing new: an observation becomes the project's
+    # business by being added to it or reported to it, not by being
+    # talked about.
     def comment_alert(project, observation, target, told)
       return activity(project, observation, target, told.target_name) if told
       return nil unless project.observations.exists?(observation.id)

@@ -1211,7 +1211,7 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   # An undated observation is inside any window: a project watching
-  # for a rare find wants to hear about one whose date nobody gave.
+  # for a rare species wants to hear about one whose date nobody gave.
   def alert_within_dates?(observation)
     seen = observation.when
     return true if seen.blank?
