@@ -105,14 +105,19 @@ class Project < AbstractModel # rubocop:disable Metrics/ClassLength
   serialize :alert_recipient_ids, coder: JSON
   after_initialize :ensure_alert_recipient_ids_initialized
 
-  # Projects whose alerts go to somebody. Both kinds of target are
-  # required, since the taxa are what an alert is about and the
-  # locations are what keep the net from covering the world (#5721).
-  # The empty list is written three ways, and each is compared as the
-  # serialized attribute rather than as a string.
+  # Projects that could alert, whether or not anyone has subscribed.
+  # Both kinds of target are required, since the taxa are what an alert
+  # is about and the locations are what keep the net from covering the
+  # world (#5721).
+  scope :alertable, lambda {
+    joins(:project_target_names).joins(:project_target_locations).distinct
+  }
+
+  # Projects whose alerts go to somebody. The empty list is written
+  # three ways, and each is compared as the serialized attribute rather
+  # than as a string.
   scope :alerting, lambda {
-    joins(:project_target_names).joins(:project_target_locations).distinct.
-      where.not(alert_recipient_ids: [nil, [], ""])
+    alertable.where.not(alert_recipient_ids: [nil, [], ""])
   }
 
   # What the project already holds from an external site (#5416): how

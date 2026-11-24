@@ -135,8 +135,7 @@ class ProjectAlert < AbstractModel
   # observation hears about a confirming or disagreeing identification
   # on it as activity, not as something new.
   def self.kind_for(project, external_site, observation_id)
-    told = exists?(project: project, external_site: external_site,
-                   remote_observation_id: observation_id)
+    told = told_about_remote(project, external_site, observation_id).exists?
     told ? OTHER_ACTIVITY : NEW_OBSERVATION
   end
 
@@ -166,6 +165,29 @@ class ProjectAlert < AbstractModel
   # nothing.
   def self.last_alert_for(project, observation)
     told_about(project, observation).order(:id).last
+  end
+
+  # The same question asked of the site's record: what this project has
+  # been told about the observation the site calls this id, whichever
+  # source said so. The poll knows a record by that id alone, while an
+  # import writes its row against MO's copy, so the copy is looked up
+  # for the two to answer alike.
+  def self.told_about_remote(project, external_site, remote_observation_id)
+    remote = where(project: project, external_site: external_site,
+                   remote_observation_id: remote_observation_id.to_s)
+    linked_observations(external_site, remote_observation_id).
+      reduce(remote) { |rows, obs| rows.or(told_about(project, obs)) }
+  end
+
+  # MO's copies of the site's record. More than one is possible: the
+  # site's duplicate uploads of one collection may be linked to
+  # separate observations here.
+  def self.linked_observations(external_site, remote_observation_id)
+    ids = ExternalLink.where(external_site: external_site,
+                             target_type: "Observation",
+                             external_id: remote_observation_id.to_s).
+          pluck(:target_id)
+    Observation.where(id: ids)
   end
 
   # A remote id means something only with the site that issued it, so
