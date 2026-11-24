@@ -21,7 +21,7 @@
 #   app/components/dropdown.rb
 #   app/components/link/external.rb (owns target="_blank")
 #   app/components/link/collapse_toggle.rb,
-#     app/components/badge/collapse_toggle.rb (own data-toggle="collapse")
+#     app/components/badge/collapse_toggle.rb (owns data-toggle="collapse")
 #   app/components/form/checkbox_collapse.rb (owns checkbox-driven collapse)
 #   app/components/form/location_map.rb (Button::CollapseToggle via type: kwarg)
 #   app/components/application_form/input_group_addon.rb (owns input-group-btn)

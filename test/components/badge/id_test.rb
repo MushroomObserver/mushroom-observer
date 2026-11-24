@@ -97,6 +97,15 @@ class Components::Badge::IDTest < ComponentTestCase
     assert_no_html(html, "button[data-title='#{:copy_this_id.ti}']")
   end
 
+  def test_caller_data_merges_alongside_clipboard_wiring
+    obs = observations(:minimal_unknown_obs)
+    html = render_badge(object: obs, size: :md,
+                        data: { turbo_frame: "obs_badge" })
+
+    assert_html(html, "button[data-turbo-frame='obs_badge']")
+    assert_html(html, "button[data-controller='clipboard']")
+  end
+
   private
 
   def render_badge(**)

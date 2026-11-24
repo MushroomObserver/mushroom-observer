@@ -60,20 +60,20 @@ class Components::Badge::ID < Components::Badge
   private
 
   def render_interactive_badge
-    button(
-      **badge_attributes,
-      type: "button",
-      role: "button",
-      data: {
-        tooltip_target: "tip", placement: "bottom",
-        title: @title || :copy_this_id.ti,
-        controller: "clipboard", clipboard_target: "source",
-        action: "clipboard#copy",
-        clipboard_copied_value: :copied.ti
-      }
-    ) do
+    button(**mix(badge_attributes, data: clipboard_data),
+           type: "button", role: "button") do
       plain(display_value)
     end
+  end
+
+  def clipboard_data
+    {
+      tooltip_target: "tip", placement: "bottom",
+      title: @title || :copy_this_id.ti,
+      controller: "clipboard", clipboard_target: "source",
+      action: "clipboard#copy",
+      clipboard_copied_value: :copied.ti
+    }
   end
 
   def badge_attributes

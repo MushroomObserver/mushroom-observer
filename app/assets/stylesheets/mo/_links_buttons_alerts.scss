@@ -253,8 +253,9 @@ form.button_to {
   }
 }
 
-// Only the interactive forms hover -- not the static span form.
-// button& isn't valid Sass, so this stays a standalone rule.
+// Only the interactive button/collapse-toggle anchor forms hover --
+// not the static span form. button& isn't valid Sass, so this stays
+// a standalone rule.
 button.badge-id:hover,
 a.badge-id[data-toggle="collapse"]:hover {
   background-color: $text-color;
