@@ -48,8 +48,8 @@ class Components::ObservationFragment::LightboxTitle < Components::Base
   end
 
   def render_link
-    Link(type: :object, object: @obs, name: @obs.id.to_s,
-         class: "badge badge-id badge-xl mr-3",
-         id: "caption_obs_link_#{@obs.id}")
+    Badge(variant: :id, object: @obs, size: :xl, class: "mr-3",
+          id: "caption_obs_link_#{@obs.id}",
+          link: url_for(@obs.show_link_args))
   end
 end

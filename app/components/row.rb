@@ -28,9 +28,6 @@ class Components::Row < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    send(@element,
-         class: class_names("row", @attributes[:class]),
-         **@attributes.except(:class),
-         &block)
+    send(@element, **mix({ class: "row" }, @attributes), &block)
   end
 end

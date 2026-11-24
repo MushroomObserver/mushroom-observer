@@ -60,14 +60,25 @@ module Views::Controllers::Observations::ExternalLinks
     def render_own_row(link)
       li(class: "hanging-indent") do
         Link(type: :external, link: link)
+        render_site_record_badge(link)
         if @obs.reflection?
           render_read_only_note
           render_placeholder_notes if placeholder_source?(link)
         else
-          whitespace
           InlineCRUDLinks(target: link, observation: @obs, user: @user)
         end
       end
+    end
+
+    # Copy-to-clipboard badge for sites with a numeric id (iNaturalist,
+    # MyCoPortal) -- not part of the link text itself, so a click on it
+    # doesn't also fire the link's navigation.
+    def render_site_record_badge(link)
+      return unless link.site_record_id
+
+      Badge(variant: :id, value: link.site_record_id, size: :lg,
+            title: :copy_this_site_id.ti(site: link.site_name),
+            class: "ml-2")
     end
 
     # A reflection's scalar core (date, location, GPS, notes) can't be
@@ -109,6 +120,7 @@ module Views::Controllers::Observations::ExternalLinks
     def render_sibling_row(sib_link)
       li(class: "hanging-indent") do
         Link(type: :external, link: sib_link.link)
+        render_site_record_badge(sib_link.link)
         whitespace
         sibling_attribution(sib_link.observation)
         render_read_only_note if sib_link.observation.reflection?

@@ -38,6 +38,10 @@ class Components::Form::CheckboxCollapse < Components::Base
 
   private
 
+  # A caller's label_data/label_aria keys must replace a colliding
+  # base key outright, not concatenate with it -- mix() would combine
+  # two colliding String values instead of letting one override the
+  # other.
   def collapse_label_data
     { toggle: "collapse", target: "##{@target_id}" }.
       merge(@attributes[:label_data] || {})
@@ -56,7 +60,7 @@ class Components::Form::CheckboxCollapse < Components::Base
   # clicking it to "fix" that collapsed the section instead. A caller
   # that genuinely needs them to differ can still pass `checked:`.
   def passthrough_attrs
-    { checked: @expanded }.merge(@attributes.except(:label_data,
-                                                    :label_aria))
+    mix({ checked: @expanded },
+        @attributes.except(:label_data, :label_aria))
   end
 end

@@ -56,8 +56,8 @@ class ModalTest < ComponentTestCase
 
   def test_extras_class_data_and_id_overrides
     html = render_modal(id: "modal_x", title: "T",
-                        extra_class: "modal-form",
-                        extra_data: { identifier: "x", foo: "bar" },
+                        class: "modal-form",
+                        data: { identifier: "x", foo: "bar" },
                         title_id: "modal_x_header",
                         body_id: "modal_x_body") do |m|
       m.with_body { "b".html_safe }

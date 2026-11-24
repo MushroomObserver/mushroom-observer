@@ -31,15 +31,7 @@ class Components::Navbar::Text < Components::Base
   prop :attributes, _Hash(Symbol, _Any), :**
 
   def view_template(&block)
-    send(@element || :div, **computed_attributes, &block)
-  end
-
-  private
-
-  def computed_attributes
-    {
-      class: class_names("navbar-text", @attributes[:class]),
-      **@attributes.except(:class)
-    }
+    send(@element || :div, **mix({ class: "navbar-text" }, @attributes),
+         &block)
   end
 end

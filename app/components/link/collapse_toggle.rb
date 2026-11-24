@@ -50,6 +50,7 @@
 #   )) { render(Components::Icon.new(type: :chevron_down)) }
 class Components::Link::CollapseToggle < Components::Link
   include Components::Button::CollapseContent
+  include Components::CollapseAnchorAttributes
 
   prop :target_id, String
   prop :collapsed, _Boolean, default: true
@@ -78,44 +79,18 @@ class Components::Link::CollapseToggle < Components::Link
   end
 
   def view_template(&block)
-    a(
-      href: link_href,
-      role: "button",
-      class: class_names(btn_styling, size_class, @attributes[:class],
-                         { "collapsed" => @collapsed }),
+    a(href: link_href, role: "button",
+      **mix({ class: toggle_class }, @attributes.except(:data, :aria)),
       data: { toggle: "collapse", **collapse_data },
-      aria: { expanded: @collapsed ? "false" : "true",
-              **(@target_id.present? ? { controls: @target_id } : {}) },
-      **@attributes.except(:class, :data, :aria)
-    ) do
+      aria: collapse_aria) do
       block ? yield : collapse_content
     end
   end
 
   private
 
-  def link_href
-    @fallback_href || "##{@target_id}"
-  end
-
-  def collapse_data
-    extra_data = @attributes[:data] || {}
-    return extra_data unless @fallback_href
-
-    # Bootstrap's collapse data-API only prevents the default
-    # navigation when data-target is absent; fallback_href needs
-    # data-target present so collapse.js can find the pane, so the
-    # navigation has to be prevented explicitly instead. See
-    # app/javascript/controllers/collapse-fallback_controller.js --
-    # no :prevent action modifier here, the controller itself decides
-    # whether to call preventDefault() (it skips it for a
-    # data-turbo-frame trigger, letting Turbo handle that case).
-    extra_data.merge(target: "##{@target_id}",
-                     controller: [extra_data[:controller],
-                                  "collapse-fallback"].compact.join(" "),
-                     action: [extra_data[:action],
-                              "click->collapse-fallback#intercept"].
-                             compact.join(" "))
+  def toggle_class
+    class_names(btn_styling, size_class, "collapsed" => @collapsed)
   end
 
   def size_class

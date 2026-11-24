@@ -13,10 +13,9 @@
 #   # The link text leads with the relationship date, then the relationship:
 #   # "<date>: <relationship>" (e.g. "2025-05-04: Imported from
 #   # iNaturalist"). For sites with an id accessor on ExternalLink
-#   # (iNaturalist, MyCoPortal), that id follows as a sibling
-#   # copy-to-clipboard Badge(variant: :id), not part of the link text -- a
-#   # <button> nested inside the <a> would be invalid HTML and would
-#   # double-fire the link's navigation on a badge click.
+#   # (iNaturalist, MyCoPortal), the caller renders that id as a sibling
+#   # copy-to-clipboard Badge(variant: :id) -- this component only
+#   # renders the link itself.
 #
 # Via context-nav dispatcher:
 #   # Tab sets html_options: { external: true }; dispatcher routes here.
@@ -33,8 +32,6 @@ class Components::Link::External < Components::Link
 
   prop :content, _Nilable(String), default: nil
   prop :path, _Nilable(String), default: nil
-  prop :site_record_id, _Nilable(String), default: nil
-  prop :site_name, _Nilable(String), default: nil
   prop :icon, _Nilable(_Union(*Components::Button::ICONS)), default: nil
   prop :opts, _Hash(Symbol, _Any?), :**
 
@@ -46,9 +43,7 @@ class Components::Link::External < Components::Link
       content, path = resolve_link(link)
     end
     validate_icon_has_label!(icon, content)
-    super(content: content, path: path, icon: icon,
-          site_record_id: link&.site_record_id, site_name: link&.site_name,
-          **opts)
+    super(content: content, path: path, icon: icon, **opts)
   end
 
   def view_template
@@ -56,11 +51,6 @@ class Components::Link::External < Components::Link
                    **link_html_options) do
       render_link_content
     end
-    return unless @site_record_id
-
-    whitespace
-    Badge(variant: :id, value: @site_record_id, size: :lg,
-          title: :copy_this_site_id.ti(site: @site_name))
   end
 
   private

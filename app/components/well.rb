@@ -14,9 +14,6 @@ class Components::Well < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    send(@element,
-         class: class_names("well", @attributes[:class]),
-         **@attributes.except(:class),
-         &block)
+    send(@element, **mix({ class: "well" }, @attributes), &block)
   end
 end
