@@ -38,19 +38,27 @@ class Components::Link::Modal < Components::Link
 
   private
 
+  # modal_data's Stimulus wiring must win outright over a colliding
+  # caller data: key, not concatenate with it -- mix() would combine
+  # two colliding String values instead of letting one replace the
+  # other, so this uses deep_merge.
   def plain_link_args
-    mix(mix({ class: merged_class }, @attributes), data: modal_data)
+    { class: merged_class }.
+      merge(@attributes.except(:class)).
+      deep_merge(data: modal_data)
   end
 
   # Forwards `button:`/`size:` rather than a pre-built `class:` string,
   # so the nested `Link(type: :get, ...)` computes the btn styling.
   def icon_link_args
-    mix(mix({ icon: @icon, icon_class: @icon_class, show_label: @show_label,
-              button: @button, size: @size }, @attributes), data: modal_data)
+    { icon: @icon, icon_class: @icon_class, show_label: @show_label,
+      button: @button, size: @size, class: @attributes[:class] }.
+      merge(@attributes.except(:class)).
+      deep_merge(data: modal_data)
   end
 
   def merged_class
-    class_names(btn_styling, size_class(@size))
+    class_names(btn_styling, size_class(@size), @attributes[:class])
   end
 
   def modal_data

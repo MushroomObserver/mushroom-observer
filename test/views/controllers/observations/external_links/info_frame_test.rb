@@ -58,7 +58,13 @@ module Views::Controllers::Observations::ExternalLinks
     def test_own_link_without_site_record_id_shows_no_badge
       site = external_sites(:mycoportal)
       obs = observations(:coprinus_comatus_obs)
-      link = ExternalLink.new(external_site: site, target: obs)
+      # relationship: :export (not the default :manual) so this saves
+      # without an external_id -- an export link is created before the
+      # external site has assigned one (see issue #5315). Saved (not
+      # just .new) since rolf owns obs, so InlineCRUDLinks' edit/
+      # destroy links need a persisted id to build their route from.
+      link = ExternalLink.create!(external_site: site, target: obs,
+                                  user: users(:rolf), relationship: :export)
 
       html = render(frame_with(obs: obs, site_links: [link],
                                user: users(:rolf)))

@@ -33,7 +33,11 @@ class Components::Modal::CloseButton < Components::Base
   private
 
   def button_attrs
-    attrs = mix(@attributes, data: { dismiss: "modal" })
+    attrs = @attributes.dup
+    # `dismiss: "modal"` must win outright, not merge token-wise with a
+    # caller's `data: { dismiss: ... }` -- mix() would concatenate two
+    # colliding String values instead of replacing one with the other.
+    attrs[:data] = (attrs[:data] || {}).merge(dismiss: "modal")
     attrs[:name] = @name
     if @target
       attrs[:type] = :get

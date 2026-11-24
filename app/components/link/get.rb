@@ -99,14 +99,18 @@ class Components::Link::Get < Components::Link
 
   def merged_class
     class_names(identifier, stateful_class, icon_wrapper_class, btn_styling,
-                size_class(@size))
+                size_class(@size), @attributes[:class])
   end
 
+  # Scalars like `title:` must come from whichever of tooltip_data/
+  # confirm_data/@attributes sets them last, replacing outright --
+  # mix() would concatenate two colliding String values instead of
+  # letting one override the other, so this uses deep_merge.
   def link_html_options
     base = { class: merged_class }
-    base = mix(base, tooltip_data) if @icon
-    base = mix(base, confirm_data) if @confirm
-    options = mix(base, @attributes.except(:params))
+    base = base.deep_merge(tooltip_data) if @icon
+    base = base.deep_merge(confirm_data) if @confirm
+    options = base.deep_merge(@attributes.except(:class, :params))
     # `params:` is only meaningful to Rails' `button_to` (extra hidden
     # form fields) -- `link_to` has no such option, so it's excluded
     # above and only re-added when rendering via `button_to` (mirrors

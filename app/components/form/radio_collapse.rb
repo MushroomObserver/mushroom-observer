@@ -34,6 +34,11 @@ class Components::Form::RadioCollapse < Components::Base
   private
 
   def merged_attrs
-    mix({ data: { action: "change->collapse-switch#switch" } }, @attributes)
+    # A caller-supplied `data: { action: ... }` must replace the
+    # collapse-switch wiring outright, not concatenate with it --
+    # mix() would combine two colliding String values instead.
+    data = { action: "change->collapse-switch#switch" }.
+           merge(@attributes[:data] || {})
+    @attributes.merge(data: data)
   end
 end
