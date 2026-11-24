@@ -103,10 +103,10 @@
 // `$LEFT_BAR_BG_COLOR` is. ID selector wins over `.sidebar-nav
 // .list-group-item`'s specificity without needing `!important`.
 #language_dropdown_collapse .list-group-item {
-  // Each row is a `<button>` (`.btn` sets `display: inline-block`),
-  // shrinking the row to its text instead of spanning the panel.
   display: block;
   width: 100%;
+  text-align: left;
+  padding: 0.25rem 0.5rem 0.25rem 0.75rem;
   color: $card-color;
   background-color: $list-group-bg;
 
