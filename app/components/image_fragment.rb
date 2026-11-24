@@ -16,6 +16,7 @@ class Components::ImageFragment < Components::Base
     lightbox_caption: :LightboxCaption,
     original_link: :OriginalLink,
     reuse_form: :ReuseForm,
+    reuse_toggle: :ReuseToggle,
     vote_interface: :VoteInterface,
     vote_interface_streams: :VoteInterfaceStreams
   }.freeze

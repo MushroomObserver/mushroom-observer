@@ -17,6 +17,7 @@ module Views::Controllers::GlossaryTerms::Images
       )
       add_context_nav(::Tab::GlossaryTerm::ImageForm.new(term: @object))
       container_class(:full)
+      add_all_users_toggle_to_sorter_slot
       add_pagination(@pagination_data)
 
       render(::Views::Controllers::Shared::ImagesToReuseForm.new(
@@ -26,6 +27,17 @@ module Views::Controllers::GlossaryTerms::Images
                pagination_data: @pagination_data,
                all_users: @all_users
              ))
+    end
+
+    private
+
+    def add_all_users_toggle_to_sorter_slot
+      content_for(:sorter) do
+        capture do
+          ImageFragment(type: :reuse_toggle, target: @object,
+                        all_users: @all_users)
+        end
+      end
     end
   end
 end

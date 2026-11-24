@@ -1643,8 +1643,9 @@
   image_file_size: File size
 
   # account/profile/images/reuse
-  image_reuse_all_users: Include other users' images.
-  image_reuse_just_yours: Only show your images.
+  image_reuse_all_users: All images
+  image_reuse_just_yours: My images
+  image_reuse_show_header: Show
 
   # observations/images/edit
 
