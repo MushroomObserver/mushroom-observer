@@ -46,7 +46,7 @@ class Components::IndexFilter < Components::Base
   prop :to, _Union(String, Hash)
   prop :submit_text, String
   prop :form_id, _Nilable(String), default: nil
-  prop :extra_class, _Nilable(String), default: nil
+  prop :attributes, _Hash(Symbol, _Any?), :**
 
   # Not a Superform -- this filter's params need to land as flat,
   # unnamespaced top-level URL params (e.g. ?project=123) for the
@@ -55,20 +55,14 @@ class Components::IndexFilter < Components::Base
   # elsewhere in the app is.
   # rubocop:disable-next MO/NoHandRolledFormTag
   def view_template(&block)
-    form(action: url_for(@to), method: "get",
-         class: form_class, id: @form_id,
-         data: { turbo: "false" }) do
+    form(**mix({ action: url_for(@to), method: "get",
+                 class: "form-inline", id: @form_id,
+                 data: { turbo: "false" } }, @attributes)) do
       div(class: "d-flex gap-2 align-items-end") do
         yield if block
         Button(type: :submit, name: @submit_text,
                html_name: "commit")
       end
     end
-  end
-
-  private
-
-  def form_class
-    ["form-inline", @extra_class].compact.join(" ")
   end
 end

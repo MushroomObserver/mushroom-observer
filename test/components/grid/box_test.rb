@@ -118,12 +118,12 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_includes(html, "col-12 col-sm-6")
   end
 
-  def test_renders_with_extra_class
+  def test_renders_with_caller_class
     obs = observations(:coprinus_comatus_obs)
     component = Components::Grid::Box.new(
       user: @user,
       object: obs,
-      extra_class: "custom-class"
+      class: "custom-class"
     )
     html = render(component)
 
@@ -136,7 +136,7 @@ class Components::Grid::BoxTest < ComponentTestCase
   # in the component's Phlex context, not the test context
   # def test_renders_custom_block_content
   #   component = Components::Grid::Box.new(
-  #                 id: 123, extra_class: "test-cls"
+  #                 id: 123, class: "test-cls"
   #               ) do
   #     div { "Custom content" }
   #   end

@@ -49,7 +49,7 @@ module Views::Controllers::Projects
           whitespace
           span(class: "ml-3") { plain("(#{:open.ti})") }
         end
-        Badge(variant: :id, object: project, size: :xl, extra_class: "ml-3")
+        Badge(variant: :id, object: project, size: :xl, class: "ml-3")
       end
     end
 

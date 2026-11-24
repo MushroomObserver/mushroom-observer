@@ -24,7 +24,7 @@
 #   )
 #
 # @example Custom block content
-#   render Components::Grid::Box.new(id: 123, extra_class: "text-center") do
+#   render Components::Grid::Box.new(id: 123, class: "text-center") do
 #     Panel do |panel|
 #       panel.with_body { "Custom content" }
 #     end
@@ -45,7 +45,7 @@ class Components::Grid::Box < Components::Base
   # override this explicitly, typically to
   # `Components::Column.classes_for(xs: 12)` for one-per-line stacking.
   prop :columns, String, default: "col"
-  prop :extra_class, String, default: ""
+  prop :attributes, _Hash(Symbol, _Any?), :**
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
@@ -74,10 +74,8 @@ class Components::Grid::Box < Components::Base
     # Get observation_view from eager-loaded association (nil if not loaded)
     @observation_view = observation_view_for_identify if @identify
 
-    li(
-      id: "box_#{@data[:id]}",
-      class: class_names("grid-box", @columns, @extra_class)
-    ) do
+    li(**mix({ id: "box_#{@data[:id]}",
+               class: class_names("grid-box", @columns) }, @attributes)) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
       # rotate/mirror only happens on the image-show page, so only
       # that page live-updates. A grid page with dozens of boxes
@@ -111,11 +109,9 @@ class Components::Grid::Box < Components::Base
   end
 
   def render_custom_layout(&block)
-    li(
-      id: @id ? "box_#{@id}" : nil,
-      class: class_names("grid-box", @columns, @extra_class),
-      &block
-    )
+    li(**mix({ id: @id ? "box_#{@id}" : nil,
+               class: class_names("grid-box", @columns) }, @attributes),
+       &block)
   end
 
   # Render image section
@@ -159,7 +155,7 @@ class Components::Grid::Box < Components::Base
                target: @data[:what].show_link_args) { render_title }
         end
         whitespace
-        Badge(variant: :id, object: @data[:what], size: :lg, extra_class: nil)
+        Badge(variant: :id, object: @data[:what], size: :lg)
       end
 
       render_identify_ui if @identify

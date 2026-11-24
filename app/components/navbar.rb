@@ -65,22 +65,17 @@ module Components
     prop :attributes, _Hash(Symbol, _Any?), :**
 
     def view_template(&block)
-      send(@element, **computed_attributes, &block)
+      send(@element, **mix({ class: base_class }, @attributes), &block)
     end
 
     private
 
-    def computed_attributes
-      {
-        class: class_names(base_class, @attributes[:class]),
-        **@attributes.except(:class)
-      }
-    end
-
-    # `p-0` default since Bootstrap's `.navbar` padding isn't zero and
-    # most callers want zero. Bootstrap padding utilities are all
-    # `!important`, so a caller needing different padding must
-    # override via `padding:`, not by adding another class alongside it.
+    # `p-0` default since the bridge rule's `padding` is nonzero, not
+    # a no-op - most callers want zero, so they shouldn't have to
+    # remember it. Bootstrap padding utilities are all `!important`
+    # (`mo/_utilities.scss`), so a caller needing different padding
+    # must override via `padding:`, not by adding another padding
+    # utility class alongside it.
     def base_class
       "navbar navbar-#{@variant} #{@padding}"
     end

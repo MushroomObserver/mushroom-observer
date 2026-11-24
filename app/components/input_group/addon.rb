@@ -41,10 +41,7 @@ module Components
     private
 
     def wrapper_attributes
-      {
-        class: class_names("input-group-#{@position}", @attributes[:class]),
-        **@attributes.except(:class)
-      }
+      mix({ class: "input-group-#{@position}" }, @attributes)
     end
   end
 end

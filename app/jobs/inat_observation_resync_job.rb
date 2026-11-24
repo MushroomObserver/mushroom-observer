@@ -13,7 +13,9 @@ class InatObservationResyncJob < ApplicationJob
   def perform(observation, requested_by = nil)
     resyncer = Inat::ObservationResyncer.new(observation,
                                              requested_by: requested_by)
-    resyncer.resync
+    # A name the sync moves off what a project was told is an alert
+    # (#5705); the digests go out when the whole occurrence is done.
+    ProjectAlert::Collector.around { resyncer.resync }
     # Same treatment as the scheduled batch gives them
     # (InatReflectionBatchResyncJob): a sync engine that declined to act
     # is for a human to look at, and nothing else surfaces these.

@@ -3645,6 +3645,14 @@
   email_project_alert_activity_intro_one: "h2. *Other activity on an observation of [name]*\n\n[site] has new activity on [count] [:observation] matching a [:project] you are watching:"
   email_project_alert_row: "[name], observed [date], in [projects]:"
   email_project_alert_row_undated: "[name], date unknown, in [projects]:"
+  email_project_alert_row_activity: "[name], observed [date], in [projects] - [what]:"
+  email_project_alert_row_activity_undated: "[name], date unknown, in [projects] - [what]:"
+  email_project_alert_what_changed_from: "changed from [name]"
+  email_project_alert_what_comment: a comment was added
+  email_project_alert_what_confirmed: the current name was confirmed
+  email_project_alert_what_naming: "[name] was proposed"
+  email_project_alert_what_provisional: "provisional name [name] was applied"
+  email_project_alert_what_untracked: "[name] is not tracked by this project"
   email_inat_import_digest_truncated: "This email shows the first [shown] of [count] matching [:observations]."
   email_name_merge_digest_intro: "h2. *Name Merge*\n\n[user] merged [old] into [new]."
   email_name_merge_digest_admin: An admin

@@ -96,6 +96,20 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       )
     end
 
+    def test_archive_link_is_icon_only
+      obs = observations(:genbanked_obs)
+      sequence = sequences(:deposited_sequence)
+      html = render(panel_with(obs))
+
+      assert_html(
+        html,
+        "#sequence_#{sequence.id} a[href='#{sequence.accession_url}'] " \
+        "svg.mo-icon-new-window"
+      )
+      assert_html(html, "#sequence_#{sequence.id} a .sr-only",
+                  text: :show_observation_archive_link.t)
+    end
+
     private
 
     def panel_with(obs, user = @user)

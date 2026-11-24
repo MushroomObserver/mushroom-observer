@@ -70,13 +70,59 @@ class Inat
       raw = by_id[self.class.inat_id(reflection).to_s]
       return absent_result(reflection, absent) unless raw
 
-      # Quiet: iNaturalist alerted a watching project on this there.
-      ProjectAlert.suppress do
-        apply(reflection, Inat::Obs.new(JSON.generate(raw)))
+      inat_obs = Inat::Obs.new(JSON.generate(raw))
+      name_before = reflection.name_id
+      reconciled_before = reconciled_at(reflection)
+      # Quiet: what the sync brings in happened on iNaturalist, which
+      # reported it to a watching project there. The one exception is
+      # the name moving, raised below.
+      result = ProjectAlert.suppress do
+        apply(reflection, inat_obs)
       end
+      report_name_move(reflection, inat_obs, name_before, reconciled_before)
+      result
     end
 
     private
+
+    # A project told about an observation hears when the name moves
+    # off the one it was told. That move takes the observation out
+    # of the alert poll's taxon filter, so this is the only place it
+    # shows -- and not from the Naming callbacks, which fire on
+    # creation only: the sync often moves the name by re-voting a
+    # naming it proposed earlier, which creates nothing.
+    #
+    # Nothing is said for a move MO cannot date to after it knew the
+    # observation: catching up is not news.
+    def report_name_move(obs, inat_obs, name_before, reconciled_before)
+      return if reconciled_before.nil?
+      return if obs.reload.name_id == name_before
+
+      ProjectAlert::Collector.touch(obs, lead_naming(obs) || obs,
+                                    provisional: provisional?(inat_obs))
+    end
+
+    # The naming the observation now reads from, so a later move to
+    # another name is a row of its own rather than a repeat.
+    def lead_naming(obs)
+      obs.namings.find { |naming| naming.name_id == obs.name_id }
+    end
+
+    # iNaturalist marks a provisional taxon on the observation, and
+    # also carries one as an observation field.
+    def provisional?(inat_obs)
+      inat_obs.provisional_taxon? || inat_obs.provisional_name.present?
+    end
+
+    # When MO last squared this reflection with iNaturalist. The import
+    # is the first of those -- it built the records from a live fetch --
+    # and `reflected_at` is what dates it, since the sync's own stamp
+    # starts empty and the nightly batch reaches a reflection only when
+    # iNaturalist reports it changed.
+    def reconciled_at(reflection)
+      self.class.inat_link(reflection)&.last_synced_at ||
+        reflection.reflected_at
+    end
 
     def absent_result(reflection, absent)
       return deleted(reflection) if absent == :deleted

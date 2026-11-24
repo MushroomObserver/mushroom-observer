@@ -20,7 +20,8 @@
 #   app/components/panel.rb and app/components/panel/**
 #   app/components/dropdown.rb
 #   app/components/link/external.rb (owns target="_blank")
-#   app/components/link/collapse_toggle.rb (owns data-toggle="collapse")
+#   app/components/link/collapse_toggle.rb,
+#     app/components/badge/collapse_toggle.rb (owns data-toggle="collapse")
 #   app/components/form/checkbox_collapse.rb (owns checkbox-driven collapse)
 #   app/components/form/location_map.rb (Button::CollapseToggle via type: kwarg)
 #   app/components/application_form/input_group_addon.rb (owns input-group-btn)
@@ -70,6 +71,7 @@ is_exempt_file() {
     app/components/dropdown.rb|\
     app/components/link/external.rb|\
     app/components/link/collapse_toggle.rb|\
+    app/components/badge/collapse_toggle.rb|\
     app/components/form/checkbox_collapse.rb|\
     app/components/form/location_map.rb|\
     app/components/accordion.rb|\
@@ -121,6 +123,7 @@ case "$TOOL" in
       ':(exclude)app/components/dropdown.rb' \
       ':(exclude)app/components/link/external.rb' \
       ':(exclude)app/components/link/collapse_toggle.rb' \
+      ':(exclude)app/components/badge/collapse_toggle.rb' \
       ':(exclude)app/components/form/checkbox_collapse.rb' \
       ':(exclude)app/components/form/location_map.rb' \
       ':(exclude)app/components/accordion.rb' \

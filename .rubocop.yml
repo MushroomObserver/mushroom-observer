@@ -425,6 +425,9 @@ MO/NoRawLinkOrButtonTo:
     # is .btn-family styling/variants, which doesn't fit a badge.
     # Genuinely a different primitive, not a bypass of Button.
     - "app/components/badge/id.rb"
+    # Same reasoning as badge/id.rb above, for the <a> collapse-toggle
+    # form -- a .badge-styled anchor, not Components::Link's family.
+    - "app/components/badge/collapse_toggle.rb"
 
 MO/NoRegexpEscape:
   Description: >-

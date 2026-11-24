@@ -234,7 +234,7 @@ class GridTest < ComponentTestCase
       grid.render(
         Components::Grid::Box.new(
           id: 123,
-          extra_class: "block-test"
+          class: "block-test"
         ) do
           view_context.tag.div(class: "panel panel-default") do
             "Custom content"

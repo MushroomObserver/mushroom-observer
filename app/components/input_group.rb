@@ -24,16 +24,7 @@ module Components
     prop :attributes, _Hash(Symbol, _Any), :**
 
     def view_template(&block)
-      div(**group_attributes, &block)
-    end
-
-    private
-
-    def group_attributes
-      {
-        class: class_names("input-group", @attributes[:class]),
-        **@attributes.except(:class)
-      }
+      div(**mix({ class: "input-group" }, @attributes), &block)
     end
   end
 end

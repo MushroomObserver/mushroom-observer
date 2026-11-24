@@ -12,50 +12,44 @@ class ObservationFragmentLightboxTitleTest < ComponentTestCase
   def test_renders_basic_title_structure
     html = render_title
 
-    # Should have heading with proper ID and class
-    assert_includes(html, "observation_what_#{@obs.id}")
-    assert_includes(html, "obs-what")
+    assert_html(html, "#observation_what_#{@obs.id}" \
+                      "[data-controller='section-update']" \
+                      "[data-section-update-user-value='#{@user.id}']")
 
-    # Should have Stimulus data attributes
-    assert_includes(html, 'data-controller="section-update"')
-    assert_includes(html, "data-section-update-user-value=\"#{@user.id}\"")
-
-    # Should have observation ID link, styled as a badge
-    assert_includes(html, "caption_obs_link_#{@obs.id}")
-    assert_includes(html, "/obs/#{@obs.id}")
-    assert_includes(html, @obs.id.to_s)
-    assert_includes(html, "badge-id")
+    # The observation id, styled as a badge, links to the observation.
+    assert_html(html, "a#caption_obs_link_#{@obs.id}" \
+                      "[href='/obs/#{@obs.id}']",
+                text: @obs.id.to_s)
 
     # Should have the formatted name -- a bare trailing expression
     # (no `plain`/`trusted_html`) is dead code in Phlex and silently
-    # renders nothing; this pins that the name text actually appears.
-    title_text = Nokogiri::HTML5.fragment(html).at_css("h4").text
-    assert_includes(title_text, @obs.name.text_name)
+    # renders nothing; this pins that the name text shows up.
+    heading_text = Nokogiri::HTML5.fragment(html).
+                   at_css("#observation_what_#{@obs.id}").text
+    assert_includes(heading_text, @obs.name.text_name)
   end
 
   def test_renders_with_identify_mode
     html = render_title(identify: true)
+    heading_text = Nokogiri::HTML5.fragment(html).
+                   at_css("#observation_what_#{@obs.id}").text
 
-    # Should have Observation label (localized)
-    assert_includes(html, "Observation:")
+    assert_includes(heading_text, :observation.ti)
   end
 
   def test_renders_without_identify_mode
     html = render_title(identify: false)
+    heading_text = Nokogiri::HTML5.fragment(html).
+                   at_css("#observation_what_#{@obs.id}").text
 
-    # Should not have OBSERVATION label
-    assert_not_includes(html, "OBSERVATION:")
+    assert_not_includes(heading_text, :observation.ti)
   end
 
   def test_renders_without_user
     html = render_title(user: nil)
 
-    # Should still render basic structure
-    assert_includes(html, "observation_what_#{@obs.id}")
-    assert_includes(html, "obs-what")
-
-    # Should not have user value in data attribute
-    assert_not_includes(html, "data-section-update-user-value")
+    assert_html(html, "#observation_what_#{@obs.id}")
+    assert_no_html(html, "[data-section-update-user-value]")
   end
 
   private

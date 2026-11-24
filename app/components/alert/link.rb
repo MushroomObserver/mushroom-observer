@@ -8,10 +8,7 @@ class Components::Alert::Link < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template
-    Link(type: :get,
-         name: @text,
-         target: @href,
-         class: class_names("alert-link", @attributes[:class]),
-         **@attributes.except(:class))
+    Link(type: :get, name: @text, target: @href,
+         **mix({ class: "alert-link" }, @attributes))
   end
 end

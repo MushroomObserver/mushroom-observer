@@ -299,11 +299,14 @@ class Components::Table < Components::Base
   private
 
   def table_attributes
-    attrs = @attributes.except(:class)
-    attrs[:class] = class_names("table", variant_classes, identifier_class,
-                                align_middle_class, @attributes[:class])
+    attrs = mix({ class: table_class }, @attributes)
     attrs[:id] = @id if @id
     attrs
+  end
+
+  def table_class
+    class_names("table", variant_classes, identifier_class,
+                align_middle_class)
   end
 
   def variant_classes

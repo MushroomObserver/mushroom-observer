@@ -60,6 +60,7 @@ class ProjectAlert < AbstractModel
             remote_identification_id: identification[:id].to_s,
             remote_observation_id: observation_id,
             name: identification[:name], target_name: target_name,
+            provisional: identification[:provisional] == true,
             kind: kind_for(project, external_site, observation_id),
             observed_on: observation[:observed_on],
             alerted_at: Time.zone.now)
@@ -68,12 +69,15 @@ class ProjectAlert < AbstractModel
   end
 
   # The same for an observation here, where the target is the record
-  # whose arrival said so. Nil when this project has been told about
+  # whose arrival said so. `proposal` is the name that arrived and
+  # whether it is a provisional code, the way `identification` carries
+  # both for a site row. Nil when this project has been told about
   # that record already.
-  def self.record_local(project:, observation:, target:, name:,
+  def self.record_local(project:, observation:, target:, proposal:,
                         target_name:)
     create!(project: project, observation: observation, target: target,
-            name: name, target_name: target_name,
+            name: proposal[:name], target_name: target_name,
+            provisional: proposal[:provisional] == true,
             kind: local_kind_for(project, observation, target),
             observed_on: observation.when,
             alerted_at: Time.zone.now)
@@ -216,6 +220,20 @@ class ProjectAlert < AbstractModel
     kind == NEW_OBSERVATION
   end
 
+  # What happened, for a row of an activity message: a coordinator
+  # told that something changed wants to know what. A proposal names
+  # what was proposed; otherwise the answer is what the name did,
+  # against the name this project was last told. Nil for a find,
+  # whose message already says an observation arrived.
+  def activity_phrase
+    return nil unless kind == OTHER_ACTIVITY
+    return :email_project_alert_what_comment.l if target_type == "Comment"
+    return qualify(provisional_phrase, name) if provisional
+    return qualify(proposal_phrase, proposed_name) if proposal?
+
+    qualify(name_change_phrase, name)
+  end
+
   # What groups alerts into messages: one message per watched name per
   # kind, so a subject line can name the taxon.
   def message_key
@@ -223,6 +241,83 @@ class ProjectAlert < AbstractModel
   end
 
   private
+
+  # A code waiting to be confirmed, which is what a rare-challenge
+  # coordinator acts on: iNaturalist marks the taxon provisional and
+  # the flag is stored with the row.
+  def provisional_phrase
+    :email_project_alert_what_provisional.l(name: name.to_s)
+  end
+
+  def proposal_phrase
+    :email_project_alert_what_naming.l(name: proposed_name)
+  end
+
+  # A name the project watches needs no decision. One it does not is
+  # what the coordinators asked to be told, so they can add it or
+  # leave it; MO says so rather than adding anything. The clause
+  # names which name it is about, since the phrase it follows may
+  # name a different one, or none.
+  def qualify(phrase, subject)
+    return phrase if phrase.blank? || tracked?(subject)
+
+    "#{phrase}; #{:email_project_alert_what_untracked.l(name: subject)}"
+  end
+
+  # Decided the way the collector decides what a project watches:
+  # through the targets expanded by synonym and sub-taxon, not by the
+  # spelling of a target alone. A name MO does not hold is one no
+  # project can watch.
+  def tracked?(text_name)
+    Name.where(text_name: text_name).any? do |name|
+      project.alert_matches_name?(name)
+    end
+  end
+
+  # A naming of something the observation does not carry: nothing
+  # has moved yet, and what somebody proposed is the news. A Naming
+  # since destroyed names nothing, and falls through to what the
+  # name did.
+  def proposal?
+    proposed_name.present? && proposed_name != name
+  end
+
+  def proposed_name
+    return @proposed_name if defined?(@proposed_name)
+
+    @proposed_name = target_type == "Naming" ? target&.name&.text_name : nil
+  end
+
+  # What the name did, against the name this project was last told.
+  # A site row carries one name and cannot say by itself whether an
+  # identification agreed or moved it; the row before it holds the
+  # answer, for either source. Only a naming or an identification
+  # confirms a name -- an observation saved with its name unchanged
+  # has nothing to report, and its row stays as it was.
+  def name_change_phrase
+    previous = previously_alerted_name
+    return nil if previous.blank?
+    return :email_project_alert_what_changed_from.l(name: previous) if
+      previous != name
+    return nil unless target_type == "Naming" || external_site_id
+
+    :email_project_alert_what_confirmed.l
+  end
+
+  def previously_alerted_name
+    earlier_rows.order(:id).last&.name
+  end
+
+  def earlier_rows
+    rows = if external_site_id
+             self.class.where(project_id: project_id,
+                              external_site_id: external_site_id,
+                              remote_observation_id: remote_observation_id)
+           else
+             self.class.told_about(project, observation)
+           end
+    id ? rows.where(self.class[:id].lt(id)) : rows
+  end
 
   # A row says what it alerted on, whichever source it came from.
   def names_what_it_alerted_on

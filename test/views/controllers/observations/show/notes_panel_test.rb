@@ -103,6 +103,74 @@ class Views::Controllers::Observations::Show::NotesPanelTest < ComponentTestCase
     assert_includes(notes, "on oak wood")  # inherited from the sibling
   end
 
+  def test_inat_snapshot_renders_as_separate_collapsed_panel
+    key = ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    @obs.notes = { Substrate: "wood", key => "long imported blob" }
+
+    html = render(panel_with(@obs))
+
+    assert_html(html, "#observation_inat_snapshot .panel-title",
+                text: :inat_snapshot_caption.ti)
+    assert_html(html, "a.panel-collapse-trigger[data-toggle='collapse']" \
+                      "[href='#observation_inat_snapshot_body']")
+    assert_html(html, "#observation_inat_snapshot_body.collapse",
+                text: "long imported blob")
+  end
+
+  # The iNat value gets a separate panel from the regular notes panel
+  # -- "wood" shouldn't end up inside the collapsible pane.
+  def test_inat_snapshot_separate_from_regular_notes_panel
+    key = ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    @obs.notes = { Substrate: "wood", key => "long imported blob" }
+
+    html = render(panel_with(@obs))
+    fragment = Nokogiri::HTML.fragment(html)
+
+    assert_includes(fragment.at_css("#observation_notes .obs-notes").text,
+                    "wood")
+    assert_not_includes(
+      fragment.at_css("#observation_notes .obs-notes").text, "long imported"
+    )
+  end
+
+  def test_other_parts_do_not_render_as_collapsible
+    @obs.notes = { Substrate: "wood", Other: "field notes here" }
+
+    html = render(panel_with(@obs))
+
+    assert_no_html(html, "a.panel-collapse-trigger")
+    assert_no_html(html, "#observation_inat_snapshot")
+  end
+
+  # A blank "Other" value alongside an iNat snapshot must not render an
+  # empty Notes panel above the iNat panel.
+  def test_inat_only_notes_render_only_inat_panel
+    key = ::Observation.notes_normalized_key(:inat_snapshot_caption.l)
+    @obs.notes = { key => "long imported blob", Other: "" }
+
+    html = render(panel_with(@obs))
+
+    assert_no_html(html, "#observation_notes")
+    assert_html(html, "#observation_inat_snapshot")
+  end
+
+  # A viewer's locale is independent of whatever locale was active
+  # when the observation was imported -- the key this view looks for
+  # has to resolve the same way regardless.
+  def test_inat_snapshot_key_pinned_to_default_locale
+    seen_locale = nil
+    I18n.with_locale(:es) do
+      Observation.stub(:notes_normalized_key, lambda { |part|
+        seen_locale = I18n.locale
+        part.to_s.tr(" ", "_").to_sym
+      }) do
+        panel_with(@obs).send(:inat_snapshot_key)
+      end
+    end
+
+    assert_equal(MO.default_locale.to_sym, seen_locale)
+  end
+
   private
 
   def panel_with(obs, user = @user)

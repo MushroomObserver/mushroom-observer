@@ -43,6 +43,7 @@
 #   )) { render(Components::Icon.new(type: :chevron_down)) }
 class Components::Link::CollapseToggle < Components::Link
   include Components::Button::CollapseContent
+  include Components::CollapseAnchorAttributes
 
   prop :target_id, String
   prop :collapsed, _Boolean, default: true
@@ -71,31 +72,18 @@ class Components::Link::CollapseToggle < Components::Link
   end
 
   def view_template(&block)
-    a(
-      href: link_href,
-      role: "button",
-      class: class_names(btn_styling, size_class, @attributes[:class],
-                         { "collapsed" => @collapsed }),
+    a(href: link_href, role: "button",
+      **mix({ class: toggle_class }, @attributes.except(:data, :aria)),
       data: { toggle: "collapse", **collapse_data },
-      aria: { expanded: @collapsed ? "false" : "true",
-              **(@target_id.present? ? { controls: @target_id } : {}) },
-      **@attributes.except(:class, :data, :aria)
-    ) do
+      aria: collapse_aria) do
       block ? yield : collapse_content
     end
   end
 
   private
 
-  def link_href
-    @fallback_href || "##{@target_id}"
-  end
-
-  def collapse_data
-    extra_data = @attributes[:data] || {}
-    return extra_data unless @fallback_href
-
-    extra_data.merge(target: "##{@target_id}")
+  def toggle_class
+    class_names(btn_styling, size_class, "collapsed" => @collapsed)
   end
 
   def size_class

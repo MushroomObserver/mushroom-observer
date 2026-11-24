@@ -22,17 +22,8 @@ module Components
     prop :attributes, _Hash(Symbol, _Any), :**
 
     def view_template(&block)
-      div(**group_attributes, &block)
-    end
-
-    private
-
-    def group_attributes
-      {
-        class: class_names("btn-group", @attributes[:class]),
-        role: @attributes[:role] || "group",
-        **@attributes.except(:class, :role)
-      }
+      div(**mix({ class: "btn-group" }, @attributes.except(:role)),
+          role: @attributes[:role] || "group", &block)
     end
   end
 end

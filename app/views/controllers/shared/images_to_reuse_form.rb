@@ -43,7 +43,7 @@ module Views::Controllers::Shared
 
     def render_image_card(image)
       render(::Components::Grid::Box.new(
-               extra_class: "text-center", id: image.id
+               class: "text-center", id: image.id
              )) do
         Panel do |panel|
           panel.with_body do

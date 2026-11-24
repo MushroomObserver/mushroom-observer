@@ -97,11 +97,7 @@ class Components::Description::NewDraftForm < Components::ApplicationForm
   end
 
   def form_attributes
-    {
-      id: @attributes[:id],
-      class: class_names("mb-0", @attributes[:class]),
-      data: @attributes[:data] || {}
-    }
+    mix({ class: "mb-0" }, @attributes.slice(:id, :class, :data))
   end
 
   # GET forms don't need authenticity tokens or _method fields

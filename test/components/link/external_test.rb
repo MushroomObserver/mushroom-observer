@@ -34,6 +34,55 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html, "a.my-class[target='_blank']")
   end
 
+  # ---- Icon-only form ----
+
+  def test_icon_renders_svg_and_hides_content_as_sr_only
+    html = render_link(content: "Show Archive Record",
+                       path: "https://example.com", icon: :new_window)
+
+    assert_html(html, "a svg.mo-icon-new-window")
+    assert_html(html, "a .sr-only", text: "Show Archive Record")
+  end
+
+  def test_icon_adds_hover_tooltip
+    html = render_link(content: "Show Archive Record",
+                       path: "https://example.com", icon: :new_window)
+
+    assert_html(html, "a[title='Show Archive Record']" \
+                      "[data-tooltip-target='tip']")
+  end
+
+  def test_tab_html_options_icon_flows_through
+    tab = FakeTab.new
+    tab.html_options[:icon] = :new_window
+    html = render_link(tab: tab)
+
+    assert_html(html, "a svg.mo-icon-new-window")
+    assert_html(html, "a .sr-only", text: "External Resource")
+  end
+
+  def test_no_icon_renders_plain_text_with_no_tooltip
+    html = render_link(content: "GBIF", path: "https://gbif.org")
+
+    assert_no_html(html, "svg")
+    assert_no_html(html, "a[data-tooltip-target]")
+  end
+
+  def test_icon_with_blank_content_raises
+    assert_raises(ArgumentError) do
+      render_link(content: nil, path: "https://example.com",
+                  icon: :new_window)
+    end
+  end
+
+  def test_tab_icon_does_not_leak_into_link_attributes
+    tab = FakeTab.new
+    tab.html_options[:icon] = :new_window
+    html = render_link(tab: tab)
+
+    assert_no_html(html, "a[icon]")
+  end
+
   # ---- Tab PORO form ----
 
   def test_tab_form_uses_tab_title_path_and_html_options
@@ -47,8 +96,13 @@ class Components::Link::ExternalTest < ComponentTestCase
   end
 
   # ---- ExternalLink AR record (link:) form ----
+  #
+  # The site-record-id copy-to-clipboard badge is no longer rendered
+  # here -- Link::External only renders the link itself; the caller
+  # (Views::Controllers::Observations::ExternalLinks::InfoFrame) renders
+  # the badge directly. See info_frame_test.rb for that coverage.
 
-  def test_inat_link_renders_relationship_date_and_id_badge
+  def test_inat_link_renders_relationship_date
     link = external_links(:coprinus_comatus_obs_inaturalist_link)
     html = render_link(link: link)
 
@@ -57,16 +111,10 @@ class Components::Link::ExternalTest < ComponentTestCase
                 text: "Manual link to iNaturalist")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
-    # The id is a sibling copy-to-clipboard badge, not link text -- a
-    # <button> nested inside the <a> would be invalid HTML.
-    assert_html(html, "button.badge-id", text: "234723")
-    assert_no_html(html, "a button")
-    # Tooltip names the site so it's unambiguous next to other badges.
-    title = :copy_this_site_id.ti(site: "iNaturalist")
-    assert_html(html, "button.badge-id[data-title='#{title}']")
+    assert_no_html(html, "button.badge-id")
   end
 
-  def test_inat_import_link_renders_derived_id_badge
+  def test_inat_import_link_renders_relationship_text
     site = external_sites(:inaturalist)
     link = ExternalLink.new(external_site: site, relationship: :import,
                             external_id: "372490529")
@@ -76,10 +124,9 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html, "a[href='#{site.observation_url("372490529")}']" \
                       "[target='_blank'][rel='noopener noreferrer']",
                 text: "Imported from iNaturalist")
-    assert_html(html, "button.badge-id", text: "372490529")
   end
 
-  def test_mycoportal_link_renders_relationship_date_and_id_badge
+  def test_mycoportal_link_renders_relationship_date
     link = external_links(:coprinus_comatus_obs_mycoportal_link)
     html = render_link(link: link)
 
@@ -89,18 +136,6 @@ class Components::Link::ExternalTest < ComponentTestCase
                 text: "Manual link to MyCoPortal")
     assert_includes(html, "#{link.relationship_date.web_date}: ")
     assert_no_html(html, "small")
-    assert_html(html, "button.badge-id", text: "1950183")
-    title = :copy_this_site_id.ti(site: "MyCoPortal")
-    assert_html(html, "button.badge-id[data-title='#{title}']")
-  end
-
-  def test_site_with_no_id_accessor_renders_no_badge
-    site = ExternalSite.new(name: "GenBank",
-                            base_url: "https://genbank.example/")
-    link = ExternalLink.new(external_site: site, external_id: "123")
-
-    html = render_link(link: link)
-
     assert_no_html(html, "button.badge-id")
   end
 

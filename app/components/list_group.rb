@@ -98,7 +98,7 @@ class Components::ListGroup < Components::Base
     # afterwards.
     vanish(self, &block)
 
-    send(@element, **container_attrs) do
+    send(@element, **mix(container_attrs, @attributes)) do
       @items.each { |i| render_item(i) }
       render_empty if @empty_block
     end
@@ -149,10 +149,8 @@ class Components::ListGroup < Components::Base
   private
 
   def container_attrs
-    classes = class_names(
-      "list-group", ("list-group-flush" if @flush), @attributes[:class]
-    )
-    { class: classes, id: @id }.compact.merge(@attributes.except(:class))
+    { class: class_names("list-group", ("list-group-flush" if @flush)),
+      id: @id }.compact
   end
 
   def item_element

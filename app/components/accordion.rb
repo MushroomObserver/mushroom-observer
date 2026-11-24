@@ -63,15 +63,9 @@ class Components::Accordion < Components::Base
 
   def view_template
     div(class: "border-none mb-0", id: @id) do
-      div(class: inner_class, **@attributes.except(:class)) do
+      div(**mix({ class: "panel border-none bg-none" }, @attributes)) do
         pane_slots.each { |pane| render(pane) } if pane_slots?
       end
     end
-  end
-
-  private
-
-  def inner_class
-    class_names("border-none bg-none", @attributes[:class])
   end
 end

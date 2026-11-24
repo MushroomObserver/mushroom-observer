@@ -6,7 +6,24 @@
 #   Badge(variant: :id, object: @project, size: :sm)
 class Components::Badge < Components::Base
   DISPATCH = { count: :Count, id: :ID,
-               sibling_marker: :SiblingMarker }.freeze
+               sibling_marker: :SiblingMarker,
+               collapse_toggle: :CollapseToggle }.freeze
+
+  # Shared by any Badge variant rendering a `.badge-id`-sized badge
+  # (Badge::ID, Badge::CollapseToggle) -- `.badge-id` itself has no
+  # inherent font-size, so callers state a size explicitly:
+  #   :xl -- project/species-list table row title badges
+  #   :lg -- copy-to-clipboard external-site record id, Matching
+  #          Observations panel row ids
+  #   :md -- matrix box title and other index-row id badges
+  #   :sm -- sitting next to a large page-title heading
+  # Each maps regularly to "badge-#{size}" -- no irregular Bootstrap
+  # naming to account for here (unlike Button::Styling's BTN_SIZES).
+  SIZES = [:xl, :lg, :md, :sm].freeze
+
+  def self.size_class(size)
+    "badge-#{size}"
+  end
 
   def self.new(**kwargs, &block)
     variant_sym = kwargs[:variant]&.to_sym

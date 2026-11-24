@@ -27,6 +27,23 @@ class ProjectAlertMailerTest < MailerTestCase
     )
   end
 
+  # A row MO recorded: no site, no remote ids, and the record whose
+  # arrival said so as the target.
+  def local_activity(obs, target)
+    ProjectAlert.create!(
+      project: @project, observation: obs, target: obs,
+      name: obs.name.text_name, target_name: "Coprinus comatus",
+      kind: ProjectAlert::NEW_OBSERVATION, observed_on: obs.when,
+      alerted_at: 1.hour.ago
+    )
+    ProjectAlert.create!(
+      project: @project, observation: obs, target: target,
+      name: obs.name.text_name, target_name: "Coprinus comatus",
+      kind: ProjectAlert::OTHER_ACTIVITY, observed_on: obs.when,
+      alerted_at: Time.zone.now
+    )
+  end
+
   def test_html_digest
     mary.update!(email_html: true)
 
@@ -67,6 +84,79 @@ class ProjectAlertMailerTest < MailerTestCase
     ).message
 
     assert_includes(mail.body.to_s, :unknown.l)
+  end
+
+  # An activity row says what happened, which the ledger holds and
+  # the message used to leave to the coordinator to find out.
+  def test_an_activity_row_names_a_comment
+    obs = observations(:coprinus_comatus_obs)
+    comment = comments(:detailed_unknown_obs_comment)
+
+    mail = ProjectAlertMailer.build(
+      receiver: mary, alerts: [local_activity(obs, comment)]
+    ).message
+
+    assert_includes(mail.body.to_s,
+                    :email_project_alert_what_comment.l)
+  end
+
+  def test_an_activity_row_names_the_proposed_name
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+    row = local_activity(obs, naming)
+    row.update!(name: "Agaricus campestris")
+
+    mail = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: [row]).message
+
+    assert_includes(
+      mail.body.to_s,
+      :email_project_alert_what_naming.l(name: naming.name.text_name)
+    )
+  end
+
+  # Proposing the name the observation already carries confirms it.
+  def test_a_naming_of_the_same_name_says_it_confirmed
+    obs = observations(:coprinus_comatus_obs)
+    naming = namings(:coprinus_comatus_naming)
+
+    mail = ProjectAlertMailer.build(
+      receiver: mary, alerts: [local_activity(obs, naming)]
+    ).message
+
+    assert_includes(mail.body.to_s,
+                    :email_project_alert_what_confirmed.l)
+  end
+
+  # A site row reads against the row before it: the project was told
+  # about this observation under another name.
+  def test_an_activity_row_from_a_site_says_the_name_moved
+    alert(name: "Helvella palustris")
+    moved = alert(kind: ProjectAlert::OTHER_ACTIVITY,
+                  remote_identification_id: "1000")
+
+    mail = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: [moved]).message
+
+    assert_includes(
+      mail.body.to_s,
+      :email_project_alert_what_changed_from.l(name: "Helvella palustris")
+    )
+  end
+
+  # A find's message already says an observation arrived, so its row
+  # keeps the plain shape with nothing appended.
+  def test_a_find_row_says_nothing_about_what_happened
+    body = ProjectAlertMailer.build(receiver: mary,
+                                    alerts: [alert]).message.body.to_s
+
+    assert_includes(
+      body,
+      :email_project_alert_row.l(name: "Coprinus comatus",
+                                 date: Date.parse("2026-09-20").web_date,
+                                 projects: @project.title)
+    )
+    assert_not_includes(body, :email_project_alert_what_comment.l)
   end
 
   def test_several_alerts_are_one_message

@@ -501,6 +501,23 @@ class InatObsTest < UnitTestCase
     )
   end
 
+  # The import job has no per-request locale, and a later viewer's
+  # locale is independent of whatever locale was active at import --
+  # the stored notes key has to resolve the same way at both ends.
+  def test_notes_snapshot_key_pinned_to_default_locale
+    seen_locale = nil
+    I18n.with_locale(:es) do
+      Observation.stub(:notes_normalized_key, lambda { |part|
+        seen_locale = I18n.locale
+        part.to_s.tr(" ", "_").to_sym
+      }) do
+        mock_observation("coprinus").notes
+      end
+    end
+
+    assert_equal(MO.default_locale.to_sym, seen_locale)
+  end
+
   def strip_html_comments(str)
     str.gsub(/<!---.*?--->/m, "")
   end

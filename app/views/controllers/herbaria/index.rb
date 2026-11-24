@@ -66,7 +66,7 @@ module Views::Controllers::Herbaria
     end
 
     def render_id_badge(herbarium)
-      Badge(variant: :id, object: herbarium, size: :lg, extra_class: nil)
+      Badge(variant: :id, object: herbarium, size: :lg)
     end
 
     def user_header

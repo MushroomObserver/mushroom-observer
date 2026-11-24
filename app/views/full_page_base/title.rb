@@ -103,12 +103,10 @@ module Views::FullPageBase::Title
     end
   end
 
-  # Name + its leading space are one flex item -- flexbox collapses
-  # whitespace between siblings.
   def render_name_line(object, user)
-    render(::Components::Badge.new(variant: :id, object: object, size: :sm))
+    render(::Components::Badge.new(variant: :id, object: object, size: :sm,
+                                   class: "mr-3"))
     span do
-      whitespace
       trusted_html(viewer_aware_format_name(object, user).t.small_author)
     end
   end
@@ -136,13 +134,13 @@ module Views::FullPageBase::Title
   end
 
   # Rendered twice by Header::PageTitle (desktop + mobile row), each
-  # placement supplying the spacing it needs -- extra_class: nil.
+  # placement supplying the spacing it needs.
   # size: :xl since neither placement scales off an ancestor heading.
   def add_id_badge(object)
     content_for(:id_badge) do
       capture do
         render(::Components::Badge.new(variant: :id, object: object,
-                                       size: :xl, extra_class: nil))
+                                       size: :xl))
       end
     end
   end

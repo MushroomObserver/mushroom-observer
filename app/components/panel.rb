@@ -159,8 +159,7 @@ class Components::Panel < Components::Base
          target_id: @collapse_id || "",
          collapsed: !@expanded,
          class: "panel-collapse-trigger ml-3 inline-flex-center",
-         data: collapse_toggle_data,
-         aria: collapse_aria) do
+         data: collapse_toggle_data) do
       render_collapse_message
 
       Icon(type: :chevron_down, title: :open.ti, class: "active-icon",
@@ -171,16 +170,10 @@ class Components::Panel < Components::Base
 
   # For ID-based targets, omit data-target so Bootstrap reads href="#id"
   # and calls e.preventDefault() — preventing Turbo from navigating the
-  # frame. For CSS class selectors (rare, never inside Turbo frames),
+  # frame. For CSS class selectors (rare, not used inside Turbo frames),
   # data-target is required so Bootstrap can match multiple panes.
   def collapse_toggle_data
     @collapse_class ? { target: @collapse_target } : {}
-  end
-
-  def collapse_aria
-    aria = { expanded: @expanded ? "true" : "false" }
-    aria[:controls] = @collapse_id if @collapse_id.present?
-    aria
   end
 
   def render_collapse_message

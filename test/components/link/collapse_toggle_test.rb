@@ -78,6 +78,26 @@ class CollapseToggleLinkTest < ComponentTestCase
     assert_html(html, "a[data-toggle='collapse']")
   end
 
+  # Caller-supplied aria attrs merge alongside the computed
+  # expanded:/controls: pair, instead of being silently dropped.
+  def test_extra_aria_attrs_merged
+    html = render_it(aria: { label: "Toggle details" })
+
+    assert_html(html, "a[aria-label='Toggle details']")
+    assert_html(html, "a[aria-expanded='false']")
+    assert_html(html, "a[aria-controls='help_foo']")
+  end
+
+  # A caller can't override expanded:/controls: through aria: -- they
+  # always come from collapsed:/target_id:, not whatever a caller
+  # passes, so the two can't drift out of sync with the toggle's state.
+  def test_caller_cannot_override_computed_aria_keys
+    html = render_it(aria: { expanded: "bogus", controls: "bogus" })
+
+    assert_html(html, "a[aria-expanded='false']")
+    assert_html(html, "a[aria-controls='help_foo']")
+  end
+
   def test_fallback_href_sets_href_and_adds_data_target
     html = render_it(fallback_href: "/things/new")
 
