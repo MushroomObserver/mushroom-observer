@@ -14,13 +14,20 @@
 # feedback_banned_words_canonical_consume.md /
 # feedback_never_is_a_narrative_smell.md.
 #
-# Also blocks the noun "find"/"finds" standing in for an Observation
-# ("a find", "the project's finds", "a run of finds") -- invented
-# jargon for a word MO already has, and a term with several everyday
-# meanings. See .claude/rules/mo_terminology.md. The verb is
-# untouched: only "find(s)" directly after an article, a possessive
-# or "of" is matched, so "the query finds observations", "find_by"
-# and "find out" all pass.
+# Also blocks the noun "find"/"finds" where it stands in for an
+# Observation ("a find", "the project's finds", "a run of finds") --
+# invented jargon for a word MO already has, and a term with several
+# everyday meanings. See .claude/rules/mo_terminology.md.
+#
+# Only that sense is the rule's business, so the match is deliberately
+# two-part: the word has to sit directly after an article, a
+# possessive or "of", AND the same line has to mention something from
+# the alert domain (observation, project, alert, iNat, naming, taxon,
+# coordinator). "The find command", "a find in the log" and "the verb
+# finds" are nobody's business here and pass, as do the verb
+# generally, "find_by" and "find out". The cost of that is a miss
+# when a line uses the noun with no domain word on it; the rule file
+# is what covers those, not this hook.
 #
 # Word list: real, genuine(ly), actual(ly), exactly, never, ever,
 # canonical, consume, "at all", own -- used as intensifiers/hedges,
@@ -51,9 +58,11 @@ WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|cano
 # always legitimate and isn't matched here.
 OWN_RE="('s|its|their|his|her|your|my|our)[[:space:]]+own([^[:alnum:]_]|$)"
 # The noun "find"/"finds" -- see the header. The trailing class also
-# excludes a hyphen, so "a find-and-replace" is left alone.
+# excludes a hyphen, so "a find-and-replace" is left alone, and a hit
+# counts only on a line FIND_CONTEXT_RE also matches.
 FIND_RE="(^|[^[:alnum:]_])(a|the|of|these|those|new|rare|more)[[:space:]]+finds?([^[:alnum:]_-]|$)"
 FIND_POSS_RE="('s|its|their|his|her|your|my|our)[[:space:]]+finds?([^[:alnum:]_-]|$)"
+FIND_CONTEXT_RE="(observation|project|alert|inat|naming|taxon|coordinator)"
 
 TEXT=""
 case "$TOOL" in
@@ -107,7 +116,8 @@ HITS="$( { printf '%s' "$SCAN_TEXT" | grep -inE "$WORD_RE" || true
            printf '%s' "$SCAN_TEXT" | grep -inE "$OWN_RE" || true; } )"
 
 FIND_HITS="$( { printf '%s' "$SCAN_TEXT" | grep -inE "$FIND_RE" || true
-                printf '%s' "$SCAN_TEXT" | grep -inE "$FIND_POSS_RE" || true; } )"
+                printf '%s' "$SCAN_TEXT" | grep -inE "$FIND_POSS_RE" || true; } \
+              | grep -iE "$FIND_CONTEXT_RE" || true )"
 
 if [ -n "$HITS" ]; then
   cat >&2 <<EOF
@@ -129,8 +139,9 @@ fi
 
 if [ -n "$FIND_HITS" ]; then
   cat >&2 <<EOF
-🚫 BLOCKED: "find"/"finds" used as a noun for an Observation -- MO
-vocabulary rule, see .claude/rules/mo_terminology.md.
+🚫 BLOCKED: "find"/"finds" looks like a noun standing in for an
+Observation -- MO vocabulary rule, see
+.claude/rules/mo_terminology.md.
 
 Matches:
 $FIND_HITS

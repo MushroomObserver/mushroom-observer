@@ -40,10 +40,23 @@ back one comment at a time.
 
 ## Enforcement
 
-`.claude/hooks/block_banned_words.sh` blocks the noun shapes — "find"
-or "finds" directly after an article, a possessive, or "of" — in file
+`.claude/hooks/block_banned_words.sh` blocks the noun shapes in file
 writes, commit messages and `gh` issue/PR bodies, alongside the
 intensifier list in
-[gh_pr_issue_formatting.md](gh_pr_issue_formatting.md). A false
-positive gets rephrased, not bypassed. Files under `.claude/` are
-skipped, so a rule doc can quote the words it bans.
+[gh_pr_issue_formatting.md](gh_pr_issue_formatting.md).
+
+**The block is narrow on purpose, and the rule is narrower than the
+word.** Only the Observation sense is in scope. These all pass, and
+should: "the find command", "a find in the log", `find_by`,
+"find out", and the verb generally. A first version of the hook keyed
+on the grammar alone and caught every one of them, which is not what
+was asked for. A hit now needs two things on one line — the word
+directly after an article, a possessive or "of", AND a word from the
+alert domain (observation, project, alert, iNat, naming, taxon,
+coordinator).
+
+That heuristic misses the noun on a line carrying no domain word. This
+doc covers those, not the hook: the hook is a backstop for the place
+the word crept in last time, not the rule itself. A false positive
+gets rephrased, not bypassed. Files under `.claude/` are skipped, so a
+rule doc can quote the words it bans.
