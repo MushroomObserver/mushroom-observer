@@ -14,6 +14,14 @@
 # feedback_banned_words_canonical_consume.md /
 # feedback_never_is_a_narrative_smell.md.
 #
+# Also blocks the noun "find"/"finds" standing in for an Observation
+# ("a find", "the project's finds", "a run of finds") -- invented
+# jargon for a word MO already has, and a term with several everyday
+# meanings. See .claude/rules/mo_terminology.md. The verb is
+# untouched: only "find(s)" directly after an article, a possessive
+# or "of" is matched, so "the query finds observations", "find_by"
+# and "find out" all pass.
+#
 # Word list: real, genuine(ly), actual(ly), exactly, never, ever,
 # canonical, consume, "at all", own -- used as intensifiers/hedges,
 # they carry no information and read as arguing for a claim instead of
@@ -42,6 +50,10 @@ WORD_RE='(^|[^[:alnum:]_])(real|genuine(ly)?|actual(ly)?|exactly|never|ever|cano
 # its own Y / their own Y, etc.) -- a verb use ("doesn't own") is
 # always legitimate and isn't matched here.
 OWN_RE="('s|its|their|his|her|your|my|our)[[:space:]]+own([^[:alnum:]_]|$)"
+# The noun "find"/"finds" -- see the header. The trailing class also
+# excludes a hyphen, so "a find-and-replace" is left alone.
+FIND_RE="(^|[^[:alnum:]_])(a|the|of|these|those|new|rare|more)[[:space:]]+finds?([^[:alnum:]_-]|$)"
+FIND_POSS_RE="('s|its|their|his|her|your|my|our)[[:space:]]+finds?([^[:alnum:]_-]|$)"
 
 TEXT=""
 case "$TOOL" in
@@ -94,6 +106,9 @@ SCAN_TEXT="$(printf '%s' "$TEXT" | awk '
 HITS="$( { printf '%s' "$SCAN_TEXT" | grep -inE "$WORD_RE" || true
            printf '%s' "$SCAN_TEXT" | grep -inE "$OWN_RE" || true; } )"
 
+FIND_HITS="$( { printf '%s' "$SCAN_TEXT" | grep -inE "$FIND_RE" || true
+                printf '%s' "$SCAN_TEXT" | grep -inE "$FIND_POSS_RE" || true; } )"
+
 if [ -n "$HITS" ]; then
   cat >&2 <<EOF
 🚫 BLOCKED: banned word/phrase detected (real/genuine/actual(ly)/
@@ -108,6 +123,22 @@ Cut the word outright rather than substituting a synonym (truly,
 legitimately, literally have the same problem). State the plain fact
 instead. If this is a direct quote discussing the rule itself, ask
 the user before proceeding.
+EOF
+  exit 2
+fi
+
+if [ -n "$FIND_HITS" ]; then
+  cat >&2 <<EOF
+🚫 BLOCKED: "find"/"finds" used as a noun for an Observation -- MO
+vocabulary rule, see .claude/rules/mo_terminology.md.
+
+Matches:
+$FIND_HITS
+
+Write "Observation", or name the alert kind: a new observation, or
+activity on one the project already has. The verb is fine; if this is
+one of those (or a quote discussing the rule), ask the user before
+proceeding.
 EOF
   exit 2
 fi
