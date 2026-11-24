@@ -813,7 +813,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   private
 
   # Change Observations whose GPS box falls outside this Location's new box to
-  # smallest Location containing new box.
+  # the smallest Location containing that GPS box.
   def relocate_observations_outside_box
     return unless box_shrunk?
 
