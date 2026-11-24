@@ -95,9 +95,12 @@ export default class extends GeocodeController {
     }
 
     // use center and zoom here
+    // zoom 1 (and minZoom below 2) lets the Mercator projection repeat
+    // the world 2-3 times side by side in a typical-width viewport.
     this.mapOptions = {
       center: this.mapCenter,
-      zoom: 1,
+      zoom: 2,
+      minZoom: 2,
       mapTypeId: 'terrain',
       mapTypeControl: 'true'
     }
