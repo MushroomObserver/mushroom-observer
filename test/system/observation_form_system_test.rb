@@ -489,6 +489,12 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       "[data-type='location_google'][data-autocompleter='connected']",
       wait: 10
     )
+    # Wait for the autocompleter to receive Google's primer results,
+    # not just for the field to flip into location_google mode -- the
+    # Google geocode round-trip is a separate async step after the
+    # mode switch (see system_test_flakiness.md: incremental
+    # assertions, not one long wait on the end state).
+    wait_for_autocompleter_match
     # Place name should now have been filled by Google, no MO locations match
     assert_field("observation_place_name", with: UNIVERSITY_PARK[:name],
                                            wait: 6)
