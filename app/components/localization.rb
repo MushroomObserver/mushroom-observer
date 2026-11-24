@@ -66,6 +66,11 @@ module Components::Localization
   # The one place to change the trailing ":" on label-style text
   # site-wide. Also included into `Components::ApplicationForm`
   # directly, since that class doesn't inherit `Components::Base`.
+  #
+  # `space: false` drops the trailing space -- for a label followed
+  # by an element that supplies a leading margin (e.g. an inline icon
+  # block), where the text-level space would stack with that margin
+  # instead of replacing it.
   def append_colon(text, space: true)
     [text, space ? ": " : ":"].safe_join
   end

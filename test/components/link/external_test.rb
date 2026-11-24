@@ -34,6 +34,55 @@ class Components::Link::ExternalTest < ComponentTestCase
     assert_html(html, "a.my-class[target='_blank']")
   end
 
+  # ---- Icon-only form ----
+
+  def test_icon_renders_svg_and_hides_content_as_sr_only
+    html = render_link(content: "Show Archive Record",
+                       path: "https://example.com", icon: :new_window)
+
+    assert_html(html, "a svg.mo-icon-new-window")
+    assert_html(html, "a .sr-only", text: "Show Archive Record")
+  end
+
+  def test_icon_adds_hover_tooltip
+    html = render_link(content: "Show Archive Record",
+                       path: "https://example.com", icon: :new_window)
+
+    assert_html(html, "a[title='Show Archive Record']" \
+                      "[data-tooltip-target='tip']")
+  end
+
+  def test_tab_html_options_icon_flows_through
+    tab = FakeTab.new
+    tab.html_options[:icon] = :new_window
+    html = render_link(tab: tab)
+
+    assert_html(html, "a svg.mo-icon-new-window")
+    assert_html(html, "a .sr-only", text: "External Resource")
+  end
+
+  def test_no_icon_renders_plain_text_with_no_tooltip
+    html = render_link(content: "GBIF", path: "https://gbif.org")
+
+    assert_no_html(html, "svg")
+    assert_no_html(html, "a[data-tooltip-target]")
+  end
+
+  def test_icon_with_blank_content_raises
+    assert_raises(ArgumentError) do
+      render_link(content: nil, path: "https://example.com",
+                  icon: :new_window)
+    end
+  end
+
+  def test_tab_icon_does_not_leak_into_link_attributes
+    tab = FakeTab.new
+    tab.html_options[:icon] = :new_window
+    html = render_link(tab: tab)
+
+    assert_no_html(html, "a[icon]")
+  end
+
   # ---- Tab PORO form ----
 
   def test_tab_form_uses_tab_title_path_and_html_options
