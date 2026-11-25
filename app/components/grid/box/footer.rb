@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Components::Matrix::Box
-  # Footer rendering methods for Components::Matrix::Box.
+class Components::Grid::Box
+  # Footer rendering methods for Components::Grid::Box.
   #
   # Included by Box to keep the footer slot logic in its own file.
   # Methods here call `panel.with_footer(classes:) { ... }` on the

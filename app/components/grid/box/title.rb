@@ -1,25 +1,25 @@
 # frozen_string_literal: true
 
-# Matrix box title component.
+# Grid box title component.
 #
-# Renders the title span for a matrix box item. The title styling varies
+# Renders the title span for a grid box item. The title styling varies
 # based on the object type - observations and names get regular weight,
 # while other types get bold weight.
 #
 # @example With observation
-#   render MatrixBoxTitle.new(
+#   render Grid::Box::Title.new(
 #     id: obs.id,
 #     name: obs.format_name,
 #     type: :observation
 #   )
 #
 # @example With user
-#   render MatrixBoxTitle.new(
+#   render Grid::Box::Title.new(
 #     id: user.id,
 #     name: user.unique_text_name,
 #     type: :user
 #   )
-class Components::Matrix::Box::Title < Components::Base
+class Components::Grid::Box::Title < Components::Base
   prop :id, Integer
   prop :name, String
   prop :type, Symbol

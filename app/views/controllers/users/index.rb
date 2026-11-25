@@ -2,7 +2,7 @@
 
 module Views::Controllers::Users
   # Users index — admins see a verification/groups/last-login table;
-  # everyone else sees the matrix of user thumbnails.
+  # everyone else sees the grid of user thumbnails.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :users, _Array(::User)
@@ -18,7 +18,7 @@ module Views::Controllers::Users
         render_admin_table
       else
         PaginatedResults do
-          render(::Components::Matrix::Table.new(objects: @users))
+          Grid(objects: @users)
         end
       end
     end

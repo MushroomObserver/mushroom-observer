@@ -7,7 +7,7 @@ module Images
 
     # Renders just the vote interface for one image, fresh and
     # uncached -- fetched via a lazy Turbo Frame so a viewer's vote
-    # state stays out of `Matrix::Box`'s shared fragment cache.
+    # state stays out of `Grid::Box`'s shared fragment cache.
     # Anonymous viewers can load this too (`.require-user` CSS-hides
     # it), matching the overlay copy's render-regardless-of-`@user`
     # behavior.

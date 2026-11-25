@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# Matrix box component for displaying objects in a responsive grid.
+# Grid box component for displaying objects in a responsive grid.
 # Essentially a wrapper for a Panel component
 #
 # This component can be used in two ways:
@@ -9,10 +9,10 @@
 # 2. With a block - renders a simple <li> wrapper for custom content
 #
 # @example Standard object rendering
-#   render Components::Matrix::Box.new(user: @user, object: @observation)
+#   render Components::Grid::Box.new(user: @user, object: @observation)
 #
 # @example With custom options
-#   render Components::Matrix::Box.new(
+#   render Components::Grid::Box.new(
 #     user: @user,
 #     object: @observation,
 #     identify: true,
@@ -20,12 +20,12 @@
 #   )
 #
 # @example Custom block content
-#   render MatrixBox.new(id: 123, class: "text-center") do
+#   render Grid::Box.new(id: 123, class: "text-center") do
 #     tag.div(class: "panel panel-default") { "Custom content" }
 #   end
-class Components::Matrix::Box < Components::Base
-  include Components::Matrix::Box::RenderData
-  include Components::Matrix::Box::Footer
+class Components::Grid::Box < Components::Base
+  include Components::Grid::Box::RenderData
+  include Components::Grid::Box::Footer
 
   # Properties
   prop :user, _Nilable(User), default: nil
@@ -37,7 +37,7 @@ class Components::Matrix::Box < Components::Base
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
-  # Project context — when an observation matrix box is rendered inside a
+  # Project context — when an observation grid box is rendered inside a
   # project-filtered observations index, a project admin sees an Exclude
   # button that moves the observation to the project's excluded list.
   prop :project, _Nilable(Project), default: nil
@@ -63,7 +63,7 @@ class Components::Matrix::Box < Components::Base
     @observation_view = observation_view_for_identify if @identify
 
     li(**mix({ id: "box_#{@data[:id]}",
-               class: class_names("matrix-box", @columns) }, @attributes)) do
+               class: class_names("grid-box", @columns) }, @attributes)) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
       # rotate/mirror only happens on the image-show page, so only
       # that page (Views::Controllers::Images::Show::ImagePanel)
@@ -98,7 +98,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_custom_layout(&block)
     li(**mix({ id: @id ? "box_#{@id}" : nil,
-               class: class_names("matrix-box", @columns) }, @attributes),
+               class: class_names("grid-box", @columns) }, @attributes),
        &block)
   end
 
@@ -154,7 +154,7 @@ class Components::Matrix::Box < Components::Base
   end
 
   def render_title
-    render(Components::Matrix::Box::Title.new(
+    render(Components::Grid::Box::Title.new(
              id: @data[:id],
              name: @data[:name],
              type: @data[:type]
@@ -193,7 +193,7 @@ class Components::Matrix::Box < Components::Base
       ) do
         render(Views::Controllers::Observations::Namings::Votes::Form.new(
                  naming: naming, user: @user, vote: nil,
-                 context: "matrix_box"
+                 context: "grid_box"
                ))
       end
     else
@@ -206,7 +206,7 @@ class Components::Matrix::Box < Components::Base
       type: :modal,
       name: :create_naming.t,
       target: new_observation_naming_path(
-        observation_id: obs.id, context: "matrix_box"
+        observation_id: obs.id, context: "grid_box"
       ),
       modal_id: "obs_#{obs.id}_naming",
       class: "d-inline-block mb-3 propose-naming-link"
@@ -237,7 +237,7 @@ class Components::Matrix::Box < Components::Base
 
   def render_who
     if @data[:who_obs]
-      render(Components::Matrix::Box::Who.new(obs: @data[:who_obs]))
+      render(Components::Grid::Box::Who.new(obs: @data[:who_obs]))
     else
       span(class: "log-who") { Link(type: :user, user: @data[:who]) }
     end

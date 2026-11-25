@@ -191,7 +191,7 @@ module Observations
     end
 
     # Successful-create response when the form was opened from the
-    # lightbox / matrix-box context: swap the obs's title in both
+    # lightbox / grid-box context: swap the obs's title in both
     # places (it now reflects the new naming), close out the
     # naming modal + the AJAX-progress modal, and clear the
     # identify-this-obs strip.
@@ -305,7 +305,7 @@ module Observations
     end
 
     def respond_to_successful_create
-      if params[:context].in?(%w[lightgallery matrix_box])
+      if params[:context].in?(%w[lightgallery grid_box])
         render_update_matrix_box_streams
       else
         redirect_to_obs(@observation)

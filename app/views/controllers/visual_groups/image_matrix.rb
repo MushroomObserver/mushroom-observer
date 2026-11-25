@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Image-matrix grid for a visual group's edit + show pages. Every
-# image in the current subset gets its own matrix box with the
-# image's panel + a `StatusLinks` block (needs-review / include /
-# exclude trio + image id link).
+# image in the current subset gets a grid box with the image's
+# panel + a `StatusLinks` block (needs-review / include / exclude
+# trio + image id link).
 module Views::Controllers::VisualGroups
   class ImageMatrix < Views::Base
     prop :user, _Nilable(User)
@@ -14,7 +14,7 @@ module Views::Controllers::VisualGroups
 
     def view_template
       PaginatedResults do
-        render(Components::Matrix::Table.new) do
+        Grid() do
           @subset.each { |row| render_matrix_box(row) }
         end
       end
@@ -24,7 +24,7 @@ module Views::Controllers::VisualGroups
 
     def render_matrix_box(row)
       image, image_status = row
-      render(Components::Matrix::Box.new(id: image.id)) do
+      render(Components::Grid::Box.new(id: image.id)) do
         Panel do |panel|
           panel.with_thumbnail do
             InteractiveImage(

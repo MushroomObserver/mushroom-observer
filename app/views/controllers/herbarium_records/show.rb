@@ -89,9 +89,9 @@ module Views::Controllers::HerbariumRecords
     end
 
     def render_observation_matrix
-      render(Components::Matrix::Table.new(
-               objects: @herbarium_record.observations.to_a, user: @user
-             ))
+      Grid(
+        objects: @herbarium_record.observations.to_a, user: @user
+      )
     end
 
     def herbarium

@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
-# Who a matrix box names for an Observation: the collector, falling
+# Who a grid box names for an Observation: the collector, falling
 # back to the entering user when none is recorded. The one-line box
 # drops the "Entered by:" line `ObservationFragment::Who` adds.
-class Components::Matrix::Box::Who < Components::Base
+class Components::Grid::Box::Who < Components::Base
   prop :obs, ::Observation
 
   def view_template

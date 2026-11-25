@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Views::Controllers::GlossaryTerms::Images
-  # Bulk image-removal form: shows a matrix of images with a
-  # checkbox under each, plus a submit button below the matrix.
+  # Bulk image-removal form: shows a grid of images with a
+  # checkbox under each, plus a submit button below the grid.
   # The controller action receives `params[:selected][image_id] =
   # "yes"` for selected images (and `"no"` for unselected, via the
   # hidden sidecar).
@@ -39,13 +39,13 @@ module Views::Controllers::GlossaryTerms::Images
     end
 
     def render_image_matrix
-      render(Components::Matrix::Table.new) do
+      Grid() do
         model.images.each { |image| render_image_cell(image) }
       end
     end
 
     def render_image_cell(image)
-      render(Components::Matrix::Box.new(id: image.id)) do
+      render(Components::Grid::Box.new(id: image.id)) do
         div(class: "py-3 text-center") { render_image_preview(image) }
         div(class: "pb-3 text-center") { render_select_checkbox(image) }
       end
