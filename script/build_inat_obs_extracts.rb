@@ -26,7 +26,7 @@
 require "optparse"
 
 class BuildInatObsExtracts
-  BATCH_SIZE = Inat::ObsFetcher::PAGE_SIZE
+  BATCH_SIZE = Inat::Constants::MAX_PER_PAGE
 
   def initialize(opts)
     @only_ids = opts[:ids]
