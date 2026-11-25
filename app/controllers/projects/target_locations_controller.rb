@@ -84,6 +84,7 @@ module Projects
       end
       return unless added.any?
 
+      InatTargetLookupJob.look_up_later(@project)
       list = added.map(&:display_name).join(", ")
       flash_notice(
         :project_target_locations_added.t(names: list)

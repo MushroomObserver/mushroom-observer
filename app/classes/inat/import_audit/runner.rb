@@ -8,7 +8,7 @@ module Inat::ImportAudit
   # rows, append to the CSV, log progress - so memory stays bounded, the CSV
   # survives a crash, and a live rate/ETA is visible. No writes to MO or iNat.
   class Runner
-    PAGE = Inat::ObsFetcher::PAGE_SIZE
+    include Inat::Constants
 
     # Summary flags counted by truthiness/presence (booleans + delta strings).
     TALLY_FLAGS = [:has_delta, :delta_note_keys, :collector_differs,
@@ -72,13 +72,13 @@ module Inat::ImportAudit
     end
 
     def each_batch(scope)
-      batches = (count(scope) / PAGE.to_f).ceil
+      batches = (count(scope) / MAX_PER_PAGE.to_f).ceil
       if scope.is_a?(Array)
-        scope.each_slice(PAGE).with_index do |batch, i|
+        scope.each_slice(MAX_PER_PAGE).with_index do |batch, i|
           yield(batch, i, batches)
         end
       else
-        scope.in_batches(of: PAGE).each_with_index do |rel, i|
+        scope.in_batches(of: MAX_PER_PAGE).each_with_index do |rel, i|
           yield(rel.to_a, i, batches)
         end
       end

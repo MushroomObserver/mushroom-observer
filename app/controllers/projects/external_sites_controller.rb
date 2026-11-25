@@ -6,6 +6,7 @@
 #            configuration for the sites MO can act on
 #  create::  first save, which is what brings the row into being
 #  update::  later saves
+#  look_up:: looks up the project's targets on iNat
 #
 #  Site admins only, which is how the issue's rollout gate is expressed:
 #  a site admin creating the row is the approval, so there is no
@@ -42,12 +43,23 @@ module Projects
       save_site
     end
 
+    # Looks up the project's targets on iNat, so an admin can see
+    # which ones iNat does not know before turning alerts or imports on.
+    def look_up
+      return unless find_project!
+
+      InatTargetLookupJob.perform_later(@project)
+      flash_notice(:project_sites_looking_up_targets.t)
+      redirect_to(project_external_sites_path(project_id: @project.id))
+    end
+
     private
 
     def save_site
       return render_index_view_invalid unless resolve_remote_project
       return render_index_view_invalid unless @site.save
 
+      InatTargetLookupJob.look_up_later(@project)
       flash_notice(:project_site_updated.t)
       redirect_to(project_external_sites_path(project_id: @project.id))
     end
@@ -131,8 +143,8 @@ module Projects
       @inat_site ||= ExternalSite.inaturalist
     end
 
-    # What the saved configuration would bring in, asked of iNat rather
-    # than guessed at.
+    # What the saved configuration would bring in, asked of iNat.
+    # The page reports the saved target lookups and starts none.
     def candidates
       Inat::CandidateCount.for(project_site: project_sites[inat_site.id])
     end
