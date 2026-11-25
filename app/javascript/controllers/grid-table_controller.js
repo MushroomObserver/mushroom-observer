@@ -1,23 +1,23 @@
 import { Controller } from "@hotwired/stimulus"
 
-// Connects to data-controller="matrix-table"
+// Connects to data-controller="grid-table"
 export default class extends Controller {
   connect() {
-    this.element.dataset.matrixTable = "connected";
+    this.element.dataset.gridTable = "connected";
 
-    this.matrixBoxes =
-      this.element.querySelectorAll('.matrix-box')
+    this.gridBoxes =
+      this.element.querySelectorAll('.grid-box')
     this.boxes =
-      this.element.querySelectorAll('.matrix-box .panel-sizing')
+      this.element.querySelectorAll('.grid-box .panel-sizing')
     this.footers =
-      this.element.querySelectorAll('.matrix-box .log-footer')
+      this.element.querySelectorAll('.grid-box .log-footer')
 
     this.add_spacers()
     this.rearrange()
   }
 
   add_spacers() {
-    this.matrixBoxes.forEach((element, i) => {
+    this.gridBoxes.forEach((element, i) => {
       if (i % 2 == 0) {
         element.insertAdjacentElement('beforebegin', this.smSpacer())
       }

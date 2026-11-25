@@ -231,12 +231,12 @@ class Components::Image::Base < Components::Base
                   context: vote_context)
   end
 
-  # Which VoteInterface surface this is -- :matrix by default (a
+  # Which VoteInterface surface this is -- :grid by default (a
   # single-image hover overlay, InteractiveImage); Carousel::Item
   # overrides to :carousel (per-slide caption, different tooltip
   # placement/container needs -- see VoteInterface#context doc).
   def vote_context
-    :matrix
+    :grid
   end
 
   # Render original filename if applicable

@@ -92,7 +92,7 @@ class Components::Carousel::Item < Components::Image::Base
 
   # See Image::Base#vote_context -- every carousel slide (show-page
   # gallery, matrix-box mini-carousel) shares this caption layout, so
-  # both need the :carousel tooltip treatment, not just :matrix.
+  # both need the :carousel tooltip treatment, not just :grid.
   def vote_context
     :carousel
   end

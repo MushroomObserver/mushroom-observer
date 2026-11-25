@@ -174,7 +174,7 @@ class Components::Grid::Box < Components::Base
 
     li(class: "log-occurrence hanging-indent mt-3") do
       Link(type: :get, target: occurrence_path(occ),
-           name: :matrix_box_occurrence.l, icon: :matrix,
+           name: :grid_box_occurrence.l, icon: :matrix,
            show_label: :responsive,
            class: "occurrence-link")
     end

@@ -207,7 +207,7 @@ module Observations
                ),
                turbo_stream.replace(
                  "box_title_#{obs_id}",
-                 Components::Matrix::Box::Title.new(
+                 Components::Grid::Box::Title.new(
                    id: obs_id,
                    name: @observation.format_name(@user).
                          t.break_name.small_author,

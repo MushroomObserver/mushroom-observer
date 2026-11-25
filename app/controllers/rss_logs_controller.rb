@@ -59,7 +59,7 @@ class RssLogsController < ApplicationController
   end
 
   def index_display_opts(opts, _query)
-    { matrix: true, cache: true,
+    { grid: true, cache: true,
       include: rss_log_includes }.merge(opts)
   end
 
@@ -99,7 +99,7 @@ class RssLogsController < ApplicationController
       glossary_term: :user,
       location: :user,
       name: :user,
-      observation: Observation.matrix_box_includes,
+      observation: Observation.grid_box_includes,
       project: [:location, :user],
       species_list: [:location, :user]
     }

@@ -63,7 +63,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     end
     assert_selector("body.identify__index")
 
-    box_ids = find_all(".matrix-box").first(4).pluck(:id)
+    box_ids = find_all(".grid-box").first(4).pluck(:id)
     first_three = box_ids.first(3)
     last_one = box_ids.fourth
 
@@ -82,9 +82,9 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
   end
 
   # Test that marking an observation as reviewed in the lightbox syncs to the
-  # matrix box, and vice versa. This tests the Turbo Stream action and the
+  # grid box, and vice versa. This tests the Turbo Stream action and the
   # lightgallery controller's caption update functionality.
-  def test_mark_as_reviewed_syncs_between_lightbox_and_matrix_box
+  def test_mark_as_reviewed_syncs_between_lightbox_and_grid_box
     rolf = users("rolf")
     login!(rolf)
 
@@ -94,7 +94,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     assert_selector("body.identify__index")
 
     # Find an observation box that has an image (theater button)
-    box_with_image = first(".matrix-box:has(.theater-btn)")
+    box_with_image = first(".grid-box:has(.theater-btn)")
     obs_id = box_with_image[:id].sub("box_", "")
 
     # Verify both checkboxes start unchecked
@@ -118,12 +118,12 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
       find(".caption-reviewed-link").click
     end
 
-    # Verify the matrix box checkbox is now checked (synced via Turbo Stream)
+    # Verify the grid box checkbox is now checked (synced via Turbo Stream)
     within(box_with_image) do
       assert_checked_field("box_reviewed_#{obs_id}", wait: 5)
     end
 
-    # Unmark in the lightbox, verify it syncs to matrix box
+    # Unmark in the lightbox, verify it syncs to grid box
     within(".lg-sub-html") do
       find(".caption-reviewed-link").click
     end
@@ -138,7 +138,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     end
     assert_no_selector(".lg-container")
 
-    # Mark in the matrix box
+    # Mark in the grid box
     within(box_with_image) do
       find(".caption-reviewed-link").click
     end
@@ -157,7 +157,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
       assert_checked_field("caption_reviewed_#{obs_id}", wait: 5)
     end
 
-    # Unmark in the matrix box, verify lightbox syncs
+    # Unmark in the grid box, verify lightbox syncs
     within(box_with_image) do
       find(".caption-reviewed-link").trigger("click")
     end

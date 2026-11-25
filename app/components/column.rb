@@ -62,7 +62,7 @@ class Components::Column < Components::Base
 
   # Callable without instantiating -- for call sites that need a raw class
   # string merged into an existing element's `class:` rather than a full
-  # Column-wrapped element (Components::Matrix::Box's `columns:` prop
+  # Column-wrapped element (Components::Grid::Box's `columns:` prop
   # default, Views::Layouts::Header#title_cols).
   def self.classes_for(col: false, offset_xs: nil, show_at: nil, hide_at: nil,
                        **widths)
