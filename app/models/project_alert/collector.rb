@@ -97,10 +97,21 @@ class ProjectAlert
     end
 
     def record(observation, target)
-      Project.alerting.includes(:project_target_names,
-                                :project_target_locations).filter_map do |pr|
-        alert_for(pr, observation, target)
+      alerting_projects.filter_map do |project|
+        alert_for(project, observation, target)
       end
+    end
+
+    # One query for the whole flush, and the Project instances it
+    # returns hold what they expand: Project#expanded_target_name_id_set
+    # memoizes per instance, and excluded_observations loads once per
+    # instance. Querying inside the per-observation loop threw both
+    # away, so an import paid for them again for every observation it
+    # brought in.
+    def alerting_projects
+      @alerting_projects ||=
+        Project.alerting.includes(:project_target_names,
+                                  :project_target_locations).to_a
     end
 
     # What this project hears about an action on this observation. A
