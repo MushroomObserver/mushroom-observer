@@ -3,8 +3,13 @@
 # Matrix box title component.
 #
 # Renders the title span for a matrix box item. The title styling varies
-# based on the object type - observations and names get regular weight,
-# while other types get bold weight.
+# based on the object type - observations and names get regular weight
+# (their text is already textile-bold/italic), while other types get
+# bold weight. Pass `bold:` explicitly to override that type-based
+# default -- e.g. an image box, whose title text comes from whichever
+# subjects it's attached to (an already-bold observation name, or a
+# plain glossary_term/user name) and so needs a per-image decision,
+# not a per-type one.
 #
 # @example With observation
 #   render MatrixBoxTitle.new(
@@ -19,10 +24,19 @@
 #     name: user.unique_text_name,
 #     type: :user
 #   )
+#
+# @example With an explicit bold override
+#   render MatrixBoxTitle.new(
+#     id: image.id,
+#     name: image.format_name,
+#     type: :image,
+#     bold: image.observations.empty?
+#   )
 class Components::Matrix::Box::Title < Components::Base
   prop :id, Integer
   prop :name, String
   prop :type, Symbol
+  prop :bold, _Nilable(_Boolean), default: nil
 
   def view_template
     span(
@@ -34,6 +48,12 @@ class Components::Matrix::Box::Title < Components::Base
   private
 
   def title_weight
-    "font-weight-bold" unless [:observation, :name].include?(@type)
+    "font-weight-bold" if bold?
+  end
+
+  def bold?
+    return @bold unless @bold.nil?
+
+    [:observation, :name].exclude?(@type)
   end
 end

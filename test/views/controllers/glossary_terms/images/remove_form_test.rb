@@ -36,6 +36,7 @@ module Views::Controllers::GlossaryTerms::Images
         # Hidden sidecar carries the "no" default for unchecked state.
         assert_html(html, "input[type='hidden']" \
                           "[name='selected[#{image.id}]'][value='no']")
+        assert_includes(html, "#{:image.ti} ##{image.id}")
       end
     end
 

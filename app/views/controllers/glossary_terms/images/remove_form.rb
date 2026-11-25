@@ -46,8 +46,15 @@ module Views::Controllers::GlossaryTerms::Images
 
     def render_image_cell(image)
       render(Components::Matrix::Box.new(id: image.id)) do
-        div(class: "py-3 text-center") { render_image_preview(image) }
-        div(class: "pb-3 text-center") { render_select_checkbox(image) }
+        Panel do |panel|
+          panel.with_thumbnail { render_image_preview(image) }
+          panel.with_body(classes: "pt-1") do
+            div(class: "text-center mb-3") do
+              render(::Components::Image::OriginalFilenameRow.new(image: image))
+            end
+            div(class: "text-center") { render_select_checkbox(image) }
+          end
+        end
       end
     end
 
@@ -55,7 +62,7 @@ module Views::Controllers::GlossaryTerms::Images
       InteractiveImage(
         user: @user,
         image: image,
-        original: true,
+        show_filename_row: false,
         votes: false,
         extra_classes: "image-to-remove"
       )
@@ -67,7 +74,7 @@ module Views::Controllers::GlossaryTerms::Images
     # checkbox in MO's standard `.checkbox` BS3 markup.
     def render_select_checkbox(image)
       checkbox_field("selected[#{image.id}]",
-                     label: "#{:image.l} ##{image.id}",
+                     label: "#{:image.ti} ##{image.id}",
                      wrap_class: "my-0",
                      checked_value: "yes",
                      unchecked_value: "no")

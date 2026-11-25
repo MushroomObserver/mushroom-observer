@@ -54,7 +54,7 @@ class Components::InteractiveImage < Components::Image::Base
       style: build_width_style(@data[:width])
     ) do
       render_image_container
-      render_stretched_link
+      render_stretched_link if @data[:image_link]
       render_image_overlays
     end
 

@@ -50,6 +50,29 @@ class MatrixBoxRenderDataTest < ComponentTestCase
     assert_nil(component.extract_image_data[:when])
   end
 
+  # An image attached to an observation gets its title text from the
+  # observation's format_name, already textile-bold/italic -- Title
+  # should not double-bold it.
+  def test_extract_image_data_title_bold_false_with_observation
+    image = images(:connected_coprinus_comatus_image)
+    component = Components::Matrix::Box.new(user: @user, object: image)
+    data = component.extract_image_data
+
+    assert_not(data[:title_bold])
+    assert_includes(data[:name], component.append_colon(:image.ti))
+  end
+
+  # An image with no observation subject falls back to a plain
+  # ":image #N" title, which needs Title's bold treatment.
+  def test_extract_image_data_title_bold_true_without_observation
+    image = images(:disconnected_coprinus_comatus_image)
+    component = Components::Matrix::Box.new(user: @user, object: image)
+    data = component.extract_image_data
+
+    assert(data[:title_bold])
+    assert_not_includes(data[:name], component.append_colon(:image.ti))
+  end
+
   # An observation with a thumbnail uses it.
   def test_observation_uses_thumb_image
     obs = observations(:coprinus_comatus_obs)

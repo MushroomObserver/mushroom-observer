@@ -1642,18 +1642,15 @@
   image_file_name: File name
   image_file_size: File size
 
-  # account/profile/images/reuse
-  image_reuse_all_users: All images
-  image_reuse_just_yours: My images
-  image_reuse_show_header: Show
-
   # observations/images/edit
 
   # observations/images/remove
   image_remove_remove: Remove
   image_remove_title: Remove Images from [name]
 
-  # observations/images/reuse
+  # images/reuse
+  image_reuse_all_users: All images
+  image_reuse_just_yours: My images
   image_reuse_on_reflection_companion_created: That observation is a read-only reflection of its imported source, so Mushroom Observer created a linked [:companion_observation] for the image. The two are grouped as one occurrence for the same specimen.
   image_reuse_on_reflection_companion_existing: That observation is a read-only reflection of its imported source, so the image goes on its linked [:companion_observation] for the same specimen.
   image_reuse_title: Reuse Image for [name]

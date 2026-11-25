@@ -1,29 +1,26 @@
 # frozen_string_literal: true
 
 # Per-image status-buttons block for the visual-group image matrix
-# (`needs review | include | exclude` trio + image id link). Extracted
-# as its own Phlex view so the matrix grid AND the turbo-stream
-# response from `visual_groups/images#update` (the click on one of
-# the status links re-renders just that image's block) can both
-# render it.
+# (`needs review | include | exclude` trio). Extracted as a Phlex
+# view so the matrix grid AND the turbo-stream response from
+# `visual_groups/images#update` (the click on one of the status links
+# re-renders just that image's block) can both render it.
 module Views::Controllers::VisualGroups
   class StatusLinks < Views::Base
     prop :visual_group, VisualGroup
-    prop :image_id, Integer
+    prop :image, ::Image
     # Booleans only — `nil` means no VisualGroupImage exists (needs
     # review), `true` means included, `false` means excluded.
     prop :status, _Nilable(_Boolean), default: nil
 
     def view_template
       div(class: "status_buttons text-center small",
-          id: "visual_group_status_links_#{@image_id}") do
-        ButtonGroup(class: "status-btn-group mb-2") { render_status_link_trio }
-        br
-        render_image_id_line
+          id: "visual_group_status_links_#{@image.id}") do
+        ButtonGroup(class: "status-btn-group") { render_status_link_trio }
         br
         # The `data_container` hidden span lets older inherited
         # image-matrix JS read the image id off the DOM.
-        span(class: "hidden data_container", data: { id: @image_id })
+        span(class: "hidden data_container", data: { id: @image.id })
       end
     end
 
@@ -53,17 +50,12 @@ module Views::Controllers::VisualGroups
         name: link_text,
         class: "status-link",
         target: visual_group_image_path(
-          id: @image_id, visual_group_id: @visual_group.id,
+          id: @image.id, visual_group_id: @visual_group.id,
           status: link
         ),
         title: link_text,
         data: { turbo: true }
       )
-    end
-
-    def render_image_id_line
-      trusted_html(append_colon(:image_reuse_id.t))
-      Link(type: :get, name: @image_id.to_s, target: image_path(id: @image_id))
     end
 
     def status_text(status)
