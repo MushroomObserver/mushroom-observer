@@ -29,7 +29,6 @@ class Inat
     include Inat::Constants
     include Inat::JsonFetch
 
-    PAGE_SIZE = 200
     # Enough for a taxon swap landing on a watched name; past this the
     # cycle says so rather than walking iNat for a quarter of an hour.
     MAX_PAGES = 5
@@ -39,7 +38,7 @@ class Inat
     # `page_size` and `max_pages` are arguments rather than constants
     # read directly so a test can drive the overflow path without
     # fabricating a thousand results.
-    def initialize(site: ExternalSite.inaturalist, page_size: PAGE_SIZE,
+    def initialize(site: ExternalSite.inaturalist, page_size: MAX_PER_PAGE,
                    max_pages: MAX_PAGES)
       @site = site
       @page_size = page_size

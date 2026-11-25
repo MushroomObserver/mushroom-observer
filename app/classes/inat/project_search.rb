@@ -54,6 +54,22 @@ class Inat
       @mapper.target_taxon_ids.any?
     end
 
+    # False when a target the search follows has no saved lookup, so
+    # the search would cover only part of what the project targets.
+    def complete?
+      targets_looked_up == targets_to_look_up
+    end
+
+    # The targets this search follows, which are none when it does not
+    # follow the project's constraints.
+    def targets_to_look_up
+      @project_site.use_constraints? ? @mapper.target_count : 0
+    end
+
+    def targets_looked_up
+      @project_site.use_constraints? ? @mapper.looked_up_count : 0
+    end
+
     def unresolved_names
       # Resolve first: the mapper fills @unresolved_names as a side
       # effect of target_taxon_ids, and reads empty until it runs.

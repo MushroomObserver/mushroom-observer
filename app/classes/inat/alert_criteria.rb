@@ -18,7 +18,8 @@ class Inat
       ProjectExternalSite.where(external_site: site,
                                 project: Project.alerting).
         includes(project: [:target_names, :target_locations, :location]).
-        map { |row| new(row) }.select(&:qualified?)
+        map { |row| new(row) }.
+        each(&:look_up_missing_targets).select(&:qualified?)
     end
 
     attr_reader :project_site, :project
@@ -35,6 +36,11 @@ class Inat
 
     def taxon_ids
       @taxon_ids ||= target_taxa.keys
+    end
+
+    # Queue targets which lack a saved iNat lookup.
+    def look_up_missing_targets
+      InatTargetLookupJob.perform_later(project) unless mapper.complete?
     end
 
     # The identification this project would be told about: a current
@@ -79,7 +85,11 @@ class Inat
     private
 
     def target_taxa
-      @target_taxa ||= Inat::ConstraintMapper.new(project).target_taxa
+      @target_taxa ||= mapper.target_taxa
+    end
+
+    def mapper
+      @mapper ||= Inat::ConstraintMapper.new(project)
     end
 
     # The watched taxon the identification sits at or under. The

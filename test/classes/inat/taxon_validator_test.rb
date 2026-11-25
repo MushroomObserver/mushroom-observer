@@ -107,6 +107,41 @@ class Inat
                  "Unknown taxon ID (not returned by API) is not importable")
     end
 
+    # iNat returns 30 taxa per page unless asked for more, so a long list
+    # is asked about in batches, each with a page size that fits it.
+    def test_a_long_list_is_asked_about_in_full_batches
+      ids = (1..(MAX_PER_PAGE + 1)).map { |i| 400_000 + i }
+      stub_request(:get, TAXA_URL).to_return do |request|
+        query = Rack::Utils.parse_query(URI(request.uri).query)
+        asked = query["id"].split(",").map(&:to_i)
+        { status: 200,
+          body: taxa_body(*asked.map { |id| fungi_result(id) }) }
+      end
+
+      result = TaxonValidator.new(ids).all_importable?
+
+      assert(result, "Every taxon in a long fungal list should be importable")
+      assert_requested(:get, TAXA_URL, times: 2)
+      assert_requested(:get, /per_page=#{MAX_PER_PAGE}/o,
+                       times: 2)
+    end
+
+    def test_a_non_fungal_taxon_in_a_later_batch_is_caught
+      ids = (1..(MAX_PER_PAGE + 1)).map { |i| 400_000 + i }
+      stub_request(:get, TAXA_URL).to_return do |request|
+        query = Rack::Utils.parse_query(URI(request.uri).query)
+        asked = query["id"].split(",").map(&:to_i)
+        results = asked.map do |id|
+          id == ids.last ? non_fungi_result(id) : fungi_result(id)
+        end
+        { status: 200, body: taxa_body(*results) }
+      end
+
+      result = TaxonValidator.new(ids).all_importable?
+
+      assert_not(result, "A non-fungal taxon in any batch is not importable")
+    end
+
     # ---- all_importable? on API failure (fail closed) -----------------------
 
     def test_returns_false_when_api_returns_error

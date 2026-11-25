@@ -27,7 +27,7 @@
 #     -- [projects/inat-sync/orphaned_reflections.txt]
 
 class OrphanedReflections
-  BATCH = Inat::ObsFetcher::PAGE_SIZE
+  BATCH = Inat::Constants::MAX_PER_PAGE
   PLACEHOLDER_RANKS = %w[Kingdom Phylum Class Order].freeze
   ROW = "%-8s %-8s %-11s %-6s %-7s %-9s %-14s %s"
 
