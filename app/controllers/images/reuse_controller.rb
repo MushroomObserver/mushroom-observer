@@ -75,8 +75,13 @@ module Images
     def find_reuse_target!
       return @user if params[:target_type] == "User"
 
-      find_or_goto_index(TARGET_MODELS.fetch(params[:target_type]),
-                         params[:target_id].to_s)
+      model = TARGET_MODELS[params[:target_type]]
+      unless model
+        head(:not_found)
+        return nil
+      end
+
+      find_or_goto_index(model, params[:target_id].to_s)
     end
 
     def check_reuse_permission?

@@ -15,6 +15,16 @@ module Images
       Views::Controllers::Images::Reuse::Index::Form::PLACEHOLDER_ID
 
     ##########################################################################
+    # Invalid target_type
+
+    def test_index_with_unknown_target_type_is_not_found
+      login("rolf")
+      get(:index, params: { target_type: "Bogus", target_id: "1" })
+
+      assert_response(:not_found)
+    end
+
+    ##########################################################################
     # Observation target
 
     def test_reuse_image_page_access
@@ -335,6 +345,19 @@ module Images
 
       assert_equal(img, user.image)
       assert_flash(:runtime_no_changes)
+    end
+
+    def test_attach_image_to_another_users_profile_redirects
+      user = users(:rolf)
+      other_user = users(:mary)
+      image = images(:commercial_inquiry_image)
+
+      login(user.login)
+      post(:update, params: { id: image.id, target_id: other_user.id,
+                              target_type: "User" })
+
+      assert_redirected_to(edit_account_profile_path)
+      assert_not_equal(image, other_user.reload.image)
     end
 
     def test_reuse_image_for_user_page_access
