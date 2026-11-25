@@ -2841,7 +2841,7 @@
   project_sites_no_constraints: No project constraints. Add target names, locations, or dates to enable.
   project_sites_use_constraints: Follow this project's constraints
   project_sites_use_constraints_help: A project's constraints are its target names, its target locations, the area of its location, and its dates. Whichever of those the project sets are applied; a project that sets none constrains nothing.
-  project_sites_importing: Automatically import matching observations into this project
+  project_sites_importing: Enable imports
   project_sites_import_limit: Import limit
   project_sites_import_limit_help: The most observations Mushroom Observer will ever import into this project.
   project_site_updated: External site settings saved.
