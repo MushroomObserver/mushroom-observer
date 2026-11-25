@@ -85,7 +85,7 @@ GEM
     bootstrap-sass (3.4.1)
       autoprefixer-rails (>= 5.2.1)
       sassc (>= 2.0.0)
-    brakeman (8.1.0)
+    brakeman (8.1.1)
       racc
     browser (6.2.0)
     builder (3.3.0)
@@ -299,6 +299,7 @@ GEM
     mini_magick (5.4.0)
       logger
     mini_mime (1.1.5)
+    mini_portile2 (2.8.9)
     mini_racer (0.22.2)
       libv8-node (~> 24.12.0.1)
     minitest (5.27.0)
@@ -334,6 +335,9 @@ GEM
       net-protocol
     netrc (0.11.0)
     nio4r (2.7.5)
+    nokogiri (1.19.7)
+      mini_portile2 (~> 2.8.2)
+      racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-gnu)
       racc (~> 1.4)
     nokogiri (1.19.7-aarch64-linux-musl)
