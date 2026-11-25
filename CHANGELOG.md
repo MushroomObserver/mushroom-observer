@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-11-25 (deploy-2026-11-25-13-00)
+
+- Icon-only `Link::External`/`Link::Active`, consistent inline-icon-block spacing ([PR5775](https://github.com/MushroomObserver/mushroom-observer/pull/5775), @nimmolo)
+- Collapse the iNat import snapshot behind a toggle on the Notes panel ([PR5776](https://github.com/MushroomObserver/mushroom-observer/pull/5776), @nimmolo)
+- Fix spacing and hover state on observation external-link id badges ([PR5777](https://github.com/MushroomObserver/mushroom-observer/pull/5777), @nimmolo)
+- Fix flaky `test_autofill_location_from_geotagged_image` system test ([PR5781](https://github.com/MushroomObserver/mushroom-observer/pull/5781), @nimmolo)
+- Bump prawn-svg from 0.40.4 to 1.0.0 ([PR5787](https://github.com/MushroomObserver/mushroom-observer/pull/5787), @app/dependabot)
+- Bump brakeman from 8.1.0 to 8.1.1 ([PR5788](https://github.com/MushroomObserver/mushroom-observer/pull/5788), @app/dependabot)
+- Bump puma from 8.1.0 to 8.1.2 ([PR5789](https://github.com/MushroomObserver/mushroom-observer/pull/5789), @app/dependabot)
+- Bump image_processing from 2.2.0 to 2.2.1 ([PR5790](https://github.com/MushroomObserver/mushroom-observer/pull/5790), @app/dependabot)
+- Bump webmock from 3.34.0 to 3.38.0 ([PR5791](https://github.com/MushroomObserver/mushroom-observer/pull/5791), @app/dependabot)
+
 ## 2026-11-23 (deploy-2026-11-23-13-00)
 
 - Various search form and autocompleter fixes, plus SCSS duplicate/cross-file selector finders ([PR5757](https://github.com/MushroomObserver/mushroom-observer/pull/5757), @nimmolo)
