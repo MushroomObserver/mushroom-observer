@@ -81,19 +81,13 @@ class Components::Collapsible < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    # `:id` never lands in @attributes -- the explicit `id:` prop above
-    # always claims that keyword before the `:**` catch-all sees it.
-    send(@element,
-         id: @id,
-         class: collapse_classes,
-         **@attributes.except(:class),
+    send(@element, **mix({ id: @id, class: collapse_classes }, @attributes),
          &block)
   end
 
   private
 
   def collapse_classes
-    self.class.collapse_classes(expanded: @expanded, panel: @panel,
-                                html_class: @attributes[:class])
+    self.class.collapse_classes(expanded: @expanded, panel: @panel)
   end
 end

@@ -42,8 +42,7 @@ module Views::Controllers::SpeciesLists
             trusted_html(species_list.text_name.t)
           end
         end
-        Badge(variant: :id, object: species_list, size: :xl,
-              extra_class: "ml-3")
+        Badge(variant: :id, object: species_list, size: :xl, class: "ml-3")
       end
     end
 

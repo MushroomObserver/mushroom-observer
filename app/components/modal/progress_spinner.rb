@@ -23,7 +23,7 @@ class Components::Modal::ProgressSpinner < Components::Base
       body_class: "text-center",
       body_id: BODY_ID,
       title_id: CAPTION_ID,
-      extra_data: {
+      data: {
         action: "section-update:updated@window->modal#hide",
         keyboard: "false",
         backdrop: "static"

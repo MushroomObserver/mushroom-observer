@@ -89,18 +89,20 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   end
 
   def render_badge(site_name, link)
-    Link(type: :collapse_toggle,
-         target_id: "pane_#{link.id}",
-         fallback_href: external_link_path(link.id),
-         class: "badge badge-id badge-xl ml-2 text-uppercase",
-         data: {
-           parent: "#external_links_accordion",
-           turbo_frame: "external_link_frame_#{link.id}",
-           tooltip_target: "tip", placement: "top",
-           title: :show_observation_shared_with_tooltip.l(
-             site: site_name
-           )
-         }) { plain(SITE_BADGES[site_name]) }
+    Badge(variant: :collapse_toggle,
+          value: SITE_BADGES[site_name],
+          target_id: "pane_#{link.id}",
+          fallback_href: external_link_path(link.id),
+          size: :xl,
+          class: "ml-2 text-uppercase",
+          data: {
+            parent: "#external_links_accordion",
+            turbo_frame: "external_link_frame_#{link.id}",
+            tooltip_target: "tip", placement: "top",
+            title: :show_observation_shared_with_tooltip.l(
+              site: site_name
+            )
+          })
     whitespace
   end
 

@@ -28,7 +28,7 @@ class Components::Badge::IDTest < ComponentTestCase
   def test_renders_value_when_no_object_given
     # Not an AbstractModel id -- e.g. an external site's own numeric id
     # (see Components::Link::External).
-    html = render_badge(value: "234723", size: :lg, extra_class: nil)
+    html = render_badge(value: "234723", size: :lg)
 
     assert_html(html, "button[type='button']", text: "234723")
     assert_html(html, "button[data-controller='clipboard']")
@@ -43,12 +43,11 @@ class Components::Badge::IDTest < ComponentTestCase
 
   # IDBadge's base `badge badge-id` classes are its styling contract
   # (a styling-abstraction component) -- this test verifies
-  # caller-supplied extra_class joins them rather than clobbering
-  # them.
+  # caller-supplied class: joins them rather than clobbering them.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
-  def test_extra_class_overrides_default_spacing
+  def test_caller_class_merges_with_default_classes
     obs = observations(:minimal_unknown_obs)
-    html = render_badge(object: obs, size: :md, extra_class: "custom-class")
+    html = render_badge(object: obs, size: :md, class: "custom-class")
 
     assert_html(html, "button.badge.badge-id.custom-class")
   end
@@ -62,6 +61,17 @@ class Components::Badge::IDTest < ComponentTestCase
 
       assert_html(html, "button.badge-id.#{css_class}")
     end
+  end
+
+  # `link:` renders a navigating badge instead of copy-to-clipboard --
+  # e.g. the observation lightbox caption's id badge.
+  def test_link_renders_anchor_instead_of_clipboard_button
+    obs = observations(:minimal_unknown_obs)
+    html = render_badge(object: obs, size: :md, link: "/obs/#{obs.id}")
+
+    assert_html(html, "a[href='/obs/#{obs.id}']", text: obs.id.to_s)
+    assert_no_html(html, "button")
+    assert_no_html(html, "a[data-controller='clipboard']")
   end
 
   def test_requires_size
@@ -85,6 +95,15 @@ class Components::Badge::IDTest < ComponentTestCase
 
     assert_html(html, "button[data-title='Copy Foo ID']")
     assert_no_html(html, "button[data-title='#{:copy_this_id.ti}']")
+  end
+
+  def test_caller_data_merges_alongside_clipboard_wiring
+    obs = observations(:minimal_unknown_obs)
+    html = render_badge(object: obs, size: :md,
+                        data: { turbo_frame: "obs_badge" })
+
+    assert_html(html, "button[data-turbo-frame='obs_badge']")
+    assert_html(html, "button[data-controller='clipboard']")
   end
 
   private

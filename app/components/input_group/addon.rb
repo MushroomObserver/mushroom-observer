@@ -18,16 +18,7 @@ module Components
     prop :attributes, _Hash(Symbol, _Any), :**
 
     def view_template(&block)
-      span(**addon_attributes, &block)
-    end
-
-    private
-
-    def addon_attributes
-      {
-        class: class_names(VARIANT_CLASSES[@variant], @attributes[:class]),
-        **@attributes.except(:class)
-      }
+      span(**mix({ class: VARIANT_CLASSES[@variant] }, @attributes), &block)
     end
   end
 end

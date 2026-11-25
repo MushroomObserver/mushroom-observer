@@ -26,11 +26,10 @@ class Components::Link::Object < Components::Link
 
   def link_attrs
     validate_no_btn_classes!(@attributes[:class])
-    @attributes.except(:class).merge(class: identifier_class)
+    mix({ class: identifier_class }, @attributes)
   end
 
   def identifier_class
-    class_names(btn_styling, "#{@object.type_tag}_link_#{@object.id}",
-                @attributes[:class])
+    class_names(btn_styling, "#{@object.type_tag}_link_#{@object.id}")
   end
 end

@@ -153,10 +153,7 @@ class Components::Column < Components::Base
   prop :attributes, _Hash(Symbol, _Any?), :**
 
   def view_template(&block)
-    send(@element,
-         class: class_names(width_classes, @attributes[:class]),
-         **@attributes.except(:class),
-         &block)
+    send(@element, **mix({ class: width_classes }, @attributes), &block)
   end
 
   private

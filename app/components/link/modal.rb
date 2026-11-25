@@ -38,6 +38,10 @@ class Components::Link::Modal < Components::Link
 
   private
 
+  # modal_data's Stimulus wiring must win outright over a colliding
+  # caller data: key, not concatenate with it -- mix() would combine
+  # two colliding String values instead of letting one replace the
+  # other, so this uses deep_merge.
   def plain_link_args
     { class: merged_class }.
       merge(@attributes.except(:class)).

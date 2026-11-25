@@ -100,17 +100,10 @@ module Components
     prop :attributes, _Hash(Symbol, _Any?), :**
 
     def view_template(&block)
-      send(@element, **computed_attributes, &block)
+      send(@element, **mix({ class: base_class }, @attributes), &block)
     end
 
     private
-
-    def computed_attributes
-      {
-        class: class_names(base_class, @attributes[:class]),
-        **@attributes.except(:class)
-      }
-    end
 
     # `p-0` default since the bridge rule's `padding` is nonzero, not
     # a no-op - most callers want zero, so they shouldn't have to

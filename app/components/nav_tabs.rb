@@ -74,8 +74,7 @@ class Components::NavTabs < Components::Base
     # `tabs.tab(...)` push into `@tabs`) and discards any output —
     # the block configures, the `<ul>` below renders.
     vanish(&block)
-    ul(class: class_names("nav nav-tabs", @attributes[:class]),
-       **@attributes.except(:class)) do
+    ul(**mix({ class: "nav nav-tabs" }, @attributes)) do
       @tabs.each { |tab| render_tab(tab) }
     end
   end

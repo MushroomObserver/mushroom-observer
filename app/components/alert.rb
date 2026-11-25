@@ -25,28 +25,13 @@ module Components
     prop :attributes, _Hash(Symbol, _Any), :**
 
     def view_template
-      div(**alert_attributes) do
+      div(**mix({ class: "alert alert-#{@level}" }, @attributes)) do
         if @message.present?
           plain(@message)
         elsif block_given?
           yield
         end
       end
-    end
-
-    private
-
-    def alert_attributes
-      {
-        class: alert_classes,
-        **@attributes.except(:class)
-      }
-    end
-
-    def alert_classes
-      classes = ["alert", "alert-#{@level}"]
-      classes << @attributes[:class] if @attributes[:class]
-      classes.compact.join(" ")
     end
   end
 end
