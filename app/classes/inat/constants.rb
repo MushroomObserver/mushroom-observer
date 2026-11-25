@@ -40,6 +40,10 @@ class Inat
     # The iNat API
     API_BASE = "https://api.inaturalist.org/v1"
 
+    # The most results iNat returns per page, so also the most ids to ask
+    # about in one request: a longer id list loses the overflow.
+    MAX_PER_PAGE = 200
+
     # The APIKey#notes for the user's MO API Key used for iNat imports
     MO_API_KEY_NOTES = "inat import"
 

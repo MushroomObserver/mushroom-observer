@@ -30,7 +30,7 @@ class Inat
     # Part of the cache keys: a miss is cached too, so changing how
     # targets match, or how a miss is stored, needs a new version to
     # look them up again.
-    TAXON_MATCHING_VERSION = 2
+    TAXON_MATCHING_VERSION = 3
     PLACE_MATCHING_VERSION = 4
 
     # iNat writes an infraspecific name without the rank marker MO
@@ -218,8 +218,16 @@ class Inat
       results = inat_results("taxa?q=#{escape(text_name)}&per_page=5")
       return nil unless results
 
-      results.find { |taxon| taxon["name"].to_s.casecmp?(text_name) }&.
-        dig("id") || false
+      results.find do |taxon|
+        taxon["name"].to_s.casecmp?(text_name) && importable?(taxon)
+      end&.dig("id") || false
+    end
+
+    # Some fungal names are also the names of plants or animals, and an
+    # import drops a taxon list holding any taxon outside fungi and
+    # slime molds.
+    def importable?(taxon)
+      IMPORTABLE_TAXON_IDS.intersect?(taxon["ancestor_ids"] || [])
     end
 
     # The results iNat sent, or nil when it was not asked or did not

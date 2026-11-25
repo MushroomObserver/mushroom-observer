@@ -131,8 +131,8 @@ class Inat::ProjectSearchTest < UnitTestCase
       stub_request(:get, inat_api_matcher("taxa")).
         with(query: hash_including("q" => name.text_name)).
         to_return(status: 200,
-                  body: { results: [{ "id" => 9001 + i,
-                                      "name" => name.text_name }] }.to_json)
+                  body: { results: [fungal_taxon(9001 + i,
+                                                 name.text_name)] }.to_json)
     end
   end
 end

@@ -23,7 +23,7 @@ class Inat::ConstraintMapperTest < UnitTestCase
       "#{Inat::Constants::API_BASE}/taxa?q=#{ERB::Util.url_encode(text_name)}" \
       "&per_page=5"
     ).to_return(status: 200,
-                body: { results: [{ id: id, name: text_name }] }.to_json)
+                body: { results: [fungal_taxon(id, text_name)] }.to_json)
   end
 
   # A place iNat gives a box for is accepted only when that box meets
@@ -244,8 +244,8 @@ class Inat::ConstraintMapperTest < UnitTestCase
   end
 
   def taxa_body
-    { results: [{ id: 47_347, name: "Coprinus comatus" },
-                { id: 48_701, name: "Agaricus campestris" }] }.to_json
+    { results: [fungal_taxon(47_347, "Coprinus comatus"),
+                fungal_taxon(48_701, "Agaricus campestris")] }.to_json
   end
 
   # Once iNat refuses one request, sending the rest would only be
@@ -335,6 +335,40 @@ class Inat::ConstraintMapperTest < UnitTestCase
     assert_not(mapper.complete?, "A refused lookup should be incomplete")
     assert_empty(mapper.unresolved_locations,
                  "A refused lookup should not be reported as unknown")
+  end
+
+  # Some fungal names are also animal or plant names. Only the fungus
+  # counts, whatever order iNat lists them in.
+  def test_a_same_named_animal_is_passed_over
+    animal = { id: 1, name: "Coprinus comatus", ancestor_ids: [1] }
+    stub_request(:get, inat_api_matcher("taxa")).
+      with(query: hash_including("q" => "Coprinus comatus")).
+      to_return(status: 200, body: { results: [
+        animal, fungal_taxon(47_347, "Coprinus comatus")
+      ] }.to_json)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_json("places", [])
+
+    taxa = lookup_mapper(@project).target_taxa
+
+    assert_equal({ 47_347 => "Coprinus comatus",
+                   48_701 => "Agaricus campestris" }, taxa,
+                 "The fungus should be chosen over a same-named animal")
+  end
+
+  def test_a_name_matching_only_an_animal_is_unknown
+    animal = { id: 1, name: "Coprinus comatus", ancestor_ids: [1] }
+    stub_request(:get, inat_api_matcher("taxa")).
+      with(query: hash_including("q" => "Coprinus comatus")).
+      to_return(status: 200, body: { results: [animal] }.to_json)
+    stub_taxon("Agaricus campestris", 48_701)
+    stub_json("places", [])
+    mapper = lookup_mapper(@project)
+
+    assert_not_includes(mapper.target_taxon_ids, 1,
+                        "A non-fungal taxon should not be targeted")
+    assert_includes(mapper.unresolved_names, "Coprinus comatus",
+                    "A name with no fungal match should be reported")
   end
 
   def lookup_mapper(project)

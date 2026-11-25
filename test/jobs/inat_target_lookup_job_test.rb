@@ -16,7 +16,7 @@ class InatTargetLookupJobTest < ActiveJob::TestCase
     stub_request(:get, inat_api_matcher("taxa")).
       to_return(lambda { |request|
         name = CGI.unescape(request.uri.query.to_s[/q=([^&]*)/, 1].to_s)
-        { status: 200, body: { results: [{ id: 1, name: name }] }.to_json }
+        { status: 200, body: { results: [fungal_taxon(1, name)] }.to_json }
       })
     stub_request(:get, inat_api_matcher("places")).
       to_return(status: 200, body: { results: [] }.to_json)

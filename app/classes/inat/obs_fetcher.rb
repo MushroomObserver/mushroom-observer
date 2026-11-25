@@ -10,7 +10,8 @@ class Inat
   # Shared bulk-fetch infrastructure: the import audit (#4213) and the
   # reflection-resolution extract builder (#4585) both consume it.
   class ObsFetcher
-    PAGE_SIZE = 200          # iNat's maximum per_page
+    include Inat::Constants
+
     INTER_PAGE_SLEEP = 1     # ~1 req/sec; within iNat's ~60/min guidance
     MAX_RETRIES = 3          # per batch, on 429/5xx/timeout
     RETRY_BASE_SLEEP = 2     # seconds; doubles each retry (2, 4, 8)
@@ -28,7 +29,7 @@ class Inat
     # Raised when a batch can't be fetched after MAX_RETRIES.
     class FetchError < StandardError; end
 
-    # Fetch one batch of up to PAGE_SIZE external ids. Returns
+    # Fetch one batch of up to MAX_PER_PAGE external ids. Returns
     # [results_by_id, failed?] - failed? is true when the batch exhausted its
     # retries, so the caller can mark those obs "fetch_error" vs "not_found".
     # `updated_since` (a Time) narrows the batch to ids changed on iNat
@@ -74,7 +75,7 @@ class Inat
     end
 
     def page_query(ids, updated_since = nil, field_present = nil)
-      query = { id: ids.join(","), per_page: PAGE_SIZE,
+      query = { id: ids.join(","), per_page: MAX_PER_PAGE,
                 order_by: "id", order: "asc" }
       query[:updated_since] = updated_since.utc.iso8601 if updated_since
       qs = query.to_query

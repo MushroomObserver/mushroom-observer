@@ -41,8 +41,8 @@ class InatImportsProjectScopeTest < FunctionalTestCase
       stub_request(:get, inat_api_matcher("taxa")).
         with(query: hash_including("q" => name.text_name)).
         to_return(status: 200,
-                  body: { results: [{ "id" => 9001 + i,
-                                      "name" => name.text_name }] }.to_json)
+                  body: { results: [fungal_taxon(9001 + i,
+                                                 name.text_name)] }.to_json)
     end
   end
 
@@ -215,6 +215,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
   # authenticates to iNaturalist as that account.
   def test_an_import_without_an_inat_username_is_refused
     site = project_site
+    stub_taxon_validation
 
     login(@admin.login)
     post(:create, params: { project_site: site.id, consent: "1",
@@ -262,6 +263,28 @@ class InatImportsProjectScopeTest < FunctionalTestCase
     assert_empty(InatImport.where(user: @admin, project_id: @project.id),
                  "An incomplete lookup should start no import")
     assert_enqueued_with(job: InatTargetLookupJob, args: [@project])
+  end
+
+  # Dropping a taxon iNat does not confirm as a fungus would widen a
+  # project import to everything in the project's area.
+  def test_an_import_whose_taxa_are_not_all_fungi_is_refused
+    site = project_site
+    results = @project.target_names.each_with_index.map do |_name, i|
+      { "id" => 9001 + i, "ancestor_ids" => [9001 + i] }
+    end
+    stub_request(:get, inat_api_matcher("taxa")).
+      with(query: hash_including("id" => taxon_ids)).
+      to_return(status: 200, body: { results: results }.to_json)
+
+    login(@admin.login)
+    post(:create, params: { project_site: site.id, consent: "1",
+                            inat_username: "rolf_on_inat",
+                            import_others: "1", confirmed: "1" })
+
+    assert_flash_error(:inat_import_project_taxa_not_importable)
+    assert_unprocessable
+    assert_empty(InatImport.where(user: @admin, project_id: @project.id),
+                 "A project import should not run without its taxa")
   end
 
   def stub_taxon_validation

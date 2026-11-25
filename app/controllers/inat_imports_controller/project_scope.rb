@@ -56,6 +56,12 @@ module InatImportsController::ProjectScope
     }
   end
 
+  def project_scope_valid?
+    project_targets_checked? &&
+      project_targets_resolved? &&
+      project_taxa_importable?
+  end
+
   # Target names iNat does not know are left out of the search, so a
   # project none of whose names resolve would import every fungus in
   # its area and dates. Refused rather than imported.
@@ -80,6 +86,17 @@ module InatImportsController::ProjectScope
                   count: project_search.targets_to_look_up -
                          project_search.targets_looked_up
                 ))
+    false
+  end
+
+  def project_taxa_importable?
+    return true unless project_admin_import?
+    return true if url_taxon_ids_importable?
+
+    # An import drops a taxon_id it cannot confirm as fungi or slime molds.
+    # For a project that would widen the search to everything in the
+    # project's geographic area, so the import is refused instead.
+    flash_error(:inat_import_project_taxa_not_importable.t)
     false
   end
 end

@@ -46,6 +46,12 @@ module InatStubHelpers
     "ruby/#{RUBY_VERSION}p#{RUBY_PATCHLEVEL}"
   end
 
+  # A fungus as iNat's taxa search returns it. Target lookups accept only
+  # taxa under fungi or slime molds.
+  def fungal_taxon(id, name)
+    { id: id, name: name, ancestor_ids: [FUNGI_TAXON_ID, id] }
+  end
+
   # Pages, imports and alerts read only saved iNat target lookups, and
   # the test environment caches nothing. This saves a project's lookups
   # in a memory store, as InatTargetLookupJob would, from whatever the

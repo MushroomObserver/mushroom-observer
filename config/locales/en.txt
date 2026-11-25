@@ -3023,6 +3023,7 @@
   inat_import_project_scope: "The iNaturalist observations matching [project], as its External Sites settings describe them."
   inat_import_project_targets_unresolved: "iNaturalist does not recognize [targets], so this import would cover every fungus in the project's area and dates instead. Correct the target names before importing."
   inat_import_project_targets_unchecked: "[count] of this project's target names and locations not yet looked up on iNat. MO is looking them up now. Try again in a few minutes."
+  inat_import_project_taxa_not_importable: "MO could not confirm that all of this project's target taxa on iNat are fungi or slime molds, so it did not start the import. Try again in a few minutes. If this happens again, check the project's target names."
   inat_consent_required: Your consent is required to import iNat observations. Please check the checkbox to give your consent.
   inat_username: iNat Username (mandatory)
   runtime_illegal_inat_id: iNat observation IDs can contain only numbers, letters, commas, and whitespace

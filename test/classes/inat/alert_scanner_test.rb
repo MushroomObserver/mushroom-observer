@@ -27,7 +27,7 @@ class Inat::AlertScannerTest < UnitTestCase
       to_return(lambda { |request|
         name = CGI.unescape(request.uri.query.to_s[/q=([^&]*)/, 1].to_s)
         { status: 200,
-          body: { results: [{ id: taxon_id_for(name), name: name }] }.to_json }
+          body: { results: [fungal_taxon(taxon_id_for(name), name)] }.to_json }
       })
   end
 

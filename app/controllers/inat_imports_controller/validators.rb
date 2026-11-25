@@ -17,8 +17,7 @@ module InatImportsController::Validators
   private
 
   def params_valid?
-    project_targets_checked? &&
-      project_targets_resolved? &&
+    project_scope_valid? &&
       project_url_resolved? &&
       import_adequately_constrained? &&
       imports_valid? &&
