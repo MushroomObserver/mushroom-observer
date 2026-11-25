@@ -5,67 +5,27 @@ require("test_helper")
 # tests of Images controller
 module Account::Profile
   class ImagesControllerTest < FunctionalTestCase
-    # Prove there is no change when user tries to change profile image to itself
-    def test_reuse_user_profile_image_as_itself
+    def test_detach_removes_profile_image
       user = users(:rolf)
-      assert(img = user.image, "Test needs User fixture with profile image")
+      assert(user.image, "Test needs User fixture with profile image")
 
       login(user.login)
-      params = { id: rolf.id, img_id: img.id }
-      post(:attach, params: params)
+      put(:detach, params: {})
 
-      assert_equal(img, user.image)
-      assert_flash(:runtime_no_changes)
+      assert_nil(user.reload.image)
+      assert_flash(:runtime_profile_removed_image)
+      assert_redirected_to(edit_account_profile_path)
     end
 
-    # This is what would happen when user first opens form.
-    def test_reuse_image_for_user_page_access
-      requires_login(:reuse)
-      assert_select("body.images__reuse")
-      assert_form_action(action: :attach, id: rolf.id)
-    end
+    def test_detach_with_no_profile_image_is_a_no_op
+      user = users(:zero_user)
+      assert_nil(user.image, "Test needs User fixture with no profile image")
 
-    # layout_count: 1 forces 2 pages out of mary's 2 image fixtures.
-    def test_reuse_image_page_shows_pagination_when_multiple_pages
-      mary.update!(layout_count: 1)
+      login(user.login)
+      put(:detach, params: {})
 
-      login("mary")
-      get(:reuse)
-
-      assert_select(".pagination_numbers a", { text: "Next" },
-                    "Page with multiple pages of images to reuse " \
-                    "should show a pagination nav")
-    end
-
-    # This would happen if user clicked on image.
-    def test_update_image_for_user_via_img_click
-      image = images(:commercial_inquiry_image)
-      params = { id: rolf.id, img_id: image.id.to_s }
-      post_requires_login(:attach, params)
-      assert_redirected_to(user_path(rolf.id))
-      assert_equal(rolf.id, session[:user_id])
-      assert_equal(image.id, rolf.reload.image_id)
-    end
-
-    # This would happen if user typed in id and submitted.
-    def test_update_image_for_user_via_img_id
-      image = images(:commercial_inquiry_image)
-      params = { id: rolf.id, img_id: image.id.to_s }
-      post_requires_login(:attach, params)
-      assert_redirected_to(user_path(rolf.id))
-      assert_equal(rolf.id, session[:user_id])
-      assert_equal(image.id, rolf.reload.image_id)
-    end
-
-    # Hitting `attach` with an `img_id` that doesn't resolve to an
-    # Image re-renders the reuse page with a flash error.
-    def test_attach_invalid_img_id_renders_reuse_with_flash
-      login("rolf")
-      post(:attach, params: { id: rolf.id, img_id: "99999999" })
-
-      assert_unprocessable
-      assert_flash_error(:runtime_image_reuse_invalid_id, id: "99999999")
-      assert_select("form[data-turbo='true']")
+      assert_nil(user.reload.image)
+      assert_redirected_to(edit_account_profile_path)
     end
   end
 end

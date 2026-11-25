@@ -63,6 +63,20 @@ class InteractiveImageTest < ComponentTestCase
     assert_equal("", html)
   end
 
+  def test_original_filename_row_shows_filename_and_id_badge
+    html = render_image(original: true)
+
+    assert_includes(html, @image.original_name)
+    assert_html(html, ".badge-id", text: @image.id.to_s)
+  end
+
+  def test_original_filename_row_hides_filename_but_keeps_id_badge
+    html = render_image(original: false)
+
+    assert_not_includes(html, @image.original_name)
+    assert_html(html, ".badge-id", text: @image.id.to_s)
+  end
+
   # #4894: the caption is a real, hidden DOM element nested inside the
   # theater-btn (not a captured-HTML string in `data-sub-html`) -- a
   # `div`, not an `a`, since it now legally contains the caption's own

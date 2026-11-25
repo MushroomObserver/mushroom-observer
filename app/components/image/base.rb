@@ -39,6 +39,11 @@ class Components::Image::Base < Components::Base
   prop :notes, String, default: ""
   prop :extra_classes, String, default: ""
   prop :id_prefix, String, default: "interactive_image"
+  # Suppress the inline filename/id-badge row -- for a caller that
+  # renders `Image::OriginalFilenameRow` directly somewhere else (e.g.
+  # a Panel's `:body` slot instead of this component's inline
+  # placement).
+  prop :show_filename_row, _Boolean, default: true
 
   # Link configuration
   prop :image_link, _Nilable(_Union(String, Hash)), default: nil
@@ -239,21 +244,15 @@ class Components::Image::Base < Components::Base
     :matrix
   end
 
-  # Render original filename if applicable
+  # Original filename + id badge row. Skipped entirely when
+  # `show_filename_row` is false -- a caller rendering
+  # `Image::OriginalFilenameRow` itself elsewhere (see that class).
   def render_original_filename
-    return unless show_original_name?
+    return unless @show_filename_row && @img_instance
 
-    div { @img_instance.original_name }
-  end
-
-  # Check if original filename should be shown
-  def show_original_name?
-    return false unless @original && @img_instance &&
-                        @img_instance.original_name.present?
-
-    permission?(@img_instance) ||
-      (@img_instance.user &&
-       @img_instance.user.keep_filenames == "keep_and_show")
+    render(Components::Image::OriginalFilenameRow.new(
+             image: @img_instance, attempt: @original
+           ))
   end
 
   # Render stretched link based on link method

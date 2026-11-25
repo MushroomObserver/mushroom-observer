@@ -30,14 +30,27 @@ class Components::Grid::Box
         who: @object.user,
         # format_name, not unique_format_name -- the badge already
         # shows the id.
-        name: @object.format_name.t,
+        name: image_box_title(@object),
         what: @object,
         where: nil,
         location: nil,
         image: @object,
         image_link: @object.show_link_args,
-        full_width: true
+        full_width: true,
+        # An observation subject's format_name is already
+        # textile-bold/italic -- Title's type-based default would
+        # double-bold it. No observation subject means the title came
+        # from a plain glossary_term/user name, or the ":image ##{id}"
+        # fallback, neither of which is bold.
+        title_bold: @object.observations.empty?
       }
+    end
+
+    def image_box_title(image)
+      title = image.format_name.t.break_name.small_author
+      return title if image.all_subjects.empty?
+
+      [append_colon(:image.ti, space: true), title].safe_join
     end
 
     def extract_observation_data # rubocop:disable Metrics/AbcSize

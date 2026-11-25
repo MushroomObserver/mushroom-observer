@@ -7,12 +7,13 @@ module VisualGroups
     def update
       image_id = params[:id]
       status = params[:status]
-      status = "" unless Image.find_by(id: image_id)
+      image = Image.find_by(id: image_id)
+      status = "" unless image
       visual_group = VisualGroup.find_by(id: params[:visual_group_id])
-      return unless visual_group
+      return unless visual_group && image
 
       included = update_visual_group_image(visual_group, image_id, status)
-      render_status_links_replace(visual_group, image_id, included)
+      render_status_links_replace(visual_group, image, included)
     end
 
     private
@@ -21,13 +22,13 @@ module VisualGroups
     # image whose status flipped. The same Phlex view renders both
     # in the matrix grid and here, so the replacement is identical
     # to what the next full page-load would emit.
-    def render_status_links_replace(visual_group, image_id, included)
+    def render_status_links_replace(visual_group, image, included)
       links_view = Views::Controllers::VisualGroups::StatusLinks.new(
-        visual_group: visual_group, image_id: image_id.to_i,
+        visual_group: visual_group, image: image,
         status: included
       )
       render(turbo_stream: turbo_stream.replace(
-        "visual_group_status_links_#{image_id}", links_view
+        "visual_group_status_links_#{image.id}", links_view
       ))
     end
 

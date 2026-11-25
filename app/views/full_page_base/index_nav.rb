@@ -11,8 +11,8 @@
 # `paginated_results` (the body wrapper that emits the result-set
 # `<div>` with the pagination strips woven around the block) lives on
 # `Views::Base` — sub-partials that own the results body
-# (`Shared::ImagesToReuseForm`, `VisualGroups::ImageMatrix`, etc.)
-# call it too, and they don't inherit from `FullPageBase`.
+# (`VisualGroups::ImageMatrix`, etc.) call it too, and they don't
+# inherit from `FullPageBase`.
 module Views::FullPageBase::IndexNav
   # Top + bottom pagination strips. Skips the bottom strip when there's
   # only one page — no need to repeat the (already empty) "page 1 of 1"

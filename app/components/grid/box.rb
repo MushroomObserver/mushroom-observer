@@ -127,7 +127,12 @@ class Components::Grid::Box < Components::Base
         votes: @votes && @data.fetch(:votes, true),
         full_width: @data.fetch(:full_width, true),
         identify: @identify,
-        observation_view: @observation_view
+        observation_view: @observation_view,
+        # An image-type box's title row already carries this image's
+        # id badge (`render_what_section` -- `@data[:what]` is the
+        # same record as `@data[:image]` here) -- showing it again
+        # under the thumbnail would duplicate it.
+        show_filename_row: @data[:type] != :image
       )
     end
   end
@@ -138,10 +143,22 @@ class Components::Grid::Box < Components::Base
       render_what_section
       ul(class: "list-unstyled") do
         render_where_section
+        render_filename_section
         render_when_who_section
         render_source_credit
         render_occurrence_link
       end
+    end
+  end
+
+  # An image-type box's filename, moved here from the thumbnail (see
+  # `render_thumbnail_section`) -- no id badge, since the title row
+  # already shows this image's id.
+  def render_filename_section
+    return unless @data[:type] == :image
+
+    li(class: "log-filename hanging-indent") do
+      render(Components::Image::OriginalFilenameRow.new(image: @data[:image]))
     end
   end
 
@@ -166,7 +183,8 @@ class Components::Grid::Box < Components::Base
     render(Components::Grid::Box::Title.new(
              id: @data[:id],
              name: @data[:name],
-             type: @data[:type]
+             type: @data[:type],
+             bold: @data[:title_bold]
            ))
   end
 

@@ -117,8 +117,11 @@ module Tab::Observation
       tab = Tab::Observation::ReuseImages.new(observation: @obs)
 
       assert_equal(:show_observation_reuse_image.l, tab.title)
-      assert_equal(routes.reuse_images_for_observation_path(@obs.id),
-                   tab.path)
+      assert_equal(
+        routes.images_reuse_path(target_type: "Observation",
+                                 target_id: @obs.id),
+        tab.path
+      )
     end
 
     def test_define_location
