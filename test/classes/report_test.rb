@@ -267,9 +267,24 @@ class ReportTest < UnitTestCase
       "X",
       obs.thumb_image.id.to_s,
       "Found in a strange place... & with śtrangè characters™",
-      "https://mushroomobserver.org/obs/#{obs.id}"
+      "https://mushroomobserver.org/obs/#{obs.id}",
+      nil
     ]
     do_csv_test(Report::Raw, obs, expect, &:id)
+  end
+
+  def test_raw_sequence_urls
+    obs = observations(:genbanked_obs)
+    urls = obs.sequences.order(:id).map do |seq|
+      "https://mushroomobserver.org/sequences/#{seq.id}"
+    end
+    assert_operator(urls.size, :>, 1, "Fixture needs several Sequences")
+
+    body = report_body(Report::Raw, Query.lookup(:Observation))
+    table = CSV.parse(body, col_sep: Report::Raw.separator)
+    assert_equal("sequence_urls", table.first.last)
+    row = table.find { |r| r.first == obs.id.to_s }
+    assert_equal(urls.join(", "), row.last)
   end
 
   def test_symbiota1

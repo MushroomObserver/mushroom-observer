@@ -37,6 +37,7 @@ module Report
         thumbnail_image_id
         notes
         url
+        sequence_urls
       ]
     end
 
@@ -73,7 +74,8 @@ module Report
         row.obs_is_collection_location,
         row.obs_thumb_image_id,
         row.obs_notes,
-        row.obs_url
+        row.obs_url,
+        row.val(:sequence_urls)
       ]
     end
 
@@ -81,6 +83,7 @@ module Report
       add_field_slips!(rows, :field_slips)
       add_herbarium_labels!(rows, :herbarium_labels)
       add_collector_ids!(rows, :collector_ids)
+      add_sequence_urls!(rows, :sequence_urls)
     end
 
     def sort_after(rows)

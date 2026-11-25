@@ -228,6 +228,19 @@ module Report
       add_column!(rows, vals, key)
     end
 
+    def add_sequence_urls!(rows, key)
+      vals = Sequence.joins(:observation).
+             merge(plain_query).
+             order(Sequence[:id]).
+             pluck(Sequence[:observation_id], Sequence[:id]).
+             map { |obs_id, seq_id| [obs_id, sequence_url(seq_id)] }
+      add_column!(rows, vals, key)
+    end
+
+    def sequence_url(id)
+      "#{MO.http_domain}/sequences/#{id}"
+    end
+
     def plain_query
       # Sometimes the default order requires unnecessary joins!
       # Non-primary observations already excluded by query scope.
