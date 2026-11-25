@@ -367,6 +367,13 @@ module Images
                          target_type: "User", target_id: rolf.id)
     end
 
+    def test_reuse_image_page_for_another_users_profile_redirects
+      login("rolf")
+      get(:index, params: { target_type: "User", target_id: mary.id })
+
+      assert_redirected_to(edit_account_profile_path)
+    end
+
     # layout_count: 1 forces 2 pages out of mary's 2 image fixtures.
     def test_reuse_image_page_shows_pagination_for_user
       mary.update!(layout_count: 1)

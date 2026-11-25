@@ -38,10 +38,11 @@ class Components::Grid::Box
         image_link: @object.show_link_args,
         full_width: true,
         # An observation subject's format_name is already
-        # textile-bold/italic -- Title's type-based default would
-        # double-bold it. No observation subject means the title came
-        # from a plain glossary_term/user name, or the ":image ##{id}"
-        # fallback, neither of which is bold.
+        # textile-bold/italic, so title_bold is false there to avoid
+        # double-bolding. Without an observation subject, the title
+        # is a plain glossary_term/user name or the ":image ##{id}"
+        # fallback -- neither carries bold styling already, so
+        # title_bold is true to apply Title's bold treatment.
         title_bold: @object.observations.empty?
       }
     end
