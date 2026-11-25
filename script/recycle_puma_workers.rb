@@ -91,7 +91,7 @@ class PumaRecycler
 
     # The /proc entry's mtime is when the process started, which saves
     # parsing jiffies out of /proc/<pid>/stat against the boot time.
-    def age_seconds = Time.zone.now - File.stat("/proc/#{pid}").mtime
+    def age_seconds = Time.now - File.stat("/proc/#{pid}").mtime
   end
 
   def initialize(argv)
