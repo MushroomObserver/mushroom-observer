@@ -83,15 +83,15 @@ class CollectionNumber < AbstractModel
     end
   }
 
-  # Eager-loads the observations + everything `Components::Matrix::Box`
-  # reaches into. Reuses `Observation.matrix_box_includes` so this
+  # Eager-loads the observations + everything `Components::Grid::Box`
+  # reaches into. Reuses `Observation.grid_box_includes` so this
   # matches observations#index / field_slips show + index. Includes
   # the `observation_collection_numbers` join (with `:observation`
   # preloaded) so destroy / `remove_observation` paths don't
   # lazy-load it.
   def self.show_includes_tree
     [{ observation_collection_numbers: :observation },
-     :user, { observations: Observation.matrix_box_includes }]
+     :user, { observations: Observation.grid_box_includes }]
   end
 
   # Index row only renders the collection number + a brief obs count

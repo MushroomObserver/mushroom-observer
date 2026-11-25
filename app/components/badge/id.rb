@@ -21,7 +21,7 @@
 #          (Projects::ProjectTable, SpeciesLists::SpeciesListTable)
 #   :lg -- copy-to-clipboard external-site record id (Link::External),
 #          Matching Observations panel row ids
-#   :md -- matrix box title and other index-row id badges (Matrix::Box,
+#   :md -- matrix box title and other index-row id badges (Grid::Box,
 #          Names::Index, Occurrences::Projects::Form)
 #   :sm -- sitting next to a large page-title heading
 #

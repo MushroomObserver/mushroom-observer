@@ -39,7 +39,11 @@ module Views::Controllers::Account::Profile
       assert_not_includes(html, "#{:profile_image_change.t}:")
 
       # Reuse link
-      assert_html(html, "a[href='/account/profile/images']")
+      assert_html(
+        html,
+        "a[href='#{routes.images_reuse_path(target_type: "User",
+                                            target_id: user.id)}']"
+      )
 
       assert_html(html, "button[type='submit']")
     end

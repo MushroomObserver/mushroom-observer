@@ -85,7 +85,7 @@ class Sequence < AbstractModel
   # Eager-loads the show/edit page (sequence + its user + the obs
   # the sequence belongs to, rendered as a MatrixBox).
   def self.show_includes_tree
-    [:user, { observation: Observation.matrix_box_includes }]
+    [:user, { observation: Observation.grid_box_includes }]
   end
 
   # Index row links to the underlying observation; preload :user and

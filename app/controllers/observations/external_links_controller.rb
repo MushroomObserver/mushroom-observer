@@ -99,7 +99,7 @@ module Observations
     # card.
     def load_observation_for_edit
       @observation = Observation.strict_loading.
-                     includes(Observation.matrix_box_includes).
+                     includes(Observation.grid_box_includes).
                      find(@external_link.observation.id)
     end
 

@@ -6,77 +6,7 @@
 
 module GlossaryTerms
   class ImagesController < ApplicationController
-    include ::ImageReusable
-
     before_action :login_required
-
-    # reuse_image_for_glossary_term
-    def reuse
-      return unless find_glossary_term!
-
-      load_images_to_reuse
-      render_reuse_view
-    end
-
-    # reuse image form buttons POST here
-    def attach
-      return unless find_glossary_term!
-
-      @img_id = params.dig(:image_reuse, :img_id).presence || params[:img_id]
-      image = Image.safe_find(@img_id)
-      return render_reuse_with_invalid_id_error unless image
-
-      attach_image_to_glossary_term(image)
-    end
-
-    private
-
-    ############################################################################
-
-    # The actual grid of attachable images (partial) is a shared layout.
-    # CRUD refactor makes each image link POST to create or edit.
-
-    def find_glossary_term!
-      @object = find_or_goto_index(GlossaryTerm, params[:id].to_s)
-    end
-
-    def render_reuse_with_invalid_id_error
-      flash_error(:runtime_image_reuse_invalid_id.t(id: @img_id))
-      render_reuse_page_invalid
-    end
-
-    def render_reuse_view(status: :ok, **render_opts)
-      render(
-        Views::Controllers::GlossaryTerms::Images::Reuse.new(
-          object: @object, user: @user, objects: @reuse_images,
-          pagination_data: @reuse_pagination, all_users: @reuse_all_users
-        ),
-        status: status, **render_opts
-      )
-    end
-
-    def render_reuse_page_invalid
-      load_images_to_reuse
-      render_reuse_view(location: reuse_images_for_glossary_term_path(
-        @object.id
-      ))
-      self.status = :unprocessable_content
-    end
-
-    def attach_image_to_glossary_term(image = nil)
-      if image &&
-         @object.add_image(image) &&
-         @object.save
-        image.current_user = @user
-        image.log_reuse_for(@object)
-        redirect_to(glossary_term_path(@object.id))
-      else
-        flash_error(:runtime_no_save.t(type: :glossary_term)) if image
-        render_reuse_page_invalid
-      end
-    end
-
-    public
 
     ############################################################################
 

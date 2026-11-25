@@ -11,7 +11,7 @@ class Tab::Observation::ReuseImages < Tab::Base
   end
 
   def path
-    reuse_images_for_observation_path(@observation.id)
+    images_reuse_path(target_type: "Observation", target_id: @observation.id)
   end
 
   def html_options

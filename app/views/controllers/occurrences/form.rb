@@ -52,8 +52,8 @@ module Views::Controllers::Occurrences
     private
 
     # Edit mode wires the occurrence-form Stimulus controller onto
-    # the form itself so its scope spans both the members matrix and
-    # the candidate matrix. New mode skips that — its single matrix
+    # the form itself so its scope spans both the members grid and
+    # the candidate grid. New mode skips that — its single grid
     # gets the controller wired directly (see
     # render_new_observation_grid).
     def form_options_for(model, **opts)
@@ -87,8 +87,8 @@ module Views::Controllers::Occurrences
         element: :ul,
         class: "list-unstyled mt-3",
         data: {
-          controller: "matrix-table occurrence-form",
-          action: "resize@window->matrix-table#rearrange",
+          controller: "grid-table occurrence-form",
+          action: "resize@window->grid-table#rearrange",
           "occurrence-form-fallback-value": "source"
         }
       ) do
@@ -146,8 +146,8 @@ module Views::Controllers::Occurrences
         element: :ul,
         class: "list-unstyled mt-3",
         data: {
-          controller: "matrix-table",
-          action: "resize@window->matrix-table#rearrange"
+          controller: "grid-table",
+          action: "resize@window->grid-table#rearrange"
         },
         &block
       )
@@ -196,8 +196,8 @@ module Views::Controllers::Occurrences
     # ---------- Shared per-row rendering ----------
 
     def render_obs_box(obs, &block)
-      render(Components::Matrix::Box.new(user: @user, object: obs,
-                                         votes: false)) do
+      render(Components::Grid::Box.new(user: @user, object: obs,
+                                       votes: false)) do
         if block
           yield
         else

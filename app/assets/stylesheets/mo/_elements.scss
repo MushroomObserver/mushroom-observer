@@ -16,8 +16,8 @@ body {
 }
 
 // Give focus outlines breathing room so they don't clip text/icons.
-// .log-details (_matrix_box.scss) overrides this -- overflow:hidden
-// on the matrix box clips an offset outline.
+// .log-details (_grid_box.scss) overrides this -- overflow:hidden
+// on the grid box clips an offset outline.
 a:focus,
 button:focus,
 .btn:focus,

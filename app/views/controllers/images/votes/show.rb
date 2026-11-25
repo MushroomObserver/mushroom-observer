@@ -7,11 +7,11 @@ module Views::Controllers::Images
     # find and swap it out of this response (see #4895; fetched lazily
     # from `Image::Base#render_image_vote_section` /
     # `ImageFragment::LightboxCaption#render_vote_section` instead of
-    # rendering inline inside `Matrix::Box`'s cached HTML).
+    # rendering inline inside `Grid::Box`'s cached HTML).
     class Show < Views::Base
       prop :image, ::Image
       prop :user, _Nilable(::User)
-      prop :context, Symbol, default: :matrix
+      prop :context, Symbol, default: :grid
 
       def view_template
         turbo_frame_tag(frame_id) do

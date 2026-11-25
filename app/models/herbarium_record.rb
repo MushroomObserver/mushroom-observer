@@ -101,7 +101,7 @@ class HerbariumRecord < AbstractModel
   def self.show_includes_tree
     [{ observation_herbarium_records: :observation },
      :user, { herbarium: :curators },
-     { observations: Observation.matrix_box_includes }]
+     { observations: Observation.grid_box_includes }]
   end
 
   # Index variant — herbarium + observations.name suffice for the

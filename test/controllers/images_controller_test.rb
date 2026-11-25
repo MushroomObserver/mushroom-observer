@@ -28,7 +28,7 @@ class ImagesControllerTest < FunctionalTestCase
   # Tests of index: unfiltered index, then each recognized filter param.
   def test_index_order
     check_index_sorted_by(::Query::Images.default_order) # :created_at
-    assert_select(".matrix-box")
+    assert_select(".grid-box")
     assert_page_title(:images.ti)
   end
 
@@ -59,7 +59,7 @@ class ImagesControllerTest < FunctionalTestCase
     get(:index, params: { by_user: user.id })
 
     assert_select("body.images__index")
-    assert_select(".matrix-box")
+    assert_select(".grid-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_by_users.l}: #{user.legal_name}")
   end
@@ -91,7 +91,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { project: project.id })
 
-    assert_select(".matrix-box")
+    assert_select(".grid-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_projects.l}: #{project.title}")
     assert_select("#project_banner")
@@ -154,7 +154,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params: { pattern: pattern })
 
-    assert_select(".matrix-box")
+    assert_select(".grid-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
@@ -170,7 +170,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_select(".matrix-box")
+    assert_select(".grid-box")
     assert_page_title(:images.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
   end
@@ -199,7 +199,7 @@ class ImagesControllerTest < FunctionalTestCase
     login
     get(:index, params:)
 
-    assert_select(".matrix-box")
+    assert_select(".grid-box")
     # Should NOT have flashed "no matches" — the bridge produces hits.
     assert_no_flash
   end

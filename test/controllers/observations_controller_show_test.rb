@@ -601,7 +601,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_no_edit_button(obs)
     assert_no_destroy_button(obs)
     assert_select("a:match('href',?)",
-                  reuse_images_for_observation_path(obs.id), count: 0)
+                  images_reuse_path(target_type: "Observation",
+                                    target_id: obs.id), count: 0)
     get(:edit, params: { id: obs.id })
     assert_response(:redirect)
     get(:destroy, params: { id: obs.id })
@@ -612,7 +613,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_edit_button(obs)
     assert_destroy_button(obs)
     assert_select("a[href=?]",
-                  reuse_images_for_observation_path(obs.id), minimum: 1)
+                  images_reuse_path(target_type: "Observation",
+                                    target_id: obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_select(
       "input[name='observation[place_name]'][value=?]", obs.location.name
@@ -624,7 +626,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     assert_edit_button(obs)
     assert_destroy_button(obs)
     assert_select("a[href=?]",
-                  reuse_images_for_observation_path(obs.id), minimum: 1)
+                  images_reuse_path(target_type: "Observation",
+                                    target_id: obs.id), minimum: 1)
     get(:edit, params: { id: obs.id })
     assert_response(:success)
     get(:destroy, params: { id: obs.id })

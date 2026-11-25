@@ -75,8 +75,8 @@ module Views::Controllers::GlossaryTerms
 
     def render_image_action_links
       div(class: "mb-3") do
-        Link(type: :get, name: :show_glossary_term_reuse_image.t,
-             target: reuse_images_for_glossary_term_path(@glossary_term.id))
+        Link(type: :get,
+             tab: ::Tab::GlossaryTerm::ReuseImages.new(term: @glossary_term))
         br
         Link(type: :get, name: :show_glossary_term_remove_image.t,
              target: remove_images_from_glossary_term_path(@glossary_term.id))

@@ -284,10 +284,6 @@ MushroomObserver::Application.routes.draw do
     get("no_email/:id", to: "preferences#no_email", as: "no_email")
 
     resource :profile, only: [:edit, :update], controller: "profile"
-    get("profile/images", to: "profile/images#reuse",
-                          as: "profile_select_image")
-    post("profile/images(/:id)", to: "profile/images#attach",
-                                 as: "profile_update_image")
     put("profile/images(/:id)", to: "profile/images#detach",
                                 as: "profile_remove_image")
     resource :inat_link, only: [:new]
@@ -370,10 +366,6 @@ MushroomObserver::Application.routes.draw do
   # ----- Glossary Terms: standard actions ------------------------------------
   resources :glossary_terms, id: /\d+/ do
     member do
-      get("images/reuse", to: "glossary_terms/images#reuse",
-                          as: "reuse_images_for")
-      post("images/attach", to: "glossary_terms/images#attach",
-                            as: "attach_image_to")
       get("images/remove", to: "glossary_terms/images#remove",
                            as: "remove_images_from")
       put("images/detach", to: "glossary_terms/images#detach",
@@ -431,6 +423,7 @@ MushroomObserver::Application.routes.draw do
     match("/votes/anonymity", to: "/images/votes/anonymity#update",
                               via: [:put, :patch],
                               as: "bulk_vote_anonymity_updater")
+    get("/reuse", to: "/images/reuse#index", as: "reuse")
   end
   resources :images, only: [:index, :show, :destroy] do
     member do
@@ -440,6 +433,7 @@ MushroomObserver::Application.routes.draw do
                         as: "new_commercial_inquiry_for")
       post("emails", to: "images/emails#create",
                      as: "send_commercial_inquiry_for")
+      post("reuse", to: "images/reuse#update", as: "reuse")
     end
     # Singular: one field slip extract per image, replaced on re-run.
     resource(:field_slip_extract, only: [:create, :edit, :update],
@@ -649,10 +643,6 @@ MushroomObserver::Application.routes.draw do
                         as: "new_question_for")
       post("emails", to: "observations/emails#create",
                      as: "send_question_for")
-      get("images/reuse", to: "observations/images#reuse",
-                          as: "reuse_images_for")
-      post("images/attach", to: "observations/images#attach",
-                            as: "attach_image_to")
       post("resync", to: "observations/inat_resyncs#create", as: "resync")
     end
 

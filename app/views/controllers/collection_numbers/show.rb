@@ -49,9 +49,9 @@ module Views::Controllers::CollectionNumbers
     end
 
     def render_observation_matrix
-      render(Components::Matrix::Table.new(
-               objects: @collection_number.observations.to_a, user: @user
-             ))
+      Grid(
+        objects: @collection_number.observations.to_a, user: @user
+      )
     end
   end
 end
