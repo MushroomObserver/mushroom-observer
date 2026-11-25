@@ -229,12 +229,25 @@ module Report
     end
 
     def add_sequence_urls!(rows, key)
-      vals = Sequence.joins(:observation).
-             merge(plain_query).
-             order(Sequence[:id]).
-             pluck(Sequence[:observation_id], Sequence[:id]).
+      vals = (direct_sequences + occurrence_member_sequences).
+             sort_by(&:last).
              map { |obs_id, seq_id| [obs_id, sequence_url(seq_id)] }
       add_column!(rows, vals, key)
+    end
+
+    def direct_sequences
+      Sequence.joins(:observation).
+        merge(plain_query).
+        pluck(Sequence[:observation_id], Sequence[:id])
+    end
+
+    # A non-primary member is left out of the query when its primary is
+    # in it, so the primary's row carries the member's Sequences.
+    def occurrence_member_sequences
+      Sequence.joins(observation: :occurrence).
+        where(occurrences: { primary_observation_id: plain_query.select(:id) }).
+        where(Observation[:id].not_eq(Occurrence[:primary_observation_id])).
+        pluck(Occurrence[:primary_observation_id], Sequence[:id])
     end
 
     def sequence_url(id)

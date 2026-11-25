@@ -280,10 +280,28 @@ class ReportTest < UnitTestCase
     end
     assert_operator(urls.size, :>, 1, "Fixture needs several Sequences")
 
-    body = report_body(Report::Raw, Query.lookup(:Observation))
-    table = CSV.parse(body, col_sep: Report::Raw.separator)
+    table = raw_table
     assert_equal("sequence_urls", table.first.last)
     row = table.find { |r| r.first == obs.id.to_s }
+    assert_equal(urls.join(", "), row.last)
+  end
+
+  def test_raw_sequence_urls_include_occurrence_members
+    primary = observations(:genbanked_obs)
+    member = observations(:locally_sequenced_obs)
+    occurrence = Occurrence.create!(user: primary.user,
+                                    primary_observation: primary)
+    primary.update!(occurrence:)
+    member.update!(occurrence:)
+    seqs = Sequence.where(observation: [primary, member]).order(:id)
+    urls = seqs.map do |seq|
+      "https://mushroomobserver.org/sequences/#{seq.id}"
+    end
+
+    table = raw_table
+    assert_nil(table.find { |r| r.first == member.id.to_s },
+               "Non-primary member should be folded into its primary's row")
+    row = table.find { |r| r.first == primary.id.to_s }
     assert_equal(urls.join(", "), row.last)
   end
 
@@ -1286,6 +1304,11 @@ class ReportTest < UnitTestCase
     assert_equal(query.num_results + 1, table.count)
     idx = query.results.sort_by(&block).index(obs)
     assert_equal(expect, table[idx + 1])
+  end
+
+  def raw_table
+    body = report_body(Report::Raw, Query.lookup(:Observation))
+    CSV.parse(body, col_sep: Report::Raw.separator)
   end
 
   def report_body(report_type, query, user: nil)
