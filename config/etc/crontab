@@ -25,8 +25,8 @@ MAILTO=webmaster@mushroomobserver.org
 # Puma's workers creep in RSS for as long as they live, and on
 # 2026-11-25 the host ran out of memory and swap while a 200MB cron
 # script was starting. The script reads /proc, boots no Rails, and
-# signals a phased restart only above its threshold, so most runs
-# print nothing and mail nothing.
+# replaces one worker -- the largest -- only above its threshold, so
+# most runs print nothing and mail nothing.
 */10 * * * * /var/web/mo/bin/run script/recycle_puma_workers.rb --apply
 # Solid Queue has no phased restart, so its seven processes are
 # recycled on a clock instead, at an hour with no scheduled job and
