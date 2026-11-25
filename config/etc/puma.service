@@ -27,6 +27,10 @@ WorkingDirectory=/var/web/mo
 PIDFile=/var/web/mo/tmp/pids/puma.pid
 Environment=RAILS_ENV=production
 Environment=RUBY_MANAGER=chruby
+# Caps glibc's per-thread arenas, which a long-lived Ruby process
+# otherwise accumulates as fragmentation it does not hand back.
+# https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/
+Environment=MALLOC_ARENA_MAX=2
 # Helpful for debugging socket activation, etc.
 # Environment=PUMA_DEBUG=1
 

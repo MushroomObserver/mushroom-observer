@@ -141,6 +141,12 @@ module MushroomObserver
     config.solid_cache.connects_to = { database: { writing: :cache } }
     # https://github.com/rails/solid_queue?tab=readme-ov-file#other-configuration-settings
     config.solid_queue.clear_finished_jobs_after = 1.week
+    # SIGTERM tells a worker to stop claiming and finish the job
+    # in its hands; the default 5 seconds is shorter than MO's
+    # jobs, so a restart released them to run again. Long enough
+    # here for an InatImportJob page (153s measured). Paired with
+    # TimeoutStopSec in config/etc/solidqueue.service.
+    config.solid_queue.shutdown_timeout = 5.minutes
 
     # dartsass-sprockets - sssh! about the bootstrap deprectations
     config.sass.quiet_deps = true
