@@ -1,35 +1,35 @@
 # frozen_string_literal: true
 
-# Matrix table component for displaying grids of matrix boxes.
+# Grid layout component for displaying a collection of Grid::Box items.
 #
 # Renders a responsive grid layout with Stimulus controller for dynamic
 # resizing. Can render a collection of objects or accept a block for
 # custom content.
 #
 # @example With block
-#   render(MatrixTable.new) do |table|
-#     table.render(MatrixBox.new(id: 1) { "Content" })
-#     table.render(MatrixBox.new(id: 2) { "Content" })
+#   render(Grid.new) do |grid|
+#     grid.render(Grid::Box.new(id: 1) { "Content" })
+#     grid.render(Grid::Box.new(id: 2) { "Content" })
 #   end
 #
 # @example With collection of objects
-#   render(MatrixTable.new(objects: @observations, user: @user))
+#   render(Grid.new(objects: @observations, user: @user))
 #
 # @example With caching enabled
-#   render(MatrixTable.new(
+#   render(Grid.new(
 #     objects: @observations,
 #     user: @user,
 #     cached: true
 #   ))
 #
 # @example With identify mode enabled
-#   render(MatrixTable.new(
+#   render(Grid.new(
 #     objects: @observations,
 #     user: @user,
 #     identify: true
 #   ))
-class Components::Matrix::Table < Components::Base
-  # Bump when the rendered MatrixBox HTML changes -- read via
+class Components::Grid < Components::Base
+  # Bump when the rendered Grid::Box HTML changes -- read via
   # `cache_key_for` by the write site and the controller's
   # uncached-check, since Phlex's digest doesn't survive there.
   # v2: cache-busting ?<updated_at> image URL token.
@@ -38,9 +38,10 @@ class Components::Matrix::Table < Components::Base
   # v5: ID badge bumped from size: :md to :lg.
   # v6: user-detail footer li drops hanging-indent.
   # v7: occurrence link gains a log-occurrence class and icon.
-  CACHE_VERSION = "v7"
+  # v8: Matrix -> Grid rename; box <li> class is now grid-box.
+  CACHE_VERSION = "v8"
 
-  # The cache key MatrixBox fragments are stored under, used by both
+  # The cache key Grid::Box fragments are stored under, used by both
   # the write here and the controller's batched `read_multi`
   # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
   # -- one method keeps both ends agreeing on the key shape.
@@ -51,7 +52,7 @@ class Components::Matrix::Table < Components::Base
   # but RssLogs are not touched, so a box cached before a rotate
   # would serve the stale URL token indefinitely.
   def self.cache_key_for(object, locale)
-    ["MatrixBox", CACHE_VERSION, locale, object, object.try(:thumb_image)]
+    ["Grid::Box", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end
 
   # Per-object predicate the render path uses to decide whether to
@@ -76,10 +77,10 @@ class Components::Matrix::Table < Components::Base
   prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
   prop :identify, _Boolean, default: false
-  # Project context — passed through to each MatrixBox so a project admin
+  # Project context — passed through to each Grid::Box so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
-  # Passed through to each MatrixBox -- see the prop comment there.
+  # Passed through to each Grid::Box -- see the prop comment there.
   prop :suppress_occurrence_link, _Boolean, default: false
 
   def view_template(&block)
@@ -87,8 +88,8 @@ class Components::Matrix::Table < Components::Base
       element: :ul,
       class: "list-unstyled",
       data: {
-        controller: "matrix-table",
-        action: "resize@window->matrix-table#rearrange"
+        controller: "grid-table",
+        action: "resize@window->grid-table#rearrange"
       }
     ) do
       if block
@@ -96,7 +97,7 @@ class Components::Matrix::Table < Components::Base
       elsif @cached && @objects
         render_cached_boxes
       elsif @objects
-        render_matrix_boxes
+        render_boxes
       end
     end
 
@@ -123,9 +124,9 @@ class Components::Matrix::Table < Components::Base
         # batched wrapper rather than Rails.cache directly.
         low_level_cache(
           self.class.cache_key_for(object, I18n.locale)
-        ) { render(Components::Matrix::Box.new(user: @user, object: object)) }
+        ) { render(Components::Grid::Box.new(user: @user, object: object)) }
       else
-        render(Components::Matrix::Box.new(
+        render(Components::Grid::Box.new(
                  user: @user, object: object,
                  identify: @identify, project: @project,
                  suppress_occurrence_link: @suppress_occurrence_link
@@ -157,7 +158,7 @@ class Components::Matrix::Table < Components::Base
       map { |object| self.class.cache_key_for(object, I18n.locale) }
   end
 
-  # Mirrors the controller's `matrix_caches_in_this_request?` AND
+  # Mirrors the controller's `grid_caches_in_this_request?` AND
   # `should_cache_object?` gates. Project admins see the admin-only
   # Exclude button; identify mode renders the vote selector. Both
   # diverge from the cached non-admin / non-identify markup, so the
@@ -171,9 +172,9 @@ class Components::Matrix::Table < Components::Base
     @project&.is_admin?(@user)
   end
 
-  def render_matrix_boxes
+  def render_boxes
     @objects.each do |object|
-      render(Components::Matrix::Box.new(
+      render(Components::Grid::Box.new(
                user: @user, object: object,
                identify: @identify, project: @project,
                suppress_occurrence_link: @suppress_occurrence_link

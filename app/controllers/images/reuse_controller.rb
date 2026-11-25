@@ -51,7 +51,7 @@ module Images
     # this on `?always_index=1`) -- a single reusable image must still
     # show the picker, not redirect to that image's show page.
     def index_display_opts(opts, _query)
-      { matrix: true, cache: false,
+      { grid: true, cache: false,
         include: [:user, { observations: :name }] }.
         merge(opts).
         merge(always_index: true)

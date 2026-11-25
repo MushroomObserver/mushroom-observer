@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class MatrixBoxTest < ComponentTestCase
+class Components::Grid::BoxTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -10,10 +10,10 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_renders_observation_with_thumbnail
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_html(html, "#box_#{obs.id}.matrix-box")
+    assert_html(html, "#box_#{obs.id}.grid-box")
     # Should include the thumbnail image with the correct CSS class
     assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
@@ -32,7 +32,7 @@ class MatrixBoxTest < ComponentTestCase
     assert_no_html(html, "a.occurrence-link")
   end
 
-  # Matrix boxes deliberately do NOT subscribe to
+  # Grid boxes deliberately do NOT subscribe to
   # [image, :processed] broadcasts -- rotate/mirror only happens on
   # the image-show page, and an index page with dozens of boxes would
   # otherwise open a websocket subscription per thumbnail for an event
@@ -40,7 +40,7 @@ class MatrixBoxTest < ComponentTestCase
   def test_does_not_subscribe_to_action_cable_even_with_a_thumbnail
     obs = observations(:coprinus_comatus_obs)
     assert_not_nil(obs.thumb_image)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     assert_no_html(html, "turbo-cable-stream-source")
@@ -48,18 +48,18 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_renders_observation_without_thumbnail
     obs = observations(:minimal_unknown_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_html(html, "#box_#{obs.id}.matrix-box")
+    assert_html(html, "#box_#{obs.id}.grid-box")
   end
 
   def test_renders_image_object
     image = images(:connected_coprinus_comatus_image)
-    component = Components::Matrix::Box.new(user: @user, object: image)
+    component = Components::Grid::Box.new(user: @user, object: image)
     html = render(component)
 
-    assert_html(html, "#box_#{image.id}.matrix-box")
+    assert_html(html, "#box_#{image.id}.grid-box")
     assert_html(html, "img.image_#{image.id}")
     # format_name, not unique_format_name -- the id badge beside it
     # already shows the id.
@@ -68,7 +68,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_renders_image_object_without_subjects
     image = Image.create(user: @user)
-    component = Components::Matrix::Box.new(user: @user, object: image)
+    component = Components::Grid::Box.new(user: @user, object: image)
     html = render(component)
 
     assert_html(html, ".log-name", text: :image.ti)
@@ -76,25 +76,25 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_renders_user_object
     user = users(:katrina)
-    component = Components::Matrix::Box.new(user: @user, object: user)
+    component = Components::Grid::Box.new(user: @user, object: user)
     html = render(component)
 
-    assert_html(html, "#box_#{user.id}.matrix-box")
+    assert_html(html, "#box_#{user.id}.grid-box")
   end
 
   def test_renders_rss_log_with_observation_target
     rss_log = RssLog.where.not(observation_id: nil).first
-    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
     html = render(component)
 
-    assert_html(html, "#box_#{rss_log.observation_id}.matrix-box")
+    assert_html(html, "#box_#{rss_log.observation_id}.grid-box")
   end
 
   def test_rss_log_observation_names_collector
     rss_log = RssLog.where.not(observation_id: nil).first
     rss_log.observation.assign_attributes(collector: "Jane Forager",
                                           collector_user_id: nil)
-    html = render(Components::Matrix::Box.new(user: @user, object: rss_log))
+    html = render(Components::Grid::Box.new(user: @user, object: rss_log))
 
     assert_html(html, ".log-who", text: "Jane Forager")
     assert_no_html(html, ".log-who a")
@@ -102,26 +102,26 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_renders_with_custom_columns
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(
+    component = Components::Grid::Box.new(
       user: @user,
       object: obs,
       columns: "col-xs-12 col-sm-6"
     )
     html = render(component)
 
-    assert_html(html, ".matrix-box.col-xs-12.col-sm-6")
+    assert_html(html, ".grid-box.col-xs-12.col-sm-6")
   end
 
   def test_renders_with_caller_class
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(
+    component = Components::Grid::Box.new(
       user: @user,
       object: obs,
       class: "custom-class"
     )
     html = render(component)
 
-    assert_html(html, ".matrix-box.custom-class")
+    assert_html(html, ".grid-box.custom-class")
   end
 
   # rubocop:disable MO/NoLongCommentBlock
@@ -129,7 +129,7 @@ class MatrixBoxTest < ComponentTestCase
   # This test is commented out as it requires the block to be evaluated
   # in the component's Phlex context, not the test context
   # def test_renders_custom_block_content
-  #   component = Components::Matrix::Box.new(
+  #   component = Components::Grid::Box.new(
   #                 id: 123, class: "test-cls"
   #               ) do
   #     div { "Custom content" }
@@ -145,20 +145,20 @@ class MatrixBoxTest < ComponentTestCase
   # Test HTML structure and nesting
   def test_wraps_panel_in_list_item
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Should have li.matrix-box containing div.panel
+    # Should have li.grid-box containing div.panel
     assert_nested(
       html,
-      parent_selector: "li.matrix-box",
+      parent_selector: "li.grid-box",
       child_selector: "div.panel"
     )
   end
 
   def test_panel_has_sizing_wrapper
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     # Panel should have panel-sizing wrapper (from sizing: true)
@@ -171,7 +171,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_thumbnail_nested_in_panel_thumbnail_section
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     # Thumbnail should be in thumbnail-container within panel-sizing
@@ -190,7 +190,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_details_section_has_correct_class
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     # Details section should have log-details class
@@ -203,7 +203,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_renders_what_where_when_sections_in_body
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     # Should have what section in panel-body
@@ -225,7 +225,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_observation_title_includes_name
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     # Should include observation name in the what section
@@ -239,7 +239,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_observation_includes_location
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     # Should include location in where section
@@ -251,7 +251,7 @@ class MatrixBoxTest < ComponentTestCase
     rss_log = RssLog.where.not(observation_id: nil).first
     skip("No RssLog found for testing") unless rss_log
 
-    component = Components::Matrix::Box.new(user: @user, object: rss_log)
+    component = Components::Grid::Box.new(user: @user, object: rss_log)
     html = render(component)
 
     # RssLogs should have log-footer
@@ -263,7 +263,7 @@ class MatrixBoxTest < ComponentTestCase
   end
 
   # Selection logic moved from RssLog#detail to
-  # Components::Matrix::Box::RenderData#rss_log_detail_tag (#4868) --
+  # Components::Grid::Box::RenderData#rss_log_detail_tag (#4868) --
   # this exercises the orphan/penultimate-message branch end to end,
   # matching what used to be test_detail_for_merged_location in
   # rss_log_test.rb.
@@ -275,7 +275,7 @@ class MatrixBoxTest < ComponentTestCase
     log.reload
     assert(log.orphan?)
 
-    component = Components::Matrix::Box.new(user: @user, object: log)
+    component = Components::Grid::Box.new(user: @user, object: log)
     html = render(component)
 
     assert_html(html, ".log-detail",
@@ -288,7 +288,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_image_object_structure
     image = images(:connected_coprinus_comatus_image)
-    component = Components::Matrix::Box.new(user: @user, object: image)
+    component = Components::Grid::Box.new(user: @user, object: image)
     html = render(component)
 
     # Should have panel structure
@@ -307,7 +307,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_user_object_structure
     user = users(:katrina)
-    component = Components::Matrix::Box.new(user: @user, object: user)
+    component = Components::Grid::Box.new(user: @user, object: user)
     html = render(component)
 
     # Should have panel structure
@@ -326,7 +326,7 @@ class MatrixBoxTest < ComponentTestCase
 
   def test_does_not_render_identify_ui_and_footer_when_identify_is_false
     obs = observations(:coprinus_comatus_obs)
-    component = Components::Matrix::Box.new(
+    component = Components::Grid::Box.new(
       user: @user,
       object: obs,
       identify: false
@@ -335,7 +335,7 @@ class MatrixBoxTest < ComponentTestCase
 
     # Should not have identify UI (vote container or propose naming link)
     assert_no_html(html, ".vote-select-container")
-    assert_no_html(html, "a[href*='context=matrix_box']")
+    assert_no_html(html, "a[href*='context=grid_box']")
     # Should not have identify footer
     assert_no_html(html, ".panel-active")
     assert_no_html(html, "#box_reviewed_#{obs.id}")
@@ -345,7 +345,7 @@ class MatrixBoxTest < ComponentTestCase
     # Must eager-load observation_views for identify footer to render
     obs = Observation.includes(:observation_views).
           find(observations(:coprinus_comatus_obs).id)
-    component = Components::Matrix::Box.new(
+    component = Components::Grid::Box.new(
       user: @user,
       object: obs,
       identify: true
@@ -363,7 +363,7 @@ class MatrixBoxTest < ComponentTestCase
   # rel="noopener noreferrer" so it opens in a new tab (off-site).
   def test_external_source_credit_renders_new_tab_link
     obs = observations(:imported_inat_obs)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     assert_html(html, ".log-source-credit", text: "Imported from iNaturalist")
@@ -376,14 +376,14 @@ class MatrixBoxTest < ComponentTestCase
 
   # Enum-credit branch (no import_link) -- Observation#source_credit
   # was deleted (#4868); this exercises the replacement tag directly
-  # in app/components/matrix/box.rb#render_source_credit_inner.
+  # in app/components/grid/box.rb#render_source_credit_inner.
   # mo_website specifically is excluded by source_noteworthy? (it's
   # the default, not worth calling out), so this needs a fixture with
   # a different source -- amateur_obs has mo_api.
   def test_enum_source_credit_renders_credit_text
     obs = observations(:amateur_obs)
     assert(obs.source_noteworthy?)
-    component = Components::Matrix::Box.new(user: @user, object: obs)
+    component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
     assert_html(html, ".log-source-credit", text: "#{:via.l} MO API")
@@ -392,7 +392,7 @@ class MatrixBoxTest < ComponentTestCase
   private
 
   def render_box(**)
-    render(Components::Matrix::Box.new(user: @user, **))
+    render(Components::Grid::Box.new(user: @user, **))
   end
 
   # minimal_unknown_obs is already occ_field_slip_one's sole member

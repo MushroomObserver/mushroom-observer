@@ -2,7 +2,7 @@
 
 # Renders one field-slip's details: project line, observation details
 # (date / collector / location / notes / id / id_by / other_codes),
-# creator line, and a `Components::Matrix::Box` matrix of every
+# creator line, and a `Components::Grid::Box` grid of every
 # observation attached via the field-slip's occurrence. Used by the
 # field-slip `Show` action template and by the index page's
 # `ObjectRow` (one entry per slip).
@@ -130,10 +130,10 @@ module Views::Controllers::FieldSlips
 
     def render_observations_matrix(all_obs)
       Row(element: :ul, class: "list-unstyled mt-3",
-          data: { controller: "matrix-table",
-                  action: "resize@window->matrix-table#rearrange" }) do
+          data: { controller: "grid-table",
+                  action: "resize@window->grid-table#rearrange" }) do
         all_obs.each do |obs_item|
-          render(Components::Matrix::Box.new(
+          render(Components::Grid::Box.new(
                    user: current_user, object: obs_item
                  ))
         end

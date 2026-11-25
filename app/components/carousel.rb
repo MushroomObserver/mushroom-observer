@@ -14,7 +14,7 @@
 #   (show-page IMAGES section).
 # - `Components::Form::UploadGallery` — editable image-upload carousel
 #   for the observation form.
-# - `Components::Matrix::Carousel` — per-matrix-box mini-carousel, not
+# - `Components::Grid::Box::Carousel` — per-grid-box mini-carousel, not
 #   yet consumed by the obs-index (see that class for details).
 #
 # @example
@@ -44,7 +44,7 @@ class Components::Carousel < Components::Base
   # `Form::UploadGallery` puts the prev/next arrows inside a
   # `.carousel-control-wrap.row` outside `.carousel-inner`; default
   # nil renders the controls inline as `ImageGallery` and the
-  # matrix-box caller do.
+  # grid-box caller do.
   prop :controls_wrap_class, _Nilable(::String), default: nil
   # Arbitrary `data-*` attributes merged onto the outer `<div>` (after
   # the always-emitted `data-ride="false"` / `data-interval="false"`).
@@ -62,7 +62,7 @@ class Components::Carousel < Components::Base
   # Register a slide. `class:` / `id:` / arbitrary attrs flow onto the
   # wrapping `<div class="item …">` (mirroring `ListGroup#item`).
   # `active: true` overrides the default first-slide-active behavior
-  # (`Matrix::Carousel` uses this to active the slide matching its
+  # (`Grid::Box::Carousel` uses this to active the slide matching its
   # `top_img`); when no slide is marked active, the first one gets it.
   #
   # @return [nil] so the call doesn't accidentally emit anything

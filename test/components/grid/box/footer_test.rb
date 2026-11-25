@@ -2,8 +2,8 @@
 
 require("test_helper")
 
-# Tests for Components::Matrix::Box::Footer, the mixin included by
-# Components::Matrix::Box that owns all footer slot rendering.
+# Tests for Components::Grid::Box::Footer, the mixin included by
+# Components::Grid::Box that owns all footer slot rendering.
 #
 # Content methods (render_footer_detail, render_footer_time,
 # render_user_detail) are tested by creating a minimal anonymous
@@ -13,7 +13,7 @@ require("test_helper")
 # Slot-level methods (render_log_footer, render_identify_footer,
 # render_project_admin_footer) are tested through a full Box render
 # so the Panel slot machinery is exercised.
-class MatrixBoxFooterTest < ComponentTestCase
+class Components::Grid::Box::FooterTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -109,13 +109,13 @@ class MatrixBoxFooterTest < ComponentTestCase
   private
 
   def render_box(**)
-    render(Components::Matrix::Box.new(**))
+    render(Components::Grid::Box.new(**))
   end
 
   # Renders render_footer_detail(detail) in a Phlex context.
   def render_detail(detail)
     render(Class.new(Components::Base) do
-      include Components::Matrix::Box::Footer
+      include Components::Grid::Box::Footer
 
       define_method(:view_template) { render_footer_detail(detail) }
     end.new)
@@ -124,7 +124,7 @@ class MatrixBoxFooterTest < ComponentTestCase
   # Renders render_footer_time(time) in a Phlex context.
   def render_time(time)
     render(Class.new(Components::Base) do
-      include Components::Matrix::Box::Footer
+      include Components::Grid::Box::Footer
 
       define_method(:view_template) { render_footer_time(time) }
     end.new)

@@ -2775,7 +2775,7 @@
   occurrence_multiple_existing: "Cannot combine observations from multiple existing occurrences (IDs: [ids])"
   occurrence_observations_max: "must have at most [max] observations"
   occurrence_primary_observation_must_belong: must belong to this occurrence
-  matrix_box_occurrence: See matching observations
+  grid_box_occurrence: See matching observations
   naming_see_matching_observations_reasons: See Matching Observations to Edit Other Reasons
   show_observation_add_matching_observations: Add Matching Observations
   show_observation_matching_observations: Matching Observations

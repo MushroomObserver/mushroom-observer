@@ -23,10 +23,10 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
     assert_equal("", html)
   end
 
-  # :matrix (default) -- the absolutely-positioned, hover-revealed
+  # :grid (default) -- the absolutely-positioned, hover-revealed
   # thumbnail treatment, plain (unprefixed) element ids, tooltips
   # above the button.
-  def test_matrix_context_is_the_default
+  def test_grid_context_is_the_default
     html = render_component
 
     assert_html(html, ".vote-section#image_vote_#{@image.id}")
@@ -38,7 +38,7 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
   end
 
   # :carousel -- same overlay styling, unprefixed ids, and upward
-  # tooltip as :matrix (both are legitimately "overlay" treatments,
+  # tooltip as :grid (both are legitimately "overlay" treatments,
   # see the `context` prop doc), but the tooltip container is the
   # full-width `.carousel-caption` instead of the narrower, auto-width
   # `.vote-section` -- room for a wide tooltip without crowding at
@@ -52,9 +52,9 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
                       "[data-tooltip-container='.carousel-caption']")
   end
 
-  # :lightbox -- same dark background/link treatment as :matrix,
+  # :lightbox -- same dark background/link treatment as :grid,
   # minus the absolute positioning; always visible. Every id is
-  # prefixed so a live in-page :matrix/:carousel copy and this
+  # prefixed so a live in-page :grid/:carousel copy and this
   # :lightbox copy of the same image's vote UI can coexist in the DOM
   # without colliding.
   def test_lightbox_context_uses_lightbox_styling_and_prefixed_ids
@@ -74,20 +74,20 @@ class ImageFragmentVoteInterfaceTest < ComponentTestCase
   # and swap it -- pins it against the id `#view_template` actually
   # renders (via `#vote_html_id`).
   def test_frame_id_matches_rendered_root_id
-    matrix_id = Components::ImageFragment::VoteInterface.frame_id(
+    grid_id = Components::ImageFragment::VoteInterface.frame_id(
       image_id: @image.id
     )
     lightbox_id = Components::ImageFragment::VoteInterface.frame_id(
       image_id: @image.id, context: :lightbox
     )
 
-    assert_html(render_component, "##{matrix_id}")
+    assert_html(render_component, "##{grid_id}")
     assert_html(render_component(context: :lightbox), "##{lightbox_id}")
   end
 
   private
 
-  def render_component(votes: true, context: :matrix)
+  def render_component(votes: true, context: :grid)
     render(Components::ImageFragment::VoteInterface.new(
              user: @user,
              image: @image,

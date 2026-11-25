@@ -4,7 +4,7 @@ require("test_helper")
 
 # rubocop:disable MO/NoCosmeticClassAssertion -- Title's whole job is
 # deciding whether to add font-weight-bold; the class IS the contract.
-class MatrixBoxTitleTest < ComponentTestCase
+class Components::Grid::Box::TitleTest < ComponentTestCase
   def test_observation_type_is_not_bold_by_default
     html = render_title(type: :observation)
 
@@ -32,7 +32,7 @@ class MatrixBoxTitleTest < ComponentTestCase
   private
 
   def render_title(type:, bold: nil)
-    render(Components::Matrix::Box::Title.new(
+    render(Components::Grid::Box::Title.new(
              id: 1, name: "Some Title", type: type, bold: bold
            ))
   end

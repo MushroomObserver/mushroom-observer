@@ -2,7 +2,7 @@
 
 require("test_helper")
 
-class MatrixBoxWhoTest < ComponentTestCase
+class Components::Grid::Box::WhoTest < ComponentTestCase
   def setup
     super
     # detailed_unknown_obs is mary's.
@@ -51,6 +51,6 @@ class MatrixBoxWhoTest < ComponentTestCase
   private
 
   def render_who
-    render(Components::Matrix::Box::Who.new(obs: @obs))
+    render(Components::Grid::Box::Who.new(obs: @obs))
   end
 end

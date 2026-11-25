@@ -2,7 +2,7 @@
 
 require "test_helper"
 
-class MatrixTableTest < ComponentTestCase
+class GridTest < ComponentTestCase
   def setup
     super
     @user = users(:rolf)
@@ -13,7 +13,7 @@ class MatrixTableTest < ComponentTestCase
     html = render(component)
 
     assert_includes(html, "list-unstyled")
-    assert_includes(html, "matrix-table")
+    assert_includes(html, "grid-table")
   end
 
   def test_renders_observations_without_caching
@@ -90,7 +90,7 @@ class MatrixTableTest < ComponentTestCase
     )
   end
 
-  # A bare Image object (images/index's matrix table) has no
+  # A bare Image object (images/index's grid) has no
   # `thumb_image` to defer to -- it IS the thumb. should_cache_object?
   # must check the Image's own `transferred` directly instead of
   # falling through the `respond_to?(:thumb_image)` guard to an
@@ -145,10 +145,10 @@ class MatrixTableTest < ComponentTestCase
   def test_cache_key_for_includes_the_thumb_image_record
     obs = observations(:coprinus_comatus_obs)
 
-    key = Components::Matrix::Table.cache_key_for(obs, I18n.locale)
+    key = Components::Grid.cache_key_for(obs, I18n.locale)
 
     assert_equal(
-      ["MatrixBox", Components::Matrix::Table::CACHE_VERSION,
+      ["Grid::Box", Components::Grid::CACHE_VERSION,
        I18n.locale, obs, obs.thumb_image],
       key
     )
@@ -159,7 +159,7 @@ class MatrixTableTest < ComponentTestCase
 
     obs.thumb_image.updated_at += 1.hour
     assert_nil(
-      store.read(Components::Matrix::Table.cache_key_for(obs, I18n.locale)),
+      store.read(Components::Grid.cache_key_for(obs, I18n.locale)),
       "Bumping the thumb's updated_at should invalidate the cached entry"
     )
   end
@@ -169,10 +169,10 @@ class MatrixTableTest < ComponentTestCase
   def test_cache_key_for_image_object_keys_on_the_image_itself
     image = images(:connected_coprinus_comatus_image)
 
-    key = Components::Matrix::Table.cache_key_for(image, I18n.locale)
+    key = Components::Grid.cache_key_for(image, I18n.locale)
 
     assert_equal(
-      ["MatrixBox", Components::Matrix::Table::CACHE_VERSION,
+      ["Grid::Box", Components::Grid::CACHE_VERSION,
        I18n.locale, image, nil],
       key
     )
@@ -207,7 +207,7 @@ class MatrixTableTest < ComponentTestCase
 
     # Should not have identify UI or footer
     assert_not_includes(html, "vote-select-container")
-    assert_not_includes(html, "context=matrix_box")
+    assert_not_includes(html, "context=grid_box")
     assert_not_includes(html, "panel-active")
     assert_not_includes(html, "box_reviewed")
   end
@@ -222,7 +222,7 @@ class MatrixTableTest < ComponentTestCase
     # Should have identify UI and footer
     assert(
       html.include?("vote-select-container") ||
-        html.include?("context=matrix_box"),
+        html.include?("context=grid_box"),
       "Expected identify UI to be rendered"
     )
     assert_includes(html, "panel-active")
@@ -233,7 +233,7 @@ class MatrixTableTest < ComponentTestCase
     component = build_table
     html = render(component) do |table|
       table.render(
-        Components::Matrix::Box.new(
+        Components::Grid::Box.new(
           id: 123,
           class: "block-test"
         ) do
@@ -278,7 +278,7 @@ class MatrixTableTest < ComponentTestCase
 
   def test_no_vote_interface_streams_in_block_form
     html = render(build_table) do |table|
-      table.render(Components::Matrix::Box.new(id: 456) do
+      table.render(Components::Grid::Box.new(id: 456) do
         view_context.tag.div { "Block content" }
       end)
     end
@@ -301,9 +301,9 @@ class MatrixTableTest < ComponentTestCase
       end
 
       assert_equal(
-        Components::Matrix::Table.cache_key_for(obs, I18n.locale),
+        Components::Grid.cache_key_for(obs, I18n.locale),
         captured_key,
-        "Cache key should match `MatrixTable.cache_key_for(obj, locale)`"
+        "Cache key should match `Grid.cache_key_for(obj, locale)`"
       )
     end
   end
@@ -352,9 +352,9 @@ class MatrixTableTest < ComponentTestCase
         I18n.with_locale(:es) { render(component_es) }
       end
 
-      assert_equal(Components::Matrix::Table.cache_key_for(obs, :en),
+      assert_equal(Components::Grid.cache_key_for(obs, :en),
                    keys[0], "First key should use :en locale")
-      assert_equal(Components::Matrix::Table.cache_key_for(obs, :es),
+      assert_equal(Components::Grid.cache_key_for(obs, :es),
                    keys[1], "Second key should use :es locale")
       assert_not_equal(keys[0], keys[1], "Different locales should have " \
                                          "different cache keys")
@@ -395,7 +395,7 @@ class MatrixTableTest < ComponentTestCase
     end
 
     real_store = ActiveSupport::Cache::MemoryStore.new
-    first_key = Components::Matrix::Table.cache_key_for(
+    first_key = Components::Grid.cache_key_for(
       observations.first, I18n.locale
     )
     # Pre-warm only the first object's fragment -- proves a genuine
@@ -436,7 +436,7 @@ class MatrixTableTest < ComponentTestCase
     assert_includes(html, "box_#{observations.second.id}",
                     "second object was a genuine miss and must render")
 
-    second_key = Components::Matrix::Table.cache_key_for(
+    second_key = Components::Grid.cache_key_for(
       observations.second, I18n.locale
     )
     cached_buffer, = real_store.read(second_key)
@@ -497,6 +497,6 @@ class MatrixTableTest < ComponentTestCase
   private
 
   def build_table(**)
-    Components::Matrix::Table.new(user: @user, **)
+    Components::Grid.new(user: @user, **)
   end
 end

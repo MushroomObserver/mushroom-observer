@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class Components::Matrix::Box
-  # Build render data for MatrixBox based on @object type
+class Components::Grid::Box
+  # Build render data for Grid::Box based on @object type
   module RenderData
     def build_render_data
       case @object

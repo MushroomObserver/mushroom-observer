@@ -2,7 +2,7 @@
 
 # Inline `<turbo-stream>` backfill for a page of lazy vote-interface
 # frames. Turbo executes stream elements wherever they appear in the
-# document, so one replace per image/context rendered after a matrix
+# document, so one replace per image/context rendered after a grid
 # grid fills every frame in the same response — no per-frame `src`
 # fetch ever fires. Must render outside any fragment cache: the
 # content is viewer-specific (`Image#users_vote`), which is why the
@@ -22,7 +22,7 @@ class Components::ImageFragment::VoteInterfaceStreams < Components::Base
 
     preload_votes(images)
     images.each do |image|
-      stream_for(image, :matrix)
+      stream_for(image, :grid)
       stream_for(image, :lightbox)
     end
   end

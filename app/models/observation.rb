@@ -281,7 +281,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     :where, :text_name, :notes
   ].freeze
 
-  # Eager-load tree every `Components::Matrix::Box` render reaches
+  # Eager-load tree every `Components::Grid::Box` render reaches
   # into. Shared by observations#index, field_slips show/index,
   # collection_numbers#show, herbarium_records#show, rss_logs#index,
   # sequences#new/edit, projects/updates#index, and the identify
@@ -294,7 +294,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     "#{MO.http_domain}/obs/#{id}"
   end
 
-  def self.matrix_box_includes
+  def self.grid_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
      :collector_user,
      { external_links: :external_site }, :location, :name,

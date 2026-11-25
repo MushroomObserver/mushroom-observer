@@ -96,14 +96,14 @@ module Views::Controllers::Images::Reuse
 
     def render_image_matrix
       PaginatedResults do
-        render(Components::Matrix::Table.new) do
+        Grid() do
           @objects.each { |image| render_image_card(image) }
         end
       end
     end
 
     def render_image_card(image)
-      render(::Components::Matrix::Box.new(id: image.id)) do
+      render(::Components::Grid::Box.new(id: image.id)) do
         Panel(class: "h-100") do |panel|
           panel.with_thumbnail do
             InteractiveImage(

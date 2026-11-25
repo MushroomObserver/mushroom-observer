@@ -7,7 +7,7 @@ module Images
 
     # Renders just the vote interface for one image, fresh and
     # uncached -- fetched via a lazy Turbo Frame so a viewer's vote
-    # state stays out of `Matrix::Box`'s shared fragment cache.
+    # state stays out of `Grid::Box`'s shared fragment cache.
     # Anonymous viewers can load this too (`.require-user` CSS-hides
     # it), matching the overlay copy's render-regardless-of-`@user`
     # behavior.
@@ -69,7 +69,7 @@ module Images
       ]
     end
 
-    def vote_interface(context: :matrix)
+    def vote_interface(context: :grid)
       ::Components::ImageFragment.new(
         type: :vote_interface,
         user: @user, image: @image, votes: true, context: context
@@ -77,13 +77,15 @@ module Images
     end
 
     # `:overlay` was VoteInterface's context name before it was
-    # renamed to `:matrix` -- mapped here so an old cached
-    # LazyVoteInterface turbo-frame (whose src= URL still has
-    # `context=overlay` baked in) doesn't 404 or fall into the
-    # unstyled `vote-section-inline` branch.
+    # renamed to `:matrix`, then to `:grid` -- both mapped here so an
+    # old cached LazyVoteInterface turbo-frame (whose src= URL still
+    # has `context=overlay` or `context=matrix` baked in) doesn't 404
+    # or fall into the unstyled `vote-section-inline` branch.
     def normalized_context
       value = params[:context]&.to_sym
-      value == :overlay ? :matrix : (value || :matrix)
+      return :grid if value.in?([:overlay, :matrix])
+
+      value || :grid
     end
   end
 end

@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # "Propose a new naming on this observation" link. Caller supplies
-# the text + rendering context (namings_table, matrix_box, etc.).
+# the text + rendering context (namings_table, grid_box, etc.).
 # Visual framing (btn classes, icon visibility) is the caller's
 # responsibility via `Components::Button::ModalToggle`.
 class Tab::Naming::New < Tab::Base

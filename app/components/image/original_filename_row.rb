@@ -9,7 +9,7 @@
 #
 # Factored out so the same permission-gated filename logic is shared
 # by `Image::Base#render_original_filename` (InteractiveImage's inline
-# placement), `Matrix::Box` (the images index panel body, which already
+# placement), `Grid::Box` (the images index panel body, which already
 # shows this image's id in its title row -- no second badge needed),
 # and the image-reuse index (its panel body, paired with a badge).
 class Components::Image::OriginalFilenameRow < Components::Base
