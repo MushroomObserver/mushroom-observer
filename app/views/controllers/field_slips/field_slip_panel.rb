@@ -121,14 +121,14 @@ module Views::Controllers::FieldSlips
       all_obs = @field_slip.observations.to_a
       strong { trusted_html(append_colon(:observations.ti)) }
       if all_obs.any?
-        render_observations_matrix(all_obs)
+        render_observations_grid(all_obs)
       else
         whitespace
         plain(:field_slip_no_observation.t)
       end
     end
 
-    def render_observations_matrix(all_obs)
+    def render_observations_grid(all_obs)
       Row(element: :ul, class: "list-unstyled mt-3",
           data: { controller: "grid-table",
                   action: "resize@window->grid-table#rearrange" }) do

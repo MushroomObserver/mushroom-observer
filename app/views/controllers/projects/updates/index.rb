@@ -28,7 +28,7 @@ module Views::Controllers::Projects::Updates
 
       render_toolbar
       PaginatedResults do
-        render_matrix
+        render_grid
       end
     end
 
@@ -100,7 +100,7 @@ module Views::Controllers::Projects::Updates
       )
     end
 
-    def render_matrix
+    def render_grid
       Grid() do
         @observations.each do |obs|
           render(Components::Grid::Box.new(

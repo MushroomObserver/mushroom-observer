@@ -131,7 +131,7 @@ class ObservationsController
     end
 
     # Reuses `Observation.grid_box_includes` — the canonical tree
-    # shared by every matrix-box render (field_slips show/index,
+    # shared by every grid-box render (field_slips show/index,
     # collection_numbers show).
     def observation_index_includes
       Observation.grid_box_includes

@@ -53,7 +53,8 @@
 #       belongs_to :model
 #       ALL_TYPE_TAGS # add "model"
 #
-#  4) View: Modify MatrixBoxPresenter if who/what/when/where are nonstandard.
+#  4) View: Modify Components::Grid::Box if who/what/when/where are
+#     nonstandard.
 #
 #  5) Add "show log" link at bottom of model's show page:
 #

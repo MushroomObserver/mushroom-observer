@@ -3,14 +3,14 @@
 require("test_helper")
 
 # Tests for Views::Controllers::FieldSlips::Form — the Phlex
-# field-slip form, plus its matrix sub-views.
+# field-slip form, plus its grid sub-views.
 #
 # Focus areas:
 # 1. Render-mode branching (code-only vs main form)
 # 2. New-record vs existing-record submit buttons
 # 3. Errors-present rendering
 # 4. Project-select visibility
-# 5. Observation matrix FieldProxy param wiring — the most
+# 5. Observation grid FieldProxy param wiring — the most
 #    regression-prone path (flat `observation_ids[]` + namespaced
 #    `field_slip[primary_observation_id]`), and the part with no
 #    assertions elsewhere in the codebase per coverage audit.
@@ -149,7 +149,7 @@ module Views::Controllers::FieldSlips
       )
     end
 
-    # ---------- Observation matrix (FieldProxy param wiring) -------
+    # ---------- Observation grid (FieldProxy param wiring) -------
     #
     # CRITICAL: these tests pin the param-name contract between the
     # form and field_slips_controller. A change to the FieldProxy
@@ -158,7 +158,7 @@ module Views::Controllers::FieldSlips
     # anywhere assert on `observation_ids[]` or
     # `field_slip[primary_observation_id]`.)
 
-    def test_new_action_matrix_uses_flat_observation_ids
+    def test_new_action_grid_uses_flat_observation_ids
       recent = [observations(:minimal_unknown_obs),
                 observations(:coprinus_comatus_obs)]
       html = render_form(FieldSlip.new(code: "TEST-008"),
@@ -174,7 +174,7 @@ module Views::Controllers::FieldSlips
       end
     end
 
-    def test_new_action_matrix_primary_radio_uses_namespaced_field_slip
+    def test_new_action_grid_primary_radio_uses_namespaced_field_slip
       recent = [observations(:minimal_unknown_obs)]
       html = render_form(FieldSlip.new(code: "TEST-009"),
                          recent_observations: recent)
@@ -189,7 +189,7 @@ module Views::Controllers::FieldSlips
       )
     end
 
-    def test_new_action_matrix_starts_with_no_checked_boxes
+    def test_new_action_grid_starts_with_no_checked_boxes
       recent = [observations(:minimal_unknown_obs),
                 observations(:coprinus_comatus_obs)]
       html = render_form(FieldSlip.new(code: "TEST-010"),
@@ -202,10 +202,10 @@ module Views::Controllers::FieldSlips
       end
     end
 
-    def test_no_observation_matrix_on_new_form_without_recent_obs
+    def test_no_observation_grid_on_new_form_without_recent_obs
       html = render_form(FieldSlip.new(code: "TEST-011"))
 
-      # No matrix at all if there are no recent observations.
+      # No grid if there are no recent observations.
       assert_no_html(html, "input[name='observation_ids[]']")
       assert_no_html(html,
                      "input[name='field_slip[primary_observation_id]']")
