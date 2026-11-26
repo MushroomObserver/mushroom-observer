@@ -25,7 +25,7 @@ module Views::Controllers::Images::Reuse
       add_pagination(@pagination_data)
 
       render(Index::Form.new(target: @target))
-      render_image_matrix
+      render_image_grid
     end
 
     private
@@ -92,9 +92,9 @@ module Views::Controllers::Images::Reuse
     end
 
     ############################################################################
-    # Image matrix
+    # Image grid
 
-    def render_image_matrix
+    def render_image_grid
       PaginatedResults do
         Grid() do
           @objects.each { |image| render_image_card(image) }

@@ -1215,7 +1215,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
 
   # The ExternalLink (if any) recording where this observation was imported
   # from — the external-source axis of #4208 (#4299). At most one per obs.
-  # Uses the loaded `external_links` association when present (matrix box,
+  # Uses the loaded `external_links` association when present (grid box,
   # show page) to avoid a query; otherwise queries only the import row.
   def import_link
     if external_links.loaded?

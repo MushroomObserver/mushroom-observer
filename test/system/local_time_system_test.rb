@@ -3,14 +3,14 @@
 require("application_system_test_case")
 
 class LocalTimeSystemTest < ApplicationSystemTestCase
-  def test_matrix_box_footer_time_converted_to_local
+  def test_grid_box_footer_time_converted_to_local
     login!(users("rolf"))
 
-    # Visit observations index which has matrix boxes with timestamps
+    # Visit observations index which has grid boxes with timestamps
     visit("/")
     assert_selector("body.observations__index")
 
-    # Find a matrix box with a time footer
+    # Find a grid box with a time footer
     time_element = first(".log-updated-at", wait: 5)
 
     # Verify the Stimulus controller data attribute is present

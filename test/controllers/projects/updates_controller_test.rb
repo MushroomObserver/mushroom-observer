@@ -49,7 +49,7 @@ module Projects
       get(:index, params: { project_id: @project.id })
 
       assert_response(:success)
-      assert_not_includes(assigns_matrix_observations, @matching_obs)
+      assert_not_includes(assigns_grid_observations, @matching_obs)
     end
 
     def test_index_show_excluded
@@ -248,8 +248,8 @@ module Projects
     end
 
     # Helper to pull observations from the rendered view for assertions.
-    def assigns_matrix_observations
-      # Parse matrix box ids from response body.
+    def assigns_grid_observations
+      # Parse grid box ids from response body.
       response.body.scan(/id="box_(\d+)"/).map do |match|
         Observation.find(match.first.to_i)
       end

@@ -111,7 +111,7 @@ module Views::Controllers::FieldSlips
       PaginatedResults do
         ListGroup do |list|
           @objects.each do |fs|
-            # The matrix box's margin-bottom already separates it
+            # The grid box's margin-bottom already separates it
             # from the next row -- the list-item's bottom padding
             # would double that space up.
             item_class = "pb-0" if fs.observations.any?
