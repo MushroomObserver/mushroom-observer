@@ -59,7 +59,7 @@ class Components::Image::Base < Components::Base
   prop :identify, _Boolean, default: false
   prop :observation_view, _Nilable(ObservationView), default: nil
 
-  # Upload mode (no real image instance)
+  # Upload mode (no image instance)
   prop :upload, _Boolean, default: false
 
   # This should be implemented by subclasses
