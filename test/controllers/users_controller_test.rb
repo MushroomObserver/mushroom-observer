@@ -64,6 +64,8 @@ class UsersControllerTest < FunctionalTestCase
     # matcher includes optional quotation mark (?.)
     assert_page_title(:users.ti)
     assert_displayed_filters("#{:query_pattern.l}: #{pattern}")
+    # index_display_opts's grid: option drives num_per_page via @layout.
+    assert_not_nil(@controller.instance_variable_get(:@layout))
 
     prove_sorting_links_include_contribution
   end
