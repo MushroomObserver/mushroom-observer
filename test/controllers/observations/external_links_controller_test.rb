@@ -73,9 +73,10 @@ module Observations
       get(:show, params: { id: link.id })
 
       assert_response(:success)
-      label = :show_observation_on_site.t(site: "iNaturalist").as_displayed
+      assert_select("turbo-frame#external_link_frame_#{link.id}")
       assert_select(
-        "turbo-frame#external_link_frame_#{link.id} h6", text: "#{label}:"
+        "turbo-frame#external_link_frame_#{link.id} strong",
+        text: "#{:show_observation_on_site.t(site: "iNaturalist")}:"
       )
       assert_select("a[href='#{link.link_url}']")
     end
