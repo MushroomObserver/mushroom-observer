@@ -104,8 +104,10 @@ class ObservationViewsControllerTest < FunctionalTestCase
                   "[target='lightbox_caption_#{obs.thumb_image.id}']")
 
     # Verify the toggle checkboxes are rendered in the turbo streams
-    assert_select("input[type='checkbox'][id='caption_reviewed_#{obs.id}']")
-    assert_select("input[type='checkbox'][id='box_reviewed_#{obs.id}']")
+    assert_select(
+      "input[type='checkbox'][id='caption_reviewed_#{obs.id}_lb']"
+    )
+    assert_select("input[type='checkbox'][id='box_reviewed_#{obs.id}_lb']")
 
     # Verify lightbox caption is rendered with the identify UI
     assert_select("div#observation_identify_#{obs.id}")
