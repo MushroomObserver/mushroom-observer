@@ -20,16 +20,16 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `sm` (see `render_mobile_proposer_prefix`), and `xs:` for the
   # other three sums to 12 without it.
   COLUMN_WIDTHS = {
-    name: { xs: 5, sm: 5 },
-    proposer: { sm: 2 },
+    name: { xs: 5, sm: 4 },
+    proposer: { sm: 3 },
     votes: { xs: 3, sm: 2 },
     your_vote: { xs: 4, sm: 3 }
   }.freeze
 
   def view_template
-    Row(class: "d-flex align-items-center naming-row",
+    Row(class: "d-flex flex-nowrap align-items-center naming-row",
         id: "observation_naming_#{primary.id}") do
-      Column(col: true, sm: 11) do
+      div(class: "naming-main-columns") do
         render_main_columns
         render_reasons_row
       end
@@ -130,8 +130,12 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
     end
   end
 
+  # Fixed-width CSS column (`.naming-eyes-column` in `_namings.scss`),
+  # not a Bootstrap grid fraction -- the eye icons are a small
+  # fixed-size glyph pair, not content that needs to scale with the
+  # 12-column grid the way the naming cells do.
   def render_eyes_column
-    Column(sm: 1, class: "d-none d-sm-block px-sm-0") { render_eyes }
+    div(class: "naming-eyes-column pr-2 d-none d-sm-block") { render_eyes }
   end
 
   # ---- name cell -------------------------------------------------
