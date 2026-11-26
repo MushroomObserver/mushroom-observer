@@ -38,8 +38,8 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # propose icon show on mobile.
     html = render_header
 
-    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 2)
-    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 1)
+    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 1)
+    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 2)
   end
 
   def test_name_column_is_block_on_xs
@@ -48,7 +48,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # title.
     html = render_header
 
-    assert_html(html, ".col.col-sm-4.d-block")
+    assert_html(html, ".col.col-sm-5.d-block")
   end
 
   # `align-items-end` is this header's alignment contract (see
@@ -64,6 +64,17 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     html = render_header
 
     assert_html(html, ".row.d-flex.align-items-end", count: 2)
+  end
+
+  # naming-columns (mo/_namings.scss) sets this row's gutter --
+  # load-bearing, not incidental paint: without it, the label
+  # columns use Bootstrap's default gutter while Row's value
+  # columns below use the tighter naming-columns gutter, and the
+  # two no longer line up.
+  def test_label_row_shares_naming_columns_gutter_with_row
+    html = render_header
+
+    assert_html(html, ".row.naming-columns", count: 1)
   end
 
   # `float-right` positions the button against the modal column's
