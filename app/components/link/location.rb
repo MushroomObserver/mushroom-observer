@@ -42,7 +42,7 @@ class Components::Link::Location < Components::Link::Object
   end
 
   def render_click_for_map
-    InlineLinkBlock(items: [click_for_map_icon])
+    InlineIconBlock(items: [click_for_map_icon])
   end
 
   def click_for_map_icon
@@ -50,7 +50,7 @@ class Components::Link::Location < Components::Link::Object
       name: :click_for_map.l,
       target: location_href,
       icon: :map,
-      class: Components::InlineLinkBlock.item_class
+      class: Components::InlineIconBlock.item_class
     )
   end
 

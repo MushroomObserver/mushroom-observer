@@ -134,7 +134,7 @@ tbody.collapse.in {
 // Baseline correction for icon+text pairs that aren't framed as a
 // .btn and the sidebar heading icons. `.inline-icon-link` (plain or
 // form.button_to-wrapped) gets the matching +2px correction from its
-// wrapping `.inline-link-block`'s `margin-top` instead (see
+// wrapping `.inline-icon-block`'s `margin-top` instead (see
 // _links_buttons_alerts.scss), so it's excluded here rather than
 // duplicated. `.inline-flex-center` triggers (e.g.
 // `.info-collapse-trigger`) are also excluded -- those are icon-only,

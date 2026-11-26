@@ -62,7 +62,7 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
   def render_item(project)
     li do
       Link(type: :object, object: project)
-      InlineLinkBlock(items: remove_button_items(project))
+      InlineIconBlock(items: remove_button_items(project))
     end
   end
 
@@ -92,7 +92,7 @@ class Views::Controllers::Observations::Show::ProjectsPanel < Views::Base
       name: :remove.ti,
       target: remove_path,
       confirm: :are_you_sure.l,
-      class: Components::InlineLinkBlock.item_class
+      class: Components::InlineIconBlock.item_class
     )
   end
 end

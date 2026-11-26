@@ -52,7 +52,7 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # destroy) appears next to the name link.
     html = render_row
 
-    assert_html(html, ".inline-link-block")
+    assert_html(html, ".inline-icon-block")
     assert_html(html, "a.edit_naming_link_#{@naming.id}")
   end
 
@@ -60,15 +60,15 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     # No wrapping block-level element between the name link and the
     # mod-links group -- they must sit inline, on the same line, not
     # nested in a div (which would push them onto a new line and make
-    # InlineLinkBlock's wrapper margin meaningless).
+    # InlineIconBlock's wrapper margin meaningless).
     html = render_row
 
-    assert_html(html, "a + .inline-link-block")
+    assert_html(html, "a + .inline-icon-block")
   end
 
   def test_no_mod_links_for_non_owner
     # Non-owner viewer → InlineModLinks renders nothing, so the
-    # wrapper `.inline-link-block` is also absent.
+    # wrapper `.inline-icon-block` is also absent.
     other_user = users(:mary)
     controller.instance_variable_set(:@user, other_user)
     html = render_row(user: other_user)

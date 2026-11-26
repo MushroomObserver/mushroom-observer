@@ -71,7 +71,7 @@ module Views::Layouts
       html = render_icons(user: @owner)
 
       assert_html(html, ".object_edit .mo-icon-reflection")
-      # Carries InlineLinkBlock's item class -- confirms it rendered
+      # Carries InlineIconBlock's item class -- confirms it rendered
       # as one of the block's items, with the same spacing/size as
       # the edit/delete icons beside it, instead of the sprite's
       # larger default size.

@@ -7,7 +7,7 @@
 # `Components::Link::Get`, gated by user permissions and description
 # state.
 #
-# Spaced via `Components::InlineLinkBlock` -- the same gap-based
+# Spaced via `Components::InlineIconBlock` -- the same gap-based
 # spacing every other inline icon strip in the app uses (title-bar
 # edit/delete, `Components::InlineCRUDLinks`), rather than literal
 # " | " separators.
@@ -19,7 +19,7 @@ class Components::Description::ModLinks < Components::Base
     icons = icon_components
     return if icons.empty?
 
-    InlineLinkBlock(items: icons)
+    InlineIconBlock(items: icons)
   end
 
   private
@@ -42,7 +42,7 @@ class Components::Description::ModLinks < Components::Base
   def destroy_icon
     Components::Button.new(type: :delete, target: @description,
                            variant: :strip,
-                           class: Components::InlineLinkBlock.item_class)
+                           class: Components::InlineIconBlock.item_class)
   end
 
   def admin_icons
@@ -116,7 +116,7 @@ class Components::Description::ModLinks < Components::Base
   end
 
   def item_class(*extra)
-    class_names("stateful-link", Components::InlineLinkBlock.item_class, *extra)
+    class_names("stateful-link", Components::InlineIconBlock.item_class, *extra)
   end
 
   # -- predicates -------------------------------------------------

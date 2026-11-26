@@ -66,7 +66,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
   def render_item(spl)
     li(id: "species_list_#{spl.id}") do
       Link(type: :object, object: spl, name: spl.format_name.t)
-      InlineLinkBlock(items: remove_button_items(spl))
+      InlineIconBlock(items: remove_button_items(spl))
     end
   end
 
@@ -87,7 +87,7 @@ class Views::Controllers::Observations::Show::SpeciesListsPanel < Views::Base
       name: :remove.ti,
       target: remove_path,
       confirm: :are_you_sure.l,
-      class: Components::InlineLinkBlock.item_class
+      class: Components::InlineIconBlock.item_class
     )
   end
 end

@@ -73,7 +73,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
       if @obs.field_slip
         Link(type: :object, object: @obs.field_slip, class: "ml-2")
       end
-      InlineLinkBlock(items: field_slip_action_items)
+      InlineIconBlock(items: field_slip_action_items)
     end
   end
 
@@ -97,7 +97,7 @@ class Views::Controllers::Observations::Show::Details < Views::Base
     tab = tab_class.new(observation: @obs)
     Components::Link.new(
       type: :get, tab: tab,
-      class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
+      class: Components::InlineIconBlock.item_class(tab.html_options[:class])
     )
   end
 
