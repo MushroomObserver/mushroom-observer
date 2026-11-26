@@ -130,6 +130,60 @@ class Image::ProcessorTest < UnitTestCase
     assert_not_nil(image.reload.dhash, "#process must compute the dhash")
   end
 
+  # An upright image has nothing to reorient, and decoding it costs 8
+  # bytes a pixel -- past ImageMagick's policy ceiling for a 90MP upload
+  # (see config/etc/policy.xml). MiniMagick::Image.open is the call that
+  # copies the file and leads to the decode, so stub it to prove the
+  # pass is skipped rather than merely discarded.
+  def test_auto_orient_skips_the_decode_for_an_upright_image
+    unless system("command -v identify >/dev/null 2>&1")
+      skip("ImageMagick `identify` not available")
+    end
+
+    image = images(:in_situ_image)
+    path = "#{local_root}/orig/#{image.id}.jpg"
+    FileUtils.cp(JPG_FIXTURE, path)
+    before = File.mtime(path)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+
+    MiniMagick::Image.stub(:open, lambda { |*|
+      flunk("decoded an upright image")
+    }) do
+      processor.send(:auto_orient_if_needed, path)
+    end
+
+    assert_equal(before, File.mtime(path),
+                 "an upright original must be left as it is")
+  end
+
+  def test_auto_orient_reorients_an_image_tagged_sideways
+    unless system("command -v identify >/dev/null 2>&1")
+      skip("ImageMagick `identify` not available")
+    end
+
+    image = images(:in_situ_image)
+    path = "#{local_root}/orig/#{image.id}.jpg"
+    FileUtils.cp(JPG_FIXTURE, path)
+    tag_as_sideways(path)
+    processor = Image::Processor.new(image: image, ext: "jpg")
+
+    processor.send(:auto_orient_if_needed, path)
+
+    oriented = MiniMagick::Image.new(path)
+    assert_equal("TopLeft", oriented["%[orientation]"])
+    assert_equal([500, 407], [oriented.width, oriented.height],
+                 "the 407x500 fixture tagged sideways must come back rotated")
+  end
+
+  # Writes the EXIF orientation tag without touching the pixels, which
+  # is the state a camera produces.
+  def tag_as_sideways(path)
+    exif = MiniExiftool.new(path)
+    exif.orientation = "Rotate 90 CW"
+    assert(exif.save, "could not tag the fixture sideways")
+    assert_equal("RightTop", MiniMagick::Image.new(path)["%[orientation]"])
+  end
+
   def test_process_converts_non_jpg_original
     image = images(:turned_over_image)
     image.update_columns(transferred: false, width: nil, height: nil)
