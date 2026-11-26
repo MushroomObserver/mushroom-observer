@@ -22,8 +22,7 @@ module Views::Controllers::Locations
       private
 
       def render_heading_links
-        render(show_link)
-        render(edit_link)
+        InlineIconBlock(items: [show_link, edit_link])
       end
 
       def show_link
@@ -35,8 +34,10 @@ module Views::Controllers::Locations
       end
 
       def tab_link(tab_class)
-        Link(type: :get, tab: tab_class.new(location: @location),
-             class: Components::InlineIconBlock.item_class)
+        Components::Link.new(
+          type: :get, tab: tab_class.new(location: @location),
+          class: Components::InlineIconBlock.item_class
+        )
       end
     end
   end
