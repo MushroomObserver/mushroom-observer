@@ -15,6 +15,7 @@
 #     # ... other params
 #   ))
 module Views::Controllers::Observations
+  # rubocop:disable-next Metrics/ClassLength
   class Form < ::Components::ApplicationForm
     include NotesPanel
 
@@ -71,7 +72,7 @@ module Views::Controllers::Observations
       render_notes_panel
       render_projects_panel if show_projects?
       render_lists_panel if show_lists?
-      submit(button_name, center: true, disable_with: :submitting.ti)
+      render_submit_row
     end
 
     private
@@ -82,8 +83,33 @@ module Views::Controllers::Observations
       @mode == :create
     end
 
+    def update?
+      @mode == :update
+    end
+
     def button_name
       create? ? :create.ti : :save_edits.ti
+    end
+
+    # Log Change controls whether this edit bumps the observation's
+    # RSS/activity-log entry.
+    def render_submit_row
+      div(class: "text-center") do
+        render_log_change if update?
+        submit(button_name, disable_with: :submitting.ti)
+      end
+    end
+
+    # String, not Symbol -- log_change isn't an Observation attribute,
+    # and the controller reads it as a bare params[:log_change], not
+    # params[:observation][:log_change].
+    def render_log_change
+      checkbox_field(
+        "log_change",
+        label: :form_observations_log_change,
+        checked: true,
+        wrap_class: "d-inline-block mr-3"
+      )
     end
 
     # Override Superform's form_action to include approval query params
@@ -150,14 +176,13 @@ module Views::Controllers::Observations
     end
 
     def render_upload_body(panel)
-      panel.with_body(collapse: true, classes: "border-bottom",
-                      id: "observation_upload") do
+      panel.with_body(collapse: true, id: "observation_upload") do
         render(Upload.new(form: self, good_images: @good_images))
       end
     end
 
     def render_images_body(panel)
-      panel.with_body(collapse: true, classes: "p-0",
+      panel.with_body(collapse: true, classes: "p-0 border-top",
                       id: "observation_images") do
         render(Components::Form::UploadGallery.new(
                  images: @good_images,

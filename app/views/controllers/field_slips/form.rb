@@ -201,21 +201,21 @@ module Views::Controllers::FieldSlips
     def render_observations_section
       if new_record? && @recent_observations.any?
         div(class: "clearfix")
-        render_new_action_matrix
+        render_new_action_grid
       elsif !new_record?
         div(class: "clearfix")
-        render_edit_action_matrices
+        render_edit_action_grids
       end
     end
 
     # New action: one grid of recent obs, all unchecked, plus
     # "Save with Selected Observations" submit.
-    def render_new_action_matrix
+    def render_new_action_grid
       div(class: "mt-5") do
         strong { append_colon(:field_slip_select_observations.t) }
-        render_observation_matrix(@recent_observations,
-                                  checked_ids: [],
-                                  primary_id: nil)
+        render_observation_grid(@recent_observations,
+                                checked_ids: [],
+                                primary_id: nil)
         submit(:field_slip_save_with_observations.t,
                class: "mt-3 mb-5")
       end
@@ -223,21 +223,21 @@ module Views::Controllers::FieldSlips
 
     # Edit action: a grid of current obs (checked) and a grid of
     # candidate obs (unchecked).
-    def render_edit_action_matrices
+    def render_edit_action_grids
       div(class: "mt-5", data: { controller: "field-slip-form" }) do
         current = current_observations
         primary_id = current_primary_id(current)
         if current.any?
           strong { append_colon(:observations.ti) }
-          render_observation_matrix(current,
-                                    checked_ids: current.map(&:id),
-                                    primary_id: primary_id)
+          render_observation_grid(current,
+                                  checked_ids: current.map(&:id),
+                                  primary_id: primary_id)
         end
         if @recent_observations.any?
           strong { append_colon(:field_slip_select_observations.t) }
-          render_observation_matrix(@recent_observations,
-                                    checked_ids: [],
-                                    primary_id: primary_id)
+          render_observation_grid(@recent_observations,
+                                  checked_ids: [],
+                                  primary_id: primary_id)
         end
       end
     end
@@ -255,8 +255,8 @@ module Views::Controllers::FieldSlips
       current.one? ? current.first&.id : nil
     end
 
-    def render_observation_matrix(observations, checked_ids:, primary_id:)
-      # FieldSlip submits matrix params as flat `observation_ids[]`
+    def render_observation_grid(observations, checked_ids:, primary_id:)
+      # FieldSlip submits grid params as flat `observation_ids[]`
       # and namespaced `field_slip[primary_observation_id]`.
       # FieldSlip doesn't have an `observation_ids=`
       # accessor (the join is via the occurrence), so we drive both
@@ -265,12 +265,12 @@ module Views::Controllers::FieldSlips
       # `value:` option, no Superform model binding.
       @checked_ids = checked_ids
       @primary_id = primary_id
-      Row(element: :ul, class: "list-unstyled mt-3", data: matrix_data) do
+      Row(element: :ul, class: "list-unstyled mt-3", data: grid_data) do
         observations.each { |obs| render_observation_row(obs) }
       end
     end
 
-    def matrix_data
+    def grid_data
       {
         controller: "grid-table field-slip-form",
         action: "resize@window->grid-table#rearrange"

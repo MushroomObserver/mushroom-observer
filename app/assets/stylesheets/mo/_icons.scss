@@ -41,11 +41,11 @@
 
 // Flag emoji render noticeably smaller than the `.lang-flag` PNGs
 // they replaced (~2/3 the linear size, roughly half the visual
-// area) — bump back up. `line-height: 1` keeps the taller glyph from
-// stretching the `.dropdown-item`'s row height.
+// area) — bump back up. `line-height: 0.75` keeps the taller glyph
+// from stretching the `.dropdown-item`'s row height.
 .lang-flag-emoji {
   font-size: 1.75em;
-  line-height: 1;
+  line-height: 0.75;
   // Default inline elements sit on the text baseline — at 1.75em the
   // glyph's ascent/descent hangs low relative to the normal-size text
   // beside it *and* stretches the line box to fit. `middle` aligns
@@ -134,7 +134,7 @@ tbody.collapse.in {
 // Baseline correction for icon+text pairs that aren't framed as a
 // .btn and the sidebar heading icons. `.inline-icon-link` (plain or
 // form.button_to-wrapped) gets the matching +2px correction from its
-// wrapping `.inline-link-block`'s `margin-top` instead (see
+// wrapping `.inline-icon-block`'s `margin-top` instead (see
 // _links_buttons_alerts.scss), so it's excluded here rather than
 // duplicated. `.inline-flex-center` triggers (e.g.
 // `.info-collapse-trigger`) are also excluded -- those are icon-only,

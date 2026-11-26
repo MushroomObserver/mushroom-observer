@@ -25,6 +25,37 @@ async UI: **Stimulus controller state with no reliable DOM proxy.**
   no matches" — the latter doesn't distinguish "never fired" from
   "fired with the wrong value" from "fired and got overwritten."
 
+## HARD RULE: never put `:not()` in a Capybara selector string
+
+Not "avoid it in count waits" — avoid it everywhere, including a plain
+single-element `assert_selector`/`find`. `:not()` inside a Capybara
+selector (`.foo:not(.bar)`, `input:not([disabled])`) has been found
+unreliable under this suite's Cuprite setup, confirmed on both class
+and attribute negation, both single-element and multi-element waits.
+`ObservationFormSystemTest#test_edit_observation_extracts_exif_from_saved_images`
+found 0 matches at `wait: 20` for `.upload-status-check:not(.d-none)`,
+every run, even standalone with zero contention — not a timing issue:
+a direct `evaluate_script('document.querySelectorAll(...).length')`
+poll for the identical condition passed immediately, same run, same
+page. Widening the wait repeatedly didn't help, because the assertion
+mechanism itself couldn't converge, not because it was slow. A sweep
+of `test/system/` found the same pattern (`:not(.class)`,
+`:not([disabled])`) in two other files that hadn't failed yet —
+fixed those too, on the assumption that "hasn't failed yet" means
+"hasn't been hit under load yet," not "is fine."
+
+**Fix:** replace `assert_selector("X:not(Y)")` with
+`assert_selector("X")` (if existence also needs asserting) plus
+`assert_no_selector("XY")` — i.e. assert the *positive* form doesn't
+exist, rather than asserting the negative form does. For a
+multi-element count wait, poll a positive count directly instead:
+`total - document.querySelectorAll("X.Y").length >= count` rather
+than `document.querySelectorAll("X:not(.Y)").length >= count`.
+
+There's no known case where `:not()` is safe to reach for in this
+suite — treat any new one as a bug on sight, not something to
+evaluate case by case.
+
 ## The pattern
 
 `test/system/observation_form_system_test.rb` has the working examples

@@ -21,7 +21,7 @@ module Views::Controllers::Observations::Namings
     def initialize(naming, **kwargs)
       extract_kwargs(naming, kwargs)
       # Dynamic per-observation form id — can't be auto-derived; pass
-      # explicitly so multiple namings on one obs (lightbox / matrix-
+      # explicitly so multiple namings on one obs (lightbox / grid-
       # box renders) don't collide on the same DOM id.
       super(naming, id: form_id_value, turbo: @turbo, **kwargs)
     end

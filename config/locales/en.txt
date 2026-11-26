@@ -1642,8 +1642,6 @@
   image_file_name: File name
   image_file_size: File size
 
-  # observations/images/edit
-
   # observations/images/remove
   image_remove_remove: Remove
   image_remove_title: Remove Images from [name]

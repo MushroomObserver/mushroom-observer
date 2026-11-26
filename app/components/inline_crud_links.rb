@@ -16,11 +16,11 @@
 #   InlineCRUDLinks(tab: ::Tab::CollectionNumber::New.new(observation: obs),
 #                  modal_id: "collection_number")
 #
-# Layout glue lives in `Components::InlineLinkBlock` -- this component
+# Layout glue lives in `Components::InlineIconBlock` -- this component
 # only builds the item list and hands it off. Every item it builds
-# gets `Components::InlineLinkBlock.item_class(...)` merged in (e.g.
+# gets `Components::InlineIconBlock.item_class(...)` merged in (e.g.
 # with a per-record destroy-button selector class) so `.inline-icon-link`
-# lands on the item's own element -- `InlineLinkBlock` can't do that
+# lands on the item's own element -- `InlineIconBlock` can't do that
 # itself, see its own doc comment.
 #
 # Each supported target's edit/destroy/permission behavior is
@@ -156,7 +156,7 @@ class Components::InlineCRUDLinks < Components::Base
   }.freeze
 
   def view_template
-    InlineLinkBlock(items: items)
+    InlineIconBlock(items: items)
   end
 
   private
@@ -192,7 +192,7 @@ class Components::InlineCRUDLinks < Components::Base
   # (e.g. a per-record selector class) rather than overwriting it.
   def tab_html_options(tab)
     tab.html_options.merge(
-      class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
+      class: Components::InlineIconBlock.item_class(tab.html_options[:class])
     )
   end
 
@@ -231,7 +231,7 @@ class Components::InlineCRUDLinks < Components::Base
   end
 
   def destroy_class
-    Components::InlineLinkBlock.item_class(
+    Components::InlineIconBlock.item_class(
       handler[:destroy_class] && send(handler[:destroy_class])
     )
   end
@@ -268,7 +268,7 @@ class Components::InlineCRUDLinks < Components::Base
     tab = send(handler[:tab])
     Components::Link::Get.new(
       tab: tab,
-      class: Components::InlineLinkBlock.item_class(tab.html_options[:class])
+      class: Components::InlineIconBlock.item_class(tab.html_options[:class])
     )
   end
 

@@ -35,7 +35,7 @@ module Views::Controllers::Observations
 
       render_suggestions_alert if suggest_alternates?
 
-      PaginatedResults { render_matrix }
+      PaginatedResults { render_grid }
     end
 
     private
@@ -63,7 +63,7 @@ module Views::Controllers::Observations
       )
     end
 
-    def render_matrix
+    def render_grid
       Grid(
         objects: @objects,
         user: @user,

@@ -70,7 +70,7 @@ class Components::ObservationFragment::Who < Components::Base
   end
 
   def render_send_question_link
-    InlineLinkBlock(items: [send_question_button])
+    InlineIconBlock(items: [send_question_button])
   end
 
   def send_question_button
@@ -80,7 +80,7 @@ class Components::ObservationFragment::Who < Components::Base
       target: new_question_for_observation_path(@obs.id),
       modal_id: "observation_email",
       variant: :strip, icon: :email,
-      class: Components::InlineLinkBlock.item_class
+      class: Components::InlineIconBlock.item_class
     )
   end
 end

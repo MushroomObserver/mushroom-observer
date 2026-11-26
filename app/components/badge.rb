@@ -15,7 +15,7 @@ class Components::Badge < Components::Base
   #   :xl -- project/species-list table row title badges
   #   :lg -- copy-to-clipboard external-site record id, Matching
   #          Observations panel row ids
-  #   :md -- matrix box title and other index-row id badges
+  #   :md -- grid box title and other index-row id badges
   #   :sm -- sitting next to a large page-title heading
   # Each maps regularly to "badge-#{size}" -- no irregular Bootstrap
   # naming to account for here (unlike Button::Styling's BTN_SIZES).

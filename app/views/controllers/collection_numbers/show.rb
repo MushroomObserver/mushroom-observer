@@ -14,10 +14,10 @@ module Views::Controllers::CollectionNumbers
       container_class(:full)
 
       # Top text details + bottom footer both kept at
-      # `container-text` width; the obs-matrix between them runs
+      # `container-text` width; the obs-grid between them runs
       # full-width inside the page's full-width `<main>`.
       Container(width: :text) { render_details }
-      render_observation_matrix
+      render_observation_grid
       Container(width: :text) do
         render(::Views::Layouts::ObjectFooter.new(
                  obj: @collection_number, minimal: true
@@ -48,7 +48,7 @@ module Views::Controllers::CollectionNumbers
       br
     end
 
-    def render_observation_matrix
+    def render_observation_grid
       Grid(
         objects: @collection_number.observations.to_a, user: @user
       )

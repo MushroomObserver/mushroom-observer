@@ -40,11 +40,7 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
   end
 
   def render_heading_links
-    links = [show_link, edit_link].compact
-    links.each_with_index do |link, idx|
-      render(link)
-      plain(" | ") if idx < links.length - 1
-    end
+    [show_link, edit_link].compact.each { |link| render(link) }
   end
 
   def show_link
@@ -52,7 +48,8 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
 
     Components::Link.new(
       type: :get,
-      tab: Tab::Name::ShowDescription.new(name: @name)
+      tab: Tab::Name::ShowDescription.new(name: @name),
+      class: Components::InlineIconBlock.item_class
     )
   end
 
@@ -61,7 +58,8 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
 
     Components::Link.new(
       type: :get,
-      tab: Tab::Name::EditDescription.new(name: @name)
+      tab: Tab::Name::EditDescription.new(name: @name),
+      class: Components::InlineIconBlock.item_class
     )
   end
 end

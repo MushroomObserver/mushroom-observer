@@ -2,22 +2,22 @@
 
 require("test_helper")
 
-class InlineLinkBlockTest < ComponentTestCase
+class InlineIconBlockTest < ComponentTestCase
   def test_item_class_alone
     assert_equal("inline-icon-link",
-                 Components::InlineLinkBlock.item_class)
+                 Components::InlineIconBlock.item_class)
   end
 
   def test_item_class_merges_existing_class
     assert_equal("inline-icon-link destroy_thing_link_1",
-                 Components::InlineLinkBlock.item_class(
+                 Components::InlineIconBlock.item_class(
                    "destroy_thing_link_1"
                  ))
   end
 
   def test_item_class_ignores_nil_existing_class
     assert_equal("inline-icon-link",
-                 Components::InlineLinkBlock.item_class(nil))
+                 Components::InlineIconBlock.item_class(nil))
   end
 
   def test_renders_nothing_when_items_empty
@@ -27,15 +27,15 @@ class InlineLinkBlockTest < ComponentTestCase
   end
 
   # rubocop:disable-next MO/RedundantTagInSelector
-  def test_single_item_rendered_inside_inline_link_block_span
+  def test_single_item_rendered_inside_inline_icon_block_span
     html = render_links(items: ["<b>edit</b>".html_safe])
 
-    assert_html(html, "span.inline-link-block b", text: "edit")
+    assert_html(html, "span.inline-icon-block b", text: "edit")
   end
 
   def test_no_separator_characters_between_items
     html = render_links(items: %w[a b c])
-    text = Nokogiri::HTML(html).at_css("span.inline-link-block").text
+    text = Nokogiri::HTML(html).at_css("span.inline-icon-block").text
 
     assert_equal("abc", text,
                  "Items should render with no nbsp/whitespace text " \
@@ -46,19 +46,19 @@ class InlineLinkBlockTest < ComponentTestCase
   def test_string_items_rendered_as_trusted_html
     html = render_links(items: ["<i>archive</i>".html_safe])
 
-    assert_html(html, ".inline-link-block i", text: "archive")
+    assert_html(html, ".inline-icon-block i", text: "archive")
   end
 
   def test_phlex_component_items_rendered
     button = Components::Button.new(name: "Edit", variant: :strip)
     html = render_links(items: [button])
 
-    assert_html(html, ".inline-link-block button", text: "Edit")
+    assert_html(html, ".inline-icon-block button", text: "Edit")
   end
 
   private
 
   def render_links(items:)
-    render(Components::InlineLinkBlock.new(items: items))
+    render(Components::InlineIconBlock.new(items: items))
   end
 end

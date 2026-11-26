@@ -31,7 +31,7 @@
 # The inline edit/destroy/add link group used to live here as
 # `:inline_mod` / `:inline_add` -- it renders zero, one, or two links
 # (not "a link"), so it moved out of this namespace to
-# `Components::InlineCRUDLinks` (dispatch) + `Components::InlineLinkBlock`
+# `Components::InlineCRUDLinks` (dispatch) + `Components::InlineIconBlock`
 # (layout glue).
 class Components::Link < Components::Base
   include Components::Button::Styling

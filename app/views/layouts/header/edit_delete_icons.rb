@@ -2,7 +2,7 @@
 
 # Page-title-bar edit/delete icons. Renders edit + delete buttons
 # gated by what the viewer can do to the object, via the same
-# `Components::InlineLinkBlock` spacing/styling every other inline
+# `Components::InlineIconBlock` spacing/styling every other inline
 # edit/destroy icon pair in the app uses (see `Components::
 # InlineCRUDLinks`) -- unlike that component's own `TARGET_HANDLERS`
 # dispatch, this stays generic across every model via plain
@@ -26,7 +26,7 @@ module Views::Layouts
 
     def view_template
       div(class: "h4 my-1 d-flex align-items-center object_edit") do
-        InlineLinkBlock(items: [reflection_item, edit_item,
+        InlineIconBlock(items: [reflection_item, edit_item,
                                 delete_item].compact)
       end
     end
@@ -45,7 +45,7 @@ module Views::Layouts
       ::Components::Icon.new(
         type: :reflection,
         title: :show_observation_reflection_read_only.l,
-        wrap_class: ::Components::InlineLinkBlock.item_class,
+        wrap_class: ::Components::InlineIconBlock.item_class,
         center_tooltip: true
       )
     end
@@ -59,7 +59,7 @@ module Views::Layouts
       ::Components::Button::Edit.new(
         target: @object, variant: :strip,
         name: (:edit_reflection_tooltip.l if reflection?),
-        class: ::Components::InlineLinkBlock.item_class
+        class: ::Components::InlineIconBlock.item_class
       )
     end
 
@@ -68,7 +68,7 @@ module Views::Layouts
 
       ::Components::Button::Delete.new(
         target: @object, variant: :strip,
-        class: ::Components::InlineLinkBlock.item_class
+        class: ::Components::InlineIconBlock.item_class
       )
     end
 

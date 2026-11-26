@@ -338,7 +338,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_no_html(html, "a[href*='context=grid_box']")
     # Should not have identify footer
     assert_no_html(html, ".panel-active")
-    assert_no_html(html, "#box_reviewed_#{obs.id}")
+    assert_no_html(html, "#box_reviewed_#{obs.id}_lb")
   end
 
   def test_renders_identify_ui_and_footer_when_identify_is_true
@@ -356,7 +356,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_html(html, ".vote-select-container")
     # Should have identify footer
     assert_html(html, ".panel-active")
-    assert_html(html, "#box_reviewed_#{obs.id}")
+    assert_html(html, "#box_reviewed_#{obs.id}_lb")
   end
 
   # External-source credit renders the link with target="_blank" /

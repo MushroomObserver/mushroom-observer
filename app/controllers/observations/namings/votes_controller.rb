@@ -132,7 +132,7 @@ module Observations::Namings
           when "namings_table"
             render_namings_section_update
           when "grid_box"
-            render_matrix_box_naming_update
+            render_grid_box_naming_update
           end
         end
         format.html do
@@ -164,7 +164,7 @@ module Observations::Namings
     # both places, dismiss any open naming / progress modals, and
     # clear the identify strip. Mirrors `NamingsController`'s
     # version — same 7 turbo-stream actions, same shape.
-    def render_matrix_box_naming_update
+    def render_grid_box_naming_update
       obs_id = @observation.id
       render(turbo_stream: [
                turbo_stream.replace(

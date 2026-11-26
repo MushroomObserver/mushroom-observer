@@ -250,16 +250,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                     visible: :all)
     # Overlay exists but is hidden before submission starts.
     assert_selector(".upload-status-overlay.d-none", visible: :all)
-    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+    assert_selector(".remove_image_button", visible: :all)
+    assert_no_selector(".remove_image_button[disabled]", visible: :all)
 
     within("#observation_form") { click_commit }
 
-    # The overlay unhides once this item's own upload POST starts, and
+    # The overlay unhides once this item's upload POST starts, and
     # settles on the checkmark (not the spinner) once it succeeds --
     # all while the carousel item itself remains visible throughout,
-    # unlike the old hide-the-whole-item behavior.
-    assert_selector(".upload-status-overlay:not(.d-none)", wait: 5)
-    assert_selector(".upload-status-check:not(.d-none)", wait: 8)
+    # unlike the old hide-the-whole-item behavior. Positive `.d-none`
+    # class, not `:not()` -- see system_test_state_polling.md.
+    assert_no_selector(".upload-status-overlay.d-none", wait: 5)
+    assert_no_selector(".upload-status-check.d-none", wait: 8)
     assert_selector(".carousel-item[data-image-status='upload']",
                     visible: :visible)
     assert_selector(".remove_image_button[disabled]", visible: :all)
@@ -320,8 +322,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_equal("observation_place_name",
                  evaluate_script("document.activeElement.id"),
                  "Form should accept focus again after a failed upload")
-    assert_selector("#observation_form button[type='submit']:not([disabled])")
-    assert_selector(".remove_image_button:not([disabled])", visible: :all)
+    assert_selector("#observation_form button[type='submit']")
+    assert_no_selector("#observation_form button[type='submit'][disabled]")
+    assert_selector(".remove_image_button", visible: :all)
+    assert_no_selector(".remove_image_button[disabled]", visible: :all)
   end
 
   # JoeCohen's review on #5055: the "MO does not recognize the name"
@@ -2072,7 +2076,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     end
 
     # Wait for "use exif" button to appear (not d-none)
-    assert_selector(".use_exif_btn:not(.d-none)", wait: 10)
+    assert_no_selector(".use_exif_btn.d-none", wait: 10)
 
     # For the first image, JavaScript auto-transfers EXIF data and disables
     # the button. If the button is disabled, skip clicking it.

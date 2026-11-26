@@ -95,7 +95,7 @@ module Observations
     end
 
     # The link is strict-loaded with a shallow polymorphic target, so
-    # load the observation with its matrix-box subtree for the edit
+    # load the observation with its grid-box subtree for the edit
     # card.
     def load_observation_for_edit
       @observation = Observation.strict_loading.

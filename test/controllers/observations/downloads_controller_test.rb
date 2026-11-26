@@ -4,6 +4,20 @@ require("test_helper")
 
 module Observations
   class DownloadsControllerTest < FunctionalTestCase
+    # A direct visit with a recognized filter param (here by_user:)
+    # must build a query from it, not silently reuse whatever's
+    # already stored in session from browsing the index unfiltered.
+    def test_new_with_filter_param_overrides_stored_query
+      Query.lookup_and_save(:Observation)
+
+      login(:rolf)
+      get(:new, params: { by_user: mary.id })
+
+      assert_response(:success)
+      query = @controller.instance_variable_get(:@query)
+      assert_equal([mary.id], query.params[:by_users])
+    end
+
     def test_new
       query = Query.lookup_and_save(:Observation, by_users: mary.id)
       assert(query.num_results > 1, "Test needs query with multiple results")

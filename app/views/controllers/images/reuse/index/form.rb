@@ -4,7 +4,7 @@
 # index. One `img_id` field. The "include other users' images" toggle
 # renders directly on `Index` (into the pagination row's sorter slot,
 # before `Index`'s `add_pagination` call); the surrounding image
-# matrix is also `Index`'s concern, and POSTs directly via
+# grid is also `Index`'s concern, and POSTs directly via
 # per-thumbnail links (`Components::InteractiveImage`).
 #
 # The `target` is the domain object whose images are being chosen for

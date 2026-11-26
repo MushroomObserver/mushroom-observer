@@ -73,7 +73,7 @@ class Components::Panel < Components::Base
   prop :collapse_target, _Nilable(String), default: nil
   prop :collapse_message, _Nilable(String), default: nil
   prop :expanded, _Nilable(_Boolean), default: nil
-  # Special for matrix boxes, for Bootstrap 3 "grid" effect via Stimulus:
+  # Special for grid boxes, for Bootstrap 3 "grid" effect via Stimulus:
   # Wrap thumbnail and body in .panel-sizing div, equalized per row.
   # Remove this when migrating to Bootstrap >= 4.
   prop :sizing, _Boolean, default: false
@@ -169,7 +169,7 @@ class Components::Panel < Components::Base
   end
 
   def render_thumbnail_and_body
-    # Special .panel-sizing div for matrix boxes, in Bootstrap 3 only
+    # Special .panel-sizing div for grid boxes, in Bootstrap 3 only
     if @sizing
       div(class: "panel-sizing") { render_middle_sections }
     else

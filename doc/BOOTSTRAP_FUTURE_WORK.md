@@ -10,7 +10,7 @@ Bootstrap 3 → 4 → 5 migration is planned for **Phase 3 onwards** of the comp
 
 - **Phase 3 (Weeks 8-11)**: Bootstrap 4 preparation + Phlex view migration
   - Week 8-9: Create BS4 compatibility layer in Phlex components
-  - Week 9: Use `mo/_map_theme_to_bootstrap4.scss` mapping
+  - Week 9: Use `mo/_map_theme_vars_to_bootstrap_vars.scss` mapping
   - Week 10-11: BS4 integration testing
 
 - **Phase 4 (Weeks 12-14)**: Bootstrap 4 deployment
@@ -45,7 +45,7 @@ The comprehensive plan uses a **Phlex-first approach** because:
 ## Available Resources
 
 ### Theme Mapping (Ready for Phase 3)
-- `app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss` - Complete BS4 variable mapping
+- `app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss` - Complete BS4 variable mapping
 - `app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss` - Current BS3 mapping
 
 ### Breaking Changes Reference (Ready for Phase 3)

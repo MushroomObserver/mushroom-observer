@@ -82,15 +82,15 @@ module Views::Controllers::Occurrences
       )
     end
 
-    def test_new_matrix_ul_stimulus_wiring
+    def test_new_grid_ul_stimulus_wiring
       html = render_new_form
       doc = Nokogiri::HTML(html)
 
-      # Matrix <ul> hosts the unified occurrence-form controller and
+      # Grid <ul> hosts the unified occurrence-form controller and
       # pins the "source" fallback strategy (revert primary to the
       # source obs when current primary's Include is unchecked).
       ul = doc.at_css("ul.row.list-unstyled")
-      assert(ul, "Expected matrix <ul>")
+      assert(ul, "Expected grid <ul>")
       assert_includes(ul["data-controller"].split(/\s+/),
                       "occurrence-form")
       assert_equal("source",
