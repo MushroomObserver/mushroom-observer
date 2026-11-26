@@ -18,8 +18,8 @@
 # (e.g. `AutocompleterField`) so the autocompleter widget is
 # reachable without wrapping the whole page in a Superform.
 #
-# Bootstrap-3 layout the shell owns:
-# - `.form-inline` on `<form>` (the right element per BS3 spec)
+# Layout the shell owns:
+# - `.form-inline` on `<form>`
 # - `.d-flex.gap-2.align-items-end` row inside, so siblings align
 #   to the input's baseline regardless of whether the field has a
 #   label-on-top stack (autocompleters do; plain inputs may)

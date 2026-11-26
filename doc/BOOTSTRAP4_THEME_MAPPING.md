@@ -6,7 +6,7 @@ This document describes how Mushroom Observer's standardized theme variables map
 
 ## File Location
 
-`app/assets/stylesheets/mo/_map_theme_to_bootstrap4.scss`
+`app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss`
 
 ## Purpose
 
