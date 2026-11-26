@@ -17,8 +17,7 @@ module Views::Controllers::Names::Synonyms
       )
 
       # The checkbox wrapper for @synonym1 should contain IN ORDER:
-      # checkbox, link, id badge. Checkbox and label are siblings
-      # inside the wrapper (custom-control markup), not nested.
+      # checkbox, link, id badge.
       doc = Nokogiri::HTML(html)
       wrapper = doc.css(".custom-control").find do |div|
         div.at_css("a[href='/names/#{@synonym1.id}']")

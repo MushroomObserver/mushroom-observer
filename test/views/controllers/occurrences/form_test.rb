@@ -181,8 +181,6 @@ module Views::Controllers::Occurrences
       assert(cb, "Expected include checkbox for recent obs")
       assert_equal("occurrence-form#includeToggled",
                    cb["data-action"])
-      # Checkbox and label are siblings (custom-control markup), not
-      # nested.
       label = cb.parent.at_css("label[for='#{cb["id"]}']")
       assert(label, "Expected a sibling label for the checkbox")
       assert_includes(label.text, "Include")
