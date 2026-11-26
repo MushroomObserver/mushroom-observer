@@ -40,7 +40,7 @@ class Views::Controllers::Names::Show::BestDescriptionPanel < Views::Base
   end
 
   def render_heading_links
-    [show_link, edit_link].compact.each { |link| render(link) }
+    InlineIconBlock(items: [show_link, edit_link].compact)
   end
 
   def show_link
