@@ -27,7 +27,7 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
           label_class: label_class,
           id: "#{selector}_form_#{observation_view.observation_id}",
           method: :put,
-          data: { controller: "reviewed-toggle" })
+          data: { reviewed_toggle_target: "form" })
   end
 
   def view_template
@@ -48,7 +48,8 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
   end
 
   def around_template
-    div(class: "d-inline",
+    div(class: class_names("d-inline", stretched_link_class),
+        data: outer_data,
         id: "#{@selector}_toggle_#{model.observation_id}") do
       super
     end
@@ -74,7 +75,23 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
   end
 
   def label_class_value
-    ["caption-reviewed-link", @label_class].compact_blank.join(" ")
+    classes = ["caption-reviewed-link", @label_class]
+    classes.compact_blank.join(" ").split.reject { |c| c == "stretched-link" }.
+      join(" ")
+  end
+
+  def stretched?
+    @label_class.split.include?("stretched-link")
+  end
+
+  def stretched_link_class
+    "stretched-link" if stretched?
+  end
+
+  def outer_data
+    data = { controller: "reviewed-toggle" }
+    data[:action] = "click->reviewed-toggle#toggleCheckbox" if stretched?
+    data
   end
 
   def checkbox_data

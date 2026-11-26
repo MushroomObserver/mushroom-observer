@@ -56,7 +56,8 @@ class ObservationFragmentMarkAsReviewedToggleTest < ComponentTestCase
     html = render_component(observation_view: build_obs_view(444))
 
     assert_includes(html, "data-turbo=\"true\"")
-    assert_html(html, "form[data-controller~='reviewed-toggle']")
+    assert_html(html, "[data-controller~='reviewed-toggle']")
+    assert_includes(html, "data-reviewed-toggle-target=\"form\"")
     assert_includes(html, "data-reviewed-toggle-target=\"toggle\"")
     assert_includes(html, "data-action=\"reviewed-toggle#submitForm\"")
   end
@@ -90,6 +91,21 @@ class ObservationFragmentMarkAsReviewedToggleTest < ComponentTestCase
     assert_includes(html, "custom-class")
     assert_includes(html, "Marked as reviewed")
     assert_includes(html, "checked")
+  end
+
+  def test_label_has_no_click_action
+    html = render_component(observation_view: build_obs_view(321))
+
+    assert_no_html(html, "label[data-action]")
+  end
+
+  def test_stretched_usage_keeps_outer_click_action
+    html = render_component(observation_view: build_obs_view(654),
+                            label_class: "stretched-link")
+
+    assert_html(
+      html, "[data-action='click->reviewed-toggle#toggleCheckbox']"
+    )
   end
 
   private
