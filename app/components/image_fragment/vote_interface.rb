@@ -10,7 +10,7 @@
 # - Vote buttons for all vote values
 # - Current user's vote display
 #
-# @example Thumbnail hover overlay (default -- matrix box, InteractiveImage)
+# @example Thumbnail hover overlay (default -- grid box, InteractiveImage)
 #   ImageFragment(type: :vote_interface, user: @user, image: @image,
 #                 votes: true)
 #
@@ -27,7 +27,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
   prop :image, ::Image
   prop :votes, _Boolean, default: true
   # Which surface this renders on -- governs styling class, tooltip
-  # container, and id prefixing. `:matrix`/`:carousel` are both
+  # container, and id prefixing. `:grid`/`:carousel` are both
   # overlay-styled and point tooltips up; only the container differs
   # -- `:carousel` targets `.carousel-caption` instead of
   # `.vote-section`, since a carousel's `.vote-section` is narrower
@@ -35,14 +35,14 @@ class Components::ImageFragment::VoteInterface < Components::Base
   # `.vote-section-lightbox`, keeps the downward tooltip, and is the
   # only context whose ids get `lightbox_`-prefixed, since a second
   # live copy can coexist in the DOM there.
-  prop :context, _Union(:matrix, :carousel, :lightbox), default: :matrix
+  prop :context, _Union(:grid, :carousel, :lightbox), default: :grid
 
   # The root element's own id -- also what a lazy-loading Turbo Frame
   # wrapper (see #4895) must be given so Turbo can find and swap this
   # component's response out of it. Single source of truth for both
   # `#vote_html_id("image_vote")` below and any external caller that
   # needs the id before the component itself has rendered.
-  def self.frame_id(image_id:, context: :matrix)
+  def self.frame_id(image_id:, context: :grid)
     prefix = context == :lightbox ? "lightbox_" : ""
     "#{prefix}image_vote_#{image_id}"
   end
@@ -63,7 +63,7 @@ class Components::ImageFragment::VoteInterface < Components::Base
   def section_classes
     class_names(
       case @context
-      when :matrix, :carousel then "vote-section"
+      when :grid, :carousel then "vote-section"
       when :lightbox then "vote-section-lightbox"
       end,
       "require-user"

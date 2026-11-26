@@ -3,7 +3,7 @@
 module Views::Controllers::Contributors
   # Paginated contributors index. Page chrome (title, sorter,
   # context-nav, pagination) + a one-row collapsible Legend +
-  # a Grid of user boxes.
+  # a Grid of user grid-boxes.
   class Index < Views::FullPageBase
     prop :query, ::Query
     prop :pagination_data, ::PaginationData

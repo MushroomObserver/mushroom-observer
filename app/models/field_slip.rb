@@ -90,10 +90,10 @@ class FieldSlip < AbstractModel
   }
 
   # Eager-load trees for `FieldSlipPanel` / `Components::Grid::Box`.
-  # Reuses `Observation.matrix_box_includes` so the obs subtree
+  # Reuses `Observation.grid_box_includes` so the obs subtree
   # matches observations#index and collection_numbers#show.
   def self.show_includes_tree
-    [{ occurrence: { observations: Observation.matrix_box_includes } }]
+    [{ occurrence: { observations: Observation.grid_box_includes } }]
   end
 
   # Index style: the page renders one panel per slip and also
@@ -101,7 +101,7 @@ class FieldSlip < AbstractModel
   # and `:user` lines need those preloaded too.
   def self.index_includes_tree
     [{ occurrence: [:primary_observation,
-                    { observations: Observation.matrix_box_includes }] },
+                    { observations: Observation.grid_box_includes }] },
      :project, :user]
   end
 

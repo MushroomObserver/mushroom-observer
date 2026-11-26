@@ -24,10 +24,6 @@ class Inat
   class ReflectionBatchResyncer
     include Inat::Constants
 
-    # iNat returns at most PAGE_SIZE results for one id-list query, so a
-    # larger chunk would silently drop the overflow.
-    CHUNK_SIZE = ObsFetcher::PAGE_SIZE
-
     # Messages for reflections whose iNat "Mushroom Observer URL" back-link
     # points at the wrong MO obs (see #check_back_link); the job sends
     # these to #alerts.
@@ -65,7 +61,7 @@ class Inat
       counts = Hash.new(0)
       # Stream in DB-sized batches rather than loading every reflection into
       # memory at once -- the population can reach hundreds of thousands.
-      reflections.in_batches(of: CHUNK_SIZE).each_with_index do |batch, i|
+      reflections.in_batches(of: MAX_PER_PAGE).each_with_index do |batch, i|
         # Pace chunks to iNat's ~1 req/sec guidance -- the fetcher paces
         # only its own paginating callers, not one call per chunk here.
         # No wait before the first chunk.

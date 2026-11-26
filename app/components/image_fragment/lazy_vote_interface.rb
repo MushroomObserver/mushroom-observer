@@ -9,13 +9,13 @@
 # happened to write the cache entry's vote state into the shared HTML
 # for every subsequent viewer. `loading: "lazy"` defers the fetch
 # until the frame actually scrolls into view, so an index page with
-# many matrix boxes doesn't fire a request per box on load. See #4895.
+# many grid boxes doesn't fire a request per box on load. See #4895.
 #
 # @example
-#   ImageFragment(type: :lazy_vote_interface, image: @image, context: :matrix)
+#   ImageFragment(type: :lazy_vote_interface, image: @image, context: :grid)
 class Components::ImageFragment::LazyVoteInterface < Components::Base
   prop :image, ::Image
-  prop :context, Symbol, default: :matrix
+  prop :context, Symbol, default: :grid
 
   def view_template
     turbo_frame_tag(

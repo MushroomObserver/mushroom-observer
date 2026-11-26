@@ -12,6 +12,12 @@ class Inat
   # A name that resolves to no iNat taxon, or a location to no iNat
   # place, is reported rather than guessed at: the box still constrains
   # the search, and an admin can be told what did not resolve.
+  #
+  # A project can have hundreds of target names, more than iNat's rate
+  # limit allows at once. So pages, imports and alerts read only saved
+  # lookups, and `InatTargetLookupJob` gets them (`look_up: true`),
+  # pacing itself and stopping when iNat refuses one. A target with no
+  # saved lookup is neither searched for nor reported as unknown.
   class ConstraintMapper
     include Inat::Constants
     include Inat::JsonFetch
@@ -21,9 +27,11 @@ class Inat
     # iNat's maximum for place autocomplete.
     PLACE_CANDIDATES = 20
 
-    # Part of the place cache key: a miss is cached too, so changing
-    # how places match needs a new version to look them up again.
-    PLACE_MATCHING_VERSION = 3
+    # Part of the cache keys: a miss is cached too, so changing how
+    # targets match, or how a miss is stored, needs a new version to
+    # look them up again.
+    TAXON_MATCHING_VERSION = 3
+    PLACE_MATCHING_VERSION = 4
 
     # iNat writes an infraspecific name without the rank marker MO
     # uses: MO's "Hygrophorus nemoreus var. raphaneus" is its
@@ -38,13 +46,56 @@ class Inat
     # locations are written that way.
     COUNTY_ABBREVIATION = /\bCo\.\z/
 
-    def initialize(project)
+    # look_up: send iNat a lookup for each target with no saved one.
+    # pace: seconds to wait between lookups.
+    # The block is called after each lookup iNat answered.
+    def initialize(project, look_up: false, pace: 0, &on_answer)
       @project = project
+      @look_up = look_up
+      @pace = pace
+      @on_answer = on_answer
       @unresolved_names = []
       @unresolved_locations = []
+      @inat_failed = false
+      @lookups = 0
+      @unchecked_count = 0
+      @new_answers = 0
     end
 
-    attr_reader :unresolved_names, :unresolved_locations
+    # new_answers is how many lookups iNat answered for this mapper.
+    attr_reader :unresolved_names, :unresolved_locations, :new_answers
+
+    # Resolves every target, so the counts below cover them all.
+    def look_up_targets
+      target_taxa
+      target_place_ids
+      self
+    end
+
+    # How many targets have no saved lookup.
+    def unchecked_count
+      look_up_targets
+      @unchecked_count
+    end
+
+    # False when some targets have no saved lookup, so the taxa and
+    # places are only part of what the project targets.
+    def complete?
+      unchecked_count.zero?
+    end
+
+    # True when iNat refused a lookup, so the rest were not sent.
+    def refused?
+      @inat_failed
+    end
+
+    def target_count
+      @project.target_names.size + @project.target_locations.size
+    end
+
+    def looked_up_count
+      target_count - unchecked_count
+    end
 
     # The iNat taxa the project's target names resolve to. Empty when
     # none of them do -- which is different from the search's
@@ -85,8 +136,15 @@ class Inat
     end
 
     def place_id_param
-      ids = @project.target_locations.filter_map { |loc| place_id_for(loc) }
+      ids = target_place_ids
       ids.any? ? ids.join(",") : nil
+    end
+
+    # Memoized like target_taxa, so a second call to params neither
+    # spends more lookups nor counts a target twice.
+    def target_place_ids
+      @target_place_ids ||=
+        @project.target_locations.filter_map { |loc| place_id_for(loc) }
     end
 
     def box_params
@@ -105,12 +163,46 @@ class Inat
     # Caloboletus peckii is Butyriboletus peckii there -- so the whole
     # synonym group is tried before giving up.
     def taxon_id_for(name)
-      id = Rails.cache.fetch(["inat_taxon", name.id, name.updated_at],
-                             expires_in: CACHE_TTL) do
-        text_names_for(name).lazy.filter_map { |text| search_taxon(text) }.first
+      id = saved_answer(["inat_taxon", TAXON_MATCHING_VERSION,
+                         name.id, name.updated_at]) do
+        first_answer(text_names_for(name)) { |text| search_taxon(text) }
       end
-      @unresolved_names << name.text_name unless id
+      record_outcome(id, @unresolved_names, name.text_name)
+    end
+
+    # Saved as the iNat id, or false when iNat answered with no match.
+    # nil when there is no saved answer and none was looked up.
+    def saved_answer(key)
+      return Rails.cache.read(key) unless @look_up
+
+      asked = false
+      id = Rails.cache.fetch(key, expires_in: CACHE_TTL, skip_nil: true) do
+        asked = true
+        yield
+      end
+      note_answer if asked && !id.nil?
       id
+    end
+
+    def note_answer
+      @new_answers += 1
+      @on_answer&.call(self)
+    end
+
+    def record_outcome(id, unresolved, label)
+      unresolved << label if id == false
+      @unchecked_count += 1 if id.nil?
+      id || nil
+    end
+
+    # The first match the block finds, false when every call answered
+    # with none, or nil when iNat failed before a match was found.
+    def first_answer(candidates)
+      candidates.each do |candidate|
+        answer = yield(candidate)
+        return answer unless answer == false
+      end
+      false
     end
 
     def text_names_for(name)
@@ -123,31 +215,47 @@ class Inat
     end
 
     def search_taxon(text_name)
-      results = fetch_json("taxa?q=#{escape(text_name)}&per_page=5")&.
-                dig("results") || []
-      results.find { |taxon| taxon["name"].to_s.casecmp?(text_name) }&.
-        dig("id")
+      results = inat_results("taxa?q=#{escape(text_name)}&per_page=5")
+      return nil unless results
+
+      results.find do |taxon|
+        taxon["name"].to_s.casecmp?(text_name) && importable?(taxon)
+      end&.dig("id") || false
+    end
+
+    # Some fungal names are also the names of plants or animals, and an
+    # import drops a taxon list holding any taxon outside fungi and
+    # slime molds.
+    def importable?(taxon)
+      IMPORTABLE_TAXON_IDS.intersect?(taxon["ancestor_ids"] || [])
+    end
+
+    # The results iNat sent, or nil when it was not asked or did not
+    # answer.
+    def inat_results(path)
+      return nil if @inat_failed
+
+      sleep(@pace) if @pace.positive? && @lookups.positive?
+      @lookups += 1
+      results = fetch_json(path)&.dig("results")
+      @inat_failed = true unless results
+      results
     end
 
     # MO writes a location from the inside out, so its first segment is
     # what iNat calls the place: "Barnstable Co., Massachusetts, USA"
     # searches for "Barnstable Co.".
     def place_id_for(location)
-      id = Rails.cache.fetch(["inat_place", PLACE_MATCHING_VERSION,
-                              location.id, location.updated_at],
-                             expires_in: CACHE_TTL) do
+      id = saved_answer(["inat_place", PLACE_MATCHING_VERSION,
+                         location.id, location.updated_at]) do
         search_place(location)
       end
-      @unresolved_locations << location.name unless id
-      id
+      record_outcome(id, @unresolved_locations, location.name)
     end
 
     def search_place(location)
       queries = place_queries(location)
-      return nil if queries.empty?
-
-      queries.lazy.
-        filter_map { |query| matching_place(query, queries, location) }.first
+      first_answer(queries) { |query| matching_place(query, queries, location) }
     end
 
     def place_queries(location)
@@ -161,11 +269,18 @@ class Inat
     # tried, so a fragment match -- "Washington Monument" for
     # "Washington DC" -- is no answer.
     def matching_place(query, spellings, location)
-      place_candidates(query).find do |place|
-        place_names(place).any? do |place_name|
-          spellings.any? { |name| same_place_name?(place_name, name) }
-        end && overlaps?(place, location)
-      end&.dig("id")
+      candidates = place_candidates(query)
+      return nil unless candidates
+
+      candidates.find do |place|
+        named?(place, spellings) && overlaps?(place, location)
+      end&.dig("id") || false
+    end
+
+    def named?(place, spellings)
+      place_names(place).any? do |place_name|
+        spellings.any? { |name| same_place_name?(place_name, name) }
+      end
     end
 
     # iNat spells a place with its diacritics where MO's Location
@@ -196,8 +311,8 @@ class Inat
     # A common name fills the default ten results with places
     # elsewhere: Adams County, PA is tenth for "Adams County".
     def place_candidates(query)
-      fetch_json("places/autocomplete?q=#{escape(query)}" \
-                 "&per_page=#{PLACE_CANDIDATES}")&.dig("results") || []
+      inat_results("places/autocomplete?q=#{escape(query)}" \
+                   "&per_page=#{PLACE_CANDIDATES}")
     end
 
     # A same-named place somewhere else is worse than no place at all:

@@ -32,7 +32,7 @@ module Views::Controllers::Observations::Namings::Votes
     #   used by the controller's `case params[:context]` to decide
     #   which Turbo Stream response to send back. No `else` branch
     #   there, so a value other than these two silently renders
-    #   nothing; both real callers (Show::Namings::Row, Grid::Box)
+    #   nothing; both callers (Show::Namings::Row, Grid::Box)
     #   always supply one explicitly.
     prop :context, _Union("namings_table", "grid_box")
 

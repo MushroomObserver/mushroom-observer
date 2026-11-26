@@ -38,5 +38,23 @@ module VisualGroups
                       status: "true" })
       assert_equal(count + 1, VisualGroupImage.count)
     end
+
+    def test_update_with_invalid_visual_group_id_is_not_found
+      login
+      image = images(:agaricus_campestris_image)
+      patch(:update,
+            params: { visual_group_id: 999_999_999, id: image.id,
+                      status: "true" })
+      assert_response(:not_found)
+    end
+
+    def test_update_with_invalid_image_id_is_not_found
+      login
+      visual_group = visual_groups(:visual_group_one)
+      patch(:update,
+            params: { visual_group_id: visual_group.id, id: 999_999_999,
+                      status: "true" })
+      assert_response(:not_found)
+    end
   end
 end

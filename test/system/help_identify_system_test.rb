@@ -86,9 +86,9 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
   end
 
   # Test that marking an observation as reviewed in the lightbox syncs to the
-  # matrix box, and vice versa. This tests the Turbo Stream action and the
+  # grid box, and vice versa. This tests the Turbo Stream action and the
   # lightgallery controller's caption update functionality.
-  def test_mark_as_reviewed_syncs_between_lightbox_and_matrix_box
+  def test_mark_as_reviewed_syncs_between_lightbox_and_grid_box
     rolf = users("rolf")
     login!(rolf)
 
@@ -122,12 +122,12 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
       find(".caption-reviewed-link").click
     end
 
-    # Verify the matrix box checkbox is now checked (synced via Turbo Stream)
+    # Verify the grid box checkbox is now checked (synced via Turbo Stream)
     within(box_with_image) do
       assert_checked_field("box_reviewed_#{obs_id}_lb", visible: :all, wait: 5)
     end
 
-    # Unmark in the lightbox, verify it syncs to matrix box
+    # Unmark in the lightbox, verify it syncs to grid box
     within(".lg-sub-html") do
       find(".caption-reviewed-link").click
     end
@@ -143,7 +143,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     end
     assert_no_selector(".lg-container")
 
-    # Mark in the matrix box
+    # Mark in the grid box
     arm_submit_end_listener
     find("#box_reviewed_toggle_#{obs_id}").click
     wait_for_submit_end
@@ -162,8 +162,8 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
       assert_checked_field("caption_reviewed_#{obs_id}", visible: :all, wait: 5)
     end
 
-    # Unmark in the matrix box, verify lightbox syncs -- the open
-    # lightbox covers the matrix box, so a screen-position click can't
+    # Unmark in the grid box, verify lightbox syncs -- the open
+    # lightbox covers the grid box, so a screen-position click can't
     # reach it; invoke the toggle directly instead.
     arm_submit_end_listener
     execute_script(<<~JS)

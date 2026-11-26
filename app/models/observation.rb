@@ -295,7 +295,7 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     "#{MO.http_domain}/obs/#{id}"
   end
 
-  def self.matrix_box_includes
+  def self.grid_box_includes
     [{ thumb_image: [:image_votes, :license, :projects, :user] },
      :collector_user,
      { external_links: :external_site }, :location, :name,

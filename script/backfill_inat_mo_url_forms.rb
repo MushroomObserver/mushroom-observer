@@ -48,7 +48,7 @@ require_relative("resync_diff")
 class BackfillInatMoUrlForms
   include Inat::Constants
 
-  BATCH = Inat::ObsFetcher::PAGE_SIZE
+  BATCH = Inat::Constants::MAX_PER_PAGE
   # Self-imposed throttle: stay well under iNat's 100 req/min cap.
   WRITE_SLEEP = 1.0
   BATCH_SLEEP = Inat::ObsFetcher::INTER_PAGE_SLEEP

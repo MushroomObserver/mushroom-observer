@@ -67,6 +67,8 @@ class Inat::ProjectSearchTest < UnitTestCase
   def test_targets_that_resolve_are_reported_as_resolved
     rare = projects(:rare_fungi_project)
     stub_resolved(rare)
+    stub_no_places
+    save_inat_lookups(rare)
 
     assert(Inat::ProjectSearch.new(
       ProjectExternalSite.new(project: rare, external_site: @site,
@@ -80,6 +82,8 @@ class Inat::ProjectSearchTest < UnitTestCase
     rare = projects(:rare_fungi_project)
     stub_request(:get, inat_api_matcher("taxa")).
       to_return(status: 200, body: { results: [] }.to_json)
+    stub_no_places
+    save_inat_lookups(rare)
     search = Inat::ProjectSearch.new(
       ProjectExternalSite.new(project: rare, external_site: @site,
                               use_constraints: true)
@@ -90,13 +94,45 @@ class Inat::ProjectSearchTest < UnitTestCase
                  search.unresolved_names.sort)
   end
 
+  def stub_no_places
+    stub_request(:get, inat_api_matcher("places")).
+      to_return(status: 200, body: { results: [] }.to_json)
+  end
+
+  # The search reads only saved lookups, so a project whose targets
+  # have none is not complete.
+  def test_targets_with_no_saved_lookup_are_not_complete
+    rare = projects(:rare_fungi_project)
+    search = Inat::ProjectSearch.new(
+      ProjectExternalSite.new(project: rare, external_site: @site,
+                              use_constraints: true)
+    )
+
+    assert_not(search.complete?, "No target has a saved lookup")
+    assert_equal(0, search.targets_looked_up, "No target has a saved lookup")
+    assert_equal(rare.target_names.size + rare.target_locations.size,
+                 search.targets_to_look_up, "Every target should be counted")
+  end
+
+  def test_unfollowed_constraints_need_no_lookups
+    search = Inat::ProjectSearch.new(
+      ProjectExternalSite.new(project: projects(:rare_fungi_project),
+                              external_site: @site,
+                              remote_project_id: "102213")
+    )
+
+    assert(search.complete?, "Unfollowed constraints need no lookups")
+    assert_equal(0, search.targets_to_look_up,
+                 "Unfollowed constraints have no targets to look up")
+  end
+
   def stub_resolved(project)
     project.target_names.each_with_index do |name, i|
       stub_request(:get, inat_api_matcher("taxa")).
         with(query: hash_including("q" => name.text_name)).
         to_return(status: 200,
-                  body: { results: [{ "id" => 9001 + i,
-                                      "name" => name.text_name }] }.to_json)
+                  body: { results: [fungal_taxon(9001 + i,
+                                                 name.text_name)] }.to_json)
     end
   end
 end

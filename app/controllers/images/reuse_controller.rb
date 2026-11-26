@@ -21,7 +21,7 @@ module Images
 
     def index
       return unless (@target = find_reuse_target!)
-      return unless check_reuse_permission?
+      return unless check_target_permission?
       return redirect_reflection_to_companion if reflection_target?
 
       force_index_filter_params
@@ -31,7 +31,7 @@ module Images
     # Per-thumbnail links and the id-entry form POST here.
     def update
       return unless (@target = find_reuse_target!)
-      return unless check_attach_permission?
+      return unless check_target_permission?
       return unless (@target = attach_target)
 
       image = Image.safe_find(params[:id])
@@ -75,21 +75,25 @@ module Images
     def find_reuse_target!
       return @user if params[:target_type] == "User"
 
-      find_or_goto_index(TARGET_MODELS.fetch(params[:target_type]),
-                         params[:target_id].to_s)
+      model = TARGET_MODELS[params[:target_type]]
+      unless model
+        head(:not_found)
+        return nil
+      end
+
+      find_or_goto_index(model, params[:target_id].to_s)
     end
 
-    def check_reuse_permission?
-      return true unless params[:target_type] == "Observation"
-
-      check_observation_permission?
-    end
-
-    def check_attach_permission?
+    # Observation: must have edit permission. User: target_id must
+    # match the current user's id (`find_reuse_target!` always
+    # returns `@user` for the User case, regardless of target_id --
+    # this is the check that catches a target_id naming someone
+    # else). GlossaryTerm: any logged-in user may edit.
+    def check_target_permission?
       case params[:target_type]
       when "Observation" then check_observation_permission?
       when "User" then check_profile_permission?
-      else true # GlossaryTerm: any logged-in user may edit
+      else true
       end
     end
 

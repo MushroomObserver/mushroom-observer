@@ -83,7 +83,7 @@ class Components::Grid < Components::Base
   # Project context — passed through to each Grid::Box so a project admin
   # sees an Exclude button on the observations grid filtered by project.
   prop :project, _Nilable(Project), default: nil
-  # Passed through to each MatrixBox -- see the prop comment there.
+  # Passed through to each Grid::Box -- see the prop comment there.
   prop :suppress_occurrence_link, _Boolean, default: false
 
   # BS4's `row-cols-{bp}-{n}` utilities size every direct child of

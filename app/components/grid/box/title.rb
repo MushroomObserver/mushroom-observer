@@ -1,37 +1,15 @@
 # frozen_string_literal: true
 
-# Grid box title component.
+# Grid box title component. Renders the title span for a grid box
+# item -- observations/names default to regular weight (already
+# textile-bold/italic), other types default to bold. Pass `bold:`
+# to override per instance -- e.g. an image box, whose title comes
+# from whichever subject it's attached to, needs a per-image
+# decision rather than the type-based default.
 #
-# Renders the title span for a grid box item. The title styling varies
-# based on the object type - observations and names get regular weight
-# (their text is already textile-bold/italic), while other types get
-# bold weight. Pass `bold:` explicitly to override that type-based
-# default -- e.g. an image box, whose title text comes from whichever
-# subjects it's attached to (an already-bold observation name, or a
-# plain glossary_term/user name) and so needs a per-image decision,
-# not a per-type one.
-#
-# @example With observation
-#   render Components::Grid::Box::Title.new(
-#     id: obs.id,
-#     name: obs.format_name,
-#     type: :observation
-#   )
-#
-# @example With user
-#   render Components::Grid::Box::Title.new(
-#     id: user.id,
-#     name: user.unique_text_name,
-#     type: :user
-#   )
-#
-# @example With an explicit bold override
-#   render Components::Grid::Box::Title.new(
-#     id: image.id,
-#     name: image.format_name,
-#     type: :image,
-#     bold: image.observations.empty?
-#   )
+# @example
+#   render Grid::Box::Title.new(id: image.id, name: image.format_name,
+#                               type: :image, bold: false)
 class Components::Grid::Box::Title < Components::Base
   prop :id, Integer
   prop :name, String

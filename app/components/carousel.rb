@@ -41,6 +41,12 @@ class Components::Carousel < Components::Base
   prop :show_controls, _Boolean, default: true
   prop :controls_hidden, _Boolean, default: false
   prop :show_indicators, _Boolean, default: true
+  # Wraps the controls strip in a div with this class.
+  # `Form::UploadGallery` puts the prev/next arrows inside a
+  # `.carousel-control-wrap.row` outside `.carousel-inner`; default
+  # nil renders the controls inline as `ImageGallery` and the
+  # grid-box caller do.
+  prop :controls_wrap_class, _Nilable(::String), default: nil
   # Arbitrary `data-*` attributes merged onto the outer `<div>` (after
   # the always-emitted `data-ride="false"` / `data-interval="false"` /
   # `data-wrap="false"`).
@@ -156,6 +162,14 @@ class Components::Carousel < Components::Base
   end
 
   def render_controls
+    if @controls_wrap_class
+      Row(class: @controls_wrap_class) { render_controls_inner }
+    else
+      render_controls_inner
+    end
+  end
+
+  def render_controls_inner
     render(Components::Carousel::Controls.new(
              carousel_id: @carousel_id, hidden: @controls_hidden
            ))

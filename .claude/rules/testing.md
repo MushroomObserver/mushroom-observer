@@ -41,6 +41,31 @@ bin/rails test test/models/observation_test.rb::ObservationTest#test_name -v
 bin/rails test:system test/system/help_identify_system_test.rb
 ```
 
+## Who Runs Tests
+
+- **One test file in question:** run it directly (`bin/rails test
+  path/to/file_test.rb`), once. Don't ask first, and don't re-run it
+  hoping for a different result — if it's red, diagnose and fix, then
+  run it again exactly once to confirm.
+- **More than one test file in question** (a directory, a full suite,
+  `test:controllers`/`test:system`, or several files from one change):
+  hand the list to the user and let them run it. Don't work through
+  the list file-by-file either — that's the same thing with extra
+  steps.
+- **The user states ownership** ("I run tests", "I'll run tests"):
+  this is a stronger, explicit override that stops *every* test run
+  by Claude — including single files — for the rest of that work
+  episode, regardless of scope. It survives context compaction. Only
+  resume running tests directly once a new task begins without the
+  user reasserting ownership, or the user explicitly asks for a run.
+- **If a reaction to a test run is ambiguous** (unclear whether the
+  complaint is "you ran one you shouldn't have" vs. "you asked me to
+  run one you could've just run yourself"), ask what was wrong rather
+  than assuming the broadest restriction and silently adopting it —
+  overcorrecting (e.g. refusing to run anything for the rest of the
+  session when the user never asked for that) creates the same
+  back-and-forth as undercorrecting.
+
 ## Finding Records After Creation
 
 **Never use `Model.last` (or `Model.order(...).last`) to find a record just

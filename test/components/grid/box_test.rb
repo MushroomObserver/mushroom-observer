@@ -13,8 +13,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_includes(html, "grid-box")
-    assert_includes(html, "box_#{obs.id}")
+    assert_html(html, "#box_#{obs.id}.grid-box")
     # Should include the thumbnail image with the correct CSS class
     assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
@@ -64,8 +63,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    assert_includes(html, "grid-box")
-    assert_includes(html, "box_#{obs.id}")
+    assert_html(html, "#box_#{obs.id}.grid-box")
   end
 
   def test_renders_image_object
@@ -73,9 +71,8 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: image)
     html = render(component)
 
-    assert_includes(html, "grid-box")
-    assert_includes(html, "box_#{image.id}")
-    assert_includes(html, "image_#{image.id}")
+    assert_html(html, "#box_#{image.id}.grid-box")
+    assert_html(html, "img.image_#{image.id}")
     # format_name, not unique_format_name -- the id badge beside it
     # already shows the id.
     assert_html(html, ".log-name", text: image.format_name.t.as_displayed)
@@ -94,8 +91,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: user)
     html = render(component)
 
-    assert_includes(html, "grid-box")
-    assert_includes(html, "box_#{user.id}")
+    assert_html(html, "#box_#{user.id}.grid-box")
   end
 
   def test_renders_rss_log_with_observation_target
@@ -103,7 +99,17 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: rss_log)
     html = render(component)
 
-    assert_includes(html, "grid-box")
+    assert_html(html, "#box_#{rss_log.observation_id}.grid-box")
+  end
+
+  def test_rss_log_observation_names_collector
+    rss_log = RssLog.where.not(observation_id: nil).first
+    rss_log.observation.assign_attributes(collector: "Jane Forager",
+                                          collector_user_id: nil)
+    html = render(Components::Grid::Box.new(user: @user, object: rss_log))
+
+    assert_html(html, ".log-who", text: "Jane Forager")
+    assert_no_html(html, ".log-who a")
   end
 
   def test_renders_with_custom_columns
@@ -115,7 +121,7 @@ class Components::Grid::BoxTest < ComponentTestCase
     )
     html = render(component)
 
-    assert_includes(html, "col-12 col-sm-6")
+    assert_html(html, ".grid-box.col-12.col-sm-6")
   end
 
   def test_renders_with_caller_class
@@ -328,8 +334,8 @@ class Components::Grid::BoxTest < ComponentTestCase
     html = render(component)
 
     # Should not have identify UI (vote container or propose naming link)
-    assert_not_includes(html, "vote-select-container")
-    assert_not_includes(html, "context=grid_box")
+    assert_no_html(html, ".vote-select-container")
+    assert_no_html(html, "a[href*='context=grid_box']")
     # Should not have identify footer
     assert_not_includes(html, "card-active")
     assert_not_includes(html, "box_reviewed")

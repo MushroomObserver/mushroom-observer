@@ -6,7 +6,7 @@ module Views::Controllers::FieldSlips
   # When the field slip has no code yet, renders a minimal "enter
   # code" form that GETs to /field_slips/new. Otherwise renders the
   # full editing form with all field-slip attributes, notes, and
-  # (depending on action / context) one of the two observation-matrix
+  # (depending on action / context) one of the two observation-grid
   # sections.
   class Form < ::Components::ApplicationForm
     prop :species_list, _Nilable(String), default: nil
@@ -68,8 +68,8 @@ module Views::Controllers::FieldSlips
     def render_main_form
       render(Components::Form::Errors.new(model: model))
       # Width-cap the texty fields to a comfortable reading width
-      # (`.container-text`), but keep the observation matrix full-
-      # width. Both must live inside the same `<form>` so the matrix
+      # (`.container-text`), but keep the observation grid full-
+      # width. Both must live inside the same `<form>` so the grid
       # submits with the rest — hence the in-form wrap rather than a
       # page-level `container_class(:text)`.
       #
@@ -196,7 +196,7 @@ module Views::Controllers::FieldSlips
       submit(:field_slip_create_obs.t, class: "my-3")
     end
 
-    # --- Observation matrix section ---
+    # --- Observation grid section ---
 
     def render_observations_section
       if new_record? && @recent_observations.any?
@@ -208,7 +208,7 @@ module Views::Controllers::FieldSlips
       end
     end
 
-    # New action: one matrix of recent obs, all unchecked, plus
+    # New action: one grid of recent obs, all unchecked, plus
     # "Save with Selected Observations" submit.
     def render_new_action_matrix
       div(class: "mt-5") do
@@ -221,7 +221,7 @@ module Views::Controllers::FieldSlips
       end
     end
 
-    # Edit action: a matrix of current obs (checked) and a matrix of
+    # Edit action: a grid of current obs (checked) and a grid of
     # candidate obs (unchecked).
     def render_edit_action_matrices
       div(class: "mt-5", data: { controller: "field-slip-form" }) do

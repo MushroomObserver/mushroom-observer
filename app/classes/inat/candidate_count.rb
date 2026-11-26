@@ -22,13 +22,21 @@ class Inat
 
     CACHE_TTL = 10.minutes
 
+    # Candidate names and locations to be looked up in iNat
     # total is nil when iNat could not answer, so the page can show
     # nothing rather than a wrong number. The unresolved lists are what
     # the constraints asked for and iNat does not know: left out of the
     # search rather than guessed at, and named on the page so an admin
-    # can see why a number is bigger than the project means.
+    # can see why a number is bigger than the project means. looked_up
+    # of targets have a saved iNat lookup; until all do there is no
+    # total, since it would count a different search.
     Candidates = Data.define(:configured, :total, :unresolved_names,
-                             :unresolved_locations)
+                             :unresolved_locations, :looked_up,
+                             :targets) do
+      def incomplete?
+        looked_up < targets
+      end
+    end
 
     def self.for(project_site:)
       new(project_site).candidates
@@ -48,14 +56,16 @@ class Inat
       total = count
       Candidates.new(configured: true, total: total,
                      unresolved_names: @mapper.unresolved_names,
-                     unresolved_locations: @mapper.unresolved_locations)
+                     unresolved_locations: @mapper.unresolved_locations,
+                     looked_up: @search.targets_looked_up,
+                     targets: @search.targets_to_look_up)
     end
 
     private
 
     def unconfigured
       Candidates.new(configured: false, total: nil, unresolved_names: [],
-                     unresolved_locations: [])
+                     unresolved_locations: [], looked_up: 0, targets: 0)
     end
 
     def search_params = @search.params
@@ -63,8 +73,10 @@ class Inat
     def count
       query = search_params.merge(BASE_FILTER_PARAMS).
               merge(only_id: true, per_page: 1).to_query
+      return nil unless @search.complete?
+
       Rails.cache.fetch(["inat_candidate_count", query],
-                        expires_in: CACHE_TTL) do
+                        expires_in: CACHE_TTL, skip_nil: true) do
         fetch_json("observations?#{query}")&.dig("total_results")
       end
     end

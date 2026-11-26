@@ -1,34 +1,12 @@
 # frozen_string_literal: true
 
-# One item in a Grid -- a wrapper for a Panel component.
-#
-# The `<li>` and the Panel's `<div class="card h-100">` stay two
-# separate elements deliberately: `height: 100%` on the card needs a
+# One item in a Grid -- wraps a Panel. The `<li>` and the Panel's
+# `<div class="card h-100">` stay separate: `height: 100%` needs a
 # distinct parent (the stretched `<li>`) to resolve against -- see
-# `Components::Panel#view_template`'s comment.
+# `Components::Panel#view_template`.
 #
-# This component can be used in two ways:
-# 1. With an object - calculates everything it needs from the @object and
-#    renders a standard layout for Image, Observation, RssLog, or User
-# 2. With a block - renders a simple <li> wrapper for custom content
-#
-# @example Standard object rendering
-#   render Components::Grid::Box.new(user: @user, object: @observation)
-#
-# @example With custom options
-#   render Components::Grid::Box.new(
-#     user: @user,
-#     object: @observation,
-#     identify: true,
-#     columns: Components::Column.classes_for(xs: 12)
-#   )
-#
-# @example Custom block content
-#   render Components::Grid::Box.new(id: 123, class: "text-center") do
-#     Panel do |panel|
-#       panel.with_body { "Custom content" }
-#     end
-#   end
+# With an object, renders a standard Image/Observation/RssLog/User
+# layout; with a block, wraps it in a plain `<li>` instead.
 class Components::Grid::Box < Components::Base
   include Components::Grid::Box::RenderData
   include Components::Grid::Box::Footer
@@ -201,7 +179,7 @@ class Components::Grid::Box < Components::Base
 
     li(class: "log-occurrence hanging-indent mt-3") do
       Link(type: :get, target: occurrence_path(occ),
-           name: :matrix_box_occurrence.l, icon: :matrix,
+           name: :grid_box_occurrence.l, icon: :matrix,
            show_label: :responsive,
            class: "occurrence-link")
     end

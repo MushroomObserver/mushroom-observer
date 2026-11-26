@@ -15,6 +15,7 @@ module Views::Controllers::Projects::ExternalSites
       add_project_banner(@project)
       add_page_title(:project_sites_title.l)
       container_class(:wide)
+      turbo_stream_from(InatTargetLookupJob.stream(@project))
 
       @sites.each { |site| render_site_panel(site) }
     end
@@ -52,6 +53,20 @@ module Views::Controllers::Projects::ExternalSites
 
       render(Form.new(project_site, project: @project,
                                     candidates: @candidates))
+      render_look_up_button
+    end
+
+    # Below the settings form, not in it:
+    # (The button is a form; a form nested in another breaks the outer one.)
+    def render_look_up_button
+      return unless @candidates.incomplete?
+
+      div(class: "mt-3", id: InatTargetLookupJob::LOOK_UP_BUTTON_ID) do
+        Button(type: :post, name: :project_sites_look_up_targets.l,
+               target: look_up_project_external_sites_path(
+                 project_id: @project.id
+               ))
+      end
     end
   end
 end

@@ -10,7 +10,7 @@ module VisualGroups
       image = Image.find_by(id: image_id)
       status = "" unless image
       visual_group = VisualGroup.find_by(id: params[:visual_group_id])
-      return unless visual_group && image
+      return head(:not_found) unless visual_group && image
 
       included = update_visual_group_image(visual_group, image_id, status)
       render_status_links_replace(visual_group, image, included)

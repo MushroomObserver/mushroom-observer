@@ -71,9 +71,9 @@ module Views::Controllers::Account::Profile
     end
 
     def render_file_field_between
-      reuse_tab = ::Tab::Account::ReuseProfileImage.new(user: model)
       Help(element: :span, content: "(33%)")
-      Link(type: :get, name: reuse_tab.title, target: reuse_tab.path,
+      Link(type: :get,
+           tab: ::Tab::Account::ReuseProfileImage.new(user: model),
            class: "mx-2")
     end
 

@@ -7,7 +7,7 @@
 # flashes the no-matches error when the query returned nothing,
 # optionally renders the alternate-spellings alert
 # (pattern-search-with-zero-results path), and renders the paginated
-# `Components::Grid` grid of Observation thumbnails.
+# `Components::Grid` of Observation thumbnails.
 #
 # `ObservationsController#render_index_view` overrides the
 # `ApplicationController` default to render this class directly with

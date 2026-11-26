@@ -41,7 +41,7 @@ module Views::Controllers::GlossaryTerms::Images
     end
 
     # Each per-image .checkbox wrapper gets `my-0` so the default
-    # vertical margin doesn't leave visible gaps inside the MatrixBox
+    # vertical margin doesn't leave visible gaps inside the Grid::Box
     # cell.
     # rubocop:disable-next MO/NoCosmeticClassAssertion
     def test_each_checkbox_wrap_has_my_0_class

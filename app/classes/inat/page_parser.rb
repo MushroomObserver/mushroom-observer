@@ -12,7 +12,7 @@ class Inat
     delegate :inat_ids, to: :@import
     delegate :user, to: :@import
 
-    def initialize(import, per_page: 200)
+    def initialize(import, per_page: MAX_PER_PAGE)
       @import = import
       @per_page = per_page
       @last_import_id = 0

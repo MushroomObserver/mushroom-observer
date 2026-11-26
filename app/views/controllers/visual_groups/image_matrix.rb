@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Image-matrix grid for a visual group's edit + show pages. Each
-# matrix box holds the image, a `StatusLinks` block (needs-review /
+# grid box holds the image, a `StatusLinks` block (needs-review /
 # include / exclude trio), and a filename/id-badge footer row.
 module Views::Controllers::VisualGroups
   class ImageMatrix < Views::Base

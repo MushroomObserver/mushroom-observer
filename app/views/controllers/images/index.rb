@@ -20,9 +20,7 @@ module Views::Controllers::Images
       add_pagination(@pagination_data)
 
       PaginatedResults do
-        Grid(
-          objects: @objects, user: current_user
-        )
+        Grid(objects: @objects, user: current_user)
       end
     end
   end

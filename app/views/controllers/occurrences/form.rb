@@ -52,8 +52,8 @@ module Views::Controllers::Occurrences
     private
 
     # Edit mode wires the occurrence-form Stimulus controller onto
-    # the form itself so its scope spans both the members matrix and
-    # the candidate matrix. New mode skips that — its single matrix
+    # the form itself so its scope spans both the members grid and
+    # the candidate grid. New mode skips that — its single grid
     # gets the controller wired directly (see
     # render_new_observation_grid).
     def form_options_for(model, **opts)

@@ -1126,7 +1126,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   false
                 @controller.send(
                   :objects_with_only_needed_eager_loads,
-                  query, Observation.matrix_box_includes
+                  query, Observation.grid_box_includes
                 )
               ensure
                 Rails.cache = original_cache
@@ -1173,7 +1173,7 @@ class ObservationsControllerIndexTest < FunctionalTestCase
                   true
                 @controller.send(
                   :objects_with_only_needed_eager_loads,
-                  query, Observation.matrix_box_includes
+                  query, Observation.grid_box_includes
                 )
               ensure
                 Rails.cache = original_cache

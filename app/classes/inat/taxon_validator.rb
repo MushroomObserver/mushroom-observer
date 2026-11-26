@@ -9,27 +9,31 @@ class Inat
     include Inat::Constants
 
     def initialize(taxon_ids)
-      @taxon_ids = Array(taxon_ids).map(&:to_s).compact_blank
+      @taxon_ids = Array(taxon_ids).map(&:to_s).compact_blank.uniq
     end
 
-    # Returns true if all IDs have a Fungi or Mycetozoa ancestor (or list is
-    # empty). Returns false if any ID falls outside those lineages, if iNat
-    # returns fewer results than requested (unknown ID), or if the API fails.
+    # Are IDs Fungi or Mycetozoa (or list is empty)?
+    # False if any ID falls outside those lineages, iNat
+    # returns fewer results than requested, or the API fails.
     def all_importable?
       return true if @taxon_ids.empty?
 
-      results = fetch_taxa_results
-      return false unless results
-      return false if results.length < @taxon_ids.length
-
-      results.all? { |taxon| importable_ancestor?(taxon) }
+      @taxon_ids.each_slice(MAX_PER_PAGE).all? { |ids| batch_importable?(ids) }
     end
 
     private
 
-    def fetch_taxa_results
+    def batch_importable?(ids)
+      results = fetch_taxa_results(ids)
+      return false unless results
+      return false if results.length < ids.length
+
+      results.all? { |taxon| importable_ancestor?(taxon) }
+    end
+
+    def fetch_taxa_results(ids)
       response = Inat::APIRequest.new(nil).request(
-        path: "taxa?id=#{@taxon_ids.join(",")}"
+        path: "taxa?id=#{ids.join(",")}&per_page=#{MAX_PER_PAGE}"
       )
       JSON.parse(response.body)["results"]
     rescue StandardError
