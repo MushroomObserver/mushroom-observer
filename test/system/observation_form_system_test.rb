@@ -1970,40 +1970,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :wait_for_exif_geocode_broadcast
 
-  # Diagnostic for a stuck upload/submit sequence (TEMP, flakiness
-  # investigation) -- reads client-side state (including whether
-  # form-images reconnected mid-upload) so a failure names the
-  # stuck step. Positive class-presence selectors only, no `:not()`
-  # (see system_test_state_polling.md).
-  def dump_upload_state
-    evaluate_script(<<~JS)
-      JSON.stringify({
-        spinnersTotal: document.querySelectorAll(
-          ".upload-status-spinner").length,
-        spinnersHidden: document.querySelectorAll(
-          ".upload-status-spinner.d-none").length,
-        checkmarksTotal: document.querySelectorAll(
-          ".upload-status-check").length,
-        checkmarksHidden: document.querySelectorAll(
-          ".upload-status-check.d-none").length,
-        formInert: document.getElementById("observation_form")?.inert,
-        submitEventCount: document.getElementById("observation_form")
-          ?.dataset.submitEventCount,
-        blockFormSubmission: document.getElementById("observation_form")
-          ?.dataset.blockFormSubmission,
-        formImagesConnectCount: window.formImagesConnectCount,
-        btnLabel: document.querySelector(
-          "#observation_form button[type=submit]")?.textContent?.trim(),
-        url: location.pathname
-      })
-    JS
-  end
-
-  # Polls client-side state directly instead of assert_selector --
-  # assert_selector's Capybara::ExpectationNotMet on timeout wasn't
-  # reaching a surrounding rescue in this file for reasons not yet
-  # understood, so a timeout here reported the plain Capybara message
-  # with none of the diagnostic state attached.
+  # Polls client-side state directly instead of assert_selector, per
+  # system_test_state_polling.md -- positive class-presence counts
+  # only, no `:not()`.
   def wait_for_upload_checkmarks(count:, wait: 15)
     Timeout.timeout(wait) do
       loop do
@@ -2019,8 +1988,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       end
     end
   rescue Timeout::Error
-    flunk("Timed out waiting for #{count} upload checkmarks.\n\n" \
-          "Upload state: #{dump_upload_state}")
+    flunk("Timed out waiting for #{count} upload checkmarks.")
   end
 
   def assert_image_exif_available(image_data)

@@ -59,8 +59,6 @@ export default class extends Controller {
 
   connect() {
     this.element.dataset.formImages = "connected";
-    window.formImagesConnectCount =
-      (window.formImagesConnectCount || 0) + 1;
 
     Object.assign(this, internalConfig);
     Object.assign(this.localized_text,
@@ -138,9 +136,6 @@ export default class extends Controller {
 
     // Detect when a user submits observation; includes upload logic
     this.form.onsubmit = (event) => {
-      this.form.dataset.submitEventCount =
-        (Number(this.form.dataset.submitEventCount) || 0) + 1;
-      this.form.dataset.blockFormSubmission = this.block_form_submission;
       if (this.block_form_submission) {
         this.uploadAll();
         return false;
