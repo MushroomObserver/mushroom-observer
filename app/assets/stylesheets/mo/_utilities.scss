@@ -82,6 +82,17 @@
   padding-right: $card-spacer-x !important;
 }
 
+// See .px-card above, responsive: no horizontal padding below the
+// `sm` breakpoint, `$card-spacer-x` from `sm` up. `#main_container`
+// uses this (paired with `.px-0`) to stay flush with the viewport on
+// mobile while matching the row-cols-* gutter at `sm` and up.
+@media screen and (min-width: breakpoint-min(sm)) {
+  .px-sm-card {
+    padding-left: $card-spacer-x !important;
+    padding-right: $card-spacer-x !important;
+  }
+}
+
 // See .px-card above.
 .pl-card {
   padding-left: $card-spacer-x !important;
@@ -274,11 +285,21 @@
 // margin-top on wrapped row children, not wired up here) --
 // `.grid-row`/`.grid-box` (_grid_box.scss) is the one place that
 // reads it so far, via its margin-bottom.
+// #main_container has no horizontal padding below `sm` (`.px-0
+// .px-sm-card`) -- a nonzero gutter here bleeds past the viewport
+// with nothing to cancel it. From `sm` up it matches the value
+// below, which is what `#main_container`'s padding is sized to.
 .row {
-  --bs-gutter-x: #{$grid-gutter-width * .75};
+  --bs-gutter-x: 0px;
   --bs-gutter-y: 0px;
   margin-right: calc(var(--bs-gutter-x) * -.5);
   margin-left: calc(var(--bs-gutter-x) * -.5);
+}
+
+@media screen and (min-width: breakpoint-min(sm)) {
+  .row {
+    --bs-gutter-x: #{$grid-gutter-width * .75};
+  }
 }
 
 @media screen and (min-width: breakpoint-min(lg)) {

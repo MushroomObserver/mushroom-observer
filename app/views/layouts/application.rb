@@ -81,7 +81,7 @@ module Views::Layouts
 
     def render_main_container(&block)
       banner = ::Banner.current
-      div(id: "main_container", class: "px-card",
+      div(id: "main_container", class: "px-0 px-sm-card",
           data: main_container_data(banner)) do
         render(Views::Layouts::App::Banners.new(banner: banner))
         div(class: "row-offcanvas row-offcanvas-left",

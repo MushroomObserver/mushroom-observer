@@ -34,20 +34,20 @@ $sidebar-max-width: 9.9rem;
 
 .row-offcanvas-right
 .sidebar-offcanvas {
-  right: -($sidebar-max-width + $card-spacer-x);
+  right: -$sidebar-max-width;
 }
 
 .row-offcanvas-left
 .sidebar-offcanvas {
-  left: -($sidebar-max-width + $card-spacer-x);
+  left: -$sidebar-max-width;
 }
 
 .row-offcanvas-right.active {
-  right: $sidebar-max-width + $card-spacer-x;
+  right: $sidebar-max-width;
 }
 
 .row-offcanvas-left.active {
-  left: $sidebar-max-width + $card-spacer-x;
+  left: $sidebar-max-width;
 }
 
 // Sits inside .row-offcanvas alongside #right_side.
@@ -68,6 +68,31 @@ $sidebar-max-width: 9.9rem;
 // capped by max-width: 100% against a definite ancestor width.
 #right_side {
   min-width: 0;
+}
+
+// #main_container's `.px-sm-card` insets .row-offcanvas from the
+// viewport by $card-spacer-x at this width and up -- both the
+// sidebar's offset and the active row-shift need that same amount
+// added, or the sidebar leaves a sliver when closed and sits flush
+// against #right_side (no gap) when open.
+@media screen and (min-width: breakpoint-min(sm)) {
+  .row-offcanvas-right
+  .sidebar-offcanvas {
+    right: -($sidebar-max-width + $card-spacer-x);
+  }
+
+  .row-offcanvas-left
+  .sidebar-offcanvas {
+    left: -($sidebar-max-width + $card-spacer-x);
+  }
+
+  .row-offcanvas-right.active {
+    right: $sidebar-max-width + $card-spacer-x;
+  }
+
+  .row-offcanvas-left.active {
+    left: $sidebar-max-width + $card-spacer-x;
+  }
 }
 
 @media screen and (min-width: breakpoint-min(lg)) {
