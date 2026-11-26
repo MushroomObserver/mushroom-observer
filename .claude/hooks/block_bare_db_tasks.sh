@@ -1,18 +1,9 @@
 #!/usr/bin/env bash
 # Claude Code PreToolUse hook.
 # Fires before `Bash` calls. Blocks `db:drop`, `db:reset`, and
-# `db:schema:load` outright -- alone or chained, in any `bin/rails`/
-# `bin/rake`/`bundle exec rake` command.
-#
-# Why: these drop and recreate tables. MySQL DDL isn't transactional
-# -- a command that fails partway through (e.g. a foreign-key error
-# on one table) still leaves every table processed before the failure
-# dropped and empty, even though the overall command reports failure.
-# A `bin/rails db:schema:load` run that errored out on a FK constraint
-# still wiped most of a local development database this way.
-#
-# Ask the user to run the command themselves (`! <command>` in the
-# prompt) instead of retrying past this block.
+# `db:schema:load` outright, alone or chained -- MySQL DDL isn't
+# transactional, so a failed run can still leave tables dropped and
+# empty. Ask the user to run the command themselves (`! <command>`).
 set -euo pipefail
 
 INPUT="$(cat)"
