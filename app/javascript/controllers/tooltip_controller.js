@@ -36,10 +36,6 @@ export default class extends Controller {
     if (element.dataset.activeTitle) this.watchActiveTitle(element)
   }
 
-  tipTargetDisconnected(element) {
-    element.mo_activeTitleObserver?.disconnect()
-  }
-
   // A stateful-link trigger (active_icon:/active_content:, see
   // Components::Button::Content) carries data-active-title alongside
   // the icon/label pair _icons.scss's `.stateful-link` rule swaps on
@@ -68,6 +64,7 @@ export default class extends Controller {
   // the DOM. Stimulus's target-tracking MutationObserver calls this
   // whenever a `tip` target is removed, wherever that happens.
   tipTargetDisconnected(element) {
+    element.mo_activeTitleObserver?.disconnect()
     $(element).tooltip("dispose")
   }
 }
