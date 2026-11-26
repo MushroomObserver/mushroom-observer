@@ -5,7 +5,7 @@
 # / your profile" page. `params[:target_type]`/`params[:target_id]`
 # (see config/routes.rb) pick the target; this view dispatches the few
 # bits that differ per target (title wording, context-nav tabs),
-# renders the id-entry `Form`, and paginates a matrix of clickable
+# renders the id-entry `Form`, and paginates a grid of clickable
 # thumbnails (each wrapping `Components::InteractiveImage` in a POST
 # link to the RESTful `reuse_image_path` member action, so a click
 # attaches that image directly).
@@ -25,7 +25,7 @@ module Views::Controllers::Images::Reuse
       add_pagination(@pagination_data)
 
       render(Index::Form.new(target: @target))
-      render_image_matrix
+      render_image_grid
     end
 
     private
@@ -92,9 +92,9 @@ module Views::Controllers::Images::Reuse
     end
 
     ############################################################################
-    # Image matrix
+    # Image grid
 
-    def render_image_matrix
+    def render_image_grid
       PaginatedResults do
         Grid() do
           @objects.each { |image| render_image_card(image) }

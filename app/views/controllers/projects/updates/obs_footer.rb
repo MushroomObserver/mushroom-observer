@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-# Renders action buttons on a project Updates tab matrix box.
+# Renders action buttons on a project Updates tab grid box.
 # Rendered by `Projects::UpdatesController#index` (the per-obs footer
-# inside each matrix box).
+# inside each grid box).
 #
 # When showing excluded observations, only an Add button is shown
 # (which also un-excludes). Otherwise, both Add and Exclude are shown.

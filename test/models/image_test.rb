@@ -904,7 +904,7 @@ class ImageTest < UnitTestCase
   # The broadcast must not replay a page-specific image_link/votes/
   # extra_classes/identify combination -- it only knows the model, not
   # which page's props a given subscriber originally rendered with (a
-  # matrix-box thumbnail's real image_link, votes: false on the
+  # grid-box thumbnail's image_link, votes: false on the
   # image-show page, etc). Confirms the fix for the bug where
   # rebroadcasting the *whole* Interactive component with defaults
   # would silently swap a thumbnail's link target to the image's own

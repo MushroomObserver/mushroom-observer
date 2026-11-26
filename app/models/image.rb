@@ -273,7 +273,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # instead.
   #
   # The only subscriber is the image-show page -- rotate/mirror only
-  # happens there. Index matrix boxes and the obs-show carousel
+  # happens there. Index grid boxes and the obs-show carousel
   # deliberately don't subscribe (not a supported config); those
   # pages catch up on the next load instead.
   def broadcast_processed_update

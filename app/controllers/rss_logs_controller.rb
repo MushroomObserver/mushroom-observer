@@ -6,7 +6,7 @@ class RssLogsController < ApplicationController
 
   # Default page.  Just displays latest happenings.  The actual action is
   # buried way down toward the end of this file.
-  # Displays matrix of selected RssLog's (based on current Query, if exists).
+  # Displays grid of selected RssLog's (based on current Query, if exists).
   def index
     build_index_with_query
   end

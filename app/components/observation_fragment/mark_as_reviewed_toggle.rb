@@ -9,7 +9,7 @@
 #   ObservationFragment(type: :mark_as_reviewed_toggle,
 #                        observation_view: obs_view)
 #
-# @example Matrix box usage
+# @example Grid box usage
 #   ObservationFragment(type: :mark_as_reviewed_toggle,
 #                        observation_view: obs_view,
 #                        selector: "box_reviewed",

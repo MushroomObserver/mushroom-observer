@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Views::Controllers::RssLogs
-  # Activity logs index — the front-page matrix of recent activity
+  # Activity logs index — the front-page grid of recent activity
   # across observations / names / locations / etc., filtered by
   # selected RssLog types.
   class Index < Views::FullPageBase

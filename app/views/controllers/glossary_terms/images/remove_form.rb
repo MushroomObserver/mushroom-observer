@@ -23,7 +23,7 @@ module Views::Controllers::GlossaryTerms::Images
 
     def view_template
       super do
-        render_image_matrix
+        render_image_grid
         submit_remove
       end
     end
@@ -38,7 +38,7 @@ module Views::Controllers::GlossaryTerms::Images
       submit(:image_remove_remove.l, center: true)
     end
 
-    def render_image_matrix
+    def render_image_grid
       Grid() do
         model.images.each { |image| render_image_cell(image) }
       end

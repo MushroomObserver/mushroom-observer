@@ -234,7 +234,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     [query_from_pattern(model_name, pattern), {}]
   end
 
-  # Render an index or set of search results as a list or matrix. Arguments:
+  # Render an index or set of search results as a list or grid. Arguments:
   # query::         Query instance describing search/index.
   # display_opts::  Hash of options.
   #
