@@ -32,9 +32,17 @@ export default class extends Controller {
       ? element.closest(containerSelector) || false
       : false
     $(element).tooltip({ container })
+    element.addEventListener("click", this.hideOnClick)
 
     if (element.dataset.activeTitle) this.watchActiveTitle(element)
   }
+
+  // Bootstrap's default trigger is "hover focus" -- clicking a trigger
+  // gives it keyboard focus, which keeps the tooltip shown on its own
+  // even after the mouse moves away (no blur event fires just from a
+  // mouse leaving). Hide explicitly on click instead of waiting on a
+  // hover-out that may never come.
+  hideOnClick = (event) => $(event.currentTarget).tooltip("hide")
 
   // A stateful-link trigger (active_icon:/active_content:, see
   // Components::Button::Content) carries data-active-title alongside
@@ -64,6 +72,7 @@ export default class extends Controller {
   // the DOM. Stimulus's target-tracking MutationObserver calls this
   // whenever a `tip` target is removed, wherever that happens.
   tipTargetDisconnected(element) {
+    element.removeEventListener("click", this.hideOnClick)
     element.mo_activeTitleObserver?.disconnect()
     $(element).tooltip("dispose")
   }

@@ -2067,9 +2067,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                                    visible: :all, wait: 5)
     end
 
-    # Wait for "use exif" button to appear -- assert_no_selector on
-    # the positive `.d-none` class, not `:not()` (see
-    # system_test_state_polling.md).
+    # Wait for "use exif" button to appear (not d-none)
     assert_no_selector(".use_exif_btn.d-none", wait: 10)
 
     # For the first image, JavaScript auto-transfers EXIF data and disables

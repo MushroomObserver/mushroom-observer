@@ -25,21 +25,6 @@ class Views::Controllers::Observations::Show::Namings::RowTest <
     assert_html(html, ".naming-row#observation_naming_#{@naming.id}")
   end
 
-  def test_renders_four_main_column_cells_plus_eyes_column
-    # Layout pin: name / vote-tally / your-vote widen on mobile (5/3/4)
-    # to fill the space the proposer cell would take at `sm`+ (5/2/2/3)
-    # -- the proposer cell is hidden below `sm`, its content moves to
-    # the reasons row instead (see the proposer-cell tests below). The
-    # eyes icon column is the narrow `col-sm-1`.
-    html = render_row
-
-    assert_html(html, ".col.col-sm-11 .col-5.col-sm-5")
-    assert_html(html, ".col.col-sm-11 .col-sm-2.d-none.d-sm-block")
-    assert_html(html, ".col.col-sm-11 .col-3.col-sm-2")
-    assert_html(html, ".col.col-sm-11 .col-4.col-sm-3")
-    assert_html(html, ".col-sm-1.d-none.d-sm-block")
-  end
-
   # ---- name cell -----------------------------------------------------
 
   def test_renders_name_link_to_show_name_page

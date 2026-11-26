@@ -77,7 +77,6 @@ ul.tight-list {
   font-size: 1.1rem;
 
   small {
-    @extend .ml-2;
     font-size: $font-size-base;
     color: $body-color;
   }

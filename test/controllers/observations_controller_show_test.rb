@@ -587,7 +587,8 @@ class ObservationsControllerShowTest < FunctionalTestCase
     # MycoPortal link now lives behind the "Shared with" MCP badge's info
     # modal, not inline on the page -- see external_links_controller_test.rb
     # for coverage of the modal's own content.
-    assert_select("#observation_external_links a.badge", text: "MCP")
+    assert_select("#observation_external_links a.badge .collapse-toggle-closed",
+                  text: "MCP")
   end
 
   def test_show_observation_edit_links

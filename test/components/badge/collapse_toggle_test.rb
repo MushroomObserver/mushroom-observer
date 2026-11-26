@@ -9,6 +9,19 @@ class Components::Badge::CollapseToggleTest < ComponentTestCase
     assert_html(html, "a[href='#pane_foo']", text: "MCP")
   end
 
+  def test_renders_open_and_closed_text_spans
+    html = render_it
+
+    assert_html(html, "a .collapse-toggle-closed", text: "MCP")
+    assert_html(html, "a .collapse-toggle-open", text: :hide.ti)
+  end
+
+  def test_open_text_overridable
+    html = render_it(open_text: "Close")
+
+    assert_html(html, "a .collapse-toggle-open", text: "Close")
+  end
+
   def test_role_button
     html = render_it
 

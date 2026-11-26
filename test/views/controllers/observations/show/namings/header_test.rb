@@ -32,25 +32,6 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     assert_includes(html, :show_namings_your_vote.t)
   end
 
-  def test_label_columns_hidden_on_xs
-    # The three non-leftmost label columns are hidden on `xs`
-    # via `d-none d-sm-block` so only the panel title + the
-    # propose icon show on mobile.
-    html = render_header
-
-    assert_html(html, ".col.col-sm-3.d-none.d-sm-block", count: 1)
-    assert_html(html, ".col.col-sm-2.d-none.d-sm-block", count: 2)
-  end
-
-  def test_name_column_is_block_on_xs
-    # First column (card-title column) is `d-block` not
-    # `d-none` — visible on `xs` so the panel always shows its
-    # title.
-    html = render_header
-
-    assert_html(html, ".col.col-sm-5.d-block")
-  end
-
   # `align-items-end` is this header's alignment contract (see
   # comment below), not incidental paint.
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -88,7 +69,7 @@ class Views::Controllers::Observations::Show::Namings::HeaderTest <
     # — there the footer-buttons row owns the propose CTA.
     html = render_header
 
-    assert_html(html, ".col-2.col-sm-1 .float-right.d-sm-none")
+    assert_html(html, ".naming-eyes-column .float-right.d-sm-none")
     assert_html(html, "a[data-modal='modal_obs_#{@obs.id}_naming']")
     assert_html(html, "a[data-controller='modal-toggle']")
   end

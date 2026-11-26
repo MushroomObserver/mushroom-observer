@@ -72,17 +72,21 @@
     }
   }
 
+  // Bootstrap's `.list-group-item + .list-group-item.active` rule
+  // outranks the plain `.list-group-item` rule above -- null both
+  // properties back out. Written flat, not nested with `&`, since
+  // Sass can't combine a leading `+` with an `&` that itself expands
+  // to a descendant-combinator chain (Dart Sass's "bogus combinator"
+  // check rejects it).
+  .list-group-item + .list-group-item.active {
+    margin-top: 0;
+    border-top-width: 0;
+  }
+
   .list-group-item,
   a.dropdown-toggle {
     color: $LEFT_BAR_TEXT_COLOR;
     background-color: $LEFT_BAR_BG_COLOR;
-  }
-
-  // Bootstrap's `.list-group-item + .list-group-item.active` rule
-  // reassigns margin-top/border-top-width -- null both back out.
-  .list-group-item + .list-group-item.active {
-    margin-top: 0;
-    border-top-width: 0;
   }
 }
 

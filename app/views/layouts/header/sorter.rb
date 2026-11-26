@@ -29,7 +29,7 @@ module Views::Layouts
           label: toggle_title.to_s,
           element: :div,
           wrapper_class: class_names(Components::Navbar::FORM_CLASS, "px-0"),
-          toggle_variant: :outline,
+          toggle_variant: :outline, toggle_size: :sm,
           toggle_class: "font-weight-normal",
           menu_class: "sorts",
           menu_header: mobile_header_html

@@ -19,6 +19,23 @@
   }
 }
 
+// naming-row's two flex children (replaces the old Column(sm: 11) /
+// Column(sm: 1) split): the namings' own 12-col row fills whatever
+// width is left over, and the eyes column -- a small fixed-size
+// glyph pair, not content that should scale with the 12-col grid --
+// gets a fixed width instead of a grid fraction.
+.naming-main-columns {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding-left: $grid-gutter-width / 3;
+  padding-right: $grid-gutter-width / 3;
+}
+
+.naming-eyes-column {
+  flex: 0 0 48px;
+  width: 48px;
+}
+
 // Votes::Form's float-right is for sharing a line with an inline
 // label -- the label sits in a separate row here, so cancel it.
 .naming-columns .naming-vote-form {
