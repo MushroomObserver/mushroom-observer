@@ -259,7 +259,7 @@ class ApplicationFormTest < ComponentTestCase
   end
 
   # Renders into the page title bar's CTA slot instead of inline --
-  # Header::PageTitle#render_title_bar_cta reads it back out.
+  # `Header::PageTitle#render_title_bar_cta` reads it back out.
   def test_title_bar_submit_renders_into_title_bar_cta_slot
     form = TestFormClass.new(@collection_number, action: "/test_form_path")
     form.field_block = proc { title_bar_submit("Save Changes") }
