@@ -103,7 +103,9 @@ class ObservationViewsControllerTest < FunctionalTestCase
     assert_select("turbo-stream[action='update']" \
                   "[target='lightbox_caption_#{obs.thumb_image.id}']")
 
-    # Verify the toggle checkboxes are rendered in the turbo streams
+    # Verify the toggle checkboxes are rendered in the turbo streams.
+    # "_lb" suffix: MarkAsReviewedToggle#checkbox_id keeps the id
+    # distinct from lightGallery's clone of the lightbox caption.
     assert_select(
       "input[type='checkbox'][id='caption_reviewed_#{obs.id}_lb']"
     )
