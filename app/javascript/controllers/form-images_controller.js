@@ -151,12 +151,12 @@ export default class extends Controller {
 
   addDashedBorder() {
     // console.log("addDashedBorder")
-    this.drop_zone.classList.add('border-dashed');
+    this.drop_zone.classList.add('dashed-border');
   }
 
   removeDashedBorder() {
     // console.log("removeDashedBorder")
-    this.drop_zone.classList.remove('border-dashed');
+    this.drop_zone.classList.remove('dashed-border');
   }
 
   dropFiles(e) {
