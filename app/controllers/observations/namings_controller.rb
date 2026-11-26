@@ -195,7 +195,7 @@ module Observations
     # places (it now reflects the new naming), close out the
     # naming modal + the AJAX-progress modal, and clear the
     # identify-this-obs strip.
-    def render_update_matrix_box_streams
+    def render_update_grid_box_streams
       obs_id = @observation.id
       render(turbo_stream: [
                turbo_stream.replace(
@@ -306,7 +306,7 @@ module Observations
 
     def respond_to_successful_create
       if params[:context].in?(%w[lightgallery grid_box])
-        render_update_matrix_box_streams
+        render_update_grid_box_streams
       else
         redirect_to_obs(@observation)
       end

@@ -128,14 +128,14 @@ module Views::Controllers::Occurrences
     end
 
     def render_edit_observation_grid
-      render_matrix_ul do
+      render_grid_ul do
         @observations.each { |obs| render_obs_box(obs) }
       end
     end
 
     def render_candidate_section
       h4(class: "mt-4") { plain(:edit_occurrence_add_heading.l) }
-      render_matrix_ul do
+      render_grid_ul do
         @candidates.each { |obs| render_obs_box(obs) }
       end
     end
@@ -143,7 +143,7 @@ module Views::Controllers::Occurrences
     # Delegates to Grid for its row-cols-* grid classes
     # instead of hand-rolling an equivalent Row -- Grid::Box's
     # `columns:` default assumes it's rendered inside one of those.
-    def render_matrix_ul(&block)
+    def render_grid_ul(&block)
       Grid(&block)
     end
 

@@ -81,7 +81,7 @@ export default class extends Controller {
   maybeRefreshOnStream(event) {
     const target = event.target.target;
     // observation_what_/observation_identify_ -- Observations::
-    // NamingsController#render_update_matrix_box_streams, the
+    // NamingsController#render_update_grid_box_streams, the
     // "propose a name from the lightbox" success response. Without
     // these, an open lightbox's cloned caption keeps showing the
     // stale "needs naming" strip after a naming is proposed from

@@ -121,7 +121,7 @@ module Views::Controllers::FieldSlips
       all_obs = @field_slip.observations.to_a
       strong { trusted_html(append_colon(:observations.ti)) }
       if all_obs.any?
-        render_observations_matrix(all_obs)
+        render_observations_grid(all_obs)
       else
         whitespace
         plain(:field_slip_no_observation.t)
@@ -131,7 +131,7 @@ module Views::Controllers::FieldSlips
     # Delegates to Grid for its row-cols-* grid classes --
     # Grid::Box's `columns:` default assumes it's rendered inside
     # one of those.
-    def render_observations_matrix(all_obs)
+    def render_observations_grid(all_obs)
       Grid(objects: all_obs,
            user: current_user)
     end
