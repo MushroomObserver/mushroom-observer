@@ -152,8 +152,8 @@ module Views::Layouts
     # interest_halfopen means this image" -- controller-level show-page
     # tests (observations/names/locations) assert only the class, via
     # `ControllerExtensions#assert_interest_button_in_html`, so they
-    # don't need to change if this ever moves off .png (e.g. to the
-    # SVG sprite).
+    # don't need to change if this moves off .png (e.g. to the SVG
+    # sprite).
 
     def test_watch_class_matches_watch_images
       html = render_view

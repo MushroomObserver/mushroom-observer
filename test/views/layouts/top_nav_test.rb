@@ -34,9 +34,11 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, ".new_object_button[aria-label='#{full_label}']")
     assert_html(html, ".new_object_button[title='#{full_label}']")
     assert_html(html, ".new_object_button[data-tooltip-target='tip']")
-    # Responsive content: the word "Add" appears in a span hidden
-    # below md width and shown at md and up.
-    assert_html(html, ".new_object_button .d-none.d-md-inline",
+    # Responsive content: built from IconWithText::RESPONSIVE_TEXT_CLASSES,
+    # not a raw literal.
+    responsive_classes =
+      Components::IconWithText::RESPONSIVE_TEXT_CLASSES.split.join(".")
+    assert_html(html, ".new_object_button .#{responsive_classes}",
                 text: :add.ti)
   end
 
@@ -227,10 +229,12 @@ class Views::Layouts::TopNavTest < ComponentTestCase
   def test_right_nav_list_uses_navbar_constants
     html = render(top_nav(user: @user))
 
-    # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS, not raw
-    # navbar-nav/navbar-right literals.
-    assert_html(html,
-                "ul.nav.navbar-nav.navbar-right.d-none.d-sm-block")
+    # Built from Components::Navbar::NAV_CLASS/RIGHT_CLASS and
+    # Components::Column.mobile_hide_classes, not raw literals.
+    classes = ["nav", Components::Navbar::NAV_CLASS,
+               Components::Navbar::RIGHT_CLASS, "mr-0",
+               *Components::Column.mobile_hide_classes].join(".")
+    assert_html(html, "ul.#{classes}")
   end
 
   private
