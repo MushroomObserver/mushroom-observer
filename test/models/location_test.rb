@@ -1018,8 +1018,109 @@ class LocationTest < UnitTestCase
     )
   end
 
+  def test_shrinking_box_relocates_observation_outside_it
+    outer, inner = create_nested_locations
+    leaving = place_obs(:minimal_unknown_obs, inner, -55.5, 105.5)
+    staying = place_obs(:detailed_unknown_obs, inner, -54.5, 104.5)
+    no_gps = place_obs(:coprinus_comatus_obs, inner, nil, nil)
+
+    inner.update!(south: -55, east: 105)
+
+    leaving.reload
+    assert_equal(outer, leaving.location,
+                 "Obs with GPS outside the shrunk box should move to the " \
+                 "smallest Location containing its GPS")
+    assert_equal(outer.name, leaving.where,
+                 "Moved obs should cache its new Location's name")
+    assert_equal(inner, staying.reload.location,
+                 "Obs with GPS still inside the box should keep its Location")
+    assert_equal(inner, no_gps.reload.location,
+                 "Obs without GPS should keep its Location")
+  end
+
+  def test_shrinking_box_relocates_reflection_whose_margin_sticks_out
+    outer, inner = create_nested_locations
+    public_gps = { lat: -54.5, lng: 104.5, margin_m: 100_000.0 }
+    reflection = place_obs(:minimal_unknown_obs, inner,
+                           public_gps[:lat], public_gps[:lng])
+    make_reflection(reflection, public_gps)
+
+    inner.update!(south: -55, east: 105)
+
+    assert_equal(public_gps, reflection.reload.public_gps,
+                 "Reflection should read its public GPS from the iNat " \
+                 "snapshot")
+    assert_equal(outer, reflection.location,
+                 "Reflection whose GPS margin sticks out of the shrunk box " \
+                 "should move to the smallest Location containing GPS " \
+                 "plus margin")
+  end
+
+  def test_shrinking_box_relocates_obscured_reflection_by_public_gps
+    outer, inner = create_nested_locations
+    # Private GPS stays inside the shrunk box; the public point does not.
+    reflection = place_obs(:minimal_unknown_obs, inner, -54.5, 104.5)
+    make_reflection(reflection, { lat: -55.5, lng: 105.5, margin_m: 133.0 })
+
+    inner.update!(south: -55, east: 105)
+
+    assert_equal(outer, reflection.reload.location,
+                 "Obscured reflection should be placed by its public GPS, " \
+                 "not its private lat/lng")
+  end
+
+  def test_non_box_change_does_not_relocate_observations
+    _outer, inner = create_nested_locations
+    outside = place_obs(:minimal_unknown_obs, inner, -58, 108)
+
+    inner.update!(notes: "New notes")
+
+    assert_equal(inner, outside.reload.location,
+                 "Saving a Location without changing its box should not " \
+                 "move its Observations")
+  end
+
+  def test_growing_box_does_not_relocate_observations
+    _outer, inner = create_nested_locations
+    outside = place_obs(:minimal_unknown_obs, inner, -58, 108)
+
+    inner.update!(north: -53)
+
+    assert_equal(inner, outside.reload.location,
+                 "Growing a Location's box should not move its Observations")
+  end
+
   def albion
     locations(:albion)
+  end
+
+  def create_nested_locations
+    outer = create_box_location("Outer Test Area", -50, -60, 110, 100)
+    inner = create_box_location("Inner Test Area", -54, -56, 106, 104)
+    [outer, inner]
+  end
+
+  def create_box_location(name, north, south, east, west)
+    Location.create!(name:, scientific_name: name,
+                     north:, south:, east:, west:) do |loc|
+      loc.current_user = mary
+    end
+  end
+
+  # Sets columns directly so the setup does not trigger save callbacks.
+  def place_obs(fixture, loc, lat, lng)
+    obs = observations(fixture)
+    obs.update_columns(location_id: loc.id, where: loc.name, lat:, lng:)
+    obs
+  end
+
+  def make_reflection(obs, public_gps)
+    public_gps => { lat:, lng:, margin_m: }
+    obs.update_columns(
+      reflected_at: Time.zone.now,
+      notes: { Observation.notes_normalized_key(:inat_snapshot_caption.l) =>
+                 "Public lat/lng: #{lat},#{lng} +/-#{margin_m.to_i} m" }
+    )
   end
 
   def california

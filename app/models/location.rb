@@ -152,6 +152,7 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   before_save :remember_first_version_for_current_user
   before_update :update_observation_cache
   after_update :notify_users
+  after_update :relocate_observations_outside_box
 
   SEARCHABLE_FIELDS = [
     :name, :notes
@@ -810,6 +811,55 @@ class Location < AbstractModel # rubocop:disable Metrics/ClassLength
   end
 
   private
+
+  # Change Observations whose GPS box falls outside this Location's new box to
+  # the smallest Location containing that GPS box.
+  def relocate_observations_outside_box
+    return unless box_shrunk?
+
+    observations.where.not(lat: nil).where.not(lng: nil).find_each do |obs|
+      box = gps_box(obs)
+      next if Location.contains_box(**box).exists?(id)
+
+      container = Location.contains_box(**box).min_by(&:box_area)
+
+      # Observation stays put if no Location contains the new box.
+      # Possible in production, where Earth is 89, −89, 179, −179,
+      # so it's not a guaranteed fallback. Edge cases:
+      # GPS closer to a pole or 180;
+      # Location's margin box crosses pole or 180.
+      next if container.blank?
+
+      obs.location = container
+      obs.save
+    end
+  end
+
+  # The GPS point; for a reflection, iNat's public point widened by half its
+  # public margin of error on each side, matching Inat::Obs#location.
+  def gps_box(obs)
+    gps = obs.public_gps ||
+          { lat: obs.lat.to_f, lng: obs.lng.to_f, margin_m: 0 }
+    gps => { lat:, lng:, margin_m: }
+    d_lat = margin_m / 2 / 1000 / KM_PER_DEGREE
+    d_lng = [d_lat / Math.cos(lat * Math::PI / 180), 180].min
+    { north: [lat + d_lat, 90].min, south: [lat - d_lat, -90].max,
+      east: wrap_lng(lng + d_lng), west: wrap_lng(lng - d_lng) }
+  end
+
+  def wrap_lng(lng)
+    ((lng + 180) % 360) - 180
+  end
+
+  # Does the new box not contain the old one?
+  def box_shrunk?
+    return false unless saved_change_to_north? || saved_change_to_south? ||
+                        saved_change_to_east? || saved_change_to_west?
+
+    old_box = { north: north_before_last_save, south: south_before_last_save,
+                east: east_before_last_save, west: west_before_last_save }
+    !Location.contains_box(**old_box).exists?(id)
+  end
 
   def move_observations(old_loc)
     old_loc.observations.each do |obs|

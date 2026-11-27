@@ -691,6 +691,25 @@ class Observation < AbstractModel # rubocop:disable Metrics/ClassLength
     gps_dubious
   end
 
+  # The public lat/lng and margin in the iNat snapshot note, e.g.
+  # "Public lat/lng: 44.0179139,-123.1121278 +/-133 m"
+  # iNat leaves the margin blank when it has none.
+  PUBLIC_GPS = %r{(-?\d+(?:\.\d+)?),\s*(-?\d+(?:\.\d+)?)\s*
+                  \+/-\s*(\d+(?:\.\d+)?)?\s*m\b}x
+
+  # A reflection's public GPS from iNat as { lat:, lng:, margin_m: }, or nil.
+  # iNat blurs the public point of an obscured observation, while `lat` and
+  # `lng` may hold the private one.
+  # Match every note so it works whatever locale wrote the caption.
+  def public_gps
+    return unless reflection?
+
+    match = notes.values.join("\n").match(PUBLIC_GPS)
+    return unless match
+
+    { lat: match[1].to_f, lng: match[2].to_f, margin_m: match[3].to_f }
+  end
+
   def compute_gps_dubious?
     return false unless lat && lng && location
 
