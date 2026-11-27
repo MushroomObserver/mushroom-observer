@@ -3,9 +3,11 @@
 # Two headed sections -- items an Observation belongs to, and items it
 # doesn't -- shared by `Observations::Projects::Edit` and
 # `Observations::SpeciesLists::Edit`. Row/table content is
-# caller-supplied: the block receives `|items, remove, add|` once per
-# non-empty section and renders whatever table component that caller
-# uses (`Projects::ProjectTable`, `SpeciesLists::SpeciesListTable`).
+# caller-supplied: the block receives `|items, heading, remove, add|`
+# once per non-empty section and renders whatever table component
+# that caller uses (`Projects::ProjectTable`,
+# `SpeciesLists::SpeciesListTable`) -- the heading becomes that
+# table's first column header rather than a separate element.
 #
 # @example
 #   render(Components::ObservationListManager.new(
@@ -13,9 +15,10 @@
 #     belongs_to_items: @obs_projects,
 #     not_contains_heading: :project_manage_doesnt_contain.l,
 #     not_contains_items: @other_projects
-#   )) do |projects, remove, add|
+#   )) do |projects, heading, remove, add|
 #     render(Views::Controllers::Projects::ProjectTable.new(
-#       projects, observation: @observation, remove: remove, add: add
+#       projects, heading: heading, observation: @observation,
+#       remove: remove, add: add
 #     ))
 #   end
 class Components::ObservationListManager < Components::Base
@@ -37,7 +40,6 @@ class Components::ObservationListManager < Components::Base
   def render_section(heading:, items:, remove: false, add: false)
     return if items.empty?
 
-    h5(class: "mt-3 pl-3") { trusted_html(append_colon(heading)) }
-    @row_block.call(items, remove, add)
+    @row_block.call(items, heading, remove, add)
   end
 end

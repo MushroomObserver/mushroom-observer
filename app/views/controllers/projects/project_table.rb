@@ -4,10 +4,14 @@
 # Components::Table with two columns: info (title/meta/violation
 # warning) and action (REMOVE/ADD button or an observation count
 # badge). Used by `Projects::Index` and, via
-# `Components::ObservationListManager`, by `Observations::Projects::Edit`.
+# `Components::ObservationListManager`, by `Observations::Projects::Edit`
+# -- which passes `heading:` so the first column header carries that
+# section's heading text instead of a separate element above the
+# table.
 module Views::Controllers::Projects
   class ProjectTable < Views::Base
     prop :objects, _Array(::Project), :positional
+    prop :heading, _Nilable(String), default: nil
     prop :observation, _Nilable(::Observation), default: nil
     prop :remove, _Boolean, default: false
     prop :add, _Boolean, default: false
@@ -15,14 +19,16 @@ module Views::Controllers::Projects
 
     def view_template
       Table(@objects, variant: :lg) do |t|
-        t.column(:project.ti) { |project| render_info_cell(project) }
-        t.column(:observations.ti, align: :right) do |project|
-          render_action_cell(project)
-        end
+        t.column(first_column_header) { |project| render_info_cell(project) }
+        t.column("", align: :right) { |project| render_action_cell(project) }
       end
     end
 
     private
+
+    def first_column_header
+      @heading ? append_colon(@heading) : :project.ti
+    end
 
     def render_info_cell(project)
       render_title_row(project)
@@ -43,7 +49,7 @@ module Views::Controllers::Projects
       div(class: "d-flex align-items-center") do
         Link(type: :get, name: project.title.t,
              target: project_path(project.id)) do
-          span(class: "h4") { trusted_html(project.title.t) }
+          span(class: "h5") { trusted_html(project.title.t) }
         end
         if project.open_membership
           whitespace

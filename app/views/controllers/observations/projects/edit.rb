@@ -39,9 +39,9 @@ module Views::Controllers::Observations::Projects
         belongs_to_items: @obs_projects,
         not_contains_heading: :project_manage_doesnt_contain.l,
         not_contains_items: @other_projects
-      ) do |projects, remove, add|
+      ) do |projects, heading, remove, add|
         render(Views::Controllers::Projects::ProjectTable.new(
-                 projects, observation: @observation,
+                 projects, heading: heading, observation: @observation,
                            remove: remove, add: add
                ))
       end
