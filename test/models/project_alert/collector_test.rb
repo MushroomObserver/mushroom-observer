@@ -27,6 +27,18 @@ class ProjectAlert::CollectorTest < UnitTestCase
                         name: name, text_name: name.text_name)
   end
 
+  # How many times the block asked which projects alert. The scope is
+  # the only query naming alert_recipient_ids.
+  def count_alerting_queries(&block)
+    count = 0
+    callback = lambda do |*, payload|
+      count += 1 if payload[:sql].include?("alert_recipient_ids")
+    end
+    ActiveSupport::Notifications.subscribed(callback, "sql.active_record",
+                                            &block)
+    count
+  end
+
   def test_an_observation_of_a_watched_name_alerts_the_subscriber
     obs = nil
     assert_difference("ProjectAlert.count", 1) do
@@ -297,5 +309,20 @@ class ProjectAlert::CollectorTest < UnitTestCase
     act { new_observation }
 
     assert_no_enqueued_jobs(only: ActionMailer::MailDeliveryJob)
+  end
+
+  # An import flushes hundreds of observations at once, so the cost of
+  # asking which projects alert belongs to the flush, not to each
+  # observation in it.
+  def test_the_alerting_projects_are_asked_for_once_per_flush
+    one = count_alerting_queries { act { new_observation } }
+    three = count_alerting_queries do
+      act { 3.times { new_observation } }
+    end
+
+    assert_equal(1, one, "The flush should ask once")
+    assert_equal(one, three,
+                 "Asking which projects alert should not scale with " \
+                 "the number of observations in the flush")
   end
 end
