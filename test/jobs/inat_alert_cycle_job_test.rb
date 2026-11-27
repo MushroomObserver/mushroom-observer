@@ -25,7 +25,7 @@ class InatAlertCycleJobTest < ActiveJob::TestCase
   end
 
   # One message per watched name per kind (#5677), so a subject line
-  # can name what was found and say whether it is a find or activity
+  # can name what was found and say whether it is new or activity
   # on something already reported.
   def test_a_message_per_watched_name_and_kind
     mary = users(:mary)

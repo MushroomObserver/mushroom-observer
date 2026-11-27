@@ -10,12 +10,21 @@ ExecStart=/var/web/mo/bin/run bundle exec rake solid_queue:start
 
 # Greatly reduce Ruby memory fragmentation and heap usage
 # https://www.mikeperham.com/2018/04/25/taming-rails-memory-bloat/
-#Environment=MALLOC_ARENA_MAX=2
+# The worker pools are threaded, which is where glibc's
+# per-thread arenas multiply: capping them at 2 cut the
+# footprint these processes hold between jobs.
+Environment=MALLOC_ARENA_MAX=2
 
 Environment="RAILS_ENV=production"
 Environment=RUBY_MANAGER=chruby
 
 Restart=always
+
+# A stop has to outlast SolidQueue.shutdown_timeout (5 minutes,
+# config/application.rb), or systemd kills the supervisor while a
+# worker is still finishing a job and the job is released back to
+# the queue to run again. An InatImportJob page has taken 153s.
+TimeoutStopSec=330
 
 SyslogIdentifier=solidqueue
 

@@ -920,8 +920,10 @@ Capybara/SpecificActions:
   Enabled: true
 
 Rails/TimeZone:
-  # standalone_image_dhash.rb runs on the images server with plain Ruby
-  # (no ActiveSupport) -- Time.zone does not exist there, so the cop's
-  # autocorrect would break it.
+  # Both of these run as plain Ruby with no ActiveSupport loaded, so
+  # Time.zone does not exist and the autocorrect would break them:
+  # standalone_image_dhash.rb runs on the images server, and
+  # recycle_puma_workers.rb deliberately boots no Rails.
   Exclude:
     - script/standalone_image_dhash.rb
+    - script/recycle_puma_workers.rb
