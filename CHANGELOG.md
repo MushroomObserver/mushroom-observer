@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-11-27 (deploy-2026-11-27-13-00)
+
+- Stop saving rate-limited iNat lookups as unknown targets ([PR5720](https://github.com/MushroomObserver/mushroom-observer/pull/5720), @JoeCohen)
+- Consolidate image-reuse into one controller; rename `Matrix`->`Grid` ([PR5795](https://github.com/MushroomObserver/mushroom-observer/pull/5795), @nimmolo)
+- Converge `main` with cutover: finish `Matrix`->`Grid` rename, cherry-pick fixes ([PR5800](https://github.com/MushroomObserver/mushroom-observer/pull/5800), @nimmolo)
+- Read the whole alert ledger, not one source's rows ([PR5783](https://github.com/MushroomObserver/mushroom-observer/pull/5783), @mo-nathan)
+- Say "observation" where MO means one, everywhere in the tree ([PR5785](https://github.com/MushroomObserver/mushroom-observer/pull/5785), @mo-nathan)
+- Recycle Puma and Solid Queue workers before the host runs out of memory ([PR5794](https://github.com/MushroomObserver/mushroom-observer/pull/5794), @mo-nathan)
+- WIP: Converge `main` with `nimmo-5348-bs4-cutover` ([PR5803](https://github.com/MushroomObserver/mushroom-observer/pull/5803), @nimmolo)
+- Raise the ImageMagick disk ceiling, skip the decode for upright uploads ([PR5801](https://github.com/MushroomObserver/mushroom-observer/pull/5801), @mo-nathan)
+
 ## 2026-11-25 (deploy-2026-11-25-13-00)
 
 - Icon-only `Link::External`/`Link::Active`, consistent inline-icon-block spacing ([PR5775](https://github.com/MushroomObserver/mushroom-observer/pull/5775), @nimmolo)
