@@ -256,7 +256,8 @@ module Report
 
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      # Non-primary observations already excluded by query scope.
+      # The query scope drops a non-primary observation only when its
+      # primary is also in the results.
       query.scope.reorder("")
     end
 
