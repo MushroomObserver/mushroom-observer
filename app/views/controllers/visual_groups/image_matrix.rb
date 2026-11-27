@@ -14,14 +14,14 @@ module Views::Controllers::VisualGroups
     def view_template
       PaginatedResults do
         Grid() do
-          @subset.each { |row| render_matrix_box(row) }
+          @subset.each { |row| render_grid_box(row) }
         end
       end
     end
 
     private
 
-    def render_matrix_box(row)
+    def render_grid_box(row)
       image, image_status = row
       render(Components::Grid::Box.new(id: image.id)) do
         Panel do |panel|

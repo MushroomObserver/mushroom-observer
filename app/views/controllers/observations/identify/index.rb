@@ -27,7 +27,7 @@ module Views::Controllers::Observations::Identify
 
       Container(width: :text) { render_intro_collapsible }
 
-      PaginatedResults { render_matrix }
+      PaginatedResults { render_grid }
     end
 
     private
@@ -57,7 +57,7 @@ module Views::Controllers::Observations::Identify
       end
     end
 
-    def render_matrix
+    def render_grid
       Grid(
         objects: @objects,
         user: @user,

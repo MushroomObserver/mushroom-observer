@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Per-box mini-carousel — the planned image-set rendering for the
-# observations index. Wraps the `Components::Carousel` primitive with
+# observations grid. Wraps the `Components::Carousel` primitive with
 # box-appropriate chrome: no Panel, no thumbnail strip
 # (`show_indicators: false`), the active slide chosen via `top_img`
 # rather than the default "first slide active" (so a box returning to

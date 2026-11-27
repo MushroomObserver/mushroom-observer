@@ -82,7 +82,6 @@ ul.tight-list {
   font-size: 18px;
 
   small {
-    @extend .ml-2;
     color: $text-color;
   }
 
@@ -107,7 +106,7 @@ ul.tight-list {
 
 @media screen and (min-width: $screen-sm-min) {
   .object_edit {
-    .inline-link-block {
+    .inline-icon-block {
       margin-top: 0.25rem;
     }
   }

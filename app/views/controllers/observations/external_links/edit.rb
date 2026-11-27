@@ -17,7 +17,7 @@ module Views::Controllers::Observations::ExternalLinks
 
       Row do
         Column(xs: 12, sm: 7) { render_form }
-        Column(xs: 12, sm: 5) { render_matrix_box }
+        Column(xs: 12, sm: 5) { render_grid_box }
       end
     end
 
@@ -34,7 +34,7 @@ module Views::Controllers::Observations::ExternalLinks
              ))
     end
 
-    def render_matrix_box
+    def render_grid_box
       Row(element: :ul, class: "list-unstyled") do
         render(::Components::Grid::Box.new(
                  user: @user,

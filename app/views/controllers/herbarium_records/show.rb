@@ -17,10 +17,10 @@ module Views::Controllers::HerbariumRecords
       container_class(:full)
 
       # Top text details + bottom footer both kept at
-      # `container-text` width; the obs-matrix between them runs
+      # `container-text` width; the obs-grid between them runs
       # full-width inside the page's full-width `<main>`.
       Container(width: :text) { render_details }
-      render_observation_matrix
+      render_observation_grid
       Container(width: :text) do
         render(::Views::Layouts::ObjectFooter.new(
                  obj: @herbarium_record, minimal: true
@@ -88,7 +88,7 @@ module Views::Controllers::HerbariumRecords
       trusted_html("#{:notes.ti}:\n\n#{@herbarium_record.notes}".tpl)
     end
 
-    def render_observation_matrix
+    def render_observation_grid
       Grid(
         objects: @herbarium_record.observations.to_a, user: @user
       )

@@ -99,7 +99,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
 
     # Verify both checkboxes start unchecked
     within(box_with_image) do
-      assert_no_checked_field("box_reviewed_#{obs_id}")
+      assert_no_checked_field("box_reviewed_#{obs_id}_lb")
     end
 
     # Open the lightbox
@@ -120,7 +120,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
 
     # Verify the grid box checkbox is now checked (synced via Turbo Stream)
     within(box_with_image) do
-      assert_checked_field("box_reviewed_#{obs_id}", wait: 5)
+      assert_checked_field("box_reviewed_#{obs_id}_lb", wait: 5)
     end
 
     # Unmark in the lightbox, verify it syncs to grid box
@@ -129,7 +129,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     end
 
     within(box_with_image) do
-      assert_no_checked_field("box_reviewed_#{obs_id}", wait: 5)
+      assert_no_checked_field("box_reviewed_#{obs_id}_lb", wait: 5)
     end
 
     # Close the lightbox
@@ -144,7 +144,7 @@ class HelpIdentifySystemTest < ApplicationSystemTestCase
     end
 
     within(box_with_image) do
-      assert_checked_field("box_reviewed_#{obs_id}", wait: 5)
+      assert_checked_field("box_reviewed_#{obs_id}_lb", wait: 5)
     end
 
     # Open the lightbox and verify the caption checkbox synced

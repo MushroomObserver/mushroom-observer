@@ -44,6 +44,11 @@ export default class extends Controller {
     // propose-naming), which should keep its own Enter/Space behavior.
     this.boundActivateOnKey = this.activateTheaterBtnOnKey.bind(this);
     this.element.addEventListener('keydown', this.boundActivateOnKey);
+
+    this.boundDedupeClonedIds = this.dedupeClonedIds.bind(this);
+    this.element.addEventListener(
+      'lgAfterAppendSubHtml', this.boundDedupeClonedIds
+    );
   }
 
   disconnect() {
@@ -54,6 +59,9 @@ export default class extends Controller {
       'turbo:before-stream-render', this.boundMaybeRefresh
     );
     this.element.removeEventListener('keydown', this.boundActivateOnKey);
+    this.element.removeEventListener(
+      'lgAfterAppendSubHtml', this.boundDedupeClonedIds
+    );
   }
 
   activateTheaterBtnOnKey(event) {
@@ -73,7 +81,7 @@ export default class extends Controller {
   maybeRefreshOnStream(event) {
     const target = event.target.target;
     // observation_what_/observation_identify_ -- Observations::
-    // NamingsController#render_update_matrix_box_streams, the
+    // NamingsController#render_update_grid_box_streams, the
     // "propose a name from the lightbox" success response. Without
     // these, an open lightbox's cloned caption keeps showing the
     // stale "needs naming" strip after a naming is proposed from
@@ -105,5 +113,23 @@ export default class extends Controller {
     if (this.gallery && this.gallery.lgOpened) {
       this.gallery.addHtml(this.gallery.index);
     }
+  }
+
+  // Elements the original caption marks with an "_lb" id suffix stay
+  // unique once cloned into .lg-sub-html by stripping the suffix here
+  // -- the clone's id (and any label's for= pointing at it) no longer
+  // collide with the live original.
+  dedupeClonedIds() {
+    // lightGallery appends .lg-sub-html under document.body, as a
+    // sibling of #content -- not inside it.
+    const subHtml = document.querySelector('.lg-sub-html');
+    if (!subHtml) return;
+
+    subHtml.querySelectorAll('[id$="_lb"]').forEach((el) => {
+      el.id = el.id.slice(0, -3);
+    });
+    subHtml.querySelectorAll('label[for$="_lb"]').forEach((label) => {
+      label.setAttribute('for', label.getAttribute('for').slice(0, -3));
+    });
   }
 }

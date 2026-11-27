@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Phlex view for the occurrence show page.
-# Displays observations in matrix boxes with the primary first.
+# Displays observations in grid boxes with the primary first.
 module Views::Controllers::Occurrences
   class Show < Views::FullPageBase
     prop :occurrence, ::Occurrence

@@ -14,6 +14,13 @@
 class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   prop :obs, ::Observation
 
+  # Widths come straight from `Row::COLUMN_WIDTHS` -- this row needs
+  # to share the same sm: splits as Row's value-cell row below it, so
+  # there's one constant to change instead of two files to keep in
+  # sync by hand.
+  WIDTHS =
+    Views::Controllers::Observations::Show::Namings::Row::COLUMN_WIDTHS
+
   def view_template
     # `align-items-end` on the row tells Bootstrap's default flex
     # row to bottom-align its column children. The longest label
@@ -23,38 +30,34 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
     # more reliable than putting flex-column / justify-content-end
     # on each column — those approaches collide with the columns'
     # `d-none d-sm-block` responsive-visibility classes.
-    Row(class: "d-flex align-items-end") do
-      render_label_columns
+    Row(class: "d-flex flex-nowrap align-items-end") do
+      div(class: "naming-main-columns") { render_label_columns }
       render_propose_icon_column
     end
   end
 
   private
 
+  # naming-columns (mo/_namings.scss) gives this row the same tight
+  # gutter as Row's column row below it -- without it the labels
+  # don't line up with the values.
   def render_label_columns
-    Column(xs: 10, sm: 11) do
-      Row(class: "d-flex align-items-end") do
-        render_label_column(sm_width: 4, extra: "d-block") do
-          render_panel_title
-        end
-        render_label_column { small { trusted_html(:show_namings_user.t) } }
-        render_label_column(sm_width: 2, extra: "d-none d-sm-block") do
-          small { trusted_html(:show_namings_consensus.t) }
-        end
-        render_label_column do
-          small { trusted_html(:show_namings_your_vote.t) }
-        end
+    Row(class: "d-flex align-items-end naming-columns") do
+      render_label_column(:name, extra: "d-block") { render_panel_title }
+      render_label_column(:proposer) do
+        small { trusted_html(:show_namings_user.t) }
+      end
+      render_label_column(:votes, extra: "d-none d-sm-block") do
+        small { trusted_html(:show_namings_consensus.t) }
+      end
+      render_label_column(:your_vote) do
+        small { trusted_html(:show_namings_your_vote.t) }
       end
     end
   end
 
-  # Default column is `col col-sm-3 d-none d-sm-block` (hidden on
-  # `xs`, visible on `sm+`). Callers override `sm_width:`/`extra:` for
-  # the outliers — the name-column header is wider (sm-4) and visible
-  # on `xs` (so the panel title shows on mobile too); the
-  # consensus header is narrower (sm-2).
-  def render_label_column(sm_width: 3, extra: "d-none d-sm-block", &block)
-    Column(col: true, sm: sm_width, class: extra, &block)
+  def render_label_column(key, extra: "d-none d-sm-block", &block)
+    Column(col: true, sm: WIDTHS[key][:sm], class: extra, &block)
   end
 
   def render_panel_title
@@ -62,11 +65,12 @@ class Views::Controllers::Observations::Show::Namings::Header < Views::Base
   end
 
   # Mobile-only icon button: tucked in the right gutter where the
-  # eyes column would be on `sm+`. Renders via ModalLink so a
-  # click opens the propose-naming modal in place rather than
-  # navigating away.
+  # eyes column would be on `sm+` -- `naming-eyes-column` (shared
+  # with `Row`) matches this gutter's width to the eyes column's
+  # fixed width, so the label row's right edge lines up with the
+  # value row below it.
   def render_propose_icon_column
-    Column(xs: 2, sm: 1) do
+    div(class: "naming-eyes-column pr-2") do
       span(class: "float-right d-sm-none") do
         Button(
           type: :modal,

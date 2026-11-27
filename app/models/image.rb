@@ -273,7 +273,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # instead.
   #
   # The only subscriber is the image-show page -- rotate/mirror only
-  # happens there. Index matrix boxes and the obs-show carousel
+  # happens there. Index grid boxes and the obs-show carousel
   # deliberately don't subscribe (not a supported config); those
   # pages catch up on the next load instead.
   def broadcast_processed_update
@@ -285,7 +285,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
   # re-render to just the image source, since the model can't know
   # which page-specific image_link/votes/props a subscriber
   # originally rendered with -- replaying the whole Interactive with
-  # defaults would change those (e.g. a matrix-box thumbnail's
+  # defaults would change those (e.g. a grid-box thumbnail's
   # image_link falling back to the image show page instead of the
   # parent Observation). Deliberate tradeoff: carrying per-page props
   # through the broadcast isn't possible without threading that
@@ -1201,7 +1201,7 @@ class Image < AbstractModel # rubocop:disable Metrics/ClassLength
       end
     end
     # update +updated_at+ for any associated observations, in order to update
-    # the cached interactive_image in the matrix_box (contrast with the above)
+    # the cached interactive_image in the grid_box (contrast with the above)
     observations&.touch_all
 
     value

@@ -7,7 +7,7 @@ class ObservationFragmentMarkAsReviewedToggleTest < ComponentTestCase
     html = render_component(observation_view: build_obs_view(123))
 
     assert_includes(html, "caption_reviewed_toggle_123")
-    assert_includes(html, "caption_reviewed_123")
+    assert_includes(html, "caption_reviewed_123_lb")
     assert_includes(html, "observation_view")
     assert_includes(html, "Mark as reviewed")
   end
@@ -17,7 +17,7 @@ class ObservationFragmentMarkAsReviewedToggleTest < ComponentTestCase
                             selector: "box_reviewed")
 
     assert_includes(html, "box_reviewed_toggle_456")
-    assert_includes(html, "box_reviewed_456")
+    assert_includes(html, "box_reviewed_456_lb")
   end
 
   def test_renders_with_label_class
@@ -86,7 +86,7 @@ class ObservationFragmentMarkAsReviewedToggleTest < ComponentTestCase
     )
 
     assert_includes(html, "custom_selector_toggle_999")
-    assert_includes(html, "custom_selector_999")
+    assert_includes(html, "custom_selector_999_lb")
     assert_includes(html, "custom-class")
     assert_includes(html, "Marked as reviewed")
     assert_includes(html, "checked")

@@ -9,7 +9,7 @@
 #   ObservationFragment(type: :mark_as_reviewed_toggle,
 #                        observation_view: obs_view)
 #
-# @example Matrix box usage
+# @example Grid box usage
 #   ObservationFragment(type: :mark_as_reviewed_toggle,
 #                        observation_view: obs_view,
 #                        selector: "box_reviewed",
@@ -37,13 +37,10 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
                      label_class: label_class_value,
                      label_position: :before,
                      wrap_class: "d-inline",
-                     id: "#{@selector}_#{model.observation_id}",
-                     # The "caption" variant's id gets duplicated on
-                     # the page once its content is cloned into
-                     # lightGallery's caption snapshot -- an explicit
-                     # `for=` pointing at a duplicated id leaves label
-                     # clicks ambiguous. The checkbox is already
-                     # nested inside this label, which is sufficient.
+                     id: checkbox_id,
+                     # The checkbox is already nested inside this
+                     # label, so an explicit `for=` pointing at the
+                     # (deduped, but still shared) id isn't needed.
                      label_for: nil,
                      class: "mx-3",
                      data: checkbox_data)
@@ -67,6 +64,13 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
 
   def reviewed_text
     model.reviewed ? :marked_as_reviewed.l : :mark_as_reviewed.l
+  end
+
+  # The "_lb" suffix keeps this id distinct from lightGallery's clone
+  # of it in `.lg-sub-html` -- lightgallery_controller.js strips the
+  # suffix off the clone, so each copy's id stays unique.
+  def checkbox_id
+    "#{@selector}_#{model.observation_id}_lb"
   end
 
   def label_class_value

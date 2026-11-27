@@ -36,8 +36,7 @@
 module Views::Layouts
   class Header::PageTitle < Views::Base
     SHOW_TITLE_CLASSES =
-      "show_title_nav d-flex justify-content-start align-items-start " \
-      "px-card"
+      "show_title_nav d-flex justify-content-start align-items-start px-card"
 
     # Form pages (new/edit, plus a failed create/update redisplaying
     # the same form) need more breathing room below the title bar

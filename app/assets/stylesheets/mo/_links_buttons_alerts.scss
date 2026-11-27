@@ -262,6 +262,12 @@ a.badge-id[data-toggle="collapse"]:hover {
   color: $body-bg;
 }
 
+// Overrides Bootstrap's a.badge:focus, which sets white text with no
+// matching background and outranks .badge-id's color on specificity.
+a.badge-id:focus {
+  color: $text-color;
+}
+
 // Floors badge-id column width so digit-count variance doesn't drift
 // the title column's left edge row to row.
 .id-badge-col {
@@ -269,15 +275,15 @@ a.badge-id[data-toggle="collapse"]:hover {
 }
 
 // Wrapper for a group of inline mod/add links (Components::
-// InlineLinkBlock). Flex + gap spaces items evenly, no trailing
+// InlineIconBlock). Flex + gap spaces items evenly, no trailing
 // margin after the last item. vertical-align: middle aligns this
 // inline-flex box against adjacent inline text -- its default
 // vertical-align: baseline doesn't land near text's visual center,
 // which a flat margin-top (RESOLVED, don't reintroduce) can only
-// patch for one font-size at a time. .object_edit .inline-link-block
+// patch for one font-size at a time. .object_edit .inline-icon-block
 // (_content.scss) sets a margin-top separately, for spacing against
 // the heading above it, not this.
-.inline-link-block {
+.inline-icon-block {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
@@ -298,7 +304,7 @@ a.badge-id[data-toggle="collapse"]:hover {
 // Icon-only inline mod/add links (Components::InlineCRUDLinks).
 // mo-icon's usual size is tuned for looser contexts -- shrunk here.
 // The baseline correction against adjacent text lives on the
-// wrapping `.inline-link-block`'s margin-top, just above, not here.
+// wrapping `.inline-icon-block`'s margin-top, just above, not here.
 .inline-icon-link {
   display: inline-block;
   text-indent: 0;
