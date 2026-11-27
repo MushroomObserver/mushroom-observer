@@ -2,6 +2,14 @@
 // tables
 // --------------------------------------------------
 
+// Bootstrap's header-specific border-bottom (2px) on thead th stacks
+// with the first body row's border-top (1px) at the header/body
+// boundary, rendering as a doubled/thicker line. Drop it on every
+// table -- the body row's border-top supplies that boundary.
+.table > thead > tr > th {
+  border-bottom: 0;
+}
+
 // Cell padding matching a `.list-group-item` row. Pair with
 // Components::Table's variant: :lg.
 .table-lg {
@@ -14,11 +22,18 @@
   > thead > tr > th {
     padding-top: $table-cell-padding !important;
     padding-bottom: $table-cell-padding !important;
-    // Bootstrap's header-specific border-bottom (2px) stacks with
-    // the next row's border-top (1px) -- drop it so every row
-    // boundary, including thead -> tbody, gets just the 1px border.
-    border-bottom: 0;
   }
+}
+
+// A table rendered as a card's only content (no `.card-header` above
+// it, so `.table-responsive` is the card's first child -- e.g.
+// Components::Table's `panel_wrap` option, or a page that wraps a
+// bare table in a card via `content_padding(:panels)`) stacks the
+// card's border-top with the header `<th>`'s border-top (Bootstrap's
+// base `.table th` rule) on the same edge. Drop the header's -- the
+// card already supplies that line.
+.card > .table-responsive:first-child > .table > thead > tr > th {
+  border-top: 0;
 }
 
 thead tr {

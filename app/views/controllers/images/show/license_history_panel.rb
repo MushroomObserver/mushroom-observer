@@ -14,17 +14,15 @@ module Views::Controllers::Images
         return if chgs.empty?
 
         @chgs = chgs
-        Panel do |panel|
-          panel.with_body { render_table }
-        end
+        render_table
       end
 
       private
 
       def render_table
-        Table(history_rows,
-              variant: :striped, identifier: "license-history",
-              class: "table-responsive small", panel_wrap: false) do |t|
+        Table(history_rows, variant: :striped,
+                            identifier: "license-history",
+                            class: "small") do |t|
           t.column(:dates.ti) { |row| row[:dates] }
           t.column(:license.ti) { |row| trusted_html(row[:license_link]) }
           t.column(:copyright_holder.ti) { |row| trusted_html(row[:holder]) }
