@@ -4,10 +4,13 @@
 # Components::Table with two columns: info (title/place/user) and
 # action (REMOVE/ADD button or an observation count badge). Used by
 # `SpeciesLists::Index` and, via `Components::ObservationListManager`,
-# by `Observations::SpeciesLists::Edit`.
+# by `Observations::SpeciesLists::Edit` -- which passes `heading:` so
+# the first column header carries that section's heading text instead
+# of a separate element above the table.
 module Views::Controllers::SpeciesLists
   class SpeciesListTable < Views::Base
     prop :objects, _Array(::SpeciesList), :positional
+    prop :heading, _Nilable(String), default: nil
     prop :observation, _Nilable(::Observation), default: nil
     prop :remove, _Boolean, default: false
     prop :add, _Boolean, default: false
@@ -20,14 +23,16 @@ module Views::Controllers::SpeciesLists
 
     def view_template
       Table(@objects, variant: :lg) do |t|
-        t.column(:species_list.ti) { |list| render_info_cell(list) }
-        t.column(:observations.ti, align: :right) do |list|
-          render_action_cell(list)
-        end
+        t.column(first_column_header) { |list| render_info_cell(list) }
+        t.column("", align: :right) { |list| render_action_cell(list) }
       end
     end
 
     private
+
+    def first_column_header
+      @heading ? append_colon(@heading) : :species_list.ti
+    end
 
     def render_info_cell(species_list)
       render_title_row(species_list)
@@ -38,7 +43,7 @@ module Views::Controllers::SpeciesLists
       div(class: "d-flex align-items-center") do
         Link(type: :get, name: species_list.text_name.t,
              target: species_list.show_link_with_project(@project)) do
-          span(class: "list_what h4") do
+          span(class: "list_what h5") do
             trusted_html(species_list.text_name.t)
           end
         end

@@ -45,9 +45,9 @@ module Views::Controllers::Observations::SpeciesLists
         belongs_to_items: @obs_lists,
         not_contains_heading: :species_list_manage_doesnt_contain.l,
         not_contains_items: @other_lists
-      ) do |species_lists, remove, add|
+      ) do |species_lists, heading, remove, add|
         render(Views::Controllers::SpeciesLists::SpeciesListTable.new(
-                 species_lists, observation: @observation,
+                 species_lists, heading: heading, observation: @observation,
                                 remove: remove, add: add,
                                 manageable_ids: manageable_ids(species_lists)
                ))
