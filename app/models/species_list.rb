@@ -169,7 +169,7 @@ class SpeciesList < AbstractModel # rubocop:disable Metrics/ClassLength
       { comments: Comment.index_includes_tree },
       :interests,
       :location,
-      # Reuse the matrix-box subtree on observations so
+      # Reuse the grid-box subtree on observations so
       # `species_lists/projects` and `observations/species_lists`
       # can iterate and permission-check without lazy loads.
       # The `images` subtree mirrors `Observation.show_includes` so

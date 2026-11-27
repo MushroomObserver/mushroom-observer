@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 # Copy-to-clipboard ID badge: a `<button>` with a clipboard tooltip,
-# displayed next to an object's title (matrix box, project banner,
+# displayed next to an object's title (grid box, project banner,
 # species-list listing row, etc.). Clicking the badge copies the
 # numeric id into the clipboard.
 #
@@ -21,7 +21,7 @@
 #          (Projects::ProjectTable, SpeciesLists::SpeciesListTable)
 #   :lg -- copy-to-clipboard external-site record id (Link::External),
 #          Matching Observations panel row ids
-#   :md -- matrix box title and other index-row id badges (Grid::Box,
+#   :md -- grid box title and other index-row id badges (Grid::Box,
 #          Names::Index, Occurrences::Projects::Form)
 #   :sm -- sitting next to a large page-title heading
 #

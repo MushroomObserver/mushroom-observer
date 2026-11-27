@@ -110,7 +110,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       tab = ::Tab::Sequence::Archive.new(sequence: sequence)
       Components::Link::External.new(
         tab: tab, icon: :new_window,
-        class: Components::InlineLinkBlock.item_class
+        class: Components::InlineIconBlock.item_class(tab.html_options[:class])
       )
     end
 
@@ -122,7 +122,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
 
       Components::Button::Clipboard.new(
         text: sequence.bases, name: :copy_this_sequence.ti,
-        class: Components::InlineLinkBlock.item_class
+        class: Components::InlineIconBlock.item_class
       )
     end
   end

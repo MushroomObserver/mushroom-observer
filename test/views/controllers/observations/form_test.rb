@@ -168,6 +168,15 @@ module Views::Controllers::Observations
       assert_no_html(plain, "input[type='checkbox'][name='inat']")
     end
 
+    def test_edit_form_shows_log_change_checkbox
+      user = users(:rolf)
+      obs = observations(:detailed_unknown_obs)
+
+      html = render_form(observation: obs, user: user, mode: :update)
+
+      assert_html(html, "input[type='checkbox'][name='log_change']")
+    end
+
     # A field rendering empty submits empty, and notes_to_sym_and_compact
     # drops blank values — so failing to prefill these would silently
     # delete them on any edit.

@@ -134,7 +134,12 @@ See `.claude/rules/phlex_reference.md` for Phlex coding conventions.
 See `.claude/rules/testing.md` for test structure and component test patterns.
 See `.claude/rules/system_test_state_polling.md` for when to poll a
 Stimulus controller's state (via `evaluate_script`) instead of
-waiting on a DOM selector in a system test.
+waiting on a DOM selector in a system test — also the hard rule
+against `:not()` in any Capybara selector string.
+See `.claude/rules/system_test_flakiness.md` — system tests must be
+CI-ready with zero flake tolerance; fix flakiness via incremental
+DOM-change assertions or stubbing, not a longer wait, and don't
+leave it as "pre-existing" or "likely flaky."
 See `.claude/rules/sweeps.md` for PR-scope guidance on broad sweeps
 ("remove X from all models," "convert every Y") — don't self-limit
 scope below what the sweep already declared.
@@ -162,6 +167,9 @@ See `.claude/rules/ui_conventions.md` — new UI is built without seeing
 it: copy spacing and interaction affordances (field help, destructive
 icons) from a page that already does the job, and read the rendered
 markup before calling it done.
+See `.claude/rules/mo_terminology.md` — use the words MO uses for its
+records: anywhere in the codebase, say Observation rather than the
+noun this rule names. Enforced by a `PreToolUse` hook.
 See `.claude/rules/turbo_submit_forms.md` — pattern for converting a
 Phlex form to Turbo submission (issue #5052), including which failure
 paths need a `422` and how to test the conversion without a system

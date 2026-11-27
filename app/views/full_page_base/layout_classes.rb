@@ -86,9 +86,8 @@ module Views::FullPageBase::LayoutClasses
 
   # `index`/`show` actions default to `:panels` since their content
   # is conventionally wrapped in cards/panels already. Every
-  # `*::Search::New` view (`Herbaria::Search::New`,
-  # `Names::Search::New`, ...) is also always `Components::Form::
-  # Search`, entirely panel-wrapped, despite the `new` action name --
+  # `*::Search::New` view is also always `Components::Form::Search`,
+  # entirely panel-wrapped, despite the `new` action name --
   # recognized here so none of those views needs an explicit
   # `content_padding(:panels)` call.
   def default_content_has

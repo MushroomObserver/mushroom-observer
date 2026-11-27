@@ -2,7 +2,7 @@ import { Controller } from "@hotwired/stimulus"
 
 // Connects to data-controller="tooltip", once, on <body> -- every
 // tooltip trigger element on the page carries a `tip` TARGET of this
-// one instance, not its own controller. BS3 tooltips are "opt-in" and
+// one instance, not its own controller. Bootstrap tooltips are "opt-in" and
 // need per-element activation; Stimulus's own target tracking (a
 // MutationObserver scoped to this.element) calls tipTargetConnected
 // for every matching element automatically, whether it's present at
@@ -32,13 +32,17 @@ export default class extends Controller {
       ? element.closest(containerSelector) || false
       : false
     $(element).tooltip({ container })
+    element.addEventListener("click", this.hideOnClick)
 
     if (element.dataset.activeTitle) this.watchActiveTitle(element)
   }
 
-  tipTargetDisconnected(element) {
-    element.mo_activeTitleObserver?.disconnect()
-  }
+  // Bootstrap's default trigger is "hover focus" -- clicking a trigger
+  // gives it keyboard focus, which keeps the tooltip shown on its own
+  // even after the mouse moves away (no blur event fires just from a
+  // mouse leaving). Hide explicitly on click instead of waiting on a
+  // hover-out that may never come.
+  hideOnClick = (event) => $(event.currentTarget).tooltip("hide")
 
   // A stateful-link trigger (active_icon:/active_content:, see
   // Components::Button::Content) carries data-active-title alongside
@@ -60,5 +64,16 @@ export default class extends Controller {
     const observer = new MutationObserver(sync)
     observer.observe(element, { attributes: true, attributeFilter: ["class"] })
     element.mo_activeTitleObserver = observer
+  }
+
+  // A Turbo Stream `replace` on a vote button's ancestor swaps the
+  // trigger out from under an open tooltip without ever firing its
+  // hide/hover-out handlers, leaving the popup element orphaned in
+  // the DOM. Stimulus's target-tracking MutationObserver calls this
+  // whenever a `tip` target is removed, wherever that happens.
+  tipTargetDisconnected(element) {
+    element.removeEventListener("click", this.hideOnClick)
+    element.mo_activeTitleObserver?.disconnect()
+    $(element).tooltip("destroy")
   }
 }

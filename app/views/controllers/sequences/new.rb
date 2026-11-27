@@ -13,7 +13,7 @@ module Views::Controllers::Sequences
 
       Row do
         Column(xs: 12, sm: 7) { render_form_column }
-        Column(xs: 12, sm: 5) { render_matrix_column }
+        Column(xs: 12, sm: 5) { render_grid_column }
       end
     end
 
@@ -24,7 +24,7 @@ module Views::Controllers::Sequences
       render(Form.new(@sequence, observation: @observation))
     end
 
-    def render_matrix_column
+    def render_grid_column
       Row(element: :ul, class: "list-unstyled") do
         render(::Components::Grid::Box.new(
                  user: current_user,

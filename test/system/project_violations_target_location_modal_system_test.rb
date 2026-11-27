@@ -61,7 +61,10 @@ class ProjectViolationsTargetLocationModalSystemTest < ApplicationSystemTestCase
     open_target_location_modal(project, obs)
     within("##{modal_id}") do
       assert_selector(
-        "input[type='radio'][value='#{new_location.id}']:not([disabled])"
+        "input[type='radio'][value='#{new_location.id}']"
+      )
+      assert_no_selector(
+        "input[type='radio'][value='#{new_location.id}'][disabled]"
       )
       # No Create links anywhere in the fresh modal — both suffixes
       # now point at existing Locations.

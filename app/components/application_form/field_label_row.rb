@@ -5,28 +5,18 @@ class Components::ApplicationForm < Superform::Rails::Form
   module FieldLabelRow
     include Phlex::TrustedHtml
 
-    # The gap between adjacent elements in a label row (label, help
-    # icon, appends text) and between an inline row and its field.
-    # One spacing step, referenced everywhere instead of repeating the
-    # literal class string.
+    # One spacing step between adjacent label-row elements, and
+    # between an inline row and its field.
     GAP_TRAILING = "mr-2"
     GAP_LEADING = "ml-2"
 
-    # rubocop:disable MO/NoLongCommentBlock
-    # Three layouts depending on what the label row itself needs:
-    #
-    # - No label_appends/label_end: bare `<label>` (no wrap div noise).
-    # - Has label_appends but no label_end: `d-flex` wrap holding
-    #   label + appends inline, no `justify-content-between` --
-    #   meaningless without a right-side counterpart to space against.
-    # - Has label_end: `d-flex justify-content-between` with left
-    #   (label+appends) and right (label_end) children.
-    #
-    # `between` (block content between the label row and the field)
-    # and `help` (the field's explanation block) are NOT part of the
-    # label row — see FieldWrapperRendering and FieldWithHelp for
-    # where they render instead.
-    # rubocop:enable MO/NoLongCommentBlock
+    # Three layouts for the label row:
+    # - No appends/end: bare <label>.
+    # - Appends, no end: `d-flex` label+appends.
+    # - Has end: `d-flex justify-content-between`, appends left,
+    #   label_end right.
+    # `between`/`help` blocks aren't part of this row -- see
+    # FieldWrapperRendering/FieldWithHelp for those.
     def render_label_row(label_text, inline)
       if label_end_present?
         render_label_flex_row(label_text, inline)
@@ -46,14 +36,9 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     # Resolves `wrapper_options[:label]` to display text: an explicit
     # String wins as-is, a Symbol is translated via `.t`, otherwise the
-    # field's key, humanized.
-    #
-    # Callers wanting a title-cased field-prompt label pass an
-    # already-resolved String via `.ti` (`label: :name.ti`). A bare
-    # lowercase Symbol (`label: :prefs_no_emails`) goes through the
-    # `.t` branch instead, since some translations carry bold/italic
-    # textile markup that needs rendering, not title-casing (e.g.
-    # "Opt out of _all_ email from MO.").
+    # field's key, humanized. Callers wanting title-case pass an
+    # already-resolved String via `.ti`; a bare Symbol routes through
+    # `.t` since some translations carry textile markup to render.
     def resolved_label_text
       label_option = wrapper_options[:label]
       text = case label_option
@@ -64,16 +49,11 @@ class Components::ApplicationForm < Superform::Rails::Form
       open_label_links_in_new_tab(text)
     end
 
-    # A link inside a label navigates the user away from a
-    # partly-filled form, losing their input, so this forces
-    # `target="_blank"` (plus `rel="noopener noreferrer"`) rather than
-    # stripping the link: a translator writing ordinary Textile link
-    # syntax into a label string (the `donate_who` Spanish translation
-    # did this) has no way to know it lands in a `<label>`. Nested
-    # links inside `<label for="...">` are valid HTML, and browsers
-    # give the `<a>` click priority over the click-to-focus/toggle
-    # behavior -- `CheckboxField#label_text` gets the same treatment
-    # via `resolved_label_text`.
+    # A link inside a label would navigate away from a partly-filled
+    # form, so this forces `target="_blank"` (+ `rel="noopener
+    # noreferrer"`) instead of stripping it -- a translator's Textile
+    # link syntax can land here unaware it's inside a `<label>`.
+    # Browsers give the nested `<a>` click priority over the toggle.
     LINK_TAG_RE = /<a\b([^>]*)>/i
 
     def open_label_links_in_new_tab(text)
@@ -108,14 +88,10 @@ class Components::ApplicationForm < Superform::Rails::Form
       respond_to?(:label_end_slot) && label_end_slot
     end
 
-    # `between` (the .with_between slot) renders as a block, between
-    # the label row and the field -- shared here so every field type
-    # that declares slot :between calls the same one line, instead of
-    # each hand-rolled render_with_wrapper repeating (and drifting
-    # from) the same `render(between_slot) if between_slot`. Checkbox
-    # and radio fields intentionally don't call this -- their between
-    # content renders inside/beside the field itself (FieldWithHelp's
-    # render_between_slot), a different layout by design.
+    # Renders the .with_between slot as a block between the label row
+    # and the field. Checkbox/radio fields don't call this -- their
+    # between content renders inside/beside the field itself instead
+    # (FieldWithHelp#render_between_slot).
     def render_between_block
       return unless respond_to?(:between_slot) && between_slot
 
@@ -134,14 +110,10 @@ class Components::ApplicationForm < Superform::Rails::Form
       has_help_icon || wrapper_options[:label_appends]
     end
 
-    # `wrapper_options[:label_sr_only] == true` hides the label
-    # visually but keeps the `<label for="…">` association for screen
-    # readers -- use when a panel heading already names the field.
-    # `help_placement: :above` drops the label's bottom margin, since
-    # the help block renders directly below it instead.
-    # `trailing_margin: false` (render_label_with_appends) drops
-    # GAP_TRAILING too -- each append supplies a leading GAP_LEADING
-    # instead.
+    # `label_sr_only` hides the label visually but keeps the
+    # `<label for="…">` association. `help_placement: :above` drops
+    # the bottom margin. `trailing_margin: false` drops GAP_TRAILING
+    # too -- each append supplies a leading GAP_LEADING instead.
     def label_class(trailing_margin: true)
       base = if wrapper_options[:label_sr_only]
                "sr-only"
@@ -152,11 +124,8 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # help_placement: :above puts the help block between the label
-    # row and the field, instead of the default position after the
-    # field -- see FieldWithHelp#render_help_after_field. Reads
-    # wrapper_options directly (every field class exposes it via an
-    # attr_reader) so this works regardless of which other modules a
-    # field type includes.
+    # row and the field, instead of after the field -- see
+    # FieldWithHelp#render_help_after_field.
     def help_placement_above?
       wrapper_options[:help_placement] == :above
     end
@@ -177,11 +146,10 @@ class Components::ApplicationForm < Superform::Rails::Form
     end
 
     # An inline field (e.g. a select beside its label) needs trailing
-    # space between the appends row and the input that follows it.
-    # Applied once, on the outer row, so it doesn't compound with an
-    # append's leading margin. `inline-trailing-space` is a stable
-    # hook for tests to key off, independent of whichever margin
-    # utility supplies the space.
+    # space after the appends row. Applied once, on the outer row, so
+    # it doesn't compound with an append's leading margin.
+    # `inline-trailing-space` is a stable hook for tests to key off,
+    # independent of whichever margin utility supplies the space.
     def label_row_trailing_class
       return nil unless wrapper_options[:inline]
       return nil unless respond_to?(:help_slot) && help_slot &&
@@ -193,8 +161,7 @@ class Components::ApplicationForm < Superform::Rails::Form
     # d-flex align-items-center is needed since the label and appended
     # content are otherwise just inline siblings with no shared
     # vertical-alignment context. render_label_flex_row passes
-    # wrap_class: nil since it already supplies that class and already
-    # applied label_row_trailing_class to its outer div.
+    # wrap_class: nil since it already applied label_row_trailing_class.
     def render_label_with_appends(label_text,
                                   wrap_class: "label-row-with-appends",
                                   inline: false)

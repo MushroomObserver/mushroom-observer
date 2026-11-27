@@ -55,7 +55,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
     end
 
     def render_sibling_sequence_archive(sequence)
-      InlineLinkBlock(items: [archive_link(sequence)])
+      InlineIconBlock(items: [archive_link(sequence)])
     end
 
     def archive_link(sequence)
@@ -63,7 +63,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
         type: :external,
         content: :show_observation_archive_link.l,
         path: sequence.accession_url,
-        class: Components::InlineLinkBlock.item_class
+        class: Components::InlineIconBlock.item_class
       )
     end
   end

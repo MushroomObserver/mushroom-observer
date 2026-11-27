@@ -46,7 +46,6 @@ class Article < AbstractModel
     "#{user.name} (#{user.login})"
   end
 
-  # used by MatrixBoxPresenter to show orphaned obects
   def format_name(_user = nil)
     title
   end
@@ -56,7 +55,6 @@ class Article < AbstractModel
     title.to_s.t.html_to_ascii
   end
 
-  # used by MatrixBoxPresenter to show unorphaned obects
   def unique_format_name(_user = nil)
     string_with_id(title)
   end

@@ -129,19 +129,19 @@ module Views::Controllers::Occurrences
     end
 
     def render_edit_observation_grid
-      render_matrix_ul do
+      render_grid_ul do
         @observations.each { |obs| render_obs_box(obs) }
       end
     end
 
     def render_candidate_section
       h4(class: "mt-4") { plain(:edit_occurrence_add_heading.l) }
-      render_matrix_ul do
+      render_grid_ul do
         @candidates.each { |obs| render_obs_box(obs) }
       end
     end
 
-    def render_matrix_ul(&block)
+    def render_grid_ul(&block)
       Row(
         element: :ul,
         class: "list-unstyled mt-3",

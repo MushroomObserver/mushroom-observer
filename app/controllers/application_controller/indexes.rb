@@ -234,7 +234,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     [query_from_pattern(model_name, pattern), {}]
   end
 
-  # Render an index or set of search results as a list or matrix. Arguments:
+  # Render an index or set of search results as a list or grid. Arguments:
   # query::         Query instance describing search/index.
   # display_opts::  Hash of options.
   #
@@ -398,7 +398,7 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
   # efficient caching. Sending `cache: true` here to `show_index_of_objects`
   # allows us to optimize eager-loading, doing it only for records not cached.
   # (The other place is from the template to the `Grid::Box` render, which
-  # actually caches the HTML.)
+  # caches the HTML.)
   def find_objects(query, display_opts)
     logger.warn("QUERY starting: #{query.sql.inspect}")
     @timer_start = Time.current
@@ -443,13 +443,14 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
 
   # If caching, only uncached objects need to eager_load the includes
   def objects_with_only_needed_eager_loads(query, include)
-    # When Grid bypasses the cache for the whole request
-    # (identify mode, project-admin view), or `perform_caching` is
-    # off (the dev default, where low_level_cache always executes
-    # its block), every row needs the full eager loads anyway --
-    # skipping them here just adds a second query and, when caching
-    # is off, per-object N+1 fallbacks (e.g.
-    # NamingConsensus#use_local_namings).
+    # When Grid will bypass the cache for the whole request (identify
+    # mode, project-admin view), every row needs the full eager loads
+    # anyway -- the two-query pre-check shape is strictly more work
+    # than just paginating with the includes up front. Same story
+    # when `perform_caching` is off (the dev default): low_level_cache
+    # then always executes its block, so skipping eager-load here
+    # triggers per-object N+1 fallbacks (e.g.
+    # NamingConsensus#use_local_namings) for every object.
     unless grid_caches_in_this_request? && perform_caching?
       return query.paginate(@pagination_data, include: include)
     end
@@ -474,16 +475,23 @@ module ApplicationController::Indexes # rubocop:disable Metrics/ModuleLength
     objects_simple.collate_new_instances(objects_eager)
   end
 
+  # rubocop:disable MO/NoLongCommentBlock
   # Which of `objects` need eager-loading because their `Grid::Box`
-  # fragment isn't cached yet. One `read_multi` round trip covers
-  # every object's cache-key check, instead of one DB-backed
-  # `Rails.cache.exist?` query per object.
+  # fragment isn't already cached. One `read_multi` round trip covers
+  # every object's cache-key check, instead of one `Rails.cache.exist?`
+  # query per object (Solid Cache is DB-backed, so that was one SQL
+  # query per row on the index).
   #
-  # `objects_with_only_needed_eager_loads` (the only caller) already
-  # guarantees `grid_caches_in_this_request?`; an uncacheable
-  # object always needs eager-loading, no lookup needed. Uses the
-  # shared key from `Grid.cache_key_for` to match what
-  # `Grid#render_cached_boxes` writes.
+  # Gate: `grid_caches_in_this_request?` is already guaranteed true
+  # by this method's only caller (`objects_with_only_needed_eager_loads`
+  # returns early otherwise); `Grid.should_cache_object?`
+  # (per-object) is false when the object itself isn't cacheable (e.g.
+  # an Observation with an untransferred thumb image) -- those always
+  # need eager-loading, no cache lookup necessary.
+  #
+  # Uses the shared key from `Grid.cache_key_for` so the read
+  # matches what `Grid#render_cached_boxes` writes.
+  # rubocop:enable MO/NoLongCommentBlock
   def uncached_object_ids(objects, locale)
     cacheable, uncacheable = objects.partition do |obj|
       ::Components::Grid.should_cache_object?(obj)

@@ -124,7 +124,7 @@ class Components::Grid::Box
       end
     # log can be [] when notes is blank (e.g. an unsaved/edge-case
     # RssLog), which makes the indexing above (log.last[2], log[1],
-    # etc.) raise -- RssLog#detail used to rescue exactly this same
+    # etc.) raise -- RssLog#detail used to rescue this same
     # logic; restore the same dev-safe/production-raise protection
     # now that it's here instead.
     rescue StandardError => e

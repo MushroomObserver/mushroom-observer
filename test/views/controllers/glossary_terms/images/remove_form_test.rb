@@ -3,7 +3,7 @@
 require("test_helper")
 
 # Tests for Views::Controllers::GlossaryTerms::Images::RemoveForm
-# — bulk-removal matrix used by glossary term edit. Inherits
+# — bulk-removal grid used by glossary term edit. Inherits
 # Superform (PUT request, CSRF + _method emitted automatically).
 module Views::Controllers::GlossaryTerms::Images
   class RemoveFormTest < ComponentTestCase
@@ -53,13 +53,13 @@ module Views::Controllers::GlossaryTerms::Images
       end
     end
 
-    def test_renders_submit_button_below_matrix
+    def test_renders_submit_button_below_grid
       html = render_form
 
       assert_html(html, "button[type='submit']")
     end
 
-    def test_renders_matrix_with_one_box_per_image
+    def test_renders_grid_with_one_box_per_image
       html = render_form
 
       # Each Grid::Box contains the image preview + checkbox for one

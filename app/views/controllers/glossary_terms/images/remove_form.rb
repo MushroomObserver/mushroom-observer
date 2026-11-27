@@ -23,7 +23,7 @@ module Views::Controllers::GlossaryTerms::Images
 
     def view_template
       super do
-        render_image_matrix
+        render_image_grid
         submit_remove
       end
     end
@@ -38,7 +38,7 @@ module Views::Controllers::GlossaryTerms::Images
       submit(:image_remove_remove.l, center: true)
     end
 
-    def render_image_matrix
+    def render_image_grid
       Grid() do
         model.images.each { |image| render_image_cell(image) }
       end
@@ -71,7 +71,7 @@ module Views::Controllers::GlossaryTerms::Images
     # `selected[<image_id>]` with `"yes"`/`"no"` matches the existing
     # controller's expected param structure (see
     # `glossary_terms/images_controller.rb#detach`). Wraps each
-    # checkbox in MO's standard `.checkbox` BS3 markup.
+    # checkbox in MO's standard checkbox markup.
     def render_select_checkbox(image)
       checkbox_field("selected[#{image.id}]",
                      label: "#{:image.ti} ##{image.id}",

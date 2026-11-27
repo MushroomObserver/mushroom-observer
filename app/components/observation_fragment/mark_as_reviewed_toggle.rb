@@ -9,7 +9,7 @@
 #   ObservationFragment(type: :mark_as_reviewed_toggle,
 #                        observation_view: obs_view)
 #
-# @example Matrix box usage
+# @example Grid box usage
 #   ObservationFragment(type: :mark_as_reviewed_toggle,
 #                        observation_view: obs_view,
 #                        selector: "box_reviewed",
@@ -27,7 +27,7 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
           label_class: label_class,
           id: "#{selector}_form_#{observation_view.observation_id}",
           method: :put,
-          data: { controller: "reviewed-toggle" })
+          data: { reviewed_toggle_target: "form" })
   end
 
   def view_template
@@ -37,13 +37,10 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
                      label_class: label_class_value,
                      label_position: :before,
                      wrap_class: "d-inline",
-                     id: "#{@selector}_#{model.observation_id}",
-                     # The "caption" variant's id gets duplicated on
-                     # the page once its content is cloned into
-                     # lightGallery's caption snapshot -- an explicit
-                     # `for=` pointing at a duplicated id leaves label
-                     # clicks ambiguous. The checkbox is already
-                     # nested inside this label, which is sufficient.
+                     id: checkbox_id,
+                     # The checkbox is already nested inside this
+                     # label, so an explicit `for=` pointing at the
+                     # (deduped, but still shared) id isn't needed.
                      label_for: nil,
                      class: "mx-3",
                      data: checkbox_data)
@@ -51,7 +48,8 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
   end
 
   def around_template
-    div(class: "d-inline",
+    div(class: class_names("d-inline", stretched_link_class),
+        data: outer_data,
         id: "#{@selector}_toggle_#{model.observation_id}") do
       super
     end
@@ -69,8 +67,31 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
     model.reviewed ? :marked_as_reviewed.l : :mark_as_reviewed.l
   end
 
+  # The "_lb" suffix keeps this id distinct from lightGallery's clone
+  # of it in `.lg-sub-html` -- lightgallery_controller.js strips the
+  # suffix off the clone, so each copy's id stays unique.
+  def checkbox_id
+    "#{@selector}_#{model.observation_id}_lb"
+  end
+
   def label_class_value
-    ["caption-reviewed-link", @label_class].compact_blank.join(" ")
+    classes = ["caption-reviewed-link", @label_class]
+    classes.compact_blank.join(" ").split.reject { |c| c == "stretched-link" }.
+      join(" ")
+  end
+
+  def stretched?
+    @label_class.split.include?("stretched-link")
+  end
+
+  def stretched_link_class
+    "stretched-link" if stretched?
+  end
+
+  def outer_data
+    data = { controller: "reviewed-toggle" }
+    data[:action] = "click->reviewed-toggle#toggleCheckbox" if stretched?
+    data
   end
 
   def checkbox_data
