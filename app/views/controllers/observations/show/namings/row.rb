@@ -20,8 +20,8 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
   # `sm` (see `render_mobile_proposer_prefix`), and `xs:` for the
   # other three sums to 12 without it.
   COLUMN_WIDTHS = {
-    name: { xs: 5, sm: 4 },
-    proposer: { sm: 3 },
+    name: { xs: 5, sm: 5 },
+    proposer: { sm: 2 },
     votes: { xs: 3, sm: 2 },
     your_vote: { xs: 4, sm: 3 }
   }.freeze

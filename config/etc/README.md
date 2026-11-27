@@ -27,6 +27,7 @@ Two rules:
 | `nginx.conf` | web server | `/etc/nginx/nginx.conf` |
 | `puma.service` | web server | `/etc/systemd/system/puma.service` |
 | `solidqueue.service` | web server | `/etc/systemd/system/solidqueue.service` |
+| `policy.xml` | web server | `/etc/ImageMagick-6/policy.xml` (as root) — ImageMagick resource ceilings; see the note on the `disk` line for why it differs from the packaged file |
 | `rclone_originals.sh` | images server | `/data/images/mo/rclone/rclone_originals.sh`, run by `mo`'s crontab there (`15 1 * * *`) — nightly originals→GCS archive sync |
 | `bash_aliases.sh` | web server | sourced from `mo`'s shell profile |
 | `no-reply.forward` | web server | `~no-reply/.forward` — pipes mail to the autoreply |

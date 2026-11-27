@@ -110,7 +110,7 @@ class Views::Controllers::Observations::Show::SpecimenPanel
       tab = ::Tab::Sequence::Archive.new(sequence: sequence)
       Components::Link::External.new(
         tab: tab, icon: :new_window,
-        class: Components::InlineIconBlock.item_class
+        class: Components::InlineIconBlock.item_class(tab.html_options[:class])
       )
     end
 

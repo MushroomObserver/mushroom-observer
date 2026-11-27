@@ -1,2 +1,3 @@
-|{white-space:nowrap}. 2026-11-24 | Fix spacing and hover state on observation external-link id badges | "PR#5777":https://github.com/MushroomObserver/mushroom-observer/pull/5777 |
-|{white-space:nowrap}. 2026-11-23 | Collapse long iNat-imported data into a separate panel on observation pages | "PR#5776":https://github.com/MushroomObserver/mushroom-observer/pull/5776 |
+|{white-space:nowrap}. 2026-11-27 | Fix Project alert emails sometimes reporting old observations as new | "PR#5783":https://github.com/MushroomObserver/mushroom-observer/pull/5783 |
+|{white-space:nowrap}. 2026-11-27 | Fix failed uploads of very large photos | "PR#5801":https://github.com/MushroomObserver/mushroom-observer/pull/5801 |
+|{white-space:nowrap}. 2026-11-25 | Fix lookups of MO Names and Locations in iNat for Projects with many targets | "PR#5720":https://github.com/MushroomObserver/mushroom-observer/pull/5720 |

@@ -80,8 +80,8 @@ class Inat
 
     # Only a clean poll moves the watermark. A fetch that failed leaves
     # its window unread, and stamping over it would drop whatever was
-    # identified during it -- the rare find this cycle exists to catch.
-    # The next cycle re-covers the window instead.
+    # identified during it -- the rare observation this cycle exists
+    # to catch. The next cycle re-covers the window instead.
     def advance_watermark(candidates)
       return if @fetch_failed
 
@@ -113,13 +113,14 @@ class Inat
       return nil unless criterion.matches?(candidate)
 
       told = told_target_name(criterion, candidate)
-      return find_alert(criterion, candidate) unless told
+      return new_observation_alert(criterion, candidate) unless told
 
       activity_alert(criterion, candidate, told)
     end
 
-    # A project hears about a find only under a name it watches.
-    def find_alert(criterion, candidate)
+    # A project hears about a new observation only under a name it
+    # watches.
+    def new_observation_alert(criterion, candidate)
       identification = criterion.alertable_identification(candidate)
       return nil unless identification
 
@@ -129,8 +130,9 @@ class Inat
 
     # Once a project has been told about an observation, the newest
     # identification is news whatever it names: a temporary code
-    # applied to a find is what the coordinators confirm by hand, and
-    # it is reported whether or not the community taxon follows it.
+    # applied to one it holds is what the coordinators confirm by
+    # hand, and it is reported whether or not the community taxon
+    # follows it.
     # The message stays grouped under the watched name the project
     # was told, which is where a coordinator looks for it.
     def activity_alert(criterion, candidate, target_name)
@@ -153,9 +155,13 @@ class Inat
     # The name this project was told, and nil when it has not been told
     # about this observation -- one lookup answers both, since a row
     # carries no blank target_name.
+    #
+    # Asked of the whole ledger, not of the rows this poll wrote: an
+    # import records what a watching project would have been told, and
+    # a project already holding the observation hears about an edit on
+    # iNaturalist as activity on it.
     def told_target_name(criterion, candidate)
-      ProjectAlert.where(project: criterion.project, external_site: @site,
-                         remote_observation_id: candidate.id).
+      ProjectAlert.told_about_remote(criterion.project, @site, candidate.id).
         order(:id).last&.target_name
     end
 

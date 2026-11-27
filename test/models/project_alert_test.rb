@@ -63,7 +63,7 @@ class ProjectAlertTest < UnitTestCase
                  alert.message_key)
   end
 
-  def test_the_first_alert_for_an_observation_is_a_find
+  def test_the_first_alert_for_an_observation_is_new
     alert = record
 
     assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
@@ -71,7 +71,7 @@ class ProjectAlertTest < UnitTestCase
   end
 
   # A confirming or disagreeing identification on an observation the
-  # project has heard about is activity, not a find (#5677).
+  # project has heard about is activity, not news (#5677).
   def test_a_later_identification_on_the_same_observation_is_activity
     record
     alert = record(id: 1000)
@@ -82,14 +82,14 @@ class ProjectAlertTest < UnitTestCase
 
   # One project having heard about the observation says nothing about
   # another, which is hearing for the first time.
-  def test_another_project_hearing_about_the_observation_is_a_find
+  def test_another_project_hearing_about_the_observation_is_new
     record
     alert = record(id: 1000, project: projects(:eol_project))
 
     assert_equal(ProjectAlert::NEW_OBSERVATION, alert.kind)
   end
 
-  def test_a_different_observation_is_a_find
+  def test_a_different_observation_is_new
     record
     alert = record(id: 1000, obs_id: 12_346)
 
@@ -169,9 +169,9 @@ class ProjectAlertTest < UnitTestCase
                  record_local(observation: obs, target: comment).kind)
   end
 
-  # Each observation is its own find: a project that heard about one
+  # Each observation is news in itself: a project that heard about one
   # hears about the next as news, not as activity on the first.
-  def test_a_second_observation_from_mo_is_a_find
+  def test_a_second_observation_from_mo_is_new
     record_local(observation: observations(:coprinus_comatus_obs))
 
     other = observations(:agaricus_campestris_obs)
@@ -182,7 +182,7 @@ class ProjectAlertTest < UnitTestCase
 
   # Sites number their records independently, so the same number from
   # another site is a different observation.
-  def test_a_remote_id_from_another_site_is_a_find
+  def test_a_remote_id_from_another_site_is_new
     obs = observations(:agaricus_campestris_obs)
     ExternalLink.create!(user: users(:rolf), target: obs,
                          external_site: external_sites(:mycoportal),
@@ -194,8 +194,8 @@ class ProjectAlertTest < UnitTestCase
   end
 
   # An imported observation that iNaturalist already alerted on is not
-  # a find here, whatever happens to it next.
-  def test_an_observation_alerted_on_remotely_is_not_a_find_here
+  # new here, whatever happens to it next.
+  def test_an_observation_alerted_on_remotely_is_not_new_here
     obs = observations(:coprinus_comatus_obs)
     ExternalLink.create!(user: users(:rolf), target: obs,
                          external_site: @site, external_id: "12345")
@@ -203,6 +203,26 @@ class ProjectAlertTest < UnitTestCase
 
     assert_equal(ProjectAlert::OTHER_ACTIVITY,
                  record_local(observation: obs).kind)
+  end
+
+  # The other way round: a project told about MO's copy is not told
+  # about iNaturalist's as new. An import writes its row against the
+  # copy here, while the poll knows the record by the site's id alone.
+  def test_an_observation_told_about_here_is_not_new_remotely
+    obs = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: users(:rolf), target: obs,
+                         external_site: @site, external_id: "12345")
+    record_local(observation: obs)
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, record(obs_id: 12_345).kind)
+  end
+
+  # Without a link the site's record is nothing MO holds, so the id
+  # answers for itself.
+  def test_an_unlinked_remote_record_is_new
+    record_local(observation: observations(:coprinus_comatus_obs))
+
+    assert_equal(ProjectAlert::NEW_OBSERVATION, record(obs_id: 12_345).kind)
   end
 
   # A message groups its rows by the observation they are about, which
@@ -223,8 +243,8 @@ class ProjectAlertTest < UnitTestCase
   end
 
   # What an activity row says, per record and per source. An
-  # activity row always follows a find, since that is what makes it
-  # activity, so each case is set up with the row before it.
+  # activity row always follows a new observation, since that is what
+  # makes it activity, so each case is set up with the row before it.
   def test_a_comment_says_so
     obs = observations(:coprinus_comatus_obs)
     reported(obs)
@@ -289,7 +309,7 @@ class ProjectAlertTest < UnitTestCase
   # Only a naming or an identification confirms a name. A row with
   # neither has nothing to report and reads as it did before, which
   # needs the Observation hook to stop being create-only: today a
-  # row targeting the Observation is always the find.
+  # row targeting the Observation is always the new one.
   def test_an_unchanged_name_says_nothing
     obs = observations(:coprinus_comatus_obs)
     reported(obs, target: namings(:coprinus_comatus_naming))
@@ -302,7 +322,7 @@ class ProjectAlertTest < UnitTestCase
   # is flagged, which is the decision the coordinators asked for.
   def test_a_site_row_reads_against_the_row_before_it
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Coprinus comatus")
+    remote_new(site, name: "Coprinus comatus")
 
     moved = remote_activity(site, name: "Agaricus campestris")
 
@@ -314,7 +334,7 @@ class ProjectAlertTest < UnitTestCase
 
   def test_a_name_the_project_does_not_watch_is_flagged
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Coprinus comatus")
+    remote_new(site, name: "Coprinus comatus")
 
     moved = remote_activity(site, name: "Helvella macropus")
 
@@ -330,7 +350,7 @@ class ProjectAlertTest < UnitTestCase
   # after it cannot speak for it.
   def test_a_row_reads_against_the_row_before_it_not_after
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Coprinus comatus")
+    remote_new(site, name: "Coprinus comatus")
     moved = remote_activity(site, name: "Agaricus campestris")
     remote_row(site, name: "Peltigera", ident: "3",
                      kind: ProjectAlert::OTHER_ACTIVITY)
@@ -348,7 +368,7 @@ class ProjectAlertTest < UnitTestCase
     site = external_sites(:inaturalist)
     ProjectTargetName.create!(project: projects(:rare_fungi_project),
                               name: names(:agaricus))
-    remote_find(site, name: "Coprinus comatus")
+    remote_new(site, name: "Coprinus comatus")
 
     moved = remote_activity(site, name: "Agaricus campestrus")
 
@@ -360,7 +380,7 @@ class ProjectAlertTest < UnitTestCase
 
   def test_an_agreeing_identification_confirms_the_name
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Coprinus comatus")
+    remote_new(site, name: "Coprinus comatus")
 
     agreed = remote_activity(site, name: "Coprinus comatus")
 
@@ -372,7 +392,7 @@ class ProjectAlertTest < UnitTestCase
   # not watch it yet, so the row says so.
   def test_a_provisional_code_reads_as_one
     site = external_sites(:inaturalist)
-    remote_find(site, name: "Coprinus comatus")
+    remote_new(site, name: "Coprinus comatus")
     code = remote_activity(site, name: "Russula sp-NY01")
     code.update!(provisional: true)
 
@@ -384,18 +404,18 @@ class ProjectAlertTest < UnitTestCase
     )
   end
 
-  # A find says an observation arrived; the row adds nothing.
-  def test_a_find_has_no_activity_phrase
+  # A new observation's message says it arrived; the row adds nothing.
+  def test_a_new_observation_has_no_activity_phrase
     obs = observations(:coprinus_comatus_obs)
 
     assert_nil(reported(obs).activity_phrase)
   end
 
-  # The find this project was told first, which later activity on
+  # The first thing this project was told, which later activity on
   # the same observation reads against. Its target is given, since
   # the unique index on (project, target) allows one row per record:
   # an activity row with an Observation target exists only where the
-  # find was raised by a naming or a comment.
+  # new observation was raised by a naming or a comment.
   def reported(obs, target: obs, name: nil)
     ProjectAlert.create!(
       project: projects(:rare_fungi_project), observation: obs,
@@ -406,7 +426,7 @@ class ProjectAlertTest < UnitTestCase
     )
   end
 
-  def remote_find(site, name:)
+  def remote_new(site, name:)
     remote_row(site, name: name, ident: "1",
                      kind: ProjectAlert::NEW_OBSERVATION)
   end

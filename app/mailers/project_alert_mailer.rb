@@ -7,8 +7,9 @@
 # A digest rather than a message per identification: a taxon swap on
 # iNat landing on a watched name would be surprising, but it is the
 # case that would otherwise flood an inbox. The subject names the
-# watched name and says whether this is a find or later activity on
-# something already reported (#5677) -- what a coordinator needs to
+# watched name and says whether this is a new observation or later
+# activity on something already reported (#5677) -- what a
+# coordinator needs to
 # decide how soon to follow it up. The count and the projects stay in
 # the body, since neither changes what they do about it.
 class ProjectAlertMailer < ApplicationMailer
@@ -25,8 +26,8 @@ class ProjectAlertMailer < ApplicationMailer
 
   SUBJECT_TAGS = {
     ProjectAlert::NEW_OBSERVATION =>
-      { one: :email_subject_project_alert_find_one,
-        many: :email_subject_project_alert_find },
+      { one: :email_subject_project_alert_new_one,
+        many: :email_subject_project_alert_new },
     ProjectAlert::OTHER_ACTIVITY =>
       { one: :email_subject_project_alert_activity_one,
         many: :email_subject_project_alert_activity }
