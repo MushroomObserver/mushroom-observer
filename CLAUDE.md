@@ -167,6 +167,9 @@ See `.claude/rules/ui_conventions.md` — new UI is built without seeing
 it: copy spacing and interaction affordances (field help, destructive
 icons) from a page that already does the job, and read the rendered
 markup before calling it done.
+See `.claude/rules/mo_terminology.md` — use the words MO uses for its
+records: anywhere in the codebase, say Observation rather than the
+noun this rule names. Enforced by a `PreToolUse` hook.
 See `.claude/rules/turbo_submit_forms.md` — pattern for converting a
 Phlex form to Turbo submission (issue #5052), including which failure
 paths need a `422` and how to test the conversion without a system

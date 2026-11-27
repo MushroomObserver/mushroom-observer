@@ -11,9 +11,9 @@ class ProjectAlertMailerTest < MailerTestCase
     @site = external_sites(:inaturalist)
   end
 
-  def find_subject_one
-    :email_subject_project_alert_find_one.l(name: "Coprinus comatus",
-                                            site: @site.name)
+  def new_subject_one
+    :email_subject_project_alert_new_one.l(name: "Coprinus comatus",
+                                           site: @site.name)
   end
 
   def alert(**args)
@@ -49,7 +49,7 @@ class ProjectAlertMailerTest < MailerTestCase
 
     mail = ProjectAlertMailer.build(receiver: mary, alerts: [alert]).message
 
-    assert_equal("[MO] #{find_subject_one}", mail.subject)
+    assert_equal("[MO] #{new_subject_one}", mail.subject)
     assert_includes(mail.to, mary.email)
     assert_html_mail(mail)
     body = mail.body.to_s
@@ -144,9 +144,9 @@ class ProjectAlertMailerTest < MailerTestCase
     )
   end
 
-  # A find's message already says an observation arrived, so its row
+  # A new observation's message already says it arrived, so its row
   # keeps the plain shape with nothing appended.
-  def test_a_find_row_says_nothing_about_what_happened
+  def test_a_new_observation_row_says_nothing_about_what_happened
     body = ProjectAlertMailer.build(receiver: mary,
                                     alerts: [alert]).message.body.to_s
 
@@ -167,7 +167,7 @@ class ProjectAlertMailerTest < MailerTestCase
     mail = ProjectAlertMailer.build(receiver: mary, alerts: others).message
 
     assert_equal(
-      "[MO] #{:email_subject_project_alert_find.l(
+      "[MO] #{:email_subject_project_alert_new.l(
         name: "Coprinus comatus", site: @site.name
       )}",
       mail.subject
@@ -178,7 +178,7 @@ class ProjectAlertMailerTest < MailerTestCase
     assert_includes(body, "Agaricus campestris")
   end
 
-  # The subject names the watched name and whether this is a find or
+  # The subject names the watched name and whether this is new or
   # later activity, which is what says how soon to follow it up
   # (#5677). The count and the projects stay in the body.
   def test_an_activity_message_says_so
@@ -220,8 +220,8 @@ class ProjectAlertMailerTest < MailerTestCase
     body = mail.body.to_s
 
     assert_equal(
-      "[MO] #{:email_subject_project_alert_find_one.l(name: "Coprinus",
-                                                      site: @site.name)}",
+      "[MO] #{:email_subject_project_alert_new_one.l(name: "Coprinus",
+                                                     site: @site.name)}",
       mail.subject
     )
     assert_includes(body, "Coprinus comatus")
@@ -239,7 +239,7 @@ class ProjectAlertMailerTest < MailerTestCase
 
     mail = ProjectAlertMailer.build(receiver: mary, alerts: alerts).message
 
-    assert_equal("[MO] #{find_subject_one}", mail.subject)
+    assert_equal("[MO] #{new_subject_one}", mail.subject)
     body = mail.body.to_s
 
     assert_includes(body, @project.title)
@@ -247,8 +247,8 @@ class ProjectAlertMailerTest < MailerTestCase
     assert_equal(1, body.scan("/observations/12345").size)
   end
 
-  # Newest observation first, with the undated ones after -- the recent
-  # find is the one an admin may still be able to do something about.
+  # Newest observation first, with the undated ones after -- the
+  # recent one is what an admin may still be able to act on.
   def test_rows_run_newest_first_with_undated_last
     alerts = [
       alert(observed_on: nil, remote_identification_id: "1002",

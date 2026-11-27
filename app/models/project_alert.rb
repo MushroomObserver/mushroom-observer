@@ -13,8 +13,8 @@
 #
 #  It also holds what the message said: the name applied, the watched
 #  name it matched, the date the mushroom was seen, and which of the
-#  two messages it went in (#5677) -- a find, or activity on an
-#  observation already reported.
+#  two messages it went in (#5677) -- a new observation, or
+#  activity on one already reported.
 #
 #  == Class methods
 #
@@ -30,7 +30,7 @@
 #  url::               where to read the observation
 #  source_name::       the site it came from, or this one
 #  observation_key::   what groups rows about one observation
-#  new_observation?::  is this a find rather than later activity
+#  new_observation?::  is this new rather than later activity
 #  message_key::       which message this alert belongs in
 #
 class ProjectAlert < AbstractModel
@@ -131,20 +131,19 @@ class ProjectAlert < AbstractModel
     Thread.current[:project_alerts_suppressed] || false
   end
 
-  # A find the first time, activity after that: a project told about an
+  # New the first time, activity after that: a project told about an
   # observation hears about a confirming or disagreeing identification
   # on it as activity, not as something new.
   def self.kind_for(project, external_site, observation_id)
-    told = exists?(project: project, external_site: external_site,
-                   remote_observation_id: observation_id)
+    told = told_about_remote(project, external_site, observation_id).exists?
     told ? OTHER_ACTIVITY : NEW_OBSERVATION
   end
 
   # An observation imported from a site carries that site's id for it,
-  # so a project told about it there does not hear about it again as a
-  # find here.
+  # so a project told about it there does not hear about it again as
+  # new here.
   #
-  # A comment is no find either: what makes an observation the
+  # A comment is nothing new either: what makes an observation the
   # project's business is a watched name arriving on it, not somebody
   # talking about it.
   def self.local_kind_for(project, observation, target = nil)
@@ -166,6 +165,29 @@ class ProjectAlert < AbstractModel
   # nothing.
   def self.last_alert_for(project, observation)
     told_about(project, observation).order(:id).last
+  end
+
+  # The same question asked of the site's record: what this project has
+  # been told about the observation the site calls this id, whichever
+  # source said so. The poll knows a record by that id alone, while an
+  # import writes its row against MO's copy, so the copy is looked up
+  # for the two to answer alike.
+  def self.told_about_remote(project, external_site, remote_observation_id)
+    remote = where(project: project, external_site: external_site,
+                   remote_observation_id: remote_observation_id.to_s)
+    linked_observations(external_site, remote_observation_id).
+      reduce(remote) { |rows, obs| rows.or(told_about(project, obs)) }
+  end
+
+  # MO's copies of the site's record. More than one is possible: the
+  # site's duplicate uploads of one collection may be linked to
+  # separate observations here.
+  def self.linked_observations(external_site, remote_observation_id)
+    ids = ExternalLink.where(external_site: external_site,
+                             target_type: "Observation",
+                             external_id: remote_observation_id.to_s).
+          pluck(:target_id)
+    Observation.where(id: ids)
   end
 
   # A remote id means something only with the site that issued it, so
@@ -223,8 +245,8 @@ class ProjectAlert < AbstractModel
   # What happened, for a row of an activity message: a coordinator
   # told that something changed wants to know what. A proposal names
   # what was proposed; otherwise the answer is what the name did,
-  # against the name this project was last told. Nil for a find,
-  # whose message already says an observation arrived.
+  # against the name this project was last told. Nil for a new
+  # observation, whose message already says one arrived.
   def activity_phrase
     return nil unless kind == OTHER_ACTIVITY
     return :email_project_alert_what_comment.l if target_type == "Comment"
