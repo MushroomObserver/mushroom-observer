@@ -149,8 +149,9 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_equal(@coprinus.text_name, alert.target_name)
   end
 
-  # A temporary code applied to a find is what the coordinators
-  # confirm by hand, so it alerts even though the project watches no
+  # A temporary code applied to an observation a project holds is
+  # what the coordinators confirm by hand, so it alerts even though
+  # the project watches no
   # such name -- the row says it is untracked rather than adding it
   # (#5705).
   def test_an_untracked_identification_alerts_as_activity
@@ -173,7 +174,7 @@ class Inat::AlertScannerTest < UnitTestCase
   end
 
   # A confirming identification on an observation the project has
-  # already been told about is activity, not a find (#5677).
+  # already been told about is activity, not news (#5677).
   def test_a_later_identification_is_other_activity
     alerting_row
     stub_observations([observation])
@@ -190,7 +191,7 @@ class Inat::AlertScannerTest < UnitTestCase
 
   # An observation a project already holds was surfaced to it when it
   # was added, so an edit on iNaturalist is activity on it rather than
-  # a find -- whichever source wrote the row saying the project knows
+  # new -- whichever source wrote the row saying the project knows
   # about it.
   def test_an_observation_mo_already_holds_alerts_as_activity
     alerting_row
@@ -248,7 +249,7 @@ class Inat::AlertScannerTest < UnitTestCase
   end
 
   # iNat withholds the point for an obscured observation, and a rare
-  # find is the case where an admin most wants to hear.
+  # species is the case where an admin most wants to hear.
   def test_an_observation_without_coordinates_alerts
     alerting_row
     stub_observations([observation("location" => nil)])

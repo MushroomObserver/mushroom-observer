@@ -38,8 +38,8 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
 
   INTRO_TAGS = {
     ::ProjectAlert::NEW_OBSERVATION =>
-      { one: :email_project_alert_find_intro_one,
-        many: :email_project_alert_find_intro },
+      { one: :email_project_alert_new_intro_one,
+        many: :email_project_alert_new_intro },
     ::ProjectAlert::OTHER_ACTIVITY =>
       { one: :email_project_alert_activity_intro_one,
         many: :email_project_alert_activity_intro }
@@ -47,8 +47,8 @@ class Views::Mailers::ProjectAlertMailer < Views::Mailers::Base
 
   # Keyed by whether the row has a date -- iNat does not always have
   # one, and "observed unknown" is worse than saying so -- and by
-  # whether it says what happened, which a find's row leaves to its
-  # message.
+  # whether it says what happened, which a new observation's row
+  # leaves to its message.
   ROW_TAGS = {
     [true, true] => :email_project_alert_row_activity,
     [true, false] => :email_project_alert_row,
