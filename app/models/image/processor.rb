@@ -31,6 +31,10 @@ class Image
     # Store Exiftool's database in a temporary directory.
     MiniExiftool.pstore_dir = Rails.root.join("tmp").to_s
 
+    # EXIF orientations that leave nothing to reorient: no tag, or one
+    # that already reads top-left.
+    UPRIGHT_ORIENTATIONS = %w[Undefined TopLeft].freeze
+
     # Source, destination sizes and quality settings for each conversion.
     SIZE_CONVERSIONS = [
       ["full_size", "huge", 1280, 93],
@@ -284,13 +288,26 @@ class Image
       layers.each { |layer| File.delete(layer) }
     end
 
+    # `mogrify -auto-orient` decodes the whole frame, and the pixel cache
+    # is 8 bytes a pixel at quantum-16: 732MB for a 90MP upload, twice
+    # over while the transform builds its result. That exceeded the 1GiB
+    # disk ceiling ImageMagick shipped in its policy (config/etc/policy.xml
+    # carries the raised copy), and the upload failed. Reading the
+    # orientation first costs a header read, and most uploads are already
+    # upright, so they no longer pay for the decode.
     def auto_orient_if_needed(filepath)
-      file_to_orient = MiniMagick::Image.open(filepath)
-      original_orientation = file_to_orient["%[orientation]"]
-      file_to_orient.auto_orient
-      new_orientation = file_to_orient["%[orientation]"]
+      return if UPRIGHT_ORIENTATIONS.include?(orientation_of(filepath))
 
-      file_to_orient.write(filepath) if original_orientation != new_orientation
+      file_to_orient = MiniMagick::Image.open(filepath)
+      file_to_orient.auto_orient
+      file_to_orient.write(filepath)
+    end
+
+    # `identify` reads the EXIF tag from the header without decoding the
+    # image. MiniMagick::Image.new wraps the path in place; .open would
+    # copy the file to /tmp first.
+    def orientation_of(filepath)
+      MiniMagick::Image.new(filepath)["%[orientation]"]
     end
 
     # This also sets transferred to false to save db writes.
