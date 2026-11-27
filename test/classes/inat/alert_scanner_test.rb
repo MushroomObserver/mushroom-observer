@@ -188,6 +188,26 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_equal("12345", alert.remote_observation_id)
   end
 
+  # An observation a project already holds was surfaced to it when it
+  # was added, so an edit on iNaturalist is activity on it rather than
+  # a find -- whichever source wrote the row saying the project knows
+  # about it.
+  def test_an_observation_mo_already_holds_alerts_as_activity
+    alerting_row
+    held = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: @recipient, target: held,
+                         external_site: @site, external_id: "12345")
+    ProjectAlert.record_local(project: @project, observation: held,
+                              target: held, proposal: { name: "Coprinus" },
+                              target_name: @coprinus.text_name)
+    stub_observations([observation])
+
+    alert = scan.values.first.first
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, alert.kind)
+    assert_equal(@coprinus.text_name, alert.target_name)
+  end
+
   # The row is what says a project has been told, so a later edit to
   # the same observation is not a second alert.
   def test_an_identification_already_alerted_on_is_skipped

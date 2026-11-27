@@ -205,6 +205,26 @@ class ProjectAlertTest < UnitTestCase
                  record_local(observation: obs).kind)
   end
 
+  # The other way round: a project told about MO's copy is not told
+  # about iNaturalist's as a find. An import writes its row against the
+  # copy here, while the poll knows the record by the site's id alone.
+  def test_an_observation_told_about_here_is_not_a_find_remotely
+    obs = observations(:coprinus_comatus_obs)
+    ExternalLink.create!(user: users(:rolf), target: obs,
+                         external_site: @site, external_id: "12345")
+    record_local(observation: obs)
+
+    assert_equal(ProjectAlert::OTHER_ACTIVITY, record(obs_id: 12_345).kind)
+  end
+
+  # Without a link the site's record is nothing MO holds, so the id
+  # answers for itself.
+  def test_an_unlinked_remote_record_is_a_find
+    record_local(observation: observations(:coprinus_comatus_obs))
+
+    assert_equal(ProjectAlert::NEW_OBSERVATION, record(obs_id: 12_345).kind)
+  end
+
   # A message groups its rows by the observation they are about, which
   # each source names its way.
   def test_observation_key_names_the_source_copy
