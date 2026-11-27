@@ -85,6 +85,27 @@ class Inat::AlertScannerTest < UnitTestCase
     assert_not_requested(:get, inat_api_matcher("observations"))
   end
 
+  # A target refresh reopens one window for one taxon when iNat moves a
+  # saved id. The watermark has to stay where it is: advancing it to now
+  # would step over whatever the ordinary poll has not reached.
+  def test_a_windowed_scan_asks_for_one_taxon_and_leaves_the_watermark
+    alerting_row
+    stub_observations([observation])
+    watermark = @site.last_alert_poll_at
+    since = 3.days.ago
+
+    Inat::AlertScanner.new(site: @site, since: since,
+                           taxon_ids: [47_347]).scan
+
+    assert_equal(watermark.to_i, @site.reload.last_alert_poll_at.to_i,
+                 "a windowed scan must not move the watermark")
+    assert_requested(:get, inat_api_matcher("observations")) do |request|
+      query = Rack::Utils.parse_query(URI(request.uri).query)
+      query["taxon_id"] == "47347" &&
+        Time.iso8601(query["updated_since"]).to_i == since.to_i
+    end
+  end
+
   # A cycle watches the targets with a saved lookup and queues the
   # lookups for the rest, rather than asking iNat itself.
   def test_targets_with_no_saved_lookup_are_queued_for_lookup

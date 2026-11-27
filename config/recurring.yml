@@ -20,6 +20,17 @@ production:
   inat_alert_cycle:
     class: InatAlertCycleJob
     schedule: every 10 minutes
+  # Re-confirms saved iNat target lookups, longest unconfirmed first.
+  # A taxon swap on iNaturalist leaves the id MO saved deactivated, and
+  # the alert poll then asks for a taxon nothing is identified as -- see
+  # InatTargetRefreshJob. The whole corpus is about 461 lookups, so one
+  # run a day covers it at iNat's one-per-second pace. On the
+  # inat_lookups queue with its own worker, so the stagger the
+  # maintenance jobs below care about does not apply; off the :00/:03
+  # marks anyway.
+  refresh_inat_target_lookups:
+    class: InatTargetRefreshJob
+    schedule: every day at 2:41am
   recover_stuck_inat_imports:
     class: InatImportRecoveryJob
     # schedule must match InatImport::STUCK_THRESHOLD

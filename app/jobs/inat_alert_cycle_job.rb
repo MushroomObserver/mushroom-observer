@@ -24,12 +24,7 @@ class InatAlertCycleJob < ApplicationJob
   def perform
     scanner = Inat::AlertScanner.new
     digests = scanner.scan
-    # Split per watched name and kind, and sent, the same way an
-    # action's alerts are (ProjectAlert.deliver_digests).
-    digests.each do |receiver, alerts|
-      alerts.group_by(&:message_key).
-        each_value { |message| ProjectAlert.deliver(receiver, message) }
-    end
+    ProjectAlert.deliver_scanned(digests)
     log("InatAlertCycleJob: #{scanner.alerts_sent} alerts, " \
         "#{digests.size} recipients")
     scanner.warnings.each { |message| alert(message) }

@@ -25,6 +25,10 @@ class InatTargetLookup < ApplicationRecord
   validates :matching_version, presence: true
   validates :checked_at, presence: true
 
+  # Longest unconfirmed first, which is the order a bounded daily
+  # re-confirmation works in.
+  scope :by_staleness, -> { order(:checked_at, :id) }
+
   class << self
     # The saved answer for this target under the current matching
     # rules: the iNat id, false when iNaturalist knew nothing, or nil

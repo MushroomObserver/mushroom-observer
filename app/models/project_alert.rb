@@ -96,6 +96,16 @@ class ProjectAlert < AbstractModel
     end
   end
 
+  # Digests as `Inat::AlertScanner` returns them, already keyed by
+  # receiver, split per watched name and kind the way `deliver_digests`
+  # splits a flat list.
+  def self.deliver_scanned(digests)
+    digests.each do |receiver, alerts|
+      alerts.group_by(&:message_key).
+        each_value { |message| deliver(receiver, message) }
+    end
+  end
+
   def self.by_recipient(alerts)
     digests = Hash.new { |hash, user| hash[user] = [] }
     alerts.compact.each do |alert|

@@ -38,11 +38,18 @@ class Inat
     # `page_size` and `max_pages` are arguments rather than constants
     # read directly so a test can drive the overflow path without
     # fabricating a thousand results.
+    # `since` and `taxon_ids` reopen one window for one taxon, which a
+    # target refresh needs when iNat moves a saved id: the watermark has
+    # advanced past the stale period, so the ordinary poll cannot reach
+    # the observations the swap moved. A scan given a window leaves the
+    # watermark where it is.
     def initialize(site: ExternalSite.inaturalist, page_size: MAX_PER_PAGE,
-                   max_pages: MAX_PAGES)
+                   max_pages: MAX_PAGES, since: nil, taxon_ids: nil)
       @site = site
       @page_size = page_size
       @max_pages = max_pages
+      @window = since
+      @only_taxa = taxon_ids
       @alerts_sent = 0
       @warnings = []
       @overflowed = false
@@ -60,12 +67,12 @@ class Inat
       # Stamped before the fetch, so anything identified while this run
       # is in flight is caught by the next one.
       @polled_at = Time.zone.now
-      @since = @site.last_alert_poll_at
+      @since = @window || @site.last_alert_poll_at
       return seed_watermark if @since.nil?
 
       candidates = fetch_candidates(criteria)
       digests = collect(criteria, candidates)
-      advance_watermark(candidates)
+      advance_watermark(candidates) unless @window
       digests
     end
 
@@ -170,7 +177,7 @@ class Inat
     # date, because a target name can be applied years after the
     # upload -- measured, one in seven arrives more than a day later.
     def fetch_candidates(criteria)
-      taxa = criteria.flat_map(&:taxon_ids).uniq
+      taxa = @only_taxa || criteria.flat_map(&:taxon_ids).uniq
       return [] if taxa.empty?
 
       pages(taxa).map { |result| Inat::AlertCandidate.new(result) }

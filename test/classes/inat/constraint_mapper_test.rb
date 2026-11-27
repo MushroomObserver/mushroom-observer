@@ -304,24 +304,21 @@ class Inat::ConstraintMapperTest < UnitTestCase
 
   # The job paces its lookups against iNat's rate limit, and is told
   # about each answer so it can report progress.
-  def test_lookups_are_paced_and_reported
+  # Pacing is the search's job and is tested there; this is the
+  # mapper's half, reporting each answer as it arrives.
+  def test_each_lookup_is_reported
     stub_taxon("Coprinus comatus", 47_347)
     stub_taxon("Agaricus campestris", 48_701)
     stub_json("places", [])
     answers = []
-    pauses = []
-    mapper = Inat::ConstraintMapper.new(@project, look_up: true, pace: 3) do |m|
+    mapper = Inat::ConstraintMapper.new(@project, look_up: true) do |m|
       answers << m.new_answers
     end
 
-    mapper.stub(:sleep, ->(seconds) { pauses << seconds }) do
-      mapper.look_up_targets
-    end
+    mapper.look_up_targets
 
-    expected = (1..mapper.target_count).to_a
-    assert_equal(expected, answers, "Each answer should be reported")
-    assert_equal([3] * (mapper.target_count - 1), pauses,
-                 "Every lookup after the first should wait")
+    assert_equal((1..mapper.target_count).to_a, answers,
+                 "Each answer should be reported")
   end
 
   def test_a_failed_place_lookup_is_not_reported
