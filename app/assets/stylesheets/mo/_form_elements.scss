@@ -307,12 +307,41 @@ form {
   }
 }
 
-// date selects: individual fields not full-width even on mobile
-.form-inline.date-selects {
+// Provisional, opt-in fix for a `.form-inline` field that shouldn't
+// stack below the `sm` breakpoint. Bootstrap's `.form-inline` is
+// `display: flex` at every width, but the "inline-block all the
+// things" treatment for `.form-group`/`.form-control`/`label` only
+// kicks in at `sm` and up -- below that, `.form-control`'s base
+// `width: 100%` pushes a field onto a separate line. Applies that
+// treatment unconditionally, scoped to this class alone so it
+// doesn't need a `.form-inline` ancestor on the same element. Apply
+// via `wrap_class: "form-inline-xs"` on a field helper, or add it
+// directly to a hand-rolled `.form-inline` wrapper's class list.
+//
+// TODO(bs4-cutover or follow-up): if this turns out to be the right
+// behavior for every `.form-inline` use rather than a per-field
+// opt-in, fold it into `.form-inline` and delete this class --
+// every current `form-inline-xs` caller is named so that sweep is
+// just deleting the class references, not rewriting rules.
+.form-inline-xs {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  margin-bottom: 0;
+
   .form-control {
     display: inline-block;
     width: auto;
     vertical-align: middle;
+  }
+
+  // Zeroes a nested .form-group's margin-bottom -- TextField's
+  // `inline: true` puts `form-inline-xs` on a `.form-inline` ancestor
+  // div around the field's `.form-group` (FieldWrapperRendering#
+  // render_with_wrapper).
+  .form-group {
+    margin-bottom: 0;
   }
 }
 

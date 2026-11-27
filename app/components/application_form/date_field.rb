@@ -63,7 +63,9 @@ class Components::ApplicationForm < Superform::Rails::Form
       # Wrapper carries the form-field id so a `<label for="…">` click
       # focuses the day select first. `d-inline-block` keeps the
       # selects on the same line as the label when `inline: true`.
-      classes = "form-inline date-selects"
+      # `form-inline-xs` keeps the selects from stacking below `sm`
+      # -- see `.form-inline-xs` in `_form_elements.scss`.
+      classes = "form-inline date-selects form-inline-xs"
       classes += " d-inline-block" if wrapper_options[:inline]
       div(class: classes, id: field_id) do
         render_day_select
