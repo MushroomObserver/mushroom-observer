@@ -34,9 +34,11 @@ class Views::Layouts::TopNavTest < ComponentTestCase
     assert_html(html, ".new_object_button[aria-label='#{full_label}']")
     assert_html(html, ".new_object_button[title='#{full_label}']")
     assert_html(html, ".new_object_button[data-tooltip-target='tip']")
-    # Responsive content: the word "Add" appears in a span hidden
-    # below md width and shown at md and up.
-    assert_html(html, ".new_object_button .d-none.d-md-inline",
+    # Responsive content: built from IconWithText::RESPONSIVE_TEXT_CLASSES,
+    # not a raw literal.
+    responsive_classes =
+      Components::IconWithText::RESPONSIVE_TEXT_CLASSES.split.join(".")
+    assert_html(html, ".new_object_button .#{responsive_classes}",
                 text: :add.ti)
   end
 
