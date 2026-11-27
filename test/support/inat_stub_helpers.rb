@@ -52,24 +52,11 @@ module InatStubHelpers
     { id: id, name: name, ancestor_ids: [FUNGI_TAXON_ID, id] }
   end
 
-  # Pages, imports and alerts read only saved iNat target lookups, and
-  # the test environment caches nothing. This saves a project's lookups
-  # in a memory store, as InatTargetLookupJob would, from whatever the
-  # test stubbed iNat to answer.
+  # Pages, imports and alerts read only saved iNat target lookups. This
+  # saves a project's, as InatTargetLookupJob would, from whatever the
+  # test stubbed iNat to answer. The rows roll back with the test
+  # transaction, so there is nothing to restore afterwards.
   def save_inat_lookups(project)
-    use_memory_cache
     Inat::ConstraintMapper.new(project, look_up: true).look_up_targets
-  end
-
-  def use_memory_cache
-    return if @cache_before_memory_store
-
-    @cache_before_memory_store = Rails.cache
-    Rails.cache = ActiveSupport::Cache::MemoryStore.new
-  end
-
-  def after_teardown
-    Rails.cache = @cache_before_memory_store if @cache_before_memory_store
-    super
   end
 end

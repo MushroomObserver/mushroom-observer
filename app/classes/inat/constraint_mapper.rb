@@ -5,9 +5,9 @@ class Inat
   # (#5416): its target names as taxon ids, its target locations as
   # place ids, the area of its location as a box, and its dates.
   #
-  # The mappings are cached per Name and per Location rather than per
-  # project, since they are the same wherever the name is targeted and
-  # they change only when the record does.
+  # The mappings are saved per Name and per Location rather than per
+  # project, since they are the same wherever the name is targeted.
+  # `InatTargetLookup` holds them and decides when one has gone stale.
   #
   # A name that resolves to no iNat taxon, or a location to no iNat
   # place, is reported rather than guessed at: the box still constrains
@@ -22,12 +22,10 @@ class Inat
     include Inat::Constants
     include Inat::JsonFetch
 
-    CACHE_TTL = 30.days
-
     # iNat's maximum for place autocomplete.
     PLACE_CANDIDATES = 20
 
-    # Part of the cache keys: a miss is cached too, so changing how
+    # Stamped on each saved lookup: a miss is saved too, so changing how
     # targets match, or how a miss is stored, needs a new version to
     # look them up again.
     TAXON_MATCHING_VERSION = 3
@@ -163,25 +161,26 @@ class Inat
     # Caloboletus peckii is Butyriboletus peckii there -- so the whole
     # synonym group is tried before giving up.
     def taxon_id_for(name)
-      id = saved_answer(["inat_taxon", TAXON_MATCHING_VERSION,
-                         name.id, name.updated_at]) do
+      id = saved_answer(name, TAXON_MATCHING_VERSION) do
         first_answer(text_names_for(name)) { |text| search_taxon(text) }
       end
       record_outcome(id, @unresolved_names, name.text_name)
     end
 
-    # Saved as the iNat id, or false when iNat answered with no match.
-    # nil when there is no saved answer and none was looked up.
-    def saved_answer(key)
-      return Rails.cache.read(key) unless @look_up
+    # The iNat id, or false when iNat answered with no match. nil when
+    # there is no saved answer and none was looked up, and when iNat was
+    # asked and did not answer -- an unanswered question is not saved,
+    # so the next pass asks it again.
+    def saved_answer(target, version)
+      saved = InatTargetLookup.answer_for(target, version: version)
+      return saved unless @look_up && saved.nil?
 
-      asked = false
-      id = Rails.cache.fetch(key, expires_in: CACHE_TTL, skip_nil: true) do
-        asked = true
-        yield
-      end
-      note_answer if asked && !id.nil?
-      id
+      answer = yield
+      return nil if answer.nil?
+
+      InatTargetLookup.record(target, answer, version: version)
+      note_answer
+      answer
     end
 
     def note_answer
@@ -246,8 +245,7 @@ class Inat
     # what iNat calls the place: "Barnstable Co., Massachusetts, USA"
     # searches for "Barnstable Co.".
     def place_id_for(location)
-      id = saved_answer(["inat_place", PLACE_MATCHING_VERSION,
-                         location.id, location.updated_at]) do
+      id = saved_answer(location, PLACE_MATCHING_VERSION) do
         search_place(location)
       end
       record_outcome(id, @unresolved_locations, location.name)
