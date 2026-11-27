@@ -228,9 +228,36 @@ module Report
       add_column!(rows, vals, key)
     end
 
+    def add_sequence_urls!(rows, key)
+      vals = (direct_sequences + occurrence_member_sequences).
+             sort_by(&:last).
+             map { |obs_id, seq_id| [obs_id, sequence_url(seq_id)] }
+      add_column!(rows, vals, key)
+    end
+
+    def direct_sequences
+      Sequence.joins(:observation).
+        merge(plain_query).
+        pluck(Sequence[:observation_id], Sequence[:id])
+    end
+
+    # A non-primary member is left out of the query when its primary is
+    # in it, so the primary's row carries the member's Sequences.
+    def occurrence_member_sequences
+      Sequence.joins(observation: :occurrence).
+        where(occurrences: { primary_observation_id: plain_query.select(:id) }).
+        where(Observation[:id].not_eq(Occurrence[:primary_observation_id])).
+        pluck(Occurrence[:primary_observation_id], Sequence[:id])
+    end
+
+    def sequence_url(id)
+      "#{MO.http_domain}/sequences/#{id}"
+    end
+
     def plain_query
       # Sometimes the default order requires unnecessary joins!
-      # Non-primary observations already excluded by query scope.
+      # The query scope drops a non-primary observation only when its
+      # primary is also in the results.
       query.scope.reorder("")
     end
 
