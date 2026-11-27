@@ -8,7 +8,6 @@ class Inat::ConstraintMapperTest < UnitTestCase
 
   def setup
     super
-    Rails.cache.clear
     @project = projects(:rare_fungi_project)
   end
 

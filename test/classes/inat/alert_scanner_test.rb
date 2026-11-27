@@ -88,7 +88,7 @@ class Inat::AlertScannerTest < UnitTestCase
   # A cycle watches the targets with a saved lookup and queues the
   # lookups for the rest, rather than asking iNat itself.
   def test_targets_with_no_saved_lookup_are_queued_for_lookup
-    Rails.cache.clear
+    InatTargetLookup.delete_all
     alerting_row
     WebMock.reset_executed_requests!
 
