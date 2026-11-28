@@ -1072,7 +1072,42 @@ class QueryTest < UnitTestCase
     assert_equal(ids[index + 1], query.next_id)
   end
 
-  # `current_sort_values` (read the current row's own sort columns)
+  # Issue #5796: a MySQL `float` column's stored value can fail to
+  # compare equal (or compare as strictly greater/less) to a literal
+  # built from that same value, since the column is single-precision
+  # but the literal compares as double-precision -- a seek predicate
+  # seeded from the current row's value can then spuriously match
+  # that row, so `next_id` pointed back at the current observation
+  # instead of advancing.
+  def test_next_and_prev_float_order_column_falls_back_to_full_scan
+    user = users(:rolf)
+    project = Project.create!(title: "float order test", user: user)
+    high = Observation.create!(user: user, when: Time.zone.today)
+    mid = Observation.create!(user: user, when: Time.zone.today)
+    low = Observation.create!(user: user, when: Time.zone.today)
+    {
+      high => 4.0,
+      mid => 2.14737,
+      low => nil
+    }.each do |obs, vote|
+      image = Image.create!(user: user, vote_cache: vote)
+      ObservationImage.create!(observation: obs, image: image)
+      obs.update!(thumb_image: image)
+    end
+    project.observations = [high, mid, low]
+
+    query = Query.lookup(:Observation, projects: [project.id],
+                                       order_by: :thumbnail_quality)
+    assert_nil(query.send(:seekable_cols),
+               "thumbnail_quality orders by a float column and " \
+               "should be treated as unseekable")
+
+    query.current_id = mid.id
+    assert_equal(high.id, query.prev_id)
+    assert_equal(low.id, query.next_id)
+  end
+
+  # `current_sort_values` (read the current row's sort columns)
   # and the two directional window fetches are separate queries -- a
   # concurrent write to the current row between them could seed the
   # window from an already-stale value unless the reads share one
