@@ -231,6 +231,10 @@ class CheckForBrokenReferencesJob
       [Comment,         SpeciesList],
       [CopyrightChange, Image],
       [ExternalLink,    Observation],
+      # A saved iNat lookup answers a question about one target. With
+      # the Name or Location gone there is no question left to answer.
+      [InatTargetLookup, Name],
+      [InatTargetLookup, Location],
       [Interest,        Observation],
       [Interest,        Name],
       [Interest,        Location],

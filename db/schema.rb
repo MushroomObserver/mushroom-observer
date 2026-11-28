@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_27_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -351,6 +351,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.datetime "updated_at", null: false
     t.index ["dhash"], name: "index_inat_photo_hashes_on_dhash"
     t.index ["inat_photo_id"], name: "index_inat_photo_hashes_on_inat_photo_id", unique: true
+  end
+
+  create_table "inat_target_lookups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "target_type", limit: 30, null: false
+    t.integer "target_id", null: false
+    t.integer "inat_id"
+    t.integer "matching_version", null: false
+    t.datetime "target_updated_at", null: false
+    t.datetime "checked_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checked_at"], name: "index_inat_target_lookups_on_checked_at"
+    t.index ["target_type", "target_id"], name: "index_inat_target_lookups_on_target", unique: true
   end
 
   create_table "interests", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|

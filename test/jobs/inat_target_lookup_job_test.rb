@@ -12,7 +12,6 @@ class InatTargetLookupJobTest < ActiveJob::TestCase
     super
     @project = projects(:rare_fungi_project)
     @inat = external_sites(:inaturalist)
-    use_memory_cache
     stub_request(:get, inat_api_matcher("taxa")).
       to_return(lambda { |request|
         name = CGI.unescape(request.uri.query.to_s[/q=([^&]*)/, 1].to_s)

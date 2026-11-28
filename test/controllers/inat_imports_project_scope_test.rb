@@ -232,7 +232,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
   def test_an_import_whose_targets_do_not_resolve_is_refused
     site = project_site
     stub_unresolved_targets
-    Rails.cache.clear
+    InatTargetLookup.delete_all
     save_inat_lookups(@project)
 
     login(@admin.login)
@@ -249,7 +249,7 @@ class InatImportsProjectScopeTest < FunctionalTestCase
   # than the project means.
   def test_an_import_whose_targets_were_not_all_checked_is_refused
     site = project_site
-    Rails.cache.clear
+    InatTargetLookup.delete_all
 
     login(@admin.login)
     post(:create, params: { project_site: site.id, consent: "1",
