@@ -37,7 +37,7 @@
 # when it does.
 #
 # @example
-#   Badge(variant: :id, object: @project, size: :sm, class: "mr-3")
+#   Badge(type: :id, object: @project, size: :sm, class: "mr-3")
 class Components::Badge::ID < Components::Badge
   prop :object, _Nilable(::AbstractModel), default: nil
   prop :value, _Nilable(_Union(String, Integer)), default: nil

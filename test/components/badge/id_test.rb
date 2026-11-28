@@ -78,7 +78,7 @@ class Components::Badge::IDTest < ComponentTestCase
     obs = observations(:minimal_unknown_obs)
 
     assert_raises(ArgumentError) do
-      Components::Badge.new(variant: :id, object: obs)
+      Components::Badge.new(type: :id, object: obs)
     end
   end
 
@@ -109,6 +109,6 @@ class Components::Badge::IDTest < ComponentTestCase
   private
 
   def render_badge(**)
-    render(Components::Badge.new(variant: :id, **))
+    render(Components::Badge.new(type: :id, **))
   end
 end

@@ -63,7 +63,7 @@ module Views::Controllers::Locations
         table.column(:place.ti) { |desc| render_name_cell(desc) }
         table.column(:type.ti) { |desc| render_type_cell(desc) }
         table.column(:mo_id.t, align: :right, class: "text-nowrap") do |desc|
-          Badge(variant: :id, object: desc, size: :md)
+          Badge(type: :id, object: desc, size: :md)
         end
       end
 

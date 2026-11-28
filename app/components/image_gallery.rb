@@ -111,7 +111,7 @@ class Components::ImageGallery < Components::Base
     marker = @markers[image.id]
     return unless marker
 
-    Badge(variant: :sibling_marker, **marker, fill: :solid,
+    Badge(type: :sibling_marker, **marker, fill: :solid,
           isolate_click: true,
           class: "carousel-thumbnail-marker")
   end

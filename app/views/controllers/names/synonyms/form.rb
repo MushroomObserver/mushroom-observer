@@ -104,7 +104,7 @@ module Views::Controllers::Names::Synonyms
              name: name_obj.display_name(@user).t)
       end
       badge = capture do
-        Badge(variant: :id, object: name_obj, size: :sm)
+        Badge(type: :id, object: name_obj, size: :sm)
       end
       [link, badge].safe_join(" ")
     end

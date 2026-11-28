@@ -182,11 +182,6 @@ form.button_to {
 
 // badges
 
-// .badge has no color; needs a .badge-#{color} modifier.
-.count-badge {
-  @include badge-variant($secondary);
-}
-
 // A lighter-weight badge variant: outlined in body-color, no fill,
 // normal (not bold) weight -- for a count/label that shouldn't read
 // as loudly as Bootstrap's solid-background default.

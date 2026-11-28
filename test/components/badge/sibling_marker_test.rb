@@ -76,7 +76,7 @@ class Components::Badge::SiblingMarkerTest < ComponentTestCase
 
   def render_marker(number:, observation_id:, **attrs)
     render(Components::Badge.new(
-             variant: :sibling_marker,
+             type: :sibling_marker,
              number: number, observation_id: observation_id, **attrs
            ))
   end
