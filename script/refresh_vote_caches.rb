@@ -26,6 +26,14 @@
 # `update_all`, so no name, timestamp, `needs_naming` or notification
 # moves either way.
 #
+# It also sweeps up the image votes belonging to no image, since the
+# image averages are what surfaced them. Clearing an image vote
+# nullified the row rather than deleting it until `dependent:
+# :destroy` reached the association in 2022 (`c8e38834b0`), which left
+# 3,153 behind. Nothing reads them, every read going through
+# `image.image_votes`, and `belongs_to :image` has refused a nil since,
+# so the sweep should find nothing the second time it runs.
+#
 # Dry run (default -- reports, writes nothing):
 #   bin/rails runner script/refresh_vote_caches.rb
 # Apply:
@@ -54,6 +62,7 @@ class VoteCacheRefresh
   end
 
   def run
+    purge_orphan_image_votes
     total = scope.count
     warn("#{total} observations carry a naming")
     done = 0
@@ -72,6 +81,15 @@ class VoteCacheRefresh
   end
 
   private
+
+  def purge_orphan_image_votes
+    ids = ImageVote.where(image_id: nil).pluck(:id)
+    warn("#{ids.size} image vote(s) belong to no image")
+    return if ids.empty?
+
+    warn("ids: #{write_report("orphan_image_vote_ids.txt", ids)}")
+    ImageVote.where(id: ids).delete_all if @apply
+  end
 
   def scope
     Observation.where(id: Naming.select(:observation_id))
@@ -148,10 +166,15 @@ class VoteCacheRefresh
          "#{@mismatched.first(MISMATCH_SAMPLE).join(", ")}")
     return if @mismatched.size <= MISMATCH_SAMPLE
 
+    warn("full list: #{write_report("consensus_name_mismatches.txt",
+                                    @mismatched)}")
+  end
+
+  def write_report(name, ids)
     FileUtils.mkdir_p(REPORT_DIR)
-    path = File.join(REPORT_DIR, "consensus_name_mismatches.txt")
-    File.write(path, "#{@mismatched.join("\n")}\n")
-    warn("full list: #{path}")
+    path = File.join(REPORT_DIR, name)
+    File.write(path, "#{ids.join("\n")}\n")
+    path
   end
 end
 
