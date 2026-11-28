@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 # Single entry-point dispatcher for Bootstrap `.badge` components.
-# Pass `variant:` to route to the matching subclass.
+# Pass `type:` to route to the matching subclass.
 #
-#   Badge(variant: :id, object: @project, size: :sm)
+#   Badge(type: :id, object: @project, size: :sm)
 class Components::Badge < Components::Base
   DISPATCH = { count: :Count, id: :ID,
                sibling_marker: :SiblingMarker,
@@ -21,27 +21,36 @@ class Components::Badge < Components::Base
   # naming to account for here (unlike Button::Styling's BTN_SIZES).
   SIZES = [:xl, :lg, :md, :sm].freeze
 
+  # Bootstrap's theme-color keys -- each has a native `.badge-#{color}`
+  # class (see _variables.scss's $theme-colors).
+  COLORS = [:primary, :secondary, :success, :info, :warning, :danger,
+            :light, :dark].freeze
+
   def self.size_class(size)
     "badge-#{size}"
   end
 
   def self.new(**kwargs, &block)
-    variant_sym = kwargs[:variant]&.to_sym
-    if (klass_name = DISPATCH[variant_sym])
-      kwargs.delete(:variant)
+    type_sym = kwargs[:type]&.to_sym
+    if (klass_name = DISPATCH[type_sym])
+      kwargs.delete(:type)
       return const_get(klass_name).new(**kwargs, &block)
     end
 
     # Reached a second time, on the way back in through a subclass's
-    # inherited `self.new` -- `:variant` is already deleted by then,
-    # so this only raises when a caller's `variant:` didn't match.
-    if kwargs.key?(:variant)
+    # inherited `self.new` -- `:type` is already deleted by then, so
+    # this only raises when a caller's `type:` didn't match.
+    if kwargs.key?(:type)
       raise(ArgumentError.new(
-              "Unknown Badge variant: #{kwargs[:variant].inspect}. " \
-              "Valid variants: #{DISPATCH.keys.join(", ")}."
+              "Unknown Badge type: #{kwargs[:type].inspect}. " \
+              "Valid types: #{DISPATCH.keys.join(", ")}."
             ))
     end
 
     super
   end
+
+  # Background/text color, via Bootstrap's native `.badge-#{color}`
+  # classes -- nil means no color class (the caller's CSS decides).
+  prop :variant, _Nilable(_Union(*COLORS)), default: nil
 end

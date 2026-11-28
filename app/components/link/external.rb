@@ -14,7 +14,7 @@
 #   # "<date>: <relationship>" (e.g. "2025-05-04: Imported from
 #   # iNaturalist"). For sites with an id accessor on ExternalLink
 #   # (iNaturalist, MyCoPortal), the caller renders that id as a sibling
-#   # copy-to-clipboard Badge(variant: :id) -- this component only
+#   # copy-to-clipboard Badge(type: :id) -- this component only
 #   # renders the link itself.
 #
 # Via context-nav dispatcher:

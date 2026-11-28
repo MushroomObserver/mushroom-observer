@@ -17,8 +17,8 @@ module Views::Controllers::VisualModels
           Link(type: :get, name: vm.name, target: vm)
         end
         t.column("Groups", align: :center) do |vm|
-          Badge(variant: :count, count: vm.visual_groups.size,
-                type: :visual_group)
+          Badge(type: :count, count: vm.visual_groups.size,
+                object_type: :visual_group)
         end
         t.column(:actions.ti, align: :center) { |vm| render_actions(vm) }
       end

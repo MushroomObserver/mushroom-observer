@@ -135,7 +135,7 @@ module Views::Controllers::Images::Reuse
     def render_filename_and_badge_row(image)
       div(class: "d-flex justify-content-between align-items-center") do
         render(::Components::Image::OriginalFilenameRow.new(image: image))
-        Badge(variant: :id, object: image, size: :lg)
+        Badge(type: :id, object: image, size: :lg)
       end
     end
 

@@ -48,7 +48,7 @@ module Views::Controllers::VisualGroups
         render(::Components::Image::OriginalFilenameRow.new(image: image))
         span do
           plain(append_colon(:image_reuse_id.ti))
-          Badge(variant: :id, object: image, size: :xl,
+          Badge(type: :id, object: image, size: :xl,
                 link: image_path(id: image.id))
         end
       end

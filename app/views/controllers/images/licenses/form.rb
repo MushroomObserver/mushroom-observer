@@ -49,8 +49,8 @@ module Views::Controllers::Images::Licenses
       namespace(idx.to_s) do |row_ns|
         tr do
           td do
-            Badge(variant: :count, count: row.license_count, type: :image,
-                  fill: :outline)
+            Badge(type: :count, count: row.license_count,
+                  object_type: :image, fill: :outline)
           end
           td { render_holder_cell(row_ns, row) }
           td { render_license_cell(row_ns, row) }

@@ -21,7 +21,7 @@ class Components::Badge::CountTest < ComponentTestCase
     assert_no_html(html, "[data-controller]")
   end
 
-  def test_default_type_is_observation
+  def test_default_object_type_is_observation
     html = render_badge(count: 5)
 
     tooltip = :count_badge_tooltip.t(type: :observation.t.upcase_first)
@@ -29,8 +29,8 @@ class Components::Badge::CountTest < ComponentTestCase
                       "[data-tooltip-target='tip']")
   end
 
-  def test_type_herbarium_record
-    html = render_badge(count: 5, type: :herbarium_record)
+  def test_object_type_herbarium_record
+    html = render_badge(count: 5, object_type: :herbarium_record)
 
     tooltip = :count_badge_tooltip.t(type: :herbarium_record.t.upcase_first)
     assert_html(html, ".count-badge[title='#{tooltip}']")
@@ -48,10 +48,27 @@ class Components::Badge::CountTest < ComponentTestCase
     assert_html(html, ".count-badge.badge-outline", text: "5")
   end
 
+  # `.badge-#{variant}` is Bootstrap's color class (styling
+  # abstraction -- the class name IS this prop's contract).
+  def test_default_variant_is_secondary
+    html = render_badge(count: 5)
+
+    assert_html(html, ".count-badge.badge-secondary", text: "5")
+  end
+
+  def test_variant_overrides_default_color
+    html = render_badge(count: 5, variant: :danger)
+
+    assert_html(html, ".count-badge.badge-danger", text: "5")
+    assert_no_html(html, ".badge-secondary")
+  end
+
   private
 
-  def render_badge(count:, type: :observation, fill: :solid)
-    render(Components::Badge.new(variant: :count, count: count, type: type,
-                                 fill: fill))
+  def render_badge(count:, object_type: :observation, fill: :solid,
+                   variant: :secondary)
+    render(Components::Badge.new(type: :count, count: count,
+                                 object_type: object_type, fill: fill,
+                                 variant: variant))
   end
 end

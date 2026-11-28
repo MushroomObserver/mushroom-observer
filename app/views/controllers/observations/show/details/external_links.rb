@@ -89,7 +89,7 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   end
 
   def render_badge(site_name, link)
-    Badge(variant: :collapse_toggle,
+    Badge(type: :collapse_toggle,
           value: SITE_BADGES[site_name],
           target_id: "pane_#{link.id}",
           fallback_href: external_link_path(link.id),
