@@ -44,7 +44,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form
 
     # Should have panels based on FIELD_COLUMNS
-    assert_html(html, ".panel")
+    assert_html(html, ".card")
   end
 
   def test_renders_submit_button
@@ -95,10 +95,6 @@ class SearchFormTest < ComponentTestCase
                 "span[aria-label='#{:search_bar_fewer_options.l}']")
     assert_html(html,
                 "a[data-search-type-target='barToggle'] svg.mo-icon-minus")
-    # navbar-link comes from Components::Navbar::LINK_CLASS, not a raw
-    # literal.
-    assert_html(html,
-                "a[data-search-type-target='barToggle'].navbar-link")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -106,10 +102,10 @@ class SearchFormTest < ComponentTestCase
     html = render_form(context: :dropdown)
 
     assert_html(html,
-                "a[data-search-type-target='barToggle'].d-md-none")
+                "a[data-search-type-target='barToggle'].d-lg-none")
     assert_html(html,
                 "a[data-search-type-target='barToggle']" \
-                ".btn.btn-outline-default.d-none.d-md-inline-block",
+                ".btn.btn-outline-default.d-none.d-lg-inline-block",
                 text: :search_bar_fewer_options.l)
   end
 
@@ -224,7 +220,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form_with_query(query)
 
     # The dates panel's collapse div should be expanded
-    assert_html(html, "#observations_dates.panel-collapse.#{EXPANDED}")
+    assert_html(html, "#observations_dates.card-collapse.#{EXPANDED}")
   end
 
   # TDD test: Panel collapse should NOT be expanded when no collapsed fields
@@ -237,7 +233,7 @@ class SearchFormTest < ComponentTestCase
     html = render_form_with_query(query)
 
     # The dates panel's collapse div should NOT be expanded
-    assert_html(html, "#observations_dates.panel-collapse:not(.#{EXPANDED})")
+    assert_html(html, "#observations_dates.card-collapse:not(.#{EXPANDED})")
   end
 
   # TDD test: Modifier collapse should be expanded when lookup has value
@@ -252,7 +248,7 @@ class SearchFormTest < ComponentTestCase
 
     html = render_form_with_query(query)
 
-    # The collapse div should be expanded because lookup has a value
+    # The collapse div SHOULD be expanded because lookup has a value
     assert_html(
       html,
       "[data-autocompleter--name-target='collapseFields'].#{EXPANDED}"

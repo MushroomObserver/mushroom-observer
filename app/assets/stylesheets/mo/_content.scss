@@ -1,3 +1,11 @@
+// Bootstrap 4's reboot hardcodes `small { font-size: 80%; }` (not
+// driven by a variable) -- overridden here to ~85%
+// (`ceil($font-size-base * .85) / $font-size-base`).
+small,
+.small {
+  font-size: 85%;
+}
+
 // Cached content display/hide
 // location format, when both are printed
 
@@ -30,13 +38,9 @@
 // interest eyes
 // --------------------------------------------------
 
-// Same size for the state indicator and the two clickable icons --
-// matches #top_nav .top_nav_icon_button .mo-icon's 1.5em scale. These
-// use the shared .mo-icon class (see _icons.scss) rather than their
-// own sizing; .btn:not(.btn-link) .mo-icon doesn't apply here since
-// these buttons are .btn-link, so this needs its own explicit rule.
-// Visual weight is the wrapping Button's job now (variant/.disabled),
-// not a bigger raster image.
+// Matches #top_nav .top_nav_icon_button .mo-icon's 1.5em scale.
+// `.btn:not(.btn-link) .mo-icon` doesn't reach these -- they're
+// `.btn-link` -- hence this explicit rule.
 .interest-eyes .mo-icon {
   width: 1.5em;
   height: 1.5em;
@@ -46,25 +50,16 @@
 // style tweaks
 // --------------------------------------------------
 
-// Indents every line of a paragraph EXCEPT the first -- e.g. a
-// wrapped "Kingdom: Fungi" classification row should have its
-// continuation line align under "Fungi", not restart at the margin.
-// The `hanging` keyword does this directly (indents all lines but
-// the first) -- opt this onto the specific `<p>` that wants it, not
-// an ancestor selector. The old approach (`.name-section p { padding-
-// left: 1em; text-indent: -1em; }`) applied to every `<p>` inside any
-// panel merely marked `panel_class: "name-section"` -- almost none of
-// which wanted a hanging indent -- and needed two separate resets
-// elsewhere (`.obs-notes .textile p`, `.glyphicon`) to undo the leak.
+// Indents every line of a paragraph except the first. Use directly
+// on the li, p, or div that needs it.
 .hanging-indent {
   margin: 0;
   text-indent: 1em hanging;
 }
 
 // Views::FullPageBase::Title#render_name_line's id-badge/name line.
-// padding-left, not text-indent: hanging -- every line this wraps to
-// needs the same indent, the first included, since the line has no
-// shared label text for only the continuation lines to align under.
+// padding-left, not text-indent: hanging -- every wrapped line here
+// needs the same indent, the first line included.
 .title-name-line {
   display: inline-flex;
   align-items: center;
@@ -79,53 +74,50 @@ ul.tight-list {
 }
 
 .h3.page-title {
-  font-size: 18px;
+  font-size: 1.1rem;
 
   small {
-    color: $text-color;
+    font-size: $font-size-base;
+    color: $body-color;
   }
 
-  // 992px -- cutover's BS4 "lg" breakpoint; main's $screen-lg
-  // (1200px) is a different value, so this is hardcoded rather than
-  // reusing that variable.
-  @media screen and (min-width: 992px) {
-    font-size: 22px;
+  @media screen and (min-width: breakpoint-min(lg)) {
+    font-size: 1.375rem;
   }
 }
 
-#owner_naming.h5 {
-  font-size: $font-size-base;
-
-  // 992px -- cutover's BS4 "lg" breakpoint; main's $screen-lg
-  // (1200px) is a different value, so this is hardcoded rather than
-  // reusing that variable.
-  @media screen and (min-width: 992px) {
-    font-size: $font-size-large;
-  }
-}
-
-@media screen and (min-width: $screen-sm-min) {
-  .object_edit {
-    .inline-icon-block {
-      margin-top: 0.25rem;
-    }
-  }
-}
-
-// #title_bar's two column wrappers (.title_bar_left_col,
-// .title_bar_right_col) are BS3 float columns, so their stacking
-// order below `md` just follows source order -- left col first,
-// then right col. Between sm and md that pairing reads awkwardly;
-// flex-ify the row and reorder the right column above the left
-// column for just that range, leaving source order (and md+'s
-// side-by-side layout) untouched outside it.
-@media screen and (min-width: $screen-sm-min) and (max-width: $screen-sm-max) {
-  #title_bar {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
+// #title_bar's columns stack left-then-right below `md`, which reads
+// awkwardly between `sm` and `md` -- reorder just for that range.
+@media screen and (min-width: breakpoint-min(sm)) and (max-width: breakpoint-max(sm)) {
   .title_bar_right_col {
     order: -1;
   }
+}
+
+// Show observation
+#owner_naming.h5 {
+  font-size: 1rem;
+
+  @media screen and (min-width: breakpoint-min(lg)) {
+    font-size: $h5-font-size;
+  }
+}
+
+.violation-highlight {
+  background-color: orange;
+}
+
+// Gap between the per-row action buttons (a mix of button_to forms
+// and plain buttons), which otherwise touch.
+.project-violations td .button_to,
+.project-violations td > button {
+  display: inline-block;
+  // Without this, the form-wrapped and bare buttons' baselines
+  // differ, so the last one sits half a line higher.
+  vertical-align: top;
+  margin: 0 4px 4px 0;
+}
+.project-violations td .button_to:last-child,
+.project-violations td > button:last-child {
+  margin-right: 0;
 }

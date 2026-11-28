@@ -40,7 +40,7 @@ module Views::Controllers::GlossaryTerms::Images
       end
     end
 
-    # Each per-image .checkbox wrapper gets `my-0` so the default
+    # Each per-image custom-control wrapper gets `my-0` so the default
     # vertical margin doesn't leave visible gaps inside the Grid::Box
     # cell.
     # rubocop:disable-next MO/NoCosmeticClassAssertion
@@ -48,8 +48,11 @@ module Views::Controllers::GlossaryTerms::Images
       html = render_form
 
       @model.images.each do |image|
-        assert_html(html,
-                    ".checkbox.my-0 input[name='selected[#{image.id}]']")
+        assert_html(
+          html,
+          ".custom-control.custom-checkbox.my-0 " \
+          "input[name='selected[#{image.id}]']"
+        )
       end
     end
 

@@ -2,37 +2,68 @@
 // rss log
 // --------------------------------------------------
 
-.grid-box {
+// --bs-gutter-x comes from .row's default (_utilities.scss) -- only
+// --bs-gutter-y needs setting here, since nothing else reads it yet.
+.grid-row {
+  --bs-gutter-y: #{$grid-gutter-width * .75};
+}
 
-  .panel {
+@media screen and (min-width: breakpoint-min(lg)) {
+  .grid-row {
+    --bs-gutter-y: #{$grid-gutter-width};
+  }
+}
+
+.grid-box {
+  // On the <li>, not the card: the card has `h-100` (fills the
+  // row's stretched height), so a margin-bottom on the card itself
+  // pushes it past the <li>'s box instead of creating visible space.
+  margin-bottom: var(--bs-gutter-y);
+
+  .card {
     // min-height: 200px;
-    margin-bottom: $grid-gutter-width;
+    // h-100 fills the row's stretched height -- the <li>'s
+    // margin-bottom above provides the spacing instead.
+    margin-bottom: 0;
 
     .thumbnail-container {
       min-height: 30px;
     }
   }
 
-  .panel-sizing {
-    min-height: 180px;
-  }
-
   // for when the whole panel section is a link, or has a stretched link
   // rule necessary when the "link" is a checkbox <label>, not an <a>.
   // e.g. "Mark as reviewed"
-  .panel-active {
+  .card-active {
     &:hover,
     &:focus,
     .stretched-link:hover,
     .stretched-link:focus {
       cursor: pointer;
-      background-color: darken($panel-bg, 6.5%)
+      background-color: darken($card-bg, 6.5%)
     }
   }
 }
 
-.log-details {
+// Shared size for .log-details and .log-footer -- one declaration
+// instead of each wrap repeating the same value.
+.log-text {
+  font-size: 0.81rem;
+}
 
+@media screen and (min-width: breakpoint-min(xl)) {
+  .log-text {
+    font-size: 0.85rem;
+  }
+}
+
+// Tighter than BS4's stock .card-footer padding ($card-spacer-y
+// $card-spacer-x).
+.log-footer {
+  padding: 0.5rem 0.75rem;
+}
+
+.log-details {
   a {
     color: inherit !important;
 
@@ -54,19 +85,6 @@
   }
 }
 
-// Shared size for .log-details and .log-footer -- one declaration
-// instead of each wrap repeating the same value. BS3-only values --
-// take cutover's .log-text size when switching to BS4.
-.log-text {
-  font-size: 0.75rem;
-}
-
-@media screen and (min-width: $screen-lg-min) {
-  .log-text {
-    font-size: 0.78rem;
-  }
-}
-
 // To make way for floating ID
 .log-heading {
   @extend .d-flex, .justify-content-between, .align-items-start, .gap-3;
@@ -82,10 +100,10 @@
 
 // `.text-nowrap` (`String#small_author`, see app/extensions/string.rb)
 // keeps an author citation from splitting mid-phrase when it shares a
-// line with the name elsewhere in the app. In a matrix box,
-// `String#break_name` already forces the author onto a separate line
-// below the name -- so the citation itself needs to be free to wrap
-// across multiple lines, or a long one overflows the box.
+// line with the name elsewhere in the app. In a grid box,
+// `String#break_name` already forces the author onto its own line
+// below the name -- so here the citation itself needs to be free to
+// wrap across multiple lines, or a long one overflows the box.
 .log-name small.text-nowrap {
   white-space: normal !important;
 }
@@ -97,7 +115,13 @@
 }
 
 .log-heading h5 {
-  font-size: 14px;
+  font-size: 0.9375rem; // 15px at 16px root
+}
+
+@media screen and (min-width: breakpoint-min(xl)) {
+  .log-heading h5 {
+    font-size: 1rem;
+  }
 }
 
 // Each `li` in the details/footer `ul.list-unstyled` carries the
@@ -107,7 +131,7 @@
 // it, rather than duplicating the class name here.
 .log-details li,
 .log-footer li {
-  margin-bottom: 5px;
+  margin-bottom: 0.3125rem; // 5px at 16px root
 }
 
 .log-what,
@@ -118,7 +142,7 @@
   text-overflow: ellipsis;
 }
 
-@media screen and (max-width: $screen-xs-max) {
+@media screen and (max-width: breakpoint-max(sm)) {
   .log-details {
     height: auto !important;
   }

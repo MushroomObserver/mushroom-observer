@@ -21,7 +21,7 @@
 # rule).
 module Components::IconWithText
   # `icon-text-gap`, not a `.pl-*` rem-based utility -- the gap needs
-  # to scale with the surrounding font-size (a `.panel-title` heading's
+  # to scale with the surrounding font-size (a `.card-title` heading's
   # bold type needs visibly more gap than small body text), which only
   # an em-based value does. See `_icons.scss` for the rule.
   RESPONSIVE_TEXT_CLASSES = "d-none d-md-inline icon-text-gap"

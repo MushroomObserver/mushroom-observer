@@ -63,7 +63,7 @@ module Views::Controllers::Sequences
 
     def render_row(seq)
       div(class: "id-badge-col") do
-        Badge(variant: :id, object: seq, size: :lg)
+        Badge(type: :id, object: seq, size: :lg)
       end
       div(class: "flex-grow-1") do
         render_obs_link(seq)

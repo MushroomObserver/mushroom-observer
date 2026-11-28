@@ -265,16 +265,20 @@ module Views::Controllers::FieldSlips
       # `value:` option, no Superform model binding.
       @checked_ids = checked_ids
       @primary_id = primary_id
-      Row(element: :ul, class: "list-unstyled mt-3", data: grid_data) do
+      # Can't delegate to Grid here (it has no `data:`
+      # passthrough for the Stimulus wiring below), so its
+      # row-cols-* grid classes are reproduced by hand -- Grid::Box's
+      # `columns:` default assumes it's rendered inside one of those.
+      Row(element: :ul,
+          class: class_names(Components::Grid::ROW_COLS_CLASSES,
+                             "list-unstyled mt-3"),
+          data: grid_data) do
         observations.each { |obs| render_observation_row(obs) }
       end
     end
 
     def grid_data
-      {
-        controller: "grid-table field-slip-form",
-        action: "resize@window->grid-table#rearrange"
-      }
+      { controller: "field-slip-form" }
     end
 
     def render_observation_row(obs)

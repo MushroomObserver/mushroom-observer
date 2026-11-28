@@ -3,10 +3,12 @@
 require("test_helper")
 
 class ButtonTest < ComponentTestCase
+  # rubocop:disable-next MO/NoCosmeticClassAssertion
   def test_default_styling
     html = render_button(name: "Click me")
 
     assert_html(html, "button[type='button']", text: "Click me")
+    assert_html(html, "button.btn.btn-secondary")
   end
 
   # rubocop:disable-next MO/NoCosmeticClassAssertion

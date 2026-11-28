@@ -13,12 +13,12 @@
 # silently when there's nothing to show and no eligible site to add a
 # link to; when there's an eligible site but no badges yet, shows a
 # "No external links" caption alongside the add link instead of an
-# unlabeled "+". `Details` renders this inside a `.panel-body.p-0` (id +
-# section-update wiring live on that panel-body, not here) so the
+# unlabeled "+". `Details` renders this inside a `.card-body.p-0` (id +
+# section-update wiring live on that card-body, not here) so the
 # badge row and the accordion below it can each supply padding and
-# reach full width against the panel edge -- see
+# reach full width against the card edge -- see
 # `app/views/controllers/images/show/vote_panel.rb` for the same
-# `panel-body.p-0` + self-padding-children pattern.
+# `card-body.p-0` + self-padding-children pattern.
 class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Base
   prop :obs, ::Observation
   prop :user, _Nilable(::User), default: nil
@@ -89,14 +89,13 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
   end
 
   def render_badge(site_name, link)
-    Badge(variant: :collapse_toggle,
+    Badge(type: :collapse_toggle,
           value: SITE_BADGES[site_name],
           target_id: "pane_#{link.id}",
           fallback_href: external_link_path(link.id),
           size: :xl,
           class: "ml-2 text-uppercase",
           data: {
-            parent: "#external_links_accordion",
             turbo_frame: "external_link_frame_#{link.id}",
             tooltip_target: "tip", placement: "top",
             title: :show_observation_shared_with_tooltip.l(
@@ -117,7 +116,9 @@ class Views::Controllers::Observations::Show::Details::ExternalLinks < Views::Ba
       visible_sites.map(&:last).each do |link|
         accordion.with_pane(id: "pane_#{link.id}",
                             class: "p-card border-bottom") do
-          turbo_frame_tag("external_link_frame_#{link.id}")
+          turbo_frame_tag("external_link_frame_#{link.id}",
+                          src: external_link_path(link.id),
+                          loading: "lazy")
         end
       end
     end

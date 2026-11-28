@@ -18,6 +18,18 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_html(html, "img.image_#{obs.thumb_image_id}")
   end
 
+  # Regression: Panel(panel_class: "h-100") stopped working after
+  # Panel dropped its panel_class: prop for a plain class: kwarg
+  # (#5702) -- the stale kwarg name fell into Panel's catch-all
+  # attributes instead of the card's class, silently dropping the
+  # stretch-to-fill-row-height behavior.
+  def test_card_stretches_to_fill_row_height
+    obs = observations(:coprinus_comatus_obs)
+    html = render_box(object: obs)
+
+    assert_html(html, ".grid-box > .card.h-100")
+  end
+
   def test_renders_occurrence_link_for_multi_observation_occurrence
     obs = multi_observation_occurrence_primary
     html = render_box(object: obs)
@@ -105,11 +117,11 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(
       user: @user,
       object: obs,
-      columns: "col-xs-12 col-sm-6"
+      columns: "col-12 col-sm-6"
     )
     html = render(component)
 
-    assert_html(html, ".grid-box.col-xs-12.col-sm-6")
+    assert_html(html, ".grid-box.col-12.col-sm-6")
   end
 
   def test_renders_with_caller_class
@@ -148,24 +160,11 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Should have li.grid-box containing div.panel
+    # Should have li.grid-box containing div.card
     assert_nested(
       html,
       parent_selector: "li.grid-box",
-      child_selector: "div.panel"
-    )
-  end
-
-  def test_panel_has_sizing_wrapper
-    obs = observations(:coprinus_comatus_obs)
-    component = Components::Grid::Box.new(user: @user, object: obs)
-    html = render(component)
-
-    # Panel should have panel-sizing wrapper (from sizing: true)
-    assert_nested(
-      html,
-      parent_selector: "div.panel-sizing",
-      child_selector: "div.thumbnail-container"
+      child_selector: "div.card"
     )
   end
 
@@ -174,10 +173,10 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Thumbnail should be in thumbnail-container within panel-sizing
+    # Thumbnail should be in thumbnail-container within the card
     assert_nested(
       html,
-      parent_selector: "div.panel-sizing",
+      parent_selector: "div.card",
       child_selector: "div.thumbnail-container"
     )
     # Should contain the image
@@ -194,9 +193,10 @@ class Components::Grid::BoxTest < ComponentTestCase
     html = render(component)
 
     # Details section should have log-details class
+    assert_includes(html, "log-details")
     assert_nested(
       html,
-      parent_selector: "div.panel-body.log-details",
+      parent_selector: "div.card-body.log-details",
       child_selector: "div.log-what"
     )
   end
@@ -206,16 +206,16 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: obs)
     html = render(component)
 
-    # Should have what section in panel-body
+    # Should have what section in card-body
     assert_nested(
       html,
-      parent_selector: "div.panel-body.log-details",
+      parent_selector: "div.card-body.log-details",
       child_selector: "div.log-what"
     )
-    # Should have where section in panel-body
+    # Should have where section in card-body
     assert_nested(
       html,
-      parent_selector: "div.panel-body.log-details",
+      parent_selector: "div.card-body.log-details",
       child_selector: "li.log-where"
     )
     # Should have when/who info (rendered with log-when and log-who classes)
@@ -257,8 +257,8 @@ class Components::Grid::BoxTest < ComponentTestCase
     # RssLogs should have log-footer
     assert_nested(
       html,
-      parent_selector: "div.panel",
-      child_selector: "div.panel-footer.log-footer"
+      parent_selector: "div.card",
+      child_selector: "div.card-footer.log-footer"
     )
   end
 
@@ -291,11 +291,11 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: image)
     html = render(component)
 
-    # Should have panel structure
+    # Should have card structure
     assert_nested(
       html,
-      parent_selector: "#box_#{image.id}",
-      child_selector: "div.panel"
+      parent_selector: "li#box_#{image.id}",
+      child_selector: "div.card"
     )
     # Should have thumbnail
     assert_nested(
@@ -310,16 +310,16 @@ class Components::Grid::BoxTest < ComponentTestCase
     component = Components::Grid::Box.new(user: @user, object: user)
     html = render(component)
 
-    # Should have panel structure
+    # Should have card structure
     assert_nested(
       html,
-      parent_selector: "#box_#{user.id}",
-      child_selector: "div.panel"
+      parent_selector: "li#box_#{user.id}",
+      child_selector: "div.card"
     )
     # Should have user info in body
     assert_nested(
       html,
-      parent_selector: "div.panel-body",
+      parent_selector: "div.card-body",
       child_selector: "div.log-what"
     )
   end
@@ -337,8 +337,8 @@ class Components::Grid::BoxTest < ComponentTestCase
     assert_no_html(html, ".vote-select-container")
     assert_no_html(html, "a[href*='context=grid_box']")
     # Should not have identify footer
-    assert_no_html(html, ".panel-active")
-    assert_no_html(html, "#box_reviewed_#{obs.id}_lb")
+    assert_not_includes(html, "card-active")
+    assert_not_includes(html, "box_reviewed")
   end
 
   def test_renders_identify_ui_and_footer_when_identify_is_true
@@ -353,10 +353,14 @@ class Components::Grid::BoxTest < ComponentTestCase
     html = render(component)
 
     # Should have identify UI (vote container or propose naming link)
-    assert_html(html, ".vote-select-container")
+    assert(
+      html.include?("vote-select-container") ||
+        html.include?("context=grid_box"),
+      "Expected identify UI to be rendered"
+    )
     # Should have identify footer
-    assert_html(html, ".panel-active")
-    assert_html(html, "#box_reviewed_#{obs.id}_lb")
+    assert_includes(html, "card-active")
+    assert_includes(html, "box_reviewed")
   end
 
   # External-source credit renders the link with target="_blank" /

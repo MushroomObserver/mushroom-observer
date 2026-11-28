@@ -70,7 +70,7 @@ class TableTest < ComponentTestCase
       t.column("Name", &:name)
     end
 
-    assert_html(html, ".panel.my-3")
+    assert_html(html, ".card.my-3")
   end
 
   def test_wrap_class_ignored_when_panel_wrap_false
@@ -80,7 +80,7 @@ class TableTest < ComponentTestCase
       t.column("Name", &:name)
     end
 
-    assert_no_html(html, ".panel")
+    assert_no_html(html, ".card")
     assert_no_html(html, ".my-3")
   end
 
@@ -91,7 +91,7 @@ class TableTest < ComponentTestCase
       t.column("Name", &:name)
     end
 
-    assert_html(html, ".panel#my-wrap")
+    assert_html(html, ".card#my-wrap")
     assert_no_html(html, "table#my-wrap")
   end
 

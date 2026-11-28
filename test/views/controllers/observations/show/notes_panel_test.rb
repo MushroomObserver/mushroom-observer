@@ -109,7 +109,7 @@ class Views::Controllers::Observations::Show::NotesPanelTest < ComponentTestCase
 
     html = render(panel_with(@obs))
 
-    assert_html(html, "#observation_inat_snapshot .panel-title",
+    assert_html(html, "#observation_inat_snapshot .card-title",
                 text: :inat_snapshot_caption.ti)
     assert_html(html, "a.panel-collapse-trigger[data-toggle='collapse']" \
                       "[href='#observation_inat_snapshot_body']")

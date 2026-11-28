@@ -14,11 +14,11 @@ export default class extends Controller {
     this.formTarget.requestSubmit();
   }
 
-  // A click on the label itself already natively toggles the nested
-  // checkbox -- only handle clicks elsewhere in the stretched area,
-  // or this double-toggles back to unchecked.
+  // A click on the label itself already natively toggles the
+  // checkbox via its for= attribute -- only handle clicks elsewhere
+  // in the stretched area, or this double-toggles back to unchecked.
   toggleCheckbox(event) {
-    if (event.target.closest(".caption-reviewed-link")) return;
+    if (event.target.closest(".custom-control-label")) return;
 
     this.toggleTarget.checked = !this.toggleTarget.checked;
     // Stimulus's default action event for an <input> is "input", not

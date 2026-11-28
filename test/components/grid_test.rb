@@ -8,12 +8,11 @@ class GridTest < ComponentTestCase
     @user = users(:rolf)
   end
 
-  def test_renders_empty_table_when_no_objects
-    component = build_table
+  def test_renders_empty_grid_when_no_objects
+    component = build_grid
     html = render(component)
 
     assert_includes(html, "list-unstyled")
-    assert_includes(html, "grid-table")
   end
 
   def test_renders_observations_without_caching
@@ -21,7 +20,7 @@ class GridTest < ComponentTestCase
       observations(:coprinus_comatus_obs),
       observations(:agaricus_campestris_obs)
     ]
-    component = build_table(objects: observations, cached: false)
+    component = build_grid(objects: observations, cached: false)
     html = render(component)
 
     assert_includes(html, "box_#{observations.first.id}")
@@ -32,7 +31,7 @@ class GridTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     # Stub transferred to return true
     obs.thumb_image.stub(:transferred, true) do
-      component = build_table(objects: [obs], cached: true)
+      component = build_grid(objects: [obs], cached: true)
 
       # Expect cache to be called
       cache_called = false
@@ -51,7 +50,7 @@ class GridTest < ComponentTestCase
     obs = observations(:coprinus_comatus_obs)
     # Stub transferred to return false
     obs.thumb_image.stub(:transferred, false) do
-      component = build_table(objects: [obs], cached: true)
+      component = build_grid(objects: [obs], cached: true)
 
       # Expect cache NOT to be called
       cache_called = false
@@ -73,7 +72,7 @@ class GridTest < ComponentTestCase
 
   def test_caches_objects_without_thumb_image
     user = users(:katrina)
-    component = build_table(objects: [user], cached: true)
+    component = build_grid(objects: [user], cached: true)
 
     # Expect cache to be called for user objects
     cache_called = false
@@ -98,7 +97,7 @@ class GridTest < ComponentTestCase
   def test_caches_image_objects_with_transferred_true
     image = images(:connected_coprinus_comatus_image)
     image.stub(:transferred, true) do
-      component = build_table(objects: [image], cached: true)
+      component = build_grid(objects: [image], cached: true)
 
       cache_called = false
       component.stub(:low_level_cache, lambda { |_key, &block|
@@ -116,7 +115,7 @@ class GridTest < ComponentTestCase
   def test_does_not_cache_image_objects_with_transferred_false
     image = images(:connected_coprinus_comatus_image)
     image.stub(:transferred, false) do
-      component = build_table(objects: [image], cached: true)
+      component = build_grid(objects: [image], cached: true)
 
       cache_called = false
       component.stub(:low_level_cache, lambda { |_key, &block|
@@ -183,7 +182,7 @@ class GridTest < ComponentTestCase
     assert_nil(obs.thumb_image,
                "Test requires observation with nil thumb_image")
 
-    component = build_table(objects: [obs], cached: true)
+    component = build_grid(objects: [obs], cached: true)
 
     # Expect cache to be called when thumb_image is nil
     cache_called = false
@@ -202,13 +201,13 @@ class GridTest < ComponentTestCase
 
   def test_does_not_render_identify_ui_and_footer_when_identify_is_false
     obs = observations(:coprinus_comatus_obs)
-    component = build_table(objects: [obs], identify: false)
+    component = build_grid(objects: [obs], identify: false)
     html = render(component)
 
     # Should not have identify UI or footer
     assert_not_includes(html, "vote-select-container")
     assert_not_includes(html, "context=grid_box")
-    assert_not_includes(html, "panel-active")
+    assert_not_includes(html, "card-active")
     assert_not_includes(html, "box_reviewed")
   end
 
@@ -216,7 +215,7 @@ class GridTest < ComponentTestCase
     # Must eager-load observation_views for identify footer to render
     obs = Observation.includes(:observation_views).
           find(observations(:coprinus_comatus_obs).id)
-    component = build_table(objects: [obs], identify: true)
+    component = build_grid(objects: [obs], identify: true)
     html = render(component)
 
     # Should have identify UI and footer
@@ -225,14 +224,14 @@ class GridTest < ComponentTestCase
         html.include?("context=grid_box"),
       "Expected identify UI to be rendered"
     )
-    assert_includes(html, "panel-active")
+    assert_includes(html, "card-active")
     assert_includes(html, "box_reviewed")
   end
 
   def test_renders_with_block
-    component = build_table
-    html = render(component) do |table|
-      table.render(
+    component = build_grid
+    html = render(component) do |grid|
+      grid.render(
         Components::Grid::Box.new(
           id: 123,
           class: "block-test"
@@ -250,11 +249,11 @@ class GridTest < ComponentTestCase
   end
 
   # The boxes' cached fragments hold only empty vote-interface frames;
-  # the table must follow them with viewer-specific replace streams so
+  # the grid must follow them with viewer-specific replace streams so
   # the whole page needs zero per-frame fetches.
   def test_renders_vote_interface_streams_after_boxes
     obs = observations(:coprinus_comatus_obs)
-    html = render(build_table(objects: [obs], cached: false))
+    html = render(build_grid(objects: [obs], cached: false))
 
     image_id = obs.thumb_image.id
     assert_html(
@@ -270,15 +269,15 @@ class GridTest < ComponentTestCase
   def test_no_vote_interface_streams_for_objects_without_thumb_images
     obs = observations(:coprinus_comatus_obs)
     obs.stub(:thumb_image, nil) do
-      html = render(build_table(objects: [obs], cached: false))
+      html = render(build_grid(objects: [obs], cached: false))
 
       assert_no_html(html, "turbo-stream")
     end
   end
 
   def test_no_vote_interface_streams_in_block_form
-    html = render(build_table) do |table|
-      table.render(Components::Grid::Box.new(id: 456) do
+    html = render(build_grid) do |grid|
+      grid.render(Components::Grid::Box.new(id: 456) do
         view_context.tag.div { "Block content" }
       end)
     end
@@ -289,7 +288,7 @@ class GridTest < ComponentTestCase
   def test_cache_key_includes_locale
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.stub(:transferred, true) do
-      component = build_table(objects: [obs], cached: true)
+      component = build_grid(objects: [obs], cached: true)
 
       # Capture the cache key that gets passed to low_level_cache
       captured_key = nil
@@ -311,7 +310,7 @@ class GridTest < ComponentTestCase
   def test_does_not_cache_when_identify_is_true
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.stub(:transferred, true) do
-      component = build_table(objects: [obs], cached: true, identify: true)
+      component = build_grid(objects: [obs], cached: true, identify: true)
 
       cache_called = false
       component.stub(:low_level_cache, lambda { |_key, &block|
@@ -335,7 +334,7 @@ class GridTest < ComponentTestCase
       keys = []
 
       # Render with English locale
-      component_en = build_table(objects: [obs], cached: true)
+      component_en = build_grid(objects: [obs], cached: true)
       component_en.stub(:low_level_cache, lambda { |key, &block|
         keys << key
         block.call
@@ -344,7 +343,7 @@ class GridTest < ComponentTestCase
       end
 
       # Render with Spanish locale (new component instance)
-      component_es = build_table(objects: [obs], cached: true)
+      component_es = build_grid(objects: [obs], cached: true)
       component_es.stub(:low_level_cache, lambda { |key, &block|
         keys << key
         block.call
@@ -404,7 +403,7 @@ class GridTest < ComponentTestCase
     real_store.write(first_key, ["<li>already cached</li>", {}])
     spy = CountingCacheStore.new(real_store)
 
-    component = build_table(objects: observations, cached: true)
+    component = build_grid(objects: observations, cached: true)
 
     # Phlex-rails' low_level_cache gates on perform_caching (unset,
     # so falsy, in the test env by default) -- without this, it always
@@ -447,7 +446,7 @@ class GridTest < ComponentTestCase
   def test_batched_store_is_cleared_after_render_completes
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.update_column(:transferred, true)
-    component = build_table(objects: [obs], cached: true)
+    component = build_grid(objects: [obs], cached: true)
 
     original_perform_caching =
       Rails.application.config.action_controller.perform_caching
@@ -469,7 +468,7 @@ class GridTest < ComponentTestCase
   def test_render_cached_boxes_skips_the_batched_read_when_caching_is_off
     obs = observations(:coprinus_comatus_obs)
     obs.thumb_image.update_column(:transferred, true)
-    component = build_table(objects: [obs], cached: true)
+    component = build_grid(objects: [obs], cached: true)
     spy = CountingCacheStore.new(ActiveSupport::Cache::MemoryStore.new)
 
     original_cache = Rails.cache
@@ -496,7 +495,7 @@ class GridTest < ComponentTestCase
 
   private
 
-  def build_table(**)
+  def build_grid(**)
     Components::Grid.new(user: @user, **)
   end
 end

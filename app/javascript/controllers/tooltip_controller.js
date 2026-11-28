@@ -74,6 +74,6 @@ export default class extends Controller {
   tipTargetDisconnected(element) {
     element.removeEventListener("click", this.hideOnClick)
     element.mo_activeTitleObserver?.disconnect()
-    $(element).tooltip("destroy")
+    $(element).tooltip("dispose")
   }
 }

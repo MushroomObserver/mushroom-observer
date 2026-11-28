@@ -76,7 +76,7 @@ class Components::Grid::Box
       return unless @observation_view
 
       panel.with_footer(
-        classes: "panel-active text-center position-relative"
+        classes: "card-active text-center position-relative"
       ) do
         ObservationFragment(
           type: :mark_as_reviewed_toggle,

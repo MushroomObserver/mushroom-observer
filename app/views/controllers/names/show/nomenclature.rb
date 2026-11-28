@@ -68,11 +68,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
         whitespace
         plain("(#{:misspelled.ti})")
       end
-      if approve_link || deprecate_link
-        span(class: "text-nowrap ml-3") do
-          render_synonym_links_inline
-        end
-      end
+      InlineIconBlock(items: [approve_link, deprecate_link].compact)
     end
   end
 
@@ -85,17 +81,6 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     @name.deprecated ? :deprecated.ti : :accepted.ti
   end
 
-  # Inline emit (the Phlex idiom) — `render` flushes each
-  # `Components::Link::Get` straight to the buffer instead of
-  # pre-building an HTML string.
-  def render_synonym_links_inline
-    links = [approve_link, deprecate_link].compact
-    links.each_with_index do |link, idx|
-      render(link)
-      plain(" | ") if idx < links.length - 1
-    end
-  end
-
   def render_name_line
     render_name_paragraph
     render_authority_paragraph
@@ -106,7 +91,7 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
     li(class: "hanging-indent") do
       trusted_html(append_colon(:name.ti))
       plain(@name.real_text_name(@user))
-      span(class: "text-nowrap ml-3") { render(synonyms_link) } if synonyms_link
+      InlineIconBlock(items: [synonyms_link].compact)
     end
   end
 
@@ -135,14 +120,16 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
                       @name.correct_spelling_id.nil?
 
     Components::Link.new(type: :get,
-                         tab: Tab::Name::Approve.new(name: @name))
+                         tab: Tab::Name::Approve.new(name: @name),
+                         class: Components::InlineIconBlock.item_class)
   end
 
   def deprecate_link
     return nil unless unlocked? && !@name.deprecated
 
     Components::Link.new(type: :get,
-                         tab: Tab::Name::Deprecate.new(name: @name))
+                         tab: Tab::Name::Deprecate.new(name: @name),
+                         class: Components::InlineIconBlock.item_class)
   end
 
   def synonyms_link
@@ -150,7 +137,8 @@ class Views::Controllers::Names::Show::Nomenclature < Views::Base
 
     Components::Link.new(
       type: :get,
-      tab: Tab::Name::EditSynonym.new(name: @name)
+      tab: Tab::Name::EditSynonym.new(name: @name),
+      class: Components::InlineIconBlock.item_class
     )
   end
 

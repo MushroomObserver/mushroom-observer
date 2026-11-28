@@ -32,6 +32,8 @@ class HelpTest < ComponentTestCase
   def test_well_wraps_in_bootstrap_well
     html = render_help(element: :p, content: "Help", well: true)
 
+    # The `well:` flavour wraps content in a Well; the element kwarg
+    # is intentionally ignored for the well shape.
     assert_html(html, "div.well.help-block.position-relative",
                 text: "Help")
   end
@@ -50,6 +52,8 @@ class HelpTest < ComponentTestCase
   def test_arrow_up_renders_arrow_up_sibling
     html = render_help(element: :div, content: "Help", arrow: :up)
 
+    # Setting `arrow:` is the legacy `help_block_with_arrow` shape —
+    # always a well, with an `arrow-up`/`arrow-down` sibling.
     assert_html(html, ".well.help-block", text: "Help")
     hide_classes = Components::Column.mobile_hide_classes.join(".")
     assert_html(html, ".arrow-up.#{hide_classes}")
@@ -75,7 +79,7 @@ class HelpTest < ComponentTestCase
     # id and arbitrary data-* asserted independently so renaming
     # the wrapper element or reshuffling attribute order doesn't
     # mass-fail this test.
-    assert_html(html, ".help-block", text: "Help")
+    assert_html(html, ".help-block.form-text", text: "Help")
     assert_html(html, "#custom-help-id")
     assert_html(html, "[data-x='v']")
   end
@@ -109,11 +113,11 @@ class HelpTest < ComponentTestCase
 
   # ----- element: :span (the "help-note" flavor) -----
   #
-  # `.help-block` is Bootstrap's class and hardcodes `display: block`,
-  # so reusing it for `element: :span` content would force a
-  # line-break regardless of the `<span>` tag. `render_plain` picks
-  # `.help-note` for `:span` and `.help-block` for everything else to
-  # keep the inline shape inline.
+  # `.help-block` carries `.form-text` (BS4's `display: block` +
+  # top-margin class), so reusing it for `element: :span` content
+  # would force a line-break regardless of the `<span>` tag.
+  # `render_plain` picks `.help-note` for `:span` and `.help-block
+  # form-text` for everything else to keep the inline shape inline.
 
   # rubocop:disable-next MO/RedundantTagInSelector
   def test_span_element_renders_help_note_class

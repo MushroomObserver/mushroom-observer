@@ -53,20 +53,25 @@ module Views::Controllers::Images::Reuse
     end
 
     def view_template
-      Row do
-        Column(md: 6) do
-          ContentPadded { trusted_html(:image_reuse_id_help.tp) }
+      Container(class: "border-bottom mb-2") do
+        Row do
+          Column(md: 6) do
+            ContentPadded { plain(:image_reuse_id_help.l) }
+          end
+          Column(md: 6) do
+            ContentPadded { render_id_field_row }
+          end
         end
-        Column(md: 6) { render_id_field_row }
       end
     end
 
     private
 
     def render_id_field_row
-      div(class: "form-group form-inline mt-3") do
+      div(class: "form-group form-inline m-0") do
         text_field(:img_id, label: :image_reuse_id,
-                            inline: true, size: 8, wrap_class: "mb-0",
+                            inline: true, size: 8,
+                            wrap_class: "mb-0",
                             data: { autofocus: "true",
                                     id_sanitizer_target: "input" })
         submit(:image_reuse_reuse.l, as: :button,

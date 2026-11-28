@@ -16,7 +16,7 @@ class Components::ImageFragment::Copyright < Components::Base
   def view_template
     return "" unless @image && show_copyright?
 
-    div(class: "image-copyright small") { render_copyright_text }
+    div(class: "image-copyright") { render_copyright_text }
   end
 
   # A class method, not private view_template logic, since
@@ -50,7 +50,9 @@ class Components::ImageFragment::Copyright < Components::Base
 
   def copyright_holder_name
     if @image.copyright_holder == @image.user.legal_name
-      capture { Link(type: :user, user: @image.user) }
+      capture do
+        Link(type: :user, user: @image.user, name: @image.user.legal_name)
+      end
     else
       @image.copyright_holder.to_s.t
     end

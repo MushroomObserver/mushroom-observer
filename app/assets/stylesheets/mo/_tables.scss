@@ -2,28 +2,50 @@
 // tables
 // --------------------------------------------------
 
+// Bootstrap's header-specific border-bottom (2px) on thead th stacks
+// with the first body row's border-top (1px) at the header/body
+// boundary, rendering as a doubled/thicker line. Drop it on every
+// table -- the body row's border-top supplies that boundary.
+.table > thead > tr > th {
+  border-bottom: 0;
+}
+
 // Cell padding matching a `.list-group-item` row. Pair with
 // Components::Table's variant: :lg.
 .table-lg {
   > thead > tr > th,
   > tbody > tr > td {
     padding: $card-spacer-x !important;
-    border-color: $list-group-border;
+    border-color: $list-group-border-color;
   }
 
   > thead > tr > th {
     padding-top: $table-cell-padding !important;
     padding-bottom: $table-cell-padding !important;
-    // Bootstrap's header-specific border-bottom (2px) stacks with
-    // the next row's border-top (1px) -- drop it so every row
-    // boundary, including thead -> tbody, gets just the 1px border.
-    border-bottom: 0;
   }
+}
+
+// A table rendered as a card's only content (no `.card-header` above
+// it, so `.table-responsive` is the card's first child -- e.g.
+// Components::Table's `panel_wrap` option, or a page that wraps a
+// bare table in a card via `content_padding(:panels)`) stacks the
+// card's border-top with the header `<th>`'s border-top (Bootstrap's
+// base `.table th` rule) on the same edge. Drop the header's -- the
+// card already supplies that line.
+.card > .table-responsive:first-child > .table > thead > tr > th {
+  border-top: 0;
 }
 
 thead tr {
   color: $list-group-disabled-color; // like navbar-inverse
   background-color: $list-group-disabled-bg;
+}
+
+// Locks column widths to the first row's natural content. Use when
+// later rows can swap in wider content (e.g. an inline edit form)
+// and you don't want the columns to reflow on every state change.
+.table-layout-fixed {
+  table-layout: fixed;
 }
 
 // Components::Table#legend -- a full-width section-label row.
@@ -37,17 +59,20 @@ thead tr {
 }
 
 // Combine with `.table` on the same <table> element to cascade
-// vertical-align: middle onto every cell -- overrides Bootstrap 3's
-// `th, td { vertical-align: top }` default. `.align-middle`
-// (mo/_utilities.scss) already covers the plain per-cell case, so
-// this class is only for the table-wide cascade.
+// vertical-align: middle onto every cell -- overrides Bootstrap's
+// `th, td { vertical-align: top }` / `thead th { vertical-align:
+// bottom }` table defaults. Bootstrap's `.align-middle` utility
+// (vertical-align: middle on the element it's applied to directly)
+// already covers the plain per-cell case, so this class is only for
+// the table-wide cascade.
 .table-align-middle.table {
-  > thead > tr > th,
-  > thead > tr > td,
-  > tbody > tr > th,
-  > tbody > tr > td,
-  > tfoot > tr > th,
-  > tfoot > tr > td {
+
+  >thead>tr>th,
+  >thead>tr>td,
+  >tbody>tr>th,
+  >tbody>tr>td,
+  >tfoot>tr>th,
+  >tfoot>tr>td {
     vertical-align: middle !important;
   }
 }
@@ -107,13 +132,12 @@ thead tr {
 
       > th,
       > td {
-        // 2.5px at the 16px root -- see issue #5527
-        padding: 0.15625rem 0;
+        padding: 0.25rem 0;
         text-align: center;
         vertical-align: middle;
 
         &:first-child {
-          padding: 0.15625rem 0.5em;
+          padding: 0.25rem 0.5em;
           text-align: left;
         }
       }
@@ -153,7 +177,7 @@ thead tr {
   }
 
   tr {
-    border-top: 1px solid $list-group-border;
+    border-top: 1px solid $list-group-border-color;
   }
 
   tr:first-child {
@@ -167,7 +191,7 @@ thead tr {
   }
 
   td {
-    border-top: 1px solid $list-group-border;
+    border-top: 1px solid $list-group-border-color;
   }
 
   th:first-child,
@@ -196,7 +220,7 @@ thead tr {
 
 .table-review-donations {
   th, td {
-    border-right: 1px solid $list-group-border;
+    border-right: 1px solid $list-group-border-color;
   }
 
   th:last-child,
@@ -251,5 +275,15 @@ table.ips-lined {
     &:not(:first-child) {
       border-left: 2px solid #d0d;
     }
+  }
+}
+
+//
+// larger devices
+// --------------------------------------------------
+
+@media screen and (min-width: breakpoint-min(sm)) {
+  .table {
+    overflow-x: scroll;
   }
 }

@@ -85,7 +85,7 @@ class Views::Controllers::Observations::Show::Namings::Row < Views::Base
 
   def render_main_columns
     render_mobile_label_row
-    Row(class: "d-flex align-items-center naming-columns") do
+    Row(class: "align-items-center naming-columns") do
       Column(**COLUMN_WIDTHS[:name]) { render_name_cell }
       Column(**COLUMN_WIDTHS[:proposer], class: "d-none d-sm-block") do
         render_proposer_cell

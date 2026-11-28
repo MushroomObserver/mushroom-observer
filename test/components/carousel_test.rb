@@ -43,7 +43,8 @@ class CarouselTest < ComponentTestCase
     )
 
     assert_html(html, ".carousel.slide[id='test_carousel']" \
-                      "[data-ride='false'][data-interval='false']")
+                      "[data-ride='false'][data-interval='false']" \
+                      "[data-wrap='false']")
     assert_html(html, ".carousel-inner[role='listbox'] " \
                       ".item.active[id='slide_1']", text: "SLIDE_ONE")
     assert_html(html, ".carousel-inner .item[id='slide_2']",
@@ -111,7 +112,8 @@ class CarouselTest < ComponentTestCase
   end
 
   # `extra_data` merges into the outer div's `data-*` attributes,
-  # alongside the always-emitted `data-ride` / `data-interval` pair.
+  # alongside the always-emitted `data-ride` / `data-interval` /
+  # `data-wrap` trio.
   def test_extra_data_merges_into_outer_data_attributes
     html = render_carousel(
       carousel_args: {
@@ -125,31 +127,19 @@ class CarouselTest < ComponentTestCase
   end
 
   # `show_controls: true` (default) renders the prev/next Controls
-  # subcomponent at the bottom of `.carousel-inner`. The
-  # `controls_wrap_class` prop, when set, wraps Controls in a `Row`
-  # with that class -- `Row` auto-prepends "row" (Form::UploadGallery
-  # passes just `"carousel-control-wrap"`).
-  def test_controls_render_inline_by_default
+  # subcomponent as siblings of `.carousel-inner`, matching Bootstrap
+  # 4's carousel markup (no wrapping element around the two buttons):
+  # https://getbootstrap.com/docs/4.6/components/carousel/
+  def test_controls_render_as_carousel_siblings
     html = render_carousel(carousel_args: { carousel_id: "c" },
                            slides: [{ content: "s" }])
 
-    assert_html(html, ".carousel-inner a.left.carousel-control")
-    assert_html(html, ".carousel-inner a.right.carousel-control")
-    assert_no_html(html, ".carousel-control-wrap")
-  end
-
-  def test_controls_can_be_wrapped_in_a_named_div
-    html = render_carousel(
-      carousel_args: {
-        carousel_id: "c",
-        controls_wrap_class: "carousel-control-wrap"
-      },
-      slides: [{ content: "s" }]
-    )
-
-    assert_html(html, ".carousel-inner " \
-                      ".carousel-control-wrap.row " \
-                      "a.left.carousel-control")
+    assert_html(html, ".carousel " \
+                      "button.carousel-control-prev[type='button']" \
+                      "[data-target='#c'][data-slide='prev']")
+    assert_html(html, ".carousel " \
+                      "button.carousel-control-next[type='button']" \
+                      "[data-target='#c'][data-slide='next']")
   end
 
   # `show_controls: false` suppresses the prev/next strip entirely
@@ -160,7 +150,8 @@ class CarouselTest < ComponentTestCase
       slides: [{ content: "s" }]
     )
 
-    assert_no_html(html, "a.carousel-control")
+    assert_no_html(html, ".carousel-control-prev")
+    assert_no_html(html, ".carousel-control-next")
   end
 
   # Default: first registered slide gets `.active`. Explicit

@@ -40,7 +40,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     browser.keyboard.type(:tab)
     assert_field("observation_naming_name", with: "Elfin saddle")
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_flash_error(:form_observations_there_is_a_problem_with_name)
     assert_selector("#observation_form")
@@ -108,7 +108,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_selector("#naming_reasons_2_notes.#{EXPANDED}", wait: 4)
     sleep(0.5)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("body.observations__show")
     new_obs = Observation.last
@@ -121,14 +121,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                "Naming should not have reason 2 (was unchecked before submit)")
   end
 
-  # Regression coverage for "click Create 3x, get 3 Observations":
-  # form-images_controller.js's `set_bindings` queries
-  # `input[type="submit"]` for the buttons to disable, but Phlex's
-  # `Components::Button::Submit` renders a `<button type="submit">`,
-  # not an `<input>`, so the selector matches nothing. Whether
-  # Turbo's native submitter-disabling covers the gap depends on the
-  # controller's `onsubmit` override, which `preventDefault`s the
-  # click while deferring to a `requestSubmit()` a tick later.
+  # form-images_controller.js's set_bindings queries
+  # input[type="submit"], which matches nothing against Phlex's
+  # <button type="submit">, so this covers Turbo's native
+  # submitter-disabling instead, via the controller's onsubmit ->
+  # requestSubmit() override.
   def test_submit_button_disables_synchronously_on_click
     login!(katrina)
     visit(new_observation_path)
@@ -165,12 +162,9 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     obs_count = Observation.count
 
-    # Fire three clicks back-to-back in one synchronous script -- no
-    # Ruby/network round-trip between them, reproducing the worst case:
-    # a user clicking faster than any round-trip-gated disabling could
-    # ever catch. Per the DOM spec, `.click()` on an already-disabled
-    # button is a no-op (no event dispatched), so clicks 2 and 3 only
-    # matter if click 1's disabling didn't take effect in time.
+    # Fires three clicks synchronously (no round-trip gap) -- a
+    # disabled button's `.click()` is a DOM no-op, so clicks 2/3 only
+    # matter if click 1's disabling was too slow.
     execute_script(<<~JS)
       const btn = document.querySelector(
         "#observation_form button[type='submit']"
@@ -186,15 +180,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                  "Observation, not one per click.")
   end
 
-  # The submit/remove-image buttons aren't the only things that need
-  # locking during the in-flight upload/submit window -- the rest of
-  # the form (locality, date, notes, projects, naming, thumb-image
-  # radios) is serialized at the *deferred* requestSubmit(), not at
-  # click time, so anything left editable can race that submit. Drives
-  # uploadAll() directly (stubbing submitForm so this doesn't actually
-  # navigate) rather than timing a real upload window, since the lock
-  # is applied synchronously at the top of uploadAll() -- no race to
-  # land a Capybara assertion inside.
+  # The whole form (locality, date, notes, projects, naming, thumb
+  # radios), not just submit/remove buttons, must lock during upload --
+  # the rest is serialized at the deferred requestSubmit(), not click
+  # time. Drives uploadAll() directly (stubbing submitForm) since the
+  # lock applies synchronously, with no Capybara-timing race to land.
   def test_form_locks_during_in_flight_upload_window
     login!(katrina)
     visit(new_observation_path)
@@ -253,13 +243,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector(".remove_image_button", visible: :all)
     assert_no_selector(".remove_image_button[disabled]", visible: :all)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
-    # The overlay unhides once this item's upload POST starts, and
-    # settles on the checkmark (not the spinner) once it succeeds --
-    # all while the carousel item itself remains visible throughout,
-    # unlike the old hide-the-whole-item behavior. Positive `.d-none`
-    # class, not `:not()` -- see system_test_state_polling.md.
+    # Overlay unhides once the POST starts, settles on the checkmark
+    # on success, carousel item stays visible throughout. Positive
+    # `.d-none` class, not `:not()` -- see system_test_state_polling.md.
     assert_no_selector(".upload-status-overlay.d-none", wait: 5)
     assert_no_selector(".upload-status-check.d-none", wait: 8)
     assert_selector(".carousel-item[data-image-status='upload']",
@@ -269,14 +257,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show", wait: 10)
   end
 
-  # Copilot review on #5055: a failed upload used to leave the form
-  # permanently `inert` (locked by uploadAll for the in-flight window)
-  # with no way for the user to recover -- nothing ever unlocked it,
-  # since the observation form itself was never submitted. Force the
-  # failure via the same path Image::UploadsController#create already
-  # rescues (image.process_image returning false), rather than a
-  # network-level failure, so this exercises the real server error
-  # response the JS has to handle.
+  # A failed upload used to leave the form permanently locked --
+  # nothing unlocks it since the observation form itself doesn't
+  # submit. Forces the failure via the same path
+  # Image::UploadsController#create rescues (process_image returning
+  # false), to exercise the error response the JS has to handle.
   def test_form_unlocks_after_upload_failure
     setup_image_dirs
     login!(katrina)
@@ -304,7 +289,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                    # so stub it rather than let it print.
                    Rails.logger.stub(:error, nil) do
                      accept_alert(wait: 8) do
-                       within("#observation_form") { click_commit }
+                       click_commit
                      end
                    end
                  ensure
@@ -344,7 +329,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_naming_name", with: "Elfin saddle")
     page.driver.browser.keyboard.type(:tab)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("#name_messages.alert-danger", wait: 6)
     assert_selector("#name_messages", text: "MO does not recognize the name")
@@ -391,7 +376,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     naming = find_by_id("observation_naming_specimen")
     scroll_to(naming, align: :top)
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     # Observation should have saved with the existing location_id for U.P.
     assert_selector("body.observations__show")
@@ -416,13 +401,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     nonexistent_where = "Chez Cohen, Clackamas Co., Oregon, USA"
     fill_in("observation_place_name", with: nonexistent_where)
 
-    # A logged-in user's place_name field defaults to their last-used
-    # Location, with a hidden observation_location_id pointing at it.
-    # Typing over the visible text doesn't clear that hidden field --
-    # explicitly click "create_locality" (same interaction as
-    # test_trying_to_create_duplicate_location_just_uses_existing_location)
-    # so the typed text is treated as free-text, not silently ignored
-    # in favor of the stale location_id.
+    # place_name defaults to the user's last Location, with a hidden
+    # observation_location_id pointing at it -- typing over the text
+    # doesn't clear that field, so click "create_locality" explicitly
+    # so the typed text is treated as free-text, not the stale id.
     find(id: "observation_place_name").trigger("click")
     within("#observation_location_autocompleter") do
       assert_selector(".create-button", visible: :all)
@@ -436,7 +418,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
     fill_in("observation_naming_name", with: "Coprinus comatus")
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("body.locations__new", wait: 6)
     assert_field("location_display_name", with: nonexistent_where)
@@ -600,14 +582,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Create observation with two geotagged images with different coordinates
     visit(new_observation_path)
     assert_selector("body.observations__new")
-    # The new-observation form copies gps_hidden from the user's last
-    # observation, with no recency window, so it may already be
-    # checked here (currently true via katrina's untrusted_hidden
-    # fixture). Force it off: the uploaded images' GPS needs to
-    # survive, or Image::Processor.strip_original_gps strips it from
-    # the originals on save. The checkbox lives inside a closed
-    # Bootstrap `.collapse` section not opened at this point in the
-    # flow, so a click isn't possible -- set it via JS.
+    # gps_hidden copies from the user's last observation with no
+    # recency window, so it may already be checked -- force off
+    # regardless, or Image::Processor.strip_original_gps strips GPS
+    # from the uploaded images. Its collapse section isn't open yet,
+    # so set via JS, not a click.
     execute_script("document.getElementById(" \
                    "'observation_gps_hidden').checked = false")
 
@@ -630,8 +609,13 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     fill_in("observation_place_name", with: "California, USA")
     fill_in("observation_naming_name", with: "Agaricus")
 
-    # Submit to create observation
-    within("#observation_form") { click_commit }
+    # Submit to create observation. click_commit's uploadAll locks the
+    # form, uploads both images (each showing a checkmark on success),
+    # polls for EXIF, then resubmits. A browser repro of this flow,
+    # test DB, same two files, completed in under 10s end to end --
+    # these waits are sized to that, not padded.
+    click_commit
+    wait_for_upload_checkmarks(count: 2)
     assert_selector("body.observations__show", wait: 10)
 
     # Navigate to edit page
@@ -693,16 +677,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_no_checked_field("observation_specimen", visible: :all)
     assert_field(other_notes_id, with: "", visible: :all)
 
-    # The new-observation form copies gps_hidden from the user's last
-    # observation (`defaults_from_last_observation_created`), with no
-    # recency window (unlike `when`) -- so it may already be checked
-    # here depending on katrina's fixture history. Force it off
-    # regardless: Image::Processor.strip_original_gps would otherwise
-    # permanently strip GPS from the geotagged image uploaded below,
-    # before this test's later EXIF assertions. The checkbox lives
-    # inside a closed Bootstrap `.collapse` section
-    # (#observation_geolocation) not opened by anything at this point
-    # in the flow, so a real click isn't possible -- set it via JS.
+    # gps_hidden copies from the user's last observation with no
+    # recency window, so it may already be checked -- force off
+    # regardless, or Image::Processor.strip_original_gps strips GPS
+    # from the geotagged image before this test's EXIF assertions.
+    # Its collapse section isn't open yet, so set via JS, not a click.
     execute_script("document.getElementById(" \
                    "'observation_gps_hidden').checked = false")
 
@@ -825,7 +804,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
 
     specimen_section = find_by_id("observation_specimen_section", visible: :all)
     scroll_to(specimen_section, align: :center)
-    assert_field("observation_specimen")
+    assert_field("observation_specimen", visible: :all)
     check("observation_specimen")
     assert_field("observation_collection_number_number")
     fill_in("observation_collection_number_number", with: "17-034a")
@@ -843,7 +822,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(naming, align: :top)
 
     # submit_observation_form_with_errors
-    within("#observation_form") { click_commit }
+    click_commit
 
     # rejected, but images uploaded
     assert_selector("body.observations__new", wait: 12)
@@ -903,12 +882,6 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # lat/lng does not match Google's Pasadena, but does match South Pasadena
     assert_selector("[data-type='location_google']")
     find_by_id("observation_place_name").trigger("focus")
-    # assert_selector(".auto_complete", wait: 6)
-    # assert_selector(".dropdown-item a[data-id='-1']",
-    #                 text: SOUTH_PASADENA[:name], visible: :all, wait: 6)
-    # There may be more than one of these, click the first
-    # find(".dropdown-item a[data-id='-1']",
-    #      text: SOUTH_PASADENA[:name], visible: :all).trigger("click")
     assert_field("observation_place_name", with: SOUTH_PASADENA[:name])
     sleep(1)
     # debugger
@@ -931,7 +904,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_select("observation_naming_vote_value",
                   selected: Vote.confidence_string(Vote.next_best_vote))
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     # NOTE: The flash message for location creation is commented out in
     # locationable.rb line 117, so we don't expect it here
@@ -965,7 +938,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
       assert_selector(".exif_lat", text: SO_PASA_EXIF[:lat].to_s, visible: :all)
       assert_selector(".exif_lng", text: SO_PASA_EXIF[:lng].to_s, visible: :all)
     end
-    assert_unchecked_field("observation_is_collection_location")
+    assert_unchecked_field("observation_is_collection_location", visible: :all)
     assert_checked_field("observation_specimen", visible: :all)
     assert_field(other_notes_id, with: "Notes for observation", visible: :all)
 
@@ -1032,7 +1005,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     scroll_to(obs_notes, align: :top)
     fill_in(other_notes_id, with: "New notes for observation")
 
-    within("#observation_form") { click_commit }
+    click_commit
 
     assert_selector("body.observations__show")
     # NOTE: Flash message behavior may have changed - commenting out for now
@@ -1051,14 +1024,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     assert_selector("body.observations__show")
     click_and_confirm(find(".destroy_observation_link_#{new_obs.id}"))
     assert_flash_for_destroy_observation(new_obs.id)
-    # Redirects to :index only when there's no active query to fall
-    # back to; the `visit(activity_logs_path)` check above leaves a
-    # session-persisted RssLog query that ObservationsController::
-    # Destroy#redirect_after_destroy correctly adapts into an
-    # Observation subquery with a valid next_id, so this lands on the
-    # next observation's show page instead -- both are correct
-    # outcomes of the same (intentional) "go to next in context, else
-    # index" redirect logic.
+    # The earlier activity_logs visit left a session RssLog query;
+    # Destroy#redirect_after_destroy adapts it into an Observation
+    # subquery with a valid next_id, landing on the next
+    # observation's show page instead of index -- both are valid
+    # "go to next in context, else index" outcomes.
     assert_selector("body.observations__show, body.observations__index")
 
     # Make sure observation is not in log index
@@ -1086,15 +1056,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # This attribute controls whether makeMapClickable() is called
     assert_selector("#observation_form_map[data-editable='true']")
 
-    # Wait for the map controller to finish drawing. The
-    # `data-map='connected'` attribute is set in `connect()` before
-    # the google.maps loader resolves, so wait for `controller.map`
-    # to be defined instead.
-    #
-    # 20s, not 10s: this waits on a network round-trip to Google's
-    # Maps JS API. Flaked with a 10s budget when running the full
-    # file, where preceding heavy tests leave the browser under
-    # enough contention that the API load didn't finish in time.
+    # Waits for `controller.map` to be defined, not just
+    # `data-map='connected'` (set before the loader resolves). 20s,
+    # not 10s -- waits on Google Maps API round-trip, which flaked at
+    # 10s under full-suite CPU/network contention.
     Timeout.timeout(20) do
       loop do
         ready = evaluate_script(<<~JS)
@@ -1174,11 +1139,7 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
 
   # Verifies the "+ New Locality" create-button stays hidden for an
-  # exact match on an existing location -- it was showing for any
-  # prefilled value since `.create-button { display: none }` tied in
-  # specificity with multiple `.btn`-family rules (`.btn` itself, and
-  # `.btn:has(.mo-icon)` for icon-centering) and lost on source order
-  # either way, regardless of how far the selector was bumped.
+  # exact match on an existing location.
   def test_create_button_hidden_for_existing_matched_location
     login!(katrina)
     visit(new_observation_path)
@@ -1223,12 +1184,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     # Upload geotagged image (Miami/University Park area - 25.7582, -80.3731)
     click_attach_file("geotagged.jpg")
 
-    # Granular per-step waits (carousel item present -> EXIF text
-    # populated -> "use exif" button enabled -> geolocation collapse
-    # expanded -> field values set) instead of one wait on the final
-    # field value, which conflated several independent async steps
-    # (EXIF FileReader parsing, jQuery collapse animation) into a
-    # single timeout that flaked under full-suite contention.
+    # Granular per-step waits (not one wait on the final value) --
+    # EXIF FileReader parsing and the jQuery collapse animation are
+    # independent async steps that flaked when combined into one
+    # timeout under full-suite contention.
     assert_image_gps_copied_to_obs(GEOTAGGED_EXIF)
 
     # Autocompleter should be in location_containing mode (MO location exists)
@@ -1374,16 +1333,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     university_park.destroy
   end
 
-  # A latitude or longitude of 0 (equator or prime meridian) is a
-  # valid coordinate: the autocompleter swaps into
-  # "location_containing" mode and carries the 0-valued params along.
-  #
-  # Needs a fixture-independent location containing (0, 0.5): the
-  # only fixture location whose box contains that point is the
-  # global "Earth" catch-all, and Autocomplete::ForLocationContaining
-  # rejects overly-broad boxes as "vague", so a whole-globe box
-  # doesn't match -- the lookup would otherwise find nothing and fall
-  # back to "location_google".
+  # A lat/lng of 0 is valid -- the autocompleter swaps into
+  # "location_containing", carrying the 0-valued params along.
+  # Needs a fixture location containing (0, 0.5): only the global
+  # "Earth" catch-all does, which Mappable::BoxMethods#vague?
+  # rejects as too broad, falling back to location_google instead.
   def test_zero_latitude_triggers_locality_lookup
     equator_location = Location.create!(
       name: "Null Island Vicinity, Gulf of Guinea",
@@ -1513,13 +1467,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     pasadena.destroy
   end
 
-  # Bug fix: when typed coordinates match no existing MO location, the
-  # locality autocompleter falls back from location_containing to
-  # location_google and runs a real Google geocode lookup.
-  # refreshGooglePrimer force-sets `focused = true` "even if input lost
-  # focus" so that fallback's result still gets processed -- without
-  # the fix, that flag doesn't distinguish real vs. programmatic focus,
-  # so the geocode result would also steal focus once it arrives.
+  # On no matching location, the autocompleter falls back from
+  # location_containing to location_google. refreshGooglePrimer
+  # force-sets `focused = true` even if input lost focus, so that
+  # fallback's geocode result still processes instead of being
+  # dropped for stealing focus.
   def test_typing_coordinates_with_no_matching_location_does_not_steal_focus
     login!(katrina)
     visit(new_observation_path)
@@ -1527,12 +1479,10 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
     wait_for_map_outlet_ready
     wait_for_map_geocoder_ready
 
-    # Alert, Nunavut -- the northernmost permanently inhabited place on
-    # Earth. No MO location record contains this point (forcing the
-    # location_containing -> location_google fallback), but it's a
-    # real locality Google geocodes to non-filtered results (unlike a
-    # mid-ocean point, which geocodes only to filtered-out types like
-    # plus_code and comes back empty).
+    # Alert, Nunavut: no MO location contains this point (forces the
+    # location_google fallback), and Google geocodes it to
+    # non-filtered results -- unlike a mid-ocean point, which only
+    # geocodes to filtered-out types like plus_code.
     execute_script(<<~JS)
       const latField = document.getElementById('observation_lat');
       const lngField = document.getElementById('observation_lng');
@@ -1554,21 +1504,18 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
                      "steal focus from the coordinate field")
   end
 
-  # Bug fix: after coordinates matched a location and its name got
-  # auto-filled into the locality field, correcting to a second,
-  # unrelated point silently failed to re-search at all -- the
-  # leftover locality text from the first match looked to
-  # refreshPrimer() like a valid "refinement" of itself, even though
-  # request_params (the actual lat/lng driving the search) had
-  # changed underneath it. Found via user testing during review.
+  # Correcting to a second point after a first match silently
+  # failed to re-search -- leftover locality text from the first
+  # match looks to refreshPrimer() like a valid "refinement" of
+  # itself, even though request_params (the lat/lng driving the
+  # search) changed underneath it.
   def test_correcting_coordinates_after_a_prior_match_still_searches
     login!(katrina)
     # MAX_STRING_LENGTH (50 chars) truncates the search token -- the
-    # name has to be longer than that so the leftover text, once
-    # truncated by the intermediate text-based search the "location"
-    # type fallback runs, becomes a proper (shorter) prefix of itself.
-    # That's what makes refreshPrimer() misidentify it as "the same
-    # search, just refined" instead of noticing request_params changed.
+    # name must be longer than that so the truncated leftover text
+    # becomes a proper prefix of itself, which is what makes
+    # refreshPrimer() misidentify it as "refined" instead of noticing
+    # request_params changed.
     alpha = Location.create!(
       name: "Test Location Alpha Extended Forest Preserve Area, " \
             "Testland Co., Testania, USA",
@@ -1798,12 +1745,23 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_date_is_now
 
-  # Editing an observation that already has coordinates: the Geolocation
-  # box must be checked, and the locality autocompleter must already be
-  # offering the localities containing that point. Neither happened --
-  # the box was bound to a non-attribute, and the swap to
-  # "location_containing" only ever fired from typing in the lat/lng
-  # inputs, so the form had to be cleared, saved and re-typed (#5002).
+  # Sets a radio's checked state directly, bypassing a coordinate
+  # click. Native radio-group exclusivity still applies when `checked`
+  # is set this way, so other radios in the group get unchecked too.
+  def check_radio(id)
+    page.execute_script(<<~JS)
+      const radio = document.getElementById("#{id}")
+      radio.checked = true
+      radio.dispatchEvent(new Event("change", { bubbles: true }))
+    JS
+  end
+  private :check_radio
+
+  # Editing an observation with coordinates: the Geolocation box
+  # must be checked, and the autocompleter must already offer
+  # localities containing that point -- previously the box was bound
+  # to a non-attribute, and the swap only fired from typing in the
+  # lat/lng inputs, forcing a clear/save/re-type round trip.
   def test_edit_form_with_coordinates_is_ready_to_use
     obs = observations(:unknown_with_lat_lng)
     assert(obs.lat.present?, "fixture needs coordinates")
@@ -1870,12 +1828,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :assert_geolocation_is_empty
 
-  # Waits for the map controller AND its autocompleter--location outlet
-  # to both be ready. `data-map="connected"` alone isn't enough --
-  # Stimulus outlets can connect on a later tick, so a synthetic event
-  # dispatched right after "connected" can still fire into a map
-  # controller whose `sendPointChanged` finds `hasAutocompleterLocationOutlet`
-  # false and silently drops the swap.
+  # Waits for both the map controller AND its autocompleter-location
+  # outlet -- `data-map="connected"` alone isn't enough, since
+  # outlets can connect a tick later, letting an early synthetic
+  # event find `hasAutocompleterLocationOutlet` false and drop the
+  # swap.
   def wait_for_map_outlet_ready
     Timeout.timeout(10) do
       loop do
@@ -1965,12 +1922,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :wait_for_autocompleter_match
 
-  # The lat/lng -> "location_containing" swap is debounced (map
-  # controller's sendPointChanged, 1s) and re-runs on every input event,
-  # so a plain `assert_selector(wait:)` on the resulting `data-type` can
-  # observe an intermediate swap (or none yet) instead of the settled
-  # one carrying these request_params. Poll the autocompleter
-  # controller's state instead of the DOM attribute.
+  # The lat/lng -> "location_containing" swap is debounced (1s,
+  # sendPointChanged) and re-runs on every input event, so a plain
+  # `assert_selector(wait:)` on `data-type` can catch an intermediate
+  # swap instead of the settled one. Poll the controller's state
+  # instead of the DOM attribute.
   def wait_for_autocompleter_request_params(lat:, lng:)
     Timeout.timeout(10) do
       loop do
@@ -1994,16 +1950,11 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :wait_for_autocompleter_request_params
 
-  # A saved image's GPS/date loads lazily via EXIFGeocodeJob (#5369),
-  # broadcast over the page's Action Cable subscription -- the test
-  # queue adapter leaves an enqueued job sitting in the queue instead
-  # of running it. A broadcast sent before that subscription connects
-  # is lost, so this polls by re-running the job against the live
-  # page instead of guessing how long the connection takes: each
-  # iteration either lands (subscription was already up) or is a
-  # harmless re-broadcast of the same content. Matches on `lat` (not
-  # just `.exif_lat`'s presence) so a page with more than one image's
-  # CameraInfo can't be satisfied by a different image's broadcast.
+  # EXIFGeocodeJob's broadcast is lost if sent before the page's
+  # Action Cable subscription connects, so this re-runs the job
+  # against the live page until it lands. Matches on `lat`, not
+  # just `.exif_lat`'s presence, so a multi-image page isn't
+  # satisfied by a different image's broadcast.
   def wait_for_exif_geocode_broadcast(image, lat:, read_only: false,
                                       date_differs: false, visible: true)
     Timeout.timeout(10) do
@@ -2019,17 +1970,26 @@ class ObservationFormSystemTest < ApplicationSystemTestCase
   end
   private :wait_for_exif_geocode_broadcast
 
-  # Sets a radio's checked state directly, bypassing a coordinate
-  # click. Native radio-group exclusivity still applies when `checked`
-  # is set this way, so other radios in the group get unchecked too.
-  def check_radio(id)
-    page.execute_script(<<~JS)
-      const radio = document.getElementById("#{id}")
-      radio.checked = true
-      radio.dispatchEvent(new Event("change", { bubbles: true }))
-    JS
+  # Polls client-side state directly instead of assert_selector, per
+  # system_test_state_polling.md -- positive class-presence counts
+  # only, no `:not()`.
+  def wait_for_upload_checkmarks(count:, wait: 15)
+    Timeout.timeout(wait) do
+      loop do
+        total = evaluate_script(
+          'document.querySelectorAll(".upload-status-check").length'
+        )
+        hidden = evaluate_script(
+          'document.querySelectorAll(".upload-status-check.d-none").length'
+        )
+        break if total - hidden >= count
+
+        sleep(0.25)
+      end
+    end
+  rescue Timeout::Error
+    flunk("Timed out waiting for #{count} upload checkmarks.")
   end
-  private :check_radio
 
   def assert_image_exif_available(image_data)
     assert_selector('[id$="when_1i"]', visible: :all)

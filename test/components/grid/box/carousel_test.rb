@@ -26,8 +26,8 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
     assert_html(html, ".carousel.slide > .carousel-inner[role='listbox']")
     # No Panel wrapper, no indicator strip — those are contracts
     # specific to the box context (the box itself owns the
-    # surrounding panel; thumbnails are not shown per-box).
-    assert_no_html(html, ".panel")
+    # surrounding card; thumbnails are not shown per-box).
+    assert_no_html(html, ".card")
     assert_no_html(html, "ol.carousel-indicators")
   end
 
@@ -65,13 +65,13 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
 
     html = render_carousel
 
-    assert_html(html, "a.left.carousel-control")
-    assert_html(html, "a.right.carousel-control")
+    assert_html(html, "button.carousel-control-prev")
+    assert_html(html, "button.carousel-control-next")
   end
 
   # Item slide does NOT pull a `:large`/original image — the
-  # `Grid::Box::Carousel::Item` subclass overrides defaults to keep
-  # the per-box render cost down.
+  # `Grid::Box::Carousel::Item` subclass overrides defaults to keep the
+  # per-box render cost down.
   # The img's `src` should be a `medium` (640px) variant rather than
   # the `:original`/`:huge`/`:large` URL.
   def test_slides_use_medium_size_not_large
@@ -82,7 +82,7 @@ class Components::Grid::Box::CarouselTest < ComponentTestCase
     assert_not_includes(html, "/orig/") # :original
   end
 
-  # Empty images set — render nothing (the box would normally gate
+  # Empty images set — render nothing (the caller would normally gate
   # this upstream, but the component shouldn't crash).
   def test_empty_images_renders_nothing
     html = render(Components::Grid::Box::Carousel.new(

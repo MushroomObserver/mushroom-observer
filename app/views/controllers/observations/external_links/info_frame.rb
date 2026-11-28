@@ -76,7 +76,7 @@ module Views::Controllers::Observations::ExternalLinks
     def render_site_record_badge(link)
       return unless link.site_record_id
 
-      Badge(variant: :id, value: link.site_record_id, size: :lg,
+      Badge(type: :id, value: link.site_record_id, size: :lg,
             title: :copy_this_site_id.ti(site: link.site_name),
             class: "ml-2")
     end

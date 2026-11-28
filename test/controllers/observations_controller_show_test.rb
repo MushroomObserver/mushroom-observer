@@ -213,7 +213,7 @@ class ObservationsControllerShowTest < FunctionalTestCase
     get(:show, params: { id: obs.id })
     # Other-only notes render under a "Notes" panel heading, with the
     # value as a textile paragraph in the panel body.
-    assert_select("#observation_notes .panel-title", text: :notes.ti)
+    assert_select("#observation_notes .card-title", text: :notes.ti)
     assert_select("#observation_notes .textile p",
                   text: "Second fruiting in bark chips")
   end
@@ -483,9 +483,9 @@ class ObservationsControllerShowTest < FunctionalTestCase
       assert_select(".comment-summary", /complicated/)
     end
     # Test that the panel title and new comment link appears.
-    assert_select("#comments_for_object .panel-title > span:first-child",
-                  text: :comments.ti)
-    assert_select("#comments_for_object .panel-heading-links",
+    assert_select_text_includes("#comments_for_object .card-header",
+                                :comments.ti)
+    assert_select("#comments_for_object .card-header-icons",
                   text: :show_comments_add_comment.l)
 
     # You must be logged in to get the show_obs naming table now.

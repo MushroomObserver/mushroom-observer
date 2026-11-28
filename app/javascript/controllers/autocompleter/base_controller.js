@@ -89,10 +89,10 @@ export const AUTOCOMPLETER_TARGETS = [
 ]
 export const AUTOCOMPLETER_OUTLETS = ["map"]
 
-// Bootstrap 3's dropdown-open class, toggled on a wrapping element --
-// Bootstrap 4 names it "show" and toggles it on the menu itself
+// Bootstrap 4's dropdown-open class, toggled on the menu itself --
+// Bootstrap 3 names it "open" and toggles it on a wrapping element
 // instead (see hidePulldown()'s comment).
-const PULLDOWN_OPEN_CLASS = "open"
+const PULLDOWN_OPEN_CLASS = "show"
 
 // Types that have their own dedicated controller files.
 // Used by swap() to determine if controller change is needed.
@@ -820,7 +820,7 @@ export default class BaseAutocompleterController extends Controller {
 
       if (matches.length > 1 || this.getSearchToken() != matches[0]['name']) {
         this.clearHide();
-        this.wrapTarget?.classList?.add(PULLDOWN_OPEN_CLASS);
+        this.pulldownTarget?.classList?.add(PULLDOWN_OPEN_CLASS);
         this.menu_up = true;
       } else {
         this.hidePulldown();
@@ -830,12 +830,11 @@ export default class BaseAutocompleterController extends Controller {
     }
   }
 
-  // PULLDOWN_OPEN_CLASS toggles on wrapTarget, the element wrapping
-  // the menu -- Bootstrap 3's `.open > .dropdown-menu` CSS rule is a
-  // parent-child selector, not a compound selector on the menu
-  // itself.
+  // PULLDOWN_OPEN_CLASS toggles on pulldownTarget itself, not
+  // wrapTarget -- `.dropdown-menu.show` is a compound selector on the
+  // menu element itself, not a parent-child selector.
   hidePulldown() {
-    this.wrapTarget?.classList?.remove(PULLDOWN_OPEN_CLASS);
+    this.pulldownTarget?.classList?.remove(PULLDOWN_OPEN_CLASS);
     this.menu_up = false;
   }
 

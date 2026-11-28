@@ -28,11 +28,11 @@ module Views::Layouts
       html = render_page_title("show")
 
       # Mobile top row: one visibility-gated copy of each piece.
-      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
-      assert_html(html, ".col-xs-12.d-sm-none .cta-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .edit-icons-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .pager-marker")
+      assert_html(html, ".col-12.d-sm-none .badge-id")
+      assert_html(html, ".col-12.d-sm-none .cta-marker")
+      assert_html(html, ".col-12.d-sm-none .edit-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .interest-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .pager-marker")
 
       # Desktop positions: same pieces, gated the other way.
       assert_html(html, ".id_badge_wrap.d-none.d-sm-block .badge-id")
@@ -76,10 +76,10 @@ module Views::Layouts
       assert_no_html(html, ".interest-icons-marker")
       assert_no_html(html, ".pager-marker")
       # Badge, CTA, and edit icons still appear at both positions.
-      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
+      assert_html(html, ".col-12.d-sm-none .badge-id")
       assert_html(html, ".id_badge_wrap.d-none.d-sm-block .badge-id")
-      assert_html(html, ".col-xs-12.d-sm-none .cta-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .edit-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .cta-marker")
+      assert_html(html, ".col-12.d-sm-none .edit-icons-marker")
     end
 
     # `new`/`create` pages have no object yet, so `add_id_badge`/
@@ -104,9 +104,9 @@ module Views::Layouts
       assert_no_html(html, ".show_object_nav")
       # Mobile row still omits the (unset) icons/pager, but keeps
       # the pieces that are set.
-      assert_html(html, ".col-xs-12.d-sm-none .badge-id")
-      assert_no_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
-      assert_no_html(html, ".col-xs-12.d-sm-none .pager-marker")
+      assert_html(html, ".col-12.d-sm-none .badge-id")
+      assert_no_html(html, ".col-12.d-sm-none .interest-icons-marker")
+      assert_no_html(html, ".col-12.d-sm-none .pager-marker")
     end
 
     # A column-less show page (e.g. SpeciesLists::Show) has no right
@@ -123,8 +123,8 @@ module Views::Layouts
       assert_html(html, ".title_bar_actions_wrap .edit-icons-marker")
       # Mobile row is unaffected by has_columns -- same inline
       # treatment it always uses.
-      assert_html(html, ".col-xs-12.d-sm-none .interest-icons-marker")
-      assert_html(html, ".col-xs-12.d-sm-none .pager-marker")
+      assert_html(html, ".col-12.d-sm-none .interest-icons-marker")
+      assert_html(html, ".col-12.d-sm-none .pager-marker")
     end
 
     def test_suppressed_on_index_action

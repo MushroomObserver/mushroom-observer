@@ -1,214 +1,389 @@
+// ==================================================
+// BOOTSTRAP 4 THEME VARIABLE MAPPING
+// ==================================================
 //
-// set bootstrap parameters first
-// --------------------------------------------------
+// Imported from mushroom_observer.scss, between the theme variable
+// file and `@import "bootstrap"` (issue #5348). Maps MO's
+// standardized theme variables to Bootstrap 4's variable system.
+//
+// Import order:
+//   1. app/assets/stylesheets/variables/{theme}.scss
+//   2. app/assets/stylesheets/mo/_map_theme_vars_to_bootstrap_vars.scss
+//      (this file)
+//   3. bootstrap (gem)
+//
+// NOTE: This file contains NO hardcoded colors. All colors come from
+// theme variables defined in app/assets/stylesheets/variables/
+//
+// ==================================================
 
-$brand-primary:                             $PRIMARY_COLOR;
-$brand-success:                             $SUCCESS_COLOR;
-$brand-info:                                $INFO_COLOR;
-$brand-warning:                             $WARNING_COLOR;
-$brand-danger:                              $DANGER_COLOR;
-$black:                                     black;
-$white:                                     white;
+// ==================================================
+// SECTION 1: SEMANTIC COLOR SYSTEM
+// ==================================================
+//
+// Bootstrap 4's core semantic colors map directly to our theme's
+// semantic color layer. These are used throughout BS4 components
+// for contextual styling (alerts, buttons, badges, etc.)
+//
 
-// Bootstrap 4's variable name (bootstrap-sass/BS3 doesn't read this --
-// defined ahead of the cutover per issue #3797's mapping direction, so
-// _utilities.scss's BS4-matching duplicates already read the BS4 name).
-// Reuses $PANEL_BORDER_COLOR rather than $muted_border directly: every
-// theme defines it, including Admin/Sudo, whose high-contrast design
-// has no $muted_border and wants a solid color here instead.
-$border-color:                              $PANEL_BORDER_COLOR;
+$primary:    $PRIMARY_COLOR;
+$secondary:  $SECONDARY_COLOR;
+$success:    $SUCCESS_COLOR;
+$info:       $INFO_COLOR;
+$warning:    $WARNING_COLOR;
+$danger:     $DANGER_COLOR;
+$light:      $LIGHT_COLOR;
+$dark:       $DARK_COLOR;
 
-$text-color:                                $BODY_TEXT_COLOR;
-$body-bg:                                   $BODY_BG_COLOR;
+// $success is a light green -- fine for alerts (a translucent tint
+// under $body-color text) and form-feedback text, but too light for
+// white text/icons on a solid `.btn-success` background. Darkened
+// separately here so those other consumers of $success keep their
+// colors unchanged; see `mo/_links_buttons_alerts.scss` for the
+// override.
+$btn-success-bg: scale-color($success, $lightness: -38%);
 
-$link-color:                                $LINK_TEXT_COLOR;
-$link-hover-color:                          $LINK_HOVER_TEXT_COLOR;
+// Bootstrap 4 uses a theme-colors map for generating variants
+// This creates .btn-primary, .btn-success, .alert-warning, etc.
+$theme-colors: (
+  "primary":    $primary,
+  "secondary":  $secondary,
+  "success":    $success,
+  "info":       $info,
+  "warning":    $warning,
+  "danger":     $danger,
+  "light":      $light,
+  "dark":       $dark
+);
 
-$font-family-sans-serif:                    Verdana, Arial, Helvetica, sans-serif;
-$font-family-base:                          $font-family-sans-serif;
-// $font-family-sans-serif:      -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Verdana, Arial, "Helvetica Neue", "Noto Sans", "Liberation Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-// $font-family-monospace:       SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+// ==================================================
+// SECTION 2: GRAYSCALE & BASIC COLORS
+// ==================================================
+//
+// Bootstrap 4 provides grayscale utilities and uses these for
+// borders, backgrounds, and text muting
+//
 
-$font-size-base:                            13px;
+$white:    #fff;
+$black:    #000;
 
-$padding-base-vertical:                     5px;
-$padding-base-horizontal:                   10px;
-$padding-large-vertical:                    8px;
-$padding-large-horizontal:                  13px;
-$padding-small-vertical:                    4px;
-$padding-small-horizontal:                  8px;
-$padding-xs-vertical:                       1px;
-$padding-xs-horizontal:                     4px;
+// MO's widest layout tier is wider than Bootstrap's stock $xl
+// (1200px) -- everything else stays at Bootstrap's default.
+$grid-breakpoints: (
+  xs: 0,
+  sm: 576px,
+  md: 768px,
+  lg: 992px,
+  xl: 1320px
+);
 
-$border-radius-base:                        5px;
+// $BODY_TEXT_COLOR/$BODY_BG_COLOR (not $LIGHT_COLOR/$DARK_COLOR)
+// already resolve light/dark per theme -- see color_derivation.scss --
+// so gray-900 (BS4's high-contrast-text extreme) and gray-100 (its
+// near-background extreme) don't need a per-theme conditional here.
+// A dark theme like Amanita gets this right automatically: its
+// $BODY_TEXT_COLOR is light, so $gray-900 ends up light there too,
+// matching the role BS4 components expect from the darkest step.
+$gray-100: $BODY_BG_COLOR;
+$gray-600: muted_text();
+$gray-900: $BODY_TEXT_COLOR;
 
-$component-active-color:                    $MENU_HOVER_TEXT_COLOR;
-$component-active-bg:                       $MENU_HOVER_BG_COLOR;
+// `color-yiq()` picks text color per arbitrary button background --
+// left at defaults ($gray-900/$white) it inherits $gray-900's remap
+// above, which is light in Amanita, so light-bg buttons got light
+// text. $DARK_COLOR/$LIGHT_COLOR stay dark/light regardless of which
+// plays "text" vs. "background" for the theme.
+$yiq-text-dark:  $DARK_COLOR;
+$yiq-text-light: $LIGHT_COLOR;
 
-$table-cell-padding:                        6px;
-$table-condensed-cell-padding:              4px;
-// Matches cutover's $card-spacer-x -- BS3 has no such variable, so
-// this is defined here rather than mapped from a BS4 default.
-$card-spacer-x:                             0.75rem;
-$table-bg:                                  $LIST_BG_COLOR;
-$table-bg-accent:                           $LIST_ODD_BG_COLOR;
-$table-bg-hover:                            $LIST_HOVER_BG_COLOR;
-$table-bg-active:                           $MENU_ACTIVE_BG_COLOR;
-$table-border-color:                        $MENU_BORDER_COLOR;
+// ==================================================
+// SECTION 3: TYPOGRAPHY
+// ==================================================
+//
+// Body text and links - the foundation of readable content
+//
 
-$btn-font-weight:                           bold;
+$body-color: $BODY_TEXT_COLOR;
+$body-bg:    $BODY_BG_COLOR;
 
-$btn-default-color:                         $BUTTON_TEXT_COLOR;
-$btn-default-bg:                            $BUTTON_BG_COLOR;
-$btn-default-border:                        $BUTTON_BORDER_COLOR;
+$link-color:            $LINK_TEXT_COLOR;
+$link-hover-color:      $LINK_HOVER_TEXT_COLOR;
+$link-decoration:       none;
+$link-hover-decoration: underline;
 
-// Currently btn-primary is not used on navbar login, and reverify.
-// $btn-primary-color:                         $BUTTON_PRIMARY_TEXT_COLOR;
-// $btn-primary-bg:                            $BUTTON_PRIMARY_BG_COLOR;
-// $btn-primary-border:                        $BUTTON_PRIMARY_BORDER_COLOR;
+// Font settings -- family left at Bootstrap's stock
+// $font-family-sans-serif default (a system-font stack), not pinned
+// to a specific typeface list.
+$font-size-base:         0.875rem;  // 14px at 16px root
+// Bootstrap 4's stock default is 1.5; set to 20px/14px instead,
+// which is what MO's typography is built against.
+$line-height-base:       1.428571429;
 
-$btn-link-disabled-color:                   mix($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, 75%);
+// Headings
+$headings-color: $BODY_TEXT_COLOR;
 
-$input-bg:                                  $INPUT_BG_COLOR;
-$input-bg-disabled:                         mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR);
-$input-color:                               $INPUT_TEXT_COLOR;
-$input-border:                              $INPUT_BORDER_COLOR;
-$input-color-placeholder:                   mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR);
-$legend-color:                              $BODY_TEXT_COLOR;
-$legend-border-color:                       $INPUT_BORDER_COLOR;
-$input-group-addon-bg:                      $INPUT_BG_COLOR;
-$input-group-addon-border-color:            $INPUT_BORDER_COLOR;
-$cursor-disabled:                           not-allowed;
+// ==================================================
+// SECTION 4: SPACING & BORDERS
+// ==================================================
+//
+// Bootstrap 4 uses a consistent spacing scale and border settings
+//
 
-$dropdown-bg:                               $MENU_BG_COLOR;
-$dropdown-border:                           $MENU_BORDER_COLOR;
-$dropdown-fallback-border:                  $MENU_BORDER_COLOR;
-$dropdown-divider-bg:                       $MENU_BG_COLOR;
-$dropdown-link-color:                       $MENU_TEXT_COLOR;
-$dropdown-link-hover-color:                 $MENU_HOVER_TEXT_COLOR;
-$dropdown-link-hover-bg:                    $MENU_HOVER_BG_COLOR;
-$dropdown-link-active-color:                $MENU_ACTIVE_TEXT_COLOR;
-$dropdown-link-active-bg:                   $MENU_ACTIVE_BG_COLOR;
-$dropdown-link-disabled-color:              mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%);
-$dropdown-header-color:                     $MENU_TEXT_COLOR;
-$dropdown-caret-color:                      $BODY_TEXT_COLOR;
+$border-radius:    0.3125rem;
+$border-radius-sm: 0.3125rem;
+$border-radius-lg: 0.3125rem;
 
-$screen-sm:                                 576px;
-$screen-lg:                                 1320px;
-$screen-lg-min:                             1320px;
-$screen-md-max:                             1319px;
+// mo/_grid_box.scss reads this directly too.
+$grid-gutter-width: 18px;
 
-$grid-gutter-width:                         24px;
-// Matches cutover's $card-spacer-x -- BS3 has no such variable, so
-// this is an addition, not a theme override.
-$card-spacer-x:                             0.75rem;
-$navbar-height:                             40px;
-$navbar-margin-bottom:                      13px;
-$navbar-border-radius:                      0;
-$navbar-padding-horizontal:                 13px;
-$navbar-padding-vertical:                   10px;
+// Bootstrap 4's name for this; bootstrap-sass does not read it.
+$border-color: $PANEL_BORDER_COLOR;
 
-$navbar-default-color:                      $TOP_BAR_TEXT_COLOR;
-$navbar-default-bg:                         $TOP_BAR_BG_COLOR;
-$navbar-default-border:                     $TOP_BAR_BORDER_COLOR;
-$navbar-default-link-color:                 $TOP_BAR_LINK_TEXT_COLOR;
-$navbar-default-link-hover-color:           $TOP_BAR_LINK_HOVER_TEXT_COLOR;
-$navbar-default-link-hover-bg:              $TOP_BAR_LINK_HOVER_BG_COLOR;
-$navbar-default-link-active-color:          $TOP_BAR_LINK_TEXT_COLOR;
-$navbar-default-link-active-bg:             $TOP_BAR_LINK_BG_COLOR;
-$navbar-default-link-disabled-color:        mix($TOP_BAR_LINK_TEXT_COLOR, $TOP_BAR_LINK_BG_COLOR, 75%);
-$navbar-default-link-disabled-bg:           $TOP_BAR_LINK_BG_COLOR;
+// `.mt-n2`/`.mb-n3`/etc -- off by default in Bootstrap 4.
+$enable-negative-margins: true;
 
-// Reset inverted navbar basics
-$navbar-inverse-color:                      $LEFT_BAR_TEXT_COLOR;
-$navbar-inverse-bg:                         $LEFT_BAR_BG_COLOR;
-$navbar-inverse-border:                     $LEFT_BAR_BORDER_COLOR;
+// ==================================================
+// SECTION 5: BUTTONS
+// ==================================================
+//
+// Bootstrap 4 generates button variants automatically from $theme-colors
+// but we can customize the base button styling here
+//
 
-// Inverted navbar links
-$navbar-inverse-link-color:                 $LEFT_BAR_TEXT_COLOR;
-$navbar-inverse-link-hover-color:           $LEFT_BAR_HOVER_TEXT_COLOR;
-$navbar-inverse-link-hover-bg:              $LEFT_BAR_HOVER_BG_COLOR;
-$navbar-inverse-link-active-color:          $navbar-inverse-link-hover-color;
-$navbar-inverse-link-active-bg:             darken($navbar-inverse-bg, 10%);
-$navbar-inverse-link-disabled-color:        $LEFT_BAR_HEADER_TEXT_COLOR;
-$navbar-inverse-link-disabled-bg:           $LEFT_BAR_HEADER_BG_COLOR;
+$btn-font-weight:     bold;
+$btn-border-radius:   0.3125rem;
 
-// Inverted navbar brand label
-$navbar-inverse-brand-color:                $navbar-inverse-link-color;
-$navbar-inverse-brand-hover-color:          $LEFT_BAR_HOVER_TEXT_COLOR;
-$navbar-inverse-brand-hover-bg:             $LEFT_BAR_BG_COLOR;
+// Button padding intentionally left at BS4's default
+// ($input-btn-padding-x/-y, shared with $input-padding-x/-y) so a
+// button and a form-control/input-group render the same height --
+// see Header::Sorter's dropdown toggle vs. IndexPaginationNav's goto
+// input-group, which need to line up in the same row.
 
-// Inverted navbar toggle - not used?
-$navbar-inverse-toggle-hover-bg:            $LEFT_BAR_BG_COLOR;
-$navbar-inverse-toggle-icon-bar-bg:         $LEFT_BAR_TEXT_COLOR;
-$navbar-inverse-toggle-border-color:        $LEFT_BAR_BORDER_COLOR;
+// `.btn-link` reads `$link-color`/`$link-hover-color` directly (set
+// in Section 3 above) -- BS4 has no separate $btn-link-color/
+// $btn-link-hover-color, unlike bootstrap-sass.
+$btn-link-disabled-color:  mix($BUTTON_TEXT_COLOR, $BUTTON_BG_COLOR, 75%);
 
-$state-success-text: $SUCCESS_COLOR;
-$state-success-bg: rgba($SUCCESS_COLOR, 20%);
-$state-success-border: $SUCCESS_COLOR;
-$state-info-text: $INFO_COLOR;
-$state-info-bg: rgba($INFO_COLOR, 20%);
-$state-info-border: $INFO_COLOR;
-$state-warning-text: $WARNING_COLOR;
-$state-warning-bg: rgba($WARNING_COLOR, 20%);
-$state-warning-border: $WARNING_COLOR;
-$state-danger-text: $DANGER_COLOR;
-$state-danger-bg: rgba($DANGER_COLOR, 20%);
-$state-danger-border: $DANGER_COLOR;
+// Active/focus states
+$btn-active-box-shadow: none;
+$btn-focus-box-shadow:  none;
 
-$tooltip-opacity: 1;
-$tooltip-max-width: 400px;
-$tooltip-color: $TOOLTIP_TEXT_COLOR;
-$tooltip-bg: $TOOLTIP_BG_COLOR;
+// ==================================================
+// SECTION 6: FORMS & INPUTS
+// ==================================================
+//
+// Form controls, selects, checkboxes, and validation states
+//
 
-//** Background color of modal content area
-$modal-content-bg:                             $MENU_BG_COLOR;
-//** Modal content border color
-$modal-content-border-color:                   $MENU_BORDER_COLOR;
-//** Modal content border color **for IE8**
-$modal-content-fallback-border-color:          $MENU_BORDER_COLOR;
+$input-bg:                 $INPUT_BG_COLOR;
+$input-color:              $INPUT_TEXT_COLOR;
+$input-border-color:       $INPUT_BORDER_COLOR;
+$input-border-width:       1px;
+$input-border-radius:      0.3125rem;
 
-$alert-info-bg: rgba($INFO_COLOR, 20%);
-$alert-info-text: $BODY_TEXT_COLOR;
-$alert-info-border: $INFO_COLOR;
-$alert-success-bg: rgba($SUCCESS_COLOR, 20%);
-$alert-success-text: $BODY_TEXT_COLOR;
-$alert-success-border: $SUCCESS_COLOR;
-$alert-warning-bg: rgba($WARNING_COLOR, 20%);
-$alert-warning-text: $BODY_TEXT_COLOR;
-$alert-warning-border: $WARNING_COLOR;
-$alert-danger-bg: rgba($DANGER_COLOR, 20%);
-$alert-danger-text: $BODY_TEXT_COLOR;
-$alert-danger-border: $DANGER_COLOR;
+$input-focus-border-color: $PRIMARY_COLOR;
+$input-focus-box-shadow:   none;
 
-$progress-bg: $PROGRESS_BG_COLOR;
-$progress-bar-bg: $PROGRESS_BAR_COLOR;
-$progress-bar-color: $PROGRESS_TEXT_COLOR; // this is text, unused
+$input-disabled-bg:        mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR);
 
-$list-group-bg: $LIST_BG_COLOR;
-$list-group-border: $LIST_BORDER_COLOR;
-$list-group-hover-bg: $LIST_BG_COLOR;
+$input-placeholder-color:  mix($INPUT_TEXT_COLOR, $INPUT_BG_COLOR);
+
+// Input groups
+$input-group-addon-bg:           $INPUT_BG_COLOR;
+$input-group-addon-border-color: $INPUT_BORDER_COLOR;
+
+// Form validation states use semantic colors
+$form-feedback-valid-color:   $SUCCESS_COLOR;
+$form-feedback-invalid-color: $DANGER_COLOR;
+
+// ==================================================
+// SECTION 7: DROPDOWNS & MENUS
+// ==================================================
+//
+// Dropdown menus, popovers, and similar floating UI
+//
+
+$dropdown-bg:               $MENU_BG_COLOR;
+$dropdown-border-color:     $MENU_BORDER_COLOR;
+$dropdown-divider-bg:       $MENU_BORDER_COLOR;
+
+$dropdown-link-color:       $MENU_TEXT_COLOR;
+$dropdown-link-hover-color: $MENU_HOVER_TEXT_COLOR;
+$dropdown-link-hover-bg:    $MENU_HOVER_BG_COLOR;
+
+$dropdown-link-active-color: $MENU_ACTIVE_TEXT_COLOR;
+$dropdown-link-active-bg:    $MENU_ACTIVE_BG_COLOR;
+
+$dropdown-link-disabled-color: mix($MENU_TEXT_COLOR, $MENU_BG_COLOR, 75%);
+
+$dropdown-header-color:     $MENU_TEXT_COLOR;
+
+// Tighter than BS4's default (.25rem 1.5rem). Single source of
+// truth: reference these variables directly anywhere a
+// dropdown-item-style row needs this padding, rather than repeating
+// the literal value per file.
+$dropdown-item-padding-y:  0.25rem;
+$dropdown-item-padding-x:  1rem;
+
+// ==================================================
+// SECTION 8: NAVIGATION (NAVBAR)
+// ==================================================
+//
+// Top navigation bar and branding
+//
+
+// Navbar dimensions
+$navbar-padding-y: 0.625rem;   // ~10px
+$navbar-padding-x: 0.8125rem;  // ~13px
+
+// Light navbar (maps to our TOP_BAR variables)
+$navbar-light-color:        $TOP_BAR_TEXT_COLOR;
+$navbar-light-hover-color:  $TOP_BAR_LINK_HOVER_TEXT_COLOR;
+$navbar-light-active-color: $TOP_BAR_LINK_TEXT_COLOR;
+
+// Dark navbar (maps to our LEFT_BAR variables)
+$navbar-dark-color:         $LEFT_BAR_TEXT_COLOR;
+$navbar-dark-hover-color:   $LEFT_BAR_HOVER_TEXT_COLOR;
+$navbar-dark-active-color:  $LEFT_BAR_TEXT_COLOR;
+
+// ==================================================
+// SECTION 10: TABLES
+// ==================================================
+//
+// Table styling for data display
+//
+
+$table-cell-padding:          0.375rem;  // ~6px
+$table-cell-padding-sm:       0.25rem;   // ~4px
+
+$table-bg:        $LIST_BG_COLOR;
+$table-accent-bg: $LIST_ODD_BG_COLOR;
+$table-hover-bg:  $LIST_HOVER_BG_COLOR;
+$table-active-bg: $MENU_ACTIVE_BG_COLOR;
+
+$table-border-color: $LIST_BORDER_COLOR;
+
+$table-head-bg:    $LIST_HEADER_BG_COLOR;
+$table-head-color: $LIST_HEADER_TEXT_COLOR;
+
+// ==================================================
+// SECTION 11: ALERTS & BANNERS
+// ==================================================
+//
+// Contextual feedback messages
+//
+
+$alert-border-width:  2px;
+$alert-border-radius: 0.3125rem;
+
+// `.alert-success`/`.alert-info`/`.alert-warning`/`.alert-danger` get
+// translucent backgrounds instead of Bootstrap's default bg/border/
+// text mix -- see `mo/_links_buttons_alerts.scss`. `$alert-*-level`
+// stays at Bootstrap's defaults so any other generated variant
+// (`.alert-primary`, etc.) stays legible.
+
+// ==================================================
+// SECTION 12: MODALS
+// ==================================================
+//
+// Dialog boxes and overlays
+//
+
+$modal-content-bg:           $MENU_BG_COLOR;
+$modal-content-border-color: $MENU_BORDER_COLOR;
+
+$modal-header-border-color: $MENU_BORDER_COLOR;
+$modal-footer-border-color: $MENU_BORDER_COLOR;
+
+$modal-header-padding-y: 0.5rem;
+
+// ==================================================
+// SECTION 13: TOOLTIPS & POPOVERS
+// ==================================================
+//
+// Contextual help and additional information
+//
+
+$tooltip-color:      $TOOLTIP_TEXT_COLOR;
+$tooltip-bg:         $TOOLTIP_BG_COLOR;
+$tooltip-opacity:    1;
+$tooltip-max-width:  400px;
+
+$popover-bg:           $MENU_BG_COLOR;
+$popover-border-color: $MENU_BORDER_COLOR;
+
+// ==================================================
+// SECTION 14: PROGRESS BARS
+// ==================================================
+//
+// Visual progress indicators
+//
+
+$progress-bg:         $PROGRESS_BG_COLOR;
+$progress-bar-color:  $PROGRESS_TEXT_COLOR;
+$progress-bar-bg:     $PROGRESS_BAR_COLOR;
+
+// ==================================================
+// SECTION 15: LIST GROUPS
+// ==================================================
+//
+// Flexible component for displaying lists of content
+//
+
+$list-group-bg:           $LIST_BG_COLOR;
+$list-group-border-color: $LIST_BORDER_COLOR;
+$list-group-hover-bg:     $LIST_HOVER_BG_COLOR;
+
 $list-group-disabled-color: $LIST_HEADER_TEXT_COLOR;
-$list-group-disabled-bg: $LIST_HEADER_BG_COLOR;
-$list-group-disabled-text-color: $LIST_HEADER_TEXT_COLOR;
-$list-group-link-color: $LINK_TEXT_COLOR;
-$list-group-link-hover-color: $LINK_HOVER_TEXT_COLOR;
+$list-group-disabled-bg:    $LIST_HEADER_BG_COLOR;
 
-$panel-bg: $PANEL_BG_COLOR;
-$panel-body-padding: 12px;
-$panel-heading-padding: 8px 12px;
-$panel-inner-border: $PANEL_BORDER_COLOR;
-$panel-footer-bg: $PANEL_FOOTER_BG_COLOR;
-$panel-footer-text: $PANEL_TEXT_COLOR;
-$panel-default-text: $PANEL_TEXT_COLOR;
-$panel-default-border: $PANEL_BORDER_COLOR;
-$panel-default-heading-bg: $PANEL_BG_COLOR;
+$list-group-action-color:       $LINK_TEXT_COLOR;
+$list-group-action-hover-color: $LINK_HOVER_TEXT_COLOR;
 
-$hr-border: $LIST_BORDER_COLOR;
+// ==================================================
+// SECTION 16: CARDS
+// ==================================================
 
-// Typography - muted/secondary text colors
-$text-muted: rgba($text-color, 0.75);
-$headings-small-color: $text-muted;
-$blockquote-small-color: $text-muted;
+$card-bg:           $LIST_BG_COLOR;
+$card-border-color: $LIST_BORDER_COLOR;
+$card-color:        $PANEL_TEXT_COLOR;
 
-$well-bg: $PANEL_BG_COLOR;
+// A visible step between the card and the page it sits on, not a
+// small darken of the card's color.
+$card-cap-bg: mix($LIST_BG_COLOR, $BODY_BG_COLOR, 50%);
+
+// bootstrap-sass's panel used 12px (0.75rem) all around. BS4's stock
+// $card-spacer-y already matches; only the wider horizontal default
+// (1.25rem) needs narrowing.
+$card-spacer-x: 0.75rem;
+
+// ==================================================
+// SECTION 17: MISCELLANEOUS COMPONENTS
+// ==================================================
+
+// Horizontal rule
+$hr-border-color: $LIST_BORDER_COLOR;
+
+// Close button (X in modals, alerts, etc.)
+$close-color: $BODY_TEXT_COLOR;
+
+// ==================================================
+// UNMAPPED THEME VARIABLES
+// ==================================================
+//
+// The following MO theme variables don't have direct Bootstrap 4 equivalents:
+//
+// - $LINK_BG_COLOR             (Bootstrap links are always transparent)
+// - $LINK_HOVER_BG_COLOR       (Bootstrap links don't typically have bg)
+// - $BUTTON_ACTIVE_TEXT_COLOR    (use :active pseudo-class)
+// - $BUTTON_ACTIVE_BG_COLOR    (use :active pseudo-class)
+// - $LOGO_* variables          (custom component, not part of Bootstrap)
+// - $LEFT_BAR_* variables      (partially mapped to navbar-dark-*)
+// - $TOP_BAR_* variables       (partially mapped to navbar-light-*)
+// - $VOTE_METER_* variables    (custom component)
+// - $WELL_* variables          (wells removed in BS4, use .bg-light utility)
+//
+// These variables can still be used in custom MO stylesheets for
+// components that aren't part of Bootstrap's component library.
+//
+// ==================================================

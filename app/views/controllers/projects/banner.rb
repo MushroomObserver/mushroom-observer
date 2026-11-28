@@ -84,7 +84,7 @@ module Views::Controllers::Projects
 
       h1(class: class_names("h3", title_classes), id: title_id) do
         div(class: "d-flex align-items-center") do
-          Badge(variant: :id, object: @project, size: :sm, class: "mr-3")
+          Badge(type: :id, object: @project, size: :sm, class: "mr-3")
           if current_user
             Link(type: :object, object: @project)
           else

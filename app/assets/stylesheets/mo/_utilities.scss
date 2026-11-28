@@ -82,6 +82,17 @@
   padding-right: $card-spacer-x !important;
 }
 
+// See .px-card above, responsive: no horizontal padding below the
+// `sm` breakpoint, `$card-spacer-x` from `sm` up. `#main_container`
+// uses this (paired with `.px-0`) to stay flush with the viewport on
+// mobile while matching the row-cols-* gutter at `sm` and up.
+@media screen and (min-width: breakpoint-min(sm)) {
+  .px-sm-card {
+    padding-left: $card-spacer-x !important;
+    padding-right: $card-spacer-x !important;
+  }
+}
+
 // See .px-card above.
 .pl-card {
   padding-left: $card-spacer-x !important;
@@ -211,33 +222,24 @@
   }
 }
 
-.list-group-item.none-yet {
-  display: none;
-
-  &:only-child {
-    display: block;
-  }
-}
-
 .bg-none {
   background: none !important;
 }
 
-// Bootstrap's bg-* utilities are theme-color names, not tied to
-// $body-bg/$text-color -- these read the theme's values directly.
+// The theme-aware page background. Named to match Bootstrap 5.3's
+// .bg-body so it's a no-op rename at upgrade. Bootstrap's bg-*
+// utilities are theme-color names, not tied to $body-bg/$body-color --
+// these read the theme's values directly.
 .bg-body {
   background-color: $body-bg !important;
 }
 
-.bg-text {
-  background-color: $text-color !important;
+.bg-card {
+  background-color: $card-bg !important;
 }
 
-// Locks column widths to the first row's natural content. Use when
-// later rows can swap in wider content (e.g. an inline edit form)
-// and you don't want the columns to reflow on every state change.
-.table-layout-fixed {
-  table-layout: fixed;
+.bg-text {
+  background-color: $body-color !important;
 }
 
 .bg-visible {
@@ -248,45 +250,19 @@
   background: rgba($black, 0.6);
 }
 
-// Bootstrap 4's badge-color generation may not be enabled the same
-// way in this app's eventual config, and the colors here are this
-// app's theme-mapped warning colors, not necessarily Bootstrap's
-// defaults -- kept hand-written rather than assumed-duplicate.
+// Lighter/translucent, not Bootstrap's solid-background native
+// `.badge-warning` -- kept hand-written rather than assumed-duplicate.
 .badge-warning {
-  background-color: $alert-warning-bg;
-  color: $alert-warning-text;
+  background-color: rgba($warning, 0.2);
+  color: $body-color;
   font-weight: normal;
 }
 
-// Bootstrap 3 - collapse "fade" instead of "slide"
+// Fade instead of slide for a `.collapsing` element.
 .fade-not-slide.collapsing {
   // transition-duration: 0.3s;
   transition: height 0s, opacity 0.3s;
   opacity: 0;
-}
-
-.violation-highlight {
-  background-color: orange;
-}
-
-// Project violations page (#4136) — `button_to` renders each per-row
-// action as its inline form, and the modal trigger is a plain
-// <button>. Adjacent elements touch by default; add a small gap on
-// both axes so the action buttons don't visually merge, including
-// when they wrap to a second line.
-.project-violations td .button_to,
-.project-violations td > button {
-  display: inline-block;
-  // `button_to` wraps its <button> in a <form>, while the modal
-  // trigger is a bare <button>. Without an explicit vertical-align
-  // their baselines differ and the last button sits half a line
-  // higher than its siblings.
-  vertical-align: top;
-  margin: 0 4px 4px 0;
-}
-.project-violations td .button_to:last-child,
-.project-violations td > button:last-child {
-  margin-right: 0;
 }
 
 // Bootstrap 5+ feature (not shipped by Bootstrap 4) -- stays
@@ -299,10 +275,64 @@
   gap: 1rem !important;
 }
 
-// Not a utility class -- a plain element override, so it isn't a
-// Bootstrap-duplicate candidate.
-@media screen and (min-width: $screen-sm-min) {
-  .table {
-    overflow-x: scroll;
+// Bootstrap 5's row/column gutter mechanism, backported: --bs-gutter-x
+// and --bs-gutter-y read via calc() by .row's margin and every
+// column's padding, so a .gx-*/.gy-*/.g-* class can override one
+// row's gutter instead of the default below. Named to match
+// Bootstrap 5 -- nothing that uses these classes needs to change at
+// upgrade, only this backport gets deleted.
+// `.row`'s children don't read --bs-gutter-y yet (BS5 applies it as
+// margin-top on wrapped row children, not wired up here) --
+// `.grid-row`/`.grid-box` (_grid_box.scss) is the one place that
+// reads it so far, via its margin-bottom.
+// #main_container has no horizontal padding below `sm` (`.px-0
+// .px-sm-card`) -- a nonzero gutter here bleeds past the viewport
+// with nothing to cancel it. From `sm` up it matches the value
+// below, which is what `#main_container`'s padding is sized to.
+.row {
+  --bs-gutter-x: 0px;
+  --bs-gutter-y: 0px;
+  margin-right: calc(var(--bs-gutter-x) * -.5);
+  margin-left: calc(var(--bs-gutter-x) * -.5);
+}
+
+@media screen and (min-width: breakpoint-min(sm)) {
+  .row {
+    --bs-gutter-x: #{$grid-gutter-width * .75};
+  }
+}
+
+@media screen and (min-width: breakpoint-min(lg)) {
+  .row {
+    --bs-gutter-x: #{$grid-gutter-width};
+  }
+}
+
+.row > .col,
+.row > [class*="col-"] {
+  padding-right: calc(var(--bs-gutter-x) * .5);
+  padding-left: calc(var(--bs-gutter-x) * .5);
+}
+
+@each $breakpoint in map-keys($grid-breakpoints) {
+  @include media-breakpoint-up($breakpoint) {
+    $infix: breakpoint-infix($breakpoint, $grid-breakpoints);
+
+    @each $key in (0, 1, 2, 3, 4, 5) {
+      $value: map-get($spacers, $key);
+
+      .g#{$infix}-#{$key} {
+        --bs-gutter-x: #{$value};
+        --bs-gutter-y: #{$value};
+      }
+
+      .gx#{$infix}-#{$key} {
+        --bs-gutter-x: #{$value};
+      }
+
+      .gy#{$infix}-#{$key} {
+        --bs-gutter-y: #{$value};
+      }
+    }
   }
 }

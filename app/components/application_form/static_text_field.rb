@@ -31,7 +31,7 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def view_template
       render_with_wrapper do
-        p(class: "form-control-static") { display_text }
+        p(class: static_text_class) { display_text }
       end
     end
 
@@ -39,6 +39,16 @@ class Components::ApplicationForm < Superform::Rails::Form
 
     def display_text
       @wrapper_options[:value] || @wrapper_options[:text] || ""
+    end
+
+    # `.form-control-plaintext` is `display: block; width: 100%` --
+    # Bootstrap 4's `.form-inline .form-control` override doesn't
+    # cover this class, so it stays full-width even as a flex item,
+    # forcing the next sibling onto a new line.
+    def static_text_class
+      return "form-control-plaintext" unless inline?
+
+      "form-control-plaintext d-inline-block w-auto"
     end
   end
 end

@@ -5,8 +5,8 @@
 .well {
   padding: 0.5rem;
   margin-bottom: 0.75rem;
-  border: 1px solid $well-border;
-  border-radius: $border-radius-base;
+  border: 1px solid $card-border-color;
+  border-radius: $border-radius;
 
   p {
     margin: 0;

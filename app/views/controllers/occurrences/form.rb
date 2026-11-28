@@ -87,8 +87,7 @@ module Views::Controllers::Occurrences
         element: :ul,
         class: "list-unstyled mt-3",
         data: {
-          controller: "grid-table occurrence-form",
-          action: "resize@window->grid-table#rearrange",
+          controller: "occurrence-form",
           "occurrence-form-fallback-value": "source"
         }
       ) do
@@ -141,16 +140,11 @@ module Views::Controllers::Occurrences
       end
     end
 
+    # Delegates to Grid for its row-cols-* grid classes
+    # instead of hand-rolling an equivalent Row -- Grid::Box's
+    # `columns:` default assumes it's rendered inside one of those.
     def render_grid_ul(&block)
-      Row(
-        element: :ul,
-        class: "list-unstyled mt-3",
-        data: {
-          controller: "grid-table",
-          action: "resize@window->grid-table#rearrange"
-        },
-        &block
-      )
+      Grid(&block)
     end
 
     # Primary-obs inline edit section (edit mode only). Fields ride

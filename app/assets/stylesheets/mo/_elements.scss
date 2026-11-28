@@ -1,18 +1,20 @@
 // Sitewide elements
 
-// bootstrap-sass hardcodes `html { font-size: 10px }` as a literal
-// value in _scaffolding.scss (not a Sass variable), so no var
-// override in mo/_map_theme_vars_to_bootstrap_vars.scss can touch
-// it -- this file imports after `@import "bootstrap"`, so the later
-// source-order rule wins the cascade instead. 16px matches the
-// nimmo-5348-bs4-cutover branch's root (an unmodified browser
-// default), so the two branches' rem math agrees -- see issue #5527.
-html {
-  font-size: 16px;
-}
-
 body {
   word-wrap: break-word;
+}
+
+// rem font-sizes (Bootstrap sets .btn/.form-control's at compile
+// time) are relative to the root, not to body -- list any such
+// element here so it follows body's breakpoint bump too.
+// .dropdown-menu gets the same bump in _dropdowns.scss, which owns
+// that selector.
+body,
+.btn:not(.btn-lg):not(.btn-sm),
+.form-control {
+  @include media-breakpoint-up(lg) {
+    font-size: 0.9375rem; // 15px at 16px root
+  }
 }
 
 // Give focus outlines breathing room so they don't clip text/icons.

@@ -35,13 +35,11 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
       checkbox_field(:reviewed,
                      label: reviewed_text,
                      label_class: label_class_value,
-                     label_position: :before,
-                     wrap_class: "d-inline",
+                     # d-inline breaks the custom-control's absolutely
+                     # positioned input (needs a block-ish containing
+                     # block).
+                     wrap_class: "d-inline-block",
                      id: checkbox_id,
-                     # The checkbox is already nested inside this
-                     # label, so an explicit `for=` pointing at the
-                     # (deduped, but still shared) id isn't needed.
-                     label_for: nil,
                      class: "mx-3",
                      data: checkbox_data)
     end
@@ -69,7 +67,8 @@ class Components::ObservationFragment::MarkAsReviewedToggle <
 
   # The "_lb" suffix keeps this id distinct from lightGallery's clone
   # of it in `.lg-sub-html` -- lightgallery_controller.js strips the
-  # suffix off the clone, so each copy's id stays unique.
+  # suffix off the clone, so each copy's id stays unique and the
+  # label's native for= association keeps working for both.
   def checkbox_id
     "#{@selector}_#{model.observation_id}_lb"
   end

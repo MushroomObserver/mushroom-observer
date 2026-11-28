@@ -4,7 +4,7 @@
 # 3-column flex row: the marker (a chevron for the observation being
 # viewed, a footnote number or nothing for a sibling), the name (a
 # status icon, then the name -- plain text for the current
-# observation, a link for a sibling), then a Badge(variant: :id). The
+# observation, a link for a sibling), then a Badge(type: :id). The
 # name column is the only one that grows/wraps, keeping the marker
 # and id badge in their columns regardless of name length. No
 # occurrence yet: just an "Add Matching Observations" link, no body.
@@ -72,7 +72,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
     div(class: "matching-observation-row mb-1") do
       render_marker(member, current: !link)
       render_member_name_cell(member, link: link)
-      Badge(variant: :id, object: member, size: :lg, interactive: link)
+      Badge(type: :id, object: member, size: :lg, interactive: link)
     end
   end
 
@@ -109,7 +109,7 @@ class Views::Controllers::Observations::Show::MatchingObservationsPanel < Views:
       else
         marker = @markers[member.id]
         if marker
-          Badge(variant: :sibling_marker, number: marker,
+          Badge(type: :sibling_marker, number: marker,
                 observation_id: member.id)
         end
       end

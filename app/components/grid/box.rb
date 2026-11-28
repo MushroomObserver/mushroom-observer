@@ -1,28 +1,12 @@
 # frozen_string_literal: true
 
-# Grid box component for displaying objects in a responsive grid.
-# Essentially a wrapper for a Panel component
+# One item in a Grid -- wraps a Panel. The `<li>` and the Panel's
+# `<div class="card h-100">` stay separate: `height: 100%` needs a
+# distinct parent (the stretched `<li>`) to resolve against -- see
+# `Components::Panel#view_template`.
 #
-# This component can be used in two ways:
-# 1. With an object - calculates everything it needs from the @object and
-#    renders a standard layout for Image, Observation, RssLog, or User
-# 2. With a block - renders a simple <li> wrapper for custom content
-#
-# @example Standard object rendering
-#   render Components::Grid::Box.new(user: @user, object: @observation)
-#
-# @example With custom options
-#   render Components::Grid::Box.new(
-#     user: @user,
-#     object: @observation,
-#     identify: true,
-#     columns: Components::Column.classes_for(xs: 12)
-#   )
-#
-# @example Custom block content
-#   render Grid::Box.new(id: 123, class: "text-center") do
-#     tag.div(class: "panel panel-default") { "Custom content" }
-#   end
+# With an object, renders a standard Image/Observation/RssLog/User
+# layout; with a block, wraps it in a plain `<li>` instead.
 class Components::Grid::Box < Components::Base
   include Components::Grid::Box::RenderData
   include Components::Grid::Box::Footer
@@ -31,14 +15,20 @@ class Components::Grid::Box < Components::Base
   prop :user, _Nilable(User), default: nil
   prop :object, _Nilable(AbstractModel), default: nil
   prop :id, _Nilable(_Union(Integer, String)), default: nil
-  prop :columns, String,
-       default: -> { Components::Column.classes_for(xs: 12, sm: 6, md: 4, lg: 3) }
+  # Bare `.col` -- when rendered inside a `Components::Grid`
+  # (the common case), that grid's `row-cols-*` utilities size
+  # every box equally per breakpoint, so no per-breakpoint width class
+  # is needed here. Callers rendering a box (or several) outside a
+  # `Grid` -- a plain `Row(element: :ul)`, no `row-cols-*` --
+  # override this explicitly, typically to
+  # `Components::Column.classes_for(xs: 12)` for one-per-line stacking.
+  prop :columns, String, default: "col"
   prop :attributes, _Hash(Symbol, _Any?), :**
   prop :identify, _Boolean, default: false
   prop :votes, _Boolean, default: true
   prop :footer, _Union(Array, _Boolean, nil), default: -> { [] }
-  # Project context — when an observation grid box is rendered inside a
-  # project-filtered observations index, a project admin sees an Exclude
+  # Project context — when an observation box is rendered inside a
+  # project-filtered observations grid, a project admin sees an Exclude
   # button that moves the observation to the project's excluded list.
   prop :project, _Nilable(Project), default: nil
   # The occurrence show page renders every member of one Occurrence --
@@ -66,13 +56,13 @@ class Components::Grid::Box < Components::Base
                class: class_names("grid-box", @columns) }, @attributes)) do
       # Deliberately NOT subscribed to [image, :processed] broadcasts:
       # rotate/mirror only happens on the image-show page, so only
-      # that page (Views::Controllers::Images::Show::ImagePanel)
-      # live-updates. An index page
-      # with dozens of boxes would otherwise open a websocket
-      # subscription (plus a solid_cable MAX(id) query) per thumbnail
-      # for an event that can't happen from this page; it catches up
-      # on the next load via the #4808 cache-busting URL token.
-      Panel(sizing: true) do |panel|
+      # that page live-updates. A grid page with dozens of boxes
+      # would otherwise open a websocket subscription per thumbnail
+      # for an event that can't happen here; it catches up on the
+      # next load via the cache-busting URL token.
+      # `h-100` fills the row's stretched height (BS4's `.row`
+      # defaults to `align-items: stretch`).
+      Panel(class: "h-100") do |panel|
         render_thumbnail_section(panel)
         render_details_section(panel)
         render_log_footer(panel)
@@ -160,10 +150,7 @@ class Components::Grid::Box < Components::Base
                target: @data[:what].show_link_args) { render_title }
         end
         whitespace
-        # size: :lg is a BS3-only value, ported straight from
-        # cutover -- it may already be correct there; re-check
-        # against cutover's value when switching to BS4.
-        Badge(variant: :id, object: @data[:what], size: :lg)
+        Badge(type: :id, object: @data[:what], size: :lg)
       end
 
       render_identify_ui if @identify
@@ -277,7 +264,7 @@ class Components::Grid::Box < Components::Base
   # wrapper -- needed to sit next to the bold "via" on one line).
   # `source_noteworthy?` (the caller's guard) guarantees `source` is
   # present whenever `import_link` isn't, so the enum branch is safe
-  # without its own presence check.
+  # with no presence check needed here.
   def render_source_credit_inner(target)
     if (link = target.import_link)
       render_external_credit_link(link)

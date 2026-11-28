@@ -104,7 +104,7 @@ module Views::FullPageBase::Title
   end
 
   def render_name_line(object, user)
-    render(::Components::Badge.new(variant: :id, object: object, size: :sm,
+    render(::Components::Badge.new(type: :id, object: object, size: :sm,
                                    class: "mr-3"))
     span do
       trusted_html(viewer_aware_format_name(object, user).t.small_author)
@@ -139,7 +139,7 @@ module Views::FullPageBase::Title
   def add_id_badge(object)
     content_for(:id_badge) do
       capture do
-        render(::Components::Badge.new(variant: :id, object: object,
+        render(::Components::Badge.new(type: :id, object: object,
                                        size: :xl))
       end
     end

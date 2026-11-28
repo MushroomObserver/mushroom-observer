@@ -17,20 +17,20 @@
   font-weight: normal !important;
 }
 
-// Custom variant (not in BS3) that mirrors form-input styling, using
-// BS3's darken() step pattern and $input-* vars so dark themes get
-// dark hover/active for free.
+// A custom variant that mirrors form-input styling, using the same
+// darken() step pattern and $input-* vars so dark themes get dark
+// hover/active for free.
 .btn-outline-default {
   color: $input-color;
   background-color: $input-bg;
-  border-color: $input-border;
+  border-color: $input-border-color;
 
   &:hover,
   &:focus,
   &.focus {
     color: $input-color;
     background-color: darken($input-bg, 5%);
-    border-color: darken($input-border, 10%);
+    border-color: darken($input-border-color, 10%);
     text-decoration: none;
   }
 
@@ -38,7 +38,7 @@
   &.active {
     color: $input-color;
     background-color: darken($input-bg, 10%);
-    border-color: darken($input-border, 12%);
+    border-color: darken($input-border-color, 12%);
     background-image: none;
     box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
@@ -51,6 +51,32 @@
     color: $input-color;
     opacity: 1;
     cursor: not-allowed;
+  }
+}
+
+// $success is too light for white text/icons on a solid button --
+// $btn-success-bg is a darker green; $success stays unchanged for
+// alerts/badges/form-feedback text.
+.btn-success {
+  color: $white;
+  background-color: $btn-success-bg;
+  border-color: $btn-success-bg;
+
+  &:hover,
+  &:focus,
+  &.focus {
+    color: $white;
+    background-color: darken($btn-success-bg, 7.5%);
+    border-color: darken($btn-success-bg, 10%);
+  }
+
+  &:active,
+  &.active {
+    color: $white;
+    background-color: darken($btn-success-bg, 10%);
+    border-color: darken($btn-success-bg, 12.5%);
+    background-image: none;
+    box-shadow: inset 0 3px 5px rgba(0, 0, 0, 0.125);
   }
 }
 
@@ -93,14 +119,9 @@ form.button_to {
   }
 }
 
-// A form-wrapped button (Components::Button::CRUDBase) gets none of
-// `.btn-group`'s border-radius squaring or margin collapse -- BS3's
-// CSS only reaches a `.btn` that's a direct child. Reimplemented
-// generically below for every `.btn-group`.
-//
-// `.vote-btn-group` (_images.scss) overrides this on its elements via
-// higher selector specificity and import order -- no extra override
-// needed here.
+// Bootstrap's `.btn-group` squaring/margin-collapse only reaches a
+// `.btn` direct child, missing form-wrapped buttons (Components::
+// Button::CRUDBase) -- reimplemented generically below.
 .btn-group {
   // BS4's fix: flex stretches every child (form-wrapped or not) to
   // the same height.
@@ -153,73 +174,32 @@ form.button_to {
   }
 }
 
-// BS3's .input-group is table/table-cell layout, which doesn't
-// stretch an icon-bearing flex .btn (.btn:has(.mo-icon), _icons.scss)
-// to match its cell's height. Switched to flex, mirroring BS4's fix,
-// same approach as the .btn-group supplement above.
-//
-// .navbar-form .input-group needs the override too: BS3's
-// `@media (min-width: 768px)` rule sets display: inline-table there,
-// out-specifying a bare .input-group rule -- desktop-only, hence
-// this breaking on desktop widths but not mobile.
-.input-group,
-.navbar-form .input-group {
-  display: flex;
-  align-items: stretch;
-
-  > .form-control {
-    flex: 1 1 auto;
-    // min-width: 0 lets it shrink below its content width when a
-    // sibling addon needs the room.
-    min-width: 0;
-  }
-
-  > .input-group-addon,
-  > .input-group-btn {
-    // BS3's width: 1% relies on table shrink-to-content sizing; under
-    // flex that's a literal 1%, overflowing the box. Back to
-    // content-driven sizing.
-    flex: 0 0 auto;
-    width: auto;
-    display: flex;
-    // stretch, not center -- a .btn child (e.g. the pagination goto
-    // icon) needs to fill this span's full height, confirmed
-    // empirically short by ~2px with center.
-    align-items: stretch;
-
-    > .btn {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-    }
-  }
-}
-
-// Same fix as above, but inline-flex: plain flex is block-level and
-// breaks the line after it, defeating .form-inline.
+// Same fix as .btn-group above, but inline-flex: plain flex is
+// block-level and breaks the line after it, defeating .form-inline.
 .form-inline .input-group {
   display: inline-flex;
 }
 
 // badges
 
-// A lighter-weight badge variant: outlined in text-color, no fill,
+// A lighter-weight badge variant: outlined in body-color, no fill,
 // normal (not bold) weight -- for a count/label that shouldn't read
 // as loudly as Bootstrap's solid-background default.
 .badge-outline {
   font-weight: normal;
   background-color: transparent;
-  color: $text-color;
-  border: 1px solid $text-color;
+  color: $body-color;
+  border: 1px solid $body-color;
 }
 
 // Record id badge. No inherent font-size -- every caller states one
 // of the .badge-* sizes below.
 .badge-id {
   font-weight: normal;
+  letter-spacing: 0.021rem;
   background-color: transparent;
-  color: $text-color;
-  border: 1px solid $text-color;
+  color: $body-color;
+  border: 1px solid $body-color;
   border-radius: 3px;
   flex-shrink: 0;
   // align-self: self-start;
@@ -237,18 +217,18 @@ form.button_to {
 
   // rss-feed-style contexts (matrix box title, list rows).
   &.badge-md {
-    font-size: 80% !important;
+    font-size: 81% !important;
   }
 
   // Sitting next to a large page-title heading.
   &.badge-sm {
-    font-size: 60% !important;
+    font-size: 72% !important;
   }
 
   // Accordion triggers stay "hovered" while their pane is open.
   // Scoped to [data-toggle="collapse"] so plain badges don't match.
   &[data-toggle="collapse"]:not(.collapsed) {
-    background-color: $text-color;
+    background-color: $body-color;
     color: $body-bg;
   }
 }
@@ -258,35 +238,32 @@ form.button_to {
 // a standalone rule.
 button.badge-id:hover,
 a.badge-id[data-toggle="collapse"]:hover {
-  background-color: $text-color;
+  background-color: $body-color;
   color: $body-bg;
 }
 
 // Overrides Bootstrap's a.badge:focus, which sets white text with no
 // matching background and outranks .badge-id's color on specificity.
 a.badge-id:focus {
-  color: $text-color;
+  color: $body-color;
 }
 
 // Floors badge-id column width so digit-count variance doesn't drift
 // the title column's left edge row to row.
 .id-badge-col {
-  min-width: 3.75rem; // 60px at the 16px root -- see issue #5527
+  min-width: 6rem;
 }
 
 // Wrapper for a group of inline mod/add links (Components::
 // InlineIconBlock). Flex + gap spaces items evenly, no trailing
-// margin after the last item. vertical-align: middle aligns this
-// inline-flex box against adjacent inline text -- its default
-// vertical-align: baseline doesn't land near text's visual center,
-// which a flat margin-top (RESOLVED, don't reintroduce) can only
-// patch for one font-size at a time. .object_edit .inline-icon-block
-// (_content.scss) sets a margin-top separately, for spacing against
-// the heading above it, not this.
+// margin after the last. vertical-align: middle aligns against
+// adjacent text; margin-bottom corrects middle's half-x-height
+// reference point sitting below an icon box's visual center.
 .inline-icon-block {
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
+  margin-bottom: 0.25em;
   white-space: nowrap;
   // em, not rem -- scales with the surrounding context's font-size
   // (a title-bar heading vs. small body text), same reasoning as
@@ -294,10 +271,21 @@ a.badge-id:focus {
   gap: 0.75em;
 }
 
+// Show page title-bar edit/destroy links
+.object_edit {
+  @media screen and (max-width: breakpoint-max(md)) {
+    font-size: 1rem;
+  }
+
+  .inline-icon-block {
+    margin-top: map-get($spacers, 1);
+  }
+}
+
 // Trailing observation-count column on the locations list-group --
 // a fixed width so counts line up row to row regardless of digit count.
 .obs-count-col {
-  flex: 0 0 2.5rem; // 40px at the 16px root -- see issue #5527
+  flex: 0 0 4rem;
   text-align: right;
 }
 
@@ -306,7 +294,8 @@ a.badge-id:focus {
 // The baseline correction against adjacent text lives on the
 // wrapping `.inline-icon-block`'s margin-top, just above, not here.
 .inline-icon-link {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   text-indent: 0;
   line-height: 1;
   background-color: transparent;
@@ -322,10 +311,9 @@ a.badge-id:focus {
   }
 }
 
-// button_to's <form> wrapper around a destroy .inline-icon-link keeps
-// the browser's default line-height, taller than `line-height: 1` on
-// the button -- flex-centering collapses the form to its content
-// height so the icon doesn't float inside extra line-height.
+// A destroy .inline-icon-link's <form> wrapper keeps the browser's
+// default line-height -- flex-centering collapses it so the icon
+// doesn't float inside the extra height.
 form:has(> .inline-icon-link) {
   display: inline-flex;
   align-items: center;
@@ -349,16 +337,34 @@ form:has(> .inline-icon-link) {
   }
 }
 
+// Translucent backgrounds, not Bootstrap's default bg/border/text
+// mix toward white/black -- that mix doesn't track a dark theme's
+// page background.
+$alert-variant-colors: (
+  success: $success,
+  info:    $info,
+  warning: $warning,
+  danger:  $danger
+);
+
+@each $name, $color in $alert-variant-colors {
+  .alert-#{$name} {
+    background-color: rgba($color, 0.15);
+    border-color: rgba($color, 0.4);
+    color: $body-color;
+  }
+}
+
 // Responsive message text, kept separate from .message-banner's
 // layout classes.
 .banner-message {
   font-size: 1em;
 
-  @media screen and (min-width: $screen-sm-min) {
+  @media screen and (min-width: breakpoint-min(md)) {
     font-size: 1.2em;
   }
 
-  @media screen and (min-width: $screen-md-min) {
+  @media screen and (min-width: breakpoint-min(lg)) {
     font-size: 1.5em;
   }
 }
@@ -383,9 +389,9 @@ button:disabled {
 }
 
 .nav-tabs .nav-link {
-  color: $navbar-inverse-link-color;
+  color: $LEFT_BAR_TEXT_COLOR;
   font-size: 125%;
-  background-color: $navbar-inverse-bg;
+  background-color: $LEFT_BAR_BG_COLOR;
   border: 1px solid #dee2e6;
 }
 
@@ -396,8 +402,8 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning {
-  color: $alert-warning-text;
-  background-color: $alert-warning-bg;
+  color: $body-color;
+  background-color: rgba($warning, 0.2);
 }
 
 .nav-tabs .nav-link.text-warning:hover {
@@ -405,23 +411,19 @@ button:disabled {
 }
 
 .nav-tabs .nav-link.text-warning.active {
-  color: $alert-warning-text;
+  color: $body-color;
   border-color: #ffc107 #ffc107 #fff;
 }
 
 // The number saying which occurrence member a comment or photo came
-// from (#5718). Shares .badge-outline's shape in prose and in the
-// Matching Observations panel, where the column of numbers is the
-// legend for the markers elsewhere on the page.
+// from. Shares .badge-outline's shape.
 .sibling-marker {
   font-size: 75%;
 }
 
-// Over a photograph an outline disappears into the image, so the
-// carousel badge fills with the page background instead -- readable
-// on a dark photo or a light one, and theme-aware either way.
-// A fixed size, not the 75% above: the badge sits on a 6vw
-// thumbnail, where a relative size shrinks it past legibility.
+// Filled, not outlined -- an outline disappears into a photo.
+// Fixed size, not the 75% above: a relative size shrinks past
+// legibility on the carousel's 6vw thumbnail.
 .sibling-marker-solid {
   font-size: 11px;
   font-weight: normal;
@@ -431,9 +433,9 @@ button:disabled {
   // without this the digit has no height and the bubble reads
   // as empty.
   line-height: 1.4;
-  color: $text-color;
+  color: $body-color;
   background-color: $body-bg;
-  border: 1px solid $text-color;
+  border: 1px solid $body-color;
 }
 
 // A link around a badge should not underline or recolor it.

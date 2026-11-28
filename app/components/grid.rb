@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-# Grid layout component for displaying a collection of Grid::Box items.
-#
-# Renders a responsive grid layout with Stimulus controller for dynamic
-# resizing. Can render a collection of objects or accept a block for
-# custom content.
+# Responsive grid layout for displaying a collection of Grid::Box
+# items. Renders as a `<ul>` with Bootstrap 4's `row-cols-*`
+# utilities (see ROW_COLS_CLASSES) -- can render a collection of
+# objects or accept a block for custom content.
 #
 # @example With block
 #   render(Grid.new) do |grid|
@@ -29,28 +28,33 @@
 #     identify: true
 #   ))
 class Components::Grid < Components::Base
-  # Bump when the rendered Grid::Box HTML changes -- read via
-  # `cache_key_for` by the write site and the controller's
-  # uncached-check, since Phlex's digest doesn't survive there.
-  # v2: cache-busting ?<updated_at> image URL token.
-  # v3: observation boxes name the collector, not the entering user.
-  # v4: rss-* classes renamed to log-*, heading structure changed.
-  # v5: ID badge bumped from size: :md to :lg.
-  # v6: user-detail footer li drops hanging-indent.
-  # v7: occurrence link gains a log-occurrence class and icon.
-  # v8: Matrix -> Grid rename; box <li> class is now grid-box.
-  CACHE_VERSION = "v8"
-
-  # The cache key Grid::Box fragments are stored under, used by both
-  # the write here and the controller's batched `read_multi`
+  # Bump when the rendered Grid::Box HTML changes (or any
+  # observable behavior the cached fragment captures). This is the
+  # invalidation lever for cached `Grid::Box` fragments — both the
+  # write site (`render_cached_boxes`) and the controller's
   # pre-check (`ApplicationController::Indexes#uncached_object_ids`)
-  # -- one method keeps both ends agreeing on the key shape.
+  # read this through `cache_key_for`. Phlex's automatic class +
+  # method + line digest doesn't survive into the controller's
+  # check, so the version is encoded explicitly here.
+  CACHE_VERSION = "v15"
+
+  # rubocop:disable MO/NoLongCommentBlock
+  # The cache key Grid::Box fragments are stored under -- shared by
+  # the write here and the controller's batched `read_multi`
+  # pre-check (`ApplicationController::Indexes#uncached_object_ids`),
+  # so both agree on the key shape.
   #
-  # Folds in the thumb image record so the key tracks its
-  # updated_at. `object` alone isn't enough: `Verifier#
-  # mark_transferred` touch_all's related Observations on transfer,
-  # but RssLogs are not touched, so a box cached before a rotate
-  # would serve the stale URL token indefinitely.
+  # Folds in the thumb image record so the key tracks the thumb's
+  # updated_at (cache_versioning is off in MO, so an AR object in the
+  # key array expands via cache_key, embedding that timestamp). The
+  # rendered HTML embeds the thumb's URL tokened on the same
+  # timestamp, so the fragment must bust when it changes. `object`
+  # alone isn't enough: Verifier#mark_transferred touch_all's related
+  # Observations on a transfer, but not RssLogs, so an RssLog box
+  # cached before a rotate would keep serving the pre-rotate URL
+  # token. (An `Image` object is its thumb and already keys on that
+  # timestamp via `object` -- `try(:thumb_image)` is nil there.)
+  # rubocop:enable MO/NoLongCommentBlock
   def self.cache_key_for(object, locale)
     ["Grid::Box", CACHE_VERSION, locale, object, object.try(:thumb_image)]
   end
@@ -62,8 +66,8 @@ class Components::Grid < Components::Base
   # Objects with an untransferred thumb_image are skipped — the
   # rendered HTML embeds the image URL, which would be wrong (and
   # wrongly cached) until the transfer completes. An `Image` object
-  # itself (images/index) has no `thumb_image` to defer to -- it IS
-  # the thumb -- so check its own `transferred` directly instead of
+  # (images/index) has no `thumb_image` to defer to -- it IS
+  # the thumb -- so check its `transferred` directly instead of
   # falling through the `respond_to?` guard to an unconditional true.
   def self.should_cache_object?(object)
     return object.transferred != false if object.is_a?(::Image)
@@ -72,7 +76,6 @@ class Components::Grid < Components::Base
     object.thumb_image&.transferred != false
   end
 
-  # Properties
   prop :objects, _Nilable(Array), default: nil
   prop :user, _Nilable(User), default: nil
   prop :cached, _Boolean, default: false
@@ -83,14 +86,16 @@ class Components::Grid < Components::Base
   # Passed through to each Grid::Box -- see the prop comment there.
   prop :suppress_occurrence_link, _Boolean, default: false
 
+  # BS4's `row-cols-{bp}-{n}` utilities size every direct child of
+  # the row equally, so `Components::Grid::Box` doesn't need a
+  # per-breakpoint width class -- just the bare `.col` default (see
+  # its `columns` prop).
+  ROW_COLS_CLASSES = "row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-xl-4"
+
   def view_template(&block)
     Row(
       element: :ul,
-      class: "list-unstyled",
-      data: {
-        controller: "grid-table",
-        action: "resize@window->grid-table#rearrange"
-      }
+      class: class_names(ROW_COLS_CLASSES, "grid-row list-unstyled mt-2")
     ) do
       if block
         yield
@@ -145,8 +150,8 @@ class Components::Grid < Components::Base
 
   # Skip the batched store (and its upfront read_multi) entirely when
   # caching is off -- `low_level_cache` (phlex-rails) already yields
-  # unconditionally in that case and never touches `cache_store`, so
-  # building it here would be a pure-waste DB round trip.
+  # unconditionally in that case and doesn't touch `cache_store`, so
+  # building it here would be a wasted DB round trip.
   def build_batched_store
     return unless Rails.application.config.action_controller.perform_caching
 

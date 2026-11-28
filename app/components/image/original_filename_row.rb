@@ -5,7 +5,7 @@
 # `keep_filenames` preference is "keep_and_show" -- otherwise renders
 # empty. Filename text only, no id badge -- a caller that wants one
 # alongside it (e.g. in a flex-justified row) renders
-# `Badge(variant: :id, object: image, size: ...)` directly.
+# `Badge(type: :id, object: image, size: ...)` directly.
 #
 # Factored out so the same permission-gated filename logic is shared
 # by `Image::Base#render_original_filename` (InteractiveImage's inline

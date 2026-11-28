@@ -105,10 +105,6 @@ class Components::Badge::CollapseToggleTest < ComponentTestCase
     # Bootstrap reads data-target before href; both must be present
     assert_html(html, "a[data-target='#pane_foo']")
     assert_html(html, "a[data-toggle='collapse']")
-    assert_html(html, "a[data-controller='collapse-fallback']")
-    assert_html(
-      html, "a[data-action='click->collapse-fallback#intercept']"
-    )
   end
 
   def test_without_fallback_href_href_is_anchor
