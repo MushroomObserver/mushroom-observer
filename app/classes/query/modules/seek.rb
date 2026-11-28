@@ -11,8 +11,7 @@
 #  applies when the query's ORDER BY is a plain list of columns --
 #  `seekable_cols` returns nil for shapes a keyset comparison can't
 #  express (aggregates, CASE expressions, FIND_IN_SET-based position
-#  ordering, float-typed columns), and the caller falls back to the
-#  full-array path.
+#  ordering), and the caller falls back to the full-array path.
 #
 ##############################################################################
 
@@ -20,29 +19,18 @@ module Query::Modules::Seek
   private
 
   # Allow-list: anything not a plain column Ascending/Descending
-  # (aggregate, CASE, FindInSet), or a float-typed column, falls back
-  # to the full-array path. Memoizes the order columns themselves, not
-  # just whether they qualify, so callers don't need to re-read
-  # `scope.order_values` -- `scope` itself is unmemoized and rebuilds
-  # the whole relation.
+  # (aggregate, CASE, FindInSet) falls back to the full-array path.
+  # Memoizes the order columns themselves, not just whether they
+  # qualify, so callers don't need to re-read `scope.order_values` --
+  # `scope` itself is unmemoized and rebuilds the whole relation.
   def seekable_cols
     return @seekable_cols if defined?(@seekable_cols)
 
     values = scope.order_values
-    seekable = values.present? && values.all? { |o| seekable_column?(o) }
+    seekable = values.present? && values.all? do |o|
+      o.respond_to?(:direction) && o.expr.is_a?(Arel::Attributes::Attribute)
+    end
     @seekable_cols = seekable ? values : nil
-  end
-
-  # A MySQL `float` column's stored value doesn't round-trip through
-  # an equality literal built from that same value (single- vs.
-  # double-precision comparison), so a seek predicate seeded from the
-  # current row's value can spuriously match that row.
-  def seekable_column?(order_node)
-    return false unless order_node.respond_to?(:direction)
-    return false unless order_node.expr.is_a?(Arel::Attributes::Attribute)
-
-    attr = order_node.expr
-    attr.relation.type_for_attribute(attr.name).type != :float
   end
 
   # Current row's own sort-column values, to seed the keyset
