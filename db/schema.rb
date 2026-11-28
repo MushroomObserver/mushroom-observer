@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
+ActiveRecord::Schema[7.2].define(version: 2026_11_28_120000) do
   create_table "api_keys", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
     t.datetime "created_at", precision: nil
     t.datetime "last_used", precision: nil
@@ -272,7 +272,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.datetime "last_view", precision: nil
     t.integer "width"
     t.integer "height"
-    t.float "vote_cache"
+    t.float "vote_cache", limit: 53
     t.boolean "ok_for_export", default: true, null: false
     t.string "original_name", limit: 120, default: ""
     t.boolean "transferred", default: false, null: false
@@ -297,7 +297,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.datetime "ended_at"
     t.integer "total_imported_count"
     t.integer "total_seconds"
-    t.float "avg_import_time"
+    t.float "avg_import_time", limit: 53
     t.datetime "last_obs_start"
     t.boolean "cancel"
     t.boolean "import_others", default: false, null: false
@@ -327,7 +327,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.date "observed_on"
     t.decimal "lat", precision: 15, scale: 10
     t.decimal "lng", precision: 15, scale: 10
-    t.float "public_accuracy"
+    t.float "public_accuracy", limit: 53
     t.boolean "obscured", default: false, null: false
     t.string "taxon_name"
     t.string "taxon_rank"
@@ -351,6 +351,19 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.datetime "updated_at", null: false
     t.index ["dhash"], name: "index_inat_photo_hashes_on_dhash"
     t.index ["inat_photo_id"], name: "index_inat_photo_hashes_on_inat_photo_id", unique: true
+  end
+
+  create_table "inat_target_lookups", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "target_type", limit: 30, null: false
+    t.integer "target_id", null: false
+    t.integer "inat_id"
+    t.integer "matching_version", null: false
+    t.datetime "target_updated_at", null: false
+    t.datetime "checked_at", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["checked_at"], name: "index_inat_target_lookups_on_checked_at"
+    t.index ["target_type", "target_id"], name: "index_inat_target_lookups_on_target", unique: true
   end
 
   create_table "interests", id: :integer, charset: "utf8mb4", collation: "utf8mb4_general_ci", force: :cascade do |t|
@@ -443,12 +456,12 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.integer "version"
     t.datetime "updated_at", precision: nil
     t.integer "user_id"
-    t.float "north"
-    t.float "south"
-    t.float "west"
-    t.float "east"
-    t.float "high"
-    t.float "low"
+    t.float "north", limit: 53
+    t.float "south", limit: 53
+    t.float "west", limit: 53
+    t.float "east", limit: 53
+    t.float "high", limit: 53
+    t.float "low", limit: 53
     t.string "name", limit: 1024
     t.text "notes"
     t.string "scientific_name", limit: 1024
@@ -470,8 +483,8 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.decimal "south", precision: 15, scale: 10, null: false
     t.decimal "west", precision: 15, scale: 10, null: false
     t.decimal "east", precision: 15, scale: 10, null: false
-    t.float "high"
-    t.float "low"
+    t.float "high", limit: 53
+    t.float "low", limit: 53
     t.boolean "ok_for_export", default: true, null: false
     t.text "notes"
     t.string "name", limit: 1024, null: false
@@ -626,7 +639,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.integer "observation_id"
     t.integer "name_id"
     t.integer "user_id"
-    t.float "vote_cache", default: 0.0
+    t.float "vote_cache", limit: 53, default: 0.0
     t.text "reasons"
     t.integer "external_site_id"
     t.index ["external_site_id"], name: "index_namings_on_external_site_id"
@@ -672,7 +685,7 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.integer "name_id"
     t.integer "location_id"
     t.boolean "is_collection_location", default: true, null: false
-    t.float "vote_cache", default: 0.0
+    t.float "vote_cache", limit: 53, default: 0.0
     t.integer "num_views", default: 0, null: false
     t.datetime "last_view", precision: nil
     t.integer "rss_log_id"
@@ -1230,9 +1243,9 @@ ActiveRecord::Schema[7.2].define(version: 2026_11_22_120000) do
     t.integer "user_id"
     t.integer "observation_id", default: 0
     t.boolean "favorite"
-    t.float "value"
+    t.float "value", limit: 53
     t.integer "external_site_id"
-    t.float "source_value"
+    t.float "source_value", limit: 53
     t.index ["external_site_id"], name: "index_votes_on_external_site_id"
     t.index ["naming_id"], name: "naming_index"
     t.index ["observation_id"], name: "observation_index"
