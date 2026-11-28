@@ -38,6 +38,12 @@
 #   bin/rails runner script/refresh_vote_caches.rb
 # Apply:
 #   bin/rails runner script/refresh_vote_caches.rb --apply
+#
+# In production it runs about an hour, sits at roughly 70% of a core
+# and holds some 400MB, so detach it and let the site have the CPU
+# first:
+#   setsid nice -n 19 bin/rails runner script/refresh_vote_caches.rb \
+#     --apply > projects/5811/refresh.log 2>&1 &
 # rubocop:enable MO/NoLongCommentBlock
 
 APPLY = ARGV.delete("--apply") ? true : false
