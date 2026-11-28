@@ -71,7 +71,7 @@ module Views::Controllers::Images::Reuse
       div(class: "form-group form-inline m-0") do
         text_field(:img_id, label: :image_reuse_id,
                             inline: true, size: 8,
-                            wrap_class: "mb-0 form-inline-xs",
+                            wrap_class: "mb-0",
                             data: { autofocus: "true",
                                     id_sanitizer_target: "input" })
         submit(:image_reuse_reuse.l, as: :button,
