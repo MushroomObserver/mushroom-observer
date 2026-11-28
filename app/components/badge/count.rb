@@ -10,11 +10,12 @@
 # does.
 class Components::Badge::Count < Components::Badge
   prop :count, ::Integer
-  prop :type, Symbol, default: :observation
+  prop :object_type, Symbol, default: :observation
+  prop :variant, _Union(*Components::Badge::COLORS), default: :secondary
   # :outline -- lighter-weight `.badge-outline` styling (see
   # _links_buttons_alerts.scss) for a count that shouldn't read as
   # loudly as the solid default. Named `fill:`, not `variant:` --
-  # `variant:` is the dispatcher's kwarg (see Components::Badge).
+  # `variant:` is the color prop (see Components::Badge).
   prop :fill, _Union(:solid, :outline), default: :solid
   # Catch-all for class:, data:, and any other HTML attrs -- matches
   # Components::ContentPadded/Table's pattern.
@@ -30,12 +31,12 @@ class Components::Badge::Count < Components::Badge
   private
 
   def badge_class
-    return "badge count-badge" unless @fill == :outline
+    return "badge count-badge badge-outline" if @fill == :outline
 
-    "badge count-badge badge-outline"
+    "badge count-badge badge-#{@variant}"
   end
 
   def tooltip_title
-    :count_badge_tooltip.t(type: @type.t.upcase_first)
+    :count_badge_tooltip.t(type: @object_type.t.upcase_first)
   end
 end

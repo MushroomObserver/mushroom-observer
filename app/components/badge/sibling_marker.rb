@@ -10,7 +10,7 @@
 # established bubble on MO.
 #
 # @example
-#   Badge(variant: :sibling_marker, number: 2, observation_id: 663635)
+#   Badge(type: :sibling_marker, number: 2, observation_id: 663635)
 class Components::Badge::SiblingMarker < Components::Badge
   prop :number, ::Integer
   prop :observation_id, _Nilable(::Integer), default: nil

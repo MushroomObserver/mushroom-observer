@@ -68,6 +68,9 @@ class Views::Controllers::Observations::Show::ImagesPanel < Views::Base
   end
 
   def render_copyright(image)
-    ImageFragment(type: :copyright, user: @user, image: image, object: @obs)
+    div(class: "small") do
+      ImageFragment(type: :copyright, user: @user, image: image,
+                    object: @obs)
+    end
   end
 end

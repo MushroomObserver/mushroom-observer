@@ -307,12 +307,27 @@ form {
   }
 }
 
-// date selects: individual fields not full-width even on mobile
-.form-inline.date-selects {
+// Bootstrap's `.form-inline` rules all sit inside the `sm` breakpoint;
+// below it, a `.form-inline` field stacks like any other. Applies the
+// same inline-flex layout unconditionally.
+.form-inline {
+  display: flex;
+  flex: 0 0 auto;
+  flex-flow: row wrap;
+  align-items: center;
+  margin-bottom: 0;
+
   .form-control {
     display: inline-block;
     width: auto;
     vertical-align: middle;
+  }
+
+  // Zeroes a nested .form-group's margin-bottom -- TextField's
+  // `inline: true` wraps the field's `.form-group` in a `.form-inline`
+  // ancestor div (FieldWrapperRendering#render_with_wrapper).
+  .form-group {
+    margin-bottom: 0;
   }
 }
 

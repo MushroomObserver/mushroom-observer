@@ -55,7 +55,7 @@ class ManagerTestHost < Components::Base
              belongs_to_items: @belongs_to,
              not_contains_heading: "Does not contain",
              not_contains_items: @not_contains
-           )) do |items, remove, _add|
+           )) do |items, _heading, remove, _add|
       p { plain("row:#{items.join(",")}:#{remove ? "remove" : "add"}") }
     end
   end

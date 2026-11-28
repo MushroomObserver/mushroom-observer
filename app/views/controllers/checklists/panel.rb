@@ -66,7 +66,7 @@ module Views::Controllers::Checklists
     end
 
     def taxon_marker_items(name, deprecated, synonym_id)
-      items = [Components::Badge.new(variant: :count,
+      items = [Components::Badge.new(type: :count,
                                      count: @data.counts[name],
                                      class: "badge-outline ml-2")]
       if deprecated

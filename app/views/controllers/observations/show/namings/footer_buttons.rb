@@ -28,12 +28,10 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
 
   # Always at least the propose-naming button; the suggest-names
   # button only renders when the user is allowed to use it. Both
-  # flow inline (wrapping if too narrow) at `sm`+, where propose is
-  # visible -- see `render_buttons_spacer`.
+  # flow inline (wrapping if too narrow) at `sm`+.
   def render_buttons
-    div(class: "d-flex flex-wrap") do
+    div(class: "d-flex flex-wrap gap-2") do
       render_propose_button
-      render_buttons_spacer if suggest_namings_enabled?
       render_suggest_button if suggest_namings_enabled?
     end
   end
@@ -56,14 +54,6 @@ class Views::Controllers::Observations::Show::Namings::FooterButtons < Views::Ba
         class: "propose-naming-link"
       )
     end
-  end
-
-  # `.spacer` (`mo/_utilities.scss`) instead of a margin on either
-  # button -- see its comment there. `d-none d-sm-inline-block`
-  # mirrors Propose's visibility, so there's no stray gap before
-  # Suggest when Propose is hidden.
-  def render_buttons_spacer
-    span(class: "spacer d-none d-sm-inline-block")
   end
 
   # Gating: a thumb image must exist (so

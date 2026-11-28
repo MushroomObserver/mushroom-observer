@@ -9,7 +9,7 @@
 # `Components::Button::CollapseContent` uses.
 #
 # @example "Shared with: [MCP]" accordion trigger
-#   Badge(variant: :collapse_toggle, value: "MCP",
+#   Badge(type: :collapse_toggle, value: "MCP",
 #         target_id: "pane_123", fallback_href: external_link_path(123),
 #         size: :xl, class: "ml-2 text-uppercase")
 class Components::Badge::CollapseToggle < Components::Badge

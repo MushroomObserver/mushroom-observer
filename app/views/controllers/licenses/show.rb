@@ -48,7 +48,7 @@ module Views::Controllers::Licenses
 
     def show_title
       capture do
-        Badge(variant: :id, object: @license, size: :sm, class: "mr-3")
+        Badge(type: :id, object: @license, size: :sm, class: "mr-3")
         plain(@license.display_name)
       end
     end

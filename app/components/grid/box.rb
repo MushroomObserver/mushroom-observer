@@ -163,7 +163,7 @@ class Components::Grid::Box < Components::Base
         # size: :lg is a BS3-only value, ported straight from
         # cutover -- it may already be correct there; re-check
         # against cutover's value when switching to BS4.
-        Badge(variant: :id, object: @data[:what], size: :lg)
+        Badge(type: :id, object: @data[:what], size: :lg)
       end
 
       render_identify_ui if @identify
