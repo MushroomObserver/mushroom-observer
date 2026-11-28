@@ -1072,14 +1072,15 @@ class QueryTest < UnitTestCase
     assert_equal(ids[index + 1], query.next_id)
   end
 
-  # Issue #5796: a MySQL `float` column's stored value can fail to
-  # compare equal (or compare as strictly greater/less) to a literal
-  # built from that same value, since the column is single-precision
-  # but the literal compares as double-precision -- a seek predicate
-  # seeded from the current row's value can then spuriously match
-  # that row, so `next_id` pointed back at the current observation
-  # instead of advancing.
-  def test_next_and_prev_float_order_column_falls_back_to_full_scan
+  # Issue #5796: a single-precision column's stored value could fail
+  # to compare equal (or strictly greater/less) to a literal built
+  # from that same value, because MySQL serves a FLOAT to the client
+  # at single precision -- a seek predicate seeded from the current
+  # row matched that row, so `next_id` pointed back at the current
+  # observation instead of advancing. These columns hold double
+  # precision now, so 2.14737 survives the round trip and the keyset
+  # path answers correctly.
+  def test_next_and_prev_seek_a_quality_ordered_column
     user = users(:rolf)
     project = Project.create!(title: "float order test", user: user)
     high = Observation.create!(user: user, when: Time.zone.today)
@@ -1098,9 +1099,9 @@ class QueryTest < UnitTestCase
 
     query = Query.lookup(:Observation, projects: [project.id],
                                        order_by: :thumbnail_quality)
-    assert_nil(query.send(:seekable_cols),
-               "thumbnail_quality orders by a float column and " \
-               "should be treated as unseekable")
+    assert_not_nil(query.send(:seekable_cols),
+                   "thumbnail_quality orders by plain columns, which " \
+                   "the keyset path handles")
 
     query.current_id = mid.id
     assert_equal(high.id, query.prev_id)
